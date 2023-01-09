@@ -1,0 +1,80 @@
+﻿<Window x:Class="CampaignEditor.AddUser"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CampaignEditor"
+        mc:Ignorable="d"
+        Title="AddUser" Height="500" Width="600"
+        FontSize="20">
+    <Grid>
+        <Label x:Name="lblUsername" Content="Username: " HorizontalContentAlignment="Right" 
+               Width="200"
+               FontWeight="DemiBold"
+               HorizontalAlignment="Left" VerticalAlignment="Top" Margin="20,50,0,0"/>
+        <TextBox x:Name="tbUsername" CommandManager.PreviewExecuted="textBoxes_PreviewExecuted" ContextMenu="{x:Null}"
+                 Width="270"                  
+                 HorizontalAlignment="Right" VerticalAlignment="Top" 
+                 Margin="0,55,100,0" TextWrapping="NoWrap"/>
+
+        <Label x:Name="lblPassword" Content="Password: " HorizontalContentAlignment="Right" 
+               Width="200"
+               FontWeight="DemiBold"
+               HorizontalAlignment="Left" VerticalAlignment="Top" Margin="20,100,0,0"/>
+        <PasswordBox x:Name="pbPassword" CommandManager.PreviewExecuted="textBoxes_PreviewExecuted" ContextMenu="{x:Null}"
+                     Width="270"                  
+                     HorizontalAlignment="Right" VerticalAlignment="Top" 
+                     Margin="0,105,100,0" 
+                     PreviewKeyDown="pbPassword_PreviewKeyDown"/>
+
+        <Label x:Name="lblPasswordConfirm" Content="Confirm password: " HorizontalContentAlignment="Right" 
+               Width="200" FontWeight="DemiBold"
+               HorizontalAlignment="Left" VerticalAlignment="Top" Margin="20,150,0,0"/>
+        <PasswordBox x:Name="pbPasswordConfirm" CommandManager.PreviewExecuted="textBoxes_PreviewExecuted" ContextMenu="{x:Null}"
+                     Width="270"                
+                     HorizontalAlignment="Right" VerticalAlignment="Top" 
+                     Margin="0,155,100,0" 
+                     PreviewKeyDown="pbPassword_PreviewKeyDown"/>
+
+        <Label x:Name="lblUserLevel" Content="Authorization: " HorizontalContentAlignment="Right" 
+               Width="200" FontWeight="DemiBold"
+               HorizontalAlignment="Left" VerticalAlignment="Top" Margin="20,200,0,0"/>
+        <ComboBox x:Name="cbAuthorization" HorizontalContentAlignment="Center" FontSize="18"
+                  Width="270" Height="30"
+                  HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0, 205, 100, 0" SelectedIndex="0">
+            <ComboBoxItem>Read only</ComboBoxItem>
+            <ComboBoxItem>Read and Write</ComboBoxItem>
+            <ComboBoxItem>Administrator</ComboBoxItem>
+        </ComboBox>
+
+        <Label x:Name="lblEmail" Content="E-mail: " HorizontalContentAlignment="Right" 
+               Width="200" FontWeight="Light"
+               HorizontalAlignment="Left" VerticalAlignment="Top" Margin="20,250,0,0"/>
+        <TextBox x:Name="tbEmail" 
+                 Width="270"                  
+                 HorizontalAlignment="Right" VerticalAlignment="Top" 
+                 Margin="0,255,100,0" TextWrapping="NoWrap"/>
+        <Label x:Name="lblPhone" Content="Phone: " HorizontalContentAlignment="Right" 
+               Width="200" FontWeight="Light"
+               HorizontalAlignment="Left" VerticalAlignment="Top" Margin="20,300,0,0"/>
+        <TextBox x:Name="tbPhone" 
+                 Width="270"                  
+                 HorizontalAlignment="Right" VerticalAlignment="Top" 
+                 Margin="0,305,100,0" TextWrapping="NoWrap"/>
+        <Button x:Name="btnAddUser" Content="Add user" 
+                Width="100" Height="40"
+                HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,400,100,0"
+                Click="btnAddUser_Click"/>
+        <Button x:Name="btnDeleteUser" Content="Delete user" 
+                Width="100" Height="40"
+                HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,400,450,0"
+                Click="btnDeleteUser_Click"/>
+        <Label x:Name="lblError" Content="" Foreground="Red" HorizontalContentAlignment="Right"
+               Width="400"
+               HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,350,100,0"/>
+        <Button x:Name="btnCancel" Content="Cancel" 
+                Width="100" Height="40"
+                HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,400,250,0"
+                Click="btnCancel_Click"/>
+    </Grid>
+</Window>

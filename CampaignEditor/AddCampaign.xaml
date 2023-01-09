@@ -1,0 +1,87 @@
+﻿<Window x:Class="CampaignEditor.AddCampaign"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CampaignEditor"
+        mc:Ignorable="d"
+        Title="AddCampaign" Height="450" Width="800"
+        FontSize="20">
+    <Grid>
+
+        <Label x:Name="llbUser" Content="User: " HorizontalContentAlignment="Right"
+               Width="120"
+               HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,20,0,0" />
+        <ComboBox x:Name="cbUsers" 
+                  Width="150" Height="30"
+                  HorizontalAlignment="Left" VerticalAlignment="Top" Margin="130,25,0,0"
+                  SelectionChanged="cbUsers_SelectionChanged"/>
+        <Label x:Name="lblClient" Content="Client: " HorizontalContentAlignment="Right"
+               Width="120"
+               HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,60,0,0" />
+        <ComboBox x:Name="cbClients" 
+                  Width="150" Height="30"
+                  HorizontalAlignment="Left" VerticalAlignment="Top" Margin="130,65,0,0"  />
+
+        <Label x:Name="lblName" Content="Name: " HorizontalContentAlignment="Right"
+               Width="120"
+               HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,100,0,0" />
+        <TextBox x:Name="tbName" 
+                 Width="150"
+                 TextWrapping="NoWrap"
+                 HorizontalAlignment="Left" VerticalAlignment="Top" Margin="130,105,0,0" />
+        <Label x:Name="lblStartDate" Content="Start Date: " HorizontalContentAlignment="Right"
+               Width="120"
+               HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,140,0,0" />
+        <DatePicker x:Name="dpStartDate" 
+                    Width="150" Height="30"
+                    HorizontalAlignment="Left" Margin="130,145,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="lblEndDate" Content="End Date: " HorizontalContentAlignment="Right" 
+               Width="120"
+               HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,180,0,0" />
+        <DatePicker x:Name="dpEndDate" 
+                    Width="150" Height="30"
+                    HorizontalAlignment="Left" Margin="130,185,0,0" VerticalAlignment="Top"/>
+        <Label x:Name="lblTbStart" Content="TB Start: " HorizontalContentAlignment="Right" 
+               Width="120"
+               HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,220,0,0" />
+        <TextBox x:Name="tbTbStartHours" MaxLength="2"
+                 Width="50"
+                 TextWrapping="Wrap"
+                 HorizontalAlignment="Left" VerticalAlignment="Top" Margin="130,225,0,0"
+                 TextChanged="TxtBoxes_TextChanged"/>
+        <Label x:Name="lblDots1" Content=":" HorizontalContentAlignment="Right" FontWeight="Bold" 
+               HorizontalAlignment="Left" VerticalAlignment="Top" Margin="184,220,0,0" />
+        <TextBox x:Name="tbTbStartMinutes" MaxLength="2"
+                 Width="50"
+                 TextWrapping="Wrap"
+                 HorizontalAlignment="Left" VerticalAlignment="Top" Margin="200,225,0,0" 
+                 TextChanged="TxtBoxes_TextChanged"/>
+        <Label x:Name="lblTbEnd" Content="TB End: " HorizontalContentAlignment="Right" 
+               Width="120"
+               HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,260,0,0" />
+        <TextBox x:Name="tbTbEndHours" MaxLength="2"
+                 Width="50"
+                 TextWrapping="Wrap"
+                 HorizontalAlignment="Left" VerticalAlignment="Top" Margin="130,265,0,0" 
+                 TextChanged="TxtBoxes_TextChanged"/>
+        <Label x:Name="lblDots2" Content=":" HorizontalContentAlignment="Right" FontWeight="Bold" 
+               HorizontalAlignment="Left" VerticalAlignment="Top" Margin="184,260,0,0" />
+        <TextBox x:Name="tbTbEndMinutes" MaxLength="2"
+                 Width="50"
+                 TextWrapping="Wrap"
+                 HorizontalAlignment="Left" VerticalAlignment="Top" Margin="200,265,0,0" 
+                 TextChanged="TxtBoxes_TextChanged"/>
+        <Button x:Name="btnSave" Content="Save" 
+                Width="100" Height="40"
+                HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,10,10" Click="btnSave_Click" />
+        <Button x:Name="btnCancel" Content="Cancel" 
+                Width="100" Height="40"
+                HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,120,10"
+                Click="btnCancel_Click"/>
+        <Label x:Name="lblError" Content="" Foreground="Red" HorizontalContentAlignment="Right"
+               Width="750"
+               HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,10,60" />
+        
+    </Grid>
+</Window>
