@@ -74,6 +74,16 @@ namespace Database.Repositories
             return affected != 0;
         }
 
+        public async Task<bool> DeleteUserClients(int usrid, int clid)
+        {
+            using var connection = _context.GetConnection();
+
+            var affected = await connection.ExecuteAsync(
+                "DELETE FROM tblclientsusers WHERE usrid = @Usrid AND cliid = @Cliid", new { Usrid = usrid, Cliid = clid });
+
+            return affected != 0;
+        }
+
         public async Task<IEnumerable<UserClientsDTO>> GetAllUserClients()
         {
             using var connection = _context.GetConnection();
@@ -102,5 +112,6 @@ namespace Database.Repositories
 
             return _mapper.Map<IEnumerable<UserClientsDTO>>(allUsers);
         }
+
     }
 }

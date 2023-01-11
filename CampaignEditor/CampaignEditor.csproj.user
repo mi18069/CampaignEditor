@@ -19,6 +19,12 @@
     <Compile Update="Clients.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="UsersListItem.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="UsersOfClient.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <Page Update="AddCampaign.xaml">
@@ -34,6 +40,12 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="MainWindow.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UsersListItem.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UsersOfClient.xaml">
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>

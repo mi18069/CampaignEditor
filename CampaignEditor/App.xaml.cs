@@ -2,7 +2,6 @@
 using Microsoft.Extensions.Hosting;
 using System.Windows;
 using CampaignEditor.StartupHelpers;
-using CampaignEditor.Repositories;
 using Database.Data;
 
 namespace CampaignEditor
@@ -18,6 +17,8 @@ namespace CampaignEditor
                 .ConfigureServices((hostContext, services) =>
                 {
                     services.AddSingleton<MainWindow>();
+                    services.AddFormFactory<UsersAndClients>();
+                    services.AddFormFactory<UsersOfClient>();
                     services.AddFormFactory<AddUser>();
                     services.AddFormFactory<AddClient>();
                     services.AddFormFactory<Clients>();

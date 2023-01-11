@@ -158,11 +158,6 @@ C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Debug\net6.0-wind
 C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Debug\net6.0-windows\App.g.cs
 C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Debug\net6.0-windows\CampaignEditor_MarkupCompile.cache
 C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Debug\net6.0-windows\CampaignEditor_MarkupCompile.lref
-C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Debug\net6.0-windows\AddCampaign.baml
-C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Debug\net6.0-windows\AddClient.baml
-C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Debug\net6.0-windows\AddUser.baml
-C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Debug\net6.0-windows\Clients.baml
-C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Debug\net6.0-windows\MainWindow.baml
 C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Debug\net6.0-windows\CampaignEditor.g.resources
 C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Debug\net6.0-windows\CampaignEditor.GeneratedMSBuildEditorConfig.editorconfig
 C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Debug\net6.0-windows\CampaignEditor.AssemblyInfoInputs.cache
@@ -174,3 +169,14 @@ C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Debug\net6.0-wind
 C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Debug\net6.0-windows\CampaignEditor.pdb
 C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Debug\net6.0-windows\CampaignEditor.genruntimeconfig.cache
 C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Debug\net6.0-windows\ref\CampaignEditor.dll
+C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Debug\net6.0-windows\UsersOfClient.g.cs
+C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Debug\net6.0-windows\UsersListItem.g.cs
+C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\bin\Debug\net6.0-windows\CampaignEditor.dll.config
+C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Debug\net6.0-windows\GeneratedInternalTypeHelper.g.cs
+C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Debug\net6.0-windows\AddCampaign.baml
+C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Debug\net6.0-windows\AddClient.baml
+C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Debug\net6.0-windows\AddUser.baml
+C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Debug\net6.0-windows\Clients.baml
+C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Debug\net6.0-windows\MainWindow.baml
+C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Debug\net6.0-windows\UsersListItem.baml
+C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Debug\net6.0-windows\UsersOfClient.baml

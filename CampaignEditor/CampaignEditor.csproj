@@ -8,6 +8,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="images\GreenPlus.png" />
+    <None Remove="images\Green_+.jpg" />
+    <None Remove="images\Red_X.png" />
+    <None Remove="images\UserIcon.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.0" />
@@ -15,6 +22,27 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Database\Database.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="images\GreenPlus.png" />
+    <Resource Include="images\Red_X.png" />
+    <Resource Include="images\UserIcon.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Properties\Settings.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
   </ItemGroup>
 
 </Project>

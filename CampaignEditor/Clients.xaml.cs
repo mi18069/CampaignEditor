@@ -11,6 +11,7 @@ namespace CampaignEditor
     {
 
         private readonly IAbstractFactory<AddUser> _factoryAddUser;
+        private readonly IAbstractFactory<UsersOfClient> _factoryUsersOfClient;
         private readonly IAbstractFactory<AddClient> _factoryAddClient;
         private readonly IAbstractFactory<ClientsTreeView> _factoryClientsTreeView;
         private readonly IAbstractFactory<AddCampaign> _factoryAddCampaign;
@@ -24,13 +25,15 @@ namespace CampaignEditor
         private bool campaignsUpdated = false;
 
         public Clients(IAbstractFactory<ClientsTreeView> factoryClientsTreeView, IAbstractFactory<AddUser> factoryAddUser, 
-            IAbstractFactory<AddClient> factoryAddClient, IAbstractFactory<AddCampaign> factoryAddCampaign)
+            IAbstractFactory<AddClient> factoryAddClient, IAbstractFactory<AddCampaign> factoryAddCampaign,
+            IAbstractFactory<UsersOfClient> factoryUsersOfClient)
         {
             InitializeComponent();
             _factoryAddUser = factoryAddUser;
             _factoryAddClient = factoryAddClient;
             _factoryClientsTreeView = factoryClientsTreeView;
             _factoryAddCampaign = factoryAddCampaign;
+            _factoryUsersOfClient = factoryUsersOfClient;
 
             instance = this;
 
@@ -181,6 +184,11 @@ namespace CampaignEditor
         private void cbUsers_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             _clientsTree.UpdateTree();
+        }
+
+        private void btnShowUsersOfClient_Click(object sender, RoutedEventArgs e)
+        {
+            _factoryUsersOfClient.Create().Show();
         }
     }
 }

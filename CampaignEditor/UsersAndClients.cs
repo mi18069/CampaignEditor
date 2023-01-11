@@ -5,6 +5,8 @@ using Database.DTOs.ClientDTO;
 using Database.DTOs.UserClients;
 using Database.Repositories;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 // This class is made in order to simplify process of adding/removing users/clients in database
 
@@ -24,11 +26,41 @@ namespace CampaignEditor
             _userClientsController = new UserClientsController(userClientsRepository);
         }
 
+        public async Task<IEnumerable<UserDTO>> GetAllUsersOfClient(string clientname)
+        {
+            ClientDTO client = await _clientController.GetClientByName(clientname);
+            var userClients = await _userClientsController.GetAllUserClientsByClientId(client.clid);
+            var users = new List<UserDTO>();
+
+            foreach (var userClient in userClients)
+            {
+                users.Add(await _userController.GetUserById(userClient.usrid));
+            }
+
+            return users;
+        }
+
+        #region Assign/Unassign Users to Clients
+
+        public async void AssignUserToClient(UserDTO user, ClientDTO client)
+        {
+            var userClient = new UserClientsDTO(user.usrid, client.clid);
+            await _userClientsController.CreateUserClients(userClient);
+        }
+
+        public async void UnassignUserFromClient(UserDTO user, ClientDTO client)
+        {
+            await _userClientsController.DeleteUserClients(user.usrid, client.clid);
+        }
+
+        #endregion
+
+        #region Delete Users and Clients
         public async void DeleteUserByUsername(string username)
         {          
             UserDTO user = await _userController.GetUserByUsername(username);
             int userID = user.usrid;
-            List<UserClientsDTO> userClients = (List<UserClientsDTO>)await _userClientsController.GetAllUserClientsByUserId(userID);
+            var userClients = await _userClientsController.GetAllUserClientsByUserId(userID);
 
             foreach (UserClientsDTO userClient in userClients)
             {
@@ -49,5 +81,7 @@ namespace CampaignEditor
             }
             await _clientController.DeleteClientById(clientId);
         }
+
+        #endregion
     }
 }

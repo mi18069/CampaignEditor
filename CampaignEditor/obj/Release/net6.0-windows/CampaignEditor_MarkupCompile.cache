@@ -10,11 +10,11 @@ none
 false
 TRACE;RELEASE;NET;NET6_0;NETCOREAPP
 C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\App.xaml
-5-836359543
+7-1321604359
 
-17-1413488354
+20-92382440
 245650314061
-AddCampaign.xaml;AddClient.xaml;AddUser.xaml;Clients.xaml;MainWindow.xaml;
+AddCampaign.xaml;AddClient.xaml;AddUser.xaml;Clients.xaml;MainWindow.xaml;UsersListItem.xaml;UsersOfClient.xaml;
 
 True
 

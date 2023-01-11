@@ -47,6 +47,10 @@
                 Width="150" Height="40"
                 VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,100,300,0" 
                 Click="btnAddCampaign_Click"/>
+        <Button x:Name="btnShowUsersOfClient" Content="Show users of client" HorizontalContentAlignment="Center" 
+                Width="150" Height="40"
+                VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,100,500,0" 
+                Click="btnShowUsersOfClient_Click"/>
         
         <DatePicker x:Name="dpStartDate" 
                     Width="150" Height="40"
