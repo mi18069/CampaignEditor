@@ -26,6 +26,8 @@ namespace CampaignEditor
             _userClientsController = new UserClientsController(userClientsRepository);
         }
 
+        #region Users of Client
+
         public async Task<IEnumerable<UserDTO>> GetAllUsersOfClient(string clientname)
         {
             ClientDTO client = await _clientController.GetClientByName(clientname);
@@ -40,6 +42,7 @@ namespace CampaignEditor
             return users;
         }
 
+        // Used when you need all users except users from one client 
         public async Task<IEnumerable<UserDTO>> GetUsersNotFromClient(string clientname)
         {
             var AllUsers = await _userController.GetAllUsers();
@@ -49,6 +52,8 @@ namespace CampaignEditor
 
             return remainingUsers;
         }
+
+        #endregion
 
         #region Assign/Unassign Users to Clients
 

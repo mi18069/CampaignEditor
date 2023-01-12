@@ -1,21 +1,14 @@
-﻿using CampaignEditor.Controllers;
-using CampaignEditor.DTOs.UserDTO;
+﻿using CampaignEditor.DTOs.UserDTO;
 using CampaignEditor.StartupHelpers;
-using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace CampaignEditor
 {
@@ -43,6 +36,7 @@ namespace CampaignEditor
             spUsers.Children.Clear();
 
             List<UserDTO> users = (List<UserDTO>) await _factoryUsersAndClients.Create().GetAllUsersOfClient("Stark");
+            users = users.OrderBy(u => u.usrname).ToList();
 
             UsersListItem[] listItems = new UsersListItem[users.Count()];
 
