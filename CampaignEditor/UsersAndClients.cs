@@ -40,16 +40,31 @@ namespace CampaignEditor
             return users;
         }
 
+        public async Task<IEnumerable<UserDTO>> GetUsersNotFromClient(string clientname)
+        {
+            var AllUsers = await _userController.GetAllUsers();
+            var ClientUsers = await GetAllUsersOfClient(clientname);
+
+            var remainingUsers = AllUsers.Where(p => !ClientUsers.Any(p2 => p2.usrid == p.usrid)); 
+
+            return remainingUsers;
+        }
+
         #region Assign/Unassign Users to Clients
 
-        public async void AssignUserToClient(UserDTO user, ClientDTO client)
+
+        public async Task AssignUserToClient(string username, string clientname)
         {
-            var userClient = new UserClientsDTO(user.usrid, client.clid);
+            UserDTO user = await _userController.GetUserByUsername(username);
+            ClientDTO client = await _clientController.GetClientByName(clientname);
+            var userClient = new UserClientsDTO(client.clid, user.usrid);
             await _userClientsController.CreateUserClients(userClient);
         }
 
-        public async void UnassignUserFromClient(UserDTO user, ClientDTO client)
+        public async Task UnassignUserFromClient(string username, string clientname)
         {
+            UserDTO user = await _userController.GetUserByUsername(username);
+            ClientDTO client = await _clientController.GetClientByName(clientname);
             await _userClientsController.DeleteUserClients(user.usrid, client.clid);
         }
 

@@ -16,6 +16,9 @@
     <Compile Update="AddUser.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="AssignUser.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Clients.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -34,6 +37,9 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="AddUser.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="AssignUser.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Clients.xaml">

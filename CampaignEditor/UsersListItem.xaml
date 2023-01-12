@@ -12,12 +12,12 @@
                HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,0,0,0"/>
         <Label x:Name="lblUsername" Content="Username" FontWeight="Bold"
                Width="200"
-               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="130,0,0,0"/>
+               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="100,0,0,0"/>
         <Label x:Name="lblUserLevel" Content="User level" FontStyle="Italic"
                Width="100"
-               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="350,0,0,0"/>
+               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="320,0,0,0"/>
         <Button x:Name="btnUnassign" Background="White" BorderThickness="0"
                 Width="25" Height="25"
-                HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,50,0"/>
+                HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,50,0" Click="btnUnassign_Click"/>
     </Grid>
 </UserControl>

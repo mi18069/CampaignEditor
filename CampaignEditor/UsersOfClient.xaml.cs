@@ -1,4 +1,5 @@
-﻿using CampaignEditor.DTOs.UserDTO;
+﻿using CampaignEditor.Controllers;
+using CampaignEditor.DTOs.UserDTO;
 using CampaignEditor.StartupHelpers;
 using Microsoft.Extensions.DependencyInjection;
 using System;
@@ -20,13 +21,21 @@ namespace CampaignEditor
 {
     public partial class UsersOfClient : Window
     {
+        public static UsersOfClient instance;
+
+        private string appPath = Directory.GetCurrentDirectory();
+        private string imgGreenPlusPath = "\\images\\GreenPlus.png";
 
         private readonly IAbstractFactory<UsersAndClients> _factoryUsersAndClients;
-        public UsersOfClient(IAbstractFactory<UsersAndClients> factoryUsersAndClients)
+        private readonly IAbstractFactory<AssignUser> _factoryAssignUser;
+        public UsersOfClient(IAbstractFactory<UsersAndClients> factoryUsersAndClients,
+                             IAbstractFactory<AssignUser> factoryAssignUser)
         {
+            instance = this;
             InitializeComponent();
             _factoryUsersAndClients = factoryUsersAndClients;
             PopulateItems();
+            _factoryAssignUser = factoryAssignUser; 
         }
 
         private async void PopulateItems()
@@ -37,14 +46,14 @@ namespace CampaignEditor
 
             UsersListItem[] listItems = new UsersListItem[users.Count()];
 
-            
 
-            for (int i=0; i<listItems.Length; i++)
+
+            for (int i = 0; i < listItems.Length; i++)
             {
                 listItems[i] = new UsersListItem();
                 listItems[i].Username = users[i].usrname;
 
-                listItems[i].Userlevel = users[i].usrlevel == 0 ? "Administrator" : 
+                listItems[i].Userlevel = users[i].usrlevel == 0 ? "Administrator" :
                                          users[i].usrlevel == 1 ? "Read and write" : "Read";
 
                 spUsers.Children.Add(listItems[i]);
@@ -56,10 +65,33 @@ namespace CampaignEditor
             Button.Background = new SolidColorBrush(Colors.White);
             Button.BorderThickness = new Thickness(0);
             Image imgGreenPlus = new Image();
-            imgGreenPlus.Source = new BitmapImage(new Uri(Directory.GetCurrentDirectory() + "\\images\\GreenPlus.png"));
+            imgGreenPlus.Source = new BitmapImage(new Uri(appPath + imgGreenPlusPath));
             Button.Content = imgGreenPlus;
+            Button.Click += new RoutedEventHandler(AssignUser_Click);
+
 
             spUsers.Children.Add(Button);
+        }
+
+        public async Task UnassignUser_Click(string username)
+        {
+            await _factoryUsersAndClients.Create().UnassignUserFromClient(username, "Stark");
+            PopulateItems();
+        }
+
+        private void AssignUser_Click(object sender, RoutedEventArgs e)
+        {
+            _factoryAssignUser.Create().Show();
+        }
+        public async Task AssignUser(string username)
+        {
+            await _factoryUsersAndClients.Create().AssignUserToClient(username, "Stark");
+            PopulateItems();
+        }
+
+        private void btnClose_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
         }
     }
 }

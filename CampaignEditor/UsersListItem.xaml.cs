@@ -25,13 +25,13 @@ namespace CampaignEditor
         private string _username;
         private string _userlevel;
         private Image _userIcon;
-        private Button _btnUnbind;
+        private Button _btnUnassign;
 
         [Category("Custom Props")]
         public string Username
         {
             get { return _username; }
-            set { _username = value; lblUsername.Content = value; }
+            set { _username = value.Trim() ; lblUsername.Content = value.Trim(); }
         }
 
         [Category("Custom Props")]
@@ -49,10 +49,10 @@ namespace CampaignEditor
         }
 
         [Category("Custom Props")]
-        public Button BtnUnbind
+        public Button BtnUnassign
         {
-            get { return _btnUnbind; }
-            set { _btnUnbind = value; btnUnassign = value; }
+            get { return _btnUnassign; }
+            set { _btnUnassign = value; btnUnassign = value; }
         }
 
         #endregion
@@ -64,6 +64,11 @@ namespace CampaignEditor
             Image imgRedX = new Image();
             imgRedX.Source = new BitmapImage(new Uri(appPath + imgRedXPath));
             btnUnassign.Content = imgRedX;
+        }
+
+        private void btnUnassign_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            UsersOfClient.instance.UnassignUser_Click(Username);
         }
     }
 

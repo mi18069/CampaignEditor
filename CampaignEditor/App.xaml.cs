@@ -18,6 +18,7 @@ namespace CampaignEditor
                 {
                     services.AddSingleton<MainWindow>();
                     services.AddFormFactory<UsersAndClients>();
+                    services.AddFormFactory<AssignUser>();
                     services.AddFormFactory<UsersOfClient>();
                     services.AddFormFactory<AddUser>();
                     services.AddFormFactory<AddClient>();

@@ -5,14 +5,21 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CampaignEditor"
         mc:Ignorable="d"
-        Title="UsersOfClient" Height="450" Width="800">
+        Title="UsersOfClient" Height="450" Width="600">
     <Grid>
-        <ScrollViewer VerticalScrollBarVisibility="Auto" Width="600" Height="400">
+        <ScrollViewer VerticalScrollBarVisibility="Auto" 
+                      Width="500" Height="300"
+                      VerticalAlignment="Center" HorizontalAlignment="Center">
             <StackPanel x:Name="spUsers"                
                         CanVerticallyScroll="True">
                 <local:UsersListItem/>
             </StackPanel>
         </ScrollViewer>
+        <Label x:Name="lblUsersOfClient" Content="Users of client " FontSize="22" 
+               HorizontalAlignment="Left" VerticalAlignment="Top" Margin="80,20,0,0"/>
+        <Button x:Name="btnClose" Content="Close" 
+                Width="100" Height="40"
+                HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,40,20" Click="btnClose_Click"/>
 
     </Grid>
 </Window>
