@@ -1,10 +1,4 @@
-﻿using Database.DTOs.ClientDTO;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace Database.DTOs.ClientDTO
 {
     public class BaseIdentityClientDTO : BaseClientDTO
