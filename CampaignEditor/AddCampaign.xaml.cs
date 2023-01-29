@@ -1,6 +1,8 @@
 ﻿using CampaignEditor.Controllers;
+using CampaignEditor.DTOs.CampaignDTO;
 using CampaignEditor.DTOs.UserDTO;
 using CampaignEditor.Repositories;
+using Database.DTOs.ClientDTO;
 using Database.DTOs.UserClients;
 using Database.Repositories;
 using System;
@@ -20,7 +22,9 @@ namespace CampaignEditor
         private UserController _userController;
         private ClientController _clientController;
         private UserClientsController _userClientsController;
-        //private CampaignInfo _ci;
+
+        private CampaignDTO campaign;
+        private ClientDTO client;
 
         public AddCampaign(ICampaignRepository campaignRepository, IUserRepository userRepository, 
             IClientRepository clientRepository, IUserClientsRepository userClientsRepository)
@@ -29,23 +33,34 @@ namespace CampaignEditor
             _userController = new UserController(userRepository);
             _clientController = new ClientController(clientRepository);
             _userClientsController = new UserClientsController(userClientsRepository);
-            InitializeComponent();
-
-            //_ci = new CampaignInfo();
-            InitializeFields();
-            
+            InitializeComponent();            
 
         }
 
-        private void InitializeFields()
+        public async void InitializeFields(string campaignName)
         {
-            dpStartDate.SelectedDate = DateTime.Now;
-            dpEndDate.SelectedDate = DateTime.Now;
+            campaign = await _campaignController.GetCampaignByName(campaignName);
+            client = await _clientController.GetClientById(campaign.clid);
 
-            FillUsersComboBox();
+            tbName.Text = campaignName;
+            lblClientname.Content = client.clname;
+
+            dpStartDate.SelectedDate = ConvertStringToDate(campaign.cmpsdate);
+            dpEndDate.SelectedDate = ConvertStringToDate(campaign.cmpedate);
+
+            FillTBTextBoxes();
         }
 
-        private async void FillUsersComboBox()
+        private void FillTBTextBoxes()
+        {
+            tbTbStartHours.Text = campaign.cmpstime[0].ToString() + campaign.cmpstime[1].ToString();
+            tbTbStartMinutes.Text = campaign.cmpstime[3].ToString() + campaign.cmpstime[4].ToString();
+
+            tbTbEndHours.Text = campaign.cmpetime[0].ToString() + campaign.cmpetime[1].ToString();
+            tbTbEndMinutes.Text = campaign.cmpetime[3].ToString() + campaign.cmpetime[4].ToString();
+        }
+
+        /*private async void FillUsersComboBox()
         {
             IEnumerable<string> usernames = await _userController.GetAllUsernames();
             usernames = usernames.OrderBy(u => u);
@@ -140,12 +155,7 @@ namespace CampaignEditor
                 AddNewCampaign(username, clientname, campaignname, startDate, endDate);
             }         
 
-        }
-
-        private void AddNewCampaign(string username, string clientname, string campaignname, DateTime startDate, DateTime endDate)
-        {
-            
-        }
+        }*/
 
         private string ConvertDateTimeToDateString(DateTime dateTime)
         {
@@ -164,9 +174,13 @@ namespace CampaignEditor
             return hour + minute + second;
         }
 
-        private void cbUsers_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private DateTime ConvertStringToDate(string timeString)
         {
-            FillClientsComboBox();
+            int year = Convert.ToInt32(timeString[0].ToString() + timeString[1].ToString() + timeString[2].ToString() + timeString[3].ToString());
+            int month = Convert.ToInt32(timeString[4].ToString() + timeString[5].ToString());
+            int day = Convert.ToInt32(timeString[6].ToString() + timeString[7].ToString());
+
+            return new DateTime(year, month, day);
         }
 
         private void TxtBoxes_TextChanged(object sender, TextChangedEventArgs e)
