@@ -5,6 +5,7 @@ using CampaignEditor.Repositories;
 using Database.DTOs.ClientDTO;
 using Database.DTOs.UserClients;
 using Database.Repositories;
+using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -37,6 +38,7 @@ namespace CampaignEditor
             _campaignController = new CampaignController(campaignRepository);
         }
 
+        // Initializing dictionaries
         public async void InitializeTree()
         {
             IEnumerable<UserDTO> users = new List<UserDTO>();
@@ -74,6 +76,7 @@ namespace CampaignEditor
             UpdateTree();
         }
 
+        // Checking for changes in tree
         public async void UpdateTree()
         {
             SortedDictionary<ClientDTO, IEnumerable<CampaignDTO>> clientCampaignsDict =
@@ -102,6 +105,7 @@ namespace CampaignEditor
             InitializeTreeView(clientCampaignsDict, expandTree);
         }
 
+        // Initializing treeView GUI
         public void InitializeTreeView(SortedDictionary<ClientDTO, IEnumerable<CampaignDTO>> clientCampaignsDict, bool expand = false)
         {
             _tvClients.Items.Clear();
@@ -110,6 +114,7 @@ namespace CampaignEditor
             {
                 TreeViewItem newClient = new TreeViewItem();
                 newClient.Header = client.clname;
+                newClient.Tag = "Client";
                 _tvClients.Items.Add(newClient);               
 
                 foreach (CampaignDTO campaign in clientCampaignsDict[client])
@@ -124,6 +129,8 @@ namespace CampaignEditor
                     {
                         newCampaign.Header = campaign.cmpname;
                     }
+                    newCampaign.Tag = "Campaign";
+                    newCampaign.MouseDoubleClick += Clients.instance.btnAddCampaign_Click;
                     newClient.Items.Add(newCampaign);
                 }
             }
@@ -138,8 +145,77 @@ namespace CampaignEditor
                 }
             }
 
+        } 
+
+        // Tried something with UserControls
+        /*public void InitializeTreeView(SortedDictionary<ClientDTO, IEnumerable<CampaignDTO>> clientCampaignsDict, bool expand = false)
+        {
+            _tvClients.Items.Clear();
+
+            foreach (ClientDTO client in clientCampaignsDict.Keys)
+            {
+                TreeViewClientsItem newClient = new TreeViewClientsItem();
+                newClient.Item = client;             
+                int numCampaigns = _clientCampaignsDict[client].Count();
+                newClient.Description = numCampaigns + " campaigns";
+                newClient.Tag = "Client";
+                _tvClients.Items.Add(newClient);
+
+                foreach (CampaignDTO campaign in clientCampaignsDict[client])
+                {
+                    TreeViewCampaignsItem newCampaign = new TreeViewCampaignsItem();
+                    if (IsCampaignExpired(campaign))
+                    {
+                        newCampaign.Foreground = Brushes.Gray;      
+                    }
+                    else if (IsCampaignStarted(campaign))
+                    {
+                        newCampaign.Foreground = Brushes.LightGreen;
+                    }
+                    newCampaign.Item = campaign;
+                    
+                    newCampaign.Description = "( " + PrintCampaignDate(campaign) + " )";
+                    newCampaign.Tag = "Campaign";
+
+                    
+                    //newClient.Items.Add(newCampaign);
+                }
+            }
+
+            if (expand)
+            {
+                foreach (var item in _tvClients.Items)
+                {
+                    var tvi = item as TreeViewItem;
+                    if (tvi != null)
+                        tvi.ExpandSubtree();
+                }
+            }
+
+        } */
+
+        public async Task<IEnumerable<string>> GetSupervisedUsernames()
+        {
+            IEnumerable<UserDTO> users = new List<UserDTO>();
+
+            if (_userDTO.usrlevel == 0)
+            {
+                users = await _userController.GetAllUsers();
+            }
+            else
+            {
+                users = users.Append(await _userController.GetUserById(_userDTO.usrid));
+            }
+            IEnumerable<string> usernames = new List<string>();
+
+            foreach (UserDTO user in users)
+            {
+                usernames = usernames.Append(user.usrname);
+            }
+            return usernames;
         }
 
+        #region Filters
         private SortedDictionary<ClientDTO, IEnumerable<CampaignDTO>> FilterCampaigns(SortedDictionary<ClientDTO, IEnumerable<CampaignDTO>> clientCampaignsDict)
         {
             bool startDate = false;
@@ -261,26 +337,16 @@ namespace CampaignEditor
             }
             return false;
         }
+        #endregion
 
-        public async Task<IEnumerable<string>> GetSupervisedUsernames()
+        #region Parsers
+
+        private string PrintCampaignDate(CampaignDTO campaign)
         {
-            IEnumerable<UserDTO> users = new List<UserDTO>();
+            DateTime startDateTime = ParseDateTime(campaign.cmpsdate, campaign.cmpstime);
+            DateTime endDateTime = ParseDateTime(campaign.cmpedate, campaign.cmpetime);
 
-            if (_userDTO.usrlevel == 0)
-            {
-                users = await _userController.GetAllUsers();
-            }
-            else
-            {
-                users = users.Append(await _userController.GetUserById(_userDTO.usrid));
-            }
-            IEnumerable<string> usernames = new List<string>();
-
-            foreach (UserDTO user in users)
-            {
-                usernames = usernames.Append(user.usrname);
-            }
-            return usernames;
+            return startDateTime.ToString() + " - " + endDateTime.ToString();
         }
 
         private DateTime ParseDateTime(string dateString, string timeString)
@@ -300,7 +366,7 @@ namespace CampaignEditor
         }
         private bool IsCampaignStarted(CampaignDTO campaign)
         {
-            DateTime dateTime = ParseDateTime(campaign.cmpedate, campaign.cmpetime);
+            DateTime dateTime = ParseDateTime(campaign.cmpsdate, campaign.cmpstime);
 
             DateTime now = DateTime.Now;
             return dateTime < now;
@@ -314,6 +380,10 @@ namespace CampaignEditor
             DateTime now = DateTime.Now;
             return dateTime < now;
         }
+
+        #endregion
+
+        #region Comparers
         public class ClientComparer : IComparer<ClientDTO>
         {
             public int Compare(ClientDTO client1, ClientDTO client2)
@@ -329,5 +399,7 @@ namespace CampaignEditor
                 return user1.usrname.CompareTo(user2.usrname);
             }
         }
+
+        #endregion
     }
 }

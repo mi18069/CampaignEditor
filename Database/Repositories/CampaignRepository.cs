@@ -25,10 +25,10 @@ namespace Database.Repositories
             using var connection = _context.GetConnection();
 
             var affected = await connection.ExecuteAsync(
-                "INSERT INTO tblcampaigns (cmprev, cmpown, cmpname, clid, cmpsdate, cmpedate, cmpstime, cmpetime)" +
-                    "cmpstatus, sostring, activity, cmpaddedon, cmpaddededat, active, forcec" +
-                    "VALUES (@cmprev, @cmpown, @cmpname, @clid, @cmpsdate, @cmpedate, @cmpstime, @cmpetime)" +
-                        "@cmpstatus, @sostring, @activity, @cmpaddedon, @cmpaddededat, @active, @forcec)",
+                "INSERT INTO tblcampaigns (cmprev, cmpown, cmpname, clid, cmpsdate, cmpedate, cmpstime, cmpetime, " +
+                    "cmpstatus, sostring, activity, cmpaddedon, cmpaddedat, active, forcec)" +
+                    " VALUES (@cmprev, @cmpown, @cmpname, @clid, @cmpsdate, @cmpedate, @cmpstime, @cmpetime, " +
+                        "@cmpstatus, @sostring, @activity, @cmpaddedon, @cmpaddedat, @active, @forcec)",
             new
             {
                 campaignDTO.cmprev,

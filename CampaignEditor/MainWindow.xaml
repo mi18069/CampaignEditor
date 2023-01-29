@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:CampaignEditor"
         mc:Ignorable="d"
         Title="MainWindow" Height="400" Width="600"
-        FontSize="20">
+        FontSize="20" ResizeMode="NoResize">
     <Grid>
         <Label x:Name="lblUsername" Content="Username: " HorizontalContentAlignment="Right" 
                FontWeight="DemiBold"

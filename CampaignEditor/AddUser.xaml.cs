@@ -13,6 +13,7 @@ namespace CampaignEditor
     {
         private readonly IUserRepository _userRepository;
         private UserController _userController;
+        private UserDTO user;
 
         public AddUser(IUserRepository userRepository)
         {
@@ -20,6 +21,13 @@ namespace CampaignEditor
 
             _userRepository = userRepository;
             _userController = new UserController(_userRepository);
+
+            // If user don't have administrator privileges, he shouldn't be able to add users to client
+            user = MainWindow.instance.user;
+            if (user.usrlevel != 0)
+            {
+                btnAddUser.Visibility = Visibility.Hidden;
+            }
         }
 
         private async void btnAddUser_Click(object sender, RoutedEventArgs e)

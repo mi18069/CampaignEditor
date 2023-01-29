@@ -5,6 +5,8 @@ using Database.DTOs.ClientDTO;
 using Database.DTOs.UserClients;
 using Database.Repositories;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 // This class is made in order to simplify process of adding/removing users/clients in database
 
@@ -24,11 +26,61 @@ namespace CampaignEditor
             _userClientsController = new UserClientsController(userClientsRepository);
         }
 
+        #region Users of Client
+
+        public async Task<IEnumerable<UserDTO>> GetAllUsersOfClient(string clientname)
+        {
+            ClientDTO client = await _clientController.GetClientByName(clientname);
+            var userClients = await _userClientsController.GetAllUserClientsByClientId(client.clid);
+            var users = new List<UserDTO>();
+
+            foreach (var userClient in userClients)
+            {
+                users.Add(await _userController.GetUserById(userClient.usrid));
+            }
+
+            return users;
+        }
+
+        // Used when you need all users except users from one client 
+        public async Task<IEnumerable<UserDTO>> GetUsersNotFromClient(string clientname)
+        {
+            var AllUsers = await _userController.GetAllUsers();
+            var ClientUsers = await GetAllUsersOfClient(clientname);
+
+            var remainingUsers = AllUsers.Where(p => !ClientUsers.Any(p2 => p2.usrid == p.usrid)); 
+
+            return remainingUsers;
+        }
+
+        #endregion
+
+        #region Assign/Unassign Users to Clients
+
+
+        public async Task AssignUserToClient(string username, string clientname)
+        {
+            UserDTO user = await _userController.GetUserByUsername(username);
+            ClientDTO client = await _clientController.GetClientByName(clientname);
+            var userClient = new UserClientsDTO(client.clid, user.usrid);
+            await _userClientsController.CreateUserClients(userClient);
+        }
+
+        public async Task UnassignUserFromClient(string username, string clientname)
+        {
+            UserDTO user = await _userController.GetUserByUsername(username);
+            ClientDTO client = await _clientController.GetClientByName(clientname);
+            await _userClientsController.DeleteUserClients(user.usrid, client.clid);
+        }
+
+        #endregion
+
+        #region Delete Users and Clients
         public async void DeleteUserByUsername(string username)
         {          
             UserDTO user = await _userController.GetUserByUsername(username);
             int userID = user.usrid;
-            List<UserClientsDTO> userClients = (List<UserClientsDTO>)await _userClientsController.GetAllUserClientsByUserId(userID);
+            var userClients = await _userClientsController.GetAllUserClientsByUserId(userID);
 
             foreach (UserClientsDTO userClient in userClients)
             {
@@ -49,5 +101,7 @@ namespace CampaignEditor
             }
             await _clientController.DeleteClientById(clientId);
         }
+
+        #endregion
     }
 }

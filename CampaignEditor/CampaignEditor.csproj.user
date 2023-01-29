@@ -16,7 +16,25 @@
     <Compile Update="AddUser.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="AssignUser.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Clients.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="NewCampaign.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="TreeViewCampaignsItem.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="TreeViewClientsItem.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="UsersListItem.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="UsersOfClient.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
   </ItemGroup>
@@ -30,10 +48,28 @@
     <Page Update="AddUser.xaml">
       <SubType>Designer</SubType>
     </Page>
+    <Page Update="AssignUser.xaml">
+      <SubType>Designer</SubType>
+    </Page>
     <Page Update="Clients.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="MainWindow.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="NewCampaign.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="TreeViewCampaignsItem.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="TreeViewClientsItem.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UsersListItem.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UsersOfClient.xaml">
       <SubType>Designer</SubType>
     </Page>
   </ItemGroup>
