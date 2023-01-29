@@ -40,9 +40,9 @@ namespace Database.Repositories
         {
             using var connection = _context.GetConnection();
 
-            var allUsers = await connection.QueryAsync<User>("SELECT * FROM tblclients");
+            var allClients = await connection.QueryAsync<Client>("SELECT * FROM tblclients");
 
-            return _mapper.Map<IEnumerable<ClientDTO>>(allUsers);
+            return _mapper.Map<IEnumerable<ClientDTO>>(allClients);
         }
 
         public async Task<ClientDTO> GetClientById(int id)
