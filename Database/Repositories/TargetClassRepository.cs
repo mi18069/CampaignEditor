@@ -2,7 +2,6 @@
 using Dapper;
 using Database.Data;
 using Database.DTOs.TargetClassDTO;
-using Database.DTOs.TargetDTO;
 using Database.Entities;
 using System;
 using System.Collections.Generic;
