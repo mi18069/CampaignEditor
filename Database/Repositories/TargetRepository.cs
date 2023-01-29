@@ -42,7 +42,7 @@ namespace Database.Repositories
             using var connection = _context.GetConnection();
 
             var target = await connection.QueryFirstOrDefaultAsync<Target>(
-                "SELECT * FROM tbltargets WHERE targname = @Id", new { Id = id });
+                "SELECT * FROM tbltargets WHERE targid = @Id", new { Id = id });
 
             return _mapper.Map<TargetDTO>(target);
         }
