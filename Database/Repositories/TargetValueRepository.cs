@@ -62,6 +62,16 @@ namespace Database.Repositories
             return _mapper.Map<IEnumerable<TargetValueDTO>>(allTargetValues);
         }
 
+        public async Task<IEnumerable<TargetValueDTO>> GetAllTargetValuesWithId(int id)
+        {
+            using var connection = _context.GetConnection();
+
+            var allTargetValues = await connection.QueryAsync<TargetValue>
+                ("SELECT * FROM demo_slave WHERE demoid = @Id", new { Id = id });
+
+            return _mapper.Map<IEnumerable<TargetValueDTO>>(allTargetValues);
+        }
+
         public async Task<bool> UpdateTargetValue(UpdateTargetValueDTO targetValueDTO)
         {
             using var connection = _context.GetConnection();

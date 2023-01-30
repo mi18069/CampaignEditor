@@ -14,6 +14,8 @@ namespace Database.Repositories
         Task<TargetValueDTO> GetTargetValueById(int id);
         Task<TargetValueDTO> GetTargetValueByName(string valuename);
         Task<IEnumerable<TargetValueDTO>> GetAllTargetValues();
+        Task<IEnumerable<TargetValueDTO>> GetAllTargetValuesWithId(int id);
+
         Task<bool> UpdateTargetValue(UpdateTargetValueDTO targetValueDTO);
         Task<bool> DeleteTargetValueById(int id);
         Task<bool> DeleteTargetValueByName(string valuename);

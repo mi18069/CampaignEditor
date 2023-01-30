@@ -26,7 +26,7 @@ namespace CampaignEditor.Controllers
             var target = await _repository.GetTargetById(id);
             return target;
         }
-        public async Task<TargetDTO> GettargetByName(string targname)
+        public async Task<TargetDTO> GetTargetByName(string targname)
         {
             var target = await _repository.GetTargetByName(targname);
             return target;

@@ -181,7 +181,7 @@ namespace CampaignEditor {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/CampaignEditor;component/adduser.xaml", System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri("/CampaignEditor;V1.0.0.0;component/adduser.xaml", System.UriKind.Relative);
             
             #line 1 "..\..\..\AddUser.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);
