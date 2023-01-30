@@ -47,7 +47,7 @@ namespace CampaignEditor
             FillTBTextBoxes();
             FillTargetsComboBox();
         }
-
+        #region Info
         private void FillTBTextBoxes()
         {
             tbTbStartHours.Text = campaign.cmpstime[0].ToString() + campaign.cmpstime[1].ToString();
@@ -56,18 +56,6 @@ namespace CampaignEditor
             tbTbEndHours.Text = campaign.cmpetime[0].ToString() + campaign.cmpetime[1].ToString();
             tbTbEndMinutes.Text = campaign.cmpetime[3].ToString() + campaign.cmpetime[4].ToString();
         }
-
-        private async void FillTargetsComboBox()
-        {
-            IEnumerable<TargetDTO> targets = await _targetController.GetAllTargets();
-            targets = targets.OrderBy(t => t.targname);
-            cbTargets.DisplayMemberPath = "targname";
-            foreach (var target in targets)
-            {
-                cbTargets.Items.Add(target);
-            }
-        }
-
         #region Converters
         private string ConvertDateTimeToDateString(DateTime dateTime)
         {
@@ -108,11 +96,20 @@ namespace CampaignEditor
             }
         }
 
-        private void btnCancel_Click(object sender, RoutedEventArgs e)
-        {
-            this.Close();
-        }
+        #endregion
 
+        #region Targets
+        private async void FillTargetsComboBox()
+        {
+            IEnumerable<TargetDTO> targets = await _targetController.GetAllTargets();
+            targets = targets.OrderBy(t => t.targname);
+            cbTargets.DisplayMemberPath = "targname";
+
+            foreach (var target in targets)
+            {
+                cbTargets.Items.Add(target);
+            }
+        }
         private void cbTargets_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (cbTargets.SelectedIndex != -1)
@@ -121,5 +118,17 @@ namespace CampaignEditor
                 lblTargetDescription.Content = target.targdesc;
             }
         }
+        private void btnNewTarget_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+        #endregion
+
+        private void btnCancel_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
+
+        
     }
 }
