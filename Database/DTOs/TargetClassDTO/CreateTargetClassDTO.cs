@@ -8,7 +8,7 @@ namespace Database.DTOs.TargetClassDTO
 {
     public class CreateTargetClassDTO : BaseTargetClassDTO
     {
-        public CreateTargetClassDTO(string name, int type, string position) 
+        public CreateTargetClassDTO(string name, string type, string position) 
             : base(name, type, position)
         {
         }

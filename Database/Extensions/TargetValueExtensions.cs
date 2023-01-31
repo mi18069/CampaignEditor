@@ -10,7 +10,7 @@ namespace Database.Extensions
     {
         public static void AddTargetValueExtensions(this IServiceCollection services)
         {
-            services.AddScoped<ITargetRepository, TargetRepository>();
+            services.AddScoped<ITargetValueRepository, TargetValueRepository>();
             services.AddAutoMapper(configuration => {
                 configuration.CreateMap<TargetValueDTO, TargetValue>().ReverseMap();
             });

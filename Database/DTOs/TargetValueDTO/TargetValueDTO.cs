@@ -2,9 +2,9 @@
 
 namespace Database.DTOs.TargetValueDTO
 {
-    public class TargetValueDTO : BaseTargetValueDTO
+    public class TargetValueDTO : BaseIdentityTargetValueDTO
     {
-        public TargetValueDTO(string name, int value) 
+        public TargetValueDTO(string name, string value) 
             : base(name, value)
         {
         }

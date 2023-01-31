@@ -9,7 +9,7 @@ namespace Database.Extensions
     {
         public static void AddTargetClassExtensions(this IServiceCollection services)
         {
-            services.AddScoped<ITargetRepository, TargetRepository>();
+            services.AddScoped<ITargetClassRepository, TargetClassRepository>();
             services.AddAutoMapper(configuration => {
                 configuration.CreateMap<TargetClassDTO, TargetClass>().ReverseMap();
             });

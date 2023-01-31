@@ -5,6 +5,6 @@ namespace Database.Entities
     {
         public int id { get; set; }
         public string name { get; set; }
-        public int value { get; set; }
+        public string value { get; set; }
     }
 }

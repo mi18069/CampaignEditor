@@ -91,7 +91,7 @@ namespace CampaignEditor.Controllers
         {
             return await _valueRepository.GetAllTargetValues();
         }
-        public async Task<IEnumerable<TargetValueDTO>> GetValuesOfClass(int classId)
+        public async Task<IEnumerable<TargetValueDTO>> GetAllTargetValuesWithId(int classId)
         {
             return await _valueRepository.GetAllTargetValuesWithId(classId);
         }

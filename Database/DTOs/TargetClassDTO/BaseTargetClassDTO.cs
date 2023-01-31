@@ -4,7 +4,7 @@ namespace Database.DTOs.TargetClassDTO
 {
     public class BaseTargetClassDTO
     {
-        public BaseTargetClassDTO(string name, int type, string position)
+        public BaseTargetClassDTO(string name, string type, string position)
         {
             this.name = name ?? throw new ArgumentNullException(nameof(name));
             this.type = type;
@@ -12,7 +12,7 @@ namespace Database.DTOs.TargetClassDTO
         }
 
         public string name { get; set; }
-        public int type { get; set; }
+        public string type { get; set; }
         public string position { get; set; }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using CampaignEditor.Controllers;
 using CampaignEditor.DTOs.CampaignDTO;
+using CampaignEditor.StartupHelpers;
 using Database.DTOs.ClientDTO;
 using Database.DTOs.TargetDTO;
 using Database.Repositories;
@@ -15,6 +16,7 @@ namespace CampaignEditor
 
     public partial class AddCampaign : Window
     {
+        private readonly IAbstractFactory<NewTarget> _factoryNewTarget;
 
         private CampaignController _campaignController;
         private TargetController _targetController;
@@ -24,8 +26,9 @@ namespace CampaignEditor
         private ClientDTO client;
 
         public AddCampaign(ICampaignRepository campaignRepository, ITargetRepository targetRepository, 
-            IClientRepository clientRepository)
+            IClientRepository clientRepository, IAbstractFactory<NewTarget> factoryNewTarget)
         {
+            _factoryNewTarget = factoryNewTarget;
             _campaignController = new CampaignController(campaignRepository);
             _targetController = new TargetController(targetRepository);
             _clientController = new ClientController(clientRepository);
@@ -115,12 +118,12 @@ namespace CampaignEditor
             if (cbTargets.SelectedIndex != -1)
             {
                 var target = cbTargets.SelectedItem as TargetDTO;
-                lblTargetDescription.Content = target.targdesc;
+                lblTargetDescription.Content = target!.targdesc;
             }
         }
         private void btnNewTarget_Click(object sender, RoutedEventArgs e)
         {
-
+            _factoryNewTarget.Create().Show();
         }
         #endregion
 

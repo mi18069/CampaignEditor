@@ -24,7 +24,7 @@ namespace Database.Repositories
             using var connection = _context.GetConnection();
 
             var affected = await connection.ExecuteAsync(
-                "INSERT INTO demo_master (demo, type, position) " +
+                "INSERT INTO demo_master (name, type, position) " +
                 "VALUES (@TargetClassName, @TargetClassType, @TargetClassPosition)",
             new
             {
@@ -51,7 +51,7 @@ namespace Database.Repositories
             using var connection = _context.GetConnection();
 
             var targetClass = await connection.QueryFirstOrDefaultAsync<TargetClass>(
-                "SELECT * FROM demo_master WHERE demo = @Classname", new { Classname = classname });
+                "SELECT * FROM demo_master WHERE name = @Classname", new { Classname = classname });
 
             return _mapper.Map<TargetClassDTO>(targetClass);
         }
@@ -59,7 +59,7 @@ namespace Database.Repositories
         public async Task<IEnumerable<TargetClassDTO>> GetAllTargetClasses()
         {
             using var connection = _context.GetConnection();
-
+            
             var allTargetClasses = await connection.QueryAsync<TargetClass>("SELECT * FROM demo_master");
 
             return _mapper.Map<IEnumerable<TargetClassDTO>>(allTargetClasses);
@@ -70,12 +70,12 @@ namespace Database.Repositories
             using var connection = _context.GetConnection();
 
             var affected = await connection.ExecuteAsync(
-                "Update demo_master SET demoid = @TargetClassId, demo = @TargetClassName, " +
+                "Update demo_master SET demoid = @TargetClassId, name = @TargetClassName, " +
                 "type = @TargetClassType, position = @TargetClassPosition) " +
                 "WHERE demoid = @TargetClassId",
             new
             {
-                TargetClassId = targetClassDTO.classid,
+                TargetClassId = targetClassDTO.demoid,
                 TargetClassName = targetClassDTO.name,
                 TargetClassType = targetClassDTO.type,
                 TargetClassPosition = targetClassDTO.position,
@@ -99,7 +99,7 @@ namespace Database.Repositories
             using var connection = _context.GetConnection();
 
             var affected = await connection.ExecuteAsync(
-                "DELETE FROM demo_master WHERE demo = @Classname", new { Classname = classname });
+                "DELETE FROM demo_master WHERE name = @Classname", new { Classname = classname });
 
             return affected != 0;
         }
