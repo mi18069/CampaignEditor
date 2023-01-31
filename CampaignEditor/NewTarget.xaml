@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CampaignEditor"
         mc:Ignorable="d"
-        Title="NewTarget" Height="450" Width="600" ResizeMode="NoResize">
+        Title="NewTarget" Height="600" Width="800" ResizeMode="NoResize" FontSize="18">
     <Window.Resources>
         <ResourceDictionary>
             <Style x:Key="TreeViewItemStyle" TargetType="TreeViewItem">
@@ -23,7 +23,7 @@
     </Window.Resources>
     <Grid>
         <Border BorderBrush="LightGray" BorderThickness="1" 
-                Width="300" Height="415"
+                Width="400" Height="545"
                 HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10, 10, 0, 0">
             <TreeView x:Name="tvTargets"
                       ItemContainerStyle="{StaticResource TreeViewItemStyle}"
@@ -31,19 +31,19 @@
                       LostMouseCapture="tvTargets_LostMouseCapture"/>
         </Border>
         <Label x:Name="lblName" Content="Name:" FontWeight="Bold"
-               HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,20,200,0"/>
+               HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,20,240,0"/>
         <TextBox x:Name="tbName"
-            Width="180"
+            Width="230"
             HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,25,10,0" 
-            TextWrapping="Wrap"/>
+            TextWrapping="NoWrap"/>
         <Label x:Name="lblDescription" Content="Description:" FontWeight="Bold"
-               HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,60,200,0"/>
+               HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,60,240,0"/>
         <TextBox x:Name="tbDescription"
-            Width="180"
+            Width="230"
             HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,65,10,0" 
-            TextWrapping="Wrap"/>
+            TextWrapping="NoWrap"/>
         <Button x:Name="btnAdd" Content="Add target" 
-                Width="100" Height="40"
+                Width="120" Height="50"
                 HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,10,10"/>
     </Grid>
 </Window>

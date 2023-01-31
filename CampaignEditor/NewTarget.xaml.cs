@@ -7,8 +7,10 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using TreeViewModels;
 
@@ -33,15 +35,18 @@ namespace CampaignEditor
             _targetValueController = new TargetValueController(targetValueRepository);
 
             InitializeTree();
-            //tvTargets.ItemsSource = SetTree().Result;
         }
 
         private async void InitializeTree()
         {
             var treeResult = await SetTree();
             tvTargets.Items.Clear();
+            
             tvTargets.ItemsSource = treeResult;
+
+
         }
+
         private async Task<Dictionary<TargetClassDTO, IEnumerable<TargetValueDTO>>> GetNodes()
         {
 
