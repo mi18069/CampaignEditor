@@ -3,14 +3,9 @@ using CampaignEditor.Repositories;
 using Database.DTOs.TargetClassDTO;
 using Database.DTOs.TargetValueDTO;
 using Database.Repositories;
-using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
 using TreeViewModels;
 
@@ -23,12 +18,13 @@ namespace CampaignEditor
         private TargetClassController _targetClassController;
         private TargetValueController _targetValueController;
 
-
+        public bool isDataRangeChecked { get; set; } = false;
         public NewTarget(ITargetRepository targetRepository, 
                          ITargetClassRepository targetClassRepository,
                          ITargetValueRepository targetValueRepository)
         {
             InitializeComponent();
+            this.DataContext = this;
 
             _targetController = new TargetController(targetRepository);
             _targetClassController = new TargetClassController(targetClassRepository);
@@ -46,6 +42,7 @@ namespace CampaignEditor
 
         }
 
+        #region TargetTree
         private async Task<Dictionary<TargetClassDTO, IEnumerable<TargetValueDTO>>> GetNodes()
         {
 
@@ -67,6 +64,12 @@ namespace CampaignEditor
 
             foreach (TargetClassDTO node in nodes.Keys)
             {
+
+                if (node.type == "R")
+                {
+                    continue;
+                }
+
                 TreeViewModel tv1 = new TreeViewModel(node, node.name);
                 treeViewList.Add(tv1);
 
@@ -86,18 +89,18 @@ namespace CampaignEditor
 
         private void tvTargets_LostMouseCapture(object sender, MouseEventArgs e)
         {
-            /*Dictionary<string, List<string>> treeDict = new Dictionary<string, List<string>>();
+            Dictionary<string, List<string>> treeDict = new Dictionary<string, List<string>>();
             foreach (TreeViewModel tv in tvTargets.ItemsSource)
             {
-                Debug.WriteLine(tv.IsChecked);
                 if (tv.IsChecked != false)
                 {
                     List<string> strings = TreeViewModel.GetSelected(tv);
                     treeDict[tv.Name] = strings;
                 }
-            }*/
-        }
+            }
 
-       
+        }
+        #endregion
+
     }
 }

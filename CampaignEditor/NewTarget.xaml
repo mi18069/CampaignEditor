@@ -3,7 +3,6 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:CampaignEditor"
         mc:Ignorable="d"
         Title="NewTarget" Height="600" Width="800" ResizeMode="NoResize" FontSize="18">
     <Window.Resources>
@@ -30,6 +29,28 @@
                       ItemTemplate="{StaticResource CheckBoxItemTemplate}"
                       LostMouseCapture="tvTargets_LostMouseCapture"/>
         </Border>
+        <Border BorderBrush="LightGray" BorderThickness="1" 
+                Width="340" Height="300"
+                HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,100,10,0">
+            <TextBlock x:Name="tbSelected" TextWrapping="NoWrap" />
+        </Border>
+        
+        <Grid Width="330" Height="50" 
+              HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0, 410, 10, 0">
+            <CheckBox x:Name="cbAgeRange"
+                      Width="20" Height="20"
+                      HorizontalAlignment="Left" Margin="0, 7, 0, 0"/>
+            <Label x:Name="lblAgeRange" Content="Age Range:   From               To" IsEnabled="{Binding ElementName=cbAgeRange, Path=IsChecked}"
+                           VerticalAlignment="Center" Margin="20, 0, 0, 0"/>
+            <TextBox x:Name="tbFrom"  MaxLength="3" HorizontalContentAlignment="Center"
+                     IsEnabled="{Binding ElementName=cbAgeRange, Path=IsChecked}"
+                     Width="50" Height="30"
+                     HorizontalAlignment="Left" Margin="180, 0, 0, 0"/>
+            <TextBox x:Name="tbTo" MaxLength="3" HorizontalContentAlignment="Center"
+                     IsEnabled="{Binding ElementName=cbAgeRange, Path=IsChecked}"
+                             Width="50" Height="30"
+                             HorizontalAlignment="Left" Margin="275, 0, 0, 0"/>
+        </Grid>
         <Label x:Name="lblName" Content="Name:" FontWeight="Bold"
                HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,20,240,0"/>
         <TextBox x:Name="tbName"
