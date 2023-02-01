@@ -7,14 +7,16 @@ namespace TreeViewModels
 {
     public class TreeViewModel : INotifyPropertyChanged
     {
-        public TreeViewModel(string name)
+        public TreeViewModel(Object item, string name)
         {
+            Item = item;
             Name = name;
             Children = new List<TreeViewModel>();
         }
 
         #region Properties
 
+        public Object Item { get; private set;}
         public string Name { get; private set; }
         public List<TreeViewModel> Children { get; private set; }
         public bool IsInitiallySelected { get; private set; }
@@ -77,44 +79,6 @@ namespace TreeViewModels
                 child._parent = this;
                 child.Initialize();
             }
-        }
-        private static Dictionary<string, List<string>> GetNodes()
-        {
-            Dictionary<string, List<string>> nodes = new Dictionary<string, List<string>>
-            {
-                { "Sex", new List<string>{ "male", "female" }},
-                { "Age Groups", new List<string>{ "kids", "teens", "adults" }},
-                { "Region", new List<string>{ "Serbia", "others" }},
-                { "Working Status", new List<string>{ "employed", "unemployed" }}
-            };
-
-            return nodes;
-
-        }
-
-        public static List<TreeViewModel> SetTree()
-        {
-            Dictionary<string, List<string>> nodes = GetNodes();
-
-            List<TreeViewModel> treeViewList = new List<TreeViewModel>();
-
-            foreach (string nodeName in nodes.Keys)
-            {
-                TreeViewModel tv1 = new TreeViewModel(nodeName);
-                treeViewList.Add(tv1);
-
-                foreach (string subNodeName in nodes[nodeName])
-                {
-                    tv1.Children.Add(new TreeViewModel(subNodeName));
-                }
-
-            }
-            foreach (TreeViewModel tv in treeViewList)
-            {
-                tv.Initialize();
-            }
-
-            return treeViewList;
         }
 
         #endregion

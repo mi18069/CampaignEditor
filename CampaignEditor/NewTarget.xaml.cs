@@ -44,7 +44,6 @@ namespace CampaignEditor
             
             tvTargets.ItemsSource = treeResult;
 
-
         }
 
         private async Task<Dictionary<TargetClassDTO, IEnumerable<TargetValueDTO>>> GetNodes()
@@ -68,12 +67,12 @@ namespace CampaignEditor
 
             foreach (TargetClassDTO node in nodes.Keys)
             {
-                TreeViewModel tv1 = new TreeViewModel(node.name);
+                TreeViewModel tv1 = new TreeViewModel(node, node.name);
                 treeViewList.Add(tv1);
 
                 foreach (TargetValueDTO subNode in nodes[node])
                 {
-                    tv1.Children.Add(new TreeViewModel(subNode.name));
+                    tv1.Children.Add(new TreeViewModel(subNode, subNode.name));
                 }
 
             }
