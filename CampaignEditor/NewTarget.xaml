@@ -44,29 +44,32 @@
                       HorizontalAlignment="Left" Margin="0, 7, 0, 0"/>
             <Label x:Name="lblAgeRange" Content="Age Range:   From               To" IsEnabled="{Binding ElementName=cbAgeRange, Path=IsChecked}"
                            VerticalAlignment="Center" Margin="20, 0, 0, 0"/>
-            <TextBox x:Name="tbFrom"  MaxLength="3" HorizontalContentAlignment="Center"
+            <TextBox x:Name="tbFrom"  MaxLength="2" HorizontalContentAlignment="Center"
                      IsEnabled="{Binding ElementName=cbAgeRange, Path=IsChecked}"
                      Width="50" Height="30"
                      HorizontalAlignment="Left" Margin="180, 0, 0, 0"/>
-            <TextBox x:Name="tbTo" MaxLength="3" HorizontalContentAlignment="Center"
+            <TextBox x:Name="tbTo" MaxLength="2" HorizontalContentAlignment="Center"
                      IsEnabled="{Binding ElementName=cbAgeRange, Path=IsChecked}"
                              Width="50" Height="30"
                              HorizontalAlignment="Left" Margin="275, 0, 0, 0"/>
         </Grid>
         <Label x:Name="lblName" Content="Name:" FontWeight="Bold"
                HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,20,240,0"/>
-        <TextBox x:Name="tbName"
+        <TextBox x:Name="tbName" MaxLength="25"
             Width="230"
             HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,25,10,0" 
             TextWrapping="NoWrap"/>
         <Label x:Name="lblDescription" Content="Description:" FontWeight="Bold"
                HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,60,240,0"/>
-        <TextBox x:Name="tbDescription"
+        <TextBox x:Name="tbDescription" MaxLength="255"
             Width="230"
             HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,65,10,0" 
             TextWrapping="NoWrap"/>
         <Button x:Name="btnAdd" Content="Add target" 
                 Width="120" Height="50"
-                HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,10,10"/>
+                HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,10,10" Click="btnAdd_Click"/>
+        <Label x:Name="lblError" Content="" Foreground="Red"
+               MaxWidth="330"
+               HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,10,60"/>
     </Grid>
 </Window>

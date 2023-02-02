@@ -23,11 +23,15 @@ namespace CampaignEditor
         private ClientController _clientController;
 
         private CampaignDTO campaign;
-        private ClientDTO client;
+        public ClientDTO client;
+
+        public static AddCampaign instance;
 
         public AddCampaign(ICampaignRepository campaignRepository, ITargetRepository targetRepository, 
             IClientRepository clientRepository, IAbstractFactory<NewTarget> factoryNewTarget)
         {
+            instance = this;
+
             _factoryNewTarget = factoryNewTarget;
             _campaignController = new CampaignController(campaignRepository);
             _targetController = new TargetController(targetRepository);
