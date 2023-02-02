@@ -3,7 +3,9 @@ using CampaignEditor.Repositories;
 using Database.DTOs.TargetClassDTO;
 using Database.DTOs.TargetValueDTO;
 using Database.Repositories;
+using System;
 using System.Collections.Generic;
+using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -17,6 +19,7 @@ namespace CampaignEditor
         private TargetController _targetController;
         private TargetClassController _targetClassController;
         private TargetValueController _targetValueController;
+        List<TreeViewModel> treeViewList;// = new List<TreeViewModel>();
 
         public bool isDataRangeChecked { get; set; } = false;
         public NewTarget(ITargetRepository targetRepository, 
@@ -39,7 +42,7 @@ namespace CampaignEditor
             tvTargets.Items.Clear();
             
             tvTargets.ItemsSource = treeResult;
-
+            
         }
 
         #region TargetTree
@@ -60,11 +63,11 @@ namespace CampaignEditor
         {
             Dictionary<TargetClassDTO, IEnumerable<TargetValueDTO>> nodes = await GetNodes();
 
-            List<TreeViewModel> treeViewList = new List<TreeViewModel>();
+            treeViewList = new List<TreeViewModel>();
 
             foreach (TargetClassDTO node in nodes.Keys)
             {
-
+                // Don't want to include range fields in treeView
                 if (node.type == "R")
                 {
                     continue;
@@ -100,7 +103,51 @@ namespace CampaignEditor
             }
 
         }
+
+        // For writing in textBox element
+        private List<string> GetSelectedStrings()
+        {
+            
+            List<string> selectedStrings = new List<string>();
+            foreach (TreeViewModel parent in treeViewList)
+            {
+                StringBuilder row = new StringBuilder("");
+                if (parent.IsChecked != false){
+                    row.Append(parent.Name.Trim() + ": ");
+                }
+                int i = 0;
+                foreach (TreeViewModel child in parent.Children)
+                {
+                    if (child.IsChecked != false)
+                    {
+                        if (i != 0)
+                        {
+                            row.Append(",\n");
+                            int numOfWhitespaces = parent.Name.Trim().Length + 2;
+                            row.Append(' ', numOfWhitespaces);
+                        }
+                        row.Append(child.Name.Trim());
+                        i++;
+                    }
+                }
+                if (parent.IsChecked != false)
+                    selectedStrings.Add(row.ToString());
+            }
+
+            return selectedStrings;
+        }
+        private void CheckBox_Click(object sender, RoutedEventArgs e)
+        {
+            tbSelected.Text = "";
+            List<string> selectedStrings = GetSelectedStrings();
+            foreach (string str in selectedStrings)
+            {
+                tbSelected.Text += str + "\n";
+            }
+        }
+
         #endregion
+
 
     }
 }
