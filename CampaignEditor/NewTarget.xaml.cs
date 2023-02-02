@@ -30,7 +30,6 @@ namespace CampaignEditor
         {
             InitializeComponent();
             this.DataContext = this;
-
             _targetController = new TargetController(targetRepository);
             _targetClassController = new TargetClassController(targetClassRepository);
             _targetValueController = new TargetValueController(targetValueRepository);
@@ -188,8 +187,11 @@ namespace CampaignEditor
                     if (parentid > 10 && k == 0)
                     {
                         string AgeRange = ParseAgeRangeTargetdefi();
-                        string prefix = j == 0 ? "" : " ";
-                        sbTargetdefi.Append(prefix + AgeRange);
+                        if (AgeRange != "")
+                        {
+                            string prefix = j == 0 ? "" : " ";
+                            sbTargetdefi.Append(prefix + AgeRange);
+                        }
                         k++;
                     }
 
@@ -240,8 +242,11 @@ namespace CampaignEditor
                     if (parentid > 10 && k == 0)
                     {
                         string AgeRange = ParseAgeRangeTargetdefp();
-                        string prefix = j == 0 ? "" : "&;";
-                        sbTargetdefp.Append(prefix + AgeRange);
+                        if (AgeRange != "")
+                        {
+                            string prefix = j == 0 ? "" : "&;";
+                            sbTargetdefp.Append(prefix + AgeRange);
+                        }
                         k++;
                     }
 

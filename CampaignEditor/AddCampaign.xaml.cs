@@ -108,6 +108,7 @@ namespace CampaignEditor
         #region Targets
         private async void FillTargetsComboBox()
         {
+            cbTargets.Items.Clear();
             IEnumerable<TargetDTO> targets = await _targetController.GetAllTargets();
             targets = targets.OrderBy(t => t.targname);
             cbTargets.DisplayMemberPath = "targname";
@@ -127,7 +128,8 @@ namespace CampaignEditor
         }
         private void btnNewTarget_Click(object sender, RoutedEventArgs e)
         {
-            _factoryNewTarget.Create().Show();
+            _factoryNewTarget.Create().ShowDialog();
+            FillTargetsComboBox();
         }
         #endregion
 
