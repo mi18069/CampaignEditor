@@ -1,5 +1,4 @@
 ﻿using CampaignEditor.Controllers;
-using CampaignEditor.Repositories;
 using Database.DTOs.TargetClassDTO;
 using Database.DTOs.TargetDTO;
 using Database.DTOs.TargetValueDTO;
@@ -8,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -256,9 +256,9 @@ namespace CampaignEditor
                         {
                             sbTargetdefp.Append("&;");
                         }
-                        int convertedId = ConvertToPlaceInTargetdefp(parentid);
+                        int id = ConvertToPlaceInTargetdefp(parentid);
                         int childid = Convert.ToInt32((child.Item as TargetValueDTO).value);
-                        sbTargetdefp.Append("C;" + convertedId + ",1" + ";INL," + childid + ";100;");
+                        sbTargetdefp.Append("C;" + id + ",1" + ";INL," + childid + ";100;");
                         i++;
                         j++;
                     }
@@ -290,6 +290,58 @@ namespace CampaignEditor
                 return 14;
             else
                 return parentid;
+        }
+
+        public async Task<string> ParseTargetdefi(string targetdefi)
+        {
+            // Trimming [ and ][]
+            targetdefi = targetdefi.Trim();
+            if (targetdefi.Length < 4 || !CheckTargetdefiFormat(targetdefi))
+                return "";
+            targetdefi = targetdefi.Substring(1, targetdefi.Length - 4);
+            
+            Regex regex = new Regex(@"\S+");
+            StringBuilder sb = new StringBuilder("");
+
+            var matches = regex.Matches(targetdefi);
+            int lastClassId = -1;
+            foreach (var match in matches)
+            {
+                // match = num.num || num.range
+                string[] splitted = match.ToString()!.Split('.');
+                int classid = Convert.ToInt32(splitted[0]);
+                var classDTO = await _targetClassController.GetTargetClassById(classid);
+
+                // if class is the same as last, there's no need to write it's name again
+                if (lastClassId != classid) 
+                { 
+                    sb.Append(classDTO.name.Trim() + ":\n");
+                    lastClassId = classid;
+                }
+
+                if (classDTO.type == "S")
+                {
+                    string value = splitted[1];
+                    var valueDTO = await _targetValueController.GetTargetValueByIdAndValue(classid, value);
+                    sb.Append(' ', 5);
+                    sb.Append(valueDTO.name.Trim() + "\n");
+                }
+                else if (classDTO.type == "R")
+                {
+                    sb.Append(' ', 5);
+                    sb.Append(splitted[1]);
+                }
+            }
+
+            return sb.ToString();
+        }
+
+        private bool CheckTargetdefiFormat(string targetdefi)
+        {
+            Regex checkFormat = new Regex(@"\[.*\]\[\]");
+            if (checkFormat.IsMatch(targetdefi))
+                return true;
+            return false;
         }
 
         #endregion

@@ -13,6 +13,7 @@ namespace Database.Repositories
         Task<bool> CreateTargetValue(CreateTargetValueDTO targetValueDTO);
         Task<TargetValueDTO> GetTargetValueById(int id);
         Task<TargetValueDTO> GetTargetValueByName(string valuename);
+        Task<TargetValueDTO> GetTargetValueByIdAndValue(int id, string value);
         Task<IEnumerable<TargetValueDTO>> GetAllTargetValues();
         Task<IEnumerable<TargetValueDTO>> GetAllTargetValuesWithId(int id);
 

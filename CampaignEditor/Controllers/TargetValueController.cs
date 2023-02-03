@@ -31,6 +31,11 @@ namespace CampaignEditor.Controllers
             var target = await _repository.GetTargetValueByName(targname);
             return target;
         }
+        public async Task<TargetValueDTO> GetTargetValueByIdAndValue(int id, string value)
+        {
+            var target = await _repository.GetTargetValueByIdAndValue(id, value);
+            return target;
+        }
 
         public async Task<bool> UpdateTarget(UpdateTargetValueDTO targetValueDTO)
         {

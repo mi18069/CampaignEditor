@@ -89,6 +89,12 @@
                         Click="btnNewTarget_Click">
                     <Image Source="\images\GreenPlus.png"></Image>
                 </Button>
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                              Width="280" Height="170"
+                              HorizontalAlignment="Center" VerticalAlignment="Center" Margin="10,90,10,0">
+                    <TextBlock x:Name="tbFilters" TextWrapping="NoWrap" Text="" 
+                               Foreground="DarkGray" FontSize="16"/>
+                </ScrollViewer>
             </Grid>
         </Border>
         <Button x:Name="btnSave" Content="Save" 

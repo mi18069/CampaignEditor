@@ -124,6 +124,7 @@ namespace CampaignEditor
             {
                 var target = cbTargets.SelectedItem as TargetDTO;
                 lblTargetDescription.Content = target!.targdesc;
+                FillTargetTextBlock(target.targdefi);
             }
         }
         private void btnNewTarget_Click(object sender, RoutedEventArgs e)
@@ -131,6 +132,14 @@ namespace CampaignEditor
             _factoryNewTarget.Create().ShowDialog();
             FillTargetsComboBox();
         }
+
+        private async void FillTargetTextBlock(string targetdefi)
+        {
+            var instance = _factoryNewTarget.Create();
+            string text = await instance.ParseTargetdefi(targetdefi);
+            tbFilters.Text = text;
+        }
+
         #endregion
 
         private void btnCancel_Click(object sender, RoutedEventArgs e)
