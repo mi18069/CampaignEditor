@@ -27,6 +27,7 @@ namespace CampaignEditor
                     services.AddFormFactory<AddCampaign>();
                     services.AddFormFactory<NewCampaign>();
                     services.AddFormFactory<NewTarget>();
+                    services.AddFormFactory<AssignTargets>();
                     services.AddScoped<IDataContext, DataContext>();
                     // Add services
                     Extensions.UserExtensions.AddUserExtensions(services);

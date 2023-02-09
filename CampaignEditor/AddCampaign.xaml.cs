@@ -16,7 +16,7 @@ namespace CampaignEditor
 
     public partial class AddCampaign : Window
     {
-        private readonly IAbstractFactory<NewTarget> _factoryNewTarget;
+        private readonly IAbstractFactory<AssignTargets> _factoryAssignTargets;
 
         private CampaignController _campaignController;
         private TargetController _targetController;
@@ -28,11 +28,11 @@ namespace CampaignEditor
         public static AddCampaign instance;
 
         public AddCampaign(ICampaignRepository campaignRepository, ITargetRepository targetRepository, 
-            IClientRepository clientRepository, IAbstractFactory<NewTarget> factoryNewTarget)
+            IClientRepository clientRepository, IAbstractFactory<AssignTargets> factoryAssignTargets)
         {
             instance = this;
 
-            _factoryNewTarget = factoryNewTarget;
+            _factoryAssignTargets = factoryAssignTargets;
             _campaignController = new CampaignController(campaignRepository);
             _targetController = new TargetController(targetRepository);
             _clientController = new ClientController(clientRepository);
@@ -129,15 +129,15 @@ namespace CampaignEditor
         }
         private void btnNewTarget_Click(object sender, RoutedEventArgs e)
         {
-            _factoryNewTarget.Create().ShowDialog();
-            FillTargetsComboBox();
+            //_factoryNewTarget.Create().ShowDialog();
+            //FillTargetsComboBox();
         }
 
         private async void FillTargetTextBlock(string targetdefi)
         {
-            var instance = _factoryNewTarget.Create();
-            string text = await instance.ParseTargetdefi(targetdefi);
-            tbFilters.Text = text;
+            //var instance = _factoryNewTarget.Create();
+            //string text = await instance.ParseTargetdefi(targetdefi);
+            //tbFilters.Text = text;
         }
 
         #endregion
@@ -147,6 +147,9 @@ namespace CampaignEditor
             this.Close();
         }
 
-        
+        private void btnAssignTargets_Click(object sender, RoutedEventArgs e)
+        {
+            _factoryAssignTargets.Create().Show();
+        }
     }
 }

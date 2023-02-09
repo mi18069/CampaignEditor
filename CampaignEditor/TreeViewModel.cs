@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace TreeViewModels
 {
@@ -112,6 +113,22 @@ namespace TreeViewModels
         }
 
         public event PropertyChangedEventHandler PropertyChanged;
+
+        protected bool SetProperty<T>(ref T field, T newValue, [CallerMemberName] string propertyName = null)
+        {
+            if (!Equals(field, newValue))
+            {
+                field = newValue;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+                return true;
+            }
+
+            return false;
+        }
+
+        private System.Collections.IEnumerable targetsList1;
+
+        public System.Collections.IEnumerable targetsList { get => targetsList1; set => SetProperty(ref targetsList1, value); }
 
         #endregion
     }

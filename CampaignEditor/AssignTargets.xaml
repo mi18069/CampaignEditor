@@ -10,17 +10,22 @@
         <Border BorderBrush="Gray" BorderThickness="1"
             Width="300" Height="400" 
              HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10, 0, 0, 0">
-            <ListBox x:Name="lbTargets" 
-                 d:ItemsSource="{d:SampleData ItemCount=5}"/>
+            <ListView x:Name="lbTargets"
+                      ItemsSource="{Binding TargetsList}"
+                      DisplayMemberPath="targname"
+                     MouseDoubleClick="lbTargets_MouseDoubleClick"/>
+
         </Border>
         <Button x:Name="btnToSelected" Background="White"
                 Width="100" Height="40"
-                HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0, 80, 0, 0">
+                HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0, 80, 0, 0"
+                Click="btnToSelected_Click">
             <Image Source="\images\RightArrow.png"></Image>
         </Button>
         <Button x:Name="btnFromSelected" Background="White"
                 Width="100" Height="40"
-                HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0, 140, 0, 0">
+                HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0, 140, 0, 0"
+                Click="btnFromSelected_Click">
             <Image Source="\images\LeftArrow.png"></Image>
         </Button>
         <Button x:Name="btnNewTarget" Background="White"
@@ -36,8 +41,10 @@
         <Border BorderBrush="Gray" BorderThickness="1"
             Width="300" Height="100" 
              HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0, 15, 10, 0">
-            <ListBox x:Name="lbSelectedTargets" 
-                 d:ItemsSource="{d:SampleData ItemCount=3}"/>
+            <ListView x:Name="lbSelectedTargets" 
+                     ItemsSource="{Binding SelectedTargetsList}"
+                     DisplayMemberPath="targname"
+                     MouseDoubleClick="lbSelectedTargets_MouseDoubleClick"/>
         </Border>
         <Border BorderBrush="Gray" BorderThickness="1"
             Width="300" Height="200" 

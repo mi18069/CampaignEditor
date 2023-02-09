@@ -8,9 +8,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="images\EditIcon.png" />
     <None Remove="images\GreenPlus.png" />
     <None Remove="images\Green_+.jpg" />
+    <None Remove="images\LeftArrow.png" />
     <None Remove="images\Red_X.png" />
+    <None Remove="images\RightArrow.png" />
     <None Remove="images\UserIcon.png" />
   </ItemGroup>
 
@@ -26,7 +29,9 @@
 
   <ItemGroup>
     <Resource Include="images\GreenPlus.png" />
+    <Resource Include="images\LeftArrow.png" />
     <Resource Include="images\Red_X.png" />
+    <Resource Include="images\RightArrow.png" />
     <Resource Include="images\UserIcon.png" />
   </ItemGroup>
 
