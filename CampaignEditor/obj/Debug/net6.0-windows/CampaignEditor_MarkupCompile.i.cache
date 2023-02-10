@@ -16,5 +16,5 @@ C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\App.xaml
 245919750172
 AddCampaign.xaml;AddClient.xaml;AddUser.xaml;AssignTargets.xaml;AssignUser.xaml;Clients.xaml;MainWindow.xaml;NewCampaign.xaml;NewTarget.xaml;TreeViewCampaignsItem.xaml;TreeViewClientsItem.xaml;UsersListItem.xaml;UsersOfClient.xaml;
 
-True
+False
 

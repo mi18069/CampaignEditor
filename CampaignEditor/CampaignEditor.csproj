@@ -9,6 +9,8 @@
 
   <ItemGroup>
     <None Remove="images\EditIcon.png" />
+    <None Remove="images\Edit_Icon.png" />
+    <None Remove="images\Edit_Icon2.png" />
     <None Remove="images\GreenPlus.png" />
     <None Remove="images\Green_+.jpg" />
     <None Remove="images\LeftArrow.png" />
@@ -28,6 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="images\Edit_Icon2.png" />
     <Resource Include="images\GreenPlus.png" />
     <Resource Include="images\LeftArrow.png" />
     <Resource Include="images\Red_X.png" />

@@ -23,6 +23,8 @@ namespace CampaignEditor
         private TargetValueController _targetValueController;
         List<TreeViewModel> treeViewList;
 
+        public bool success = false;
+
         public bool isDataRangeChecked { get; set; } = false;
         public NewTarget(ITargetRepository targetRepository, 
                          ITargetClassRepository targetClassRepository,
@@ -165,8 +167,9 @@ namespace CampaignEditor
                 string targdefi = ParseSelectedTargdefi();
                 string targdefp = ParseSelectedTargdefp();
 
-                await _targetController.CreateTarget(new CreateTargetDTO(targname, targown, 
+                _ = await _targetController.CreateTarget(new CreateTargetDTO(targname, targown, 
                                                                          targdesc, targdefi, targdefp));
+                success = true;
                 this.Close();
             }
         }

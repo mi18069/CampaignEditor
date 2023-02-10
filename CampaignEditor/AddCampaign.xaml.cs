@@ -5,8 +5,7 @@ using Database.DTOs.ClientDTO;
 using Database.DTOs.TargetDTO;
 using Database.Repositories;
 using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -52,7 +51,6 @@ namespace CampaignEditor
             dpEndDate.SelectedDate = ConvertStringToDate(campaign.cmpedate);
 
             FillTBTextBoxes();
-            FillTargetsComboBox();
         }
         #region Info
         private void FillTBTextBoxes()
@@ -106,7 +104,7 @@ namespace CampaignEditor
         #endregion
 
         #region Targets
-        private async void FillTargetsComboBox()
+        /*private async void FillTargetsComboBox()
         {
             cbTargets.Items.Clear();
             IEnumerable<TargetDTO> targets = await _targetController.GetAllTargets();
@@ -138,6 +136,36 @@ namespace CampaignEditor
             //var instance = _factoryNewTarget.Create();
             //string text = await instance.ParseTargetdefi(targetdefi);
             //tbFilters.Text = text;
+        }*/
+
+        private void btnAssignTargets_Click(object sender, RoutedEventArgs e)
+        {
+            var factory = _factoryAssignTargets.Create();
+            factory.ShowDialog();
+            if (factory.success)
+                FillTargetLabels(factory.SelectedTargetsList);
+        }
+
+        private void FillTargetLabels(ObservableCollection<TargetDTO> selectedTargetsList)
+        {
+            lblPrimaryTarget.Content = "";
+            lblSecondaryTarget.Content = "";
+            lblTertiaryTarget.Content = "";
+
+            int numOfTargets = selectedTargetsList.Count;
+
+            if (numOfTargets > 0)
+            {
+                lblPrimaryTarget.Content = selectedTargetsList[0].targname;
+            }
+            if (numOfTargets > 1)
+            {
+                lblSecondaryTarget.Content = selectedTargetsList[1].targname;
+            }
+            if (numOfTargets > 2)
+            {
+                lblTertiaryTarget.Content = selectedTargetsList[2].targname;
+            }
         }
 
         #endregion
@@ -147,9 +175,6 @@ namespace CampaignEditor
             this.Close();
         }
 
-        private void btnAssignTargets_Click(object sender, RoutedEventArgs e)
-        {
-            _factoryAssignTargets.Create().Show();
-        }
+        
     }
 }

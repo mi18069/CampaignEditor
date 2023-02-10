@@ -1,19 +1,26 @@
 ﻿using CampaignEditor.Controllers;
+using CampaignEditor.StartupHelpers;
 using Database.DTOs.TargetDTO;
+using Database.Entities;
 using Database.Repositories;
-using System.Collections.Generic;
+using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Shell;
 
 namespace CampaignEditor
 {
     public partial class AssignTargets : Window
     {
+        private readonly IAbstractFactory<NewTarget> _factoryNewTarget;
+
         private TargetController _targetController;
+        public bool success = false;
 
         private ObservableCollection<TargetDTO> _targetsList = new ObservableCollection<TargetDTO>();
         private ObservableCollection<TargetDTO> _selectedTargetsList = new ObservableCollection<TargetDTO>();
@@ -23,10 +30,11 @@ namespace CampaignEditor
         public ObservableCollection<TargetDTO> TargetsList { get { return _targetsList; } }
         public ObservableCollection<TargetDTO> SelectedTargetsList { get { return _selectedTargetsList; } }
 
-        public AssignTargets(ITargetRepository targetRepository)
+        public AssignTargets(ITargetRepository targetRepository, IAbstractFactory<NewTarget> factoryNewTarget)
         {
             _targetController = new TargetController(targetRepository);
             _ = InitializeListsAsync();
+            _factoryNewTarget = factoryNewTarget;
 
             InitializeComponent();
             this.DataContext = this;
@@ -34,6 +42,9 @@ namespace CampaignEditor
 
         private async Task InitializeListsAsync()
         {
+            _targetsList.Clear();
+            _selectedTargetsList.Clear();
+
             var targets = await _targetController.GetAllTargets();
             targets = targets.OrderBy(t => t.targname);
 
@@ -42,53 +53,6 @@ namespace CampaignEditor
                 _targetsList.Add(target);
             }
 
-        }
-
-        private void lbTargets_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
-        {
-            DependencyObject obj = (DependencyObject)e.OriginalSource;
-
-            while (obj != null && obj != lbTargets)
-            {
-                if (obj.GetType() == typeof(ListViewItem))
-                {
-                    // Do something here
-                    if (maxSelected > 0)
-                    {
-                        var target = lbTargets.SelectedItem as TargetDTO;
-                        if (target != null)
-                        {
-                            MoveTargetToSelected(target);
-                            maxSelected--;
-                        }
-                    }
-
-                    break;
-                }
-                obj = VisualTreeHelper.GetParent(obj);
-            }
-
-        }
-
-        private void lbSelectedTargets_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
-        {
-            DependencyObject obj = (DependencyObject)e.OriginalSource;
-
-            while (obj != null && obj != lbTargets)
-            {
-                if (obj.GetType() == typeof(ListViewItem))
-                {
-                    var target = lbSelectedTargets.SelectedItem as TargetDTO;
-                    if (target != null)
-                    {
-                        MoveTargetFromSelected(target);
-                        maxSelected++;
-                    }
-                    
-                    break;
-                }
-                obj = VisualTreeHelper.GetParent(obj);
-            }
         }
         private void MoveTargetToSelected(TargetDTO target)
         {
@@ -122,7 +86,7 @@ namespace CampaignEditor
             }
         }
 
-        public ObservableCollection<TargetDTO> OrderCollection(ObservableCollection<TargetDTO> collection)
+        private ObservableCollection<TargetDTO> OrderCollection(ObservableCollection<TargetDTO> collection)
         {
             ObservableCollection<TargetDTO> temp;
             temp = new ObservableCollection<TargetDTO>(collection.OrderBy(p => p.targname));
@@ -130,6 +94,118 @@ namespace CampaignEditor
             foreach (TargetDTO j in temp) 
                 collection.Add(j);
             return collection;
+        }
+
+        private void btnNewTarget_Click(object sender, RoutedEventArgs e)
+        {
+            _factoryNewTarget.Create().ShowDialog();
+            _ = InitializeListsAsync();
+        }
+
+        private void btnEditTarget_Click(object sender, RoutedEventArgs e)
+        {
+            var factory = _factoryNewTarget.Create();
+            factory.ShowDialog();
+            if (factory.success)
+                _ = InitializeListsAsync();
+                
+
+        }
+
+        private void btnSave_Click(object sender, RoutedEventArgs e)
+        {
+            success = true;
+            this.Close();
+        }
+
+        private void btnCancel_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
+
+        private void SelectedTargetsItem_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            var target = lbSelectedTargets.SelectedItem as TargetDTO;
+            if (target != null)
+            {
+                MoveTargetFromSelected(target);
+                maxSelected++;
+            }
+        }
+
+        private void TargetsItem_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (maxSelected > 0)
+            {
+                var target = lbTargets.SelectedItem as TargetDTO;
+                if (target != null)
+                {
+                    MoveTargetToSelected(target);
+                    maxSelected--;
+                }
+            }
+        }
+
+        private void ListViewItem_PreviewMouseMove(object sender, MouseEventArgs e)
+        {
+            if (e.LeftButton == MouseButtonState.Pressed)
+            {
+                if (sender is ListViewItem)
+                {
+                    ListViewItem draggedItem = sender as ListViewItem;
+                    DragDrop.DoDragDrop(draggedItem, draggedItem.DataContext, DragDropEffects.Move);
+                    draggedItem.IsSelected = true;
+                }
+            }
+        }
+
+        private void ListViewItem_Drop(object sender, DragEventArgs e)
+        {
+            TargetDTO droppedData = e.Data.GetData(typeof(TargetDTO)) as TargetDTO;
+            TargetDTO target = ((ListBoxItem)(sender)).DataContext as TargetDTO;
+
+            int removedIdx = lbSelectedTargets.Items.IndexOf(droppedData);
+            int targetIdx = lbSelectedTargets.Items.IndexOf(target);
+
+            if (removedIdx < targetIdx)
+            {
+                _selectedTargetsList.Insert(targetIdx + 1, droppedData);
+                _selectedTargetsList.RemoveAt(removedIdx);
+            }
+            else
+            {
+                int remIdx = removedIdx + 1;
+                if (_selectedTargetsList.Count + 1 > remIdx)
+                {
+                    _selectedTargetsList.Insert(targetIdx, droppedData);
+                    _selectedTargetsList.RemoveAt(remIdx);
+                }
+            }
+        }
+        private void TargetsItem_PreviewMouseUp(object sender, MouseButtonEventArgs e)
+        {
+            var target = lbTargets.SelectedItem as TargetDTO;
+            if (target != null)
+                FillTargetTextBlock(target.targdefi);
+        }
+
+        private void SelectedTargetsItem_PreviewMouseUp(object sender, MouseButtonEventArgs e)
+        {
+            var target = lbSelectedTargets.SelectedItem as TargetDTO;
+            if (target != null)
+                FillTargetTextBlock(target.targdefi);
+        }
+
+        private async void FillTargetTextBlock(string targetdefi)
+        {
+            var instance = _factoryNewTarget.Create();
+            string text = await instance.ParseTargetdefi(targetdefi);
+            tbTargetFilters.Text = text;
+        }
+
+        private void ListViewItem_LostFocus(object sender, RoutedEventArgs e)
+        {
+            tbTargetFilters.Text = "";
         }
     }
     

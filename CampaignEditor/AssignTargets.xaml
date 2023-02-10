@@ -12,8 +12,15 @@
              HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10, 0, 0, 0">
             <ListView x:Name="lbTargets"
                       ItemsSource="{Binding TargetsList}"
-                      DisplayMemberPath="targname"
-                     MouseDoubleClick="lbTargets_MouseDoubleClick"/>
+                      DisplayMemberPath="targname">
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <EventSetter Event="PreviewMouseUp" Handler="TargetsItem_PreviewMouseUp"/>
+                        <EventSetter Event="LostFocus" Handler="ListViewItem_LostFocus"/>
+                        <EventSetter Event="MouseDoubleClick" Handler="TargetsItem_MouseDoubleClick"/>
+                    </Style>
+                </ListView.ItemContainerStyle>
+            </ListView>
 
         </Border>
         <Button x:Name="btnToSelected" Background="White"
@@ -30,32 +37,45 @@
         </Button>
         <Button x:Name="btnNewTarget" Background="White"
                 Width="100" Height="40"
-                HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0, 250, 0, 0">
+                HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0, 250, 0, 0"
+                Click="btnNewTarget_Click">
             <Image Source="\images\GreenPlus.png"></Image>
         </Button>
         <Button x:Name="btnEditTarget" Background="White"
                 Width="100" Height="40"
-                HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0, 310, 0, 0">
-            <Image Source="\images\EditIcon.png"></Image>
+                HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0, 310, 0, 0"
+                Click="btnEditTarget_Click">
+            <Image Source="\images\Edit_Icon2.png"></Image>
         </Button>
         <Border BorderBrush="Gray" BorderThickness="1"
             Width="300" Height="100" 
              HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0, 15, 10, 0">
             <ListView x:Name="lbSelectedTargets" 
-                     ItemsSource="{Binding SelectedTargetsList}"
-                     DisplayMemberPath="targname"
-                     MouseDoubleClick="lbSelectedTargets_MouseDoubleClick"/>
+                      ItemsSource="{Binding SelectedTargetsList}"
+                      DisplayMemberPath="targname" AllowDrop="True">
+                <ListView.ItemContainerStyle>
+                    <Style TargetType="ListViewItem">
+                        <EventSetter Event="PreviewMouseUp"  Handler="SelectedTargetsItem_PreviewMouseUp"/>
+                        <EventSetter Event="LostFocus" Handler="ListViewItem_LostFocus"/>
+                        <EventSetter Event="PreviewMouseMove" Handler="ListViewItem_PreviewMouseMove"/>
+                        <EventSetter Event="Drop" Handler="ListViewItem_Drop"/>
+                        <EventSetter Event="MouseDoubleClick" Handler="SelectedTargetsItem_MouseDoubleClick"/>
+                    </Style>
+                </ListView.ItemContainerStyle>
+            </ListView>
         </Border>
         <Border BorderBrush="Gray" BorderThickness="1"
             Width="300" Height="200" 
              HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0, 150, 10, 0">
-            <TextBlock x:Name="tbTargetFilters" Foreground="Gray"/>
+            <TextBlock x:Name="tbTargetFilters" Foreground="Gray" FontSize="18"/>
         </Border>
         <Button x:Name="btnSave" Content="Assign"
                 Width="100" Height="40"
-                HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0, 0, 10, 10"/>
+                HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0, 0, 10, 10"
+                Click="btnSave_Click"/>
         <Button x:Name="btnCancel" Content="Cancel"
                 Width="100" Height="40"
-                HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0, 0, 150, 10"/>
+                HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0, 0, 150, 10"
+                Click="btnCancel_Click"/>
     </Grid>
 </Window>
