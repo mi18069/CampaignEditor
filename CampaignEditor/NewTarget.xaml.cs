@@ -21,7 +21,7 @@ namespace CampaignEditor
         private TargetController _targetController;
         private TargetClassController _targetClassController;
         private TargetValueController _targetValueController;
-        List<TreeViewModel> treeViewList;
+        public List<TreeViewModel> treeViewList;
 
         public bool success = false;
 
@@ -36,12 +36,12 @@ namespace CampaignEditor
             _targetClassController = new TargetClassController(targetClassRepository);
             _targetValueController = new TargetValueController(targetValueRepository);
 
-            InitializeTree();
+            //_ = InitializeTree();
         }
 
         #region TargetTree
 
-        private async void InitializeTree()
+        public async Task InitializeTree()
         {
             var treeResult = await SetTree();
             tvTargets.Items.Clear();
@@ -92,6 +92,21 @@ namespace CampaignEditor
             return treeViewList;
         }
 
+        public async Task<bool> InitializeTargetToEdit(TargetDTO target)
+        {
+            await InitializeTree();
+            tbName.Text = target.targname;
+            tbDescription.Text = target.targdesc;
+            
+            var res = await CheckTreeUsingTargetdefi(target.targdefi);
+            PrintInTbSelected();
+
+            if (res == false)
+                return false;
+            else
+                return true;
+        }
+
         private void tvTargets_LostMouseCapture(object sender, MouseEventArgs e)
         {
             Dictionary<string, List<string>> treeDict = new Dictionary<string, List<string>>();
@@ -137,22 +152,36 @@ namespace CampaignEditor
 
             return selectedStrings;
         }
-
-        private void CheckBox_Click(object sender, RoutedEventArgs e)
+        private void PrintInTbSelected()
         {
             tbSelected.Text = "";
             List<string> selectedStrings = GetSelectedStrings();
+            if (cbAgeRange.IsChecked == true)
+            {
+                string from = tbFrom.Text;
+                string to = tbTo.Text;
+                string ageString = "Age Range:\n     " + from + " - " + to;
+                selectedStrings.Add(ageString);
+            }
             foreach (string str in selectedStrings)
             {
                 tbSelected.Text += str + "\n";
             }
+        }
+        private void tb_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            PrintInTbSelected();
+        }
+        private void CheckBox_Click(object sender, RoutedEventArgs e)
+        {
+            PrintInTbSelected();
         }
 
         #endregion
 
         #region Targets 
 
-        private void btnAdd_Click(object sender, RoutedEventArgs e)
+        private void btnSave_Click(object sender, RoutedEventArgs e)
         {
             AddNewTarget();
         }
@@ -339,6 +368,60 @@ namespace CampaignEditor
             return sb.ToString();
         }
 
+        private async Task<bool> CheckTreeUsingTargetdefi(string targetdefi)
+        {
+            // Trimming [ and ][]
+            targetdefi = targetdefi.Trim();
+            if (targetdefi.Length < 4 || !CheckTargetdefiFormat(targetdefi))
+                return false;
+
+            targetdefi = targetdefi.Substring(1, targetdefi.Length - 4);
+
+            Regex regex = new Regex(@"\S+");
+            //StringBuilder sb = new StringBuilder("");
+
+            var matches = regex.Matches(targetdefi);
+            foreach (var match in matches)
+            {
+                // match = num.num || num.range
+                string[] splitted = match.ToString()!.Split('.');
+                int classid = Convert.ToInt32(splitted[0]);
+                var classDTO = await _targetClassController.GetTargetClassById(classid);
+
+                if (classDTO.type == "S")
+                {
+                    string value = splitted[1];
+                    var valueDTO = await _targetValueController.GetTargetValueByIdAndValue(classid, value);
+                    CheckInTree(classDTO, valueDTO);
+                }
+                else if (classDTO.type == "R")
+                {
+                    string from = (splitted[1].Split('-'))[0];
+                    string to = (splitted[1].Split('-'))[1];
+
+                    cbAgeRange.IsChecked = true;
+                    tbFrom.Text = from;
+                    tbTo.Text = to;
+                }
+            }
+            return true;
+        }
+
+        private void CheckInTree(TargetClassDTO classDTO, TargetValueDTO valueDTO)
+        {
+            foreach (TreeViewModel parent in tvTargets.ItemsSource)
+            {
+                if (parent.Name == classDTO.name)
+                    foreach (TreeViewModel child in parent.Children)
+                    {
+                        if (child.Name == valueDTO.name)
+                        {
+                            child.IsChecked = true;
+                        }
+                    }
+            }
+        }
+
         private bool CheckTargetdefiFormat(string targetdefi)
         {
             Regex checkFormat = new Regex(@"\[.*\]\[\]");
@@ -380,16 +463,17 @@ namespace CampaignEditor
                     return false;
                 }
             }
-            else if (await _targetController.GetTargetByName(tbName.Text.Trim()) != null)
+            /*else if (await _targetController.GetTargetByName(tbName.Text.Trim()) != null)
             {
                 lblError.Content = "Target name already exist";
                 return false;
-            }
+            }*/
             return true;
         }
 
+
         #endregion
 
-
+        
     }
 }

@@ -44,6 +44,7 @@
         <Button x:Name="btnEditTarget" Background="White"
                 Width="100" Height="40"
                 HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0, 310, 0, 0"
+                IsEnabled="False"
                 Click="btnEditTarget_Click">
             <Image Source="\images\Edit_Icon2.png"></Image>
         </Button>

@@ -33,7 +33,7 @@
                 Width="340" Height="300"
                 HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,100,10,0">
             <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                <TextBlock x:Name="tbSelected" TextWrapping="NoWrap"/>
+                <TextBlock x:Name="tbSelected" Foreground="Gray" TextWrapping="NoWrap"/>
             </ScrollViewer>
         </Border>
         
@@ -47,11 +47,13 @@
             <TextBox x:Name="tbFrom"  MaxLength="2" HorizontalContentAlignment="Center"
                      IsEnabled="{Binding ElementName=cbAgeRange, Path=IsChecked}"
                      Width="50" Height="30"
-                     HorizontalAlignment="Left" Margin="180, 0, 0, 0"/>
+                     HorizontalAlignment="Left" Margin="180, 0, 0, 0"
+                     TextChanged="tb_TextChanged"/>
             <TextBox x:Name="tbTo" MaxLength="2" HorizontalContentAlignment="Center"
                      IsEnabled="{Binding ElementName=cbAgeRange, Path=IsChecked}"
-                             Width="50" Height="30"
-                             HorizontalAlignment="Left" Margin="275, 0, 0, 0"/>
+                     Width="50" Height="30"
+                     HorizontalAlignment="Left" Margin="275, 0, 0, 0"
+                     TextChanged="tb_TextChanged"/>
         </Grid>
         <Label x:Name="lblName" Content="Name:" FontWeight="Bold"
                HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,20,240,0"/>
@@ -65,9 +67,11 @@
             Width="230"
             HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,65,10,0" 
             TextWrapping="NoWrap"/>
-        <Button x:Name="btnAdd" Content="Add target" 
+        <Button x:Name="btnSave" Content="Save" 
                 Width="120" Height="50"
-                HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,10,10" Click="btnAdd_Click"/>
+                HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,10,10" 
+                Click="btnSave_Click"/>
+        
         <Label x:Name="lblError" Content="" Foreground="Red"
                MaxWidth="330"
                HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,10,60"/>

@@ -21,12 +21,14 @@ namespace CampaignEditor
 
         private TargetController _targetController;
         public bool success = false;
+        private bool canBeEdited = false;
 
         private ObservableCollection<TargetDTO> _targetsList = new ObservableCollection<TargetDTO>();
         private ObservableCollection<TargetDTO> _selectedTargetsList = new ObservableCollection<TargetDTO>();
 
         int maxSelected = 3;
 
+        public bool CanBeEdited { get; }
         public ObservableCollection<TargetDTO> TargetsList { get { return _targetsList; } }
         public ObservableCollection<TargetDTO> SelectedTargetsList { get { return _selectedTargetsList; } }
 
@@ -96,20 +98,32 @@ namespace CampaignEditor
             return collection;
         }
 
-        private void btnNewTarget_Click(object sender, RoutedEventArgs e)
-        {
-            _factoryNewTarget.Create().ShowDialog();
-            _ = InitializeListsAsync();
-        }
-
-        private void btnEditTarget_Click(object sender, RoutedEventArgs e)
+        private async void btnNewTarget_Click(object sender, RoutedEventArgs e)
         {
             var factory = _factoryNewTarget.Create();
+            await factory.InitializeTree();
             factory.ShowDialog();
             if (factory.success)
                 _ = InitializeListsAsync();
-                
+        }
 
+        private async void btnEditTarget_Click(object sender, RoutedEventArgs e)
+        {
+            var factory = _factoryNewTarget.Create();
+            var target = lbTargets.SelectedItems.Count > 0 ? lbTargets.SelectedItems[0] as TargetDTO :
+                                                             lbSelectedTargets.SelectedItems[0] as TargetDTO;
+
+            
+            if (target != null)
+            {
+                var success = await factory.InitializeTargetToEdit(target);
+            }
+
+            factory.ShowDialog();
+
+            if (factory.success)
+                _ = InitializeListsAsync();
+                
         }
 
         private void btnSave_Click(object sender, RoutedEventArgs e)
@@ -182,11 +196,20 @@ namespace CampaignEditor
                 }
             }
         }
+
+        private void CheckEdit()
+        {
+            if ((lbTargets.SelectedItems.Count + lbSelectedTargets.SelectedItems.Count) == 1)
+                btnEditTarget.IsEnabled = true;
+            else
+                btnEditTarget.IsEnabled = false;
+        }
         private void TargetsItem_PreviewMouseUp(object sender, MouseButtonEventArgs e)
         {
             var target = lbTargets.SelectedItem as TargetDTO;
             if (target != null)
                 FillTargetTextBlock(target.targdefi);
+            CheckEdit();
         }
 
         private void SelectedTargetsItem_PreviewMouseUp(object sender, MouseButtonEventArgs e)
@@ -194,6 +217,7 @@ namespace CampaignEditor
             var target = lbSelectedTargets.SelectedItem as TargetDTO;
             if (target != null)
                 FillTargetTextBlock(target.targdefi);
+            CheckEdit();
         }
 
         private async void FillTargetTextBlock(string targetdefi)
@@ -206,6 +230,7 @@ namespace CampaignEditor
         private void ListViewItem_LostFocus(object sender, RoutedEventArgs e)
         {
             tbTargetFilters.Text = "";
+            CheckEdit();
         }
     }
     
