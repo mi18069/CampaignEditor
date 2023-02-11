@@ -71,6 +71,10 @@
                 Width="120" Height="50"
                 HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,10,10" 
                 Click="btnSave_Click"/>
+        <Button x:Name="btnSaveAs" Content="Save As" Visibility="Hidden"
+                Width="120" Height="50"
+                HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,150,10" 
+                Click="btnSaveAs_Click"/>
         
         <Label x:Name="lblError" Content="" Foreground="Red"
                MaxWidth="330"

@@ -4,8 +4,8 @@ namespace Database.DTOs.TargetValueDTO
 {
     public class TargetValueDTO : BaseIdentityTargetValueDTO
     {
-        public TargetValueDTO(string name, string value) 
-            : base(name, value)
+        public TargetValueDTO(int id, string name, string value) 
+            : base(id, name, value)
         {
         }
     }

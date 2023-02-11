@@ -23,6 +23,8 @@ namespace CampaignEditor
         private TargetValueController _targetValueController;
         public List<TreeViewModel> treeViewList;
 
+        private TargetDTO targetToEdit = null;
+
         public bool success = false;
 
         public bool isDataRangeChecked { get; set; } = false;
@@ -35,8 +37,6 @@ namespace CampaignEditor
             _targetController = new TargetController(targetRepository);
             _targetClassController = new TargetClassController(targetClassRepository);
             _targetValueController = new TargetValueController(targetValueRepository);
-
-            //_ = InitializeTree();
         }
 
         #region TargetTree
@@ -95,8 +95,10 @@ namespace CampaignEditor
         public async Task<bool> InitializeTargetToEdit(TargetDTO target)
         {
             await InitializeTree();
-            tbName.Text = target.targname;
-            tbDescription.Text = target.targdesc;
+            tbName.Text = target.targname.Trim();
+            tbDescription.Text = target.targdesc.Trim();
+            btnSaveAs.Visibility = Visibility.Visible;
+            targetToEdit = target;
             
             var res = await CheckTreeUsingTargetdefi(target.targdefi);
             PrintInTbSelected();
@@ -183,12 +185,19 @@ namespace CampaignEditor
 
         private void btnSave_Click(object sender, RoutedEventArgs e)
         {
+            if (btnSaveAs.Visibility == Visibility.Collapsed)
+                AddNewTarget();
+            else
+                UpdateTarget();
+        }
+        private void btnSaveAs_Click(object sender, RoutedEventArgs e)
+        {
             AddNewTarget();
         }
 
         private async void AddNewTarget()
         {
-            if (await CheckValues())
+            if (await CheckValues(true))
             {
                 string targname = tbName.Text.Trim();
                 int targown = AddCampaign.instance.client.clid;
@@ -198,6 +207,24 @@ namespace CampaignEditor
 
                 _ = await _targetController.CreateTarget(new CreateTargetDTO(targname, targown, 
                                                                          targdesc, targdefi, targdefp));
+                success = true;
+                this.Close();
+            }
+        }
+
+        private async void UpdateTarget()
+        {
+            if (await CheckValues())
+            {
+                int targid = targetToEdit.targid;
+                string targname = tbName.Text.Trim();
+                int targown = AddCampaign.instance.client.clid;
+                string targdesc = tbDescription.Text.Trim();
+                string targdefi = ParseSelectedTargdefi();
+                string targdefp = ParseSelectedTargdefp();
+
+                _ = await _targetController.UpdateTarget(new UpdateTargetDTO(targid, targname, targown,
+                                                         targdesc, targdefi, targdefp));
                 success = true;
                 this.Close();
             }
@@ -432,7 +459,7 @@ namespace CampaignEditor
 
         #endregion
 
-        private async Task<bool> CheckValues()
+        private async Task<bool> CheckValues(bool checkname = false)
         {
             lblError.Content = "";
             if (tbName.Text == "")
@@ -463,13 +490,14 @@ namespace CampaignEditor
                     return false;
                 }
             }
-            /*else if (await _targetController.GetTargetByName(tbName.Text.Trim()) != null)
+            else if (checkname && await _targetController.GetTargetByName(tbName.Text.Trim()) != null)
             {
                 lblError.Content = "Target name already exist";
                 return false;
-            }*/
+            }
             return true;
         }
+
 
 
         #endregion
