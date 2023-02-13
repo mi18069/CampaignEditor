@@ -1,13 +1,11 @@
 ﻿using CampaignEditor.Controllers;
 using CampaignEditor.DTOs.CampaignDTO;
-using CampaignEditor.DTOs.UserDTO;
-using CampaignEditor.Repositories;
+using CampaignEditor.StartupHelpers;
 using Database.DTOs.ClientDTO;
-using Database.DTOs.UserClients;
+using Database.DTOs.TargetDTO;
 using Database.Repositories;
 using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -17,22 +15,26 @@ namespace CampaignEditor
 
     public partial class AddCampaign : Window
     {
+        private readonly IAbstractFactory<AssignTargets> _factoryAssignTargets;
 
         private CampaignController _campaignController;
-        private UserController _userController;
+        private TargetController _targetController;
         private ClientController _clientController;
-        private UserClientsController _userClientsController;
 
-        private CampaignDTO campaign;
-        private ClientDTO client;
+        private CampaignDTO campaign = null;
+        public ClientDTO client = null;
 
-        public AddCampaign(ICampaignRepository campaignRepository, IUserRepository userRepository, 
-            IClientRepository clientRepository, IUserClientsRepository userClientsRepository)
+        public static AddCampaign instance;
+
+        public AddCampaign(ICampaignRepository campaignRepository, ITargetRepository targetRepository, 
+            IClientRepository clientRepository, IAbstractFactory<AssignTargets> factoryAssignTargets)
         {
+            instance = this;
+
+            _factoryAssignTargets = factoryAssignTargets;
             _campaignController = new CampaignController(campaignRepository);
-            _userController = new UserController(userRepository);
+            _targetController = new TargetController(targetRepository);
             _clientController = new ClientController(clientRepository);
-            _userClientsController = new UserClientsController(userClientsRepository);
             InitializeComponent();            
 
         }
@@ -50,7 +52,7 @@ namespace CampaignEditor
 
             FillTBTextBoxes();
         }
-
+        #region Info
         private void FillTBTextBoxes()
         {
             tbTbStartHours.Text = campaign.cmpstime[0].ToString() + campaign.cmpstime[1].ToString();
@@ -59,104 +61,7 @@ namespace CampaignEditor
             tbTbEndHours.Text = campaign.cmpetime[0].ToString() + campaign.cmpetime[1].ToString();
             tbTbEndMinutes.Text = campaign.cmpetime[3].ToString() + campaign.cmpetime[4].ToString();
         }
-
-        /*private async void FillUsersComboBox()
-        {
-            IEnumerable<string> usernames = await _userController.GetAllUsernames();
-            usernames = usernames.OrderBy(u => u);
-            foreach (var username in usernames)
-            {
-                cbUsers.Items.Add(username);
-            }
-
-            cbUsers.SelectedItem = MainWindow.instance.user.usrname;
-            if (MainWindow.instance.user.usrlevel != 0)
-                cbUsers.IsEnabled = false;
-        }
-        private async void FillClientsComboBox()
-        {
-            cbClients.Items.Clear();
-            if (cbUsers.SelectedIndex != -1)
-            {
-                var username = cbUsers.SelectedItem.ToString().Trim();
-                GetAllClientsByUsername(username);
-            }
-
-        }
-
-        private async void GetAllClientsByUsername(string username)
-        {
-
-            List<string> clients = new List<string>();
-            UserDTO user = await _userController.GetUserByUsername(username);
-
-            foreach (UserClientsDTO userClients in await _userClientsController.GetAllUserClientsByUserId(user.usrid))
-            {
-                var client = await _clientController.GetClientById(userClients.cliid);
-                clients.Add(client.clname);
-            }
-
-            clients.Sort();
-            foreach (string clientname in clients)
-                cbClients.Items.Add(clientname);
-
-            cbClients.SelectedIndex = 0;
-
-            if (clients.Count <= 0)
-                cbClients.IsEnabled = false;
-            else
-                cbClients.IsEnabled = true;
-        }
-
-        private async void btnSave_Click(object sender, RoutedEventArgs e)
-        {
-            lblError.Content = "";
-
-            string campaignname = tbName.Text.Trim();
-
-            DateTime startDate = (DateTime)dpStartDate.SelectedDate!;
-            DateTime endDate = (DateTime)dpEndDate.SelectedDate!;
-
-            if (!(int.TryParse(tbTbStartHours.Text, out int startHours) && int.TryParse(tbTbStartMinutes.Text, out int startMinutes) && 
-                int.TryParse(tbTbEndHours.Text, out int endHours) && int.TryParse(tbTbEndMinutes.Text, out int endMinutes)))
-            {
-                lblError.Content = "Unsupported TB time format";
-            }
-            else
-            {
-                startDate = startDate.AddHours(startHours).AddMinutes(startMinutes);
-                endDate = endDate.AddHours(endHours).AddMinutes(endMinutes);
-            }
-
-            if (cbUsers.SelectedIndex == -1)
-            {
-                lblError.Content = "User must be selected";
-            }
-            else if (cbClients.SelectedIndex == -1)
-            {
-                lblError.Content = "Client not selected";
-            }
-            else if (campaignname == "")
-            {
-                lblError.Content = "Enter campaign name";
-            }
-            else if (await _campaignController.GetCampaignByName(campaignname) != null)
-            {
-                lblError.Content = "Campaign name already exists";
-            }
-            else if (startDate >= endDate)
-            {
-                lblError.Content = "Start time must be before end time";
-            }
-            else
-            {
-                string username = cbUsers.SelectedValue.ToString()!.Trim();
-                string clientname = cbClients.SelectedValue.ToString()!.Trim();
-                AddNewCampaign(username, clientname, campaignname, startDate, endDate);
-            }         
-
-        }*/
-
+        #region Converters
         private string ConvertDateTimeToDateString(DateTime dateTime)
         {
             string year = dateTime.Year.ToString("0000");
@@ -183,6 +88,8 @@ namespace CampaignEditor
             return new DateTime(year, month, day);
         }
 
+        #endregion
+
         private void TxtBoxes_TextChanged(object sender, TextChangedEventArgs e)
         {
             if (((TextBox)sender).MaxLength == ((TextBox)sender).Text.Length)
@@ -194,9 +101,46 @@ namespace CampaignEditor
             }
         }
 
+        #endregion
+
+        #region Targets
+        private void btnAssignTargets_Click(object sender, RoutedEventArgs e)
+        {
+            var factory = _factoryAssignTargets.Create();
+            factory.ShowDialog();
+            if (factory.success)
+                FillTargetLabels(factory.SelectedTargetsList);
+        }
+
+        private void FillTargetLabels(ObservableCollection<TargetDTO> selectedTargetsList)
+        {
+            lblPrimaryTarget.Content = "";
+            lblSecondaryTarget.Content = "";
+            lblTertiaryTarget.Content = "";
+
+            int numOfTargets = selectedTargetsList.Count;
+
+            if (numOfTargets > 0)
+            {
+                lblPrimaryTarget.Content = selectedTargetsList[0].targname;
+            }
+            if (numOfTargets > 1)
+            {
+                lblSecondaryTarget.Content = selectedTargetsList[1].targname;
+            }
+            if (numOfTargets > 2)
+            {
+                lblTertiaryTarget.Content = selectedTargetsList[2].targname;
+            }
+        }
+
+        #endregion
+
         private void btnCancel_Click(object sender, RoutedEventArgs e)
         {
             this.Close();
         }
+
+        
     }
 }

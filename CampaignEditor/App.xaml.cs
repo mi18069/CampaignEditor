@@ -26,13 +26,18 @@ namespace CampaignEditor
                     services.AddFormFactory<ClientsTreeView>();
                     services.AddFormFactory<AddCampaign>();
                     services.AddFormFactory<NewCampaign>();
+                    services.AddFormFactory<NewTarget>();
+                    services.AddFormFactory<AssignTargets>();
                     services.AddScoped<IDataContext, DataContext>();
-                    // services for user
+                    // Add services
                     Extensions.UserExtensions.AddUserExtensions(services);
-                    // services for Campaign
                     Extensions.CampaignExtensions.AddCampaignExtensions(services);
                     Database.Extensions.UserClientsExtensions.AddUserClientsExtensions(services);
                     Database.Extensions.ClientExtensions.AddClientExtensions(services);
+                    Database.Extensions.TargetExtensions.AddTargetExtensions(services);
+                    Database.Extensions.TargetClassExtensions.AddTargetClassExtensions(services);
+                    Database.Extensions.TargetValueExtensions.AddTargetValueExtensions(services);
+
                 }).Build();
         }
 
