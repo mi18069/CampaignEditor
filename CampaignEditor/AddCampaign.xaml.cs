@@ -21,8 +21,8 @@ namespace CampaignEditor
         private TargetController _targetController;
         private ClientController _clientController;
 
-        private CampaignDTO campaign;
-        public ClientDTO client;
+        private CampaignDTO campaign = null;
+        public ClientDTO client = null;
 
         public static AddCampaign instance;
 
@@ -104,40 +104,6 @@ namespace CampaignEditor
         #endregion
 
         #region Targets
-        /*private async void FillTargetsComboBox()
-        {
-            cbTargets.Items.Clear();
-            IEnumerable<TargetDTO> targets = await _targetController.GetAllTargets();
-            targets = targets.OrderBy(t => t.targname);
-            cbTargets.DisplayMemberPath = "targname";
-
-            foreach (var target in targets)
-            {
-                cbTargets.Items.Add(target);
-            }
-        }
-        private void cbTargets_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (cbTargets.SelectedIndex != -1)
-            {
-                var target = cbTargets.SelectedItem as TargetDTO;
-                lblTargetDescription.Content = target!.targdesc;
-                FillTargetTextBlock(target.targdefi);
-            }
-        }
-        private void btnNewTarget_Click(object sender, RoutedEventArgs e)
-        {
-            //_factoryNewTarget.Create().ShowDialog();
-            //FillTargetsComboBox();
-        }
-
-        private async void FillTargetTextBlock(string targetdefi)
-        {
-            //var instance = _factoryNewTarget.Create();
-            //string text = await instance.ParseTargetdefi(targetdefi);
-            //tbFilters.Text = text;
-        }*/
-
         private void btnAssignTargets_Click(object sender, RoutedEventArgs e)
         {
             var factory = _factoryAssignTargets.Create();

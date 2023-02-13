@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="NewTarget" Height="600" Width="800" ResizeMode="NoResize" FontSize="18">
+        Title="NewTarget" Height="600" Width="800" FontSize="18">
     <Window.Resources>
         <ResourceDictionary>
             <Style x:Key="TreeViewItemStyle" TargetType="TreeViewItem">
@@ -20,64 +20,66 @@
             </HierarchicalDataTemplate>
         </ResourceDictionary>
     </Window.Resources>
-    <Grid>
-        <Border BorderBrush="LightGray" BorderThickness="1" 
+    <Viewbox>
+        <Grid Width="800" Height="600">
+            <Border BorderBrush="LightGray" BorderThickness="1" 
                 Width="400" Height="545"
                 HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10, 10, 0, 0">
-            <TreeView x:Name="tvTargets"
+                <TreeView x:Name="tvTargets"
                       ItemContainerStyle="{StaticResource TreeViewItemStyle}"
                       ItemTemplate="{StaticResource CheckBoxItemTemplate}"
                       LostMouseCapture="tvTargets_LostMouseCapture"/>
-        </Border>
-        <Border BorderBrush="LightGray" BorderThickness="1" 
+            </Border>
+            <Border BorderBrush="LightGray" BorderThickness="1" 
                 Width="340" Height="300"
                 HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,100,10,0">
-            <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                <TextBlock x:Name="tbSelected" Foreground="Gray" TextWrapping="NoWrap"/>
-            </ScrollViewer>
-        </Border>
-        
-        <Grid Width="330" Height="50" 
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                    <TextBlock x:Name="tbSelected" Foreground="Gray" TextWrapping="NoWrap"/>
+                </ScrollViewer>
+            </Border>
+
+            <Grid Width="330" Height="50" 
               HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0, 410, 10, 0">
-            <CheckBox x:Name="cbAgeRange"
+                <CheckBox x:Name="cbAgeRange"
                       Width="20" Height="20"
                       HorizontalAlignment="Left" Margin="0, 7, 0, 0"/>
-            <Label x:Name="lblAgeRange" Content="Age Range:   From               To" IsEnabled="{Binding ElementName=cbAgeRange, Path=IsChecked}"
+                <Label x:Name="lblAgeRange" Content="Age Range:   From               To" IsEnabled="{Binding ElementName=cbAgeRange, Path=IsChecked}"
                            VerticalAlignment="Center" Margin="20, 0, 0, 0"/>
-            <TextBox x:Name="tbFrom"  MaxLength="2" HorizontalContentAlignment="Center"
+                <TextBox x:Name="tbFrom"  MaxLength="2" HorizontalContentAlignment="Center"
                      IsEnabled="{Binding ElementName=cbAgeRange, Path=IsChecked}"
                      Width="50" Height="30"
                      HorizontalAlignment="Left" Margin="180, 0, 0, 0"
                      TextChanged="tb_TextChanged"/>
-            <TextBox x:Name="tbTo" MaxLength="2" HorizontalContentAlignment="Center"
+                <TextBox x:Name="tbTo" MaxLength="2" HorizontalContentAlignment="Center"
                      IsEnabled="{Binding ElementName=cbAgeRange, Path=IsChecked}"
                      Width="50" Height="30"
                      HorizontalAlignment="Left" Margin="275, 0, 0, 0"
                      TextChanged="tb_TextChanged"/>
-        </Grid>
-        <Label x:Name="lblName" Content="Name:" FontWeight="Bold"
+            </Grid>
+            <Label x:Name="lblName" Content="Name:" FontWeight="Bold"
                HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,20,240,0"/>
-        <TextBox x:Name="tbName" MaxLength="25"
+            <TextBox x:Name="tbName" MaxLength="25"
             Width="230"
             HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,25,10,0" 
             TextWrapping="NoWrap"/>
-        <Label x:Name="lblDescription" Content="Description:" FontWeight="Bold"
+            <Label x:Name="lblDescription" Content="Description:" FontWeight="Bold"
                HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,60,240,0"/>
-        <TextBox x:Name="tbDescription" MaxLength="255"
+            <TextBox x:Name="tbDescription" MaxLength="255"
             Width="230"
             HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,65,10,0" 
             TextWrapping="NoWrap"/>
-        <Button x:Name="btnSave" Content="Save" 
+            <Button x:Name="btnSave" Content="Save" 
                 Width="120" Height="50"
                 HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,10,10" 
                 Click="btnSave_Click"/>
-        <Button x:Name="btnSaveAs" Content="Save As" Visibility="Hidden"
+            <Button x:Name="btnSaveAs" Content="Save As" Visibility="Hidden"
                 Width="120" Height="50"
                 HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,150,10" 
                 Click="btnSaveAs_Click"/>
-        
-        <Label x:Name="lblError" Content="" Foreground="Red"
+
+            <Label x:Name="lblError" Content="" Foreground="Red"
                MaxWidth="330"
                HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,10,60"/>
-    </Grid>
+        </Grid>
+    </Viewbox>
 </Window>
