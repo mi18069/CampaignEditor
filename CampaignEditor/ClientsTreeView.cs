@@ -30,12 +30,16 @@ namespace CampaignEditor
         public ClientsTreeView(IUserRepository userRepository, IClientRepository clientRepository,
             IUserClientsRepository userClientsRepository, ICampaignRepository campaignRepository)
         {
-            _userDTO = MainWindow.instance.user;
 
             _userController = new UserController(userRepository);
             _clientController = new ClientController(clientRepository);
             _userClientsController = new UserClientsController(userClientsRepository);
             _campaignController = new CampaignController(campaignRepository);
+        }
+
+        public void Initialization(UserDTO user)
+        {
+            _userDTO = user;
         }
 
         // Initializing dictionaries

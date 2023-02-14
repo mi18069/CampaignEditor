@@ -1,5 +1,6 @@
 ﻿using CampaignEditor.Controllers;
 using CampaignEditor.DTOs.UserDTO;
+using CampaignEditor.Entities;
 using CampaignEditor.Repositories;
 using CampaignEditor.StartupHelpers;
 using System;
@@ -13,9 +14,6 @@ namespace CampaignEditor
 {
     public partial class MainWindow : Window
     {
-        public static MainWindow instance;
-        public UserDTO user;
-
         private readonly IUserRepository _userRepository;
         private readonly IAbstractFactory<Clients> _factoryClients;
         private UserController _userController;
@@ -24,14 +22,13 @@ namespace CampaignEditor
         private string imgPeekPath = "\\images\\PassPeekImg.png";
         private string imgUnpeekPath = "\\images\\PassUnpeekImg.png";
 
+        public static UserDTO user = null;
         public MainWindow(IUserRepository userRepository, IAbstractFactory<Clients> factoryClients)
         {
             
             InitializeComponent();
             _userRepository = userRepository;
             _factoryClients = factoryClients;
-
-            instance = this;
 
             _userController = new UserController(_userRepository);
 
@@ -55,7 +52,8 @@ namespace CampaignEditor
             else
             {
                 user = await _userController.GetUserByUsername(username);
-                _factoryClients.Create().Show();
+                var f = _factoryClients.Create();
+                f.Show();
                 this.Close();
             }
                 

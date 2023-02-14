@@ -1,4 +1,8 @@
-﻿namespace CampaignEditor.Entities
+﻿using CampaignEditor.DTOs.UserDTO;
+using System;
+using System.Runtime.CompilerServices;
+
+namespace CampaignEditor.Entities
 {
     public class User
     {
@@ -11,5 +15,9 @@
         public int enabled { get; set; }
         public int father { get; set; }
         public int buy { get; set; }
+
+        public bool isAdministrator { get { return usrlevel == 0; }  }
+        public bool isReadWrite { get { return usrlevel == 1 ? true : isAdministrator; }  }
+
     }
 }

@@ -69,7 +69,7 @@ namespace CampaignEditor {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/CampaignEditor;V1.0.0.0;component/treeviewclientsitem.xaml", System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri("/CampaignEditor;component/treeviewclientsitem.xaml", System.UriKind.Relative);
             
             #line 1 "..\..\..\TreeViewClientsItem.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);

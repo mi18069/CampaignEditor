@@ -1,6 +1,7 @@
 ﻿using CampaignEditor.Controllers;
 using CampaignEditor.DTOs.UserDTO;
 using CampaignEditor.Repositories;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -13,7 +14,6 @@ namespace CampaignEditor
     {
         private readonly IUserRepository _userRepository;
         private UserController _userController;
-        private UserDTO user;
 
         public AddUser(IUserRepository userRepository)
         {
@@ -23,8 +23,7 @@ namespace CampaignEditor
             _userController = new UserController(_userRepository);
 
             // If user don't have administrator privileges, he shouldn't be able to add users to client
-            user = MainWindow.instance.user;
-            if (user.usrlevel != 0)
+            if (MainWindow.user.usrlevel != 0)
             {
                 btnAddUser.Visibility = Visibility.Hidden;
             }
@@ -39,7 +38,7 @@ namespace CampaignEditor
             string email = tbEmail.Text.Trim();
             string phone = tbPhone.Text.Trim();
             int enabled = 1;
-            int father = MainWindow.instance.user.usrid;
+            int father = MainWindow.user.usrid;
             bool buy = false;
 
             if ( await CheckRegistrationCredentialsAsync(username, password, passwordConfirmed, phone) )

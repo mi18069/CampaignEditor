@@ -1,5 +1,6 @@
 ﻿using CampaignEditor.Controllers;
 using CampaignEditor.DTOs.CampaignDTO;
+using CampaignEditor.DTOs.UserDTO;
 using CampaignEditor.StartupHelpers;
 using Database.DTOs.ClientDTO;
 using Database.DTOs.TargetDTO;
@@ -39,11 +40,16 @@ namespace CampaignEditor
 
         }
 
-        public async void InitializeFields(string campaignName)
+        public async void Initialization(string campaignName)
         {
             campaign = await _campaignController.GetCampaignByName(campaignName);
             client = await _clientController.GetClientById(campaign.clid);
 
+            InitializeFields(campaignName);
+        }
+
+        private void InitializeFields(string campaignName)
+        {
             tbName.Text = campaignName;
             lblClientname.Content = client.clname;
 
@@ -52,6 +58,7 @@ namespace CampaignEditor
 
             FillTBTextBoxes();
         }
+
         #region Info
         private void FillTBTextBoxes()
         {

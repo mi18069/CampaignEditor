@@ -5,6 +5,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using CampaignEditor.DTOs.UserDTO;
 using CampaignEditor.StartupHelpers;
+using Database.DTOs.ClientDTO;
 
 namespace CampaignEditor
 {
@@ -27,8 +28,6 @@ namespace CampaignEditor
         private bool clientsUpdated = false;
         private bool campaignsUpdated = false;
 
-        private UserDTO user;
-
         // Variables in order to determine wheather some of the context men uoptions should be disabled
         public bool isAdministrator { get; set; }  = false;
         public bool isReadWrite { get; set;  } = false;
@@ -49,15 +48,15 @@ namespace CampaignEditor
             instance = this;
 
             _clientsTree = factoryClientsTreeView.Create();
+            _clientsTree.Initialization(MainWindow.user);
             _clientsTree.InitializeTree();
 
             
-            user = MainWindow.instance.user;
-            isAdministrator = user.usrlevel == 0;
-            isReadWrite = user.usrlevel == 1 ? true : isAdministrator;
+            isAdministrator = MainWindow.user.usrlevel == 0;
+            isReadWrite = MainWindow.user.usrlevel == 1 ? true : isAdministrator;
             
 
-            lblUsername.Content += user.usrname;
+            lblUsername.Content += MainWindow.user.usrname;
 
             tbSearchCampaigns.Text = searchCampaignsString;
             tbSearchClients.Text = searchClientsString;
@@ -244,7 +243,7 @@ namespace CampaignEditor
         {
             var f = _factoryAddCampaign.Create();
             string campaignName = ((HeaderedItemsControl)tvClients.SelectedItem).Header.ToString()!.Trim();
-            f.InitializeFields(campaignName);
+            f.Initialization(campaignName);
             f.Show();
         }
 
@@ -263,7 +262,8 @@ namespace CampaignEditor
         }
         private void btnAddUser_Click(object sender, RoutedEventArgs e)
         {
-            _factoryAddUser.Create().Show();
+            var f = _factoryAddUser.Create();
+            f.Show();
         }
 
         private void btnAddClient_Click(object sender, RoutedEventArgs e)
