@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using CampaignEditor.DTOs.UserDTO;
+using CampaignEditor.Entities;
 using Dapper;
 using Database.Data;
 using Database.DTOs.ChannelDTO;
@@ -46,6 +48,16 @@ namespace Database.Repositories
 
             var channel = await connection.QueryFirstOrDefaultAsync<Channel>(
                 "SELECT * FROM tblchannels WHERE chid = @Id", new { Id = id });
+
+            return _mapper.Map<ChannelDTO>(channel);
+        }
+
+        public async Task<ChannelDTO> GetChannelByName(string channelname)
+        {
+            using var connection = _context.GetConnection();
+
+            var channel = await connection.QueryFirstOrDefaultAsync<Channel>(
+                "SELECT * FROM tblchannels WHERE chname = @Chname", new { Chname = channelname });
 
             return _mapper.Map<ChannelDTO>(channel);
         }

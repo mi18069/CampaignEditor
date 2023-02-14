@@ -37,6 +37,7 @@ namespace CampaignEditor
                     Database.Extensions.TargetExtensions.AddTargetExtensions(services);
                     Database.Extensions.TargetClassExtensions.AddTargetClassExtensions(services);
                     Database.Extensions.TargetValueExtensions.AddTargetValueExtensions(services);
+                    Database.Extensions.ChannelExtensions.AddChannelExtensions(services);
 
                 }).Build();
         }

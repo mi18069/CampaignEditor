@@ -12,9 +12,9 @@ TRACE;DEBUG;NET;NET6_0;NETCOREAPP
 C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\App.xaml
 131556121259
 
-33-1826572424
+34-1664812697
 245919750172
 AddCampaign.xaml;AddClient.xaml;AddUser.xaml;AssignTargets.xaml;AssignUser.xaml;Clients.xaml;MainWindow.xaml;NewCampaign.xaml;NewTarget.xaml;TreeViewCampaignsItem.xaml;TreeViewClientsItem.xaml;UsersListItem.xaml;UsersOfClient.xaml;
 
-False
+True
 
