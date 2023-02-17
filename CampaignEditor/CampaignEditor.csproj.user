@@ -31,6 +31,12 @@
     <Compile Update="NewTarget.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="PriceList.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="TargetDPItem.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="TreeViewCampaignsItem.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -70,6 +76,12 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="NewTarget.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="PriceList.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="TargetDPItem.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="TreeViewCampaignsItem.xaml">

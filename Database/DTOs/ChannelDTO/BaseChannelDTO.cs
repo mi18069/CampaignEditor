@@ -9,7 +9,7 @@ namespace Database.DTOs.ChannelDTO
             this.chactive = chactive;
             this.chname = chname ?? throw new ArgumentNullException(nameof(chname));
             this.chrdsid = chrdsid;
-            this.chsname = chsname ?? throw new ArgumentNullException(nameof(chsname));
+            this.chsname = chsname ?? "";
             this.shid = shid;
             this.chrfid = chrfid;
         }

@@ -17,6 +17,8 @@ namespace CampaignEditor
     public partial class AddCampaign : Window
     {
         private readonly IAbstractFactory<AssignTargets> _factoryAssignTargets;
+        private readonly IAbstractFactory<PriceList> _factoryPriceList;
+
 
         private CampaignController _campaignController;
         private TargetController _targetController;
@@ -28,11 +30,14 @@ namespace CampaignEditor
         public static AddCampaign instance;
 
         public AddCampaign(ICampaignRepository campaignRepository, ITargetRepository targetRepository, 
-            IClientRepository clientRepository, IAbstractFactory<AssignTargets> factoryAssignTargets)
+            IClientRepository clientRepository, IAbstractFactory<AssignTargets> factoryAssignTargets,
+            IAbstractFactory<PriceList> factoryPriceList)
         {
             instance = this;
 
             _factoryAssignTargets = factoryAssignTargets;
+            _factoryPriceList = factoryPriceList;
+
             _campaignController = new CampaignController(campaignRepository);
             _targetController = new TargetController(targetRepository);
             _clientController = new ClientController(clientRepository);
@@ -148,6 +153,10 @@ namespace CampaignEditor
             this.Close();
         }
 
-        
+        private void btnPriceList_Click(object sender, RoutedEventArgs e)
+        {
+            var f = _factoryPriceList.Create();
+            f.ShowDialog();
+        }
     }
 }

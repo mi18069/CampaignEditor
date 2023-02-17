@@ -192,3 +192,7 @@ C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Debug\net6.0-wind
 C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Debug\net6.0-windows\NewTarget.baml
 C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Debug\net6.0-windows\AssignTargets.g.cs
 C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Debug\net6.0-windows\AssignTargets.baml
+C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Debug\net6.0-windows\PriceList.g.cs
+C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Debug\net6.0-windows\PriceList.baml
+C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Debug\net6.0-windows\TargetDPItem.g.cs
+C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Debug\net6.0-windows\TargetDPItem.baml

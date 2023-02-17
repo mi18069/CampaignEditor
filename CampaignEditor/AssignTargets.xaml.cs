@@ -1,17 +1,14 @@
 ﻿using CampaignEditor.Controllers;
 using CampaignEditor.StartupHelpers;
 using Database.DTOs.TargetDTO;
-using Database.Entities;
 using Database.Repositories;
-using System;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Shell;
+
 
 namespace CampaignEditor
 {
