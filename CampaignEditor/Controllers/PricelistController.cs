@@ -1,17 +1,13 @@
-﻿using CampaignEditor.DTOs.UserDTO;
-using CampaignEditor.Repositories;
-using Database.DTOs.PricelistDTO;
-using Database.Entities;
+﻿using Database.DTOs.PricelistDTO;
 using Database.Repositories;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace CampaignEditor.Controllers
 {
-    public class PricelistController
+    public class PricelistController : ControllerBase
     {
         private readonly IPricelistRepository _repository;
         public PricelistController(IPricelistRepository repository)

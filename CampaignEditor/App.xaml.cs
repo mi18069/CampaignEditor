@@ -40,6 +40,7 @@ namespace CampaignEditor
                     Database.Extensions.TargetValueExtensions.AddTargetValueExtensions(services);
                     Database.Extensions.ChannelExtensions.AddChannelExtensions(services);
                     Database.Extensions.PricelistExtensions.AddPricelistExtensions(services);
+                    Database.Extensions.PricelistChannelsExtensions.AddPricelistChannelsExtensions(services);
 
                 }).Build();
         }
