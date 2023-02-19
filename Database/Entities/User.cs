@@ -1,7 +1,4 @@
-﻿using CampaignEditor.DTOs.UserDTO;
-using System;
-using System.Runtime.CompilerServices;
-
+﻿
 namespace CampaignEditor.Entities
 {
     public class User

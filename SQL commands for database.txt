@@ -1,0 +1,14 @@
+-- to make table tblplchn: 
+
+CREATE TABLE [IF NOT EXISTS] tblplchn (
+   plid serial NOT NULL,
+   chid int NOT NULL,
+   PRIMARY KEY (user_id, role_id),
+   FOREIGN KEY (plid)
+      REFERENCES tblpricelist (plid),
+   FOREIGN KEY (chidid)
+      REFERENCES tblchannels (chid)
+);
+
+-- rename usrid to clid in tblpricelist:
+ ALTER TABLE tblpricelist RENAME COLUMN usrid TO clid

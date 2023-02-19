@@ -1,14 +1,13 @@
 ﻿using CampaignEditor.Controllers;
 using Database.Repositories;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using System.Xml;
 
 namespace CampaignEditor
 {
@@ -25,8 +24,33 @@ namespace CampaignEditor
 
             InitializeComponent();
 
+            Initialize();
+            
+        }
+
+        private void Initialize()
+        {
             FillChannels();
             UpdateDayParts();
+            FillComboBoxes();
+        }
+
+        private void FillComboBoxes()
+        {
+            List<string> typeList = new List<string> { "CPP", "Seconds", "Package" };
+            List<string> sectable = new List<string> { "LINEAR" };
+
+
+            foreach (string type in typeList)
+            {
+                cbType.Items.Add(type);
+            }
+
+            foreach (string sect in sectable)
+            {
+                cbSectable.Items.Add(sect);
+                cbSectable2.Items.Add(sect);
+            }
         }
 
         // Adding Add Button and New TargetDPItem
