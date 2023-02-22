@@ -1,6 +1,4 @@
-﻿
-using CampaignEditor.DTOs.UserDTO;
-using Database.DTOs.PricelistChannels;
+﻿using Database.DTOs.PricelistChannels;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 

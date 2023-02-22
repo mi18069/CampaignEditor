@@ -1,6 +1,4 @@
 ﻿using AutoMapper;
-using CampaignEditor.DTOs.UserDTO;
-using CampaignEditor.Entities;
 using Dapper;
 using Database.Data;
 using Database.DTOs.ChannelDTO;

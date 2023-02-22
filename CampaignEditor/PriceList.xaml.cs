@@ -1,9 +1,12 @@
 ﻿using CampaignEditor.Controllers;
+using Database.DTOs.PricelistChannels;
+using Database.DTOs.PricelistDTO;
 using Database.Repositories;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -14,18 +17,47 @@ namespace CampaignEditor
     public partial class PriceList : Window
     {
         private ChannelController _channelController;
+        private PricelistChannelsController _pricelistChannelsController;
+        private PricelistController _pricelistController;
+
 
         // For Plus Icon
         private string appPath = Directory.GetCurrentDirectory();
         private string imgGreenPlusPath = "\\images\\GreenPlus.png";
-        public PriceList(IChannelRepository channelRepository)
+        public PriceList(IChannelRepository channelRepository,
+            IPricelistRepository pricelistRepository, IPricelistChannelsRepository pricelistChannelsRepository)
         {
             _channelController = new ChannelController(channelRepository);
+            _pricelistChannelsController = new PricelistChannelsController(pricelistChannelsRepository);
+            _pricelistController = new PricelistController(pricelistRepository);
+
 
             InitializeComponent();
 
             Initialize();
+            //DoOnce();
             
+        }
+
+        Regex rg = new Regex(@"[\d+]");
+        private async void DoOnce()
+        {
+            List<PricelistDTO> pricelists = (List<PricelistDTO>)await _pricelistController.GetAllPricelists();
+            foreach (PricelistDTO pricelist in pricelists)
+            {
+                string channelsString = pricelist.a2chn;
+                var matches = rg.Matches(channelsString);
+
+                foreach (var match in matches)
+                {
+                    string m = match.ToString();
+                    m.Trim('[');
+                    m.Trim(']');
+                    int chid = Convert.ToInt32(m);
+                    await _pricelistChannelsController.CreatePricelistChannels(
+                        new CreatePricelistChannelsDTO(pricelist.plid, chid));
+                }
+            }
         }
 
         private void Initialize()
