@@ -1,13 +1,10 @@
 ﻿using AutoMapper;
 using Dapper;
 using Database.Data;
-using Database.DTOs.SectableDTO;
 using Database.DTOs.SectablesDTO;
 using Database.Entities;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Database.Repositories
@@ -51,7 +48,7 @@ namespace Database.Repositories
         {
             using var connection = _context.GetConnection();
 
-            var allSectables = await connection.QueryAsync<Channel>("SELECT * FROM tblsectables");
+            var allSectables = await connection.QueryAsync<Sectables>("SELECT * FROM tblsectables");
 
             return _mapper.Map<IEnumerable<SectablesDTO>>(allSectables);
         }
@@ -77,7 +74,7 @@ namespace Database.Repositories
             using var connection = _context.GetConnection();
 
             var affected = await connection.ExecuteAsync(
-                "DELETE FROM tblsectables WHERE sctidid = @Sctid", new { Sctid = id });
+                "DELETE FROM tblsectables WHERE sctid = @Sctid", new { Sctid = id });
 
             return affected != 0;
         }

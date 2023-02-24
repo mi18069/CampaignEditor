@@ -85,7 +85,7 @@ namespace CampaignEditor {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/CampaignEditor;V1.0.0.0;component/userslistitem.xaml", System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri("/CampaignEditor;component/userslistitem.xaml", System.UriKind.Relative);
             
             #line 1 "..\..\..\UsersListItem.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);

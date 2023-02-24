@@ -51,7 +51,7 @@ namespace Database.Repositories
         {
             using var connection = _context.GetConnection();
 
-            var sectable = await connection.QueryFirstOrDefaultAsync<Channel>(
+            var sectable = await connection.QueryFirstOrDefaultAsync<Sectable>(
                 "SELECT * FROM tblsectable WHERE sctname = @Sctname", new { Sctname = sectablename });
 
             return _mapper.Map<SectableDTO>(sectable);

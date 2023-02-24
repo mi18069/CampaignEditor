@@ -49,3 +49,7 @@ CREATE TABLE tblpricelistchn AS
 ALTER TABLE tblpricelistchn ADD CONSTRAINT pk_plchid PRIMARY KEY (plid, chid);
 ALTER TABLE tblpricelistchn ADD CONSTRAINT fk_plplid FOREIGN KEY (plid) REFERENCES tblpricelist (plid);
 ALTER TABLE tblpricelistchn ADD CONSTRAINT fk_plchid FOREIGN KEY (chid) REFERENCES tblchannels (chid);
+
+
+-- to rename tabel tblseasonality_s to seasonalities
+ALTER TABLE tblseasonality_s RENAME TO tblseasonalities;

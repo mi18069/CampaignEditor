@@ -62,7 +62,7 @@ namespace Database.Repositories
         {
             using var connection = _context.GetConnection();
 
-            var allSeasonalities = await connection.QueryAsync<Channel>("SELECT * FROM tblseasonality");
+            var allSeasonalities = await connection.QueryAsync<Seasonality>("SELECT * FROM tblseasonality");
 
             return _mapper.Map<IEnumerable<SeasonalityDTO>>(allSeasonalities);
         }
