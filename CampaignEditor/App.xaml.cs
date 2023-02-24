@@ -43,6 +43,7 @@ namespace CampaignEditor
                     Database.Extensions.PricelistChannelsExtensions.AddPricelistChannelsExtensions(services);
                     Database.Extensions.SectableExtensions.AddSectableExtensions(services);
                     Database.Extensions.SectablesExtensions.AddSectablesExtensions(services);
+                    Database.Extensions.SectableChannelsExtensions.AddSectableChannelsExtensions(services);
 
                 }).Build();
         }

@@ -25,7 +25,7 @@ namespace Database.Repositories
             using var connection = _context.GetConnection();
 
             var affected = await connection.ExecuteAsync(
-                "INSERT INTO tblplchn (plid, chid)" +
+                "INSERT INTO tblpricelistchn (plid, chid)" +
                     "VALUES (@Plid, @Chid)",
                 new
                 {
@@ -41,7 +41,7 @@ namespace Database.Repositories
             using var connection = _context.GetConnection();
 
             var pricelistChannels = await connection.QueryFirstOrDefaultAsync<PricelistChannels>(
-                "SELECT * FROM tblplchn WHERE plid = @Plid AND chid = @Chid", 
+                "SELECT * FROM tblpricelistchn WHERE plid = @Plid AND chid = @Chid", 
                 new { 
                     PlId = plid,
                     Chid = chid
@@ -55,7 +55,7 @@ namespace Database.Repositories
             using var connection = _context.GetConnection();
 
             var pricelistChannels = await connection.QueryAsync<PricelistChannels>
-                ("SELECT * FROM tblplchn WHERE plid = @Plid", new { Plid = plid });
+                ("SELECT * FROM tblpricelistchn WHERE plid = @Plid", new { Plid = plid });
 
             return _mapper.Map<IEnumerable<PricelistChannelsDTO>>(pricelistChannels);
         }
@@ -65,7 +65,7 @@ namespace Database.Repositories
             using var connection = _context.GetConnection();
 
             var pricelistChannels = await connection.QueryAsync<PricelistChannels>
-                ("SELECT * FROM tblplchn WHERE chid = @Chid", new { Chid = chid });
+                ("SELECT * FROM tblpricelistchn WHERE chid = @Chid", new { Chid = chid });
 
             return _mapper.Map<IEnumerable<PricelistChannelsDTO>>(pricelistChannels);
         }
@@ -75,7 +75,7 @@ namespace Database.Repositories
             using var connection = _context.GetConnection();
 
             var pricelistChannels = await connection.QueryAsync<PricelistChannels>
-                ("SELECT * FROM tblplchn ");
+                ("SELECT * FROM tblpricelistchn ");
 
             return _mapper.Map<IEnumerable<PricelistChannelsDTO>>(pricelistChannels);
         }
@@ -85,7 +85,7 @@ namespace Database.Repositories
             using var connection = _context.GetConnection();
 
             var affected = await connection.ExecuteAsync(
-                "UPDATE tblplchn SET plid = @Plid, chid = @Chid" +
+                "UPDATE tblpricelistchn SET plid = @Plid, chid = @Chid" +
                 "WHERE plid = @Plid AND chid = @Chid",
                 new
                 {
@@ -101,7 +101,7 @@ namespace Database.Repositories
             using var connection = _context.GetConnection();
 
             var affected = await connection.ExecuteAsync(
-                "DELETE FROM tblplchn WHERE plid = @Plid AND chid = @Chid", 
+                "DELETE FROM tblpricelistchn WHERE plid = @Plid AND chid = @Chid", 
                 new { 
                     Plid = plid, 
                     Chid = chid

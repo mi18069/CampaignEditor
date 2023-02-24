@@ -12,3 +12,40 @@ CREATE TABLE [IF NOT EXISTS] tblplchn (
 
 -- rename usrid to clid in tblpricelist:
  ALTER TABLE tblpricelist RENAME COLUMN usrid TO clid
+
+
+
+-- to make new tabels to resolve problems with normalizations between tblchannels and tblsectable
+
+CREATE TABLE tblsectablechn AS 
+  SELECT sctid, unnest(string_to_array(rtrim(ltrim(replace (channel, '][', ','), '['), ']'), ','))::int AS chid
+  FROM tblsectable;
+
+ALTER TABLE tblsectablechn ADD CONSTRAINT pk_assign PRIMARY KEY (sctid, chid);
+ALTER TABLE tblsectablechn ADD CONSTRAINT fk_sctid FOREIGN KEY (sctid) REFERENCES tblsectable (sctid);
+ALTER TABLE tblsectablechn ADD CONSTRAINT fk_chid FOREIGN KEY (chid) REFERENCES tblchannels (chid);
+
+
+
+-- to make new tabels to resolve problems with normalizations between tblchannels and tblseasonality
+
+CREATE TABLE tblseasonalitychn AS 
+  SELECT seasid, unnest(string_to_array(rtrim(ltrim(replace (channel, '][', ','), '['), ']'), ','))::int AS chid
+  FROM tblseasonality;
+
+ALTER TABLE tblseasonalitychn ADD CONSTRAINT pk_seaschid PRIMARY KEY (seasid, chid);
+ALTER TABLE tblseasonalitychn ADD CONSTRAINT fk_seasseasid FOREIGN KEY (seasid) REFERENCES tblseasonality (seasid);
+ALTER TABLE tblseasonalitychn ADD CONSTRAINT fk_seaschid FOREIGN KEY (chid) REFERENCES tblchannels (chid);
+
+
+
+
+-- to make new tabels to resolve problems with normalizations between tblchannels and tblpricelist
+
+CREATE TABLE tblpricelistchn AS 
+  SELECT plid, unnest(string_to_array(rtrim(ltrim(replace (a2chn, '][', ','), '['), ']'), ','))::int AS chid
+  FROM tblpricelist;
+
+ALTER TABLE tblpricelistchn ADD CONSTRAINT pk_plchid PRIMARY KEY (plid, chid);
+ALTER TABLE tblpricelistchn ADD CONSTRAINT fk_plplid FOREIGN KEY (plid) REFERENCES tblpricelist (plid);
+ALTER TABLE tblpricelistchn ADD CONSTRAINT fk_plchid FOREIGN KEY (chid) REFERENCES tblchannels (chid);
