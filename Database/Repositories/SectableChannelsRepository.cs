@@ -1,8 +1,6 @@
-﻿
-using AutoMapper;
+﻿using AutoMapper;
 using Dapper;
 using Database.Data;
-using Database.DTOs.PricelistChannels;
 using Database.DTOs.SectableChannels;
 using Database.Entities;
 using System;
@@ -66,7 +64,7 @@ namespace Database.Repositories
         {
             using var connection = _context.GetConnection();
 
-            var sectableChannels = await connection.QueryAsync<PricelistChannels>
+            var sectableChannels = await connection.QueryAsync<SectableChannels>
                 ("SELECT * FROM tblsectablechn WHERE chid = @Chid", new { Chid = chid });
 
             return _mapper.Map<IEnumerable<SectableChannelsDTO>>(sectableChannels);
@@ -77,7 +75,7 @@ namespace Database.Repositories
         {
             using var connection = _context.GetConnection();
 
-            var sectableChannels = await connection.QueryAsync<PricelistChannels>
+            var sectableChannels = await connection.QueryAsync<SectableChannels>
                 ("SELECT * FROM tblsectablechn ");
 
             return _mapper.Map<IEnumerable<SectableChannelsDTO>>(sectableChannels);

@@ -45,7 +45,7 @@ namespace CampaignEditor.Controllers
             return await _repository.UpdateSectableChannels(sectableChannelsDTO);
         }
 
-        public async Task<bool> DeletePricelistChannelsByIds(int sctid, int chid)
+        public async Task<bool> DeleteSectableChannelsByIds(int sctid, int chid)
         {
             return await _repository.DeleteSectableChannelsByIds(sctid, chid);
         }
