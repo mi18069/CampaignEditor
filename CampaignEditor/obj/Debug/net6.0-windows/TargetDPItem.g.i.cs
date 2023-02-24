@@ -109,7 +109,7 @@ namespace CampaignEditor {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/CampaignEditor;component/targetdpitem.xaml", System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri("/CampaignEditor;V1.0.0.0;component/targetdpitem.xaml", System.UriKind.Relative);
             
             #line 1 "..\..\..\TargetDPItem.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);

@@ -89,7 +89,7 @@ namespace Database.Repositories
             using var connection = _context.GetConnection();
 
             var affected = await connection.ExecuteAsync(
-                "DELETE FROM tblsectable WHERE sctidid = @Sctid", new { Sctid = id });
+                "DELETE FROM tblsectable WHERE sctid = @Sctid", new { Sctid = id });
 
             return affected != 0;
         }
