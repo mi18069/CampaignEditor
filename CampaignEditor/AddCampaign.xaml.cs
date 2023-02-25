@@ -1,6 +1,5 @@
 ﻿using CampaignEditor.Controllers;
 using CampaignEditor.DTOs.CampaignDTO;
-using CampaignEditor.DTOs.UserDTO;
 using CampaignEditor.StartupHelpers;
 using Database.DTOs.ClientDTO;
 using Database.DTOs.TargetDTO;
@@ -29,6 +28,7 @@ namespace CampaignEditor
 
         public static AddCampaign instance;
 
+        AssignTargets assignFactory = null;
         public AddCampaign(ICampaignRepository campaignRepository, ITargetRepository targetRepository, 
             IClientRepository clientRepository, IAbstractFactory<AssignTargets> factoryAssignTargets,
             IAbstractFactory<PriceList> factoryPriceList)
@@ -118,10 +118,13 @@ namespace CampaignEditor
         #region Targets
         private void btnAssignTargets_Click(object sender, RoutedEventArgs e)
         {
-            var factory = _factoryAssignTargets.Create();
-            factory.ShowDialog();
-            if (factory.success)
-                FillTargetLabels(factory.SelectedTargetsList);
+            if (assignFactory == null)
+                assignFactory = _factoryAssignTargets.Create();
+            assignFactory.ShowDialog();
+            if (assignFactory.success)
+            {
+                FillTargetLabels(assignFactory.SelectedTargetsList);
+            }
         }
 
         private void FillTargetLabels(ObservableCollection<TargetDTO> selectedTargetsList)

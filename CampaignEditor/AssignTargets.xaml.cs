@@ -2,6 +2,7 @@
 using CampaignEditor.StartupHelpers;
 using Database.DTOs.TargetDTO;
 using Database.Repositories;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -37,6 +38,18 @@ namespace CampaignEditor
 
             InitializeComponent();
             this.DataContext = this;
+        }
+
+        public void LoadTargets(List<TargetDTO> targets)
+        {
+            foreach(var targetInList in TargetsList)
+                foreach (var target in targets)
+                {
+                    if (targetInList.targid == target.targid)
+                    {
+                        MoveTargetToSelected(targetInList);
+                    }
+                }
         }
 
         private async Task InitializeListsAsync()
@@ -126,12 +139,12 @@ namespace CampaignEditor
         private void btnSave_Click(object sender, RoutedEventArgs e)
         {
             success = true;
-            this.Close();
+            this.Hide();
         }
 
         private void btnCancel_Click(object sender, RoutedEventArgs e)
         {
-            this.Close();
+            this.Hide();
         }
 
         private void SelectedTargetsItem_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
