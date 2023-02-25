@@ -25,7 +25,7 @@ namespace CampaignEditor.Controllers
             return sectableChannels;
         }
 
-        public async Task<IEnumerable<SectableChannelsDTO>> GetAllSectableChannelsByPlid(int sctid)
+        public async Task<IEnumerable<SectableChannelsDTO>> GetAllSectableChannelsBySctid(int sctid)
         {
             return await _repository.GetAllSectableChannelsBySctid(sctid);
         }

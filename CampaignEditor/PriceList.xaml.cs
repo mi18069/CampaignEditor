@@ -1,12 +1,15 @@
 ﻿using CampaignEditor.Controllers;
-using Database.DTOs.PricelistChannels;
-using Database.DTOs.PricelistDTO;
+using CampaignEditor.StartupHelpers;
+using Database.DTOs.ClientDTO;
+using Database.DTOs.SeasonalityDTO;
+using Database.DTOs.SectableDTO;
+using Database.DTOs.TargetDTO;
+using Database.Entities;
 using Database.Repositories;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -19,14 +22,30 @@ namespace CampaignEditor
         private ChannelController _channelController;
         private PricelistChannelsController _pricelistChannelsController;
         private PricelistController _pricelistController;
+        private SectableController _sectableController;
+        private SeasonalityController _seasonalityController;
+        private TargetController _targetController;
 
+
+        private readonly IAbstractFactory<Sectable> _factorySectable;
+        private readonly IAbstractFactory<Seasonality> _factorySeasonality;
+        private ClientDTO client;
 
         // For Plus Icon
         private string appPath = Directory.GetCurrentDirectory();
         private string imgGreenPlusPath = "\\images\\GreenPlus.png";
-        public PriceList(IChannelRepository channelRepository,
-            IPricelistRepository pricelistRepository, IPricelistChannelsRepository pricelistChannelsRepository)
+        public PriceList(IAbstractFactory<Sectable> factorySectable, IAbstractFactory<Seasonality> factorySeasonality,
+            IChannelRepository channelRepository,
+            IPricelistRepository pricelistRepository, IPricelistChannelsRepository pricelistChannelsRepository,
+            ISectableRepository sectableRepository, ISeasonalityRepository seasonalityRepository,
+            ITargetRepository targetRepository)
         {
+            _factorySectable = factorySectable;
+            _factorySeasonality = factorySeasonality;
+
+            _sectableController = new SectableController(sectableRepository);
+            _seasonalityController = new SeasonalityController(seasonalityRepository);
+            _targetController = new TargetController(targetRepository);
             _channelController = new ChannelController(channelRepository);
             _pricelistChannelsController = new PricelistChannelsController(pricelistChannelsRepository);
             _pricelistController = new PricelistController(pricelistRepository);
@@ -34,54 +53,47 @@ namespace CampaignEditor
 
             InitializeComponent();
 
-            Initialize();
-            //DoOnce();
-            
         }
 
-        Regex rg = new Regex(@"[\d+]");
-        private async void DoOnce()
+        public void Initialize(ClientDTO client)
         {
-            List<PricelistDTO> pricelists = (List<PricelistDTO>)await _pricelistController.GetAllPricelists();
-            foreach (PricelistDTO pricelist in pricelists)
-            {
-                string channelsString = pricelist.a2chn;
-                var matches = rg.Matches(channelsString);
-
-                foreach (var match in matches)
-                {
-                    string m = match.ToString();
-                    m.Trim('[');
-                    m.Trim(']');
-                    int chid = Convert.ToInt32(m);
-                    await _pricelistChannelsController.CreatePricelistChannels(
-                        new CreatePricelistChannelsDTO(pricelist.plid, chid));
-                }
-            }
+            this.client = client;
+            FillFields();
         }
 
-        private void Initialize()
+        private void FillFields()
         {
             FillChannels();
             UpdateDayParts();
             FillComboBoxes();
         }
 
-        private void FillComboBoxes()
+        private async void FillComboBoxes()
         {
             List<string> typeList = new List<string> { "CPP", "Seconds", "Package" };
-            List<string> sectable = new List<string> { "LINEAR" };
-
+            List<SectableDTO> sectables = (List<SectableDTO>) await _sectableController.GetAllSectablesByOwnerId(client.clid);
+            List<SeasonalityDTO> seasonalities = (List<SeasonalityDTO>) await _seasonalityController.GetAllSeasonalitiesByOwnerId(client.clid);
+            List<TargetDTO> targets = (List<TargetDTO>)await _targetController.GetAllClientTargets(client.clid);
 
             foreach (string type in typeList)
             {
                 cbType.Items.Add(type);
             }
 
-            foreach (string sect in sectable)
+            foreach (var sectable in sectables)
             {
-                cbSectable.Items.Add(sect);
-                cbSectable2.Items.Add(sect);
+                cbSectable.Items.Add(sectable);
+                cbSectable2.Items.Add(sectable);
+            }
+
+            foreach (var seasonality in seasonalities)
+            {
+                cbSeasonality.Items.Add(seasonality);
+            }
+
+            foreach (var target in targets)
+            {
+                cbTarget.Items.Add(target);
             }
         }
 
@@ -135,6 +147,16 @@ namespace CampaignEditor
             
             tb.SelectAll();
             tb.Focus();
+        }
+
+        private void btnNewSectable_Click(object sender, RoutedEventArgs e)
+        {
+            _factorySectable.Create().Show();
+        }
+
+        private void btnNewSeasonality_Click(object sender, RoutedEventArgs e)
+        {
+            _factorySeasonality.Create().Show();
         }
     }
 }

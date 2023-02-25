@@ -38,7 +38,7 @@ namespace Database.Repositories
         {
             using var connection = _context.GetConnection();
 
-            var sectables = await connection.QueryFirstOrDefaultAsync<Sectables>(
+            var sectables = await connection.QueryAsync<Sectables>(
                 "SELECT * FROM tblsectables WHERE sctid = @Id", new { Id = id });
 
             return _mapper.Map<IEnumerable<SectablesDTO>>(sectables);

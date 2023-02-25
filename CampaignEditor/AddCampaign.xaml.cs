@@ -156,6 +156,7 @@ namespace CampaignEditor
         private void btnPriceList_Click(object sender, RoutedEventArgs e)
         {
             var f = _factoryPriceList.Create();
+            f.Initialize(client);
             f.ShowDialog();
         }
     }

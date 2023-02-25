@@ -56,11 +56,20 @@ namespace Database.Repositories
 
             return _mapper.Map<SectableDTO>(sectable);
         }
+        public async Task<IEnumerable<SectableDTO>> GetAllSectablesByOwnerId(int id)
+        {
+            using var connection = _context.GetConnection();
+
+            var allSectables = await connection.QueryAsync<Sectable>
+                ("SELECT * FROM tblsectable WHERE ownedby = @Id OR ownedby = 0", new { Id = id });
+
+            return _mapper.Map<IEnumerable<SectableDTO>>(allSectables);
+        }
         public async Task<IEnumerable<SectableDTO>> GetAllSectables()
         {
             using var connection = _context.GetConnection();
 
-            var allSectables = await connection.QueryAsync<Channel>("SELECT * FROM tblsectable");
+            var allSectables = await connection.QueryAsync<Sectable>("SELECT * FROM tblsectable");
 
             return _mapper.Map<IEnumerable<SectableDTO>>(allSectables);
         }
@@ -93,5 +102,6 @@ namespace Database.Repositories
 
             return affected != 0;
         }
+
     }
 }

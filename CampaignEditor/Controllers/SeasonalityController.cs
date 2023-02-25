@@ -32,6 +32,11 @@ namespace CampaignEditor.Controllers
             var seasonality = await _repository.GetSeasonalityByName(seasonalityname);
             return seasonality;
         }
+        public async Task<IEnumerable<SeasonalityDTO>> GetAllSeasonalitiesByOwnerId(int id)
+        {
+            return await _repository.GetAllSeasonalitiesByOwnerId(id);
+        }
+
         public async Task<IEnumerable<SeasonalityDTO>> GetAllSeasonalities()
         {
             return await _repository.GetAllSeasonalities();

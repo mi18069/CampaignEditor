@@ -67,8 +67,8 @@ namespace Database.Repositories
         {
             using var connection = _context.GetConnection();
 
-            var allTargets = await connection.QueryFirstAsync<Target>(
-                "SELECT * FROM tbltargets WHERE targown == 0 OR targown == @ClientId",
+            var allTargets = await connection.QueryAsync<Target>(
+                "SELECT * FROM tbltargets WHERE targown = 0 OR targown = @ClientId",
                 new { ClientId = clientId});
 
             return _mapper.Map<IEnumerable<TargetDTO>>(allTargets);

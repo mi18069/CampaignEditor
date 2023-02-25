@@ -2,8 +2,6 @@
 using Dapper;
 using Database.Data;
 using Database.DTOs.SeasonalitiesDTO;
-using Database.DTOs.SectableDTO;
-using Database.DTOs.SectablesDTO;
 using Database.Entities;
 using System;
 using System.Collections.Generic;
@@ -41,7 +39,7 @@ namespace Database.Repositories
         {
             using var connection = _context.GetConnection();
 
-            var seasonalities = await connection.QueryFirstOrDefaultAsync<Sectables>(
+            var seasonalities = await connection.QueryAsync<Seasonalities>(
                 "SELECT * FROM tblseasonalities WHERE seasid = @Id", new { Id = id });
 
             return _mapper.Map<IEnumerable<SeasonalitiesDTO>>(seasonalities);

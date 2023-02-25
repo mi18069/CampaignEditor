@@ -32,6 +32,10 @@ namespace CampaignEditor.Controllers
             var sectable = await _repository.GetSectableByName(sectablename);
             return sectable;
         }
+        public async Task<IEnumerable<SectableDTO>> GetAllSectablesByOwnerId(int id)
+        {
+            return await _repository.GetAllSectablesByOwnerId(id);
+        }
         public async Task<IEnumerable<SectableDTO>> GetAllSectables()
         {
             return await _repository.GetAllSectables();

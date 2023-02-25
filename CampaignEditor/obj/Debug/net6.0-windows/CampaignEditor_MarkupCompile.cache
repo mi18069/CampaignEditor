@@ -10,11 +10,11 @@ none
 false
 TRACE;DEBUG;NET;NET6_0;NETCOREAPP
 C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\App.xaml
-15198354950
+17-2008647918
 
-42-602166532
+44348702585
 245919750172
-AddCampaign.xaml;AddClient.xaml;AddUser.xaml;AssignTargets.xaml;AssignUser.xaml;Clients.xaml;MainWindow.xaml;NewCampaign.xaml;NewTarget.xaml;PriceList.xaml;TargetDPItem.xaml;TreeViewCampaignsItem.xaml;TreeViewClientsItem.xaml;UsersListItem.xaml;UsersOfClient.xaml;
+AddCampaign.xaml;AddClient.xaml;AddUser.xaml;AssignTargets.xaml;AssignUser.xaml;Clients.xaml;MainWindow.xaml;NewCampaign.xaml;NewTarget.xaml;PriceList.xaml;Seasonality.xaml;Sectable.xaml;TargetDPItem.xaml;TreeViewCampaignsItem.xaml;TreeViewClientsItem.xaml;UsersListItem.xaml;UsersOfClient.xaml;
 
 False
 

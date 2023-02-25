@@ -22,8 +22,8 @@ namespace CampaignEditor.Controllers
 
         public async Task<IEnumerable<SectablesDTO>> GetSectablesById(int id)
         {
-            var sectable = await _repository.GetSectablesById(id);
-            return sectable;
+            var sectables = await _repository.GetSectablesById(id);
+            return sectables;
         }
 
         public async Task<IEnumerable<SectablesDTO>> GetAllSectables()

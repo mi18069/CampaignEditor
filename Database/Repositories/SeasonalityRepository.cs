@@ -2,13 +2,9 @@
 using Dapper;
 using Database.Data;
 using Database.DTOs.SeasonalityDTO;
-using Database.DTOs.SectableDTO;
-using Database.DTOs.SectablesDTO;
 using Database.Entities;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Database.Repositories
@@ -58,6 +54,15 @@ namespace Database.Repositories
 
             return _mapper.Map<SeasonalityDTO>(seasonality);
         }
+        public async Task<IEnumerable<SeasonalityDTO>> GetAllSeasonalitiesByOwnerId(int id)
+        {
+            using var connection = _context.GetConnection();
+
+            var allSeasonalities = await connection.QueryAsync<Seasonality>
+                ("SELECT * FROM tblseasonality WHERE ownedby = @Id OR ownedby = 0", new { Id = id });
+
+            return _mapper.Map<IEnumerable<SeasonalityDTO>>(allSeasonalities);
+        }
         public async Task<IEnumerable<SeasonalityDTO>> GetAllSeasonalities()
         {
             using var connection = _context.GetConnection();
@@ -94,5 +99,7 @@ namespace Database.Repositories
 
             return affected != 0;
         }
+
+
     }
 }

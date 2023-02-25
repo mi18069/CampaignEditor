@@ -9,7 +9,7 @@ namespace Database.Extensions
     {
         public static void AddSectablesExtensions(this IServiceCollection services)
         {
-            services.AddScoped<ISectableRepository, SectableRepository>();
+            services.AddScoped<ISectablesRepository, SectablesRepository>();
             services.AddAutoMapper(configuration => {
                 configuration.CreateMap<SectablesDTO, Sectables>().ReverseMap();
             });
