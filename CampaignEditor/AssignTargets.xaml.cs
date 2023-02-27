@@ -4,6 +4,7 @@ using Database.DTOs.TargetDTO;
 using Database.Repositories;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -241,6 +242,13 @@ namespace CampaignEditor
         {
             tbTargetFilters.Text = "";
             CheckEdit();
+        }
+
+        // Overriding OnClosing because click on x button should only hide window
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            e.Cancel = true;
+            Hide();
         }
     }
     

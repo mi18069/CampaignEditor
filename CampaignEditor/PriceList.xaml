@@ -47,7 +47,7 @@
                 Margin="40, 10, 0, 10"/>
 
         <Label x:Name="lblSectable" Content="Sectable: " Grid.Row="3" Grid.Column="1" Margin="0,10"/>
-        <ComboBox x:Name="cbSectable" Text="" Grid.Row="3" Grid.Column="2" Margin="53,10,133,0" Grid.ColumnSpan="4"
+        <ComboBox x:Name="cbSectable" Text="" Grid.Row="3" Grid.Column="3" Grid.ColumnSpan="2" Margin="0,10"
                   DisplayMemberPath="sctname" SelectedIndex="0" Height="26" VerticalAlignment="Top"/>
         <Button x:Name="btnNewSectable" Content="New" Grid.Row="3" Grid.Column="5" 
                 Margin="40, 10, 0, 10" Click="btnNewSectable_Click"/>
@@ -116,7 +116,7 @@
         <DatePicker x:Name="dpValidityFrom" Text="" Grid.Row="10" Grid.Column="3" 
                     HorizontalAlignment="Left" Margin="0,10" 
                     Width="110"/>
-        <DatePicker x:Name="dpValidityTo" Text="" Grid.Row="10" Grid.Column="5"
+        <DatePicker x:Name="dpValidityTo" Text="" Grid.Row="10" Grid.Column="4"
                     HorizontalAlignment="Right" Margin="0,10"
                     Width="110"/>
 
