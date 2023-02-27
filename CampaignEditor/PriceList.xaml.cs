@@ -4,7 +4,6 @@ using Database.DTOs.ClientDTO;
 using Database.DTOs.SeasonalityDTO;
 using Database.DTOs.SectableDTO;
 using Database.DTOs.TargetDTO;
-using Database.Entities;
 using Database.Repositories;
 using System;
 using System.Collections.Generic;
@@ -112,6 +111,7 @@ namespace CampaignEditor
             btnAddDP.HorizontalAlignment = HorizontalAlignment.Center;
 
             TargetDPItem dpItem = new TargetDPItem();
+            dpItem.Width = wpDayParts.Width;
             wpDayParts.Children.Add(dpItem);
 
             wpDayParts.Children.Add(btnAddDP);
