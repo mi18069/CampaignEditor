@@ -55,6 +55,7 @@ namespace CampaignEditor
             _pricelistChannelsController = new PricelistChannelsController(pricelistChannelsRepository);
             _pricelistController = new PricelistController(pricelistRepository);
 
+            
 
             InitializeComponent();
 
@@ -179,6 +180,8 @@ namespace CampaignEditor
             }
         }
 
+        #region Writing into base
+        // for writing data in Database tblpricelist and tblpricelistchn
         private async Task MakeNewPricelist()
         {
             int clid = client.clid;
@@ -225,6 +228,7 @@ namespace CampaignEditor
                     new CreatePricelistChannelsDTO(pricelist.plid, channel.chid));
             }
         }
+        #endregion
 
         #region Check Values
         private async Task<bool> CheckValues()

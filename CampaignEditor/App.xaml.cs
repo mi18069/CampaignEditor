@@ -3,6 +3,8 @@ using Microsoft.Extensions.Hosting;
 using System.Windows;
 using CampaignEditor.StartupHelpers;
 using Database.Data;
+using System.Globalization;
+using System.Threading;
 
 namespace CampaignEditor
 {
@@ -51,6 +53,11 @@ namespace CampaignEditor
                     Database.Extensions.SeasonalityChannelsExtensions.AddSeasonalityChannelsExtensions(services);
 
                 }).Build();
+
+            // For displaying time format
+            CultureInfo ci = CultureInfo.CreateSpecificCulture(CultureInfo.CurrentCulture.Name);
+            ci.DateTimeFormat.ShortDatePattern = "dd.MM.yyyy";
+            Thread.CurrentThread.CurrentCulture = ci;
         }
 
         protected override async void OnStartup(StartupEventArgs e)
