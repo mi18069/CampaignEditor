@@ -43,14 +43,15 @@
 
         <Label x:Name="lblType" Content="Type: " Grid.Row="2" Grid.Column="1" Margin="0,10,0,10"/>
         <ComboBox x:Name="cbType" Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="5"
-                  Margin="0,10" SelectedIndex="0"/>
+                  Margin="0,10" SelectedIndex="0" VerticalAlignment="Center"/>
 
         <Label x:Name="lblSectable" Content="Sectable: " Grid.Row="3" Grid.Column="1" Margin="0,10,0,10"/>
         <ComboBox x:Name="cbSectable" Text="" Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="3" Margin="0,10"
-                  DisplayMemberPath="sctname" SelectedIndex="0" Height="26" VerticalAlignment="Center"/>
+                  DisplayMemberPath="sctname" SelectedIndex="0" VerticalAlignment="Center"
+                  SelectionChanged="cbSectable_SelectionChanged"/>
         <Button x:Name="btnEditSectable" Grid.Row="3" Grid.Column="5" 
                 Width="30" Height="30" BorderThickness="0" Background="White" Margin="0,10"
-                >
+                Click="btnEditSectable_Click" Visibility="Hidden">
             <Image Source="\images\Edit_Icon2.png"></Image>
         </Button>
         <Button x:Name="btnNewSectable" Grid.Row="3" Grid.Column="6" 
@@ -63,7 +64,7 @@
                IsEnabled="{Binding ElementName=chbSectable2, Path=IsChecked}"/>
         <ComboBox x:Name="cbSectable2" Text="" Grid.Row="4" Grid.Column="2" Margin="0,10" Grid.ColumnSpan="3"
                   IsEnabled="{Binding ElementName=chbSectable2, Path=IsChecked}"
-                  DisplayMemberPath="sctname" SelectedIndex="0"/>
+                  DisplayMemberPath="sctname" SelectedIndex="0" VerticalAlignment="Center"/>
         <CheckBox x:Name="chbSectable2" Content="" Grid.Row="4" Grid.Column="5"
                   VerticalAlignment="Center" HorizontalAlignment="Center"
                   IsChecked="False">
@@ -76,7 +77,7 @@
                VerticalAlignment="Center"
                IsEnabled="{Binding ElementName=chbSectable2, Path=IsChecked}" Grid.ColumnSpan="1"/>
         <TextBox x:Name="tbSec2From" Grid.Row="5" Grid.Column="3" 
-                 Width="50" Margin="0,10"
+                 Width="50" Margin="0,10" VerticalAlignment="Center"
                  Text="0200" HorizontalContentAlignment="Right"
                  MaxLength="4" 
                  IsEnabled="{Binding ElementName=chbSectable2, Path=IsChecked}"
@@ -85,7 +86,7 @@
                VerticalAlignment="Center" HorizontalAlignment="Left"
                IsEnabled="{Binding ElementName=chbSectable2, Path=IsChecked}" Grid.ColumnSpan="3" Margin="0,10"/>
         <TextBox x:Name="tbSec2To" Grid.Row="5" Grid.Column="4" 
-                 Width="50" Margin="0,10"
+                 Width="50" Margin="0,10" VerticalAlignment="Center"
                  Text="2559" HorizontalContentAlignment="Right"
                  MaxLength="4" 
                  IsEnabled="{Binding ElementName=chbSectable2, Path=IsChecked}"
@@ -93,10 +94,11 @@
 
         <Label x:Name="lblSeasonality" Content="Seasonality Type: " Grid.Row="6" Grid.Column="1" Margin="0,10"/>
         <ComboBox x:Name="cbSeasonality" Text="" Grid.Row="6" Grid.Column="2" Margin="0,10" Grid.ColumnSpan="3"
-                  DisplayMemberPath="seasname" SelectedIndex="0"/>
+                  DisplayMemberPath="seasname" SelectedIndex="0" VerticalAlignment="Center"
+                  SelectionChanged="cbSeasonality_SelectionChanged"/>
         <Button x:Name="btnEditSeasonality" Grid.Row="6" Grid.Column="5" 
                 Width="30" Height="30" BorderThickness="0" Background="White" Margin="0,10"
-                >
+                Click="btnEditSeasonality_Click" Visibility="Hidden">
             <Image Source="\images\Edit_Icon2.png"></Image>
         </Button>
         <Button x:Name="btnNewSeasonality" Grid.Row="6" Grid.Column="6" 
@@ -122,10 +124,11 @@
 
         <Label x:Name="lblTarget" Content="Target: " Grid.Row="9" Grid.Column="1" Margin="0,10"/>
         <ComboBox x:Name="cbTarget" Text="" Grid.Row="9" Grid.Column="2" Margin="0,10" Grid.ColumnSpan="3"
-                  DisplayMemberPath="targname"/>
+                  DisplayMemberPath="targname" VerticalAlignment="Center"
+                  SelectionChanged="cbTarget_SelectionChanged"/>
         <Button x:Name="btnEditTarget" Grid.Row="9" Grid.Column="5" 
                 Width="30" Height="30" BorderThickness="0" Background="White" Margin="0,10"
-                >
+                Click="btnEditTarget_Click" Visibility="Hidden">
             <Image Source="\images\Edit_Icon2.png"></Image>
         </Button>
         <Button x:Name="btnNewTarget" Grid.Row="9" Grid.Column="6" 

@@ -31,15 +31,17 @@ namespace CampaignEditor
         private SeasonalityController _seasonalityController;
         private TargetController _targetController;
 
-
         private readonly IAbstractFactory<Sectable> _factorySectable;
         private readonly IAbstractFactory<Seasonality> _factorySeasonality;
+        private readonly IAbstractFactory<NewTarget> _factoryNewTarget;
+
         private ClientDTO client;
 
         // For Plus Icon
         private string appPath = Directory.GetCurrentDirectory();
         private string imgGreenPlusPath = "\\images\\GreenPlus.png";
         public PriceList(IAbstractFactory<Sectable> factorySectable, IAbstractFactory<Seasonality> factorySeasonality,
+            IAbstractFactory<NewTarget> factoryNewTarget,
             IChannelRepository channelRepository,
             IPricelistRepository pricelistRepository, IPricelistChannelsRepository pricelistChannelsRepository,
             ISectableRepository sectableRepository, ISeasonalityRepository seasonalityRepository,
@@ -47,6 +49,7 @@ namespace CampaignEditor
         {
             _factorySectable = factorySectable;
             _factorySeasonality = factorySeasonality;
+            _factoryNewTarget = factoryNewTarget;
 
             _sectableController = new SectableController(sectableRepository);
             _seasonalityController = new SeasonalityController(seasonalityRepository);
@@ -54,8 +57,6 @@ namespace CampaignEditor
             _channelController = new ChannelController(channelRepository);
             _pricelistChannelsController = new PricelistChannelsController(pricelistChannelsRepository);
             _pricelistController = new PricelistController(pricelistRepository);
-
-            
 
             InitializeComponent();
 
@@ -67,39 +68,45 @@ namespace CampaignEditor
             FillFields();
         }
 
+        #region Fill Fields
+
+        #region DP functionality
+        private void btnAddDP_Click(object sender, RoutedEventArgs e)
+        {
+            var btnAdd = sender as Button;
+            wpDayParts.Children.Remove(btnAdd);
+
+            UpdateDayParts();
+        }
+
+        // Selecting whole text when captured
+        private void tbSec2_GotMouseCapture(object sender, System.Windows.Input.MouseEventArgs e)
+        {
+            var tb = sender as TextBox;
+
+            tb.SelectAll();
+            tb.Focus();
+        }
+        #endregion
+
         private void FillFields()
         {
             FillChannels();
             UpdateDayParts();
             FillComboBoxes();
         }
-
-        private async void FillComboBoxes()
+        private async void FillChannels()
         {
-            List<string> typeList = new List<string> { "CPP", "Seconds", "Package" };
-            List<SectableDTO> sectables = (List<SectableDTO>) await _sectableController.GetAllSectablesByOwnerId(client.clid);
-            List<SeasonalityDTO> seasonalities = (List<SeasonalityDTO>) await _seasonalityController.GetAllSeasonalitiesByOwnerId(client.clid);
-            List<TargetDTO> targets = (List<TargetDTO>)await _targetController.GetAllClientTargets(client.clid);
+            var channels = await _channelController.GetAllChannels();
 
-            foreach (string type in typeList)
-            {
-                cbType.Items.Add(type);
-            }
+            channels = channels.OrderBy(c => c.chname);
 
-            foreach (var sectable in sectables)
+            foreach (var channel in channels)
             {
-                cbSectable.Items.Add(sectable);
-                cbSectable2.Items.Add(sectable);
-            }
-
-            foreach (var seasonality in seasonalities)
-            {
-                cbSeasonality.Items.Add(seasonality);
-            }
-
-            foreach (var target in targets)
-            {
-                cbTarget.Items.Add(target);
+                CheckBox cb = new CheckBox();
+                cb.Content = channel.chname;
+                cb.Tag = channel;
+                wpChannels.Children.Add(cb);
             }
         }
 
@@ -124,61 +131,50 @@ namespace CampaignEditor
             wpDayParts.Children.Add(btnAddDP);
         }
 
-        private void btnAddDP_Click(object sender, RoutedEventArgs e)
+        private async void FillComboBoxes()
         {
-            var btnAdd = sender as Button;
-            wpDayParts.Children.Remove(btnAdd);
-
-            UpdateDayParts();
+            FillCBType();
+            await FillCBSectable();
+            await FillCBSeasonality();
+            await FillCBTarget();
         }
 
-        private async void FillChannels()
+        private void FillCBType()
         {
-            var channels = await _channelController.GetAllChannels();
-
-            channels = channels.OrderBy(c => c.chname);
-
-            foreach (var channel in channels)
+            List<string> typeList = new List<string> { "CPP", "Seconds", "Package" };
+            foreach (string type in typeList)
             {
-                CheckBox cb = new CheckBox();
-                cb.Content = channel.chname;
-                cb.Tag = channel;
-                wpChannels.Children.Add(cb);
+                cbType.Items.Add(type);
+            }
+        }
+        private async Task FillCBSectable()
+        {
+            List<SectableDTO> sectables = (List<SectableDTO>)await _sectableController.GetAllSectablesByOwnerId(client.clid);
+            foreach (var sectable in sectables)
+            {
+                cbSectable.Items.Add(sectable);
+                cbSectable2.Items.Add(sectable);
+            }
+        }
+        private async Task FillCBSeasonality()
+        {
+            List<SeasonalityDTO> seasonalities = (List<SeasonalityDTO>)await _seasonalityController.GetAllSeasonalitiesByOwnerId(client.clid);
+            foreach (var seasonality in seasonalities)
+            {
+                cbSeasonality.Items.Add(seasonality);
+            }
+        }
+        private async Task FillCBTarget()
+        {
+            List<TargetDTO> targets = (List<TargetDTO>)await _targetController.GetAllClientTargets(client.clid);
+
+            foreach (var target in targets)
+            {
+                cbTarget.Items.Add(target);
             }
         }
 
-        // Selecting whole text when captured
-        private void tbSec2_GotMouseCapture(object sender, System.Windows.Input.MouseEventArgs e)
-        {
-            var tb = sender as TextBox;
-            
-            tb.SelectAll();
-            tb.Focus();
-        }
-
-        private void btnNewSectable_Click(object sender, RoutedEventArgs e)
-        {
-            _factorySectable.Create().Show();
-        }
-
-        private void btnNewSeasonality_Click(object sender, RoutedEventArgs e)
-        {
-            _factorySeasonality.Create().Show();
-        }
-
-        private void btnCancel_Click(object sender, RoutedEventArgs e)
-        {
-            this.Close();
-        }
-
-        private async void btnSave_Click(object sender, RoutedEventArgs e)
-        {
-            if (await CheckValues())
-            {
-                //MakeNewPricelist();
-                //MakeNewPricelistChannels();
-            }
-        }
+        #endregion
 
         #region Writing into base
         // for writing data in Database tblpricelist and tblpricelistchn
@@ -385,9 +381,90 @@ namespace CampaignEditor
         }
         #endregion
 
-        private void btnNewTarget_Click(object sender, RoutedEventArgs e)
+        #region Edit buttons mechanism
+        private void cbSectable_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (cbSectable.SelectedIndex <= 0)
+                btnEditSectable.Visibility = Visibility.Hidden;
+            else
+                btnEditSectable.Visibility = Visibility.Visible;
+        }
+
+        private void cbSeasonality_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (cbSeasonality.SelectedIndex <= 0)
+                btnEditSeasonality.Visibility = Visibility.Hidden;
+            else
+                btnEditSeasonality.Visibility = Visibility.Visible;
+        }
+
+        private void cbTarget_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (cbTarget.SelectedIndex == -1)
+                btnEditTarget.Visibility = Visibility.Hidden;
+            else
+                btnEditTarget.Visibility = Visibility.Visible;
+        }
+        #endregion
+
+        #region Edit and New Buttons
+        private async void btnNewTarget_Click(object sender, RoutedEventArgs e)
+        {
+            var factory = _factoryNewTarget.Create();
+            await factory.InitializeTree();
+            factory.ShowDialog();
+            if (factory.success)
+                await FillCBTarget();
+        }
+
+        private async void btnEditTarget_Click(object sender, RoutedEventArgs e)
+        {
+            var factory = _factoryNewTarget.Create();
+            var target = cbTarget.SelectedItem as TargetDTO;
+
+
+            if (target != null)
+            {
+                var success = await factory.InitializeTargetToEdit(target);
+            }
+
+            factory.ShowDialog();
+
+            if (factory.success)
+                await FillCBTarget();
+        }
+        private void btnNewSectable_Click(object sender, RoutedEventArgs e)
+        {
+            _factorySectable.Create().Show();
+        }
+        private void btnEditSectable_Click(object sender, RoutedEventArgs e)
         {
 
         }
+
+        private void btnNewSeasonality_Click(object sender, RoutedEventArgs e)
+        {
+            _factorySeasonality.Create().Show();
+        }
+        private void btnEditSeasonality_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+        #endregion
+
+        private async void btnSave_Click(object sender, RoutedEventArgs e)
+        {
+            if (await CheckValues())
+            {
+                //MakeNewPricelist();
+                //MakeNewPricelistChannels();
+            }
+        }
+
+        private void btnCancel_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
+
     }
 }
