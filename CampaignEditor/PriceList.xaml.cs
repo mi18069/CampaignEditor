@@ -235,7 +235,7 @@ namespace CampaignEditor
         {
             
             if (await CheckName() && CheckCP() && CheckMinGRP() &&
-                CheckValidity() && CheckDPs() && CheckComboBoxes())
+                CheckValidity() && CheckComboBoxes() && CheckDPs())
             {
                 if ((bool)chbSectable2.IsChecked)
                 {
@@ -384,5 +384,10 @@ namespace CampaignEditor
             return true;
         }
         #endregion
+
+        private void btnNewTarget_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }

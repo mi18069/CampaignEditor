@@ -14,9 +14,11 @@
             <ColumnDefinition Width="auto" />
             <ColumnDefinition Width="auto" />
             <ColumnDefinition Width="auto" />
+            <ColumnDefinition Width="auto" />
             <ColumnDefinition Width="50" />
             <ColumnDefinition Width="auto" />
-            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="0*" />
+            <ColumnDefinition/>
             <ColumnDefinition Width="10" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
@@ -35,27 +37,35 @@
             <RowDefinition Height="60" />
             <RowDefinition Height="10" />
         </Grid.RowDefinitions>
-        <Label x:Name="lblName" Content="Price List name: " Grid.Row="1" Grid.Column="1" Margin="0,10"/>
-        <TextBox x:Name="tbName" Grid.Row="1" Grid.Column="3" Margin="0,10" Grid.ColumnSpan="3"
+        <Label x:Name="lblName" Content="Price List name: " Grid.Row="1" Grid.Column="1" Margin="0,10,0,10"/>
+        <TextBox x:Name="tbName" Grid.Row="1" Grid.Column="2" Margin="0,10" Grid.ColumnSpan="5"
                  VerticalContentAlignment="Center"/>
 
-        <Label x:Name="lblType" Content="Type: " Grid.Row="2" Grid.Column="1" Margin="0,10"/>
-        <ComboBox x:Name="cbType" Grid.Row="2" Grid.Column="3" Grid.ColumnSpan="3"
+        <Label x:Name="lblType" Content="Type: " Grid.Row="2" Grid.Column="1" Margin="0,10,0,10"/>
+        <ComboBox x:Name="cbType" Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="5"
                   Margin="0,10" SelectedIndex="0"/>
 
-        <Label x:Name="lblSectable" Content="Sectable: " Grid.Row="3" Grid.Column="1" Margin="0,10"/>
-        <ComboBox x:Name="cbSectable" Text="" Grid.Row="3" Grid.Column="3" Grid.ColumnSpan="2" Margin="0,10"
-                  DisplayMemberPath="sctname" SelectedIndex="0" Height="26" VerticalAlignment="Top"/>
-        <Button x:Name="btnNewSectable" Content="New" Grid.Row="3" Grid.Column="5" 
-                Margin="40, 10, 0, 10" Click="btnNewSectable_Click"/>
+        <Label x:Name="lblSectable" Content="Sectable: " Grid.Row="3" Grid.Column="1" Margin="0,10,0,10"/>
+        <ComboBox x:Name="cbSectable" Text="" Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="3" Margin="0,10"
+                  DisplayMemberPath="sctname" SelectedIndex="0" Height="26" VerticalAlignment="Center"/>
+        <Button x:Name="btnEditSectable" Grid.Row="3" Grid.Column="5" 
+                Width="30" Height="30" BorderThickness="0" Background="White" Margin="0,10"
+                >
+            <Image Source="\images\Edit_Icon2.png"></Image>
+        </Button>
+        <Button x:Name="btnNewSectable" Grid.Row="3" Grid.Column="6" 
+                Width="30" Height="30" BorderThickness="0" Background="White"
+                Click="btnNewSectable_Click" Margin="0,10">
+            <Image Source="\images\GreenPlus.png"></Image>
+        </Button>
 
         <Label x:Name="lblSectable2" Content="Sectable 2: " Grid.Row="4" Grid.Column="1" Margin="0,10"
                IsEnabled="{Binding ElementName=chbSectable2, Path=IsChecked}"/>
-        <ComboBox x:Name="cbSectable2" Text="" Grid.Row="4" Grid.Column="3" Margin="0,10" Grid.ColumnSpan="3"
+        <ComboBox x:Name="cbSectable2" Text="" Grid.Row="4" Grid.Column="2" Margin="0,10" Grid.ColumnSpan="3"
                   IsEnabled="{Binding ElementName=chbSectable2, Path=IsChecked}"
                   DisplayMemberPath="sctname" SelectedIndex="0"/>
-        <CheckBox x:Name="chbSectable2" Content="" Grid.Row="4" Grid.Column="2"
-                  VerticalAlignment="Center" HorizontalAlignment="Center" Margin="0, 0, 0, 0"
+        <CheckBox x:Name="chbSectable2" Content="" Grid.Row="4" Grid.Column="5"
+                  VerticalAlignment="Center" HorizontalAlignment="Center"
                   IsChecked="False">
             <CheckBox.LayoutTransform>
                 <ScaleTransform ScaleX="1.5" ScaleY="1.5" />
@@ -64,34 +74,41 @@
 
         <Label x:Name="lblSec2From" Content="From:" Grid.Row="5" Grid.Column="3"
                VerticalAlignment="Center"
-               IsEnabled="{Binding ElementName=chbSectable2, Path=IsChecked}"/>
+               IsEnabled="{Binding ElementName=chbSectable2, Path=IsChecked}" Grid.ColumnSpan="1"/>
         <TextBox x:Name="tbSec2From" Grid.Row="5" Grid.Column="3" 
-                 Width="50" Margin="10"
+                 Width="50" Margin="0,10"
                  Text="0200" HorizontalContentAlignment="Right"
                  MaxLength="4" 
                  IsEnabled="{Binding ElementName=chbSectable2, Path=IsChecked}"
                  GotMouseCapture="tbSec2_GotMouseCapture"/>
-        <Label x:Name="lblSec2To" Content="To:" Grid.Row="5" Grid.Column="4"
-               VerticalAlignment="Center"
-               IsEnabled="{Binding ElementName=chbSectable2, Path=IsChecked}"/>
+        <Label x:Name="lblSec2To" Content="  To:" Grid.Row="5" Grid.Column="4"
+               VerticalAlignment="Center" HorizontalAlignment="Left"
+               IsEnabled="{Binding ElementName=chbSectable2, Path=IsChecked}" Grid.ColumnSpan="3" Margin="0,10"/>
         <TextBox x:Name="tbSec2To" Grid.Row="5" Grid.Column="4" 
-                 Margin="10"
-                 Width="50"
+                 Width="50" Margin="0,10"
                  Text="2559" HorizontalContentAlignment="Right"
                  MaxLength="4" 
                  IsEnabled="{Binding ElementName=chbSectable2, Path=IsChecked}"
                  GotMouseCapture="tbSec2_GotMouseCapture"/>
 
         <Label x:Name="lblSeasonality" Content="Seasonality Type: " Grid.Row="6" Grid.Column="1" Margin="0,10"/>
-        <ComboBox x:Name="cbSeasonality" Text="" Grid.Row="6" Grid.Column="3" Margin="0,10" Grid.ColumnSpan="2"
+        <ComboBox x:Name="cbSeasonality" Text="" Grid.Row="6" Grid.Column="2" Margin="0,10" Grid.ColumnSpan="3"
                   DisplayMemberPath="seasname" SelectedIndex="0"/>
-        <Button x:Name="btnNewSeasonality" Content="New" Grid.Row="6" Grid.Column="5" 
-                Margin="40, 10, 0, 10" Click="btnNewSeasonality_Click"/>
+        <Button x:Name="btnEditSeasonality" Grid.Row="6" Grid.Column="5" 
+                Width="30" Height="30" BorderThickness="0" Background="White" Margin="0,10"
+                >
+            <Image Source="\images\Edit_Icon2.png"></Image>
+        </Button>
+        <Button x:Name="btnNewSeasonality" Grid.Row="6" Grid.Column="6" 
+                Width="30" Height="30" BorderThickness="0" Background="White"
+                Click="btnNewSeasonality_Click" Margin="0,10">
+            <Image Source="\images\GreenPlus.png"></Image>
+        </Button>
 
         <Label x:Name="lblCP" Content="CP(I/P/S): " Grid.Row="7" Grid.Column="1" Margin="0,10"/>
-        <TextBox x:Name="tbCP" Text="" Grid.Row="7" Grid.Column="3" Margin="0,10" Grid.ColumnSpan="1"
+        <TextBox x:Name="tbCP" Text="" Grid.Row="7" Grid.Column="2" Margin="0,10" Grid.ColumnSpan="2"
                  VerticalContentAlignment="Center"/>
-        <CheckBox x:Name="chbCP" Content="Zero GRP Only" Grid.Row="7" Grid.Column="4" Margin="2,0"
+        <CheckBox x:Name="chbCP" Content="Zero GRP Only" Grid.Row="7" Grid.Column="4" Margin="10"
                   VerticalAlignment="Center" VerticalContentAlignment="Center" FontSize="8">
             <CheckBox.LayoutTransform>
                 <ScaleTransform ScaleX="1.5" ScaleY="1.5" />
@@ -99,32 +116,40 @@
         </CheckBox>
 
         <Label x:Name="lblMinGRP" Content="Min GRP: " Grid.Row="8" Grid.Column="1" Margin="0,10"/>
-        <TextBox x:Name="tbMinGRP" Text="" Grid.Row="8" Grid.Column="3" Margin="0,10" Grid.ColumnSpan="1"
+        <TextBox x:Name="tbMinGRP" Text="" Grid.Row="8" Grid.Column="2" Margin="0,10" Grid.ColumnSpan="2"
                  VerticalContentAlignment="Center"/>
-        <Label Content="€" Grid.Row="8" Grid.Column="4" VerticalContentAlignment="Center" FontSize="22"/>
+        <Label Content="€" Grid.Row="8" Grid.Column="4" FontWeight="Bold" VerticalContentAlignment="Center" Margin="0,10"/>
 
         <Label x:Name="lblTarget" Content="Target: " Grid.Row="9" Grid.Column="1" Margin="0,10"/>
-        <ComboBox x:Name="cbTarget" Text="" Grid.Row="9" Grid.Column="3" Margin="0,10" Grid.ColumnSpan="2"
+        <ComboBox x:Name="cbTarget" Text="" Grid.Row="9" Grid.Column="2" Margin="0,10" Grid.ColumnSpan="3"
                   DisplayMemberPath="targname"/>
-        <Button x:Name="btnNewTarget" Content="New" Grid.Row="9" Grid.Column="5" 
-                Margin="40, 10, 0, 10"/>
+        <Button x:Name="btnEditTarget" Grid.Row="9" Grid.Column="5" 
+                Width="30" Height="30" BorderThickness="0" Background="White" Margin="0,10"
+                >
+            <Image Source="\images\Edit_Icon2.png"></Image>
+        </Button>
+        <Button x:Name="btnNewTarget" Grid.Row="9" Grid.Column="6" 
+                Width="30" Height="30" BorderThickness="0" Background="White"
+                Click="btnNewTarget_Click" Margin="0,10">
+            <Image Source="\images\GreenPlus.png"></Image>
+        </Button>
 
         <Label x:Name="lblValidity" Content="Validity: " Grid.Row="10" Grid.Column="1" Margin="0,10"/>
         <DatePicker x:Name="dpValidityFrom" Grid.Row="10" Grid.Column="3" 
-                    HorizontalAlignment="Left" Margin="0,10" 
-                    Width="110"/>
+                    HorizontalAlignment="Center" Margin="0,10" 
+                    Width="110" Grid.ColumnSpan="1"/>
         <DatePicker x:Name="dpValidityTo" Grid.Row="10" Grid.Column="4"
-                    HorizontalAlignment="Right" Margin="0,10"
-                    Width="110"/>
+                    HorizontalAlignment="Center" Margin="0,10"
+                    Width="110" Grid.ColumnSpan="1"/>
 
-        <Border Grid.Row="1" Grid.Column="8" Grid.RowSpan="11" Grid.ColumnSpan="1"
+        <Border Grid.Row="1" Grid.Column="9" Grid.RowSpan="11" Grid.ColumnSpan="2"
                 BorderBrush="LightGray" BorderThickness="1">
             <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
                 <WrapPanel x:Name="wpChannels" Orientation="Vertical" />
             </ScrollViewer>
         </Border>
 
-        <Border Grid.Row="11" Grid.Column="1" Grid.RowSpan="2" Grid.ColumnSpan="5"
+        <Border Grid.Row="11" Grid.Column="1" Grid.RowSpan="2" Grid.ColumnSpan="6"
                 BorderBrush="LightGray" BorderThickness="1"
                 MinWidth="470">
             <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Visible">
@@ -132,9 +157,9 @@
             </ScrollViewer>
         </Border>
 
-        <Button x:Name="btnSave" Content="Save" Grid.Row="12" Grid.Column="8"
-                Width="100" HorizontalAlignment="Right" Margin="0, 10" Click="btnSave_Click"/>
-        <Button x:Name="btnCancel" Content="Cancel" Grid.Row="12" Grid.Column="8"
-                Width="100" HorizontalAlignment="Right" Margin="0, 10, 120, 10" Click="btnCancel_Click"/>
+        <Button x:Name="btnSave" Content="Save" Grid.Row="12" Grid.Column="10"
+                Width="100" HorizontalAlignment="Right" Margin="0,10" Click="btnSave_Click"/>
+        <Button x:Name="btnCancel" Content="Cancel" Grid.Row="12" Grid.Column="10"
+                Width="100" HorizontalAlignment="Right" Margin="0,10,120,10" Click="btnCancel_Click"/>
     </Grid>
 </Window>
