@@ -14,7 +14,6 @@ namespace Database.Entities
         public float minprice { get; set; }
         public bool prgcoef { get; set; }
         public int pltarg { get; set; }
-        public string a2chn { get; set; }
         public bool use2 { get; set; }
         public int sectbid2 { get; set; }
         public int sectb2st { get; set; }

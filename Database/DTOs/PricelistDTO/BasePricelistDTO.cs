@@ -10,7 +10,7 @@ namespace Database.DTOs.PricelistDTO
     {
         public BasePricelistDTO(int clid, string plname, int pltype, 
             int sectbid, int seastbid, bool plactive, float price, 
-            float minprice, bool prgcoef, int pltarg, string a2chn, 
+            float minprice, bool prgcoef, int pltarg, 
             bool use2, int sectbid2, int sectb2st, int sectb2en, 
             int valfrom, int valto, bool mgtype)
         {
@@ -24,7 +24,6 @@ namespace Database.DTOs.PricelistDTO
             this.minprice = minprice;
             this.prgcoef = prgcoef;
             this.pltarg = pltarg;
-            this.a2chn = a2chn;
             this.use2 = use2;
             this.sectbid2 = sectbid2;
             this.sectb2st = sectb2st;

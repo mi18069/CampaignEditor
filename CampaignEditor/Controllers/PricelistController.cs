@@ -25,6 +25,16 @@ namespace CampaignEditor.Controllers
             var pricelist = await _repository.GetPricelistById(id);
             return pricelist;
         }
+        public async Task<PricelistDTO> GetPricelistByName(string pricelistname)
+        {
+            var pricelist = await _repository.GetPricelistByName(pricelistname);
+            return pricelist;
+        }
+        public async Task<PricelistDTO> GetClientPricelistByName(int clid, string pricelistname)
+        {
+            var pricelist = await _repository.GetClientPricelistByName(clid, pricelistname);
+            return pricelist;
+        }
 
         public async Task<IEnumerable<PricelistDTO>> GetAllPricelists()
         {

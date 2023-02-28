@@ -3,8 +3,8 @@ namespace Database.DTOs.SeasonalityDTO
 {
     public class BaseIdentitySeasonalityDTO : BaseSeasonalityDTO
     {
-        public BaseIdentitySeasonalityDTO(int seasid, string seasname, bool seasactive, string channel, int ownedby) 
-            : base(seasname, seasactive, channel, ownedby)
+        public BaseIdentitySeasonalityDTO(int seasid, string seasname, bool seasactive, int ownedby) 
+            : base(seasname, seasactive, ownedby)
         {
             this.seasid = seasid;
         }

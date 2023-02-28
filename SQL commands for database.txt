@@ -26,7 +26,6 @@ ALTER TABLE tblsectablechn ADD CONSTRAINT fk_sctid FOREIGN KEY (sctid) REFERENCE
 ALTER TABLE tblsectablechn ADD CONSTRAINT fk_chid FOREIGN KEY (chid) REFERENCES tblchannels (chid);
 
 
-
 -- to make new tabels to resolve problems with normalizations between tblchannels and tblseasonality
 
 CREATE TABLE tblseasonalitychn AS 
@@ -51,5 +50,10 @@ ALTER TABLE tblpricelistchn ADD CONSTRAINT fk_plplid FOREIGN KEY (plid) REFERENC
 ALTER TABLE tblpricelistchn ADD CONSTRAINT fk_plchid FOREIGN KEY (chid) REFERENCES tblchannels (chid);
 
 
--- to rename tabel tblseasonality_s to seasonalities
+-- to rename table tblseasonality_s to seasonalities
 ALTER TABLE tblseasonality_s RENAME TO tblseasonalities;
+
+-- to delete unnecessary columns with channel strings
+ALTER TABLE tblpricelist DROP COLUMN a2chn;
+ALTER TABLE tblsectable DROP COLUMN channel;
+ALTER TABLE tblseasonality DROP COLUMN channel;

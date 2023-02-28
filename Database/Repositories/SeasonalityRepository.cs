@@ -24,12 +24,11 @@ namespace Database.Repositories
 
             var affected = await connection.ExecuteAsync(
                 "INSERT INTO tblseasonality (seasname, seasactive, channel, ownedby)" +
-                    "VALUES (@Seasname, @Seasactive, @Channel, @Ownedby)",
+                    "VALUES (@Seasname, @Seasactive, @Ownedby)",
             new
             {
                 Sctname = seasonalityDTO.seasname,
                 Seasactive = seasonalityDTO.seasactive,
-                Channel = seasonalityDTO.channel,
                 Ownedby = seasonalityDTO.ownedby
             });
 
@@ -78,13 +77,12 @@ namespace Database.Repositories
 
             var affected = await connection.ExecuteAsync(
                 "UPDATE tblseasonality SET seasid = @Seasid, seasname = @Seasname, " +
-                "channel = @Channel, ownedby = @Ownedby" +
+                "ownedby = @Ownedby" +
                 "WHERE sctid = @Sctid",
             new
             {
                     Seasid = seasonalityDTO.seasid,
                     Seasname = seasonalityDTO.seasname,
-                    Channel = seasonalityDTO.channel,
                     Ownedby = seasonalityDTO.ownedby
                 });
 

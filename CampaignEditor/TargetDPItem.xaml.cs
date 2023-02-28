@@ -13,6 +13,36 @@ namespace CampaignEditor
             InitializeComponent();
         }
 
+        // For checking validity of time order
+        public string CheckValidity()
+        {
+            string retString = "";
+            retString = CheckFields();
+            return retString;
+        }
+
+        // Checking text and time 
+        private string CheckFields()
+        {
+            int fromH;
+            int fromM;
+            int toH;
+            int toM;
+            double coef;
+
+            if (!int.TryParse(tbFromH.Text, out fromH) ||
+                !int.TryParse(tbFromM.Text, out fromM) ||
+                !int.TryParse(tbToH.Text, out toH) ||
+                !int.TryParse(tbToM.Text, out toM))
+                return "Invalid values for Day Parts";
+            else if (fromH > toH || (fromH == toH && fromM > toM))
+                return "Invalid values for Day Parts";
+            else if (!double.TryParse(tbCoef.Text, out coef))
+                return "Invalid value for DP Coef";
+            else 
+                return "";
+        }
+
         // Selecting whole text
         private void tb_GotMouseCapture(object sender, MouseEventArgs e)
         {

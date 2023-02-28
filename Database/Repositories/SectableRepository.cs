@@ -24,14 +24,13 @@ namespace Database.Repositories
             using var connection = _context.GetConnection();
 
             var affected = await connection.ExecuteAsync(
-                "INSERT INTO tblsectable (sctname, sctlinear, sctactive, channel, ownedby)" +
-                    "VALUES (@Sctname, @Sctlinear, @Sctactive, @Channel, @Ownedby)",
+                "INSERT INTO tblsectable (sctname, sctlinear, sctactive, ownedby)" +
+                    "VALUES (@Sctname, @Sctlinear, @Sctactive, @Ownedby)",
             new
             {
                 Sctname = sectableDTO.sctname,
                 Sctlinear = sectableDTO.sctlinear,
                 Sctactive = sectableDTO.sctactive,
-                Channel = sectableDTO.channel,
                 Ownedby = sectableDTO.ownedby
             });
 
@@ -80,14 +79,13 @@ namespace Database.Repositories
 
             var affected = await connection.ExecuteAsync(
                 "UPDATE tblsectable SET sctid = @Sctid, sctname = @Sctname, " +
-                "sctlinear = @Sctlinear, channel = @Channel, ownedby = @Ownedby" +
+                "sctlinear = @Sctlinear, ownedby = @Ownedby" +
                 "WHERE sctid = @Sctid",
                 new
                 {
                     Sctid = sectableDTO.sctid,
                     Sctname = sectableDTO.sctname,
                     Sctlinear = sectableDTO.sctlinear,
-                    Channel = sectableDTO.channel,
                     Ownedby = sectableDTO.ownedby
                 });
 

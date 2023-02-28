@@ -1,6 +1,4 @@
 ﻿using AutoMapper;
-using CampaignEditor.DTOs.UserDTO;
-using CampaignEditor.Entities;
 using Dapper;
 using Database.Data;
 using Database.DTOs.PricelistDTO;
@@ -28,7 +26,7 @@ namespace Database.Repositories
 
             var affected = await connection.ExecuteAsync(
                 "INSERT INTO tblpricelist (clid, plname, pltype, sectbid, seastbid, plactive, price, minprice, " +
-                "prgcoef, pltarg, a2chn, use2, sectbid2, sectb2st, sectb2en, valfrom, valto, mgtype)" +
+                "prgcoef, pltarg, use2, sectbid2, sectb2st, sectb2en, valfrom, valto, mgtype)" +
                     "VALUES (@Clid, @Plname, @Pltype, @Sectbid, @Seastbid, @Plactive, @Price, @Minprice, " +
                     "@Prgcoef, @Pltarg, @A2chn, @Use2, @Sectbid2, @Sectb2st, @Sectb2en, @Valfrom, @Valto, @Mgtype)",
             new
@@ -43,7 +41,6 @@ namespace Database.Repositories
                 Minprice = pricelistDTO.minprice,
                 Prgcoef = pricelistDTO.prgcoef,
                 Pltarg = pricelistDTO.pltarg,
-                A2chn = pricelistDTO.a2chn,
                 Use2 = pricelistDTO.use2,
                 Sectbid2 = pricelistDTO.sectbid2,
                 Sectb2st = pricelistDTO.sectb2st,
@@ -61,12 +58,30 @@ namespace Database.Repositories
         {
             using var connection = _context.GetConnection();
 
-            var pricelist = await connection.QueryFirstOrDefaultAsync<Pricelist>(
+            var pricelist = await connection.QueryAsync<Pricelist>(
                 "SELECT * FROM tblpricelist WHERE plid = @Id", new { Id = id });
 
             return _mapper.Map<PricelistDTO>(pricelist);
         }
+        public async Task<PricelistDTO> GetPricelistByName(string pricelistname)
+        {
+            using var connection = _context.GetConnection();
 
+            var pricelist = await connection.QueryFirstOrDefaultAsync<Pricelist>(
+                "SELECT * FROM tblpricelist WHERE plname = @Plname", new { Plname = pricelistname });
+
+            return _mapper.Map<PricelistDTO>(pricelist);
+        }
+        public async Task<PricelistDTO> GetClientPricelistByName(int clid, string pricelistname)
+        {
+            using var connection = _context.GetConnection();
+
+            var pricelist = await connection.QueryFirstOrDefaultAsync<Pricelist>(
+                "SELECT * FROM tblpricelist WHERE plname = @Plname AND (clid = @Clid OR clid = 0)", 
+                new { Plname = pricelistname, Clid = clid});
+
+            return _mapper.Map<PricelistDTO>(pricelist);
+        }
         public async Task<IEnumerable<PricelistDTO>> GetAllPricelists()
         {
             using var connection = _context.GetConnection();
@@ -83,7 +98,7 @@ namespace Database.Repositories
             var affected = await connection.ExecuteAsync(
                 "UPDATE tblpricelist SET clid = @Clid, plname = @Plname, pltype = @Pltype, " +
                 "sectbid = @Sectbid, seastbid = @Seastbid, plactive = @Plactive, price = @Price, minprice = @Minprice" +
-                "prgcoef = @Prgcoef, pltarg = @Pltarg, a2chn = @A2chn, use2 = @Use2, sectbid2 = @sectbid2" +
+                "prgcoef = @Prgcoef, pltarg = @Pltarg, use2 = @Use2, sectbid2 = @sectbid2" +
                 "sectb2st = @Sectb2st, sectb2en = @Sectb2en, valfrom = @Valfrom, valto = @Valto, mgtype = @Mgtype" +
                 "WHERE plid = @Plid",
                 new
@@ -99,7 +114,6 @@ namespace Database.Repositories
                     Minprice = pricelistDTO.minprice,
                     Prgcoef = pricelistDTO.prgcoef,
                     Pltarg = pricelistDTO.pltarg,
-                    A2chn = pricelistDTO.a2chn,
                     Use2 = pricelistDTO.use2,
                     Sectbid2 = pricelistDTO.sectbid2,
                     Sectb2st = pricelistDTO.sectb2st,

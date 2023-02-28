@@ -1,6 +1,9 @@
 ﻿using CampaignEditor.Controllers;
 using CampaignEditor.StartupHelpers;
+using Database.DTOs.ChannelDTO;
 using Database.DTOs.ClientDTO;
+using Database.DTOs.PricelistChannels;
+using Database.DTOs.PricelistDTO;
 using Database.DTOs.SeasonalityDTO;
 using Database.DTOs.SectableDTO;
 using Database.DTOs.TargetDTO;
@@ -9,6 +12,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.Intrinsics.Arm;
+using System.Security;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
@@ -158,5 +164,221 @@ namespace CampaignEditor
         {
             _factorySeasonality.Create().Show();
         }
+
+        private void btnCancel_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
+
+        private async void btnSave_Click(object sender, RoutedEventArgs e)
+        {
+            if (await CheckValues())
+            {
+                //MakeNewPricelist();
+                //MakeNewPricelistChannels();
+            }
+        }
+
+        private async Task MakeNewPricelist()
+        {
+            int clid = client.clid;
+            string plname = tbName.Text.Trim();
+            int pltype = cbType.SelectedIndex; // Place in combobox corresponds to int value
+            int chid = 1;
+            int sectbid = (cbSectable.SelectedValue as SectableDTO)!.sctid; // By default, first value is selected
+            int seasid = (cbSeasonality.SelectedValue as SeasonalityDTO)!.seasid;
+            bool plactive = true;
+            float price = 0.0f;
+            float minprice = 0.0f;
+            bool prgcoef = false;
+            int pltarg = (cbTarget.SelectedValue as TargetDTO)!.targid;
+            bool use2 = (bool)chbSectable2.IsChecked;
+            int sectbid2 = (cbSectable2.SelectedValue as SectableDTO)!.sctid;
+            int sectb2st = int.Parse(tbSec2From.Text.Trim());
+            int sectb2en = int.Parse(tbSec2To.Text.Trim());
+            int valfrom = 0;
+            int valto = 0;
+            bool mgtype = false;
+
+            await _pricelistController.CreatePricelist(new CreatePricelistDTO
+                (clid, plname, pltype, sectbid, seasid, plactive, price, minprice,
+                prgcoef, pltarg, use2, sectbid2, sectb2st, sectb2en,
+                valfrom, valto, mgtype));
+        }
+
+        private async Task MakeNewPricelistChannels()
+        {
+            List<ChannelDTO> channels = new List<ChannelDTO>();
+            foreach (CheckBox channelBox in wpChannels.Children)
+            {
+                if ((bool)channelBox.IsChecked)
+                {
+                    channels.Add(await _channelController.GetChannelByName(channelBox.Content.ToString().Trim()));
+                }
+            }
+
+            PricelistDTO pricelist = await _pricelistController.GetClientPricelistByName(client.clid, tbName.Text.Trim());
+
+            foreach (var channel in channels)
+            {
+                await _pricelistChannelsController.CreatePricelistChannels(
+                    new CreatePricelistChannelsDTO(pricelist.plid, channel.chid));
+            }
+        }
+
+        #region Check Values
+        private async Task<bool> CheckValues()
+        {
+            
+            if (await CheckName() && CheckCP() && CheckMinGRP() &&
+                CheckValidity() && CheckDPs() && CheckComboBoxes())
+            {
+                if ((bool)chbSectable2.IsChecked)
+                {
+                    return CheckTbSectable2();
+                }
+                else
+                    return true;
+            }
+            else
+                return false;
+        }
+
+        // Values in tbSectable2 needs to be 4 chars long integers
+        private bool CheckTbSectable2()
+        {
+            int from;
+            int to;
+
+            string fromStr = tbSec2From.Text.Trim();
+            string toStr = tbSec2To.Text.Trim();
+
+            if (fromStr.Count() != 4 || toStr.Count() != 4)
+            {
+                MessageBox.Show("Values in Sectable2 needs to be 4 characters long");
+                return false;
+            }
+            else if (!int.TryParse(fromStr, out from) ||
+               !int.TryParse(toStr, out to))
+            {
+                MessageBox.Show("Invalid values for Sectable2");
+                return false;
+            }
+            else
+                return true;
+        }
+        // Name should be longer than 0 chars and shouldn't 
+        // have the same name as another pricelist from the same client
+        private async Task<bool> CheckName()
+        {
+            string name = tbName.Text.Trim();
+            if (name.Length <= 0)
+            {
+                MessageBox.Show("Enter name");
+                return false;
+            }
+            else if ((await _pricelistController.GetClientPricelistByName(client.clid, name)) != null)
+            {
+                MessageBox.Show("Name already exist");
+                return false;
+            }
+            else
+                return true;
+        }
+        private bool CheckCP()
+        {
+            string cp = tbCP.Text.Trim();
+            double cpDouble = 0;
+            if (cp.Length <= 0)
+            {
+                MessageBox.Show("Enter CP(/I/P/S)");
+                return false;
+            }else if(!double.TryParse(cp, out cpDouble))
+            {
+                MessageBox.Show("Value for CP(/I/P/S) is not valid");
+                return false;
+            }
+            else
+                return true;
+        }
+        private bool CheckMinGRP()
+        {
+            string grp = tbMinGRP.Text.Trim();
+            double grpDouble = 0;
+            if (grp.Length <= 0)
+            {
+                MessageBox.Show("Enter MinGRP");
+                return false;
+            }
+            else if (!double.TryParse(grp, out grpDouble))
+            {
+                MessageBox.Show("Value for MinGRP is not valid");
+                return false;
+            }
+            else
+                return true;
+        }
+        private bool CheckValidity()
+        {
+            DateTime? fromDate = dpValidityFrom.SelectedDate;
+            DateTime? toDate = dpValidityTo.SelectedDate;
+            if (!fromDate.HasValue || !toDate.HasValue)
+            {
+                MessageBox.Show("Select Date Range");
+                return false;
+            }
+            else if (fromDate > toDate)
+            {
+                MessageBox.Show("Selected Date Range is invalid");
+                return false;
+            }
+            else
+                return true;
+        }
+        // Each TargetDPItem has it's CheckValidity function that returns 
+        // error string if something's not ok
+        private bool CheckDPs()
+        {
+            bool success = true;
+
+            for (int i=0; i<wpDayParts.Children.Count -1; i++)
+            {
+                TargetDPItem item = (TargetDPItem)wpDayParts.Children[i];
+                string validity = "";
+                if ((validity = item.CheckValidity()) != "")
+                {
+                    MessageBox.Show(validity);
+                    success = false;
+                    break;
+                }
+            }
+            return success;
+        }
+        // Every CheckBox needs to be selected (except cbSectable2)
+        private bool CheckComboBoxes()
+        {
+            if (cbSectable.SelectedIndex == -1)
+            {
+                MessageBox.Show("Select Sectable");
+                return false;
+            }
+            else if (cbSeasonality.SelectedIndex == -1)
+            {
+                MessageBox.Show("Select Seasonality");
+                return false;
+            }
+            else if ((bool)chbSectable2.IsChecked && cbSectable2.SelectedIndex == -1)
+            {
+                MessageBox.Show("Select Sectable2");
+                return false;
+            }
+            else if (cbTarget.SelectedIndex == -1)
+            {
+                MessageBox.Show("Select Target");
+                return false;
+            }
+            return true;
+        }
+        #endregion
     }
 }

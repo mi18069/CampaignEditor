@@ -1,5 +1,4 @@
-﻿using CampaignEditor.DTOs.UserDTO;
-using Database.DTOs.PricelistDTO;
+﻿using Database.DTOs.PricelistDTO;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -9,6 +8,8 @@ namespace Database.Repositories
     {
         Task<bool> CreatePricelist(CreatePricelistDTO pricelistDTO);
         Task<PricelistDTO> GetPricelistById(int id);
+        Task<PricelistDTO> GetPricelistByName(string pricelistname);
+        Task<PricelistDTO> GetClientPricelistByName(int clid, string pricelistname);
         Task<IEnumerable<PricelistDTO>> GetAllPricelists();
         Task<bool> UpdatePricelist(UpdatePricelistDTO pricelistDTO);
         Task<bool> DeletePricelistById(int id);
