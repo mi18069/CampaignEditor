@@ -55,6 +55,7 @@ namespace Database.Repositories
 
             return _mapper.Map<SectableDTO>(sectable);
         }
+
         public async Task<IEnumerable<SectableDTO>> GetAllSectablesByOwnerId(int id)
         {
             using var connection = _context.GetConnection();
@@ -79,13 +80,14 @@ namespace Database.Repositories
 
             var affected = await connection.ExecuteAsync(
                 "UPDATE tblsectable SET sctid = @Sctid, sctname = @Sctname, " +
-                "sctlinear = @Sctlinear, ownedby = @Ownedby" +
+                "sctlinear = @Sctlinear, sctactive = @Sctactive, ownedby = @Ownedby " +
                 "WHERE sctid = @Sctid",
                 new
                 {
                     Sctid = sectableDTO.sctid,
                     Sctname = sectableDTO.sctname,
                     Sctlinear = sectableDTO.sctlinear,
+                    Sctactive = sectableDTO.sctactive,
                     Ownedby = sectableDTO.ownedby
                 });
 

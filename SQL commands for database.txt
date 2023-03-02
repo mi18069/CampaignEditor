@@ -1,6 +1,6 @@
 -- to make table tblplchn: 
 
-CREATE TABLE [IF NOT EXISTS] tblplchn (
+CREATE TABLE IF NOT EXISTS tblplchn (
    plid serial NOT NULL,
    chid int NOT NULL,
    PRIMARY KEY (user_id, role_id),
@@ -50,10 +50,43 @@ ALTER TABLE tblpricelistchn ADD CONSTRAINT fk_plplid FOREIGN KEY (plid) REFERENC
 ALTER TABLE tblpricelistchn ADD CONSTRAINT fk_plchid FOREIGN KEY (chid) REFERENCES tblchannels (chid);
 
 
+
+
 -- to rename table tblseasonality_s to seasonalities
 ALTER TABLE tblseasonality_s RENAME TO tblseasonalities;
+
+
 
 -- to delete unnecessary columns with channel strings
 ALTER TABLE tblpricelist DROP COLUMN a2chn;
 ALTER TABLE tblsectable DROP COLUMN channel;
 ALTER TABLE tblseasonality DROP COLUMN channel;
+
+
+
+
+-- check for duplicates in tblsectables
+
+SELECT sctid, sec, coef, 
+    COUNT(*) AS CNT
+FROM tblsectables
+GROUP BY sctid, sec, coef
+HAVING COUNT(*) > 1;
+
+
+
+-- to delete duplicates from tblsectables
+with cte1 as (
+    delete
+    from tblsectables
+    returning *
+), cte2 as (
+    select
+        row_number() over(partition by sctid, sec, coef order by sctid desc) as rn,
+        *
+    from cte1
+)
+insert into tblsectables
+select sctid, sec, coef
+from cte2
+where rn = 1

@@ -1,8 +1,13 @@
 ﻿using CampaignEditor.Controllers;
+using Database.DTOs.ClientDTO;
+using Database.DTOs.PricelistDTO;
+using Database.DTOs.SectableDTO;
 using Database.DTOs.SectablesDTO;
 using Database.Repositories;
+using System;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
+using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -13,25 +18,55 @@ namespace CampaignEditor
         private SectablesController _sectablesController;
         private SectableController _sectableController;
 
-        private readonly Regex regInteger = new Regex("[0-9]+"); //regex that matches integers
-        private readonly Regex regDouble = new Regex("[0-9]+(\\.[0-9]+)?"); //regex that matches integers
+        public bool success = false;
+        private bool modifiedSectables = false;
+        private bool modifiedSectable = false;
 
-        public Sectable(ISectableRepository sectableRepository, 
+        private SectableDTO _sectable = null;
+        private ClientDTO _client = null;
+        ObservableCollection<Tuple<int, double>> dgList = new ObservableCollection<Tuple<int, double>>();
+
+        public Sectable(ISectableRepository sectableRepository,
             ISectablesRepository sectablesRepository)
         {
             InitializeComponent();
 
             _sectablesController = new SectablesController(sectablesRepository);
             _sectableController = new SectableController(sectableRepository);
-            FillBySctIdAsync(1);
+
         }
 
-        private async Task FillBySctIdAsync(int id)
+        public async void Initialize(ClientDTO client, SectableDTO sectable = null)
         {
-            List<SectablesDTO> seccoefs = (List<SectablesDTO>)await _sectablesController.GetSectablesById(id);
-            dgSectables.ItemsSource = seccoefs;
+            if (sectable != null)
+            {
+                _sectable = sectable;
+                await FillBySctAsync(_sectable);
+            }
+            _client = client;
         }
 
+        private async Task FillBySctAsync(SectableDTO sectable)
+        {
+            tbName.Text = sectable.sctname.Trim();
+            cbLinear.IsChecked = sectable.sctlinear;
+            cbActive.IsChecked = sectable.sctactive;
+
+            List<SectablesDTO> seccoefs = (List<SectablesDTO>)await _sectablesController.GetSectablesById(sectable.sctid);
+            seccoefs = seccoefs.OrderBy(s => s.sec).ToList();
+            foreach (var seccoef in seccoefs)
+            {
+                dgList.Add(Tuple.Create(seccoef.sec, seccoef.coef));
+            }
+            FillDGSectables();
+        }
+
+        private void FillDGSectables()
+        {
+            dgSectables.ItemsSource = dgList;
+        }
+
+        #region Text Boxes mechanism
         private void tbAddFrom_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
         {
             tbAddTo.Text = tbAddFrom.Text;
@@ -48,6 +83,9 @@ namespace CampaignEditor
             bool success = int.TryParse(e.Text, out num);
             e.Handled = !success;
         }
+        #endregion
+
+        #region Add and Delete Buttons
 
         private void btnAdd_Click(object sender, RoutedEventArgs e)
         {
@@ -55,12 +93,160 @@ namespace CampaignEditor
             int to = 0;
             double coef = 0;
 
-            if (int.TryParse(tbAddFrom.Text, out from) && 
-                int.TryParse(tbAddTo.Text, out to) && 
+            if (int.TryParse(tbAddFrom.Text, out from) &&
+                int.TryParse(tbAddTo.Text, out to) &&
                 double.TryParse(tbCoef.Text, out coef))
             {
-                
+                InsertRange(from, to, coef);
+                modifiedSectables = true;
+                FillDGSectables();
             }
+        }
+        private void btnDelete_Click(object sender, RoutedEventArgs e)
+        {
+            int from = 0;
+            int to = 0;
+
+            if (int.TryParse(tbDeleteFrom.Text, out from) &&
+                int.TryParse(tbDeleteTo.Text, out to))
+            {
+                DeleteRange(from, to);
+                modifiedSectables = true;
+                FillDGSectables();
+            }
+        }
+        private void InsertRange(int startRange, int endRange, double coef)
+        {
+            // Find the correct position for the first number in the range using binary search
+            int low = 0;
+            int high = dgList.Count() - 1;
+            while (low <= high)
+            {
+                int mid = (low + high) / 2;
+                if (dgList[mid].Item1 < startRange)
+                {
+                    low = mid + 1;
+                }
+                else
+                {
+                    high = mid - 1;
+                }
+            }
+
+            // Insert or override the numbers in the range
+            int currentValue = startRange;
+            int currentIndex = low;
+            while (currentValue <= endRange)
+            {
+                if (currentIndex < dgList.Count() && dgList[currentIndex].Item1 == currentValue)
+                {
+                    // Override the existing number
+                    dgList[currentIndex] = Tuple.Create(currentValue, coef);
+                }
+                else
+                {
+                    // Insert the new number
+                    dgList.Add(Tuple.Create(0, coef));
+                    for (int i = dgList.Count() - 1; i > currentIndex; i--)
+                    {
+                        dgList[i] = dgList[i - 1];
+                    }
+                    dgList[currentIndex] = Tuple.Create(currentValue, coef);
+                }
+
+                currentValue++;
+                currentIndex++;
+            }
+
+        }
+        private void DeleteRange(int startRange, int endRange)
+        {
+            // Find the correct position for the first number in the range using binary search
+            int low = 0;
+            int high = dgList.Count() - 1;
+            while (low <= high)
+            {
+                int mid = (low + high) / 2;
+                if (dgList[mid].Item1 < startRange)
+                {
+                    low = mid + 1;
+                }
+                else
+                {
+                    high = mid - 1;
+                }
+            }
+
+            // Check if the numbers in the range exist in the list, and remove them if they do
+            int currentValue = startRange;
+            int currentIndex = low;
+            while (currentValue <= endRange)
+            {
+                if (currentIndex < dgList.Count() && dgList[currentIndex].Item1 == currentValue)
+                {
+                    // Remove the number from the list
+                    dgList.RemoveAt(currentIndex);
+                }
+                else
+                {
+                    // Number not found in the list, do nothing
+                    currentValue++;
+                }
+
+            }
+
+        }
+
+        #endregion
+
+        #region Save and Cancel Buttons
+        private async void btnSave_Click(object sender, RoutedEventArgs e)
+        {
+            if (modifiedSectable == false && modifiedSectables == false)
+            {
+                this.Close();
+            }
+            else
+            {
+                if (_sectable == null)
+                {
+                    _sectable = await _sectableController.CreateSectable(new CreateSectableDTO
+                        (tbName.Text.Trim(), (bool)cbLinear.IsChecked, (bool)cbActive.IsChecked, _client.clid));
+                }
+                int id = _sectable.sctid;
+
+                if (modifiedSectables)
+                {
+                    await _sectablesController.DeleteSectablesById(id);
+                    foreach (var sectables in dgList)
+                    {
+                        await _sectablesController.CreateSectables(new CreateSectablesDTO(
+                            id, sectables.Item1, sectables.Item2));
+                    }
+                }
+                if (modifiedSectable)
+                {
+                    await _sectableController.UpdateSectable(new UpdateSectableDTO(id, tbName.Text.Trim(), (bool)cbLinear.IsChecked, (bool)cbActive.IsChecked, _client.clid));
+                }
+                success = true;
+            }
+            this.Close();
+        }
+        private void btnCancel_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
+        #endregion
+
+        private void tbName_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            modifiedSectable = true;
+        }
+
+        private void cb_Changed(object sender, RoutedEventArgs e)
+        {
+            modifiedSectable = true;
         }
     }
 }
+

@@ -22,6 +22,7 @@
             <RowDefinition Height="auto" />
             <RowDefinition Height="auto" />
             <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="10" />
         </Grid.RowDefinitions>
@@ -66,10 +67,10 @@
             </DataGrid.Columns>
         </DataGrid>
 
-        <Button x:Name="btnSave" Content="Save" Grid.Row="4" Grid.Column="6"
+        <Button x:Name="btnSave" Content="Save" Grid.Row="5" Grid.Column="6"
                 Width="100" Height="40" 
                 HorizontalAlignment="Right" VerticalAlignment="Bottom"/>
-        <Button x:Name="btnCancel" Content="Cancel" Grid.Row="4" Grid.Column="6"
+        <Button x:Name="btnCancel" Content="Cancel" Grid.Row="5" Grid.Column="6"
                 Width="100" Height="40" 
                 HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,120,0"/>
     </Grid>

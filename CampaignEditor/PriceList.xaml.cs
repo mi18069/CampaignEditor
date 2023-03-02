@@ -141,37 +141,52 @@ namespace CampaignEditor
 
         private void FillCBType()
         {
+            cbType.Items.Clear();
+
             List<string> typeList = new List<string> { "CPP", "Seconds", "Package" };
             foreach (string type in typeList)
             {
                 cbType.Items.Add(type);
             }
         }
-        private async Task FillCBSectable()
+        private async Task FillCBSectable(int index = 0)
         {
+            cbSectable.Items.Clear();
+            cbSectable2.Items.Clear();
+
             List<SectableDTO> sectables = (List<SectableDTO>)await _sectableController.GetAllSectablesByOwnerId(client.clid);
             foreach (var sectable in sectables)
             {
                 cbSectable.Items.Add(sectable);
                 cbSectable2.Items.Add(sectable);
             }
+            cbSectable.SelectedIndex = index;
+            cbSectable2.SelectedIndex = index;
         }
-        private async Task FillCBSeasonality()
+        private async Task FillCBSeasonality(int index = 0)
         {
+            cbSeasonality.Items.Clear();
+
             List<SeasonalityDTO> seasonalities = (List<SeasonalityDTO>)await _seasonalityController.GetAllSeasonalitiesByOwnerId(client.clid);
             foreach (var seasonality in seasonalities)
             {
                 cbSeasonality.Items.Add(seasonality);
             }
+
+            cbSeasonality.SelectedIndex = index;
         }
-        private async Task FillCBTarget()
+        private async Task FillCBTarget(int index = 0)
         {
+            cbTarget.Items.Clear();
+
             List<TargetDTO> targets = (List<TargetDTO>)await _targetController.GetAllClientTargets(client.clid);
 
             foreach (var target in targets)
             {
                 cbTarget.Items.Add(target);
             }
+
+            cbTarget.SelectedIndex = index;
         }
 
         #endregion
@@ -381,6 +396,8 @@ namespace CampaignEditor
         }
         #endregion
 
+        #region Edit and New Buttons
+
         #region Edit buttons mechanism
         private void cbSectable_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -407,7 +424,6 @@ namespace CampaignEditor
         }
         #endregion
 
-        #region Edit and New Buttons
         private async void btnNewTarget_Click(object sender, RoutedEventArgs e)
         {
             var factory = _factoryNewTarget.Create();
@@ -421,7 +437,7 @@ namespace CampaignEditor
         {
             var factory = _factoryNewTarget.Create();
             var target = cbTarget.SelectedItem as TargetDTO;
-
+            int index = cbTarget.SelectedIndex;
 
             if (target != null)
             {
@@ -431,15 +447,29 @@ namespace CampaignEditor
             factory.ShowDialog();
 
             if (factory.success)
-                await FillCBTarget();
+                await FillCBTarget(index);
         }
-        private void btnNewSectable_Click(object sender, RoutedEventArgs e)
+        private async void btnNewSectable_Click(object sender, RoutedEventArgs e)
         {
-            _factorySectable.Create().Show();
-        }
-        private void btnEditSectable_Click(object sender, RoutedEventArgs e)
-        {
+            var factory = _factorySectable.Create();
+            int index = cbSectable.Items.Count;
 
+            factory.Initialize(client);
+            factory.ShowDialog();
+            if (factory.success)
+                await FillCBSectable(index);
+
+        }
+        private async void btnEditSectable_Click(object sender, RoutedEventArgs e)
+        {
+            var factory = _factorySectable.Create();
+            SectableDTO sectable = (cbSectable.SelectedItem as SectableDTO)!;
+            int index = cbSectable.SelectedIndex;
+
+            factory.Initialize(client, sectable);
+            factory.ShowDialog();
+            if (factory.success)
+                await FillCBSectable(index);
         }
 
         private void btnNewSeasonality_Click(object sender, RoutedEventArgs e)
