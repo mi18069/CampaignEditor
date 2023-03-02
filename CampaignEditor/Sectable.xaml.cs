@@ -1,6 +1,5 @@
 ﻿using CampaignEditor.Controllers;
 using Database.DTOs.ClientDTO;
-using Database.DTOs.PricelistDTO;
 using Database.DTOs.SectableDTO;
 using Database.DTOs.SectablesDTO;
 using Database.Repositories;
@@ -46,6 +45,8 @@ namespace CampaignEditor
             _client = client;
         }
 
+        #region Filling fields
+
         private async Task FillBySctAsync(SectableDTO sectable)
         {
             tbName.Text = sectable.sctname.Trim();
@@ -66,6 +67,8 @@ namespace CampaignEditor
             dgSectables.ItemsSource = dgList;
         }
 
+        #endregion
+
         #region Text Boxes mechanism
         private void tbAddFrom_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
         {
@@ -83,6 +86,17 @@ namespace CampaignEditor
             bool success = int.TryParse(e.Text, out num);
             e.Handled = !success;
         }
+
+        private void tbName_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            modifiedSectable = true;
+        }
+
+        private void cb_Changed(object sender, RoutedEventArgs e)
+        {
+            modifiedSectable = true;
+        }
+
         #endregion
 
         #region Add and Delete Buttons
@@ -238,15 +252,7 @@ namespace CampaignEditor
         }
         #endregion
 
-        private void tbName_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
-        {
-            modifiedSectable = true;
-        }
-
-        private void cb_Changed(object sender, RoutedEventArgs e)
-        {
-            modifiedSectable = true;
-        }
+        
     }
 }
 

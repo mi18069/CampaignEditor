@@ -18,8 +18,8 @@ namespace CampaignEditor.Controllers
         public async Task<SeasonalityDTO> CreateSeasonality(CreateSeasonalityDTO seasonalityDTO)
         {
             await _repository.CreateSeasonality(seasonalityDTO);
-            var channel = await _repository.GetSeasonalityByName(seasonalityDTO.seasname);
-            return channel;
+            var seasonality = await _repository.GetSeasonalityByName(seasonalityDTO.seasname);
+            return seasonality;
         }
 
         public async Task<SeasonalityDTO> GetSeasonalityById(int id)

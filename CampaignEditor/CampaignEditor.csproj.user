@@ -34,6 +34,9 @@
     <Compile Update="PriceList.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="SeasonalitiesItem.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Seasonality.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -85,6 +88,9 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="PriceList.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="SeasonalitiesItem.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Seasonality.xaml">

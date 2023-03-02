@@ -23,11 +23,11 @@ namespace Database.Repositories
             using var connection = _context.GetConnection();
 
             var affected = await connection.ExecuteAsync(
-                "INSERT INTO tblseasonality (seasname, seasactive, channel, ownedby)" +
+                "INSERT INTO tblseasonality (seasname, seasactive, ownedby) " +
                     "VALUES (@Seasname, @Seasactive, @Ownedby)",
             new
             {
-                Sctname = seasonalityDTO.seasname,
+                Seasname = seasonalityDTO.seasname,
                 Seasactive = seasonalityDTO.seasactive,
                 Ownedby = seasonalityDTO.ownedby
             });
@@ -39,7 +39,7 @@ namespace Database.Repositories
         {
             using var connection = _context.GetConnection();
 
-            var seasonality = await connection.QueryFirstOrDefaultAsync<Sectable>(
+            var seasonality = await connection.QueryFirstOrDefaultAsync<Seasonality>(
                 "SELECT * FROM tblseasonality WHERE seasid = @Id", new { Id = id });
 
             return _mapper.Map<SeasonalityDTO>(seasonality);
@@ -48,7 +48,7 @@ namespace Database.Repositories
         {
             using var connection = _context.GetConnection();
 
-            var seasonality = await connection.QueryFirstOrDefaultAsync<Channel>(
+            var seasonality = await connection.QueryFirstOrDefaultAsync<Seasonality>(
                 "SELECT * FROM tblseasonality WHERE seasname = @Seasname", new { Seasname = seasonalityname });
 
             return _mapper.Map<SeasonalityDTO>(seasonality);
@@ -77,8 +77,8 @@ namespace Database.Repositories
 
             var affected = await connection.ExecuteAsync(
                 "UPDATE tblseasonality SET seasid = @Seasid, seasname = @Seasname, " +
-                "ownedby = @Ownedby" +
-                "WHERE sctid = @Sctid",
+                "ownedby = @Ownedby " +
+                "WHERE seasid = @Seasid",
             new
             {
                     Seasid = seasonalityDTO.seasid,
@@ -93,7 +93,7 @@ namespace Database.Repositories
             using var connection = _context.GetConnection();
 
             var affected = await connection.ExecuteAsync(
-                "DELETE FROM tblseasonality WHERE seasid = @Sctid", new { Seasid = id });
+                "DELETE FROM tblseasonality WHERE seasid = @Seasid", new { Seasid = id });
 
             return affected != 0;
         }

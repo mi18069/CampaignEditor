@@ -88,9 +88,10 @@
         </Button>
         
         <DataGrid x:Name="dgSectables" Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="7" Grid.RowSpan="2"
-                      AutoGenerateColumns="False"
-                      CanUserSortColumns="False"
-                      VerticalScrollBarVisibility="Visible">
+                  AutoGenerateColumns="False"
+                  CanUserSortColumns="False"
+                  IsReadOnly="True"  
+                  VerticalScrollBarVisibility="Visible">
                 <DataGrid.Resources>
                     <Style TargetType="{x:Type DataGridColumnHeader}">
                         <Setter Property="Background" Value="LightGray"/>

@@ -12,8 +12,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.Intrinsics.Arm;
-using System.Security;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -472,13 +470,26 @@ namespace CampaignEditor
                 await FillCBSectable(index);
         }
 
-        private void btnNewSeasonality_Click(object sender, RoutedEventArgs e)
+        private async void btnNewSeasonality_Click(object sender, RoutedEventArgs e)
         {
-            _factorySeasonality.Create().Show();
-        }
-        private void btnEditSeasonality_Click(object sender, RoutedEventArgs e)
-        {
+            var factory = _factorySeasonality.Create();
+            int index = cbSeasonality.Items.Count;
 
+            factory.Initialize(client);
+            factory.ShowDialog();
+            if (factory.success)
+                await FillCBSeasonality(index);
+        }
+        private async void btnEditSeasonality_Click(object sender, RoutedEventArgs e)
+        {
+            var factory = _factorySeasonality.Create();
+            SeasonalityDTO seasonality = (cbSeasonality.SelectedItem as SeasonalityDTO)!;
+            int index = cbSeasonality.SelectedIndex;
+
+            factory.Initialize(client, seasonality);
+            factory.ShowDialog();
+            if (factory.success)
+                await FillCBSeasonality(index);
         }
         #endregion
 
