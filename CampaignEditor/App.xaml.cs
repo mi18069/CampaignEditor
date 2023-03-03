@@ -33,6 +33,7 @@ namespace CampaignEditor
                     services.AddFormFactory<PriceList>();
                     services.AddFormFactory<Sectable>();
                     services.AddFormFactory<Seasonality>();
+                    services.AddFormFactory<Channels>();
                     services.AddScoped<IDataContext, DataContext>();
                     // Add services
                     Extensions.UserExtensions.AddUserExtensions(services);
@@ -51,6 +52,7 @@ namespace CampaignEditor
                     Database.Extensions.SeasonalityExtensions.AddSeasonalityExtensions(services);
                     Database.Extensions.SeasonalitiesExtensions.AddSeasonalitiesExtensions(services);
                     Database.Extensions.SeasonalityChannelsExtensions.AddSeasonalityChannelsExtensions(services);
+                    Database.Extensions.ActivityExtensions.AddActivityExtensions(services);
 
                 }).Build();
 

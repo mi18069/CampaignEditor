@@ -162,5 +162,10 @@ namespace CampaignEditor
             f.Initialize(client);
             f.ShowDialog();
         }
+
+        private void btnChannels_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }
