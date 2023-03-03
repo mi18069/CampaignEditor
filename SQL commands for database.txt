@@ -90,3 +90,6 @@ insert into tblsectables
 select sctid, sec, coef
 from cte2
 where rn = 1
+
+-- to set primary key in tblacitivity (before this, delete contraint from pgadmin)
+ALTER TABLE tblactivity ADD PRIMARY KEY (actid);

@@ -18,8 +18,8 @@ namespace CampaignEditor.Controllers
         public async Task<SectableDTO> CreateSectable(CreateSectableDTO sectableDTO)
         {
             await _repository.CreateSectable(sectableDTO);
-            var channel = await _repository.GetSectableByName(sectableDTO.sctname);
-            return channel;
+            var sectable = await _repository.GetSectableByName(sectableDTO.sctname);
+            return sectable;
         }
 
         public async Task<SectableDTO> GetSectableById(int id)

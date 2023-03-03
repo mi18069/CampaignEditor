@@ -415,7 +415,7 @@ namespace CampaignEditor
 
         private void cbTarget_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (cbTarget.SelectedIndex == -1)
+            if (cbTarget.SelectedIndex <= 0)
                 btnEditTarget.Visibility = Visibility.Hidden;
             else
                 btnEditTarget.Visibility = Visibility.Visible;
@@ -493,6 +493,7 @@ namespace CampaignEditor
         }
         #endregion
 
+        #region Save and Cancel Buttons
         private async void btnSave_Click(object sender, RoutedEventArgs e)
         {
             if (await CheckValues())
@@ -506,6 +507,8 @@ namespace CampaignEditor
         {
             this.Close();
         }
+
+        #endregion
 
     }
 }
