@@ -35,6 +35,11 @@ namespace CampaignEditor.Controllers
             return await _repository.GetAllPricelistChannelsByChid(chid);
         }
 
+        public async Task<IEnumerable<int>> GetIntersectedPlIds(IEnumerable<int> plids, IEnumerable<int> chids)
+        {
+            return await _repository.GetIntersectedPlIds(plids, chids);
+        }
+
         public async Task<IEnumerable<PricelistChannelsDTO>> GetAllPricelistChannels()
         {
             return await _repository.GetAllPricelistChannels();

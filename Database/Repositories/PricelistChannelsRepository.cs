@@ -5,6 +5,8 @@ using Database.DTOs.PricelistChannels;
 using Database.Entities;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Database.Repositories
@@ -68,6 +70,46 @@ namespace Database.Repositories
                 ("SELECT * FROM tblpricelistchn WHERE chid = @Chid", new { Chid = chid });
 
             return _mapper.Map<IEnumerable<PricelistChannelsDTO>>(pricelistChannels);
+        }
+
+        public async Task<IEnumerable<int>> GetIntersectedPlIds(IEnumerable<int> plids, IEnumerable<int> chids)
+        {
+            using var connection = _context.GetConnection();
+
+            StringBuilder sbpl = new StringBuilder("");
+            StringBuilder sbch = new StringBuilder("");
+
+            int nPl = plids.Count();
+            int nCh = chids.Count();
+
+            string query = "";
+            if (nPl > 0 || nCh > 0)
+                query += " WHERE ";
+            if (nPl > 0)
+            {
+                for (int i = 1; i < nPl; i++)
+                {
+                    sbpl.Append(", " + plids.ElementAt(i));
+                }
+                query += " plid in (" + plids.ElementAt(0) + sbpl.ToString() + ")";
+            }
+            if (nCh > 0)
+            {
+                for (int i = 1; i < nCh; i++)
+                {
+                    sbch.Append(", " + chids.ElementAt(i));
+                }
+                query += " AND chid in (" + chids.ElementAt(0) + sbch.ToString() + ")";
+            }
+            if (nPl > 0 && nCh > 0)
+            {
+                query += " GROUP BY plid HAVING COUNT (DISTINCT chid) = " + nCh;
+            }
+
+            var pricelistChannels = await connection.QueryAsync<int>
+                ("SELECT DISTINCT plid FROM tblpricelistchn" + query);
+
+            return pricelistChannels;
         }
 
         public async Task<IEnumerable<PricelistChannelsDTO>> GetAllPricelistChannels()

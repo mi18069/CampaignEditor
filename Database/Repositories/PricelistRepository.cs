@@ -58,7 +58,7 @@ namespace Database.Repositories
         {
             using var connection = _context.GetConnection();
 
-            var pricelist = await connection.QueryAsync<Pricelist>(
+            var pricelist = await connection.QueryFirstOrDefaultAsync<Pricelist>(
                 "SELECT * FROM tblpricelist WHERE plid = @Id", new { Id = id });
 
             return _mapper.Map<PricelistDTO>(pricelist);
@@ -86,7 +86,17 @@ namespace Database.Repositories
         {
             using var connection = _context.GetConnection();
 
-            var allPricelists = await connection.QueryAsync<Pricelist>("SELECT * FROM tblpricelist");
+            var allPricelists = await connection.QueryAsync<Pricelist>
+                ("SELECT * FROM tblpricelist");
+
+            return _mapper.Map<IEnumerable<PricelistDTO>>(allPricelists);
+        }
+        public async Task<IEnumerable<PricelistDTO>> GetAllClientPricelists(int clid)
+        {
+            using var connection = _context.GetConnection();
+
+            var allPricelists = await connection.QueryAsync<Pricelist>
+                ("SELECT * FROM tblpricelist WHERE clid = @Clid OR clid = 0", new { Clid = clid});
 
             return _mapper.Map<IEnumerable<PricelistDTO>>(allPricelists);
         }
@@ -134,5 +144,6 @@ namespace Database.Repositories
 
             return affected != 0;
         }
+
     }
 }

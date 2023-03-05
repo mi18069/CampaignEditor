@@ -40,7 +40,10 @@ namespace CampaignEditor.Controllers
         {
             return await _repository.GetAllPricelists();
         }
-
+        public async Task<IEnumerable<PricelistDTO>> GetAllClientPricelists(int clid)
+        {
+            return await _repository.GetAllClientPricelists(clid);
+        }
         public async Task<bool> UpdatePricelist(UpdatePricelistDTO pricelistDTO)
         {
             return await _repository.UpdatePricelist(pricelistDTO);

@@ -17,6 +17,7 @@ namespace CampaignEditor
     {
         private readonly IAbstractFactory<AssignTargets> _factoryAssignTargets;
         private readonly IAbstractFactory<PriceList> _factoryPriceList;
+        private readonly IAbstractFactory<Channels> _factoryChannels;
 
 
         private CampaignController _campaignController;
@@ -31,12 +32,13 @@ namespace CampaignEditor
         AssignTargets assignFactory = null;
         public AddCampaign(ICampaignRepository campaignRepository, ITargetRepository targetRepository, 
             IClientRepository clientRepository, IAbstractFactory<AssignTargets> factoryAssignTargets,
-            IAbstractFactory<PriceList> factoryPriceList)
+            IAbstractFactory<PriceList> factoryPriceList, IAbstractFactory<Channels> factoryChannels)
         {
             instance = this;
 
             _factoryAssignTargets = factoryAssignTargets;
             _factoryPriceList = factoryPriceList;
+            _factoryChannels = factoryChannels;
 
             _campaignController = new CampaignController(campaignRepository);
             _targetController = new TargetController(targetRepository);
@@ -165,7 +167,9 @@ namespace CampaignEditor
 
         private void btnChannels_Click(object sender, RoutedEventArgs e)
         {
-
+            var f = _factoryChannels.Create();
+            f.Initialize(client);
+            f.ShowDialog();
         }
     }
 }

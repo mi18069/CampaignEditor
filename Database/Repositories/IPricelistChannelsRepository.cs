@@ -10,6 +10,8 @@ namespace Database.Repositories
         Task<PricelistChannelsDTO> GetPricelistChannelsByIds(int plid, int chid);
         Task<IEnumerable<PricelistChannelsDTO>> GetAllPricelistChannelsByPlid(int plid);
         Task<IEnumerable<PricelistChannelsDTO>> GetAllPricelistChannelsByChid(int chid);
+        Task<IEnumerable<int>> GetIntersectedPlIds
+            (IEnumerable<int> plids, IEnumerable<int> chids);
         Task<IEnumerable<PricelistChannelsDTO>> GetAllPricelistChannels();
         Task<bool> UpdatePricelistChannels(UpdatePricelistChannelsDTO pricelistChannelsDTO);
         Task<bool> DeletePricelistChannelsByIds(int plid, int chid);
