@@ -91,6 +91,9 @@
                     <Setter Property="BorderThickness" Value="1,1,1,2"/>
                     <Setter Property="BorderBrush" Value="black"/>
                 </Style>
+                <Style TargetType="DataGridRow">
+                    <EventSetter Event="MouseDoubleClick" Handler="DataGridRow_MouseDoubleClick"/>
+                </Style>
             </DataGrid.Resources>
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Channel" Binding="{Binding Item1.chname, Mode=TwoWay}" MinWidth="160"
@@ -103,8 +106,10 @@
         </DataGrid>
 
         <Button x:Name="btnCancel" Content="Cancel" Grid.Row="4" Grid.Column="14"
-                Width="100" Height="40" HorizontalAlignment="Left" Margin="60, 0"/>
+                Width="100" Height="40" HorizontalAlignment="Right" Margin="150, 0"
+                Click="btnCancel_Click"/>
         <Button x:Name="btnSave" Content="Save" Grid.Row="4" Grid.Column="14" 
-                Width="100" Height="40" HorizontalAlignment="Right" Margin="10, 0"/>
+                Width="100" Height="40" HorizontalAlignment="Right" Margin="10, 0"
+                Click="btnSave_Click"/>
     </Grid>
 </Window>

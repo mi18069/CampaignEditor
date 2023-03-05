@@ -29,7 +29,8 @@ namespace CampaignEditor
 
         public static AddCampaign instance;
 
-        AssignTargets assignFactory = null;
+        AssignTargets assignTargetsFactory = null;
+        Channels assignChannelsFactory = null;
         public AddCampaign(ICampaignRepository campaignRepository, ITargetRepository targetRepository, 
             IClientRepository clientRepository, IAbstractFactory<AssignTargets> factoryAssignTargets,
             IAbstractFactory<PriceList> factoryPriceList, IAbstractFactory<Channels> factoryChannels)
@@ -120,12 +121,12 @@ namespace CampaignEditor
         #region Targets
         private void btnAssignTargets_Click(object sender, RoutedEventArgs e)
         {
-            if (assignFactory == null)
-                assignFactory = _factoryAssignTargets.Create();
-            assignFactory.ShowDialog();
-            if (assignFactory.success)
+            if (assignTargetsFactory == null)
+                assignTargetsFactory = _factoryAssignTargets.Create();
+            assignTargetsFactory.ShowDialog();
+            if (assignTargetsFactory.success)
             {
-                FillTargetLabels(assignFactory.SelectedTargetsList);
+                FillTargetLabels(assignTargetsFactory.SelectedTargetsList);
             }
         }
 
@@ -167,9 +168,15 @@ namespace CampaignEditor
 
         private void btnChannels_Click(object sender, RoutedEventArgs e)
         {
-            var f = _factoryChannels.Create();
-            f.Initialize(client);
-            f.ShowDialog();
+
+            if (assignChannelsFactory == null)
+                assignChannelsFactory = _factoryChannels.Create();
+            assignChannelsFactory.ShowDialog();
+            if (assignChannelsFactory.success)
+            {
+                dgChannels.ItemsSource = assignChannelsFactory.LastSelected;
+                assignChannelsFactory.success = false;
+            }
         }
     }
 }

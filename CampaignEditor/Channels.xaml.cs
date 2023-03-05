@@ -10,6 +10,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace CampaignEditor
 {
@@ -23,36 +24,51 @@ namespace CampaignEditor
         private ActivityController _activityController;
 
         private ObservableCollection<ChannelDTO> _channelList;
+        // This list will serve to get all Pricelists for client
         private List<PricelistDTO> _allPricelistsList;
         private ObservableCollection<PricelistDTO> _pricelistList;
         private ObservableCollection<ActivityDTO> _activityList;
         private ObservableCollection<Tuple<ChannelDTO, PricelistDTO, ActivityDTO>> _selected = 
                                 new ObservableCollection<Tuple<ChannelDTO, PricelistDTO, ActivityDTO>>();
-        public ObservableCollection<ChannelDTO> ChannelList
+        // Last selected is used to capture information from last succesfully saved channels
+        private List<Tuple<ChannelDTO, PricelistDTO, ActivityDTO>> _lastSelected =
+                                new List<Tuple<ChannelDTO, PricelistDTO, ActivityDTO>>();
+
+        public bool success = false;
+
+        #region Getters and Setters for lists
+        private ObservableCollection<ChannelDTO> ChannelList
         {
             get { return _channelList;  }
             set { _channelList = value; }
         }
-        public ObservableCollection<PricelistDTO> PricelistList
+        private ObservableCollection<PricelistDTO> PricelistList
         {
             get { return _pricelistList;  }
             set { _pricelistList = value; }
         }
-        public List<PricelistDTO> AllPricelistsList
+        private List<PricelistDTO> AllPricelistsList
         {
             get { return _allPricelistsList; }
             set { _allPricelistsList = value; }
         }
-        public ObservableCollection<ActivityDTO> ActivityList
+        private ObservableCollection<ActivityDTO> ActivityList
         {
             get { return _activityList;  }
             set { _activityList = value; }
         }
-        public ObservableCollection<Tuple<ChannelDTO, PricelistDTO, ActivityDTO>> Selected
+        private ObservableCollection<Tuple<ChannelDTO, PricelistDTO, ActivityDTO>> Selected
         {
             get { return _selected;  }
             set { _selected = value; }
         }
+        public List<Tuple<ChannelDTO, PricelistDTO, ActivityDTO>> LastSelected
+        {
+            get { return _lastSelected; }
+            set { _lastSelected = value; }
+        }
+        #endregion
+
         public Channels(IChannelRepository channelRepository, IPricelistRepository pricelistRepository,
             IPricelistChannelsRepository pricelistChannelsRepository, IActivityRepository activityRepository)
         {
@@ -63,8 +79,7 @@ namespace CampaignEditor
             _activityController = new ActivityController(activityRepository);
 
             InitializeComponent();
-            
-            _ =  FillLists();
+            _ = FillLists();
         }
 
         public void Initialize(ClientDTO client)
@@ -75,8 +90,8 @@ namespace CampaignEditor
         private async Task FillLists()
         {
             // Initializing and sorting lists, so it don't have to be sorted later
-            _channelList = new ObservableCollection<ChannelDTO>((await _channelController.GetAllChannels()).OrderBy(c => c.chname)); //_client.clid
-            _allPricelistsList = (List<PricelistDTO>)(await _pricelistController.GetAllClientPricelists(22));
+            _channelList = new ObservableCollection<ChannelDTO>((await _channelController.GetAllChannels()).OrderBy(c => c.chname)); 
+            _allPricelistsList = (List<PricelistDTO>)(await _pricelistController.GetAllClientPricelists(22)); //_client.clid
             _pricelistList = new ObservableCollection<PricelistDTO>((AllPricelistsList).OrderBy(p => p.plname));
             _activityList = new ObservableCollection<ActivityDTO>((await _activityController.GetAllActivities()).OrderBy(a => a.act));
 
@@ -88,7 +103,7 @@ namespace CampaignEditor
             dgSelected.ItemsSource = Selected;
         }
 
-        #region ToSelected and FromSelected Buttons
+        #region ToSelected and FromSelected 
         private void btnToSelected_Click(object sender, RoutedEventArgs e)
         {
             // At least one item from every listView needs to be selected to execute
@@ -105,7 +120,7 @@ namespace CampaignEditor
                     PricelistDTO pl = lvPricelists.SelectedItem as PricelistDTO;
                     ActivityDTO act = lvActivities.SelectedItem as ActivityDTO;
                     var list = Selected.Select(t => t.Item1).ToList(); // making a list to pass to function FindIndex
-                    int index = FindIndex(list, chn);
+                    int index = FindIndex(list, chn); // Finding the right index, to keep the list sorted
                     Selected.Insert(index, Tuple.Create(chn, pl, act)!);
                     ChannelList.Remove(chn);
                 }
@@ -145,16 +160,27 @@ namespace CampaignEditor
             return index;
         }
 
+        // On row double click, moves clicked item to Channel list
+        private void DataGridRow_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            DataGridRow row = sender as DataGridRow;
+            var item = row.Item as Tuple<ChannelDTO, PricelistDTO, ActivityDTO>;
+            var channel = item.Item1;
+            Selected.Remove(item);
+            int index = FindIndex(ChannelList, channel);
+            ChannelList.Insert(index, channel);
+        }
 
         #endregion
 
         private async void lvChannels_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
-            var br = AllPricelistsList;
-
+            // Making lists of integers for faster transition of elements
             List<int> plids = new List<int>();
             List<int> chids = new List<int>();
 
+            // taking plids from AllPricelistsList because this elements already shows 
+            // only pricelists available for current client
             foreach (var plid in AllPricelistsList)
             {
                 plids.Add(plid.plid);
@@ -163,8 +189,10 @@ namespace CampaignEditor
                 chids.Add(chid.chid);
             }
 
+            // Getting the right pricelistChannels ids which should be displayed
             var plIds = await _pricelistChannelsController.GetIntersectedPlIds(plids, chids);
 
+            // Clearing and filling with the available pricelists for selected channels
             PricelistList.Clear();
             foreach (var plid in plIds)
             {
@@ -172,5 +200,19 @@ namespace CampaignEditor
             }
 
         }
+
+        private void btnCancel_Click(object sender, RoutedEventArgs e)
+        {
+            this.Hide();
+        }
+
+        private void btnSave_Click(object sender, RoutedEventArgs e)
+        {
+            LastSelected = Selected.ToList();
+            success = true;
+            this.Hide();
+        }
+
+
     }
 }
