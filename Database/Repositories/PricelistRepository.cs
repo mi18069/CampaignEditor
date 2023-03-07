@@ -26,7 +26,7 @@ namespace Database.Repositories
 
             var affected = await connection.ExecuteAsync(
                 "INSERT INTO tblpricelist (clid, plname, pltype, sectbid, seastbid, plactive, price, minprice, " +
-                "prgcoef, pltarg, use2, sectbid2, sectb2st, sectb2en, valfrom, valto, mgtype)" +
+                "prgcoef, pltarg, use2, sectbid2, sectb2st, sectb2en, valfrom, valto, mgtype) " +
                     "VALUES (@Clid, @Plname, @Pltype, @Sectbid, @Seastbid, @Plactive, @Price, @Minprice, " +
                     "@Prgcoef, @Pltarg, @Use2, @Sectbid2, @Sectb2st, @Sectb2en, @Valfrom, @Valto, @Mgtype)",
             new
@@ -107,9 +107,9 @@ namespace Database.Repositories
 
             var affected = await connection.ExecuteAsync(
                 "UPDATE tblpricelist SET clid = @Clid, plname = @Plname, pltype = @Pltype, " +
-                "sectbid = @Sectbid, seastbid = @Seastbid, plactive = @Plactive, price = @Price, minprice = @Minprice" +
-                "prgcoef = @Prgcoef, pltarg = @Pltarg, use2 = @Use2, sectbid2 = @sectbid2" +
-                "sectb2st = @Sectb2st, sectb2en = @Sectb2en, valfrom = @Valfrom, valto = @Valto, mgtype = @Mgtype" +
+                "sectbid = @Sectbid, seastbid = @Seastbid, plactive = @Plactive, price = @Price, minprice = @Minprice, " +
+                "prgcoef = @Prgcoef, pltarg = @Pltarg, use2 = @Use2, sectbid2 = @sectbid2, " +
+                "sectb2st = @Sectb2st, sectb2en = @Sectb2en, valfrom = @Valfrom, valto = @Valto, mgtype = @Mgtype " +
                 "WHERE plid = @Plid",
                 new
                 {

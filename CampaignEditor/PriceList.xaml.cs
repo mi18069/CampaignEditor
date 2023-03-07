@@ -67,17 +67,26 @@ namespace CampaignEditor
             InitializeComponent();
 
         }
-
-        public void Initialize(ClientDTO client, PricelistDTO pricelist = null)
+        #region Initialization
+        public async Task Initialize(ClientDTO client, PricelistDTO pricelist = null)
         {
             this.client = client;
             _pricelist = pricelist;
-            FillFields();
+            await FillFields();
             if (_pricelist != null)
             {
-                AssignFields();
+                await AssignFields();
             }
+            ResetModifiers();
         }
+
+        private void ResetModifiers()
+        {
+            pricelistModified = false;
+            pricelistChannelsModified = false;
+            dayPartsModified = false;
+        }
+        #endregion
 
         #region Fill Fields
 
@@ -105,13 +114,13 @@ namespace CampaignEditor
         }
         #endregion
 
-        private void FillFields()
+        private async Task FillFields()
         {
-            FillChannels();
+            await FillChannels();
             UpdateDayParts();
-            FillComboBoxes();
+            await FillComboBoxes();
         }
-        private async void FillChannels()
+        private async Task FillChannels()
         {
             var channels = await _channelController.GetAllChannels();
 
@@ -163,7 +172,7 @@ namespace CampaignEditor
             wpDayParts.Children.Add(btnAddDP);
         }
 
-        private async void FillComboBoxes()
+        private async Task FillComboBoxes()
         {
             FillCBType();
             await FillCBSectable();
@@ -224,7 +233,7 @@ namespace CampaignEditor
         #endregion
 
         #region Assign Fields
-        private async void AssignFields()
+        private async Task AssignFields()
         {
             await AssignPricelistValues();
             await AssignDayPartsValues();
@@ -235,16 +244,16 @@ namespace CampaignEditor
             tbName.Text = _pricelist.plname;
             chbActive.IsChecked = _pricelist.plactive;
             cbType.SelectedIndex = _pricelist.pltype;
-            cbSectable.SelectedValue = await _sectableController.GetSectableById(_pricelist.sectbid);
-            cbSectable2.SelectedValue = await _sectableController.GetSectableById(_pricelist.sectbid);
+            cbSectable.SelectedItem = await _sectableController.GetSectableById(_pricelist.sectbid);
+            cbSectable2.SelectedItem = await _sectableController.GetSectableById(_pricelist.sectbid);
             chbSectable2.IsChecked = _pricelist.use2;
-            tbSec2From.Text = _pricelist.sectb2st.ToString();
-            tbSec2To.Text = _pricelist.sectb2en.ToString();
-            cbSeasonality.SelectedValue = await _seasonalityController.GetSeasonalityById(_pricelist.seastbid);
+            tbSec2From.Text = _pricelist.sectb2st.ToString().PadLeft(6,'0').Substring(0,4);
+            tbSec2To.Text = _pricelist.sectb2en.ToString().PadLeft(6,'0').Substring(0,4);
+            cbSeasonality.SelectedItem = await _seasonalityController.GetSeasonalityById(_pricelist.seastbid);
             tbCP.Text = _pricelist.price.ToString();
             tbMinGRP.Text = _pricelist.minprice.ToString();
             chbGRP.IsChecked = _pricelist.mgtype;
-            cbTarget.SelectedValue = await _targetController.GetTargetById(_pricelist.pltarg);
+            cbTarget.SelectedItem = await _targetController.GetTargetById(_pricelist.pltarg);
             dpValidityFrom.SelectedDate = TimeFormat.YMDStringToDateTime(_pricelist.valfrom.ToString());
             dpValidityTo.SelectedDate = TimeFormat.YMDStringToDateTime(_pricelist.valto.ToString());
         }
@@ -267,6 +276,7 @@ namespace CampaignEditor
                 item.tbCoef.Text = dp.price.ToString();
 
                 item.cbIsPT.IsChecked = dp.ispt;
+                item.modified = false;
 
                 wpDayParts.Children.Add(item);
             }
@@ -376,8 +386,10 @@ namespace CampaignEditor
         #region Check Values
         private async Task<bool> CheckValues()
         {
-            
-            if (await CheckName() && CheckCP() && CheckMinGRP() &&
+            if (_pricelist == null)
+                if (await CheckName() == false)
+                    return false; 
+            if (CheckCP() && CheckMinGRP() &&
                 CheckValidity() && CheckComboBoxes() && CheckDPs())
             {
                 if ((bool)chbSectable2.IsChecked)
@@ -642,7 +654,7 @@ namespace CampaignEditor
                     await CreateOrUpdatePricelist(_pricelist);
                 if (pricelistChannelsModified)
                     await CreateOrUpdatePricelistChannels(_pricelist);
-                if (dayPartsModified)
+                if (CheckDayPartsModified())
                     await CreateOrUpdateDayparts(_pricelist);
                 this.Close();
             }
@@ -656,6 +668,17 @@ namespace CampaignEditor
         #endregion
 
         #region Modification checkers
+        private bool CheckDayPartsModified()
+        {
+            int n = wpDayParts.Children.Count;
+            for (int i = 0; i < n - 1; i++)
+            {
+                TargetDPItem item = wpDayParts.Children[i] as TargetDPItem;
+                if (item.modified)
+                    dayPartsModified = true;
+            }
+            return dayPartsModified;
+        }
         private void tbName_TextChanged(object sender, TextChangedEventArgs e)
         {
             pricelistModified = true;
@@ -732,11 +755,11 @@ namespace CampaignEditor
 
         private void chbChannels_Checked(object sender, RoutedEventArgs e)
         {
-            pricelistModified = true;
+            pricelistChannelsModified = true;
         }
         private void chbChannels_Unchecked(object sender, RoutedEventArgs e)
         {
-            pricelistModified = true;
+            pricelistChannelsModified = true;
         }
 
         #endregion
