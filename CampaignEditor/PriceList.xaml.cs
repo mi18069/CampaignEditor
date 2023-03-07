@@ -196,21 +196,21 @@ namespace CampaignEditor
             int clid = client.clid;
             string plname = tbName.Text.Trim();
             int pltype = cbType.SelectedIndex; // Place in combobox corresponds to int value
-            int chid = 1;
+            int chid = 0; // Don't know what this field does
             int sectbid = (cbSectable.SelectedValue as SectableDTO)!.sctid; // By default, first value is selected
             int seasid = (cbSeasonality.SelectedValue as SeasonalityDTO)!.seasid;
-            bool plactive = true;
-            float price = 0.0f;
-            float minprice = 0.0f;
+            bool plactive = (bool)chbActive.IsChecked;
+            float price = float.Parse(tbCP.Text.Trim());
+            float minprice = float.Parse(tbMinGRP.Text.Trim());
             bool prgcoef = false;
             int pltarg = (cbTarget.SelectedValue as TargetDTO)!.targid;
             bool use2 = (bool)chbSectable2.IsChecked;
             int sectbid2 = (cbSectable2.SelectedValue as SectableDTO)!.sctid;
-            int sectb2st = int.Parse(tbSec2From.Text.Trim());
-            int sectb2en = int.Parse(tbSec2To.Text.Trim());
-            int valfrom = 0;
-            int valto = 0;
-            bool mgtype = false;
+            int sectb2st = int.Parse((tbSec2From.Text.Trim()+"00").PadLeft(6, '0'));
+            int sectb2en = int.Parse((tbSec2To.Text.Trim()+"59").PadLeft(6,'0'));
+            int valfrom = int.Parse(TimeFormat.DPToYMDString(dpValidityFrom));
+            int valto = int.Parse(TimeFormat.DPToYMDString(dpValidityTo));
+            bool mgtype = (bool)chbGRP.IsChecked;
 
             await _pricelistController.CreatePricelist(new CreatePricelistDTO
                 (clid, plname, pltype, sectbid, seasid, plactive, price, minprice,
@@ -228,9 +228,7 @@ namespace CampaignEditor
                     channels.Add(await _channelController.GetChannelByName(channelBox.Content.ToString().Trim()));
                 }
             }
-
             PricelistDTO pricelist = await _pricelistController.GetClientPricelistByName(client.clid, tbName.Text.Trim());
-
             foreach (var channel in channels)
             {
                 await _pricelistChannelsController.CreatePricelistChannels(
@@ -498,8 +496,9 @@ namespace CampaignEditor
         {
             if (await CheckValues())
             {
-                //MakeNewPricelist();
-                //MakeNewPricelistChannels();
+                await MakeNewPricelist();
+                await MakeNewPricelistChannels();
+                // Add dayparts here
             }
         }
 

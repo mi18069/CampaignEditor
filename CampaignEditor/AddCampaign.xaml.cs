@@ -170,7 +170,10 @@ namespace CampaignEditor
         {
 
             if (assignChannelsFactory == null)
+            {
                 assignChannelsFactory = _factoryChannels.Create();
+                assignChannelsFactory.Initialize(client);
+            }
             assignChannelsFactory.ShowDialog();
             if (assignChannelsFactory.success)
             {

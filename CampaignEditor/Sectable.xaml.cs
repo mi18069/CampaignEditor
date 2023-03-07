@@ -50,7 +50,6 @@ namespace CampaignEditor
         private async Task FillBySctAsync(SectableDTO sectable)
         {
             tbName.Text = sectable.sctname.Trim();
-            cbLinear.IsChecked = sectable.sctlinear;
             cbActive.IsChecked = sectable.sctactive;
 
             List<SectablesDTO> seccoefs = (List<SectablesDTO>)await _sectablesController.GetSectablesById(sectable.sctid);
@@ -225,7 +224,7 @@ namespace CampaignEditor
                 if (_sectable == null)
                 {
                     _sectable = await _sectableController.CreateSectable(new CreateSectableDTO
-                        (tbName.Text.Trim(), (bool)cbLinear.IsChecked, (bool)cbActive.IsChecked, _client.clid));
+                        (tbName.Text.Trim(), false, (bool)cbActive.IsChecked, _client.clid));
                 }
                 int id = _sectable.sctid;
 
@@ -240,7 +239,7 @@ namespace CampaignEditor
                 }
                 if (modifiedSectable)
                 {
-                    await _sectableController.UpdateSectable(new UpdateSectableDTO(id, tbName.Text.Trim(), (bool)cbLinear.IsChecked, (bool)cbActive.IsChecked, _client.clid));
+                    await _sectableController.UpdateSectable(new UpdateSectableDTO(id, tbName.Text.Trim(), false, (bool)cbActive.IsChecked, _client.clid));
                 }
                 success = true;
             }

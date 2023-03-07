@@ -38,8 +38,14 @@
             <RowDefinition Height="10" />
         </Grid.RowDefinitions>
         <Label x:Name="lblName" Content="Price List name: " Grid.Row="1" Grid.Column="1" Margin="0,10,0,10"/>
-        <TextBox x:Name="tbName" Grid.Row="1" Grid.Column="2" Margin="0,10" Grid.ColumnSpan="5"
+        <TextBox x:Name="tbName" Grid.Row="1" Grid.Column="2" Margin="0,10" Grid.ColumnSpan="3"
                  VerticalContentAlignment="Center"/>
+        <CheckBox x:Name="chbActive" Content="Active" Grid.Row="1" Grid.Column="5"  Grid.ColumnSpan="3"
+                  VerticalAlignment="Center" VerticalContentAlignment="Center" Margin="5,0,0,0">
+            <CheckBox.LayoutTransform>
+                <ScaleTransform ScaleX="1.5" ScaleY="1.5" />
+            </CheckBox.LayoutTransform>
+        </CheckBox>
 
         <Label x:Name="lblType" Content="Type: " Grid.Row="2" Grid.Column="1" Margin="0,10,0,10"/>
         <ComboBox x:Name="cbType" Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="5"
@@ -110,7 +116,7 @@
         <Label x:Name="lblCP" Content="CP(I/P/S): " Grid.Row="7" Grid.Column="1" Margin="0,10"/>
         <TextBox x:Name="tbCP" Text="" Grid.Row="7" Grid.Column="2" Margin="0,10" Grid.ColumnSpan="2"
                  VerticalContentAlignment="Center"/>
-        <CheckBox x:Name="chbCP" Content="Zero GRP Only" Grid.Row="7" Grid.Column="4" Margin="10"
+        <CheckBox x:Name="chbGRP" Content="Zero GRP Only" Grid.Row="7" Grid.Column="4" Margin="10"
                   VerticalAlignment="Center" VerticalContentAlignment="Center" FontSize="8">
             <CheckBox.LayoutTransform>
                 <ScaleTransform ScaleX="1.5" ScaleY="1.5" />
