@@ -69,7 +69,7 @@ namespace CampaignEditor {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/CampaignEditor;component/assignuser.xaml", System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri("/CampaignEditor;V1.0.0.0;component/assignuser.xaml", System.UriKind.Relative);
             
             #line 1 "..\..\..\AssignUser.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);
