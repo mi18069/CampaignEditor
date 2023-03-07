@@ -38,10 +38,11 @@
             <RowDefinition Height="10" />
         </Grid.RowDefinitions>
         <Label x:Name="lblName" Content="Price List name: " Grid.Row="1" Grid.Column="1" Margin="0,10,0,10"/>
-        <TextBox x:Name="tbName" Grid.Row="1" Grid.Column="2" Margin="0,10" Grid.ColumnSpan="3"
-                 VerticalContentAlignment="Center"/>
+        <TextBox x:Name="tbName" Grid.Row="1" Grid.Column="2" Margin="0,10,0,10" Grid.ColumnSpan="4"
+                 VerticalContentAlignment="Center" TextChanged="tbName_TextChanged" HorizontalAlignment="Left" Width="272"/>
         <CheckBox x:Name="chbActive" Content="Active" Grid.Row="1" Grid.Column="5"  Grid.ColumnSpan="3"
-                  VerticalAlignment="Center" VerticalContentAlignment="Center" Margin="5,0,0,0">
+                  VerticalAlignment="Center" VerticalContentAlignment="Center" Margin="5,0,0,0"
+                  Checked="chbActive_Checked" Unchecked="chbActive_Unchecked">
             <CheckBox.LayoutTransform>
                 <ScaleTransform ScaleX="1.5" ScaleY="1.5" />
             </CheckBox.LayoutTransform>
@@ -49,7 +50,8 @@
 
         <Label x:Name="lblType" Content="Type: " Grid.Row="2" Grid.Column="1" Margin="0,10,0,10"/>
         <ComboBox x:Name="cbType" Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="5"
-                  Margin="0,10" SelectedIndex="0" VerticalAlignment="Center"/>
+                  Margin="0,10" SelectedIndex="0" VerticalAlignment="Center"
+                  SelectionChanged="cbType_SelectionChanged"/>
 
         <Label x:Name="lblSectable" Content="Sectable: " Grid.Row="3" Grid.Column="1" Margin="0,10,0,10"/>
         <ComboBox x:Name="cbSectable" Text="" Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="3" Margin="0,10"
@@ -70,10 +72,11 @@
                IsEnabled="{Binding ElementName=chbSectable2, Path=IsChecked}"/>
         <ComboBox x:Name="cbSectable2" Text="" Grid.Row="4" Grid.Column="2" Margin="0,10" Grid.ColumnSpan="3"
                   IsEnabled="{Binding ElementName=chbSectable2, Path=IsChecked}"
-                  DisplayMemberPath="sctname" SelectedIndex="0" VerticalAlignment="Center"/>
+                  DisplayMemberPath="sctname" SelectedIndex="0" VerticalAlignment="Center"
+                  SelectionChanged="cbSectable2_SelectionChanged"/>
         <CheckBox x:Name="chbSectable2" Content="" Grid.Row="4" Grid.Column="5"
                   VerticalAlignment="Center" HorizontalAlignment="Center"
-                  IsChecked="False">
+                  IsChecked="False" Checked="chbSectable2_Checked" Unchecked="chbSectable2_Unchecked">
             <CheckBox.LayoutTransform>
                 <ScaleTransform ScaleX="1.5" ScaleY="1.5" />
             </CheckBox.LayoutTransform>
@@ -87,7 +90,7 @@
                  Text="0200" HorizontalContentAlignment="Right"
                  MaxLength="4" 
                  IsEnabled="{Binding ElementName=chbSectable2, Path=IsChecked}"
-                 GotMouseCapture="tbSec2_GotMouseCapture"/>
+                 GotMouseCapture="tbSec2_GotMouseCapture" TextChanged="tbSec2From_TextChanged"/>
         <Label x:Name="lblSec2To" Content="  To:" Grid.Row="5" Grid.Column="4"
                VerticalAlignment="Center" HorizontalAlignment="Left"
                IsEnabled="{Binding ElementName=chbSectable2, Path=IsChecked}" Grid.ColumnSpan="3" Margin="0,10"/>
@@ -96,7 +99,8 @@
                  Text="2559" HorizontalContentAlignment="Right"
                  MaxLength="4" 
                  IsEnabled="{Binding ElementName=chbSectable2, Path=IsChecked}"
-                 GotMouseCapture="tbSec2_GotMouseCapture"/>
+                 GotMouseCapture="tbSec2_GotMouseCapture"
+                 TextChanged="tbSec2To_TextChanged"/>
 
         <Label x:Name="lblSeasonality" Content="Seasonality Type: " Grid.Row="6" Grid.Column="1" Margin="0,10"/>
         <ComboBox x:Name="cbSeasonality" Text="" Grid.Row="6" Grid.Column="2" Margin="0,10" Grid.ColumnSpan="3"
@@ -115,9 +119,11 @@
 
         <Label x:Name="lblCP" Content="CP(I/P/S): " Grid.Row="7" Grid.Column="1" Margin="0,10"/>
         <TextBox x:Name="tbCP" Text="" Grid.Row="7" Grid.Column="2" Margin="0,10" Grid.ColumnSpan="2"
-                 VerticalContentAlignment="Center"/>
-        <CheckBox x:Name="chbGRP" Content="Zero GRP Only" Grid.Row="7" Grid.Column="4" Margin="10"
-                  VerticalAlignment="Center" VerticalContentAlignment="Center" FontSize="8">
+                 VerticalContentAlignment="Center"
+                 TextChanged="tbCP_TextChanged"/>
+        <CheckBox x:Name="chbGRP" Content="Zero GRP Only" Grid.Row="8" Grid.Column="4" Margin="10, 10, 10, 12"
+                  VerticalAlignment="Bottom" VerticalContentAlignment="Center" FontSize="8"
+                  Checked="chbGRP_Checked" Unchecked="chbGRP_Unchecked">
             <CheckBox.LayoutTransform>
                 <ScaleTransform ScaleX="1.5" ScaleY="1.5" />
             </CheckBox.LayoutTransform>
@@ -125,8 +131,8 @@
 
         <Label x:Name="lblMinGRP" Content="Min GRP: " Grid.Row="8" Grid.Column="1" Margin="0,10"/>
         <TextBox x:Name="tbMinGRP" Text="" Grid.Row="8" Grid.Column="2" Margin="0,10" Grid.ColumnSpan="2"
-                 VerticalContentAlignment="Center"/>
-        <Label Content="€" Grid.Row="8" Grid.Column="4" FontWeight="Bold" VerticalContentAlignment="Center" Margin="0,10"/>
+                 VerticalContentAlignment="Center" TextChanged="tbMinGRP_TextChanged"/>
+        <Label Content="€" Grid.Row="7" Grid.Column="4" FontWeight="Bold" VerticalContentAlignment="Center" Margin="0,10"/>
 
         <Label x:Name="lblTarget" Content="Target: " Grid.Row="9" Grid.Column="1" Margin="0,10"/>
         <ComboBox x:Name="cbTarget" Text="" Grid.Row="9" Grid.Column="2" Margin="0,10" Grid.ColumnSpan="3"
@@ -146,10 +152,10 @@
         <Label x:Name="lblValidity" Content="Validity: " Grid.Row="10" Grid.Column="1" Margin="0,10"/>
         <DatePicker x:Name="dpValidityFrom" Grid.Row="10" Grid.Column="3" 
                     HorizontalAlignment="Center" Margin="0,10" 
-                    Width="110" Grid.ColumnSpan="1"/>
+                    Width="110" Grid.ColumnSpan="1" SelectedDateChanged="dpValidityFrom_SelectedDateChanged"/>
         <DatePicker x:Name="dpValidityTo" Grid.Row="10" Grid.Column="4"
                     HorizontalAlignment="Center" Margin="0,10"
-                    Width="110" Grid.ColumnSpan="1"/>
+                    Width="110" Grid.ColumnSpan="1" SelectedDateChanged="dpValidityTo_SelectedDateChanged"/>
 
         <Border Grid.Row="1" Grid.Column="9" Grid.RowSpan="11" Grid.ColumnSpan="2"
                 BorderBrush="LightGray" BorderThickness="1">

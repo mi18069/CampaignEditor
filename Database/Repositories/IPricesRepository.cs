@@ -12,5 +12,6 @@ namespace Database.Repositories
         Task<IEnumerable<PricesDTO>> GetAllPrices();
         Task<bool> UpdatePrices(UpdatePricesDTO pricesDTO);
         Task<bool> DeletePricesById(int id);
+        Task<bool> DeletePricesByPlid(int id);
     }
 }

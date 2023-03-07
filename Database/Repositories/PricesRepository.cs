@@ -95,5 +95,14 @@ namespace Database.Repositories
 
             return affected != 0;
         }
+        public async Task<bool> DeletePricesByPlid(int id)
+        {
+            using var connection = _context.GetConnection();
+
+            var affected = await connection.ExecuteAsync(
+                "DELETE FROM tblprices WHERE plid = @Plid", new { Plid = id });
+
+            return affected != 0;
+        }
     }
 }

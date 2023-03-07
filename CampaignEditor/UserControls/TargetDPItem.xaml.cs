@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
 
@@ -8,6 +9,7 @@ namespace CampaignEditor
 {
     public partial class TargetDPItem : UserControl
     {
+        public bool modified = false;
         public TargetDPItem()
         {
             InitializeComponent();
@@ -30,10 +32,17 @@ namespace CampaignEditor
             int toM;
             double coef;
 
-            if (!int.TryParse(tbFromH.Text, out fromH) ||
-                !int.TryParse(tbFromM.Text, out fromM) ||
-                !int.TryParse(tbToH.Text, out toH) ||
-                !int.TryParse(tbToM.Text, out toM))
+            if (tbFromH.Text.Trim() == "" ||
+                tbFromM.Text.Trim() == "" ||
+                tbToH.Text.Trim() == "" ||
+                tbToM.Text.Trim() == "")
+            {
+                return "Empty fields in Day Parts";
+            }
+            if (!int.TryParse(tbFromH.Text.Trim(), out fromH) ||
+                !int.TryParse(tbFromM.Text.Trim(), out fromM) ||
+                !int.TryParse(tbToH.Text.Trim(), out toH) ||
+                !int.TryParse(tbToM.Text.Trim(), out toM))
                 return "Invalid values for Day Parts";
             else if (fromH > toH || (fromH == toH && fromM > toM))
                 return "Invalid values for Day Parts";
@@ -119,6 +128,21 @@ namespace CampaignEditor
                 tb.BorderBrush = Brushes.Red;
                 tb.Text = "";
             }
+        }
+
+        private void tb_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            modified = true;
+        }
+
+        private void cb_Checked(object sender, RoutedEventArgs e)
+        {
+            modified = true;
+        }
+
+        private void cb_Unchecked(object sender, RoutedEventArgs e)
+        {
+            modified = true;
         }
     }
 }

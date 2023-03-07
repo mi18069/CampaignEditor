@@ -1,12 +1,15 @@
 ﻿using CampaignEditor.Controllers;
+using CampaignEditor.StartupHelpers;
 using Database.DTOs.ActivityDTO;
 using Database.DTOs.ChannelDTO;
 using Database.DTOs.ClientDTO;
 using Database.DTOs.PricelistDTO;
+using Database.Entities;
 using Database.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -23,6 +26,9 @@ namespace CampaignEditor
         private PricelistChannelsController _pricelistChannelsController;
         private ActivityController _activityController;
 
+        private readonly IAbstractFactory<PriceList> _factoryPriceList;
+
+
         private ObservableCollection<ChannelDTO> _channelList;
         // This list will serve to get all Pricelists for client
         private List<PricelistDTO> _allPricelistsList;
@@ -35,7 +41,7 @@ namespace CampaignEditor
                                 new List<Tuple<ChannelDTO, PricelistDTO, ActivityDTO>>();
 
         public bool success = false;
-
+        public bool canEdit = false;
         #region Getters and Setters for lists
         private ObservableCollection<ChannelDTO> ChannelList
         {
@@ -70,13 +76,16 @@ namespace CampaignEditor
         #endregion
 
         public Channels(IChannelRepository channelRepository, IPricelistRepository pricelistRepository,
-            IPricelistChannelsRepository pricelistChannelsRepository, IActivityRepository activityRepository)
+            IPricelistChannelsRepository pricelistChannelsRepository, IActivityRepository activityRepository,
+            IAbstractFactory<PriceList> factoryPriceList)
         {
             this.DataContext = this;
             _channelController = new ChannelController(channelRepository);
             _pricelistController = new PricelistController(pricelistRepository);
             _pricelistChannelsController = new PricelistChannelsController(pricelistChannelsRepository);
             _activityController = new ActivityController(activityRepository);
+
+            _factoryPriceList = factoryPriceList;
 
             InitializeComponent();
             _ = FillLists();
@@ -201,6 +210,17 @@ namespace CampaignEditor
 
         }
 
+        #region Pricelist
+        private void btnPricelist_Click(object sender, RoutedEventArgs e)
+        {
+            var f = _factoryPriceList.Create();
+            if (lvPricelists.SelectedItems.Count > 0)
+                f.Initialize(_client, lvPricelists.SelectedItem as PricelistDTO);
+            else
+                f.Initialize(_client);
+            f.ShowDialog();
+        }
+        #endregion
         private void btnCancel_Click(object sender, RoutedEventArgs e)
         {
             this.Hide();
@@ -213,6 +233,12 @@ namespace CampaignEditor
             this.Hide();
         }
 
+        // Overriding OnClosing because click on x button should only hide window
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            e.Cancel = true;
+            Hide();
+        }
 
     }
 }

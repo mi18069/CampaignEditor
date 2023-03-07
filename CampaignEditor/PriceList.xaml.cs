@@ -4,6 +4,7 @@ using Database.DTOs.ChannelDTO;
 using Database.DTOs.ClientDTO;
 using Database.DTOs.PricelistChannels;
 using Database.DTOs.PricelistDTO;
+using Database.DTOs.PricesDTO;
 using Database.DTOs.SeasonalityDTO;
 using Database.DTOs.SectableDTO;
 using Database.DTOs.TargetDTO;
@@ -25,6 +26,7 @@ namespace CampaignEditor
         private ChannelController _channelController;
         private PricelistChannelsController _pricelistChannelsController;
         private PricelistController _pricelistController;
+        private PricesController _pricesController;
         private SectableController _sectableController;
         private SeasonalityController _seasonalityController;
         private TargetController _targetController;
@@ -34,13 +36,18 @@ namespace CampaignEditor
         private readonly IAbstractFactory<NewTarget> _factoryNewTarget;
 
         private ClientDTO client;
+        private PricelistDTO _pricelist;
 
         // For Plus Icon
         private string appPath = Directory.GetCurrentDirectory();
         private string imgGreenPlusPath = "\\images\\GreenPlus.png";
+
+        private bool pricelistModified = false;
+        private bool pricelistChannelsModified = false;
+        private bool dayPartsModified = false;
         public PriceList(IAbstractFactory<Sectable> factorySectable, IAbstractFactory<Seasonality> factorySeasonality,
             IAbstractFactory<NewTarget> factoryNewTarget,
-            IChannelRepository channelRepository,
+            IChannelRepository channelRepository, IPricesRepository pricesRepository,
             IPricelistRepository pricelistRepository, IPricelistChannelsRepository pricelistChannelsRepository,
             ISectableRepository sectableRepository, ISeasonalityRepository seasonalityRepository,
             ITargetRepository targetRepository)
@@ -55,15 +62,21 @@ namespace CampaignEditor
             _channelController = new ChannelController(channelRepository);
             _pricelistChannelsController = new PricelistChannelsController(pricelistChannelsRepository);
             _pricelistController = new PricelistController(pricelistRepository);
+            _pricesController = new PricesController(pricesRepository);
 
             InitializeComponent();
 
         }
 
-        public void Initialize(ClientDTO client)
+        public void Initialize(ClientDTO client, PricelistDTO pricelist = null)
         {
             this.client = client;
+            _pricelist = pricelist;
             FillFields();
+            if (_pricelist != null)
+            {
+                AssignFields();
+            }
         }
 
         #region Fill Fields
@@ -74,7 +87,12 @@ namespace CampaignEditor
             var btnAdd = sender as Button;
             wpDayParts.Children.Remove(btnAdd);
 
+            dayPartsModified = true;
             UpdateDayParts();
+        }
+        private void btnDeleteDP_Click(object sender, RoutedEventArgs e)
+        {
+            dayPartsModified = true;
         }
 
         // Selecting whole text when captured
@@ -102,14 +120,17 @@ namespace CampaignEditor
             foreach (var channel in channels)
             {
                 CheckBox cb = new CheckBox();
-                cb.Content = channel.chname;
+                cb.Content = channel.chname.Trim();
                 cb.Tag = channel;
+                cb.Checked += chbChannels_Checked;
+                cb.Unchecked += chbChannels_Unchecked;
                 wpChannels.Children.Add(cb);
             }
         }
 
         // Adding Add Button and New TargetDPItem
-        private void UpdateDayParts()
+
+        private Button MakeAddButton()
         {
             Button btnAddDP = new Button();
             btnAddDP.Click += new RoutedEventHandler(btnAddDP_Click);
@@ -122,10 +143,23 @@ namespace CampaignEditor
             btnAddDP.BorderThickness = new Thickness(0);
             btnAddDP.HorizontalAlignment = HorizontalAlignment.Center;
 
-            TargetDPItem dpItem = new TargetDPItem();
-            dpItem.Width = wpDayParts.Width;
-            wpDayParts.Children.Add(dpItem);
+            return btnAddDP;
+        }
 
+        private TargetDPItem MakeDPItem()
+        {
+            TargetDPItem dpItem = new TargetDPItem();
+            dpItem.btnDelete.Click += btnDeleteDP_Click;
+            dpItem.Width = wpDayParts.Width;
+
+            return dpItem;
+        }
+        private void UpdateDayParts()
+        {
+            Button btnAddDP = MakeAddButton();
+            TargetDPItem dpItem = MakeDPItem();
+
+            wpDayParts.Children.Add(dpItem);
             wpDayParts.Children.Add(btnAddDP);
         }
 
@@ -189,9 +223,83 @@ namespace CampaignEditor
 
         #endregion
 
+        #region Assign Fields
+        private async void AssignFields()
+        {
+            await AssignPricelistValues();
+            await AssignDayPartsValues();
+            await AssignChannelsValues();
+        }
+        private async Task AssignPricelistValues()
+        {
+            tbName.Text = _pricelist.plname;
+            chbActive.IsChecked = _pricelist.plactive;
+            cbType.SelectedIndex = _pricelist.pltype;
+            cbSectable.SelectedValue = await _sectableController.GetSectableById(_pricelist.sectbid);
+            cbSectable2.SelectedValue = await _sectableController.GetSectableById(_pricelist.sectbid);
+            chbSectable2.IsChecked = _pricelist.use2;
+            tbSec2From.Text = _pricelist.sectb2st.ToString();
+            tbSec2To.Text = _pricelist.sectb2en.ToString();
+            cbSeasonality.SelectedValue = await _seasonalityController.GetSeasonalityById(_pricelist.seastbid);
+            tbCP.Text = _pricelist.price.ToString();
+            tbMinGRP.Text = _pricelist.minprice.ToString();
+            chbGRP.IsChecked = _pricelist.mgtype;
+            cbTarget.SelectedValue = await _targetController.GetTargetById(_pricelist.pltarg);
+            dpValidityFrom.SelectedDate = TimeFormat.YMDStringToDateTime(_pricelist.valfrom.ToString());
+            dpValidityTo.SelectedDate = TimeFormat.YMDStringToDateTime(_pricelist.valto.ToString());
+        }
+        private async Task AssignDayPartsValues()
+        {
+            wpDayParts.Children.Clear();
+
+            var dpValues = await _pricesController.GetAllPricesByPlId(_pricelist.plid);
+            foreach (var dp in dpValues)
+            {
+                TargetDPItem item = MakeDPItem();
+
+                string[] fromList = dp.dps.Split(':');
+                string[] toList = dp.dpe.Split(':');
+                item.tbFromH.Text = fromList[0];
+                item.tbFromM.Text = fromList[1];
+                item.tbToH.Text = toList[0];
+                item.tbToM.Text = toList[1];
+
+                item.tbCoef.Text = dp.price.ToString();
+
+                item.cbIsPT.IsChecked = dp.ispt;
+
+                wpDayParts.Children.Add(item);
+            }
+
+            Button addButton = MakeAddButton();
+            wpDayParts.Children.Add(addButton);
+        }
+        private async Task AssignChannelsValues()
+        {
+            var checkedPricelistChannels = await _pricelistChannelsController.GetAllPricelistChannelsByPlid(_pricelist.plid);
+            List<ChannelDTO> checkedChannels = new List<ChannelDTO>();
+
+            foreach (PricelistChannelsDTO checkedPricelistChannel in checkedPricelistChannels)
+            {
+                checkedChannels.Add(await _channelController.GetChannelById(checkedPricelistChannel.chid));
+            }
+
+            foreach (CheckBox channel in wpChannels.Children)
+            {
+                foreach (ChannelDTO checkedChannel in checkedChannels)
+                {
+                    if (string.Compare(channel.Content.ToString().Trim(),checkedChannel.chname.Trim()) == 0)
+                    {
+                        channel.IsChecked = true;
+                    }
+                }
+            }
+        }
+        #endregion
+
         #region Writing into base
         // for writing data in Database tblpricelist and tblpricelistchn
-        private async Task MakeNewPricelist()
+        private async Task CreateOrUpdatePricelist(PricelistDTO pricelist = null)
         {
             int clid = client.clid;
             string plname = tbName.Text.Trim();
@@ -212,13 +320,24 @@ namespace CampaignEditor
             int valto = int.Parse(TimeFormat.DPToYMDString(dpValidityTo));
             bool mgtype = (bool)chbGRP.IsChecked;
 
-            await _pricelistController.CreatePricelist(new CreatePricelistDTO
-                (clid, plname, pltype, sectbid, seasid, plactive, price, minprice,
-                prgcoef, pltarg, use2, sectbid2, sectb2st, sectb2en,
-                valfrom, valto, mgtype));
+            if (pricelist == null)
+            {
+                await _pricelistController.CreatePricelist(new CreatePricelistDTO
+                    (clid, plname, pltype, sectbid, seasid, plactive, price, minprice,
+                    prgcoef, pltarg, use2, sectbid2, sectb2st, sectb2en,
+                    valfrom, valto, mgtype));
+                _pricelist = await _pricelistController.GetClientPricelistByName(client.clid, tbName.Text.Trim());
+            }
+            else
+            {
+                await _pricelistController.UpdatePricelist(new UpdatePricelistDTO
+                    (pricelist.plid, clid, plname, pltype, sectbid, seasid, plactive, price, minprice,
+                    prgcoef, pltarg, use2, sectbid2, sectb2st, sectb2en,
+                    valfrom, valto, mgtype));
+            }
         }
 
-        private async Task MakeNewPricelistChannels()
+        private async Task CreateOrUpdatePricelistChannels(PricelistDTO pricelist)
         {
             List<ChannelDTO> channels = new List<ChannelDTO>();
             foreach (CheckBox channelBox in wpChannels.Children)
@@ -228,11 +347,28 @@ namespace CampaignEditor
                     channels.Add(await _channelController.GetChannelByName(channelBox.Content.ToString().Trim()));
                 }
             }
-            PricelistDTO pricelist = await _pricelistController.GetClientPricelistByName(client.clid, tbName.Text.Trim());
+
+            await _pricelistChannelsController.DeleteAllPricelistChannelsByPlid(pricelist.plid);
             foreach (var channel in channels)
             {
                 await _pricelistChannelsController.CreatePricelistChannels(
                     new CreatePricelistChannelsDTO(pricelist.plid, channel.chid));
+            }
+        }
+
+        private async Task CreateOrUpdateDayparts(PricelistDTO pricelist)
+        {
+            int n = wpDayParts.Children.Count;
+
+            await _pricesController.DeletePricesByPlid(pricelist.plid);
+            for (int i = 0; i < n - 1; i++) // last item is Button
+            {
+                TargetDPItem item = wpDayParts.Children[i] as TargetDPItem;
+                string dps = (item.tbFromH.Text.Trim() + ":" + item.tbFromM.Text.Trim()).PadLeft(2,'0');
+                string dpe = (item.tbToH.Text.Trim() + ":" + item.tbToM.Text.Trim()).PadLeft(2,'0');
+                float price = float.Parse(item.tbCoef.Text.Trim());
+                bool ispt = (bool)item.cbIsPT.IsChecked;
+                await _pricesController.CreatePrices(new CreatePricesDTO(pricelist.plid, dps, dpe, price, ispt));
             }
         }
         #endregion
@@ -401,6 +537,8 @@ namespace CampaignEditor
                 btnEditSectable.Visibility = Visibility.Hidden;
             else
                 btnEditSectable.Visibility = Visibility.Visible;
+
+            pricelistModified = true;
         }
 
         private void cbSeasonality_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -409,6 +547,8 @@ namespace CampaignEditor
                 btnEditSeasonality.Visibility = Visibility.Hidden;
             else
                 btnEditSeasonality.Visibility = Visibility.Visible;
+
+            pricelistModified = true;
         }
 
         private void cbTarget_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -417,6 +557,8 @@ namespace CampaignEditor
                 btnEditTarget.Visibility = Visibility.Hidden;
             else
                 btnEditTarget.Visibility = Visibility.Visible;
+
+            pricelistModified = true;
         }
         #endregion
 
@@ -496,9 +638,13 @@ namespace CampaignEditor
         {
             if (await CheckValues())
             {
-                await MakeNewPricelist();
-                await MakeNewPricelistChannels();
-                // Add dayparts here
+                if (pricelistModified)
+                    await CreateOrUpdatePricelist(_pricelist);
+                if (pricelistChannelsModified)
+                    await CreateOrUpdatePricelistChannels(_pricelist);
+                if (dayPartsModified)
+                    await CreateOrUpdateDayparts(_pricelist);
+                this.Close();
             }
         }
 
@@ -509,5 +655,92 @@ namespace CampaignEditor
 
         #endregion
 
+        #region Modification checkers
+        private void tbName_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            pricelistModified = true;
+        }
+
+        private void chbActive_Checked(object sender, RoutedEventArgs e)
+        {
+            pricelistModified = true;
+        }
+
+        private void chbActive_Unchecked(object sender, RoutedEventArgs e)
+        {
+            pricelistModified = true;
+        }
+        private void cbType_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            pricelistModified = true;
+        }
+
+        private void cbSectable2_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            pricelistModified = true;
+        }
+
+        private void chbSectable2_Checked(object sender, RoutedEventArgs e)
+        {
+            pricelistModified = true;
+        }
+
+        private void chbSectable2_Unchecked(object sender, RoutedEventArgs e)
+        {
+            pricelistModified = true;
+        }
+
+        private void tbSec2From_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            pricelistModified = true;
+        }
+
+        private void tbSec2To_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            pricelistModified = true;
+        }
+
+        private void tbCP_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            pricelistModified = true;
+        }
+
+        private void chbGRP_Checked(object sender, RoutedEventArgs e)
+        {
+            pricelistModified = true;
+        }
+
+        private void chbGRP_Unchecked(object sender, RoutedEventArgs e)
+        {
+            pricelistModified = true;
+        }
+
+        private void tbMinGRP_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            pricelistModified = true;
+        }
+
+        private void dpValidityFrom_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
+        {
+            pricelistModified = true;
+        }
+
+        private void dpValidityTo_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
+        {
+            pricelistModified = true;
+        }
+
+        private void chbChannels_Checked(object sender, RoutedEventArgs e)
+        {
+            pricelistModified = true;
+        }
+        private void chbChannels_Unchecked(object sender, RoutedEventArgs e)
+        {
+            pricelistModified = true;
+        }
+
+        #endregion
+
+        
     }
 }

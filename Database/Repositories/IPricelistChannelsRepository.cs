@@ -15,5 +15,6 @@ namespace Database.Repositories
         Task<IEnumerable<PricelistChannelsDTO>> GetAllPricelistChannels();
         Task<bool> UpdatePricelistChannels(UpdatePricelistChannelsDTO pricelistChannelsDTO);
         Task<bool> DeletePricelistChannelsByIds(int plid, int chid);
+        Task<bool> DeleteAllPricelistChannelsByPlid(int plid);
     }
 }

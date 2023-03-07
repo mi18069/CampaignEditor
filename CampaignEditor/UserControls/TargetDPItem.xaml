@@ -38,7 +38,8 @@
                  MaxLength="2"
                  Margin="0,15" 
                  GotMouseCapture="tb_GotMouseCapture"
-                 LostFocus="tbH_LostFocus"/>
+                 LostFocus="tbH_LostFocus"
+                 TextChanged="tb_TextChanged"/>
         <Label Content=":"  FontSize="16" FontWeight="Bold" Grid.Row="1" Grid.Column="3"
                VerticalAlignment="Center" VerticalContentAlignment="Center"/>
         <TextBox x:Name="tbFromM" Grid.Row="1" Grid.Column="4" 
@@ -46,7 +47,8 @@
                  MaxLength="2"
                  Margin="0,15"
                  GotMouseCapture="tb_GotMouseCapture"
-                 LostFocus="tbM_LostFocus"/>
+                 LostFocus="tbM_LostFocus"
+                 TextChanged="tb_TextChanged"/>
 
         <Label Content="To:" Grid.Row="1" Grid.Column="5"
                VerticalAlignment="Center" Margin="5, 0, 0, 0"/>
@@ -55,7 +57,8 @@
                  MaxLength="2"
                  Margin="0,15"
                  GotMouseCapture="tb_GotMouseCapture"
-                 LostFocus="tbH_LostFocus"/>
+                 LostFocus="tbH_LostFocus"
+                 TextChanged="tb_TextChanged"/>
         <Label Content=":" FontSize="16" FontWeight="Bold" Grid.Row="1" Grid.Column="7"
                VerticalAlignment="Center"/>
         <TextBox x:Name="tbToM" Grid.Row="1" Grid.Column="8" 
@@ -63,7 +66,8 @@
                  MaxLength="2"
                  Margin="0,15"
                  GotMouseCapture="tb_GotMouseCapture"
-                 LostFocus="tbM_LostFocus"/>
+                 LostFocus="tbM_LostFocus"
+                 TextChanged="tb_TextChanged"/>
 
         <Label Content="DP Coef:" Grid.Row="1" Grid.Column="9"
                VerticalAlignment="Center" Margin="5, 0, 0, 0"/>
@@ -71,12 +75,14 @@
                  Width="50"
                  Margin="0,15"
                  GotMouseCapture="tb_GotMouseCapture"
-                 LostFocus="tbCoef_LostFocus"/>
+                 LostFocus="tbCoef_LostFocus"
+                 TextChanged="tb_TextChanged"/>
 
         <Label Content="Is PT" Grid.Row="1" Grid.Column="12"
                VerticalAlignment="Center" Margin="-7, 0, 10, 0"/>
         <CheckBox x:Name="cbIsPT" Content="" Grid.Row="1" Grid.Column="11" 
-                  VerticalAlignment="Center" HorizontalAlignment="Center" Margin="15, 0, 0, 0">
+                  VerticalAlignment="Center" HorizontalAlignment="Center" Margin="15, 0, 0, 0"
+                  Checked="cb_Checked" Unchecked="cb_Unchecked">
             <CheckBox.LayoutTransform>
                 <ScaleTransform ScaleX="1.5" ScaleY="1.5" />
             </CheckBox.LayoutTransform>

@@ -152,5 +152,18 @@ namespace Database.Repositories
             return affected != 0;
         }
 
+        public async Task<bool> DeleteAllPricelistChannelsByPlid(int plid)
+        {
+            using var connection = _context.GetConnection();
+
+            var affected = await connection.ExecuteAsync(
+                "DELETE FROM tblpricelistchn WHERE plid = @Plid",
+                new
+                {
+                    Plid = plid,
+                });
+
+            return affected != 0;
+        }
     }
 }

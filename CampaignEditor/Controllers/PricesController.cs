@@ -39,7 +39,10 @@ namespace CampaignEditor.Controllers
         public async Task<bool> DeletePricesById(int id)
         {
             return await _repository.DeletePricesById(id);
-
+        }
+        public async Task<bool> DeletePricesByPlid(int id)
+        {
+            return await _repository.DeletePricesByPlid(id);
         }
     }
 }

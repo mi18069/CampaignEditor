@@ -54,6 +54,9 @@ namespace CampaignEditor.Controllers
         {
             return await _repository.DeletePricelistChannelsByIds(plid, chid);
         }
-
+        public async Task<bool> DeleteAllPricelistChannelsByPlid(int plid)
+        {
+            return await _repository.DeleteAllPricelistChannelsByPlid(plid);
+        }
     }
 }
