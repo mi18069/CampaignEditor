@@ -3,6 +3,8 @@ using Microsoft.Extensions.Hosting;
 using System.Windows;
 using CampaignEditor.StartupHelpers;
 using Database.Data;
+using System.Globalization;
+using System.Threading;
 
 namespace CampaignEditor
 {
@@ -28,6 +30,10 @@ namespace CampaignEditor
                     services.AddFormFactory<NewCampaign>();
                     services.AddFormFactory<NewTarget>();
                     services.AddFormFactory<AssignTargets>();
+                    services.AddFormFactory<PriceList>();
+                    services.AddFormFactory<Sectable>();
+                    services.AddFormFactory<Seasonality>();
+                    services.AddFormFactory<Channels>();
                     services.AddScoped<IDataContext, DataContext>();
                     // Add services
                     Extensions.UserExtensions.AddUserExtensions(services);
@@ -37,8 +43,24 @@ namespace CampaignEditor
                     Database.Extensions.TargetExtensions.AddTargetExtensions(services);
                     Database.Extensions.TargetClassExtensions.AddTargetClassExtensions(services);
                     Database.Extensions.TargetValueExtensions.AddTargetValueExtensions(services);
+                    Database.Extensions.ChannelExtensions.AddChannelExtensions(services);
+                    Database.Extensions.PricelistExtensions.AddPricelistExtensions(services);
+                    Database.Extensions.PricelistChannelsExtensions.AddPricelistChannelsExtensions(services);
+                    Database.Extensions.SectableExtensions.AddSectableExtensions(services);
+                    Database.Extensions.SectablesExtensions.AddSectablesExtensions(services);
+                    Database.Extensions.SectableChannelsExtensions.AddSectableChannelsExtensions(services);
+                    Database.Extensions.SeasonalityExtensions.AddSeasonalityExtensions(services);
+                    Database.Extensions.SeasonalitiesExtensions.AddSeasonalitiesExtensions(services);
+                    Database.Extensions.SeasonalityChannelsExtensions.AddSeasonalityChannelsExtensions(services);
+                    Database.Extensions.ActivityExtensions.AddActivityExtensions(services);
+                    Database.Extensions.PricesExtensions.AddPricesExtensions(services);
 
                 }).Build();
+
+            // For displaying time format
+            CultureInfo ci = CultureInfo.CreateSpecificCulture(CultureInfo.CurrentCulture.Name);
+            ci.DateTimeFormat.ShortDatePattern = "dd.MM.yyyy";
+            Thread.CurrentThread.CurrentCulture = ci;
         }
 
         protected override async void OnStartup(StartupEventArgs e)

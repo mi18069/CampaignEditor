@@ -1,0 +1,97 @@
+﻿<UserControl x:Class="CampaignEditor.TargetDPItem"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:CampaignEditor"
+             mc:Ignorable="d" 
+             d:DesignHeight="50" MinWidth="450">
+    <Grid Background="White">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="0"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="0"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="5"/>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="5"/>
+        </Grid.ColumnDefinitions>
+
+        <Label Content="From:" Grid.Row="1" Grid.Column="1"
+               VerticalAlignment="Center"/>
+        <TextBox x:Name="tbFromH" Grid.Row="1" Grid.Column="2" 
+                 Width="30"
+                 MaxLength="2"
+                 Margin="0,15" 
+                 GotMouseCapture="tb_GotMouseCapture"
+                 LostFocus="tbH_LostFocus"
+                 TextChanged="tb_TextChanged"/>
+        <Label Content=":"  FontSize="16" FontWeight="Bold" Grid.Row="1" Grid.Column="3"
+               VerticalAlignment="Center" VerticalContentAlignment="Center"/>
+        <TextBox x:Name="tbFromM" Grid.Row="1" Grid.Column="4" 
+                 Width="30"
+                 MaxLength="2"
+                 Margin="0,15"
+                 GotMouseCapture="tb_GotMouseCapture"
+                 LostFocus="tbM_LostFocus"
+                 TextChanged="tb_TextChanged"/>
+
+        <Label Content="To:" Grid.Row="1" Grid.Column="5"
+               VerticalAlignment="Center" Margin="5, 0, 0, 0"/>
+        <TextBox x:Name="tbToH" Grid.Row="1" Grid.Column="6" 
+                 Width="30"
+                 MaxLength="2"
+                 Margin="0,15"
+                 GotMouseCapture="tb_GotMouseCapture"
+                 LostFocus="tbH_LostFocus"
+                 TextChanged="tb_TextChanged"/>
+        <Label Content=":" FontSize="16" FontWeight="Bold" Grid.Row="1" Grid.Column="7"
+               VerticalAlignment="Center"/>
+        <TextBox x:Name="tbToM" Grid.Row="1" Grid.Column="8" 
+                 Width="30"
+                 MaxLength="2"
+                 Margin="0,15"
+                 GotMouseCapture="tb_GotMouseCapture"
+                 LostFocus="tbM_LostFocus"
+                 TextChanged="tb_TextChanged"/>
+
+        <Label Content="DP Coef:" Grid.Row="1" Grid.Column="9"
+               VerticalAlignment="Center" Margin="5, 0, 0, 0"/>
+        <TextBox x:Name="tbCoef" Grid.Row="1" Grid.Column="10" 
+                 Width="50"
+                 Margin="0,15"
+                 GotMouseCapture="tb_GotMouseCapture"
+                 LostFocus="tbCoef_LostFocus"
+                 TextChanged="tb_TextChanged"/>
+
+        <Label Content="Is PT" Grid.Row="1" Grid.Column="12"
+               VerticalAlignment="Center" Margin="-7, 0, 10, 0"/>
+        <CheckBox x:Name="cbIsPT" Content="" Grid.Row="1" Grid.Column="11" 
+                  VerticalAlignment="Center" HorizontalAlignment="Center" Margin="15, 0, 0, 0"
+                  Checked="cb_Checked" Unchecked="cb_Unchecked">
+            <CheckBox.LayoutTransform>
+                <ScaleTransform ScaleX="1.5" ScaleY="1.5" />
+            </CheckBox.LayoutTransform>
+        </CheckBox>
+
+        <Button x:Name="btnDelete" Grid.Row="1" Grid.Column="13" 
+                Background="White" BorderThickness="0"
+                Click="btnDelete_Click">
+            <Image Source="\images\Red_X.png" Width="20" Height="20"></Image>
+        </Button>
+    </Grid>
+</UserControl>

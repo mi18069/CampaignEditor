@@ -22,6 +22,9 @@
     <Compile Update="AssignUser.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Channels.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Clients.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -31,13 +34,28 @@
     <Compile Update="NewTarget.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="TreeViewCampaignsItem.xaml.cs">
+    <Compile Update="PriceList.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="TreeViewClientsItem.xaml.cs">
+    <Compile Update="UserControls\SeasonalitiesItem.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="UsersListItem.xaml.cs">
+    <Compile Update="Seasonality.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Sectable.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="UserControls\TargetDPItem.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="UserControls\TreeViewCampaignsItem.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="UserControls\TreeViewClientsItem.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="UserControls\UsersListItem.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="UsersOfClient.xaml.cs">
@@ -60,6 +78,9 @@
     <Page Update="AssignUser.xaml">
       <SubType>Designer</SubType>
     </Page>
+    <Page Update="Channels.xaml">
+      <SubType>Designer</SubType>
+    </Page>
     <Page Update="Clients.xaml">
       <SubType>Designer</SubType>
     </Page>
@@ -72,13 +93,28 @@
     <Page Update="NewTarget.xaml">
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="TreeViewCampaignsItem.xaml">
+    <Page Update="PriceList.xaml">
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="TreeViewClientsItem.xaml">
+    <Page Update="UserControls\SeasonalitiesItem.xaml">
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="UsersListItem.xaml">
+    <Page Update="Seasonality.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Sectable.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UserControls\TargetDPItem.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UserControls\TreeViewCampaignsItem.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UserControls\TreeViewClientsItem.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UserControls\UsersListItem.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="UsersOfClient.xaml">

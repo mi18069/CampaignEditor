@@ -1,17 +1,16 @@
 ﻿using CampaignEditor.Controllers;
 using CampaignEditor.StartupHelpers;
 using Database.DTOs.TargetDTO;
-using Database.Entities;
 using Database.Repositories;
-using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Shell;
+
 
 namespace CampaignEditor
 {
@@ -40,6 +39,18 @@ namespace CampaignEditor
 
             InitializeComponent();
             this.DataContext = this;
+        }
+
+        public void LoadTargets(List<TargetDTO> targets)
+        {
+            foreach(var targetInList in TargetsList)
+                foreach (var target in targets)
+                {
+                    if (targetInList.targid == target.targid)
+                    {
+                        MoveTargetToSelected(targetInList);
+                    }
+                }
         }
 
         private async Task InitializeListsAsync()
@@ -129,12 +140,12 @@ namespace CampaignEditor
         private void btnSave_Click(object sender, RoutedEventArgs e)
         {
             success = true;
-            this.Close();
+            this.Hide();
         }
 
         private void btnCancel_Click(object sender, RoutedEventArgs e)
         {
-            this.Close();
+            this.Hide();
         }
 
         private void SelectedTargetsItem_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
@@ -231,6 +242,13 @@ namespace CampaignEditor
         {
             tbTargetFilters.Text = "";
             CheckEdit();
+        }
+
+        // Overriding OnClosing because click on x button should only hide window
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            e.Cancel = true;
+            Hide();
         }
     }
     

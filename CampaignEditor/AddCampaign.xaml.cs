@@ -1,6 +1,5 @@
 ﻿using CampaignEditor.Controllers;
 using CampaignEditor.DTOs.CampaignDTO;
-using CampaignEditor.DTOs.UserDTO;
 using CampaignEditor.StartupHelpers;
 using Database.DTOs.ClientDTO;
 using Database.DTOs.TargetDTO;
@@ -17,6 +16,8 @@ namespace CampaignEditor
     public partial class AddCampaign : Window
     {
         private readonly IAbstractFactory<AssignTargets> _factoryAssignTargets;
+        private readonly IAbstractFactory<Channels> _factoryChannels;
+
 
         private CampaignController _campaignController;
         private TargetController _targetController;
@@ -27,12 +28,17 @@ namespace CampaignEditor
 
         public static AddCampaign instance;
 
+        AssignTargets assignTargetsFactory = null;
+        Channels assignChannelsFactory = null;
         public AddCampaign(ICampaignRepository campaignRepository, ITargetRepository targetRepository, 
-            IClientRepository clientRepository, IAbstractFactory<AssignTargets> factoryAssignTargets)
+            IClientRepository clientRepository, IAbstractFactory<AssignTargets> factoryAssignTargets,
+            IAbstractFactory<Channels> factoryChannels)
         {
             instance = this;
 
             _factoryAssignTargets = factoryAssignTargets;
+            _factoryChannels = factoryChannels;
+
             _campaignController = new CampaignController(campaignRepository);
             _targetController = new TargetController(targetRepository);
             _clientController = new ClientController(clientRepository);
@@ -113,10 +119,13 @@ namespace CampaignEditor
         #region Targets
         private void btnAssignTargets_Click(object sender, RoutedEventArgs e)
         {
-            var factory = _factoryAssignTargets.Create();
-            factory.ShowDialog();
-            if (factory.success)
-                FillTargetLabels(factory.SelectedTargetsList);
+            if (assignTargetsFactory == null)
+                assignTargetsFactory = _factoryAssignTargets.Create();
+            assignTargetsFactory.ShowDialog();
+            if (assignTargetsFactory.success)
+            {
+                FillTargetLabels(assignTargetsFactory.SelectedTargetsList);
+            }
         }
 
         private void FillTargetLabels(ObservableCollection<TargetDTO> selectedTargetsList)
@@ -148,6 +157,20 @@ namespace CampaignEditor
             this.Close();
         }
 
-        
+        private void btnChannels_Click(object sender, RoutedEventArgs e)
+        {
+
+            if (assignChannelsFactory == null)
+            {
+                assignChannelsFactory = _factoryChannels.Create();
+                assignChannelsFactory.Initialize(client);
+            }
+            assignChannelsFactory.ShowDialog();
+            if (assignChannelsFactory.success)
+            {
+                dgChannels.ItemsSource = assignChannelsFactory.LastSelected;
+                assignChannelsFactory.success = false;
+            }
+        }
     }
 }
