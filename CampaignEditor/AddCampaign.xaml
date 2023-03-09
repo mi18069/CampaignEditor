@@ -112,27 +112,30 @@
                         Width="200" Height="40"
                         HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0, 10"
                         Click="btnAssignTargets_Click"/>
-                <DataGrid Grid.Row="2" Grid.Column="1" 
+                <ScrollViewer Grid.Row="2" Grid.Column="1"
+                              MaxWidth="300" VerticalScrollBarVisibility="Auto">
+                    <DataGrid  
                           x:Name="dgTargets" 
                           FontSize="15"
                           CanUserSortColumns="False"
                           AutoGenerateColumns="False"
                           IsReadOnly="True">
-                    <DataGrid.Resources>
-                        <Style TargetType="{x:Type DataGridColumnHeader}">
-                            <Setter Property="Background" Value="LightGray"/>
-                            <Setter Property="FontWeight" Value="SemiBold"/>
-                            <Setter Property="BorderThickness" Value="1,1,1,2"/>
-                            <Setter Property="BorderBrush" Value="black"/>
-                        </Style>
-                    </DataGrid.Resources>
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="Priority" Binding="{Binding Item1}" Width="100"
+                        <DataGrid.Resources>
+                            <Style TargetType="{x:Type DataGridColumnHeader}">
+                                <Setter Property="Background" Value="LightGray"/>
+                                <Setter Property="FontWeight" Value="SemiBold"/>
+                                <Setter Property="BorderThickness" Value="1,1,1,2"/>
+                                <Setter Property="BorderBrush" Value="black"/>
+                            </Style>
+                        </DataGrid.Resources>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Priority" Binding="{Binding Item1}" Width="100"
                                     IsReadOnly="True" />
-                        <DataGridTextColumn Header="Name" Binding="{Binding Item2.targname}" Width="200"
+                            <DataGridTextColumn Header="Name" Binding="{Binding Item2.targname}" Width="*"
                                     IsReadOnly="True"/>
-                    </DataGrid.Columns>
-                </DataGrid>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </ScrollViewer>
             </Grid>
         </Border>
 
@@ -155,29 +158,32 @@
                         MinWidth="200" Height="40"
                         HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,10"
                         Click="btnSpots_Click"/>
-                <DataGrid Grid.Row="2" Grid.Column="1"
+                <ScrollViewer Grid.Row="2" Grid.Column="1"
+                              MaxWidth="520" MaxHeight="200" VerticalScrollBarVisibility="Auto">
+                    <DataGrid 
                           x:Name="dgSpots" 
                           FontSize="15"
                           CanUserSortColumns="False"
                           AutoGenerateColumns="False"
                           IsReadOnly="True">
-                    <DataGrid.Resources>
-                        <Style TargetType="{x:Type DataGridColumnHeader}">
-                            <Setter Property="Background" Value="LightGray"/>
-                            <Setter Property="FontWeight" Value="SemiBold"/>
-                            <Setter Property="BorderThickness" Value="1,1,1,2"/>
-                            <Setter Property="BorderBrush" Value="black"/>
-                        </Style>
-                    </DataGrid.Resources>
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="Code" Binding="{Binding spotcode, Mode=TwoWay}" MinWidth="50"
+                        <DataGrid.Resources>
+                            <Style TargetType="{x:Type DataGridColumnHeader}">
+                                <Setter Property="Background" Value="LightGray"/>
+                                <Setter Property="FontWeight" Value="SemiBold"/>
+                                <Setter Property="BorderThickness" Value="1,1,1,2"/>
+                                <Setter Property="BorderBrush" Value="black"/>
+                            </Style>
+                        </DataGrid.Resources>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Code" Binding="{Binding spotcode, Mode=TwoWay}" MinWidth="50"
                                     IsReadOnly="True" />
-                        <DataGridTextColumn Header="Name" Binding="{Binding spotname, Mode=TwoWay}" Width="*"
+                            <DataGridTextColumn Header="Name" Binding="{Binding spotname, Mode=TwoWay}" Width="*"
                                     IsReadOnly="True"/>
-                        <DataGridTextColumn Header="Length" Binding="{Binding spotlength, Mode=TwoWay}" MinWidth="60"
-                                    IsReadOnly="True"/>
-                    </DataGrid.Columns>
-                </DataGrid>
+                            <DataGridTextColumn Header="Length" Binding="{Binding spotlength, Mode=TwoWay}" MinWidth="70"
+                                    IsReadOnly="True"/> 
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </ScrollViewer>
             </Grid>
         </Border>
 
@@ -202,30 +208,33 @@
                         Width="200" Height="40" Margin="0,10,0,0"
                         HorizontalAlignment="Center"
                         Click="btnChannels_Click"/>
-                <DataGrid Grid.Row="2" Grid.Column="1" Grid.RowSpan="2"
+                <ScrollViewer Grid.Row="2" Grid.Column="1" Grid.RowSpan="2"
+                              MaxWidth="1200" VerticalScrollBarVisibility="Auto">
+                    <DataGrid 
                           x:Name="dgChannels" 
                           Margin="10"
                           FontSize="15"
                           CanUserSortColumns="False"
                           AutoGenerateColumns="False"
                           IsReadOnly="True">
-                    <DataGrid.Resources>
-                        <Style TargetType="{x:Type DataGridColumnHeader}">
-                            <Setter Property="Background" Value="LightGray"/>
-                            <Setter Property="FontWeight" Value="SemiBold"/>
-                            <Setter Property="BorderThickness" Value="1,1,1,2"/>
-                            <Setter Property="BorderBrush" Value="black"/>
-                        </Style>
-                    </DataGrid.Resources>
-                    <DataGrid.Columns>
-                        <DataGridTextColumn Header="Channel" Binding="{Binding Item1.chname, Mode=TwoWay}" Width="*"
+                        <DataGrid.Resources>
+                            <Style TargetType="{x:Type DataGridColumnHeader}">
+                                <Setter Property="Background" Value="LightGray"/>
+                                <Setter Property="FontWeight" Value="SemiBold"/>
+                                <Setter Property="BorderThickness" Value="1,1,1,2"/>
+                                <Setter Property="BorderBrush" Value="black"/>
+                            </Style>
+                        </DataGrid.Resources>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Channel" Binding="{Binding Item1.chname, Mode=TwoWay}" Width="*"
                                     IsReadOnly="True" />
-                        <DataGridTextColumn Header="Pricelist" Binding="{Binding Item2.plname, Mode=TwoWay}" Width="*"
+                            <DataGridTextColumn Header="Pricelist" Binding="{Binding Item2.plname, Mode=TwoWay}" Width="*"
                                     IsReadOnly="True"/>
-                        <DataGridTextColumn Header="Activity" Binding="{Binding Item3.act, Mode=TwoWay}" Width="*"
+                            <DataGridTextColumn Header="Activity" Binding="{Binding Item3.act, Mode=TwoWay}" Width="*"
                                     IsReadOnly="True"/>
-                    </DataGrid.Columns>
-                </DataGrid>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </ScrollViewer>
             </Grid>
         </Border>
 

@@ -30,6 +30,11 @@ namespace CampaignEditor.Controllers
             return await _repository.GetTargetCmpByCmpid(id);
         }
 
+        public async Task<IEnumerable<TargetCmpDTO>> GetTargetCmpExceptCmpid(int id)
+        {
+            return await _repository.GetTargetCmpExceptCmpid(id);
+        }
+
         public async Task<IEnumerable<TargetCmpDTO>> GetAllTargetCmps()
         {
             return await _repository.GetAllTargetCmps();

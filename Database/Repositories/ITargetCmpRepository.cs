@@ -8,6 +8,7 @@ namespace Database.Repositories
     {
         Task<bool> CreateTargetCmp(CreateTargetCmpDTO targetCmpDTO);
         Task<IEnumerable<TargetCmpDTO>> GetTargetCmpByCmpid(int id);
+        Task<IEnumerable<TargetCmpDTO>> GetTargetCmpExceptCmpid(int id);
         Task<TargetCmpDTO> GetTargetCmpByIds(int cmpid, int targid);
         Task<IEnumerable<TargetCmpDTO>> GetAllTargetCmps();
         Task<bool> UpdateTargetCmp(UpdateTargetCmpDTO targetCmpDTO);

@@ -1,7 +1,11 @@
 ﻿using CampaignEditor.Controllers;
+using CampaignEditor.DTOs.CampaignDTO;
 using CampaignEditor.StartupHelpers;
+using Database.DTOs.TargetCmpDTO;
 using Database.DTOs.TargetDTO;
+using Database.Entities;
 using Database.Repositories;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -19,58 +23,71 @@ namespace CampaignEditor
         private readonly IAbstractFactory<NewTarget> _factoryNewTarget;
 
         private TargetController _targetController;
+        private TargetCmpController _targetCmpController;
         public bool success = false;
-        private bool canBeEdited = false;
+        public bool modified = false;
 
         private ObservableCollection<TargetDTO> _targetsList = new ObservableCollection<TargetDTO>();
         private ObservableCollection<TargetDTO> _selectedTargetsList = new ObservableCollection<TargetDTO>();
 
         int maxSelected = 3;
 
+        CampaignDTO _campaign = null;
+
         public bool CanBeEdited { get; }
         public ObservableCollection<TargetDTO> TargetsList { get { return _targetsList; } }
         public ObservableCollection<TargetDTO> SelectedTargetsList { get { return _selectedTargetsList; } }
 
-        public AssignTargets(ITargetRepository targetRepository, IAbstractFactory<NewTarget> factoryNewTarget)
+        public AssignTargets(ITargetRepository targetRepository, 
+                             IAbstractFactory<NewTarget> factoryNewTarget,
+                             ITargetCmpRepository targetCmpRepository)
         {
             _targetController = new TargetController(targetRepository);
-            _ = InitializeListsAsync();
+            _targetCmpController = new TargetCmpController(targetCmpRepository);
             _factoryNewTarget = factoryNewTarget;
-
+            
             InitializeComponent();
+
             this.DataContext = this;
         }
 
-        public void LoadTargets(List<TargetDTO> targets)
+        public async Task Initialize(CampaignDTO campaign)
         {
-            foreach(var targetInList in TargetsList)
-                foreach (var target in targets)
-                {
-                    if (targetInList.targid == target.targid)
-                    {
-                        MoveTargetToSelected(targetInList);
-                    }
-                }
-        }
-
-        private async Task InitializeListsAsync()
-        {
+            _campaign = campaign;
             _targetsList.Clear();
             _selectedTargetsList.Clear();
 
-            var targets = await _targetController.GetAllTargets();
+            var targets = await _targetController.GetAllClientTargets(_campaign.clid);
             targets = targets.OrderBy(t => t.targname);
+
+            var selectedTargets = await _targetCmpController.GetTargetCmpByCmpid(_campaign.cmpid);
+            foreach (var selectedTarget in selectedTargets)
+            {
+                _selectedTargetsList.Add(await _targetController.GetTargetById(selectedTarget.targid));
+            }
+               
 
             foreach (var target in targets)
             {
-                _targetsList.Add(target);
+                bool inSelected = false;
+                foreach (var selectedTarget in selectedTargets)
+                {
+                    if (selectedTarget.targid == target.targid)
+                        inSelected = true;
+                }
+                if (!inSelected)
+                    _targetsList.Add(target);
             }
-
         }
+
+        #region From And To Selected
         private void MoveTargetToSelected(TargetDTO target)
         {
-            _targetsList.Remove(target);
-            _selectedTargetsList.Add(target);
+            if (SelectedTargetsList.Count < maxSelected)
+            {
+                _targetsList.Remove(target);
+                _selectedTargetsList.Add(target);
+            }
         }
         private void MoveTargetFromSelected(TargetDTO target)
         {
@@ -82,23 +99,21 @@ namespace CampaignEditor
         private void btnToSelected_Click(object sender, RoutedEventArgs e)
         {
             var selectedList = lbTargets.SelectedItems;
-            while (selectedList.Count > 0 && maxSelected > 0) 
+            for (int i=0; i<maxSelected; i++) 
             {
-                MoveTargetToSelected(selectedList[0] as TargetDTO);
-                maxSelected--;
+                MoveTargetToSelected(selectedList[i] as TargetDTO);
             }
         }
 
         private void btnFromSelected_Click(object sender, RoutedEventArgs e)
         {
             var selectedList = lbSelectedTargets.SelectedItems;
-            while (selectedList.Count > 0)
+            foreach (var selected in selectedList)
             {
-                MoveTargetFromSelected(selectedList[0] as TargetDTO);
-                maxSelected++;
+                MoveTargetFromSelected(selected as TargetDTO);
             }
         }
-
+        
         private ObservableCollection<TargetDTO> OrderCollection(ObservableCollection<TargetDTO> collection)
         {
             ObservableCollection<TargetDTO> temp;
@@ -108,6 +123,7 @@ namespace CampaignEditor
                 collection.Add(j);
             return collection;
         }
+        #endregion
 
         private async void btnNewTarget_Click(object sender, RoutedEventArgs e)
         {
@@ -115,7 +131,7 @@ namespace CampaignEditor
             await factory.InitializeTree();
             factory.ShowDialog();
             if (factory.success)
-                _ = InitializeListsAsync();
+                await Initialize(_campaign);
         }
 
         private async void btnEditTarget_Click(object sender, RoutedEventArgs e)
@@ -133,19 +149,28 @@ namespace CampaignEditor
             factory.ShowDialog();
 
             if (factory.success)
-                _ = InitializeListsAsync();
+                await Initialize(_campaign);
                 
         }
 
-        private void btnSave_Click(object sender, RoutedEventArgs e)
+        private async void btnSave_Click(object sender, RoutedEventArgs e)
         {
             success = true;
-            this.Hide();
+            modified = true;
+            await _targetCmpController.DeleteTargetCmpByCmpid(_campaign.cmpid);
+            for (int i=0; i<SelectedTargetsList.Count; i++)
+            {
+                int cmpid = _campaign.cmpid;
+                int targid = SelectedTargetsList[i].targid;
+                int priority = i;
+                await _targetCmpController.CreateTargetCmp(new CreateTargetCmpDTO(cmpid, targid, priority));
+            }
+            this.Close();
         }
 
         private void btnCancel_Click(object sender, RoutedEventArgs e)
         {
-            this.Hide();
+            this.Close();
         }
 
         private void SelectedTargetsItem_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
@@ -154,21 +179,19 @@ namespace CampaignEditor
             if (target != null)
             {
                 MoveTargetFromSelected(target);
-                maxSelected++;
             }
         }
 
         private void TargetsItem_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-            if (maxSelected > 0)
+
+            var target = lbTargets.SelectedItem as TargetDTO;
+            if (target != null)
             {
-                var target = lbTargets.SelectedItem as TargetDTO;
-                if (target != null)
-                {
-                    MoveTargetToSelected(target);
-                    maxSelected--;
-                }
+                MoveTargetToSelected(target);
+                
             }
+            
         }
 
         private void ListViewItem_PreviewMouseMove(object sender, MouseEventArgs e)

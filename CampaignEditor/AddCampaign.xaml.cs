@@ -2,12 +2,12 @@
 using CampaignEditor.DTOs.CampaignDTO;
 using CampaignEditor.StartupHelpers;
 using Database.DTOs.ClientDTO;
-using Database.DTOs.SpotDTO;
 using Database.DTOs.TargetDTO;
 using Database.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -24,6 +24,7 @@ namespace CampaignEditor
 
         private CampaignController _campaignController;
         private ClientController _clientController;
+        private TargetCmpController _targetCmpController;
 
         private CampaignDTO campaign = null;
         public ClientDTO client = null;
@@ -32,7 +33,7 @@ namespace CampaignEditor
 
         AssignTargets assignTargetsFactory = null;
         Channels assignChannelsFactory = null;
-        public AddCampaign(ICampaignRepository campaignRepository, ITargetRepository targetRepository, 
+        public AddCampaign(ICampaignRepository campaignRepository, ITargetCmpRepository targetCmpRepository, 
             IClientRepository clientRepository, IAbstractFactory<AssignTargets> factoryAssignTargets,
             IAbstractFactory<Channels> factoryChannels, IAbstractFactory<Spots> factorySpots)
         {
@@ -44,20 +45,30 @@ namespace CampaignEditor
 
             _campaignController = new CampaignController(campaignRepository);
             _clientController = new ClientController(clientRepository);
+            _targetCmpController = new TargetCmpController(targetCmpRepository);
             InitializeComponent();            
 
         }
 
-        public async void Initialization(string campaignName)
+        public async Task Initialization(string campaignName)
         {
             campaign = await _campaignController.GetCampaignByName(campaignName);
             client = await _clientController.GetClientById(campaign.clid);
 
             InitializeFields(campaignName);
-            InitializeSpots();
+            await InitializeTargets();
+            await InitializeSpots();
+            
         }
 
-        private async void InitializeSpots()
+        private async Task InitializeTargets()
+        {
+            var f = _factoryAssignTargets.Create();
+            await f.Initialize(campaign);
+            FillDGTargets(f.SelectedTargetsList);
+        }
+
+        private async Task InitializeSpots()
         {
             var f = _factorySpots.Create();
             await f.Initialize(campaign);
@@ -126,15 +137,13 @@ namespace CampaignEditor
         #endregion
 
         #region Targets
-        private void btnAssignTargets_Click(object sender, RoutedEventArgs e)
+        private async void btnAssignTargets_Click(object sender, RoutedEventArgs e)
         {
-            if (assignTargetsFactory == null)
-                assignTargetsFactory = _factoryAssignTargets.Create();
-            assignTargetsFactory.ShowDialog();
-            if (assignTargetsFactory.success)
-            {
-                FillDGTargets(assignTargetsFactory.SelectedTargetsList);
-            }
+            var f = _factoryAssignTargets.Create();
+            await f.Initialize(campaign);
+            f.ShowDialog();
+            if (f.modified)
+                FillDGTargets(f.SelectedTargetsList);
         }
         private void FillDGTargets(ObservableCollection<TargetDTO> selectedTargetsList)
         {
@@ -156,11 +165,6 @@ namespace CampaignEditor
        
         #endregion
 
-        private void btnCancel_Click(object sender, RoutedEventArgs e)
-        {
-            this.Close();
-        }
-
         #region Channels
         private void btnChannels_Click(object sender, RoutedEventArgs e)
         {
@@ -180,14 +184,19 @@ namespace CampaignEditor
         #endregion
 
         #region Spots
-        private void btnSpots_Click(object sender, RoutedEventArgs e)
+        private async void btnSpots_Click(object sender, RoutedEventArgs e)
         {
             var f = _factorySpots.Create();
-            f.Initialize(campaign);
+            await f.Initialize(campaign);
             f.ShowDialog();
             if (f.spotsModified)
                 dgSpots.ItemsSource = f.Spotlist;
         }
         #endregion
+
+        private void btnCancel_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
     }
 }

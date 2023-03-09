@@ -57,6 +57,16 @@ namespace Database.Repositories
             return _mapper.Map<IEnumerable<TargetCmpDTO>>(targetCmps);
         }
 
+        public async Task<IEnumerable<TargetCmpDTO>> GetTargetCmpExceptCmpid(int id)
+        {
+            using var connection = _context.GetConnection();
+
+            var targetCmps = await connection.QueryAsync<TargetCmp>(
+                "SELECT * FROM tblcmptgt WHERE cmpid != @Id", new { Id = id });
+
+            return _mapper.Map<IEnumerable<TargetCmpDTO>>(targetCmps);
+        }
+
         public async Task<IEnumerable<TargetCmpDTO>> GetAllTargetCmps()
         {
             using var connection = _context.GetConnection();
@@ -103,5 +113,6 @@ namespace Database.Repositories
 
             return affected != 0;
         }
+
     }
 }

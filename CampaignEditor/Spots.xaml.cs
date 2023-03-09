@@ -50,8 +50,9 @@ namespace CampaignEditor
             Campaign = campaign;
             wpSpots.Children.Add(MakeAddButton());
 
-            var spots = await _spotController.GetSpotsByCmpid(Campaign.cmpid);
-            Spotlist = (List<SpotDTO>)spots;
+            List<SpotDTO> spots = (List<SpotDTO>)(await _spotController.GetSpotsByCmpid(Campaign.cmpid));
+            spots.OrderBy(s => s.spotcode);
+            Spotlist = spots;
             foreach (var spot in spots)
             {
                 AddSpotItem(spot);
