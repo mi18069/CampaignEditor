@@ -28,8 +28,6 @@ namespace CampaignEditor
         private CampaignDTO campaign = null;
         public ClientDTO client = null;
 
-        private List<SpotDTO> _spotlist;
-
         public static AddCampaign instance;
 
         AssignTargets assignTargetsFactory = null;
@@ -135,32 +133,27 @@ namespace CampaignEditor
             assignTargetsFactory.ShowDialog();
             if (assignTargetsFactory.success)
             {
-                FillTargetLabels(assignTargetsFactory.SelectedTargetsList);
+                FillDGTargets(assignTargetsFactory.SelectedTargetsList);
             }
         }
-
-        private void FillTargetLabels(ObservableCollection<TargetDTO> selectedTargetsList)
+        private void FillDGTargets(ObservableCollection<TargetDTO> selectedTargetsList)
         {
-            lblPrimaryTarget.Content = "";
-            lblSecondaryTarget.Content = "";
-            lblTertiaryTarget.Content = "";
 
-            int numOfTargets = selectedTargetsList.Count;
-
-            if (numOfTargets > 0)
+            List<Tuple<string, TargetDTO>> targets = new List<Tuple<string, TargetDTO>>();
+            int i = 0;
+            foreach (TargetDTO target in selectedTargetsList)
             {
-                lblPrimaryTarget.Content = selectedTargetsList[0].targname;
+                if (i == 0)
+                    targets.Add(Tuple.Create("Primary", target));
+                else if (i == 1)
+                    targets.Add(Tuple.Create("Secondary", target));
+                else if (i == 2)
+                    targets.Add(Tuple.Create("Tertiary", target));
+                i++;
             }
-            if (numOfTargets > 1)
-            {
-                lblSecondaryTarget.Content = selectedTargetsList[1].targname;
-            }
-            if (numOfTargets > 2)
-            {
-                lblTertiaryTarget.Content = selectedTargetsList[2].targname;
-            }
+            dgTargets.ItemsSource = targets;
         }
-
+       
         #endregion
 
         private void btnCancel_Click(object sender, RoutedEventArgs e)
