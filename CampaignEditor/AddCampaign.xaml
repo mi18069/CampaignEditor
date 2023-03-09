@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CampaignEditor"
         mc:Ignorable="d"
-        Title="AddCampaign" Height="450" Width="1200"
+        Title="AddCampaign" Height="600" Width="1200"
         FontSize="20">
     <Grid>
         <Border BorderBrush="LightGray" BorderThickness="1" 
@@ -89,9 +89,21 @@
                        HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0, 150, 0, 0"/>
             </Grid>
         </Border>
+
         <Border BorderBrush="LightGray" BorderThickness="1" 
-                Width="500" Height="280"
+                Width="300" Height="280"
                 HorizontalAlignment="Left" VerticalAlignment="Top" Margin="630, 10, 0, 0">
+            <Grid>
+                <Button x:Name="btnSpots" Content="Spots" 
+                        Width="200" Height="40"
+                        HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0, 20, 0, 0"
+                        Click="btnSpots_Click"/>
+            </Grid>
+        </Border>
+
+        <Border BorderBrush="LightGray" BorderThickness="1" 
+                Width="920" Height="280"
+                HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="10, 0, 0, 10">
             <Grid>
                 <Button x:Name="btnChannels" Content="Assign Channels" 
                         Width="200" Height="40"
@@ -99,7 +111,7 @@
                         Click="btnChannels_Click"/>
                 <DataGrid x:Name="dgChannels" 
                           Height="200" VerticalAlignment="Bottom" Margin="10"
-                          FontSize="10"
+                          FontSize="15"
                           CanUserSortColumns="False"
                           AutoGenerateColumns="False"
                           IsReadOnly="True">
@@ -112,11 +124,11 @@
                         </Style>
                     </DataGrid.Resources>
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Channel" Binding="{Binding Item1.chname, Mode=TwoWay}" MinWidth="160"
+                        <DataGridTextColumn Header="Channel" Binding="{Binding Item1.chname, Mode=TwoWay}" MinWidth="300"
                                     IsReadOnly="True" />
-                        <DataGridTextColumn Header="Pricelist" Binding="{Binding Item2.plname, Mode=TwoWay}" MinWidth="160"
+                        <DataGridTextColumn Header="Pricelist" Binding="{Binding Item2.plname, Mode=TwoWay}" MinWidth="300"
                                     IsReadOnly="True"/>
-                        <DataGridTextColumn Header="Activity" Binding="{Binding Item3.act, Mode=TwoWay}" MinWidth="160"
+                        <DataGridTextColumn Header="Activity" Binding="{Binding Item3.act, Mode=TwoWay}" MinWidth="300"
                                     IsReadOnly="True"/>
                     </DataGrid.Columns>
                 </DataGrid>

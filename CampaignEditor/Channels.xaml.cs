@@ -211,13 +211,19 @@ namespace CampaignEditor
         }
 
         #region Pricelist
-        private void btnPricelist_Click(object sender, RoutedEventArgs e)
+        private void btnEditPricelist_Click(object sender, RoutedEventArgs e)
         {
             var f = _factoryPriceList.Create();
             if (lvPricelists.SelectedItems.Count > 0)
                 f.Initialize(_client, lvPricelists.SelectedItem as PricelistDTO);
             else
                 f.Initialize(_client);
+            f.ShowDialog();
+        }
+        private void btnNewPricelist_Click(object sender, RoutedEventArgs e)
+        {
+            var f = _factoryPriceList.Create();
+            f.Initialize(_client);
             f.ShowDialog();
         }
         #endregion
@@ -239,6 +245,7 @@ namespace CampaignEditor
             e.Cancel = true;
             Hide();
         }
+
 
     }
 }

@@ -54,6 +54,7 @@ namespace CampaignEditor
                     Database.Extensions.SeasonalityChannelsExtensions.AddSeasonalityChannelsExtensions(services);
                     Database.Extensions.ActivityExtensions.AddActivityExtensions(services);
                     Database.Extensions.PricesExtensions.AddPricesExtensions(services);
+                    Database.Extensions.SpotExtensions.AddSpotExtensions(services);
 
                 }).Build();
 

@@ -157,6 +157,7 @@ namespace CampaignEditor
             this.Close();
         }
 
+        #region Channels
         private void btnChannels_Click(object sender, RoutedEventArgs e)
         {
 
@@ -172,5 +173,13 @@ namespace CampaignEditor
                 assignChannelsFactory.success = false;
             }
         }
+        #endregion
+
+        #region Spots
+        private void btnSpots_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+        #endregion
     }
 }

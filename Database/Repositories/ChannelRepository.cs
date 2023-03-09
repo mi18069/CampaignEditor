@@ -25,7 +25,7 @@ namespace Database.Repositories
             using var connection = _context.GetConnection();
 
             var affected = await connection.ExecuteAsync(
-                "INSERT INTO tblchannels (chactive, chname, chrsid, chsname, shid, chrfid)" +
+                "INSERT INTO tblchannels (chactive, chname, chrsid, chsname, shid, chrfid) " +
                     "VALUES (@Chactive, @Chname, @Chrsid, @Chsname, @Shid, @Chrfid)",
             new
                 {
@@ -75,7 +75,7 @@ namespace Database.Repositories
 
             var affected = await connection.ExecuteAsync(
                 "UPDATE tblchannels SET chid = @Chid, chactive = @Chactive, chname = @Chname, " +
-                "chrdsid = @Chrdsid, chsname = @Chsname, shid = @Shid, chrfid = @Chrfid" +
+                "chrdsid = @Chrdsid, chsname = @Chsname, shid = @Shid, chrfid = @Chrfid " +
                 "WHERE chid = @Chid",
                 new
                 {

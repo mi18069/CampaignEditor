@@ -95,3 +95,7 @@ ALTER TABLE tblactivity ADD PRIMARY KEY (actid);
 
 -- to add index in tblpricelistchn to speed up performances
 CREATE INDEX index_tblpricelistchn ON tblpricelistchn ( plid DESC NULLS LAST  ); 
+
+-- Changes in tblcmpspots2
+ALTER TABLE tblcmpspot2 RENAME COLUMN lenght TO spotlength;
+ALTER TABLE tblcmpspot2 RENAME COLUMN spotn TO spotname;
