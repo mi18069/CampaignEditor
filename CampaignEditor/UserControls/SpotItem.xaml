@@ -1,0 +1,43 @@
+﻿<UserControl x:Class="CampaignEditor.UserControls.SpotItem"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:CampaignEditor.UserControls"
+             mc:Ignorable="d" 
+             d:DesignHeight="50" d:DesignWidth="380" Background="White">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="10"/>
+            <ColumnDefinition Width="50"/>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="50"/>
+            <ColumnDefinition Width="50"/>
+            <ColumnDefinition Width="10"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="10" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="10" />
+        </Grid.RowDefinitions>
+
+        <Label x:Name="lblCode" Content="A" Grid.Row="1" Grid.Column="1" 
+               VerticalContentAlignment="Top" HorizontalContentAlignment="Center" FontSize="18" FontWeight="Bold" />
+
+        <TextBox x:Name="tbName" Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="2"
+                 VerticalAlignment="Center" FontSize="16"
+                 TextChanged="tb_TextChanged"/>
+
+        <TextBox x:Name="tbLength" Grid.Row="1" Grid.Column="4" 
+                 VerticalAlignment="Center" FontSize="16" Margin="10,0,0,0"
+                 MaxLength="3"
+                 TextChanged="tb_TextChanged"/>
+
+        <Button x:Name="btnDelete" Grid.Row="1" Grid.Column="5" 
+                Background="White" BorderThickness="0"
+                Click="btnDelete_Click">
+            <Image Source="\images\Red_X.png" Width="20" Height="20"></Image>
+        </Button>
+    </Grid>
+</UserControl>

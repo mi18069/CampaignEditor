@@ -204,3 +204,7 @@ C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Debug\net6.0-wind
 C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Debug\net6.0-windows\UserControls\TreeViewCampaignsItem.baml
 C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Debug\net6.0-windows\UserControls\TreeViewClientsItem.baml
 C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Debug\net6.0-windows\UserControls\UsersListItem.baml
+C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Debug\net6.0-windows\Spots.g.cs
+C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Debug\net6.0-windows\UserControls\SpotItem.g.cs
+C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Debug\net6.0-windows\Spots.baml
+C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Debug\net6.0-windows\UserControls\SpotItem.baml

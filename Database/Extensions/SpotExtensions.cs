@@ -1,4 +1,6 @@
-﻿using Database.Repositories;
+﻿using Database.DTOs.SpotDTO;
+using Database.Entities;
+using Database.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Database.Extensions

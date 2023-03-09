@@ -37,6 +37,9 @@
     <Compile Update="PriceList.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Spots.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="UserControls\SeasonalitiesItem.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -44,6 +47,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Sectable.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="UserControls\SpotItem.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="UserControls\TargetDPItem.xaml.cs">
@@ -96,6 +102,9 @@
     <Page Update="PriceList.xaml">
       <SubType>Designer</SubType>
     </Page>
+    <Page Update="Spots.xaml">
+      <SubType>Designer</SubType>
+    </Page>
     <Page Update="UserControls\SeasonalitiesItem.xaml">
       <SubType>Designer</SubType>
     </Page>
@@ -103,6 +112,9 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Sectable.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UserControls\SpotItem.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="UserControls\TargetDPItem.xaml">

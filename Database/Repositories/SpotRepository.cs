@@ -32,7 +32,7 @@ namespace Database.Repositories
                 Spotcode = spotDTO.spotcode,
                 Spotname = spotDTO.spotname,
                 Spotlength = spotDTO.spotlength,
-                Shid = spotDTO.ignore
+                Ignore = spotDTO.ignore
             });
 
             return affected != 0;

@@ -2,9 +2,11 @@
 using CampaignEditor.DTOs.CampaignDTO;
 using CampaignEditor.StartupHelpers;
 using Database.DTOs.ClientDTO;
+using Database.DTOs.SpotDTO;
 using Database.DTOs.TargetDTO;
 using Database.Repositories;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
@@ -17,14 +19,16 @@ namespace CampaignEditor
     {
         private readonly IAbstractFactory<AssignTargets> _factoryAssignTargets;
         private readonly IAbstractFactory<Channels> _factoryChannels;
+        private readonly IAbstractFactory<Spots> _factorySpots;
 
 
         private CampaignController _campaignController;
-        private TargetController _targetController;
         private ClientController _clientController;
 
         private CampaignDTO campaign = null;
         public ClientDTO client = null;
+
+        private List<SpotDTO> _spotlist;
 
         public static AddCampaign instance;
 
@@ -32,15 +36,15 @@ namespace CampaignEditor
         Channels assignChannelsFactory = null;
         public AddCampaign(ICampaignRepository campaignRepository, ITargetRepository targetRepository, 
             IClientRepository clientRepository, IAbstractFactory<AssignTargets> factoryAssignTargets,
-            IAbstractFactory<Channels> factoryChannels)
+            IAbstractFactory<Channels> factoryChannels, IAbstractFactory<Spots> factorySpots)
         {
             instance = this;
 
             _factoryAssignTargets = factoryAssignTargets;
             _factoryChannels = factoryChannels;
+            _factorySpots = factorySpots;
 
             _campaignController = new CampaignController(campaignRepository);
-            _targetController = new TargetController(targetRepository);
             _clientController = new ClientController(clientRepository);
             InitializeComponent();            
 
@@ -52,8 +56,15 @@ namespace CampaignEditor
             client = await _clientController.GetClientById(campaign.clid);
 
             InitializeFields(campaignName);
+            InitializeSpots();
         }
 
+        private async void InitializeSpots()
+        {
+            var f = _factorySpots.Create();
+            await f.Initialize(campaign);
+            dgSpots.ItemsSource = f.Spotlist;
+        }
         private void InitializeFields(string campaignName)
         {
             tbName.Text = campaignName;
@@ -178,7 +189,11 @@ namespace CampaignEditor
         #region Spots
         private void btnSpots_Click(object sender, RoutedEventArgs e)
         {
-
+            var f = _factorySpots.Create();
+            f.Initialize(campaign);
+            f.ShowDialog();
+            if (f.spotsModified)
+                dgSpots.ItemsSource = f.Spotlist;
         }
         #endregion
     }
