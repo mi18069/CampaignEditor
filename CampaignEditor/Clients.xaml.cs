@@ -1,16 +1,16 @@
 ﻿using System;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 using System.Windows.Media;
-using CampaignEditor.DTOs.UserDTO;
 using CampaignEditor.StartupHelpers;
-using Database.DTOs.ClientDTO;
 
 namespace CampaignEditor
 {
 
-    public partial class Clients : Window
+    public partial class Clients : Window, INotifyPropertyChanged
     {
 
         private readonly IAbstractFactory<AddUser> _factoryAddUser;
@@ -19,6 +19,7 @@ namespace CampaignEditor
         private readonly IAbstractFactory<ClientsTreeView> _factoryClientsTreeView;
         private readonly IAbstractFactory<AddCampaign> _factoryAddCampaign;
         private readonly IAbstractFactory<NewCampaign> _factoryNewCampaign;
+
         private ClientsTreeView _clientsTree;
 
         public static Clients instance;
@@ -27,6 +28,31 @@ namespace CampaignEditor
 
         private bool clientsUpdated = false;
         private bool campaignsUpdated = false;
+
+        #region Can Be Deleted
+        
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private bool _canBeDeleted = false;
+        public bool CanBeDeleted
+        {
+            get { return _canBeDeleted; }
+            set
+            {
+                _canBeDeleted = value;
+                OnPropertyChanged();
+            }
+        }
+
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            var handler = PropertyChanged;
+            if (handler != null)
+            {
+                handler(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+        #endregion
 
         // Variables in order to determine wheather some of the context men uoptions should be disabled
         public bool isAdministrator { get; set; }  = false;
@@ -49,12 +75,11 @@ namespace CampaignEditor
 
             _clientsTree = factoryClientsTreeView.Create();
             _clientsTree.Initialization(MainWindow.user);
-            _clientsTree.InitializeTree();
+            _ = _clientsTree.InitializeTree();
 
             
             isAdministrator = MainWindow.user.usrlevel == 0;
             isReadWrite = MainWindow.user.usrlevel == 1 ? true : isAdministrator;
-            
 
             lblUsername.Content += MainWindow.user.usrname;
 
@@ -200,7 +225,7 @@ namespace CampaignEditor
 
         #region Context menu mechanism
         // For creating specific context menus based on selected item
-        private void tvClients_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
+        private async void tvClients_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
             TreeViewItem SelectedItem = tvClients.SelectedItem as TreeViewItem;
             if (SelectedItem is null)
@@ -208,6 +233,7 @@ namespace CampaignEditor
             switch (SelectedItem.Tag.ToString())
             {
                 case "Client":
+                    await UpdateCanBeDeleted();
                     tvClients.ContextMenu = tvClients.Resources["ClientContext"] as System.Windows.Controls.ContextMenu;
                     break;
                 case "Campaign":
@@ -215,6 +241,13 @@ namespace CampaignEditor
                     break;
             }
         }
+
+        private async Task UpdateCanBeDeleted()
+        {
+            string clientname = ((HeaderedItemsControl)tvClients.SelectedItem).Header.ToString()!.Trim();
+            CanBeDeleted = await _clientsTree.CheckCanBeDeleted(clientname);
+        }
+
         // In order to select TreeViewItem on mouse right click
         private void tvClients_PreviewMouseRightButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
@@ -247,13 +280,13 @@ namespace CampaignEditor
             f.Show();
         }
 
-        private void btnNewCampaign_Click(object sender, RoutedEventArgs e)
+        private async void btnNewCampaign_Click(object sender, RoutedEventArgs e)
         {
             string clientname = ((HeaderedItemsControl)tvClients.SelectedItem).Header.ToString()!.Trim();
             var f = _factoryNewCampaign.Create();
             f.Initialize(clientname);
             f.ShowDialog();
-            _clientsTree.UpdateTree();
+            await _clientsTree.UpdateTree();
         }
 
         private void btnShowUsersOfClient_Click(object sender, RoutedEventArgs e)
@@ -266,9 +299,17 @@ namespace CampaignEditor
             f.Show();
         }
 
-        private void btnAddClient_Click(object sender, RoutedEventArgs e)
+        private async void btnAddClient_Click(object sender, RoutedEventArgs e)
         {
-            _factoryAddClient.Create().Show();
+            var f = _factoryAddClient.Create();
+            f.ShowDialog();
+            if (f.success)
+                await _clientsTree.InitializeTree();
+        }
+        private async void btnDeleteClient_Click(object sender, RoutedEventArgs e)
+        {
+            string clientname = ((HeaderedItemsControl)tvClients.SelectedItem).Header.ToString()!.Trim();
+            await _clientsTree.DeleteClient(clientname);
         }
 
 

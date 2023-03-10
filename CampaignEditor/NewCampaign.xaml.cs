@@ -3,6 +3,7 @@ using CampaignEditor.DTOs.CampaignDTO;
 using Database.DTOs.ClientDTO;
 using Database.Repositories;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -15,6 +16,7 @@ namespace CampaignEditor
         private ClientController _clientController;
         ClientDTO client;
 
+        public bool canClientBeDeleted = false;
         public NewCampaign(ICampaignRepository campaignRepository, IClientRepository clientRepository)
         {
             InitializeComponent();
@@ -23,10 +25,10 @@ namespace CampaignEditor
         }
 
         // For binding client to campaign
-        public async void Initialize(string clientname)
+        public async Task Initialize(string clientname)
         {
             client = await _clientController.GetClientByName(clientname);
-            var r = client;
+            canClientBeDeleted = (await _campaignController.GetCampaignsByClientId(client.clid)).Count() == 0;
         }
 
         private async void btnSave_Click(object sender, RoutedEventArgs e)

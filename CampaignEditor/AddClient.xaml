@@ -24,11 +24,7 @@
                 HorizontalContentAlignment="Center" 
                 VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="150,0,0,10"
                 Click="btnAddClient_Click"/>
-        <Button x:Name="btnDeleteClient" Content="Delete client"  
-                Width="150" Height="40"
-                HorizontalContentAlignment="Center" 
-                VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,150,10"
-                Click="btnDeleteClient_Click"/>
+        
         <Label x:Name="lblError" Content="" Foreground="Red" 
                VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0, 0, 0, 60"/>
     </Grid>

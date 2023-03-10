@@ -13,7 +13,8 @@
              HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10, 0, 0, 0">
                 <ListView x:Name="lbTargets"
                       ItemsSource="{Binding TargetsList}"
-                      DisplayMemberPath="targname">
+                      DisplayMemberPath="targname"
+                      SelectionChanged="lb_SelectionChanged">
                     <ListView.ItemContainerStyle>
                         <Style TargetType="ListViewItem">
                             <EventSetter Event="PreviewMouseUp" Handler="TargetsItem_PreviewMouseUp"/>
@@ -54,7 +55,8 @@
              HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0, 15, 10, 0">
                 <ListView x:Name="lbSelectedTargets" 
                       ItemsSource="{Binding SelectedTargetsList}"
-                      DisplayMemberPath="targname" AllowDrop="True">
+                      DisplayMemberPath="targname" AllowDrop="True"
+                          SelectionChanged="lb_SelectionChanged">
                     <ListView.ItemContainerStyle>
                         <Style TargetType="ListViewItem">
                             <EventSetter Event="PreviewMouseUp"  Handler="SelectedTargetsItem_PreviewMouseUp"/>

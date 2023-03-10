@@ -92,7 +92,7 @@ namespace CampaignEditor
         {
             SpotItem spotItem = new SpotItem();
             spotItem.btnDelete.Click += btnDeleteSpot_Click;
-            spotItem.Width = 550; // FIX THIS HARDCODING
+            spotItem.Width = wpSpots.Width; // FIX THIS HARDCODING
             spotItem.lblCode.Content = ((char)('A' + wpSpots.Children.Count-1)).ToString();
 
             if (spot != null)
@@ -181,6 +181,13 @@ namespace CampaignEditor
         private void btnCancel_Click(object sender, RoutedEventArgs e)
         {
             this.Close();
+        }
+
+        private void wpSpots_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            // Only changing width of the first element, and the others will follow 
+            SpotItem spotItem = wpSpots.Children[0] as SpotItem;
+            spotItem.Width = wpSpots.ActualWidth;
         }
     }
 }

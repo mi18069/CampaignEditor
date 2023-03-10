@@ -159,7 +159,7 @@
                         HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,10"
                         Click="btnSpots_Click"/>
                 <ScrollViewer Grid.Row="2" Grid.Column="1"
-                              MaxWidth="520" MaxHeight="200" VerticalScrollBarVisibility="Auto">
+                              MaxHeight="200" VerticalScrollBarVisibility="Auto">
                     <DataGrid 
                           x:Name="dgSpots" 
                           FontSize="15"
@@ -205,14 +205,13 @@
                 </Grid.RowDefinitions>
                 <Button Grid.Row="1" Grid.Column="1"
                         x:Name="btnChannels" Content="Assign Channels" 
-                        Width="200" Height="40" Margin="0,10,0,0"
+                        Width="200" Height="40" Margin="0,10"
                         HorizontalAlignment="Center"
                         Click="btnChannels_Click"/>
                 <ScrollViewer Grid.Row="2" Grid.Column="1" Grid.RowSpan="2"
-                              MaxWidth="1200" VerticalScrollBarVisibility="Auto">
+                              VerticalScrollBarVisibility="Auto">
                     <DataGrid 
                           x:Name="dgChannels" 
-                          Margin="10"
                           FontSize="15"
                           CanUserSortColumns="False"
                           AutoGenerateColumns="False"

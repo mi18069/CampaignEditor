@@ -24,10 +24,11 @@
                 <TreeView.Resources>
                     <ContextMenu x:Key ="ClientContext"  StaysOpen="true">
                         <MenuItem Header="Show users" Click="btnShowUsersOfClient_Click"/>
-                        <MenuItem Header="Rename client" IsEnabled="{Binding Path=isReadWrite}"/>
+                        <MenuItem Header="New campaign" Click="btnNewCampaign_Click" IsEnabled="{Binding Path=isAdministrator}"/>
+                        <MenuItem x:Name="btnRenameClient" Header="Rename client"  IsEnabled="{Binding Path=isReadWrite}"/>
                         <MenuItem Header="New user" Click="btnAddUser_Click" IsEnabled="{Binding Path=isAdministrator}"/>
                         <MenuItem Header="New client" Click="btnAddClient_Click" IsEnabled="{Binding Path=isAdministrator}"/>
-                        <MenuItem Header="New campaign" Click="btnNewCampaign_Click" IsEnabled="{Binding Path=isAdministrator}"/>
+                        <MenuItem Header="Delete client" Click="btnDeleteClient_Click"  IsEnabled="{Binding Path=CanBeDeleted}"/>
                     </ContextMenu>
                     <ContextMenu x:Key="CampaignContext"  StaysOpen="true">
                         <MenuItem Header="Edit campaign" Click="btnAddCampaign_Click" IsEnabled="{Binding Path=isReadWrite}"/>

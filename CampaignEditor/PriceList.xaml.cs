@@ -167,6 +167,7 @@ namespace CampaignEditor
         {
             Button btnAddDP = MakeAddButton();
             TargetDPItem dpItem = MakeDPItem();
+            dpItem.Width = wpDayParts.Width;
 
             wpDayParts.Children.Add(dpItem);
             wpDayParts.Children.Add(btnAddDP);

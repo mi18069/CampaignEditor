@@ -6,6 +6,7 @@ using Database.DTOs.UserClients;
 using Database.Repositories;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 
 
@@ -16,6 +17,8 @@ namespace CampaignEditor
         private ClientController _clientController;
         private UserController _userController;
         private UserClientsController _userClientsController;
+
+        public bool success = false;
         public AddClient(IClientRepository clientRepository, IUserRepository userRepository, 
             IUserClientsRepository userClientsRepository)
         {
@@ -63,16 +66,11 @@ namespace CampaignEditor
                 UserClientsDTO userClientsDTO = new UserClientsDTO(clientDTO.clid, owner.usrid);
 
                 await _userClientsController.CreateUserClients(userClientsDTO);
+                success = true;
                 Close();
             }
         }
 
-        // TODO this method shouldn't be here
-        private async void btnDeleteClient_Click(object sender, RoutedEventArgs e)
-        {           
-            ClientDTO client = await _clientController.GetClientByName(tbClientName.Text.Trim());
-            await _userClientsController.DeleteUserClientsByClientId(client.clid);
-            await _clientController.DeleteClientByName(tbClientName.Text);
-        }
+
     }
 }

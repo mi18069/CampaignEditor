@@ -5,7 +5,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:CampaignEditor.UserControls"
              mc:Ignorable="d" 
-             d:DesignHeight="50" d:DesignWidth="380" Background="White">
+             d:DesignHeight="50" d:DesignWidth="330" HorizontalAlignment="Stretch" Width="auto"  Background="White">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="10"/>

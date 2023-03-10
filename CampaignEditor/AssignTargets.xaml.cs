@@ -264,14 +264,11 @@ namespace CampaignEditor
         private void ListViewItem_LostFocus(object sender, RoutedEventArgs e)
         {
             tbTargetFilters.Text = "";
-            CheckEdit();
         }
 
-        // Overriding OnClosing because click on x button should only hide window
-        protected override void OnClosing(CancelEventArgs e)
+        private void lb_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            e.Cancel = true;
-            Hide();
+            CheckEdit();
         }
     }
     

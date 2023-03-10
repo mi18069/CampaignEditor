@@ -17,8 +17,8 @@ namespace CampaignEditor
 {
     public class ClientsTreeView
     { 
-        SortedDictionary<ClientDTO, IEnumerable<CampaignDTO>> _clientCampaignsDict = new SortedDictionary<ClientDTO, IEnumerable<CampaignDTO>>(new ClientComparer());
-        SortedDictionary<UserDTO, IEnumerable<ClientDTO>> _userClientsDict = new SortedDictionary<UserDTO, IEnumerable<ClientDTO>>(new UserComparer());
+        SortedDictionary<ClientDTO, IEnumerable<CampaignDTO>> _clientCampaignsDict;
+        SortedDictionary<UserDTO, IEnumerable<ClientDTO>> _userClientsDict;
 
         private UserController _userController;
         private ClientController _clientController;
@@ -37,15 +37,32 @@ namespace CampaignEditor
             _campaignController = new CampaignController(campaignRepository);
         }
 
+        public async Task<bool> CheckCanBeDeleted(string clientname)
+        {
+            ClientDTO client = await _clientController.GetClientByName(clientname);
+            var campaigns = await _campaignController.GetCampaignsByClientId(client.clid);
+            return campaigns.Count() == 0;
+        }
+
+        public async Task DeleteClient(string clientname)
+        {
+            ClientDTO client = await _clientController.GetClientByName(clientname);
+            await _userClientsController.DeleteUserClientsByClientId(client.clid);
+            await _clientController.DeleteClientByName(clientname);
+            await InitializeTree();
+        }
+
         public void Initialization(UserDTO user)
         {
             _userDTO = user;
         }
 
         // Initializing dictionaries
-        public async void InitializeTree()
+        public async Task InitializeTree()
         {
             IEnumerable<UserDTO> users = new List<UserDTO>();
+            _clientCampaignsDict = new SortedDictionary<ClientDTO, IEnumerable<CampaignDTO>>(new ClientComparer());
+            _userClientsDict = new SortedDictionary<UserDTO, IEnumerable<ClientDTO>>(new UserComparer());
 
             if (_userDTO.usrlevel == 0)
             {
@@ -77,11 +94,11 @@ namespace CampaignEditor
                 }
 
             }
-            UpdateTree();
+            await UpdateTree();
         }
 
         // Checking for changes in tree
-        public async void UpdateTree()
+        public async Task UpdateTree()
         {
             SortedDictionary<ClientDTO, IEnumerable<CampaignDTO>> clientCampaignsDict =
                 new SortedDictionary<ClientDTO, IEnumerable<CampaignDTO>>(_clientCampaignsDict, new ClientComparer());
@@ -150,53 +167,6 @@ namespace CampaignEditor
             }
 
         } 
-
-        // Tried something with UserControls
-        /*public void InitializeTreeView(SortedDictionary<ClientDTO, IEnumerable<CampaignDTO>> clientCampaignsDict, bool expand = false)
-        {
-            _tvClients.Items.Clear();
-
-            foreach (ClientDTO client in clientCampaignsDict.Keys)
-            {
-                TreeViewClientsItem newClient = new TreeViewClientsItem();
-                newClient.Item = client;             
-                int numCampaigns = _clientCampaignsDict[client].Count();
-                newClient.Description = numCampaigns + " campaigns";
-                newClient.Tag = "Client";
-                _tvClients.Items.Add(newClient);
-
-                foreach (CampaignDTO campaign in clientCampaignsDict[client])
-                {
-                    TreeViewCampaignsItem newCampaign = new TreeViewCampaignsItem();
-                    if (IsCampaignExpired(campaign))
-                    {
-                        newCampaign.Foreground = Brushes.Gray;      
-                    }
-                    else if (IsCampaignStarted(campaign))
-                    {
-                        newCampaign.Foreground = Brushes.LightGreen;
-                    }
-                    newCampaign.Item = campaign;
-                    
-                    newCampaign.Description = "( " + PrintCampaignDate(campaign) + " )";
-                    newCampaign.Tag = "Campaign";
-
-                    
-                    //newClient.Items.Add(newCampaign);
-                }
-            }
-
-            if (expand)
-            {
-                foreach (var item in _tvClients.Items)
-                {
-                    var tvi = item as TreeViewItem;
-                    if (tvi != null)
-                        tvi.ExpandSubtree();
-                }
-            }
-
-        } */
 
         public async Task<IEnumerable<string>> GetSupervisedUsernames()
         {
