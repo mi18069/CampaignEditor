@@ -39,6 +39,11 @@ namespace CampaignEditor
         private bool spotsModified = false;
         private Spots fSpots = null;
         private List<SpotDTO> _spotlist = new List<SpotDTO>();
+
+        private bool targetsModified = false;
+        private AssignTargets fTargets = null;
+        private List<TargetDTO> _targetlist = new List<TargetDTO>();
+
         public AddCampaign(ICampaignRepository campaignRepository, ITargetCmpRepository targetCmpRepository, 
             IClientRepository clientRepository, IAbstractFactory<AssignTargets> factoryAssignTargets,
             IAbstractFactory<Channels> factoryChannels, IAbstractFactory<Spots> factorySpots)
@@ -69,9 +74,10 @@ namespace CampaignEditor
 
         private async Task InitializeTargets()
         {
-            var f = _factoryAssignTargets.Create();
-            await f.Initialize(campaign);
-            FillDGTargets(f.SelectedTargetsList);
+            fTargets = _factoryAssignTargets.Create();
+            await fTargets.Initialize(campaign);
+            _targetlist = fTargets.SelectedTargetsList.ToList();
+            FillDGTargets(_targetlist);
         }
 
         private async Task InitializeSpots()
@@ -146,13 +152,17 @@ namespace CampaignEditor
         #region Targets
         private async void btnAssignTargets_Click(object sender, RoutedEventArgs e)
         {
-            var f = _factoryAssignTargets.Create();
-            await f.Initialize(campaign);
-            f.ShowDialog();
-            if (f.modified)
-                FillDGTargets(f.SelectedTargetsList);
+            await fTargets.Initialize(campaign, _targetlist);
+            fTargets.ShowDialog();
+            if (fTargets.targetsModified)
+            {
+                _targetlist = fTargets.SelectedTargetsList.ToList();
+                FillDGTargets(_targetlist);
+                targetsModified = true;
+                fTargets.targetsModified = false;
+            }
         }
-        private void FillDGTargets(ObservableCollection<TargetDTO> selectedTargetsList)
+        private void FillDGTargets(List<TargetDTO> selectedTargetsList)
         {
 
             List<Tuple<string, TargetDTO>> targets = new List<Tuple<string, TargetDTO>>();
@@ -193,14 +203,13 @@ namespace CampaignEditor
         #region Spots
         private async void btnSpots_Click(object sender, RoutedEventArgs e)
         {
-            //f = _factorySpots.Create();
             await fSpots.Initialize(campaign, _spotlist);
             fSpots.ShowDialog();
             if (fSpots.spotsModified)
             {
-                //dgSpots.ItemsSource = fSpots.Spotlist;
                 _spotlist = fSpots.Spotlist.ToList();
                 spotsModified = true;
+                fSpots.spotsModified = false;
             }
         }
         #endregion
@@ -215,6 +224,10 @@ namespace CampaignEditor
             if (spotsModified)
             {
                 await fSpots.UpdateDatabase(_spotlist);
+            }
+            if (targetsModified)
+            {
+                await fTargets.UpdateDatabase(_targetlist);
             }
         }
     }

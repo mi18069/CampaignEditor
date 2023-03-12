@@ -3,13 +3,12 @@ using CampaignEditor.DTOs.CampaignDTO;
 using CampaignEditor.StartupHelpers;
 using Database.DTOs.TargetCmpDTO;
 using Database.DTOs.TargetDTO;
-using Database.Entities;
 using Database.Repositories;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -24,8 +23,7 @@ namespace CampaignEditor
 
         private TargetController _targetController;
         private TargetCmpController _targetCmpController;
-        public bool success = false;
-        public bool modified = false;
+        public bool targetsModified = false;
 
         private ObservableCollection<TargetDTO> _targetsList = new ObservableCollection<TargetDTO>();
         private ObservableCollection<TargetDTO> _selectedTargetsList = new ObservableCollection<TargetDTO>();
@@ -51,33 +49,58 @@ namespace CampaignEditor
             this.DataContext = this;
         }
 
-        public async Task Initialize(CampaignDTO campaign)
+        public async Task Initialize(CampaignDTO campaign, List<TargetDTO> selectedlist = null, bool initialize = false)
         {
             _campaign = campaign;
-            _targetsList.Clear();
-            _selectedTargetsList.Clear();
 
-            var targets = await _targetController.GetAllClientTargets(_campaign.clid);
-            targets = targets.OrderBy(t => t.targname);
-
-            var selectedTargets = await _targetCmpController.GetTargetCmpByCmpid(_campaign.cmpid);
-            foreach (var selectedTarget in selectedTargets)
+            if (selectedlist == null || initialize == true)
             {
-                _selectedTargetsList.Add(await _targetController.GetTargetById(selectedTarget.targid));
-            }
-               
+                _targetsList.Clear();
+                _selectedTargetsList.Clear();
+                var targets = await _targetController.GetAllClientTargets(_campaign.clid);
+                targets = targets.OrderBy(t => t.targname);
 
-            foreach (var target in targets)
-            {
-                bool inSelected = false;
+                var selectedTargets = await _targetCmpController.GetTargetCmpByCmpid(_campaign.cmpid);
+                selectedTargets.OrderBy(s => s.priority);
                 foreach (var selectedTarget in selectedTargets)
                 {
-                    if (selectedTarget.targid == target.targid)
-                        inSelected = true;
+                    _selectedTargetsList.Add(await _targetController.GetTargetById(selectedTarget.targid));
                 }
-                if (!inSelected)
-                    _targetsList.Add(target);
+
+
+                foreach (var target in targets)
+                {
+                    bool inSelected = false;
+                    foreach (var selectedTarget in selectedTargets)
+                    {
+                        if (selectedTarget.targid == target.targid)
+                            inSelected = true;
+                    }
+                    if (!inSelected)
+                        _targetsList.Add(target);
+                }
             }
+            else
+            {
+                // First return all elements to targetsList, then by order place it in selected
+                while (SelectedTargetsList.Count() > 0)
+                {
+                    MoveTargetFromSelected(SelectedTargetsList[0]); // n times move element from first location
+                }
+
+                foreach (var selectedTarget in selectedlist)
+                {
+                    for (int i = 0; i < TargetsList.Count(); i++)
+                    {
+                        if (TargetsList[i].targid == selectedTarget.targid)
+                        {
+                            MoveTargetToSelected(TargetsList[i]);
+                            i--;
+                        }
+                    }
+                }
+            }
+            targetsModified = false;
         }
 
         #region From And To Selected
@@ -123,6 +146,28 @@ namespace CampaignEditor
                 collection.Add(j);
             return collection;
         }
+
+        private void SelectedTargetsItem_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            var target = lbSelectedTargets.SelectedItem as TargetDTO;
+            if (target != null)
+            {
+                MoveTargetFromSelected(target);
+            }
+        }
+
+        private void TargetsItem_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+
+            var target = lbTargets.SelectedItem as TargetDTO;
+            if (target != null)
+            {
+                MoveTargetToSelected(target);
+
+            }
+
+        }
+
         #endregion
 
         private async void btnNewTarget_Click(object sender, RoutedEventArgs e)
@@ -131,7 +176,7 @@ namespace CampaignEditor
             await factory.InitializeTree();
             factory.ShowDialog();
             if (factory.success)
-                await Initialize(_campaign);
+                await Initialize(_campaign, SelectedTargetsList.ToList(), true);
         }
 
         private async void btnEditTarget_Click(object sender, RoutedEventArgs e)
@@ -155,45 +200,29 @@ namespace CampaignEditor
 
         private async void btnSave_Click(object sender, RoutedEventArgs e)
         {
-            success = true;
-            modified = true;
+            targetsModified = true;
+            
+            this.Hide();
+        }
+
+        public async Task UpdateDatabase(List<TargetDTO> targetlist)
+        {
             await _targetCmpController.DeleteTargetCmpByCmpid(_campaign.cmpid);
-            for (int i=0; i<SelectedTargetsList.Count; i++)
+            for (int i = 0; i < targetlist.Count; i++)
             {
                 int cmpid = _campaign.cmpid;
-                int targid = SelectedTargetsList[i].targid;
+                int targid = targetlist[i].targid;
                 int priority = i;
                 await _targetCmpController.CreateTargetCmp(new CreateTargetCmpDTO(cmpid, targid, priority));
             }
-            this.Close();
         }
 
         private void btnCancel_Click(object sender, RoutedEventArgs e)
         {
-            this.Close();
+            this.Hide();
         }
 
-        private void SelectedTargetsItem_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
-        {
-            var target = lbSelectedTargets.SelectedItem as TargetDTO;
-            if (target != null)
-            {
-                MoveTargetFromSelected(target);
-            }
-        }
-
-        private void TargetsItem_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
-        {
-
-            var target = lbTargets.SelectedItem as TargetDTO;
-            if (target != null)
-            {
-                MoveTargetToSelected(target);
-                
-            }
-            
-        }
-
+        #region Drag and Drop selected Targets
         private void ListViewItem_PreviewMouseMove(object sender, MouseEventArgs e)
         {
             if (e.LeftButton == MouseButtonState.Pressed)
@@ -230,7 +259,9 @@ namespace CampaignEditor
                 }
             }
         }
+        #endregion
 
+        #region Edit button mechanism
         private void CheckEdit()
         {
             if ((lbTargets.SelectedItems.Count + lbSelectedTargets.SelectedItems.Count) == 1)
@@ -238,6 +269,14 @@ namespace CampaignEditor
             else
                 btnEditTarget.IsEnabled = false;
         }
+
+        private void lb_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            CheckEdit();
+        }
+        #endregion
+
+        #region Description TextBlock
         private void TargetsItem_PreviewMouseUp(object sender, MouseButtonEventArgs e)
         {
             var target = lbTargets.SelectedItem as TargetDTO;
@@ -266,10 +305,14 @@ namespace CampaignEditor
             tbTargetFilters.Text = "";
         }
 
-        private void lb_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        #endregion
+
+        // Overriding OnClosing because click on x button should only hide window
+        protected override void OnClosing(CancelEventArgs e)
         {
-            CheckEdit();
+            e.Cancel = true;
+            Hide();
         }
     }
-    
+
 }

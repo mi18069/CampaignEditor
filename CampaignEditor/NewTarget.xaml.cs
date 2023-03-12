@@ -185,7 +185,7 @@ namespace CampaignEditor
 
         private void btnSave_Click(object sender, RoutedEventArgs e)
         {
-            if (btnSaveAs.Visibility == Visibility.Collapsed)
+            if (targetToEdit == null)
                 AddNewTarget();
             else
                 UpdateTarget();
@@ -260,7 +260,7 @@ namespace CampaignEditor
                         {
                             sbTargetdefi.Append(" ");
                         }
-                        int childid = Convert.ToInt32((child.Item as TargetValueDTO).value);
+                        string childid = (child.Item as TargetValueDTO).value;
                         sbTargetdefi.Append(parentid + "." + childid);
                         i++;
                         j++;
@@ -316,7 +316,7 @@ namespace CampaignEditor
                             sbTargetdefp.Append("&;");
                         }
                         int id = ConvertToPlaceInTargetdefp(parentid);
-                        int childid = Convert.ToInt32((child.Item as TargetValueDTO).value);
+                        string childid = (child.Item as TargetValueDTO).value;
                         sbTargetdefp.Append("C;" + id + ",1" + ";INL," + childid + ";100;");
                         i++;
                         j++;

@@ -2,7 +2,6 @@
 using CampaignEditor.DTOs.CampaignDTO;
 using CampaignEditor.UserControls;
 using Database.DTOs.SpotDTO;
-using Database.Entities;
 using Database.Repositories;
 using System;
 using System.Collections.Generic;
@@ -196,7 +195,7 @@ namespace CampaignEditor
                     }                
                 }
             }
-            this.Close();
+            this.Hide();
         }
 
         private bool CheckValues()
@@ -240,14 +239,12 @@ namespace CampaignEditor
         }
 
 
-
         // Overriding OnClosing because click on x button should only hide window
         protected override void OnClosing(CancelEventArgs e)
         {
             e.Cancel = true;
             Hide();
         }
-
-        
+   
     }
 }
