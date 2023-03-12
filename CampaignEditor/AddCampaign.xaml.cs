@@ -2,11 +2,13 @@
 using CampaignEditor.DTOs.CampaignDTO;
 using CampaignEditor.StartupHelpers;
 using Database.DTOs.ClientDTO;
+using Database.DTOs.SpotDTO;
 using Database.DTOs.TargetDTO;
 using Database.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -33,6 +35,10 @@ namespace CampaignEditor
 
         AssignTargets assignTargetsFactory = null;
         Channels assignChannelsFactory = null;
+
+        private bool spotsModified = false;
+        private Spots fSpots = null;
+        private List<SpotDTO> _spotlist = new List<SpotDTO>();
         public AddCampaign(ICampaignRepository campaignRepository, ITargetCmpRepository targetCmpRepository, 
             IClientRepository clientRepository, IAbstractFactory<AssignTargets> factoryAssignTargets,
             IAbstractFactory<Channels> factoryChannels, IAbstractFactory<Spots> factorySpots)
@@ -70,9 +76,10 @@ namespace CampaignEditor
 
         private async Task InitializeSpots()
         {
-            var f = _factorySpots.Create();
-            await f.Initialize(campaign);
-            dgSpots.ItemsSource = f.Spotlist;
+            fSpots = _factorySpots.Create();
+            await fSpots.Initialize(campaign);
+            dgSpots.ItemsSource = fSpots.Spotlist;
+            _spotlist = fSpots.Spotlist.ToList();
         }
         private void InitializeFields(string campaignName)
         {
@@ -186,17 +193,29 @@ namespace CampaignEditor
         #region Spots
         private async void btnSpots_Click(object sender, RoutedEventArgs e)
         {
-            var f = _factorySpots.Create();
-            await f.Initialize(campaign);
-            f.ShowDialog();
-            if (f.spotsModified)
-                dgSpots.ItemsSource = f.Spotlist;
+            //f = _factorySpots.Create();
+            await fSpots.Initialize(campaign, _spotlist);
+            fSpots.ShowDialog();
+            if (fSpots.spotsModified)
+            {
+                //dgSpots.ItemsSource = fSpots.Spotlist;
+                _spotlist = fSpots.Spotlist.ToList();
+                spotsModified = true;
+            }
         }
         #endregion
 
         private void btnCancel_Click(object sender, RoutedEventArgs e)
         {
             this.Close();
+        }
+
+        private async void btnSave_Click(object sender, RoutedEventArgs e)
+        {
+            if (spotsModified)
+            {
+                await fSpots.UpdateDatabase(_spotlist);
+            }
         }
     }
 }

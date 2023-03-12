@@ -25,7 +25,7 @@
         <ScrollViewer Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="4" Grid.RowSpan="2"
                       VerticalScrollBarVisibility="Visible">
         <WrapPanel x:Name="wpSpots" Orientation="Vertical"
-                   SizeChanged="wpSpots_SizeChanged"/>
+                   SizeChanged="wpSpots_SizeChanged" Loaded="wpSpots_Loaded"/>
         </ScrollViewer>
         
         <Button x:Name="btnSave" Content="Save" Grid.Row="3" Grid.Column="4" Margin="10"

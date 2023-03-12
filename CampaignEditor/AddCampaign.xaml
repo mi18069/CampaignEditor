@@ -239,7 +239,8 @@
 
         <Button x:Name="btnSave" Content="Save" Grid.Row="5" Grid.Column="8"
                 Width="100" Height="40"
-                HorizontalAlignment="Right" />
+                HorizontalAlignment="Right" 
+                Click="btnSave_Click"/>
         <Button x:Name="btnCancel" Content="Cancel" Grid.Row="5" Grid.Column="8"
                 Width="100" Height="40" HorizontalAlignment="Left" 
                 Click="btnCancel_Click"/>

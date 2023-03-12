@@ -2,9 +2,12 @@
 using CampaignEditor.DTOs.CampaignDTO;
 using CampaignEditor.UserControls;
 using Database.DTOs.SpotDTO;
+using Database.Entities;
 using Database.Repositories;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -21,10 +24,10 @@ namespace CampaignEditor
         private SpotController _spotController;
 
         public bool spotsModified = false;
-        private List<SpotDTO> _spotlist;
+        private ObservableCollection<SpotDTO> _spotlist = new ObservableCollection<SpotDTO>();
         private CampaignDTO _campaign;
 
-        public List<SpotDTO> Spotlist
+        public ObservableCollection<SpotDTO> Spotlist
         {
             get { return _spotlist; }
             set { _spotlist = value; }
@@ -47,17 +50,31 @@ namespace CampaignEditor
 
         public async Task Initialize(CampaignDTO campaign, List<SpotDTO> spotlist = null)
         {
+            wpSpots.Children.Clear();
             Campaign = campaign;
             wpSpots.Children.Add(MakeAddButton());
 
-            List<SpotDTO> spots = (List<SpotDTO>)(await _spotController.GetSpotsByCmpid(Campaign.cmpid));
-            spots.OrderBy(s => s.spotcode);
-            Spotlist = spots;
-            foreach (var spot in spots)
+            // If spots are called for the first time
+            if (spotlist == null)
             {
-                AddSpotItem(spot);
+                var spots = await _spotController.GetSpotsByCmpid(Campaign.cmpid);
+                spots.OrderBy(s => s.spotcode);
+                foreach (var spot in spots)
+                {
+                    Spotlist.Add(spot);
+                    AddSpotItem(spot);
+                }
+            }
+            // Just filling up wpSpots, Spotlist already contains informations
+            else
+            {
+                foreach (var spot in spotlist)
+                {
+                    AddSpotItem(spot);
+                }
             }
             AddSpotItem();
+            ResizeSpotItems();
         }
 
         #region SpotItems
@@ -70,6 +87,12 @@ namespace CampaignEditor
         {
             spotsModified = true;
             UpdateSpots();
+            // When it's only button left, it needs to be placed in a center
+            if (wpSpots.Children.Count == 1)
+            {
+                Button button = wpSpots.Children[0] as Button;
+                button.Margin = new Thickness(wpSpots.ActualWidth / 2, 0, 0, 0);
+            }
         }
 
         private Button MakeAddButton()
@@ -92,7 +115,6 @@ namespace CampaignEditor
         {
             SpotItem spotItem = new SpotItem();
             spotItem.btnDelete.Click += btnDeleteSpot_Click;
-            spotItem.Width = wpSpots.Width; // FIX THIS HARDCODING
             spotItem.lblCode.Content = ((char)('A' + wpSpots.Children.Count-1)).ToString();
 
             if (spot != null)
@@ -121,6 +143,28 @@ namespace CampaignEditor
                 item.lblCode.Content = ((char)('A' + i)).ToString();
             }
         }
+
+        #region Resizing
+        // In order to UserControl items follow width of parent element
+        private void wpSpots_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            ResizeSpotItems();
+        }
+        // Resizing Items when WP is Loaded
+        private void wpSpots_Loaded(object sender, RoutedEventArgs e)
+        {
+            ResizeSpotItems();
+        }
+        private void ResizeSpotItems()
+        {
+            int n = wpSpots.Children.Count;
+            for (int i = 0; i < n - 1; i++)
+            {
+                SpotItem spotItem = wpSpots.Children[i] as SpotItem;
+                spotItem.Width = wpSpots.ActualWidth;
+            }
+        }
+        #endregion
         #endregion
 
         private async void btnSave_Click(object sender, RoutedEventArgs e)
@@ -139,7 +183,6 @@ namespace CampaignEditor
             if (spotsModified && CheckValues())
             {
                 Spotlist.Clear();
-                await _spotController.DeleteSpotsByCmpid(Campaign.cmpid);
                 for (int i = 0; i < n - 1; i++)
                 {
                     SpotItem item = wpSpots.Children[i] as SpotItem;
@@ -147,9 +190,9 @@ namespace CampaignEditor
                     item.tbLength.Text.Trim().Length == 0 &&
                     item.tbName.Text.Trim().Length == 0))
                     {
-                        CreateSpotDTO newSpot = new CreateSpotDTO(Campaign.cmpid, item.lblCode.Content.ToString().Trim(),
+                        SpotDTO spot = new SpotDTO(Campaign.cmpid, item.lblCode.Content.ToString().Trim(),
                         item.tbName.Text.ToString().Trim(), int.Parse(item.tbLength.Text.Trim()), false);
-                        Spotlist.Add(await _spotController.CreateSpot(newSpot));
+                        Spotlist.Add(spot);
                     }                
                 }
             }
@@ -180,14 +223,31 @@ namespace CampaignEditor
 
         private void btnCancel_Click(object sender, RoutedEventArgs e)
         {
-            this.Close();
+            this.Hide();
         }
 
-        private void wpSpots_SizeChanged(object sender, SizeChangedEventArgs e)
+        public async Task UpdateDatabase(List<SpotDTO> spotlist)
         {
-            // Only changing width of the first element, and the others will follow 
-            SpotItem spotItem = wpSpots.Children[0] as SpotItem;
-            spotItem.Width = wpSpots.ActualWidth;
+            await _spotController.DeleteSpotsByCmpid(Campaign.cmpid);
+
+            Spotlist.Clear();
+
+            foreach (var spot in spotlist)
+            {
+                CreateSpotDTO newSpot = new CreateSpotDTO(spot.cmpid, spot.spotcode, spot.spotname, spot.spotlength, spot.ignore);
+                Spotlist.Add(await _spotController.CreateSpot(newSpot));
+            }
         }
+
+
+
+        // Overriding OnClosing because click on x button should only hide window
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            e.Cancel = true;
+            Hide();
+        }
+
+        
     }
 }
