@@ -57,6 +57,7 @@ namespace CampaignEditor
                     Database.Extensions.PricesExtensions.AddPricesExtensions(services);
                     Database.Extensions.SpotExtensions.AddSpotExtensions(services);
                     Database.Extensions.TargetCmpExtensions.AddTargetCmpExtensions(services);
+                    Database.Extensions.GoalsExtensions.AddGoalsExtensions(services);
 
                 }).Build();
 
