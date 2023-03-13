@@ -253,49 +253,41 @@ namespace CampaignEditor
             {
                 if (goals.budget == 0)
                 {
-                    lblBudget.Visibility = Visibility.Collapsed;
-                    lblBudgetValue.Visibility = Visibility.Collapsed;
+                    bBudget.Visibility = Visibility.Collapsed;
                 }
                 else
                 {
-                    lblBudget.Visibility = Visibility.Visible;
-                    lblBudgetValue.Visibility = Visibility.Visible;
+                    bBudget.Visibility = Visibility.Visible;
                     lblBudgetValue.Content = goals.budget.ToString();
                 }
 
                 if (goals.grp == 0)
                 {
-                    lblGRP.Visibility = Visibility.Collapsed;
-                    lblGRPValue.Visibility = Visibility.Collapsed;
+                    bGRP.Visibility = Visibility.Collapsed;
                 }
                 else
                 {
-                    lblGRP.Visibility = Visibility.Visible;
-                    lblGRPValue.Visibility = Visibility.Visible;
+                    bGRP.Visibility = Visibility.Visible;
                     lblGRPValue.Content = goals.grp.ToString();
                 }
 
                 if (goals.ins == 0)
                 {
-                    lblInsertations.Visibility = Visibility.Collapsed;
-                    lblInsertationsValue.Visibility = Visibility.Collapsed;
+                    bInsertations.Visibility = Visibility.Collapsed;
                 }
                 else
                 {
-                    lblInsertations.Visibility = Visibility.Visible;
-                    lblInsertationsValue.Visibility = Visibility.Visible;
+                    bInsertations.Visibility = Visibility.Visible;
                     lblInsertationsValue.Content = goals.ins.ToString();
                 }
 
                 if (goals.rch == 0)
                 {
-                    lblReach.Visibility = Visibility.Collapsed;
-                    lblReachValue.Visibility = Visibility.Collapsed;
+                    bReach.Visibility = Visibility.Collapsed;
                 }
                 else
                 {
-                    lblReach.Visibility = Visibility.Visible;
-                    lblReachValue.Visibility = Visibility.Visible;
+                    bReach.Visibility = Visibility.Visible;
                     lblReachValue.Content = "from " + goals.rch_f1.ToString().Trim() + " to " + goals.rch_f2.ToString().Trim() +
                     " , " + goals.rch.ToString().Trim() + " %";
                 }                  

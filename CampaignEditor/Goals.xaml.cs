@@ -9,6 +9,8 @@ using System.ComponentModel.Design;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 
 namespace CampaignEditor
@@ -36,6 +38,7 @@ namespace CampaignEditor
             InitializeComponent();
         }
 
+        #region Initialization
         public async Task Initialize(CampaignDTO campaign, GoalsDTO goals = null)
         {
             _campaign = campaign;
@@ -75,6 +78,9 @@ namespace CampaignEditor
             CheckCorrectFields(goals);
         }
 
+        #endregion
+
+        #region Checkbox mechanism
         private void CheckCorrectFields(GoalsDTO goals = null)
         {
             if (goals == null)
@@ -107,6 +113,40 @@ namespace CampaignEditor
                     cbRCH.IsChecked = true;
             }
         }
+        private void cb_Checked(object sender, RoutedEventArgs e)
+        {
+            goalsModified = true;
+        }
+
+        private void cb_Unchecked(object sender, RoutedEventArgs e)
+        {
+            goalsModified = true;
+        }
+
+        #endregion
+
+        #region TextBox mechanism
+        // For allowing only numbers to be entered in textboxes
+        Regex onlyNumbersRegex = new Regex("[^0-9]+");
+        private void tb_PreviewTextInput(object sender, System.Windows.Input.TextCompositionEventArgs e)
+        {
+            e.Handled = onlyNumbersRegex.IsMatch(e.Text);
+            if (!e.Handled)
+                goalsModified = true;
+        }
+
+        // Selecting whole text
+        private void tb_GotMouseCapture(object sender, MouseEventArgs e)
+        {
+            var tb = sender as TextBox;
+
+            if (tb.BorderBrush == Brushes.Red)
+                tb.BorderBrush = Brushes.Gray;
+
+            tb.SelectAll();
+            tb.Focus();
+        }
+        #endregion
 
         #region Save and Cancel
         private void btnSave_Click(object sender, RoutedEventArgs e)
@@ -169,6 +209,11 @@ namespace CampaignEditor
                 MessageBox.Show("Invalid value for Reach interval");
                 return false;
             }
+            if (int.Parse(tbRCHFrom.Text) > int.Parse(tbRCHTo.Text))
+            {
+                MessageBox.Show("Invalid value for Reach interval");
+                return false;
+            }
             return true;
         }
 
@@ -193,23 +238,5 @@ namespace CampaignEditor
             Hide();
         }
 
-        // For allowing only numbers to be entered in textboxes
-        Regex onlyNumbersRegex = new Regex("[^0-9]+");
-        private void tb_PreviewTextInput(object sender, System.Windows.Input.TextCompositionEventArgs e)
-        {
-            e.Handled = onlyNumbersRegex.IsMatch(e.Text);
-            if(!e.Handled)
-                goalsModified = true;
-        }
-
-        private void cb_Checked(object sender, RoutedEventArgs e)
-        {
-            goalsModified = true;
-        }
-
-        private void cb_Unchecked(object sender, RoutedEventArgs e)
-        {
-            goalsModified = true;
-        }
     }
 }
