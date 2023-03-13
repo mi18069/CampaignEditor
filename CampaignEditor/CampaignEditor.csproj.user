@@ -28,6 +28,9 @@
     <Compile Update="Clients.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Goals.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="NewCampaign.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -88,6 +91,9 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Clients.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Goals.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="MainWindow.xaml">

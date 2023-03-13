@@ -35,6 +35,7 @@ namespace CampaignEditor
                     services.AddFormFactory<Seasonality>();
                     services.AddFormFactory<Channels>();
                     services.AddFormFactory<Spots>();
+                    services.AddFormFactory<Goals>();
                     services.AddScoped<IDataContext, DataContext>();
                     // Add services
                     Extensions.UserExtensions.AddUserExtensions(services);

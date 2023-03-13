@@ -2,6 +2,7 @@
 using CampaignEditor.DTOs.CampaignDTO;
 using CampaignEditor.StartupHelpers;
 using Database.DTOs.ClientDTO;
+using Database.DTOs.GoalsDTO;
 using Database.DTOs.SpotDTO;
 using Database.DTOs.TargetDTO;
 using Database.Repositories;
@@ -22,6 +23,7 @@ namespace CampaignEditor
         private readonly IAbstractFactory<AssignTargets> _factoryAssignTargets;
         private readonly IAbstractFactory<Channels> _factoryChannels;
         private readonly IAbstractFactory<Spots> _factorySpots;
+        private readonly IAbstractFactory<Goals> _factoryGoals;
 
 
         private CampaignController _campaignController;
@@ -44,15 +46,21 @@ namespace CampaignEditor
         private AssignTargets fTargets = null;
         private List<TargetDTO> _targetlist = new List<TargetDTO>();
 
+        private bool goalsModified = false;
+        private Goals fGoals = null;
+        private GoalsDTO _goals = null;
+
         public AddCampaign(ICampaignRepository campaignRepository, ITargetCmpRepository targetCmpRepository, 
             IClientRepository clientRepository, IAbstractFactory<AssignTargets> factoryAssignTargets,
-            IAbstractFactory<Channels> factoryChannels, IAbstractFactory<Spots> factorySpots)
+            IAbstractFactory<Channels> factoryChannels, IAbstractFactory<Spots> factorySpots,
+            IAbstractFactory<Goals> factoryGoals)
         {
             instance = this;
 
             _factoryAssignTargets = factoryAssignTargets;
             _factoryChannels = factoryChannels;
             _factorySpots = factorySpots;
+            _factoryGoals = factoryGoals;
 
             _campaignController = new CampaignController(campaignRepository);
             _clientController = new ClientController(clientRepository);
@@ -61,6 +69,7 @@ namespace CampaignEditor
 
         }
 
+        #region Initialization
         public async Task Initialization(string campaignName)
         {
             campaign = await _campaignController.GetCampaignByName(campaignName);
@@ -69,7 +78,7 @@ namespace CampaignEditor
             InitializeFields(campaignName);
             await InitializeTargets();
             await InitializeSpots();
-            
+            await InitializeGoals();
         }
 
         private async Task InitializeTargets()
@@ -97,6 +106,16 @@ namespace CampaignEditor
 
             FillTBTextBoxes();
         }
+
+        private async Task InitializeGoals()
+        {
+            fGoals = _factoryGoals.Create();
+            await fGoals.Initialize(campaign);
+            _goals = fGoals.Goal;
+            FillGoals(_goals);
+        }
+
+        #endregion
 
         #region Info
         private void FillTBTextBoxes()
@@ -214,6 +233,76 @@ namespace CampaignEditor
         }
         #endregion
 
+        #region Goals
+        private async void btnGoals_Click(object sender, RoutedEventArgs e)
+        {
+            await fGoals.Initialize(campaign, _goals);
+            fGoals.ShowDialog();
+            if (fGoals.goalsModified)
+            {
+                _goals = fGoals.Goal;
+                goalsModified = true;
+                FillGoals(_goals);
+                fGoals.goalsModified = false;
+            }
+        }
+
+        private void FillGoals(GoalsDTO goals = null)
+        {
+            if (goals != null)
+            {
+                if (goals.budget == 0)
+                {
+                    lblBudget.Visibility = Visibility.Collapsed;
+                    lblBudgetValue.Visibility = Visibility.Collapsed;
+                }
+                else
+                {
+                    lblBudget.Visibility = Visibility.Visible;
+                    lblBudgetValue.Visibility = Visibility.Visible;
+                    lblBudgetValue.Content = goals.budget.ToString();
+                }
+
+                if (goals.grp == 0)
+                {
+                    lblGRP.Visibility = Visibility.Collapsed;
+                    lblGRPValue.Visibility = Visibility.Collapsed;
+                }
+                else
+                {
+                    lblGRP.Visibility = Visibility.Visible;
+                    lblGRPValue.Visibility = Visibility.Visible;
+                    lblGRPValue.Content = goals.grp.ToString();
+                }
+
+                if (goals.ins == 0)
+                {
+                    lblInsertations.Visibility = Visibility.Collapsed;
+                    lblInsertationsValue.Visibility = Visibility.Collapsed;
+                }
+                else
+                {
+                    lblInsertations.Visibility = Visibility.Visible;
+                    lblInsertationsValue.Visibility = Visibility.Visible;
+                    lblInsertationsValue.Content = goals.ins.ToString();
+                }
+
+                if (goals.rch == 0)
+                {
+                    lblReach.Visibility = Visibility.Collapsed;
+                    lblReachValue.Visibility = Visibility.Collapsed;
+                }
+                else
+                {
+                    lblReach.Visibility = Visibility.Visible;
+                    lblReachValue.Visibility = Visibility.Visible;
+                    lblReachValue.Content = "from " + goals.rch_f1.ToString().Trim() + " to " + goals.rch_f2.ToString().Trim() +
+                    " , " + goals.rch.ToString().Trim() + " %";
+                }                  
+            }
+        }
+        #endregion
+
         private void btnCancel_Click(object sender, RoutedEventArgs e)
         {
             this.Close();
@@ -221,14 +310,19 @@ namespace CampaignEditor
 
         private async void btnSave_Click(object sender, RoutedEventArgs e)
         {
-            if (spotsModified)
-            {
-                await fSpots.UpdateDatabase(_spotlist);
-            }
             if (targetsModified)
             {
                 await fTargets.UpdateDatabase(_targetlist);
             }
+            if (spotsModified)
+            {
+                await fSpots.UpdateDatabase(_spotlist);
+            }
+            if (goalsModified)
+            {
+                await fGoals.UpdateDatabase(_goals);
+            }
         }
+
     }
 }

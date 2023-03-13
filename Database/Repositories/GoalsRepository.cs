@@ -24,17 +24,17 @@ namespace Database.Repositories
             using var connection = _context.GetConnection();
 
             var affected = await connection.ExecuteAsync(
-                "INSERT INTO tblcmpgoals (cmpid, gbudget, ggrp, gins, grch_f1, grch_f2, grch) " +
-                    "VALUES (@Cmpid, @Gbudget, @Ggrp, @Gins, @Grch_f1, @Grch_f2, @Grch)",
+                "INSERT INTO tblcmpgoals (cmpid, budget, grp, ins, rch_f1, rch_f2, rch) " +
+                    "VALUES (@Cmpid, @Budget, @Grp, @Ins, @Rch_f1, @Rch_f2, @Rch)",
             new
             {
                 Cmpid = goalsDTO.cmpid,
-                GBudget = goalsDTO.budget,
-                Ggrp = goalsDTO.grp,
-                Gins = goalsDTO.ins,
-                Grch_f1 = goalsDTO.rch_f1,
-                Grch_f2 = goalsDTO.rch_f2,
-                Grch = goalsDTO.rch
+                Budget = goalsDTO.budget,
+                Grp = goalsDTO.grp,
+                Ins = goalsDTO.ins,
+                Rch_f1 = goalsDTO.rch_f1,
+                Rch_f2 = goalsDTO.rch_f2,
+                Rch = goalsDTO.rch
             });
 
             return affected != 0;
@@ -65,18 +65,18 @@ namespace Database.Repositories
             using var connection = _context.GetConnection();
 
             var affected = await connection.ExecuteAsync(
-                "UPDATE tblcmpgoals SET cmpid = @Cmpid, gbudget = @GBudget, ggrp = @Ggrp, " +
-                "gins = @Gins, grch_f1 = @Grch_f1, grch_f2 = @Grch_f2, grch = @Grch " +
+                "UPDATE tblcmpgoals SET cmpid = @Cmpid, budget = @Budget, grp = @Grp, " +
+                "ins = @Ins, rch_f1 = @Rch_f1, rch_f2 = @Rch_f2, rch = @Rch " +
                 "WHERE cmpid = @Cmpid",
                 new
                 {
                     Cmpid = goalsDTO.cmpid,
-                    GBudget = goalsDTO.budget,
-                    Ggrp = goalsDTO.grp,
-                    Gins = goalsDTO.ins,
-                    Grch_f1 = goalsDTO.rch_f1,
-                    Grch_f2 = goalsDTO.rch_f2,
-                    Grch = goalsDTO.rch
+                    Budget = goalsDTO.budget,
+                    Grp = goalsDTO.grp,
+                    Ins = goalsDTO.ins,
+                    Rch_f1 = goalsDTO.rch_f1,
+                    Rch_f2 = goalsDTO.rch_f2,
+                    Rch = goalsDTO.rch
                 });
 
             return affected != 0;

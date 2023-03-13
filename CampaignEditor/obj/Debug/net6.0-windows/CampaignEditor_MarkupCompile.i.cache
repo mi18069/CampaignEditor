@@ -10,11 +10,11 @@ none
 false
 TRACE;DEBUG;NET;NET6_0;NETCOREAPP
 C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\App.xaml
-211129255864
+221519868745
 
-561414101209
+57230220570
 245919750172
-AddCampaign.xaml;AddClient.xaml;AddUser.xaml;AssignTargets.xaml;AssignUser.xaml;Channels.xaml;Clients.xaml;MainWindow.xaml;NewCampaign.xaml;NewTarget.xaml;PriceList.xaml;Seasonality.xaml;Sectable.xaml;Spots.xaml;UserControls\SeasonalitiesItem.xaml;UserControls\SpotItem.xaml;UserControls\TargetDPItem.xaml;UserControls\TreeViewCampaignsItem.xaml;UserControls\TreeViewClientsItem.xaml;UserControls\UsersListItem.xaml;UsersOfClient.xaml;
+AddCampaign.xaml;AddClient.xaml;AddUser.xaml;AssignTargets.xaml;AssignUser.xaml;Channels.xaml;Clients.xaml;Goals.xaml;MainWindow.xaml;NewCampaign.xaml;NewTarget.xaml;PriceList.xaml;Seasonality.xaml;Sectable.xaml;Spots.xaml;UserControls\SeasonalitiesItem.xaml;UserControls\SpotItem.xaml;UserControls\TargetDPItem.xaml;UserControls\TreeViewCampaignsItem.xaml;UserControls\TreeViewClientsItem.xaml;UserControls\UsersListItem.xaml;UsersOfClient.xaml;
 
 True
 
