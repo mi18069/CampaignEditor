@@ -1,8 +1,11 @@
 ﻿using CampaignEditor.Controllers;
 using CampaignEditor.DTOs.CampaignDTO;
 using CampaignEditor.StartupHelpers;
+using Database.DTOs.ActivityDTO;
+using Database.DTOs.ChannelDTO;
 using Database.DTOs.ClientDTO;
 using Database.DTOs.GoalsDTO;
+using Database.DTOs.PricelistDTO;
 using Database.DTOs.SpotDTO;
 using Database.DTOs.TargetDTO;
 using Database.Repositories;
@@ -50,6 +53,10 @@ namespace CampaignEditor
         private Goals fGoals = null;
         private GoalsDTO _goals = null;
 
+        private bool channelsModified = false;
+        private Channels fChannels = null;
+        private List<Tuple<ChannelDTO, PricelistDTO, ActivityDTO>> _channels = null;
+
         public AddCampaign(ICampaignRepository campaignRepository, ITargetCmpRepository targetCmpRepository, 
             IClientRepository clientRepository, IAbstractFactory<AssignTargets> factoryAssignTargets,
             IAbstractFactory<Channels> factoryChannels, IAbstractFactory<Spots> factorySpots,
@@ -79,6 +86,7 @@ namespace CampaignEditor
             await InitializeTargets();
             await InitializeSpots();
             await InitializeGoals();
+            await InitializeChannels();
         }
 
         private async Task InitializeTargets()
@@ -113,6 +121,14 @@ namespace CampaignEditor
             await fGoals.Initialize(campaign);
             _goals = fGoals.Goal;
             FillGoals(_goals);
+        }
+
+        private async Task InitializeChannels()
+        {
+            fChannels = _factoryChannels.Create();
+            await fChannels.Initialize(client, campaign);
+            _channels = fChannels.SelectedChannels;
+            dgChannels.ItemsSource = _channels;
         }
 
         #endregion
@@ -202,19 +218,17 @@ namespace CampaignEditor
         #endregion
 
         #region Channels
-        private void btnChannels_Click(object sender, RoutedEventArgs e)
+        private async void btnChannels_Click(object sender, RoutedEventArgs e)
         {
 
-            if (assignChannelsFactory == null)
+            await fChannels.Initialize(client, campaign, _channels);
+            fChannels.ShowDialog();
+            if (fChannels.channelsModified)
             {
-                assignChannelsFactory = _factoryChannels.Create();
-                assignChannelsFactory.Initialize(client);
-            }
-            assignChannelsFactory.ShowDialog();
-            if (assignChannelsFactory.success)
-            {
-                dgChannels.ItemsSource = assignChannelsFactory.LastSelected;
-                assignChannelsFactory.success = false;
+                _channels = fChannels.SelectedChannels;
+                dgChannels.ItemsSource = _channels;
+                channelsModified = true;
+                fChannels.channelsModified = false;
             }
         }
         #endregion
@@ -313,6 +327,10 @@ namespace CampaignEditor
             if (goalsModified)
             {
                 await fGoals.UpdateDatabase(_goals);
+            }
+            if (channelsModified)
+            {
+                await fChannels.UpdateDatabase(_channels);
             }
         }
 
