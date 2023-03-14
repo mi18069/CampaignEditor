@@ -107,3 +107,14 @@ ALTER TABLE tblcmpgoals RENAME COLUMN gins TO ins;
 ALTER TABLE tblcmpgoals RENAME COLUMN grch_f1 TO rch_f1;
 ALTER TABLE tblcmpgoals RENAME COLUMN grch_f2 TO rch_f2;
 ALTER TABLE tblcmpgoals RENAME COLUMN grch TO rch;
+
+-- Changes in tblcmpchn
+ALTER TABLE tblcmpchn RENAME TO tblcmpchn0
+CREATE TABLE IF NOT EXISTS tblcmpchn (
+   cmpid int NOT NULL,
+   chid int NOT NULL,
+   plid int NOT NULL,
+   actid int NOT NULL,
+   plidbuy int,
+   actidbuy int
+);
