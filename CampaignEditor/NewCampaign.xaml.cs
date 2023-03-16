@@ -61,8 +61,8 @@ namespace CampaignEditor
             int clid = client.clid;
             string cmpsdate = DateToString(now);
             string cmpedate = DateToString(now);
-            string cmpstime = TimeToString(now);
-            string cmpetime = TimeToString(now);
+            string cmpstime = "02:00:00";
+            string cmpetime = "25:59:59";
             int cmpstatus = 0;
             string sostring = "1;999;F;01234;012345";
             int activity = 0;

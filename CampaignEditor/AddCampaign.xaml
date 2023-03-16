@@ -23,78 +23,114 @@
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="10" />
-            <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" MaxHeight="250"/>
             <RowDefinition Height="10" />
             <RowDefinition Height="auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="50" />
             <RowDefinition Height="10" />
         </Grid.RowDefinitions>
-        <Border Grid.Row="1" Grid.Column="2"
-            BorderBrush="LightGray" BorderThickness="1" 
-                Width="300" Height="280">
+        <Border Grid.Row="3" Grid.Column="2" Grid.RowSpan="2"
+            BorderBrush="LightGray" BorderThickness="1"
+                Margin="0,10,0,0">
             <Grid>
-                <Label x:Name="lblClient" Content="Client: " HorizontalContentAlignment="Right"
-               Width="70"
-               HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,20,0,0" />
-                <Label x:Name="lblClientname" Content="" HorizontalContentAlignment="Left" FontWeight="Black"
-               Width="200"
-               HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,20,10,0" />
-
-                <Label x:Name="lblName" Content="Name: " HorizontalContentAlignment="Right"
-               Width="70"
-               HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,60,0,0" />
-                <TextBox x:Name="tbName" 
-                 Width="200"
-                 TextWrapping="NoWrap"
-                 HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,65,10,0" />
-                <Label x:Name="lblStartDate" Content="Start Date: " HorizontalContentAlignment="Right"
-               Width="100"
-               HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,100,0,0" />
-                <DatePicker x:Name="dpStartDate" 
-                    Width="170" Height="30"
-                    HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,105,10,0"/>
-                <Label x:Name="lblEndDate" Content="End Date: " HorizontalContentAlignment="Right" 
-               Width="100"
-               HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,140,0,0" />
-                <DatePicker x:Name="dpEndDate" 
-                    Width="170" Height="30"
-                    HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,145,10,0"/>
-                <Label x:Name="lblTbStart" Content="TB Start: " HorizontalContentAlignment="Right" 
-               Width="80"
-               HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,180,0,0" />
-                <TextBox x:Name="tbTbStartHours" MaxLength="2"
-                 Width="50"
-                 TextWrapping="Wrap"
-                 HorizontalAlignment="Left" VerticalAlignment="Top" Margin="100,185,0,0"
-                 TextChanged="TxtBoxes_TextChanged"/>
-                <Label x:Name="lblDots1" Content=":" HorizontalContentAlignment="Right" FontWeight="Bold" 
-               HorizontalAlignment="Left" VerticalAlignment="Top" Margin="154,180,0,0" />
-                <TextBox x:Name="tbTbStartMinutes" MaxLength="2"
-                 Width="50"
-                 TextWrapping="Wrap"
-                 HorizontalAlignment="Left" VerticalAlignment="Top" Margin="170,185,0,0" 
-                 TextChanged="TxtBoxes_TextChanged"/>
-                <Label x:Name="lblTbEnd" Content="TB End: " HorizontalContentAlignment="Right" 
-               Width="80"
-               HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,220,0,0" />
-                <TextBox x:Name="tbTbEndHours" MaxLength="2"
-                 Width="50"
-                 TextWrapping="Wrap"
-                 HorizontalAlignment="Left" VerticalAlignment="Top" Margin="100,225,0,0" 
-                 TextChanged="TxtBoxes_TextChanged"/>
-                <Label x:Name="lblDots2" Content=":" HorizontalContentAlignment="Right" FontWeight="Bold" 
-               HorizontalAlignment="Left" VerticalAlignment="Top" Margin="154,220,0,0" />
-                <TextBox x:Name="tbTbEndMinutes" MaxLength="2"
-                 Width="50"
-                 TextWrapping="Wrap"
-                 HorizontalAlignment="Left" VerticalAlignment="Top" Margin="170,225,0,0" 
-                 TextChanged="TxtBoxes_TextChanged"/>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="10" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="10" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="10" />
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="10" />
+                </Grid.RowDefinitions>
+                <Button x:Name="btnCmpInfo" Content="Info" Grid.Row="1" Grid.Column="1"
+                        Width="200" Height="40" Margin="10"
+                        Click="btnCmpInfo_Click"/>
+                <Border x:Name="bClient" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" 
+                        BorderThickness="0, 0, 0, 1" BorderBrush="Black">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Label x:Name="lblClient" Content="Client: " Grid.Column="0"/>
+                        <Label x:Name="lblClientValue" Grid.Column="1" 
+                           HorizontalContentAlignment="Right" FontWeight="DemiBold"/>
+                    </Grid>
+                </Border>
+                <Border x:Name="bCampaign" Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2" 
+                        BorderThickness="0, 0, 0, 1" BorderBrush="Black">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Label x:Name="lblCampaign" Content="Campaign: " Grid.Column="0"/>
+                        <Label x:Name="lblCampaignValue" Grid.Column="1" 
+                       HorizontalContentAlignment="Right" FontWeight="DemiBold"/>
+                    </Grid>
+                </Border>
+                <Border x:Name="bStartDate" Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" 
+                        BorderThickness="0, 0, 0, 1" BorderBrush="Black">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Label x:Name="lblStartDate" Content="Start Date: " Grid.Column="0"/>
+                        <Label x:Name="lblStartDateValue" Grid.Column="1" 
+                       HorizontalContentAlignment="Right" FontWeight="DemiBold"/>
+                    </Grid>
+                </Border>
+                <Border x:Name="bEndDate" Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="2" 
+                        BorderThickness="0, 0, 0, 1" BorderBrush="Black">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Label x:Name="lblEndDate" Content="End Date: " Grid.Column="0"/>
+                        <Label x:Name="lblEndDateValue" Grid.Column="1" 
+                       HorizontalContentAlignment="Right" FontWeight="DemiBold"/>
+                    </Grid>
+                </Border>
+                <Border x:Name="bDPStart" Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="2" 
+                        BorderThickness="0, 0, 0, 1" BorderBrush="Black">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Label x:Name="lblDPStart" Content="DP Start: " Grid.Column="0"/>
+                        <Label x:Name="lblDPStartValue" Grid.Column="1" 
+                       HorizontalContentAlignment="Right" FontWeight="DemiBold"/>
+                    </Grid>
+                </Border>
+                <Border x:Name="bDPEnd" Grid.Row="7" Grid.Column="1" Grid.ColumnSpan="2" 
+                        BorderThickness="0, 0, 0, 1" BorderBrush="Black">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Label x:Name="lblDPEnd" Content="DP End: " Grid.Column="0"/>
+                        <Label x:Name="lblDPEndValue" Grid.Column="1" 
+                       HorizontalContentAlignment="Right" FontWeight="DemiBold"/>
+                    </Grid>
+                </Border>
             </Grid>
         </Border>
         <Border Grid.Row="1" Grid.Column="4"
                 BorderBrush="LightGray" BorderThickness="1" 
-                MinWidth="300" Height="280">
+                MinWidth="300" >
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="10" />
@@ -150,7 +186,7 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="10" />
                     <RowDefinition Height="Auto" />
-                    <RowDefinition />
+                    <RowDefinition Height="*"/>
                     <RowDefinition Height="10" />
                 </Grid.RowDefinitions>
                 <Button Grid.Row="1" Grid.Column="1"
@@ -158,14 +194,15 @@
                         MinWidth="200" Height="40"
                         HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,10"
                         Click="btnSpots_Click"/>
-                <ScrollViewer Grid.Row="2" Grid.Column="1"
-                              MaxHeight="200" VerticalScrollBarVisibility="Auto">
+                <ScrollViewer x:Name="svSpots" Grid.Row="2" Grid.Column="1"
+                              VerticalScrollBarVisibility="Auto">
                     <DataGrid 
                           x:Name="dgSpots" 
                           FontSize="15"
                           CanUserSortColumns="False"
                           AutoGenerateColumns="False"
-                          IsReadOnly="True">
+                          IsReadOnly="True"
+                        Loaded="dgSpots_Loaded">
                         <DataGrid.Resources>
                             <Style TargetType="{x:Type DataGridColumnHeader}">
                                 <Setter Property="Background" Value="LightGray"/>
@@ -187,9 +224,8 @@
             </Grid>
         </Border>
 
-        <Border Grid.Row="3" Grid.Column="2" Grid.RowSpan="2" 
-                BorderBrush="LightGray" BorderThickness="1"
-                Margin="0,10,0,0">
+        <Border Grid.Row="1" Grid.Column="2" 
+                BorderBrush="LightGray" BorderThickness="1">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="10" />

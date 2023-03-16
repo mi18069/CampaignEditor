@@ -194,8 +194,9 @@ namespace CampaignEditor
                         Spotlist.Add(spot);
                     }                
                 }
+                this.Hide();
             }
-            this.Hide();
+            
         }
 
         private bool CheckValues()
@@ -205,15 +206,20 @@ namespace CampaignEditor
             {
                 SpotItem spotItem = wpSpots.Children[i] as SpotItem;
                 // Don't check last item if it's empty
-                if (!(i == n - 2 && 
+                if (i == n - 2 && 
                     spotItem.tbLength.Text.Trim().Length == 0 && 
-                    spotItem.tbName.Text.Trim().Length == 0))
+                    spotItem.tbName.Text.Trim().Length == 0)
                 {
                     continue;
                 }
                 if (!spotItem.tbLength.Text.Trim().All(Char.IsDigit))
                 {
                     MessageBox.Show("Invalid value for length (integers only)");
+                    return false;
+                }
+                if (spotItem.tbLength.Text.Trim() == "" || spotItem.tbLength.Text.Trim() == null)
+                {
+                    MessageBox.Show("Enter length");
                     return false;
                 }
             }

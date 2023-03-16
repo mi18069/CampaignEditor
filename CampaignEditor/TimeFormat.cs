@@ -27,5 +27,14 @@ namespace CampaignEditor
 
             return new DateTime(year, month, day);
         }
+        public static string YMDStringToRepresentative(string timeString)
+        {
+            int year = int.Parse(timeString.Substring(0, 4));
+            int month = int.Parse(timeString.Substring(4, 2));
+            int day = int.Parse(timeString.Substring(6, 2));
+
+            return day + "." + month + "." + year;
+        }
+
     }
 }

@@ -1,6 +1,5 @@
 ﻿using CampaignEditor.Controllers;
 using CampaignEditor.DTOs.UserDTO;
-using CampaignEditor.Entities;
 using CampaignEditor.Repositories;
 using CampaignEditor.StartupHelpers;
 using System;
@@ -23,6 +22,7 @@ namespace CampaignEditor
         private string imgUnpeekPath = "\\images\\PassUnpeekImg.png";
 
         public static UserDTO user = null;
+        private bool onlyOne = false; // To ensure that only one window is shown
         public MainWindow(IUserRepository userRepository, IAbstractFactory<Clients> factoryClients)
         {
             
@@ -51,10 +51,14 @@ namespace CampaignEditor
             }
             else
             {
-                user = await _userController.GetUserByUsername(username);
-                var f = _factoryClients.Create();
-                f.Show();
-                this.Close();
+                if (!onlyOne)
+                {
+                    onlyOne = true;
+                    user = await _userController.GetUserByUsername(username);
+                    var f = _factoryClients.Create();
+                    f.Show();
+                    this.Close();
+                }
             }
                 
         }
