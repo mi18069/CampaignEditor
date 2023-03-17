@@ -17,6 +17,8 @@ namespace CampaignEditor
         private ClientController _clientController;
         private UserController _userController;
         private UserClientsController _userClientsController;
+
+        private ClientDTO _client = null;
         public UsersAndClients(IClientRepository clientRepository, 
                                IUserRepository userRepository,
                                IUserClientsRepository userClientsRepository)
@@ -26,12 +28,16 @@ namespace CampaignEditor
             _userClientsController = new UserClientsController(userClientsRepository);
         }
 
+        public void Initialize(ClientDTO client)
+        {
+            _client = client;
+        }
+
         #region Users of Client
 
-        public async Task<IEnumerable<UserDTO>> GetAllUsersOfClient(string clientname)
+        public async Task<IEnumerable<UserDTO>> GetAllUsersOfClient()
         {
-            ClientDTO client = await _clientController.GetClientByName(clientname);
-            var userClients = await _userClientsController.GetAllUserClientsByClientId(client.clid);
+            var userClients = await _userClientsController.GetAllUserClientsByClientId(_client.clid);
             var users = new List<UserDTO>();
 
             foreach (var userClient in userClients)
@@ -46,7 +52,7 @@ namespace CampaignEditor
         public async Task<IEnumerable<UserDTO>> GetUsersNotFromClient(string clientname)
         {
             var AllUsers = await _userController.GetAllUsers();
-            var ClientUsers = await GetAllUsersOfClient(clientname);
+            var ClientUsers = await GetAllUsersOfClient();
 
             var remainingUsers = AllUsers.Where(p => !ClientUsers.Any(p2 => p2.usrid == p.usrid)); 
 
@@ -58,10 +64,10 @@ namespace CampaignEditor
         #region Assign/Unassign Users to Clients
 
 
-        public async Task AssignUserToClient(string username, string clientname)
+        public async Task AssignUserToClient(string username)
         {
             UserDTO user = await _userController.GetUserByUsername(username);
-            ClientDTO client = await _clientController.GetClientByName(clientname);
+            ClientDTO client = await _clientController.GetClientByName(_client.clname);
             var userClient = new UserClientsDTO(client.clid, user.usrid);
             await _userClientsController.CreateUserClients(userClient);
         }

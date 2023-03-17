@@ -1,4 +1,6 @@
 ﻿using CampaignEditor.StartupHelpers;
+using Database.DTOs.ClientDTO;
+using System.ComponentModel.Design;
 using System.Linq;
 using System.Windows;
 
@@ -8,16 +10,25 @@ namespace CampaignEditor
     {
 
         private readonly IAbstractFactory<UsersAndClients> _factoryUsersAndClients;
+
+        private ClientDTO _client;
         public AssignUser(IAbstractFactory<UsersAndClients> factoryUsersAndClients)
         {
             _factoryUsersAndClients = factoryUsersAndClients;
             InitializeComponent();
+        }
+
+        public void Initialize(ClientDTO client)
+        {
+            _client = client;
             PopulateComboBox();
         }
 
         private async void PopulateComboBox()
         {
-            var usernames = await _factoryUsersAndClients.Create().GetUsersNotFromClient("Stark");
+            var f = _factoryUsersAndClients.Create();
+            f.Initialize(_client);
+            var usernames = await f.GetUsersNotFromClient(_client.clname.Trim());
             usernames = usernames.OrderBy(u => u.usrname);
             foreach (var username in usernames)
             {

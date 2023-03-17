@@ -295,9 +295,12 @@ namespace CampaignEditor
             await _clientsTree.UpdateTree();
         }
 
-        private void btnShowUsersOfClient_Click(object sender, RoutedEventArgs e)
+        private async void btnShowUsersOfClient_Click(object sender, RoutedEventArgs e)
         {
-            _factoryUsersOfClient.Create().Show();
+            var f = _factoryUsersOfClient.Create();
+            string clientname = ((HeaderedItemsControl)tvClients.SelectedItem).Header.ToString()!.Trim();
+            await f.Initialize(clientname);
+            f.ShowDialog();
         }
         private void btnAddUser_Click(object sender, RoutedEventArgs e)
         {
@@ -317,9 +320,6 @@ namespace CampaignEditor
             string clientname = ((HeaderedItemsControl)tvClients.SelectedItem).Header.ToString()!.Trim();
             await _clientsTree.DeleteClient(clientname);
         }
-
-
-        #endregion
 
         private async void btnRenameClient_Click(object sender, RoutedEventArgs e)
         {
@@ -346,5 +346,9 @@ namespace CampaignEditor
                 await _clientsTree.InitializeTree();
             }
         }
+
+        #endregion
+
+
     }
 }

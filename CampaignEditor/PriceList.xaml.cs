@@ -159,7 +159,7 @@ namespace CampaignEditor
         {
             TargetDPItem dpItem = new TargetDPItem();
             dpItem.btnDelete.Click += btnDeleteDP_Click;
-            dpItem.Width = wpDayParts.Width;
+            dpItem.Width = wpDayParts.Width;    
 
             return dpItem;
         }
