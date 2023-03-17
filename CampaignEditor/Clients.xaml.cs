@@ -61,7 +61,7 @@ namespace CampaignEditor
         // Variables in order to determine wheather some of the context men uoptions should be disabled
         public bool isAdministrator { get; set; }  = false;
         public bool isReadWrite { get; set;  } = false;
-
+        public bool isReadOnly { get; set; } = false;
         public Clients(IAbstractFactory<ClientsTreeView> factoryClientsTreeView, IAbstractFactory<AddUser> factoryAddUser,
             IAbstractFactory<AddClient> factoryAddClient, IAbstractFactory<AddCampaign> factoryAddCampaign,
             IAbstractFactory<UsersOfClient> factoryUsersOfClient, IAbstractFactory<NewCampaign> factoryNewCampaign,
@@ -86,6 +86,7 @@ namespace CampaignEditor
             
             isAdministrator = MainWindow.user.usrlevel == 0;
             isReadWrite = MainWindow.user.usrlevel == 1 ? true : isAdministrator;
+            isReadOnly = MainWindow.user.usrlevel == 2;
 
             lblUsername.Content += MainWindow.user.usrname;
 
@@ -282,7 +283,7 @@ namespace CampaignEditor
         {
             var f = _factoryAddCampaign.Create();
             string campaignName = ((HeaderedItemsControl)tvClients.SelectedItem).Header.ToString()!.Trim();
-            f.Initialization(campaignName);
+            f.Initialization(campaignName, isReadOnly);
             f.Show();
         }
 

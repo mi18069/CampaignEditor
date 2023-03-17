@@ -11,12 +11,9 @@ using Database.DTOs.TargetDTO;
 using Database.Repositories;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
 
 namespace CampaignEditor
 {
@@ -37,6 +34,8 @@ namespace CampaignEditor
 
         private CampaignDTO campaign = null;
         public ClientDTO client = null;
+
+        private bool isReadOnly = false;
 
         public static AddCampaign instance;
 
@@ -84,10 +83,11 @@ namespace CampaignEditor
         }
 
         #region Initialization
-        public async Task Initialization(string campaignName)
+        public async Task Initialization(string campaignName, bool readOnly = false)
         {
             campaign = await _campaignController.GetCampaignByName(campaignName);
             client = await _clientController.GetClientById(campaign.clid);
+            isReadOnly = readOnly;
 
             this.Title = "Client: " + client.clname.Trim() + "  Campaign: " + campaign.cmpname.Trim();
 
@@ -100,6 +100,8 @@ namespace CampaignEditor
 
         private async Task InitializeTargets()
         {
+            if (isReadOnly)
+                btnAssignTargets.IsEnabled = false;
             fTargets = _factoryAssignTargets.Create();
             await fTargets.Initialize(campaign);
             _targetlist = fTargets.SelectedTargetsList.ToList();
@@ -108,6 +110,8 @@ namespace CampaignEditor
 
         private async Task InitializeSpots()
         {
+            if (isReadOnly)
+                btnSpots.IsEnabled = false;
             fSpots = _factorySpots.Create();
             await fSpots.Initialize(campaign);
             dgSpots.ItemsSource = fSpots.Spotlist;
@@ -115,6 +119,8 @@ namespace CampaignEditor
         }
         private void InitializeInfo()
         {
+            if (isReadOnly)
+                btnCmpInfo.IsEnabled = false;
             fInfo = _factoryInfo.Create();
             fInfo.Initialize(client, campaign);
             _campaign = fInfo.Campaign;
@@ -123,6 +129,8 @@ namespace CampaignEditor
 
         private async Task InitializeGoals()
         {
+            if (isReadOnly)
+                btnGoals.IsEnabled = false;
             fGoals = _factoryGoals.Create();
             await fGoals.Initialize(campaign);
             _goals = fGoals.Goal;
@@ -131,6 +139,8 @@ namespace CampaignEditor
 
         private async Task InitializeChannels()
         {
+            if (isReadOnly)
+                btnChannels.IsEnabled = false;
             fChannels = _factoryChannels.Create();
             await fChannels.Initialize(client, campaign);
             _channels = fChannels.SelectedChannels;
