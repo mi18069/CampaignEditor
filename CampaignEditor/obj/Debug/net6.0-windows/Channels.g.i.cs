@@ -133,7 +133,7 @@ namespace CampaignEditor {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/CampaignEditor;component/channels.xaml", System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri("/CampaignEditor;V1.0.0.0;component/channels.xaml", System.UriKind.Relative);
             
             #line 1 "..\..\..\Channels.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);
