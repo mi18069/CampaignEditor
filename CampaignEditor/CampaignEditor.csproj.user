@@ -43,6 +43,9 @@
     <Compile Update="PriceList.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Rename.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Spots.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -112,6 +115,9 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="PriceList.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Rename.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Spots.xaml">

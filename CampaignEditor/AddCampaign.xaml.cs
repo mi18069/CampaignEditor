@@ -23,6 +23,7 @@ namespace CampaignEditor
 
     public partial class AddCampaign : Window
     {
+
         private readonly IAbstractFactory<AssignTargets> _factoryAssignTargets;
         private readonly IAbstractFactory<Channels> _factoryChannels;
         private readonly IAbstractFactory<Spots> _factorySpots;
@@ -79,7 +80,7 @@ namespace CampaignEditor
             _clientController = new ClientController(clientRepository);
             _targetCmpController = new TargetCmpController(targetCmpRepository);
             InitializeComponent();            
-
+            
         }
 
         #region Initialization
@@ -87,6 +88,8 @@ namespace CampaignEditor
         {
             campaign = await _campaignController.GetCampaignByName(campaignName);
             client = await _clientController.GetClientById(campaign.clid);
+
+            this.Title = "Client: " + client.clname.Trim() + "  Campaign: " + campaign.cmpname.Trim();
 
             InitializeInfo();
             await InitializeTargets();
@@ -156,11 +159,20 @@ namespace CampaignEditor
             {
 
                 lblClientValue.Content = client.clname.ToString().Trim();
+                if (lblClientValue.Content.ToString().Length > 15)
+                {
+                    lblClientValue.Content = lblClientValue.Content.ToString().Substring(0, 14) + "...";
+                }
                 lblCampaignValue.Content = campaign.cmpname.ToString().Trim();
+                if (lblCampaignValue.Content.ToString().Length > 15)
+                {
+                    lblCampaignValue.Content = lblCampaignValue.Content.ToString().Substring(0, 14) + "...";
+                }
                 lblStartDateValue.Content = TimeFormat.YMDStringToRepresentative(campaign.cmpsdate);
                 lblEndDateValue.Content = TimeFormat.YMDStringToRepresentative(campaign.cmpedate);
                 lblDPStartValue.Content = campaign.cmpstime.ToString().Trim();
                 lblDPEndValue.Content = campaign.cmpetime.ToString().Trim();
+                lblActiveValue.Content = campaign.active;
             }
         }
 

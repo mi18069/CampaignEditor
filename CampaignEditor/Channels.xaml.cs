@@ -8,6 +8,7 @@ using Database.DTOs.ClientDTO;
 using Database.DTOs.PricelistChannels;
 using Database.DTOs.PricelistDTO;
 using Database.Repositories;
+using Microsoft.Extensions.Logging.Abstractions;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -226,8 +227,16 @@ namespace CampaignEditor
 
         #endregion
 
+        #region Selection Changed
+
         private async void lvChannels_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
+            PricelistDTO lastSelected = null;
+            if (lvPricelists.SelectedItems.Count > 0)
+            {
+                lastSelected = lvPricelists.SelectedItem as PricelistDTO;
+            }
+            PricelistList.Clear();
             // Making lists of integers for faster transition of elements
             List<int> plids = new List<int>();
             List<int> chids = new List<int>();
@@ -247,17 +256,24 @@ namespace CampaignEditor
 
             // Clearing and filling with the available pricelists for selected channels
             // == 0 because when more channels are selected, only one should modify lvPricelists
+            int selectedIndex = 0;
             if (lvPricelists.SelectedItems.Count == 0)
             {
-                PricelistList.Clear();
                 foreach (int plid in plIds)
                 {
                     PricelistDTO pricelist = await _pricelistController.GetPricelistById(plid);
                     PricelistList.Add(pricelist);
+                    if (lastSelected != null && lastSelected.plid == pricelist.plid)
+                    {
+                        lvPricelists.SelectedIndex = selectedIndex;
+                    }
+                    selectedIndex++;
                 }
             }
 
         }
+
+        #endregion
 
         #region Pricelist
         private void btnEditPricelist_Click(object sender, RoutedEventArgs e)
@@ -306,7 +322,6 @@ namespace CampaignEditor
             e.Cancel = true;
             Hide();
         }
-
 
     }
 }

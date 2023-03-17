@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.ComponentModel;
 
 namespace CampaignEditor
 {
@@ -129,6 +130,13 @@ namespace CampaignEditor
                 campaign.cmpsdate, campaign.cmpedate, campaign.cmpstime, campaign.cmpetime,
                 campaign.cmpstatus, campaign.sostring, campaign.activity, campaign.cmpaddedon,
                 campaign.cmpaddedat, campaign.active, campaign.forcec));
+        }
+
+        // Overriding OnClosing because click on x button should only hide window
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            e.Cancel = true;
+            Hide();
         }
     }
 }

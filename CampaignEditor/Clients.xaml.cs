@@ -4,8 +4,11 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Media;
+using CampaignEditor.DTOs.CampaignDTO;
 using CampaignEditor.StartupHelpers;
+using Database.DTOs.ClientDTO;
 
 namespace CampaignEditor
 {
@@ -19,6 +22,7 @@ namespace CampaignEditor
         private readonly IAbstractFactory<ClientsTreeView> _factoryClientsTreeView;
         private readonly IAbstractFactory<AddCampaign> _factoryAddCampaign;
         private readonly IAbstractFactory<NewCampaign> _factoryNewCampaign;
+        private readonly IAbstractFactory<Rename> _factoryRename;
 
         private ClientsTreeView _clientsTree;
 
@@ -60,7 +64,8 @@ namespace CampaignEditor
 
         public Clients(IAbstractFactory<ClientsTreeView> factoryClientsTreeView, IAbstractFactory<AddUser> factoryAddUser,
             IAbstractFactory<AddClient> factoryAddClient, IAbstractFactory<AddCampaign> factoryAddCampaign,
-            IAbstractFactory<UsersOfClient> factoryUsersOfClient, IAbstractFactory<NewCampaign> factoryNewCampaign)
+            IAbstractFactory<UsersOfClient> factoryUsersOfClient, IAbstractFactory<NewCampaign> factoryNewCampaign,
+            IAbstractFactory<Rename> factoryRename)
         {
             InitializeComponent();
             this.DataContext = this;
@@ -70,6 +75,7 @@ namespace CampaignEditor
             _factoryAddCampaign = factoryAddCampaign;
             _factoryUsersOfClient = factoryUsersOfClient;
             _factoryNewCampaign = factoryNewCampaign;
+            _factoryRename = factoryRename;
 
             instance = this;
 
@@ -315,5 +321,30 @@ namespace CampaignEditor
 
         #endregion
 
+        private async void btnRenameClient_Click(object sender, RoutedEventArgs e)
+        {
+            var f = _factoryRename.Create();
+            MenuItem menuItem = (MenuItem)sender;
+            string name = ((TreeViewItem)tvClients.SelectedValue).Header.ToString().Trim();
+            f.RenameClient(name);
+            f.ShowDialog();
+            if (f.renamed)
+            {
+                await _clientsTree.InitializeTree();
+            }
+        }
+
+        private async void btnRenameCampaign_Click(object sender, RoutedEventArgs e)
+        {
+            var f = _factoryRename.Create();
+            MenuItem menuItem = (MenuItem)sender;
+            string name = ((TreeViewItem)tvClients.SelectedValue).Header.ToString().Trim();
+            f.RenameCampaign(name);
+            f.ShowDialog();
+            if (f.renamed)
+            {
+                await _clientsTree.InitializeTree();
+            }
+        }
     }
 }

@@ -76,8 +76,8 @@ namespace Database.Repositories
                 {
                     Clid = clientDTO.clid,
                     Clname = clientDTO.clname,
-                    Usrpass = clientDTO.clactive,
-                    Usrlevel = clientDTO.spid
+                    Clactive = clientDTO.clactive,
+                    Spid = clientDTO.spid
                 });
 
             return affected != 0;

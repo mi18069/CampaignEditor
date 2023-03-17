@@ -30,104 +30,121 @@
             <RowDefinition Height="50" />
             <RowDefinition Height="10" />
         </Grid.RowDefinitions>
-        <Border Grid.Row="3" Grid.Column="2" Grid.RowSpan="2"
+        <ScrollViewer Grid.Row="3" Grid.Column="2" Grid.RowSpan="2" Margin="0,10,0,0"
+                      VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Auto"
+                      MaxWidth="300">
+            <Border 
             BorderBrush="LightGray" BorderThickness="1"
-                Margin="0,10,0,0">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="10" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="10" />
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="10" />
-                    <RowDefinition Height="auto" />
-                    <RowDefinition Height="auto" />
-                    <RowDefinition Height="auto" />
-                    <RowDefinition Height="auto" />
-                    <RowDefinition Height="auto" />
-                    <RowDefinition Height="auto" />
-                    <RowDefinition Height="auto" />
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="10" />
-                </Grid.RowDefinitions>
-                <Button x:Name="btnCmpInfo" Content="Info" Grid.Row="1" Grid.Column="1"
+                >
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="10" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="10" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="10" />
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="10" />
+                    </Grid.RowDefinitions>
+                    <Button x:Name="btnCmpInfo" Content="Info" Grid.Row="1" Grid.Column="1"
                         Width="200" Height="40" Margin="10"
                         Click="btnCmpInfo_Click"/>
-                <Border x:Name="bClient" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" 
+                    <Border x:Name="bClient" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" 
                         BorderThickness="0, 0, 0, 1" BorderBrush="Black">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <Label x:Name="lblClient" Content="Client: " Grid.Column="0"/>
-                        <Label x:Name="lblClientValue" Grid.Column="1" 
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Label x:Name="lblClient" Content="Client: " Grid.Column="0"/>
+                            <Label x:Name="lblClientValue" Grid.Column="1" 
                            HorizontalContentAlignment="Right" FontWeight="DemiBold"/>
-                    </Grid>
-                </Border>
-                <Border x:Name="bCampaign" Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2" 
+                        </Grid>
+                    </Border>
+                    <Border x:Name="bCampaign" Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2" 
                         BorderThickness="0, 0, 0, 1" BorderBrush="Black">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <Label x:Name="lblCampaign" Content="Campaign: " Grid.Column="0"/>
-                        <Label x:Name="lblCampaignValue" Grid.Column="1" 
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Label x:Name="lblCampaign" Content="Campaign: " Grid.Column="0"/>
+                            <Label x:Name="lblCampaignValue" Grid.Column="1" 
                        HorizontalContentAlignment="Right" FontWeight="DemiBold"/>
-                    </Grid>
-                </Border>
-                <Border x:Name="bStartDate" Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" 
+                        </Grid>
+                    </Border>
+                    <Border x:Name="bStartDate" Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" 
                         BorderThickness="0, 0, 0, 1" BorderBrush="Black">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <Label x:Name="lblStartDate" Content="Start Date: " Grid.Column="0"/>
-                        <Label x:Name="lblStartDateValue" Grid.Column="1" 
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Label x:Name="lblStartDate" Content="Start Date: " Grid.Column="0"/>
+                            <Label x:Name="lblStartDateValue" Grid.Column="1" 
                        HorizontalContentAlignment="Right" FontWeight="DemiBold"/>
-                    </Grid>
-                </Border>
-                <Border x:Name="bEndDate" Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="2" 
+                        </Grid>
+                    </Border>
+                    <Border x:Name="bEndDate" Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="2" 
                         BorderThickness="0, 0, 0, 1" BorderBrush="Black">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <Label x:Name="lblEndDate" Content="End Date: " Grid.Column="0"/>
-                        <Label x:Name="lblEndDateValue" Grid.Column="1" 
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Label x:Name="lblEndDate" Content="End Date: " Grid.Column="0"/>
+                            <Label x:Name="lblEndDateValue" Grid.Column="1" 
                        HorizontalContentAlignment="Right" FontWeight="DemiBold"/>
-                    </Grid>
-                </Border>
-                <Border x:Name="bDPStart" Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="2" 
+                        </Grid>
+                    </Border>
+                    <Border x:Name="bDPStart" Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="2" 
                         BorderThickness="0, 0, 0, 1" BorderBrush="Black">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <Label x:Name="lblDPStart" Content="DP Start: " Grid.Column="0"/>
-                        <Label x:Name="lblDPStartValue" Grid.Column="1" 
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Label x:Name="lblDPStart" Content="DP Start: " Grid.Column="0"/>
+                            <Label x:Name="lblDPStartValue" Grid.Column="1" 
                        HorizontalContentAlignment="Right" FontWeight="DemiBold"/>
-                    </Grid>
-                </Border>
-                <Border x:Name="bDPEnd" Grid.Row="7" Grid.Column="1" Grid.ColumnSpan="2" 
+                        </Grid>
+                    </Border>
+                    <Border x:Name="bDPEnd" Grid.Row="7" Grid.Column="1" Grid.ColumnSpan="2" 
                         BorderThickness="0, 0, 0, 1" BorderBrush="Black">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-                        <Label x:Name="lblDPEnd" Content="DP End: " Grid.Column="0"/>
-                        <Label x:Name="lblDPEndValue" Grid.Column="1" 
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Label x:Name="lblDPEnd" Content="DP End: " Grid.Column="0"/>
+                            <Label x:Name="lblDPEndValue" Grid.Column="1" 
                        HorizontalContentAlignment="Right" FontWeight="DemiBold"/>
-                    </Grid>
-                </Border>
-            </Grid>
-        </Border>
+                        </Grid>
+                    </Border>
+                    <Border x:Name="bActive" Grid.Row="8" Grid.Column="1" Grid.ColumnSpan="2" 
+                        BorderThickness="0, 0, 0, 1" BorderBrush="Black">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Label x:Name="lblActive" Content="Active: " Grid.Column="0"/>
+                            <Label x:Name="lblActiveValue" Grid.Column="1" 
+                       HorizontalContentAlignment="Right" FontWeight="DemiBold"/>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </Border>
+        </ScrollViewer>
         <Border Grid.Row="1" Grid.Column="4"
                 BorderBrush="LightGray" BorderThickness="1" 
                 MinWidth="300" >
@@ -212,11 +229,11 @@
                             </Style>
                         </DataGrid.Resources>
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="Code" Binding="{Binding spotcode, Mode=TwoWay}" MinWidth="50"
+                            <DataGridTextColumn Header="Code" Binding="{Binding spotcode, Mode=TwoWay}" Width="0.2*"
                                     IsReadOnly="True" />
                             <DataGridTextColumn Header="Name" Binding="{Binding spotname, Mode=TwoWay}" Width="*"
                                     IsReadOnly="True"/>
-                            <DataGridTextColumn Header="Length" Binding="{Binding spotlength, Mode=TwoWay}" MinWidth="70"
+                            <DataGridTextColumn Header="Length" Binding="{Binding spotlength, Mode=TwoWay}" Width="0.3*"
                                     IsReadOnly="True"/> 
                         </DataGrid.Columns>
                     </DataGrid>

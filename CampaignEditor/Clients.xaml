@@ -25,18 +25,19 @@
                     <ContextMenu x:Key ="ClientContext"  StaysOpen="true">
                         <MenuItem Header="Show users" Click="btnShowUsersOfClient_Click"/>
                         <MenuItem Header="New campaign" Click="btnNewCampaign_Click" IsEnabled="{Binding Path=isAdministrator}"/>
-                        <MenuItem x:Name="btnRenameClient" Header="Rename client"  IsEnabled="{Binding Path=isReadWrite}"/>
+                        <MenuItem x:Name="btnRenameClient" Click="btnRenameClient_Click" Header="Rename client"  IsEnabled="{Binding Path=isReadWrite}"/>
                         <MenuItem Header="New user" Click="btnAddUser_Click" IsEnabled="{Binding Path=isAdministrator}"/>
                         <MenuItem Header="New client" Click="btnAddClient_Click" IsEnabled="{Binding Path=isAdministrator}"/>
                         <MenuItem Header="Delete client" Click="btnDeleteClient_Click"  IsEnabled="{Binding Path=CanBeDeleted}"/>
                     </ContextMenu>
                     <ContextMenu x:Key="CampaignContext"  StaysOpen="true">
                         <MenuItem Header="Edit campaign" Click="btnAddCampaign_Click" IsEnabled="{Binding Path=isReadWrite}"/>
-                        <MenuItem Header="Rename campaign" IsEnabled="{Binding Path=isReadWrite}"/>
+                        <MenuItem Header="Rename campaign" Click="btnRenameCampaign_Click" IsEnabled="{Binding Path=isReadWrite}"/>
                         <MenuItem Header="Delete campaign" IsEnabled="{Binding Path=isAdministrator}"/>
                     </ContextMenu>
                 </TreeView.Resources>
             </TreeView>
+
             <TextBox x:Name="tbSearchClients" Foreground="LightGray"
                      Width="{Binding ElementName=GridLeft, Path=ActualWidth, Converter={StaticResource toHalfConverter}}"
                  HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,50,0,0" 

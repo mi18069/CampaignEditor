@@ -96,8 +96,8 @@ namespace Database.Repositories
 
             var affected = await connection.ExecuteAsync(
                 "UPDATE tblcampaigns SET cmprev = @cmprev, cmpown = @cmpown, cmpname = @cmpname, clid = @clid, cmpsdate = @cmpsdate, " +
-                    "cmpedate = @cmpedate, cmpstime = @cmpstime, cmpetime = @cmpetime), cmpstatus = @cmpstatus, sostring = @sorting, " +
-                    "activity = @activity, cmpaddedon = @cmpaddedon, cmpaddededat = @cmpaddedat, active = @active, forcec = @forcec" +
+                    "cmpedate = @cmpedate, cmpstime = @cmpstime, cmpetime = @cmpetime, cmpstatus = @cmpstatus, sostring = @sostring, " +
+                    "activity = @activity, cmpaddedon = @cmpaddedon, cmpaddedat = @cmpaddedat, active = @active, forcec = @forcec " +
                     "WHERE cmpid = @cmpid",
             new
             {
