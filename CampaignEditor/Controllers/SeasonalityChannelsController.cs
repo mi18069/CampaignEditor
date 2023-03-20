@@ -1,6 +1,4 @@
-﻿
-using Database.DTOs.SectableChannels;
-using Database.Repositories;
+﻿using Database.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;

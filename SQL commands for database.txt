@@ -118,3 +118,6 @@ CREATE TABLE IF NOT EXISTS tblcmpchn (
    plidbuy int,
    actidbuy int
 );
+
+-- rename column in tblchgrchn
+ALTER TABLE tblchgrchn RENAME COLUMN chrdsid TO chid;
