@@ -34,6 +34,17 @@ namespace CampaignEditor.Controllers
             return channelGroup;
         }
 
+        public async Task<ChannelGroupDTO> GetChannelGroupByNameAndOwner(string name, int owner)
+        {
+            var channelGroup = await _repository.GetChannelGroupByNameAndOwner(name, owner);
+            return channelGroup;
+        }
+
+        public async Task<IEnumerable<ChannelGroupDTO>> GetAllOwnerChannelGroups(int ownerId)
+        {
+            return await _repository.GetAllOwnerChannelGroups(ownerId);
+        }
+
         public async Task<IEnumerable<ChannelGroupDTO>> GetAllChannelGroups()
         {
             return await _repository.GetAllChannelGroups();

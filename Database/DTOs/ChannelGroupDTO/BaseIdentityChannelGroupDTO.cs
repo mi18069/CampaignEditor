@@ -2,7 +2,7 @@
 {
     public class BaseIdentityChannelGroupDTO : BaseChannelGroupDTO
     {
-        public BaseIdentityChannelGroupDTO(int chrgid, string chgrname, int chgrown) 
+        public BaseIdentityChannelGroupDTO(int chgrid, string chgrname, int chgrown) 
             : base(chgrname, chgrown)
         {
             this.chgrid = chgrid;

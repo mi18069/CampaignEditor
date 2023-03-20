@@ -55,6 +55,29 @@ namespace Database.Repositories
             return _mapper.Map<ChannelGroupDTO>(channelGroup);
         }
 
+        public async Task<ChannelGroupDTO> GetChannelGroupByNameAndOwner(string name, int owner)
+        {
+            using var connection = _context.GetConnection();
+
+            var channelGroup = await connection.QueryFirstOrDefaultAsync<ChannelGroup>(
+                "SELECT * FROM tblchannelgroups WHERE chgrown = @Chgrown AND chgrname = @Chgrname"
+                , new { Chgrown = owner, Chgrname = name });
+
+            return _mapper.Map<ChannelGroupDTO>(channelGroup);
+        }
+
+
+        public async Task<IEnumerable<ChannelGroupDTO>> GetAllOwnerChannelGroups(int ownerId)
+        {
+            using var connection = _context.GetConnection();
+
+            var allChannelGroups = await connection.QueryAsync<ChannelGroup>
+                ("SELECT * FROM tblchannelgroups WHERE chgrown = @Chgrown", new { Chgrown = ownerId});
+
+            return _mapper.Map<IEnumerable<ChannelGroupDTO>>(allChannelGroups);
+        }
+
+
         public async Task<IEnumerable<ChannelGroupDTO>> GetAllChannelGroups()
         {
             using var connection = _context.GetConnection();

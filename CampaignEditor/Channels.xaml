@@ -42,7 +42,8 @@
                   DisplayMemberPath="chname"
                   SelectionChanged="lvChannels_SelectionChanged"/>
         <Button x:Name="btnEditChannelGroups" Grid.Row="4" Grid.Column="1" 
-                Margin="20"  Width="30" Height="30" BorderThickness="0" Background="White">
+                Margin="20"  Width="30" Height="30" BorderThickness="0" Background="White"
+                Click="btnEditChannelGroups_Click">
             <Image Source="\images\Edit_Icon2.png"></Image>
         </Button>
        

@@ -2,8 +2,8 @@
 {
     public class UpdateChannelGroupDTO : BaseIdentityChannelGroupDTO
     {
-        public UpdateChannelGroupDTO(int chrgid, string chgrname, int chgrown) 
-            : base(chrgid, chgrname, chgrown)
+        public UpdateChannelGroupDTO(int chgrid, string chgrname, int chgrown) 
+            : base(chgrid, chgrname, chgrown)
         {
         }
     }

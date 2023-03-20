@@ -34,6 +34,9 @@
     <Compile Update="Goals.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="GroupChannels.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="NewCampaign.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -103,6 +106,9 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Goals.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="GroupChannels.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="MainWindow.xaml">

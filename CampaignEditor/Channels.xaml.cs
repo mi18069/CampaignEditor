@@ -5,10 +5,8 @@ using Database.DTOs.ActivityDTO;
 using Database.DTOs.ChannelCmpDTO;
 using Database.DTOs.ChannelDTO;
 using Database.DTOs.ClientDTO;
-using Database.DTOs.PricelistChannels;
 using Database.DTOs.PricelistDTO;
 using Database.Repositories;
-using Microsoft.Extensions.Logging.Abstractions;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -32,6 +30,7 @@ namespace CampaignEditor
         private ChannelCmpController _channelCmpController;
 
         private readonly IAbstractFactory<PriceList> _factoryPriceList;
+        private readonly IAbstractFactory<GroupChannels> _factoryGroupChannels;
 
 
         private ObservableCollection<ChannelDTO> _channelList;
@@ -83,7 +82,8 @@ namespace CampaignEditor
 
         public Channels(IChannelRepository channelRepository, IPricelistRepository pricelistRepository,
             IPricelistChannelsRepository pricelistChannelsRepository, IActivityRepository activityRepository,
-            IAbstractFactory<PriceList> factoryPriceList, IChannelCmpRepository channelCmpRepository)
+            IAbstractFactory<PriceList> factoryPriceList, IChannelCmpRepository channelCmpRepository,
+            IAbstractFactory<GroupChannels> factoryGroupChannels)
         {
             this.DataContext = this;
             _channelController = new ChannelController(channelRepository);
@@ -93,6 +93,7 @@ namespace CampaignEditor
             _channelCmpController = new ChannelCmpController(channelCmpRepository);
 
             _factoryPriceList = factoryPriceList;
+            _factoryGroupChannels = factoryGroupChannels;
 
             InitializeComponent();
         }
@@ -142,7 +143,21 @@ namespace CampaignEditor
             {   
                 foreach (var selected in SelectedChannels)
                 {
-                    MoveToSelected(selected.Item1, selected.Item2, selected.Item3);
+                    // If we want to move some channel from channelList to Seleccted,
+                    // first we must find that object in ChannelList, if not,
+                    // just take from selectedList
+                    ChannelDTO selectedChannel = null;
+                    foreach (ChannelDTO channel in ChannelList)
+                    {
+                        if (channel.chname.Trim() == selected.Item1.chname.Trim())
+                        {
+                            selectedChannel = channel;
+                        }
+
+                    }
+                    if (selectedChannel == null)
+                        selectedChannel = selected.Item1;
+                    MoveToSelected(selectedChannel, selected.Item2, selected.Item3);
                 }
                 channelsModified = false;
             }
@@ -323,5 +338,11 @@ namespace CampaignEditor
             Hide();
         }
 
+        private async void btnEditChannelGroups_Click(object sender, RoutedEventArgs e)
+        {
+            var f = _factoryGroupChannels.Create();
+            await f.Initialize(_client, _campaign);
+            f.ShowDialog();
+        }
     }
 }
