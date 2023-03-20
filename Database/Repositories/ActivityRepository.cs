@@ -2,7 +2,6 @@
 using Dapper;
 using Database.Data;
 using Database.DTOs.ActivityDTO;
-using Database.DTOs.SectableDTO;
 using Database.Entities;
 using System;
 using System.Collections.Generic;

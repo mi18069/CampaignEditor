@@ -93,7 +93,7 @@ namespace CampaignEditor {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/CampaignEditor;V1.0.0.0;component/rename.xaml", System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri("/CampaignEditor;component/rename.xaml", System.UriKind.Relative);
             
             #line 1 "..\..\..\Rename.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);

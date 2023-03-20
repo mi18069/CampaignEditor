@@ -62,6 +62,7 @@ namespace CampaignEditor
                     Database.Extensions.TargetCmpExtensions.AddTargetCmpExtensions(services);
                     Database.Extensions.GoalsExtensions.AddGoalsExtensions(services);
                     Database.Extensions.ChannelCmpExtensions.AddChannelCmpExtensions(services);
+                    Database.Extensions.ChannelGroupExtensions.AddChannelGroupExtensions(services);
 
                 }).Build();
 
