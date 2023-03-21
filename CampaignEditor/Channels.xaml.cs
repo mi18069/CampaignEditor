@@ -273,7 +273,7 @@ namespace CampaignEditor
 
         private async void lvChannels_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
-            if (!changePricelist)
+            if (!changePricelist && lvChannels.SelectedItems.Count > 0)
                 return;
             PricelistDTO lastSelected = null;
             if (lvPricelists.SelectedItems.Count > 0)
@@ -320,19 +320,18 @@ namespace CampaignEditor
             // Clearing and filling with the available pricelists for selected channels
             // == 0 because when more channels are selected, only one should modify lvPricelists
             int selectedIndex = 0;
-            if (lvPricelists.SelectedItems.Count == 0)
+
+            foreach (int plid in plIds)
             {
-                foreach (int plid in plIds)
+                PricelistDTO pricelist = await _pricelistController.GetPricelistById(plid);
+                PricelistList.Add(pricelist);
+                if (lastSelected != null && lastSelected.plid == pricelist.plid)
                 {
-                    PricelistDTO pricelist = await _pricelistController.GetPricelistById(plid);
-                    PricelistList.Add(pricelist);
-                    if (lastSelected != null && lastSelected.plid == pricelist.plid)
-                    {
-                        lvPricelists.SelectedIndex = selectedIndex;
-                    }
-                    selectedIndex++;
+                    lvPricelists.SelectedIndex = selectedIndex;
                 }
+                selectedIndex++;
             }
+            
 
         }
 
