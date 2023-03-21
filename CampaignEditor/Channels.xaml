@@ -53,7 +53,12 @@
         </Button>
        
         <Label Content="Pricelists" Grid.Row="1" Grid.Column="4" Grid.ColumnSpan="2"
-               HorizontalAlignment="Center"/>
+               HorizontalAlignment="Center" />
+        <CheckBox x:Name="chbActivePricelists" Grid.Row="1" Grid.Column="4" Grid.ColumnSpan="2" 
+                  Content="Active Only" IsChecked="False" 
+                  HorizontalAlignment="Right" VerticalAlignment="Center"
+                  Checked="chbActivePricelists_Checked"
+                  Unchecked="chbActivePricelists_Unchecked"/>
         <ListView x:Name="lvPricelists" Grid.Row="2" Grid.Column="4" Grid.ColumnSpan="2" Grid.RowSpan="3"
                 MinWidth="250" 
                 DisplayMemberPath="plname"

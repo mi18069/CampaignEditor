@@ -6,6 +6,7 @@ using Database.DTOs.ChannelCmpDTO;
 using Database.DTOs.ChannelDTO;
 using Database.DTOs.ChannelGroupDTO;
 using Database.DTOs.ClientDTO;
+using Database.DTOs.PricelistChannels;
 using Database.DTOs.PricelistDTO;
 using Database.Repositories;
 using System;
@@ -48,6 +49,7 @@ namespace CampaignEditor
 
         public bool channelsModified = false;
         public bool canEdit = false;
+        private bool onlyActive = false;
         #region Getters and Setters for lists
 
         private List<ChannelDTO> AllChannelList
@@ -127,7 +129,7 @@ namespace CampaignEditor
                 // Initializing and sorting lists, so it don't have to be sorted later
                 _channelList = new ObservableCollection<ChannelDTO>((await _channelController.GetAllChannels()).OrderBy(c => c.chname));
                 _allPricelistsList = (List<PricelistDTO>)(await _pricelistController.GetAllClientPricelists(_client.clid));
-                _pricelistList = new ObservableCollection<PricelistDTO>((AllPricelistsList).OrderBy(p => p.plname));
+                _pricelistList = new ObservableCollection<PricelistDTO>((AllPricelistsList).OrderByDescending(p => p.valfrom));
                 _activityList = new ObservableCollection<ActivityDTO>((await _activityController.GetAllActivities()).OrderBy(a => a.act));
 
                 // Binding to ListViews
@@ -272,15 +274,34 @@ namespace CampaignEditor
 
             // taking plids from AllPricelistsList because this elements already shows 
             // only pricelists available for current client
-            foreach (var plid in AllPricelistsList)
+            foreach (var pricelist in AllPricelistsList)
             {
-                plids.Add(plid.plid);
+                // for adding only id-s of pricelists withing Date range
+                if (onlyActive)
+                {
+                    if (TimeFormat.YMDStringToDateTime(pricelist.valfrom.ToString().Trim()).AddDays(-1) > DateTime.Now ||
+                        TimeFormat.YMDStringToDateTime(pricelist.valto.ToString().Trim()).AddDays(1) < DateTime.Now)
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        plids.Add(pricelist.plid);
+                    }
+                }
+                else
+                {
+                    plids.Add(pricelist.plid);
+                }
             }
             foreach(ChannelDTO chid in lvChannels.SelectedItems){
                 chids.Add(chid.chid);
             }
 
             // Getting the right pricelistChannels ids which should be displayed
+            if (plids.Count == 0)
+                return;
+
             var plIds = await _pricelistChannelsController.GetIntersectedPlIds(plids, chids);
 
             // Clearing and filling with the available pricelists for selected channels
@@ -305,45 +326,43 @@ namespace CampaignEditor
         #endregion
 
         #region Pricelist
-        private void btnEditPricelist_Click(object sender, RoutedEventArgs e)
+        private async void btnEditPricelist_Click(object sender, RoutedEventArgs e)
         {
             var f = _factoryPriceList.Create();
             if (lvPricelists.SelectedItems.Count > 0)
-                f.Initialize(_client, lvPricelists.SelectedItem as PricelistDTO);
+                await f.Initialize(_client, lvPricelists.SelectedItem as PricelistDTO);
             else
-                f.Initialize(_client);
+                await f.Initialize(_client);
             f.ShowDialog();
-        }
-        private void btnNewPricelist_Click(object sender, RoutedEventArgs e)
-        {
-            var f = _factoryPriceList.Create();
-            f.Initialize(_client);
-            f.ShowDialog();
-        }
-        #endregion
-
-        private void btnSave_Click(object sender, RoutedEventArgs e)
-        {
-            if (channelsModified)
-                SelectedChannels = Selected.ToList();
-            this.Hide();
-        }
-        private void btnCancel_Click(object sender, RoutedEventArgs e)
-        {
-            channelsModified = false;
-            this.Hide();
-        }
-
-        public async Task UpdateDatabase(List<Tuple<ChannelDTO, PricelistDTO, ActivityDTO>> channelList)
-        {
-            await _channelCmpController.DeleteChannelCmpByCmpid(_campaign.cmpid);
-            foreach (var channel in SelectedChannels)
+            if (f.pricelistChanged)
             {
-                CreateChannelCmpDTO channelCmp = new CreateChannelCmpDTO
-                    (_campaign.cmpid, channel.Item1.chid, channel.Item2.plid, channel.Item3.actid, -1, -1);
-                await _channelCmpController.CreateChannelCmp(channelCmp);
+                _allPricelistsList = (List<PricelistDTO>)(await _pricelistController.GetAllClientPricelists(_client.clid)); 
+                lvChannels_SelectionChanged(lvChannels, null);
             }
         }
+        private async void btnNewPricelist_Click(object sender, RoutedEventArgs e)
+        {
+            var f = _factoryPriceList.Create();
+            await f.Initialize(_client);
+            f.ShowDialog();
+            if (f.pricelistChanged)
+            {
+                _allPricelistsList = (List<PricelistDTO>)(await _pricelistController.GetAllClientPricelists(_client.clid)); 
+                lvChannels_SelectionChanged(lvChannels, null);
+            }
+        }
+        private void chbActivePricelists_Checked(object sender, RoutedEventArgs e)
+        {
+            onlyActive = true;
+            lvChannels_SelectionChanged(lvChannels, null);
+        }
+
+        private void chbActivePricelists_Unchecked(object sender, RoutedEventArgs e)
+        {
+            onlyActive = false;
+            lvChannels_SelectionChanged(lvChannels, null);
+        }
+        #endregion
 
         #region Channel Groups
 
@@ -407,14 +426,35 @@ namespace CampaignEditor
         #endregion
 
 
+        private void btnSave_Click(object sender, RoutedEventArgs e)
+        {
+            if (channelsModified)
+                SelectedChannels = Selected.ToList();
+            this.Hide();
+        }
+        private void btnCancel_Click(object sender, RoutedEventArgs e)
+        {
+            channelsModified = false;
+            this.Hide();
+        }
+
+        public async Task UpdateDatabase(List<Tuple<ChannelDTO, PricelistDTO, ActivityDTO>> channelList)
+        {
+            await _channelCmpController.DeleteChannelCmpByCmpid(_campaign.cmpid);
+            foreach (var channel in SelectedChannels)
+            {
+                CreateChannelCmpDTO channelCmp = new CreateChannelCmpDTO
+                    (_campaign.cmpid, channel.Item1.chid, channel.Item2.plid, channel.Item3.actid, -1, -1);
+                await _channelCmpController.CreateChannelCmp(channelCmp);
+            }
+        }
+
         // Overriding OnClosing because click on x button should only hide window
         protected override void OnClosing(CancelEventArgs e)
         {
             e.Cancel = true;
             Hide();
         }
-
-
 
     }
 }

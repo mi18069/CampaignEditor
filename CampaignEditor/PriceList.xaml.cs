@@ -45,6 +45,8 @@ namespace CampaignEditor
         private bool pricelistModified = false;
         private bool pricelistChannelsModified = false;
         private bool dayPartsModified = false;
+
+        public bool pricelistChanged = false;
         public PriceList(IAbstractFactory<Sectable> factorySectable, IAbstractFactory<Seasonality> factorySeasonality,
             IAbstractFactory<NewTarget> factoryNewTarget,
             IChannelRepository channelRepository, IPricesRepository pricesRepository,
@@ -657,6 +659,10 @@ namespace CampaignEditor
                     await CreateOrUpdatePricelistChannels(_pricelist);
                 if (CheckDayPartsModified())
                     await CreateOrUpdateDayparts(_pricelist);
+                if (pricelistModified || pricelistChannelsModified || dayPartsModified)
+                {
+                    pricelistChanged = true;
+                }
                 this.Close();
             }
         }
