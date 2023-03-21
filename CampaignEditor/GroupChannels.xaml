@@ -35,7 +35,7 @@
         <Label Content="Channels" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"
                HorizontalAlignment="Center"/>
         <ListView x:Name="lvChannels" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Grid.RowSpan="3"
-                  MinWidth="200"
+                  MinWidth="200" SelectionMode="Multiple"
                   DisplayMemberPath="chname"/>
         
 

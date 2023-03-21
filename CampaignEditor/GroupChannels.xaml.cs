@@ -42,13 +42,13 @@ namespace CampaignEditor
             get { return _channelList; }
             set { _channelList = value; }
         }
-        private ObservableCollection<ChannelGroupDTO> ChannelGroupList
+        public ObservableCollection<ChannelGroupDTO> ChannelGroupList
         {
             get { return _channelGroupList; }
             set { _channelGroupList = value; }
         }
 
-        private ObservableCollection<Tuple<ChannelDTO, ChannelGroupDTO>> Assigned
+        public ObservableCollection<Tuple<ChannelDTO, ChannelGroupDTO>> Assigned
         {
             get { return _assigned; }
             set { _assigned = value; }

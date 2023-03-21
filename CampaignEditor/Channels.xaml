@@ -30,6 +30,7 @@
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="auto"/>
             <RowDefinition Height="70"/>
             <RowDefinition Height="50"/>
             <RowDefinition Height="10"/>
@@ -38,10 +39,14 @@
         <Label Content="Channels" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"
                HorizontalAlignment="Center"/>
         <ListView x:Name="lvChannels" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Grid.RowSpan="2"
-                  MinWidth="250"
-                  DisplayMemberPath="chname"
+                  MinWidth="250" Margin="0, 0, 0, 20"
+                  DisplayMemberPath="chname" SelectionMode="Multiple"
                   SelectionChanged="lvChannels_SelectionChanged"/>
-        <Button x:Name="btnEditChannelGroups" Grid.Row="4" Grid.Column="1" 
+        <ListBox x:Name="lbChannelGroups" Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2"
+                 DisplayMemberPath="chgrname" MaxHeight="150"
+                 SelectionChanged="lbChannelGroups_SelectionChanged"
+                 SelectionMode="Multiple"/>
+        <Button x:Name="btnEditChannelGroups" Grid.Row="5" Grid.Column="1" 
                 Margin="20"  Width="30" Height="30" BorderThickness="0" Background="White"
                 Click="btnEditChannelGroups_Click">
             <Image Source="\images\Edit_Icon2.png"></Image>
@@ -49,17 +54,17 @@
        
         <Label Content="Pricelists" Grid.Row="1" Grid.Column="4" Grid.ColumnSpan="2"
                HorizontalAlignment="Center"/>
-        <ListView x:Name="lvPricelists" Grid.Row="2" Grid.Column="4" Grid.ColumnSpan="2" Grid.RowSpan="2"
+        <ListView x:Name="lvPricelists" Grid.Row="2" Grid.Column="4" Grid.ColumnSpan="2" Grid.RowSpan="3"
                 MinWidth="250" 
                 DisplayMemberPath="plname"
                 SelectionMode="Single"/>
-        <Button x:Name="btnEditPricelist" Grid.Row="4" Grid.Column="4" 
+        <Button x:Name="btnEditPricelist" Grid.Row="5" Grid.Column="4" 
                 Margin="20"  Width="30" Height="30" BorderThickness="0" Background="White"
                 Visibility="{Binding ElementName=lvPricelists, Path=SelectedItem}"
                 Click="btnEditPricelist_Click">
             <Image Source="\images\Edit_Icon2.png"></Image>
         </Button>
-        <Button x:Name="btnNewPricelist"  Grid.Row="4" Grid.Column="5" 
+        <Button x:Name="btnNewPricelist"  Grid.Row="5" Grid.Column="5" 
                 Margin="20" Width="30" Height="30" BorderThickness="0" Background="White"
                 Click="btnNewPricelist_Click">
             <Image Source="\images\GreenPlus.png" ></Image>
@@ -67,7 +72,7 @@
 
         <Label Content="Acitvities" Grid.Row="1" Grid.Column="7" Grid.ColumnSpan="2"
                HorizontalAlignment="Center"/>
-        <ListView x:Name="lvActivities" Grid.Row="2" Grid.Column="7" Grid.ColumnSpan="2" Grid.RowSpan="2"
+        <ListView x:Name="lvActivities" Grid.Row="2" Grid.Column="7" Grid.ColumnSpan="2" Grid.RowSpan="3"
                     MinWidth="250"
                     DisplayMemberPath="act"
                     SelectionMode="Single"/>
@@ -87,7 +92,7 @@
         </Button>
 
 
-        <DataGrid x:Name="dgSelected" Grid.Row="2" Grid.Column="12" Grid.ColumnSpan="3" Grid.RowSpan="2"
+        <DataGrid x:Name="dgSelected" Grid.Row="2" Grid.Column="12" Grid.ColumnSpan="3" Grid.RowSpan="3"
                   CanUserSortColumns="False"
                   AutoGenerateColumns="False"
                   IsReadOnly="True"
@@ -113,10 +118,10 @@
             </DataGrid.Columns>
         </DataGrid>
 
-        <Button x:Name="btnCancel" Content="Cancel" Grid.Row="5" Grid.Column="14"
+        <Button x:Name="btnCancel" Content="Cancel" Grid.Row="6" Grid.Column="14"
                 Width="100" Height="40" HorizontalAlignment="Right" Margin="150, 0"
                 Click="btnCancel_Click"/>
-        <Button x:Name="btnSave" Content="Save" Grid.Row="5" Grid.Column="14" 
+        <Button x:Name="btnSave" Content="Save" Grid.Row="6" Grid.Column="14" 
                 Width="100" Height="40" HorizontalAlignment="Right" Margin="10, 0"
                 Click="btnSave_Click"/>
     </Grid>

@@ -4,10 +4,12 @@ using CampaignEditor.StartupHelpers;
 using Database.DTOs.ActivityDTO;
 using Database.DTOs.ChannelCmpDTO;
 using Database.DTOs.ChannelDTO;
+using Database.DTOs.ChannelGroupDTO;
 using Database.DTOs.ClientDTO;
 using Database.DTOs.PricelistDTO;
 using Database.Repositories;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -32,7 +34,7 @@ namespace CampaignEditor
         private readonly IAbstractFactory<PriceList> _factoryPriceList;
         private readonly IAbstractFactory<GroupChannels> _factoryGroupChannels;
 
-
+        private List<ChannelDTO> _allChannelList;
         private ObservableCollection<ChannelDTO> _channelList;
         // This list will serve to get all Pricelists for client
         private List<PricelistDTO> _allPricelistsList;
@@ -47,6 +49,13 @@ namespace CampaignEditor
         public bool channelsModified = false;
         public bool canEdit = false;
         #region Getters and Setters for lists
+
+        private List<ChannelDTO> AllChannelList
+        {
+            get { return _allChannelList; }
+            set { _allChannelList = value; }
+        }
+
         private ObservableCollection<ChannelDTO> ChannelList
         {
             get { return _channelList;  }
@@ -105,6 +114,7 @@ namespace CampaignEditor
             this._campaign = campaign;
             SelectedChannels = channelList;
             await FillLists();
+            await FillChannelGroups();
         }
 
         private async Task FillLists()
@@ -124,6 +134,8 @@ namespace CampaignEditor
                 lvChannels.ItemsSource = ChannelList;
                 lvPricelists.ItemsSource = PricelistList;
                 lvActivities.ItemsSource = ActivityList;
+
+                AllChannelList = ChannelList.ToList();
 
                 var selectedChannels = await _channelCmpController.GetChannelCmpsByCmpid(_campaign.cmpid);
                 if (selectedChannels != null)
@@ -173,6 +185,7 @@ namespace CampaignEditor
             int index = FindIndex(list, channel); // Finding the right index, to keep the list sorted
             Selected.Insert(index, Tuple.Create(channel, pricelist, activity)!);
             ChannelList.Remove(channel);
+            AllChannelList.Remove(channel);
             channelsModified = true;
         }
         private void MoveFromSelected(Tuple<ChannelDTO, PricelistDTO, ActivityDTO> tuple)
@@ -181,6 +194,7 @@ namespace CampaignEditor
             Selected.Remove(tuple);
             int index = FindIndex(ChannelList, channel);
             ChannelList.Insert(index, channel);
+            AllChannelList.Insert(index, channel);
             channelsModified = true;
         }
         private void btnToSelected_Click(object sender, RoutedEventArgs e)
@@ -331,6 +345,68 @@ namespace CampaignEditor
             }
         }
 
+        #region Channel Groups
+
+        private async Task FillChannelGroups()
+        {
+            var f = _factoryGroupChannels.Create();
+            await f.Initialize(_client, _campaign);
+            lbChannelGroups.ItemsSource = f.ChannelGroupList;
+        }
+        private async void btnEditChannelGroups_Click(object sender, RoutedEventArgs e)
+        {
+            var f = _factoryGroupChannels.Create();
+            await f.Initialize(_client, _campaign);
+            f.ShowDialog();
+        }
+
+        private async void lbChannelGroups_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (lbChannelGroups.SelectedItems.Count == 0)
+            {
+                ChannelList.Clear();
+                foreach (ChannelDTO channel in AllChannelList)
+                {
+                    ChannelList.Add(channel);
+                }
+            }
+            else if (e.AddedItems.Count > 0)
+            {
+                // Assuring that the only one element is selected
+                ListBox listBox = sender as ListBox;
+                var valid = e.AddedItems[0];
+                foreach (var item in new ArrayList(listBox.SelectedItems))
+                {
+                    if (item != valid)
+                    {
+                        listBox.SelectedItems.Remove(item);
+                    }
+                }
+
+                //Implementation of logic
+                ChannelGroupDTO channelGroup = lbChannelGroups.SelectedItems[0] as ChannelGroupDTO;
+                int chgrid = channelGroup.chgrid;
+                ChannelList.Clear();
+                var f = _factoryGroupChannels.Create();
+                await f.Initialize(_client, _campaign);
+                var tuples = f.Assigned.Where(t => t.Item2.chgrid == chgrid);
+                for (int i = 0; i < AllChannelList.Count; i++)
+                {
+                    ChannelDTO channel = AllChannelList[i] as ChannelDTO;
+                    if (tuples.Any(t => t.Item1.chid == channel.chid))
+                    {
+                        ChannelList.Add(channel);
+                        continue;
+                    }
+                }
+                lvChannels.SelectAll();
+            }
+
+        }
+
+        #endregion
+
+
         // Overriding OnClosing because click on x button should only hide window
         protected override void OnClosing(CancelEventArgs e)
         {
@@ -338,11 +414,7 @@ namespace CampaignEditor
             Hide();
         }
 
-        private async void btnEditChannelGroups_Click(object sender, RoutedEventArgs e)
-        {
-            var f = _factoryGroupChannels.Create();
-            await f.Initialize(_client, _campaign);
-            f.ShowDialog();
-        }
+
+
     }
 }
