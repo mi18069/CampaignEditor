@@ -6,7 +6,6 @@ using Database.DTOs.ChannelCmpDTO;
 using Database.DTOs.ChannelDTO;
 using Database.DTOs.ChannelGroupDTO;
 using Database.DTOs.ClientDTO;
-using Database.DTOs.PricelistChannels;
 using Database.DTOs.PricelistDTO;
 using Database.Repositories;
 using System;
@@ -47,9 +46,13 @@ namespace CampaignEditor
         private List<Tuple<ChannelDTO, PricelistDTO, ActivityDTO>> _selectedChannels =
                                 new List<Tuple<ChannelDTO, PricelistDTO, ActivityDTO>>();
 
+        private List<PricelistDTO> _pricelistsToBeDeleted = new List<PricelistDTO>();
+
         public bool channelsModified = false;
         public bool canEdit = false;
-        private bool onlyActive = false;
+        private bool onlyActive = false; // For chbActive
+        private bool changePricelist = true;
+        
         #region Getters and Setters for lists
 
         private List<ChannelDTO> AllChannelList
@@ -67,6 +70,11 @@ namespace CampaignEditor
         {
             get { return _pricelistList;  }
             set { _pricelistList = value; }
+        }
+        private List<PricelistDTO> PricelistsToBeDeleted
+        {
+            get { return _pricelistsToBeDeleted; }
+            set { _pricelistsToBeDeleted = value; }
         }
         private List<PricelistDTO> AllPricelistsList
         {
@@ -208,12 +216,15 @@ namespace CampaignEditor
             {
                 int n = lvChannels.SelectedItems.Count;
                 var channels = lvChannels.SelectedItems;
-                for(int i=0; i<n; i++)
+
+                PricelistDTO pricelist = lvPricelists.SelectedItem as PricelistDTO;
+                ActivityDTO activity = lvActivities.SelectedItem as ActivityDTO;
+                for (int i=0; i<n; i++)
                 {
                     ChannelDTO channel = channels[0] as ChannelDTO; // 0 because we need n iterations, and in each we remove one item
-                    PricelistDTO pricelist = lvPricelists.SelectedItem as PricelistDTO;
-                    ActivityDTO activity = lvActivities.SelectedItem as ActivityDTO;
+                    changePricelist = false;
                     MoveToSelected(channel, pricelist, activity);
+                    changePricelist = true;
                 }
             }
         }
@@ -262,6 +273,8 @@ namespace CampaignEditor
 
         private async void lvChannels_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
+            if (!changePricelist)
+                return;
             PricelistDTO lastSelected = null;
             if (lvPricelists.SelectedItems.Count > 0)
             {
@@ -447,6 +460,10 @@ namespace CampaignEditor
                     (_campaign.cmpid, channel.Item1.chid, channel.Item2.plid, channel.Item3.actid, -1, -1);
                 await _channelCmpController.CreateChannelCmp(channelCmp);
             }
+            foreach (PricelistDTO pricelist in PricelistsToBeDeleted)
+            {
+                await _pricelistController.DeletePricelistById(pricelist.plid);
+            }
         }
 
         // Overriding OnClosing because click on x button should only hide window
@@ -456,5 +473,14 @@ namespace CampaignEditor
             Hide();
         }
 
+        #region Context Menu
+        private async void miDeletePricelist_Click(object sender, RoutedEventArgs e)
+        {
+            PricelistDTO pricelist = sender as PricelistDTO;
+            PricelistsToBeDeleted.Add(pricelist);
+            PricelistList.Remove(pricelist);
+        }
+
+        #endregion
     }
 }

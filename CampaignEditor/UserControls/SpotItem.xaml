@@ -32,7 +32,8 @@
         <TextBox x:Name="tbLength" Grid.Row="1" Grid.Column="4" 
                  VerticalAlignment="Center" FontSize="16" Margin="10,0,0,0"
                  MaxLength="3"
-                 TextChanged="tb_TextChanged"/>
+                 TextChanged="tb_TextChanged" CommandManager.PreviewExecuted="tbPreviewExecuted_PreviewExecuted"
+                 PreviewTextInput="tbLength_PreviewTextInput"/>
 
         <Button x:Name="btnDelete" Grid.Row="1" Grid.Column="5" 
                 Background="White" BorderThickness="0"

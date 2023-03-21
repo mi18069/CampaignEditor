@@ -1,5 +1,7 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace CampaignEditor.UserControls
 {
@@ -20,6 +22,19 @@ namespace CampaignEditor.UserControls
         {
             modified = true;
         }
+        // Disable paste mechanism
+        private void tbPreviewExecuted_PreviewExecuted(object sender, ExecutedRoutedEventArgs e)
+        {
+            if (e.Command == ApplicationCommands.Paste)
+            {
+                e.Handled = true;
+            }
+        }
 
+        private void tbLength_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            if (!Char.IsDigit(Convert.ToChar(e.Text)))
+                e.Handled = true;
+        }
     }
 }
