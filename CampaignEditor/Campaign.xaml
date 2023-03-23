@@ -1,0 +1,28 @@
+﻿<Window x:Class="CampaignEditor.Campaign"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CampaignEditor"
+        mc:Ignorable="d"
+        Title="Campaign" 
+        Height="750" Width="1200" MinWidth="1000" MinHeight="700">
+    <Grid>
+        <UniformGrid Columns="4" Height="40" 
+                    VerticalAlignment="Top" HorizontalAlignment="Stretch">
+            <Button x:Name="btnOverview" Content="Overview" 
+                    MinWidth="100" 
+                    Click="btnOverview_Click"/>
+            <Button x:Name="btnForecast" Content="Forecast" 
+                    MinWidth="100"
+                    Click="btnForecast_Click"/>
+            <Button x:Name="btnResult" Content="Result" 
+                    MinWidth="100"
+                    />
+            <Button x:Name="btnLook" Content="Look" 
+                    MinWidth="100"
+                    />
+        </UniformGrid>
+        <Frame x:Name="ClientCampaign" Margin="0, 40, 0, 0" NavigationUIVisibility="Hidden"/>
+    </Grid>
+</Window>

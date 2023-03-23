@@ -39,6 +39,8 @@ namespace CampaignEditor
                     services.AddFormFactory<CmpInfo>();
                     services.AddFormFactory<Rename>();
                     services.AddFormFactory<GroupChannels>();
+                    services.AddFormFactory<Campaign>();
+                    services.AddFormFactory<CampaignOverview>();
                     services.AddScoped<IDataContext, DataContext>();
                     // Add services
                     Extensions.UserExtensions.AddUserExtensions(services);

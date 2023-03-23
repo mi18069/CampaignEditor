@@ -23,6 +23,7 @@ namespace CampaignEditor
         private readonly IAbstractFactory<AddCampaign> _factoryAddCampaign;
         private readonly IAbstractFactory<NewCampaign> _factoryNewCampaign;
         private readonly IAbstractFactory<Rename> _factoryRename;
+        private readonly IAbstractFactory<Campaign> _factoryCampaign;
 
         private ClientsTreeView _clientsTree;
 
@@ -65,7 +66,7 @@ namespace CampaignEditor
         public Clients(IAbstractFactory<ClientsTreeView> factoryClientsTreeView, IAbstractFactory<AddUser> factoryAddUser,
             IAbstractFactory<AddClient> factoryAddClient, IAbstractFactory<AddCampaign> factoryAddCampaign,
             IAbstractFactory<UsersOfClient> factoryUsersOfClient, IAbstractFactory<NewCampaign> factoryNewCampaign,
-            IAbstractFactory<Rename> factoryRename)
+            IAbstractFactory<Rename> factoryRename, IAbstractFactory<Campaign> factoryCampaign)
         {
             InitializeComponent();
             this.DataContext = this;
@@ -76,14 +77,14 @@ namespace CampaignEditor
             _factoryUsersOfClient = factoryUsersOfClient;
             _factoryNewCampaign = factoryNewCampaign;
             _factoryRename = factoryRename;
-
+            _factoryCampaign = factoryCampaign;
             instance = this;
 
             _clientsTree = factoryClientsTreeView.Create();
             _clientsTree.Initialization(MainWindow.user);
             _ = _clientsTree.InitializeTree();
 
-            
+
             isAdministrator = MainWindow.user.usrlevel == 0;
             isReadWrite = MainWindow.user.usrlevel == 1 ? true : isAdministrator;
             isReadOnly = MainWindow.user.usrlevel == 2;
@@ -279,11 +280,15 @@ namespace CampaignEditor
         #endregion
 
         #region Context menu options
-        public void btnAddCampaign_Click(object sender, RoutedEventArgs e)
+        public async void btnAddCampaign_Click(object sender, RoutedEventArgs e)
         {
-            var f = _factoryAddCampaign.Create();
+            /*var f = _factoryAddCampaign.Create();
             string campaignName = ((HeaderedItemsControl)tvClients.SelectedItem).Header.ToString()!.Trim();
             f.Initialization(campaignName, isReadOnly);
+            f.Show();*/
+            var f = _factoryCampaign.Create();
+            string campaignName = ((HeaderedItemsControl)tvClients.SelectedItem).Header.ToString()!.Trim();
+            await f.Initialize(campaignName, isReadOnly);
             f.Show();
         }
 

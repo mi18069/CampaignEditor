@@ -1,0 +1,12 @@
+C:\Users\marko\Desktop\posao\CampaignEditor\Database\bin\x86\Debug\net6.0-windows\Database.deps.json
+C:\Users\marko\Desktop\posao\CampaignEditor\Database\bin\x86\Debug\net6.0-windows\Database.dll
+C:\Users\marko\Desktop\posao\CampaignEditor\Database\bin\x86\Debug\net6.0-windows\Database.pdb
+C:\Users\marko\Desktop\posao\CampaignEditor\Database\obj\x86\Debug\net6.0-windows\Database.csproj.AssemblyReference.cache
+C:\Users\marko\Desktop\posao\CampaignEditor\Database\obj\x86\Debug\net6.0-windows\Database.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\marko\Desktop\posao\CampaignEditor\Database\obj\x86\Debug\net6.0-windows\Database.AssemblyInfoInputs.cache
+C:\Users\marko\Desktop\posao\CampaignEditor\Database\obj\x86\Debug\net6.0-windows\Database.AssemblyInfo.cs
+C:\Users\marko\Desktop\posao\CampaignEditor\Database\obj\x86\Debug\net6.0-windows\Database.csproj.CoreCompileInputs.cache
+C:\Users\marko\Desktop\posao\CampaignEditor\Database\obj\x86\Debug\net6.0-windows\Database.dll
+C:\Users\marko\Desktop\posao\CampaignEditor\Database\obj\x86\Debug\net6.0-windows\refint\Database.dll
+C:\Users\marko\Desktop\posao\CampaignEditor\Database\obj\x86\Debug\net6.0-windows\Database.pdb
+C:\Users\marko\Desktop\posao\CampaignEditor\Database\obj\x86\Debug\net6.0-windows\ref\Database.dll

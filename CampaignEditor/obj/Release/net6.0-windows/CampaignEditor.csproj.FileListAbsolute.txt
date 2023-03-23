@@ -128,3 +128,7 @@ C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Release\net6.0-wi
 C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Release\net6.0-windows\ref\CampaignEditor.dll
 C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Release\net6.0-windows\GroupChannels.g.cs
 C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Release\net6.0-windows\GroupChannels.baml
+C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Release\net6.0-windows\Campaign.g.cs
+C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Release\net6.0-windows\CampaignOverview.g.cs
+C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Release\net6.0-windows\Campaign.baml
+C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Release\net6.0-windows\CampaignOverview.baml

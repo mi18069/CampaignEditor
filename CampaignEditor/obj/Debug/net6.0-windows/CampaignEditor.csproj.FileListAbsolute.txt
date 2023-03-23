@@ -216,3 +216,7 @@ C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Debug\net6.0-wind
 C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Debug\net6.0-windows\Rename.baml
 C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Debug\net6.0-windows\GroupChannels.g.cs
 C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Debug\net6.0-windows\GroupChannels.baml
+C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Debug\net6.0-windows\Campaign.g.cs
+C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Debug\net6.0-windows\Campaign.baml
+C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Debug\net6.0-windows\CampaignOverview.g.cs
+C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Debug\net6.0-windows\CampaignOverview.baml
