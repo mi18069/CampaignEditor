@@ -126,3 +126,5 @@ C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Release\net6.0-wi
 C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Release\net6.0-windows\CampaignEditor.pdb
 C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Release\net6.0-windows\CampaignEditor.genruntimeconfig.cache
 C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Release\net6.0-windows\ref\CampaignEditor.dll
+C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Release\net6.0-windows\GroupChannels.g.cs
+C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Release\net6.0-windows\GroupChannels.baml

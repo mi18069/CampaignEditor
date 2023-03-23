@@ -62,9 +62,10 @@
         <ListView x:Name="lvPricelists" Grid.Row="2" Grid.Column="4" Grid.ColumnSpan="2" Grid.RowSpan="3"
                 MinWidth="250" 
                 DisplayMemberPath="plname"
-                SelectionMode="Single">
+                SelectionMode="Single"
+                PreviewMouseRightButtonDown="lvPricelists_PreviewMouseRightButtonDown">
             <ListView.Resources>
-                <ContextMenu x:Key ="PricelistContext">
+                <ContextMenu x:Key ="PricelistContext" StaysOpen="true">
                     <MenuItem Header="Delete pricelist" Click="miDeletePricelist_Click"/>
                 </ContextMenu>
             </ListView.Resources>

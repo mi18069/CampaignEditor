@@ -7,6 +7,7 @@ using Database.DTOs.ChannelDTO;
 using Database.DTOs.ChannelGroupDTO;
 using Database.DTOs.ClientDTO;
 using Database.DTOs.PricelistDTO;
+using Database.Entities;
 using Database.Repositories;
 using System;
 using System.Collections;
@@ -17,6 +18,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace CampaignEditor
 {
@@ -307,7 +309,8 @@ namespace CampaignEditor
                     plids.Add(pricelist.plid);
                 }
             }
-            foreach(ChannelDTO chid in lvChannels.SelectedItems){
+            foreach (ChannelDTO chid in lvChannels.SelectedItems)
+            {
                 chids.Add(chid.chid);
             }
 
@@ -331,9 +334,30 @@ namespace CampaignEditor
                 }
                 selectedIndex++;
             }
-            
-
         }
+
+            // In order to select ListView on mouse right click
+        private void lvPricelists_PreviewMouseRightButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            ListViewItem listViewItem = VisualUpwardSearch(e.OriginalSource as DependencyObject);
+
+            if (listViewItem != null)
+            {
+                listViewItem.Focus();
+                listViewItem.IsSelected = true;
+                lvPricelists.ContextMenu = lvPricelists.Resources["PricelistContext"] as System.Windows.Controls.ContextMenu;
+                e.Handled = true;
+            }
+        }
+
+        static ListViewItem VisualUpwardSearch(DependencyObject source)
+        {
+            while (source != null && !(source is ListViewItem))
+                source = VisualTreeHelper.GetParent(source);
+
+            return source as ListViewItem;
+        }
+
 
         #endregion
 
@@ -447,6 +471,11 @@ namespace CampaignEditor
         private void btnCancel_Click(object sender, RoutedEventArgs e)
         {
             channelsModified = false;
+            while (PricelistsToBeDeleted.Count > 0)
+            {
+                PricelistList.Add(PricelistsToBeDeleted[0]);
+                PricelistsToBeDeleted.RemoveAt(0);
+            }
             this.Hide();
         }
 
@@ -475,7 +504,8 @@ namespace CampaignEditor
         #region Context Menu
         private async void miDeletePricelist_Click(object sender, RoutedEventArgs e)
         {
-            PricelistDTO pricelist = sender as PricelistDTO;
+            PricelistDTO pricelist = lvPricelists.SelectedItem as PricelistDTO;
+            //PricelistDTO pricelist = sender as PricelistDTO;
             PricelistsToBeDeleted.Add(pricelist);
             PricelistList.Remove(pricelist);
         }
