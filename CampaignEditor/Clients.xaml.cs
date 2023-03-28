@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
@@ -7,6 +9,7 @@ using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Media;
 using CampaignEditor.DTOs.CampaignDTO;
+using CampaignEditor.Entities;
 using CampaignEditor.StartupHelpers;
 using Database.DTOs.ClientDTO;
 
@@ -15,6 +18,8 @@ namespace CampaignEditor
 
     public partial class Clients : Window, INotifyPropertyChanged
     {
+        // to keep a list of opened campaigns, we don't want the same campaign to be opened twice
+        List<Campaign> openCampaignWindows = new List<Campaign>();
 
         private readonly IAbstractFactory<AddUser> _factoryAddUser;
         private readonly IAbstractFactory<UsersOfClient> _factoryUsersOfClient;
@@ -95,6 +100,7 @@ namespace CampaignEditor
             tbSearchClients.Text = searchClientsString;
 
             FillFilterByUsersComboBox();
+
         }
 
         #region Filter ComboBox
@@ -282,14 +288,43 @@ namespace CampaignEditor
         #region Context menu options
         public async void btnAddCampaign_Click(object sender, RoutedEventArgs e)
         {
-            /*var f = _factoryAddCampaign.Create();
             string campaignName = ((HeaderedItemsControl)tvClients.SelectedItem).Header.ToString()!.Trim();
-            f.Initialization(campaignName, isReadOnly);
-            f.Show();*/
-            var f = _factoryCampaign.Create();
-            string campaignName = ((HeaderedItemsControl)tvClients.SelectedItem).Header.ToString()!.Trim();
-            await f.Initialize(campaignName, isReadOnly);
-            f.Show();
+
+            // If campaign window is minimized, show it, if campaign is not open,
+            // make new and place it in list of open campaigns 
+            if (openCampaignWindows.Any(w => w.cmpname == campaignName))
+            {
+                Campaign window = openCampaignWindows.First(w => w.cmpname == campaignName);
+                if (!window.IsVisible)
+                {
+                    window.Show();
+                }
+
+                if (window.WindowState == WindowState.Minimized)
+                {
+                    window.WindowState = WindowState.Normal;
+                }
+
+                window.Topmost = true;
+                window.Activate();
+                window.Topmost = false;
+            }
+            else
+            {
+                var f = _factoryCampaign.Create();
+                await f.Initialize(campaignName, isReadOnly);
+                openCampaignWindows.Add(f);
+                f.Closed += CampaignWindow_Closed;
+                f.Show();
+                f.Activate();
+            }
+
+        }
+        // remove from list of opened campaigns
+        private void CampaignWindow_Closed(object sender, EventArgs e)
+        {
+            Campaign window = (Campaign)sender;
+            openCampaignWindows.Remove(window);
         }
 
         private async void btnNewCampaign_Click(object sender, RoutedEventArgs e)
@@ -298,7 +333,7 @@ namespace CampaignEditor
             var f = _factoryNewCampaign.Create();
             f.Initialize(clientname);
             f.ShowDialog();
-            await _clientsTree.UpdateTree();
+            await _clientsTree.InitializeTree();
         }
 
         private async void btnShowUsersOfClient_Click(object sender, RoutedEventArgs e)

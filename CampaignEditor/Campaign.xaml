@@ -16,10 +16,10 @@
             <Button x:Name="btnForecast" Content="Forecast" 
                     MinWidth="100"
                     Click="btnForecast_Click"/>
-            <Button x:Name="btnResult" Content="Result" 
+            <Button x:Name="btnPlan" Content="Plan" 
                     MinWidth="100"
                     />
-            <Button x:Name="btnLook" Content="Look" 
+            <Button x:Name="btnReports" Content="Reports" 
                     MinWidth="100"
                     />
         </UniformGrid>

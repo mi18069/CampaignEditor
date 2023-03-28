@@ -78,7 +78,7 @@ namespace CampaignEditor
             _campaignController = new CampaignController(campaignRepository);
             _clientController = new ClientController(clientRepository);
             _targetCmpController = new TargetCmpController(targetCmpRepository);
-            InitializeComponent();            
+            InitializeComponent();
             
         }
 

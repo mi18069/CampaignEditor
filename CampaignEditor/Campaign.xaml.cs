@@ -12,7 +12,7 @@ namespace CampaignEditor
 {
     public partial class Campaign : Window
     {
-
+        public string cmpname = "";
         ClientDTO _client = null;
         CampaignDTO _campaign = null;
         bool isReadOnly = true;
@@ -35,10 +35,12 @@ namespace CampaignEditor
             _campaignController = new CampaignController(campaignRepository);
 
             InitializeComponent();
+            
         }
 
         public async Task Initialize(string campaignName, bool isReadOnly)
         {
+            cmpname = campaignName;
             _campaign = await _campaignController.GetCampaignByName(campaignName);
             _client = await _clientController.GetClientById(_campaign.clid);
             isReadOnly = isReadOnly;
