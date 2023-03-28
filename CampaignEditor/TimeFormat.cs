@@ -19,6 +19,20 @@ namespace CampaignEditor
 
             return year + month + day;
         }
+        public static string? DPToTimeString(DatePicker dp)
+        {
+            DateTime? date = dp.SelectedDate;
+            if (date == null)
+            {
+                return null;
+            }
+
+            string hour = DateTime.Parse(date.ToString()!).Hour.ToString().PadLeft(2, '0');
+            string minute = DateTime.Parse(date.ToString()!).Minute.ToString().PadLeft(2, '0');
+            string second = DateTime.Parse(date.ToString()!).Second.ToString().PadLeft(2, '0');
+
+            return hour + minute + second;
+        }
         public static DateTime YMDStringToDateTime(string timeString)
         {
             int year = int.Parse(timeString.Substring(0, 4));

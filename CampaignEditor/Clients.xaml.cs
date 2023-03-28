@@ -331,9 +331,10 @@ namespace CampaignEditor
         {
             string clientname = ((HeaderedItemsControl)tvClients.SelectedItem).Header.ToString()!.Trim();
             var f = _factoryNewCampaign.Create();
-            f.Initialize(clientname);
+            await f.Initialize(clientname);
             f.ShowDialog();
-            await _clientsTree.InitializeTree();
+            if (f.success)
+                await _clientsTree.InitializeTree();
         }
 
         private async void btnShowUsersOfClient_Click(object sender, RoutedEventArgs e)

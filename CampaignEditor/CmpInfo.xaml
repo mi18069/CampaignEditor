@@ -48,7 +48,7 @@
                HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="10" />
         <TextBox x:Name="tbClientname" Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="4" 
                  HorizontalContentAlignment="Left" FontWeight="Black"
-                 VerticalAlignment="Center" Margin="10" 
+                 VerticalAlignment="Center" Margin="10" IsReadOnly="True"
                  TextChanged="tb_TextChanged"/>
 
         <Label x:Name="lblStartDate" Content="Start Date: " Grid.Row="4" Grid.Column="1" 

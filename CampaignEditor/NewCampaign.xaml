@@ -5,22 +5,81 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CampaignEditor"
         mc:Ignorable="d"
-        Title="NewCampaign" Height="250" Width="550" FontSize="22" ResizeMode="NoResize">
+        Title="NewCampaign" Height="550" Width="500" FontSize="22" ResizeMode="NoResize">
     <Grid>
-        <Label x:Name="lblName" Content="Campaign name" 
-               HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,20,0,0"/>
-        <TextBox x:Name="tbName" TextWrapping="Wrap" Text=""
-                 Width="450"
-                 HorizontalAlignment="Center"  VerticalAlignment="Top" Margin="0,70,0,0" />
-        <Label x:Name="lblError" Content="" Foreground="Red" HorizontalContentAlignment="Center"
-               Width="450"
-               HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,100,0,0"/>
-        <Button x:Name="btnSave" Content="Save" 
-                Width="100"
-                HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,40,10" Click="btnSave_Click" />
-        <Button x:Name="btnCancel" Content="Cancel" 
-                Width="100"
-                HorizontalAlignment="Left" VerticalAlignment="Bottom" Margin="40,0,0,10" Click="btnCancel_Click"/>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="10" />
+            <ColumnDefinition Width="auto" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="20"/>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="2*" />
+            <ColumnDefinition Width="10" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="10" />
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="60" />
+            <RowDefinition Height="10" />
+        </Grid.RowDefinitions>
 
+        <Label x:Name="lblName" Content="Name: " Grid.Row="1" Grid.Column="1" 
+               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10" />
+        <TextBox x:Name="tbName" Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="4"
+                 TextWrapping="NoWrap"
+                 VerticalAlignment="Center" Margin="10"/>
+
+        <Label x:Name="lblClient" Content="Client: " Grid.Row="2" Grid.Column="1"
+               HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="10" />
+        <TextBox x:Name="tbClientname" Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="4" 
+                 HorizontalContentAlignment="Left" FontWeight="Black"
+                 VerticalAlignment="Center" Margin="10" IsReadOnly="True"/>
+
+        <Label x:Name="lblStartDate" Content="Start Date: " Grid.Row="3" Grid.Column="1" 
+               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10" />
+        <DatePicker x:Name="dpStartDate" Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="3" 
+                    VerticalAlignment="Center" Margin="10"/>
+        <Label x:Name="lblEndDate" Content="End Date: " Grid.Row="4" Grid.Column="1"
+               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10" />
+        <DatePicker x:Name="dpEndDate" Grid.Row="4" Grid.Column="2" Grid.ColumnSpan="3"
+                    VerticalAlignment="Center" Margin="10"/>
+
+        <Label x:Name="lblTbStart" Content="TB Start: " Grid.Row="5" Grid.Column="1" 
+               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10" />
+        <TextBox x:Name="tbTbStartHours" MaxLength="2" Grid.Row="5" Grid.Column="2"
+                 TextWrapping="Wrap" 
+                 VerticalAlignment="Center" Margin="10"/>
+        <Label x:Name="lblDots1" Content=":" Grid.Row="5" Grid.Column="3" FontWeight="Bold" 
+               VerticalAlignment="Center" />
+        <TextBox x:Name="tbTbStartMinutes" MaxLength="2" Grid.Row="5" Grid.Column="4"
+                 TextWrapping="Wrap"
+                 VerticalAlignment="Center" Margin="10"/>
+        <Label x:Name="lblTbEnd" Content="TB End: " Grid.Row="6" Grid.Column="1" 
+               VerticalAlignment="Center" Margin="10" />
+        <TextBox x:Name="tbTbEndHours" MaxLength="2" Grid.Row="6" Grid.Column="2"
+                 TextWrapping="Wrap"
+                 VerticalAlignment="Center" Margin="10"/>
+        <Label x:Name="lblDots2" Content=":" Grid.Row="6" Grid.Column="3" FontWeight="Bold" 
+               VerticalAlignment="Center" />
+        <TextBox x:Name="tbTbEndMinutes" MaxLength="2" Grid.Row="6" Grid.Column="4"
+                 TextWrapping="Wrap"
+                 VerticalAlignment="Center" Margin="10"/>
+
+        <Label x:Name="lblError" Grid.Row="8" Grid.Column="1" Grid.ColumnSpan="5"  
+               Foreground="Red" HorizontalAlignment="Right" />
+
+        <Button x:Name="btnSave" Content="Save" Grid.Row="9" Grid.Column="2" Grid.ColumnSpan="4" 
+                HorizontalAlignment="Right" Width="100" Margin="10, 10, 20, 10"
+                Click="btnSave_Click"/>
+        <Button x:Name="btnCancel" Content="Cancel" Grid.Row="9" Grid.Column="2" Grid.ColumnSpan="4" 
+                HorizontalAlignment="Right" Width="100" Margin="10, 10, 140, 10"
+                Click="btnCancel_Click"/>
     </Grid>
 </Window>

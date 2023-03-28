@@ -6,6 +6,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace CampaignEditor
 {
@@ -14,7 +15,10 @@ namespace CampaignEditor
 
         private CampaignController _campaignController;
         private ClientController _clientController;
-        ClientDTO client;
+        
+        private ClientDTO _client;
+
+        public bool success = false;
 
         public bool canClientBeDeleted = false;
         public NewCampaign(ICampaignRepository campaignRepository, IClientRepository clientRepository)
@@ -27,20 +31,33 @@ namespace CampaignEditor
         // For binding client to campaign
         public async Task Initialize(string clientname)
         {
-            client = await _clientController.GetClientByName(clientname);
-            canClientBeDeleted = (await _campaignController.GetCampaignsByClientId(client.clid)).Count() == 0;
+            _client = await _clientController.GetClientByName(clientname);
+            canClientBeDeleted = (await _campaignController.GetCampaignsByClientId(_client.clid)).Count() == 0;
+            FillFields();
+        }
+
+        private void FillFields()
+        {
+            tbName.Text = "";
+            tbClientname.Text = _client.clname.ToString().Trim();
+            dpStartDate.SelectedDate = DateTime.Now;
+            dpEndDate.SelectedDate = DateTime.Now;
+            tbTbStartHours.Text = "02";
+            tbTbStartMinutes.Text = "00";
+            tbTbEndHours.Text = "25";
+            tbTbEndMinutes.Text = "59";
         }
 
         private async void btnSave_Click(object sender, RoutedEventArgs e)
         {
             lblError.Content = "";
-            var a = client;
             string campaignName = tbName.Text.Trim();
-            if (await CheckCampaignName(campaignName))
+            if (await CheckCampaign())
             {
                 try
                 {
-                    await CreateCampaign(campaignName);
+                    await CreateCampaign();
+                    success = true;
                     this.Close();
                 }
                 catch (Exception ex)
@@ -51,61 +68,46 @@ namespace CampaignEditor
             }
         }
 
-        private async Task CreateCampaign(string campaignName)
+        private async Task CreateCampaign()
         {
-            DateTime now = DateTime.Now;
-
             int cmprev = 0;
             int cmpown = 1; // Don't know what this is
-            string cmpname = campaignName;
-            int clid = client.clid;
-            string cmpsdate = DateToString(now);
-            string cmpedate = DateToString(now);
-            string cmpstime = "02:00:00";
-            string cmpetime = "25:59:59";
+            string cmpname = tbName.Text.Trim();
+            int clid = _client.clid;
+            string cmpsdate = TimeFormat.DPToYMDString(dpStartDate);
+            string cmpedate = TimeFormat.DPToYMDString(dpEndDate);
+            string cmpstime = tbTbStartHours.Text.PadLeft(2, '0')+":"+tbTbStartMinutes.Text.PadLeft(2, '0')+":00";
+            string cmpetime = tbTbEndHours.Text.PadLeft(2, '0')+":"+tbTbEndMinutes.Text.PadLeft(2, '0')+":59";
             int cmpstatus = 0;
             string sostring = "1;999;F;01234;012345";
             int activity = 0;
-            int cmpaddedon = DateToInt(now);
-            int cmpaddedat = TimeToInt(now); 
-            bool active = false;
+            DatePicker dpNow = new DatePicker();
+            dpNow.SelectedDate = DateTime.Now;
+            int cmpaddedon = int.Parse(TimeFormat.DPToYMDString(dpNow));
+            int cmpaddedat = int.Parse(TimeFormat.DPToTimeString(dpNow)); 
+            bool active = true;
             bool forcec = false;
 
 
-            _ = await _campaignController.CreateCampaign(new CreateCampaignDTO(cmprev, cmpown, cmpname, clid, cmpsdate, cmpedate,
+            await _campaignController.CreateCampaign(new CreateCampaignDTO(cmprev, cmpown, cmpname, clid, cmpsdate, cmpedate,
                 cmpstime, cmpetime, cmpstatus, sostring, activity, cmpaddedon, cmpaddedat, active, forcec));
         }
 
-        private int TimeToInt(DateTime now)
+        private async Task<bool> CheckCampaign()
         {
-            return Convert.ToInt32(now.ToString("HHmmss"));
-        }
-
-        private int DateToInt(DateTime now)
-        {
-            return Convert.ToInt32(now.ToString("yyyyMMdd"));
-        }
-
-        private string TimeToString(DateTime now)
-        {
-            return now.ToString("HH:mm:ss");
-        }
-
-        private string DateToString(DateTime now)
-        {
-            return now.ToString("yyyyMMdd");
-        }
-
-        private async Task<bool> CheckCampaignName(string campaignName)
-        {
-            if (await _campaignController.GetCampaignByName(campaignName) == null)
+            if (await _campaignController.GetCampaignByName(tbName.Text.Trim()) != null)
             {
-                return true;
+                lblError.Content = "Already exists campaign with this name";
+                return false;
+            }
+            else if (dpStartDate.SelectedDate > dpEndDate.SelectedDate)
+            {
+                lblError.Content = "Start date must be prior the end date";
+                return false;
             }
             else
             {
-                lblError.Content = "Already exist campaign with this name";
-                return false;
+                return true;
             }
 
         }
