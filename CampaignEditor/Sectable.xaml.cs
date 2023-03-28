@@ -1,5 +1,5 @@
 ﻿using CampaignEditor.Controllers;
-using Database.DTOs.ClientDTO;
+using CampaignEditor.DTOs.CampaignDTO;
 using Database.DTOs.SectableDTO;
 using Database.DTOs.SectablesDTO;
 using Database.Repositories;
@@ -22,7 +22,8 @@ namespace CampaignEditor
         private bool modifiedSectable = false;
 
         private SectableDTO _sectable = null;
-        private ClientDTO _client = null;
+        private CampaignDTO _campaign = null;
+
         ObservableCollection<Tuple<int, double>> dgList = new ObservableCollection<Tuple<int, double>>();
 
         public Sectable(ISectableRepository sectableRepository,
@@ -35,14 +36,14 @@ namespace CampaignEditor
 
         }
 
-        public async void Initialize(ClientDTO client, SectableDTO sectable = null)
+        public async void Initialize(CampaignDTO campaign, SectableDTO sectable = null)
         {
             if (sectable != null)
             {
                 _sectable = sectable;
                 await FillBySctAsync(_sectable);
             }
-            _client = client;
+            _campaign = campaign;
         }
 
         #region Filling fields
@@ -224,7 +225,7 @@ namespace CampaignEditor
                 if (_sectable == null)
                 {
                     _sectable = await _sectableController.CreateSectable(new CreateSectableDTO
-                        (tbName.Text.Trim(), false, (bool)cbActive.IsChecked, _client.clid));
+                        (tbName.Text.Trim(), false, (bool)cbActive.IsChecked, _campaign.clid));
                 }
                 int id = _sectable.sctid;
 
@@ -239,7 +240,7 @@ namespace CampaignEditor
                 }
                 if (modifiedSectable)
                 {
-                    await _sectableController.UpdateSectable(new UpdateSectableDTO(id, tbName.Text.Trim(), false, (bool)cbActive.IsChecked, _client.clid));
+                    await _sectableController.UpdateSectable(new UpdateSectableDTO(id, tbName.Text.Trim(), false, (bool)cbActive.IsChecked, _campaign.clid));
                 }
                 success = true;
             }

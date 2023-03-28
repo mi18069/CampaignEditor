@@ -79,7 +79,7 @@ namespace Database.Repositories
 
             var affected = await connection.ExecuteAsync(
                 "Update tbltargets SET targname = @Targname, targown = @Targown, " +
-                "targdesc = @Targdesc, targdefi = @Targdefi, targdefp = @Targdefp) " +
+                "targdesc = @Targdesc, targdefi = @Targdefi, targdefp = @Targdefp " +
                 "WHERE targid = @Targid",
             new
             {

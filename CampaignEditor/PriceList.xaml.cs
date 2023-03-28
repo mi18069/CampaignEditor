@@ -1,7 +1,7 @@
 ﻿using CampaignEditor.Controllers;
+using CampaignEditor.DTOs.CampaignDTO;
 using CampaignEditor.StartupHelpers;
 using Database.DTOs.ChannelDTO;
-using Database.DTOs.ClientDTO;
 using Database.DTOs.PricelistChannels;
 using Database.DTOs.PricelistDTO;
 using Database.DTOs.PricesDTO;
@@ -13,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Runtime.Intrinsics.Arm;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -35,7 +36,7 @@ namespace CampaignEditor
         private readonly IAbstractFactory<Seasonality> _factorySeasonality;
         private readonly IAbstractFactory<NewTarget> _factoryNewTarget;
 
-        private ClientDTO client;
+        private CampaignDTO _campaign;
         private PricelistDTO _pricelist;
 
         // For Plus Icon
@@ -70,9 +71,9 @@ namespace CampaignEditor
 
         }
         #region Initialization
-        public async Task Initialize(ClientDTO client, PricelistDTO pricelist = null)
+        public async Task Initialize(CampaignDTO campaign, PricelistDTO pricelist = null)
         {
-            this.client = client;
+            _campaign = campaign;
             _pricelist = pricelist;
             await FillFields();
             if (_pricelist != null)
@@ -198,7 +199,7 @@ namespace CampaignEditor
             cbSectable.Items.Clear();
             cbSectable2.Items.Clear();
 
-            List<SectableDTO> sectables = (List<SectableDTO>)await _sectableController.GetAllSectablesByOwnerId(client.clid);
+            List<SectableDTO> sectables = (List<SectableDTO>)await _sectableController.GetAllSectablesByOwnerId(_campaign.clid);
             foreach (var sectable in sectables)
             {
                 cbSectable.Items.Add(sectable);
@@ -211,7 +212,7 @@ namespace CampaignEditor
         {
             cbSeasonality.Items.Clear();
 
-            List<SeasonalityDTO> seasonalities = (List<SeasonalityDTO>)await _seasonalityController.GetAllSeasonalitiesByOwnerId(client.clid);
+            List<SeasonalityDTO> seasonalities = (List<SeasonalityDTO>)await _seasonalityController.GetAllSeasonalitiesByOwnerId(_campaign.clid);
             foreach (var seasonality in seasonalities)
             {
                 cbSeasonality.Items.Add(seasonality);
@@ -223,7 +224,7 @@ namespace CampaignEditor
         {
             cbTarget.Items.Clear();
 
-            List<TargetDTO> targets = (List<TargetDTO>)await _targetController.GetAllClientTargets(client.clid);
+            List<TargetDTO> targets = (List<TargetDTO>)await _targetController.GetAllClientTargets(_campaign.clid);
 
             foreach (var target in targets)
             {
@@ -245,7 +246,6 @@ namespace CampaignEditor
         private async Task AssignPricelistValues()
         {
             tbName.Text = _pricelist.plname;
-            chbActive.IsChecked = _pricelist.plactive;
             cbType.SelectedIndex = _pricelist.pltype;
             cbSectable.SelectedItem = await _sectableController.GetSectableById(_pricelist.sectbid);
             cbSectable2.SelectedItem = await _sectableController.GetSectableById(_pricelist.sectbid);
@@ -314,13 +314,13 @@ namespace CampaignEditor
         // for writing data in Database tblpricelist and tblpricelistchn
         private async Task CreateOrUpdatePricelist(PricelistDTO pricelist = null)
         {
-            int clid = client.clid;
+            int clid = _campaign.clid;
             string plname = tbName.Text.Trim();
             int pltype = cbType.SelectedIndex; // Place in combobox corresponds to int value
             int chid = 0; // Don't know what this field does
             int sectbid = (cbSectable.SelectedValue as SectableDTO)!.sctid; // By default, first value is selected
             int seasid = (cbSeasonality.SelectedValue as SeasonalityDTO)!.seasid;
-            bool plactive = (bool)chbActive.IsChecked;
+            bool plactive = true;
             float price = float.Parse(tbCP.Text.Trim());
             float minprice = float.Parse(tbMinGRP.Text.Trim());
             bool prgcoef = false;
@@ -339,7 +339,7 @@ namespace CampaignEditor
                     (clid, plname, pltype, sectbid, seasid, plactive, price, minprice,
                     prgcoef, pltarg, use2, sectbid2, sectb2st, sectb2en,
                     valfrom, valto, mgtype));
-                _pricelist = await _pricelistController.GetClientPricelistByName(client.clid, tbName.Text.Trim());
+                _pricelist = await _pricelistController.GetClientPricelistByName(_campaign.clid, tbName.Text.Trim());
             }
             else
             {
@@ -374,14 +374,30 @@ namespace CampaignEditor
             int n = wpDayParts.Children.Count;
 
             await _pricesController.DeletePricesByPlid(pricelist.plid);
+            int created = 0;
             for (int i = 0; i < n - 1; i++) // last item is Button
             {
                 TargetDPItem item = wpDayParts.Children[i] as TargetDPItem;
-                string dps = (item.tbFromH.Text.Trim() + ":" + item.tbFromM.Text.Trim()).PadLeft(2,'0');
-                string dpe = (item.tbToH.Text.Trim() + ":" + item.tbToM.Text.Trim()).PadLeft(2,'0');
-                float price = float.Parse(item.tbCoef.Text.Trim());
-                bool ispt = (bool)item.cbIsPT.IsChecked;
-                await _pricesController.CreatePrices(new CreatePricesDTO(pricelist.plid, dps, dpe, price, ispt));
+                if (item.tbFromH.Text.Trim() == "" ||
+                    item.tbFromM.Text.Trim() == "" ||
+                    item.tbToH.Text.Trim() == "" ||
+                    item.tbToM.Text.Trim() == "")
+                {
+                    continue;
+                }
+                else
+                {
+                    string dps = (item.tbFromH.Text.Trim() + ":" + item.tbFromM.Text.Trim()).PadLeft(2, '0');
+                    string dpe = (item.tbToH.Text.Trim() + ":" + item.tbToM.Text.Trim()).PadLeft(2, '0');
+                    float price = float.Parse(item.tbCoef.Text.Trim());
+                    bool ispt = (bool)item.cbIsPT.IsChecked;
+                    await _pricesController.CreatePrices(new CreatePricesDTO(pricelist.plid, dps, dpe, price, ispt));
+                    created += 1; 
+                }
+            }
+            if (created == 0)
+            {
+                await _pricesController.CreatePrices(new CreatePricesDTO(pricelist.plid, "02:00", "25:59", 1.0f, false));
             }
         }
         #endregion
@@ -439,7 +455,7 @@ namespace CampaignEditor
                 MessageBox.Show("Enter name");
                 return false;
             }
-            else if ((await _pricelistController.GetClientPricelistByName(client.clid, name)) != null)
+            else if ((await _pricelistController.GetClientPricelistByName(_campaign.clid, name)) != null)
             {
                 MessageBox.Show("Name already exist");
                 return false;
@@ -580,7 +596,7 @@ namespace CampaignEditor
         private async void btnNewTarget_Click(object sender, RoutedEventArgs e)
         {
             var factory = _factoryNewTarget.Create();
-            await factory.InitializeTree();
+            await factory.InitializeTree(_campaign);
             factory.ShowDialog();
             if (factory.success)
                 await FillCBTarget();
@@ -594,7 +610,7 @@ namespace CampaignEditor
 
             if (target != null)
             {
-                var success = await factory.InitializeTargetToEdit(target);
+                var success = await factory.InitializeTargetToEdit(_campaign, target);
             }
 
             factory.ShowDialog();
@@ -607,7 +623,7 @@ namespace CampaignEditor
             var factory = _factorySectable.Create();
             int index = cbSectable.Items.Count;
 
-            factory.Initialize(client);
+            factory.Initialize(_campaign);
             factory.ShowDialog();
             if (factory.success)
                 await FillCBSectable(index);
@@ -619,7 +635,7 @@ namespace CampaignEditor
             SectableDTO sectable = (cbSectable.SelectedItem as SectableDTO)!;
             int index = cbSectable.SelectedIndex;
 
-            factory.Initialize(client, sectable);
+            factory.Initialize(_campaign, sectable);
             factory.ShowDialog();
             if (factory.success)
                 await FillCBSectable(index);
@@ -630,7 +646,7 @@ namespace CampaignEditor
             var factory = _factorySeasonality.Create();
             int index = cbSeasonality.Items.Count;
 
-            factory.Initialize(client);
+            factory.Initialize(_campaign);
             factory.ShowDialog();
             if (factory.success)
                 await FillCBSeasonality(index);
@@ -641,7 +657,7 @@ namespace CampaignEditor
             SeasonalityDTO seasonality = (cbSeasonality.SelectedItem as SeasonalityDTO)!;
             int index = cbSeasonality.SelectedIndex;
 
-            factory.Initialize(client, seasonality);
+            factory.Initialize(_campaign, seasonality);
             factory.ShowDialog();
             if (factory.success)
                 await FillCBSeasonality(index);
@@ -691,15 +707,6 @@ namespace CampaignEditor
             pricelistModified = true;
         }
 
-        private void chbActive_Checked(object sender, RoutedEventArgs e)
-        {
-            pricelistModified = true;
-        }
-
-        private void chbActive_Unchecked(object sender, RoutedEventArgs e)
-        {
-            pricelistModified = true;
-        }
         private void cbType_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             pricelistModified = true;

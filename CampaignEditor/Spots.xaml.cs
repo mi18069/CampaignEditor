@@ -81,6 +81,7 @@ namespace CampaignEditor
         private void btnAddSpot_Click(object sender, RoutedEventArgs e)
         {
             AddSpotItem();
+            spotsModified = true;
         }
         private void btnDeleteSpot_Click(object sender, RoutedEventArgs e)
         {
@@ -181,18 +182,23 @@ namespace CampaignEditor
             }
             if (spotsModified && CheckValues())
             {
+                int skipped = 0;
                 Spotlist.Clear();
                 for (int i = 0; i < n - 1; i++)
                 {
                     SpotItem item = wpSpots.Children[i] as SpotItem;
-                    if (!(i == n - 2 &&
-                    item.tbLength.Text.Trim().Length == 0 &&
-                    item.tbName.Text.Trim().Length == 0))
+                    if (item.tbLength.Text.Trim().Length == 0 ||
+                    item.tbName.Text.Trim().Length == 0)
                     {
-                        SpotDTO spot = new SpotDTO(Campaign.cmpid, item.lblCode.Content.ToString().Trim(),
+                        skipped += 1;
+                        continue;
+                    }
+                    else
+                    {
+                        SpotDTO spot = new SpotDTO(Campaign.cmpid, ((char)('A' + i - skipped)).ToString(),
                         item.tbName.Text.ToString().Trim(), int.Parse(item.tbLength.Text.Trim()), false);
                         Spotlist.Add(spot);
-                    }                
+                    }
                 }
                 this.Hide();
             }
@@ -206,20 +212,24 @@ namespace CampaignEditor
             {
                 SpotItem spotItem = wpSpots.Children[i] as SpotItem;
                 // Don't check last item if it's empty
-                if (i == n - 2 && 
-                    spotItem.tbLength.Text.Trim().Length == 0 && 
+                if (spotItem.tbLength.Text.Trim().Length == 0 && 
                     spotItem.tbName.Text.Trim().Length == 0)
                 {
                     continue;
                 }
-                if (!spotItem.tbLength.Text.Trim().All(Char.IsDigit))
+                if (spotItem.tbName.Text.Trim() == "" || spotItem.tbName.Text.Trim() == null)
                 {
-                    MessageBox.Show("Invalid value for length (integers only)");
+                    MessageBox.Show("Enter name");
                     return false;
                 }
                 if (spotItem.tbLength.Text.Trim() == "" || spotItem.tbLength.Text.Trim() == null)
                 {
                     MessageBox.Show("Enter length");
+                    return false;
+                }
+                if (!spotItem.tbLength.Text.Trim().All(Char.IsDigit))
+                {
+                    MessageBox.Show("Invalid value for length (integers only)");
                     return false;
                 }
             }

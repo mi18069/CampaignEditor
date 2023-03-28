@@ -366,9 +366,9 @@ namespace CampaignEditor
         {
             var f = _factoryPriceList.Create();
             if (lvPricelists.SelectedItems.Count > 0)
-                await f.Initialize(_client, lvPricelists.SelectedItem as PricelistDTO);
+                await f.Initialize(_campaign, lvPricelists.SelectedItem as PricelistDTO);
             else
-                await f.Initialize(_client);
+                await f.Initialize(_campaign);
             f.ShowDialog();
             if (f.pricelistChanged)
             {
@@ -379,7 +379,7 @@ namespace CampaignEditor
         private async void btnNewPricelist_Click(object sender, RoutedEventArgs e)
         {
             var f = _factoryPriceList.Create();
-            await f.Initialize(_client);
+            await f.Initialize(_campaign);
             f.ShowDialog();
             if (f.pricelistChanged)
             {

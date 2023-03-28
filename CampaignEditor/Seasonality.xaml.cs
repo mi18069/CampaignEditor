@@ -1,5 +1,4 @@
 ﻿using CampaignEditor.Controllers;
-using Database.DTOs.ClientDTO;
 using Database.DTOs.SeasonalitiesDTO;
 using Database.DTOs.SeasonalityDTO;
 using Database.Repositories;
@@ -12,6 +11,7 @@ using System.Windows.Controls;
 using System.Windows.Media.Imaging;
 using System.Windows.Media;
 using System.IO;
+using CampaignEditor.DTOs.CampaignDTO;
 
 namespace CampaignEditor
 {
@@ -26,7 +26,7 @@ namespace CampaignEditor
         private bool modifiedSeasonalities = false;
         private bool modifiedSeasonality = false;
 
-        private ClientDTO _client = null;
+        private CampaignDTO _campaign = null;
 
         // For Plus Icon
         private string appPath = Directory.GetCurrentDirectory();
@@ -41,7 +41,7 @@ namespace CampaignEditor
             _seasonalityController = new SeasonalityController(seasonalityRepository);
         }
 
-        public async void Initialize(ClientDTO client, SeasonalityDTO seasonality = null)
+        public async void Initialize(CampaignDTO campaign, SeasonalityDTO seasonality = null)
         {
             if (seasonality != null)
             {
@@ -55,7 +55,7 @@ namespace CampaignEditor
                 var addBtn = MakeAddButton();
                 wpSeasonalities.Children.Add(addBtn);
             }
-            _client = client;
+            _campaign = campaign;
         }
         
         #region Fill Fields
@@ -157,7 +157,7 @@ namespace CampaignEditor
                 if (_seasonality == null)
                 {
                     _seasonality = await _seasonalityController.CreateSeasonality(new CreateSeasonalityDTO
-                        (tbName.Text.Trim(), (bool)cbActive.IsChecked, _client.clid));
+                        (tbName.Text.Trim(), (bool)cbActive.IsChecked, _campaign.clid));
                 }
                 int id = _seasonality.seasid;
 
@@ -182,7 +182,7 @@ namespace CampaignEditor
                 }
                 if (modifiedSeasonality)
                 {
-                    await _seasonalityController.UpdateSeasonality(new UpdateSeasonalityDTO(id, tbName.Text.Trim(), (bool)cbActive.IsChecked, _client.clid));
+                    await _seasonalityController.UpdateSeasonality(new UpdateSeasonalityDTO(id, tbName.Text.Trim(), (bool)cbActive.IsChecked, _campaign.clid));
                 }
                 success = true;
             }

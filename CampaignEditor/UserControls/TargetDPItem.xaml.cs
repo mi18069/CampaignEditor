@@ -32,13 +32,7 @@ namespace CampaignEditor
             int toM;
             double coef;
 
-            if (tbFromH.Text.Trim() == "" ||
-                tbFromM.Text.Trim() == "" ||
-                tbToH.Text.Trim() == "" ||
-                tbToM.Text.Trim() == "")
-            {
-                return "Empty fields in Day Parts";
-            }
+
             if (!int.TryParse(tbFromH.Text.Trim(), out fromH) ||
                 !int.TryParse(tbFromM.Text.Trim(), out fromM) ||
                 !int.TryParse(tbToH.Text.Trim(), out toH) ||

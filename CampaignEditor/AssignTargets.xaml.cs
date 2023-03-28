@@ -173,7 +173,7 @@ namespace CampaignEditor
         private async void btnNewTarget_Click(object sender, RoutedEventArgs e)
         {
             var factory = _factoryNewTarget.Create();
-            await factory.InitializeTree();
+            await factory.InitializeTree(_campaign);
             factory.ShowDialog();
             if (factory.success)
                 await Initialize(_campaign, SelectedTargetsList.ToList(), true);
@@ -188,7 +188,7 @@ namespace CampaignEditor
             
             if (target != null)
             {
-                var success = await factory.InitializeTargetToEdit(target);
+                var success = await factory.InitializeTargetToEdit(_campaign, target);
             }
 
             factory.ShowDialog();

@@ -56,6 +56,7 @@
                      HorizontalAlignment="Left" Margin="275, 0, 0, 0"
                      TextChanged="tb_TextChanged"/>
             </Grid>
+
             <Label x:Name="lblName" Content="Name:" FontWeight="Bold"
                HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,20,240,0"/>
             <TextBox x:Name="tbName" MaxLength="25"

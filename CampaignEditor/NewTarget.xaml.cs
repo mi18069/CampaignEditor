@@ -1,4 +1,5 @@
 ﻿using CampaignEditor.Controllers;
+using CampaignEditor.DTOs.CampaignDTO;
 using Database.DTOs.TargetClassDTO;
 using Database.DTOs.TargetDTO;
 using Database.DTOs.TargetValueDTO;
@@ -25,6 +26,8 @@ namespace CampaignEditor
 
         private TargetDTO targetToEdit = null;
 
+        private CampaignDTO _campaign = null;
+
         public bool success = false;
 
         public bool isDataRangeChecked { get; set; } = false;
@@ -41,8 +44,10 @@ namespace CampaignEditor
 
         #region TargetTree
 
-        public async Task InitializeTree()
+        public async Task InitializeTree(CampaignDTO campaign)
         {
+            _campaign = campaign;
+
             var treeResult = await SetTree();
             tvTargets.Items.Clear();
 
@@ -92,9 +97,9 @@ namespace CampaignEditor
             return treeViewList;
         }
 
-        public async Task<bool> InitializeTargetToEdit(TargetDTO target)
+        public async Task<bool> InitializeTargetToEdit(CampaignDTO campaign, TargetDTO target)
         {
-            await InitializeTree();
+            await InitializeTree(campaign);
             tbName.Text = target.targname.Trim();
             tbDescription.Text = target.targdesc.Trim();
             btnSaveAs.Visibility = Visibility.Visible;
@@ -200,7 +205,7 @@ namespace CampaignEditor
             if (await CheckValues(true))
             {
                 string targname = tbName.Text.Trim();
-                int targown = AddCampaign.instance.client.clid;
+                int targown = _campaign.clid;
                 string targdesc = tbDescription.Text.Trim();
                 string targdefi = ParseSelectedTargdefi();
                 string targdefp = ParseSelectedTargdefp();
@@ -218,7 +223,7 @@ namespace CampaignEditor
             {
                 int targid = targetToEdit.targid;
                 string targname = tbName.Text.Trim();
-                int targown = AddCampaign.instance.client.clid;
+                int targown = _campaign.clid;
                 string targdesc = tbDescription.Text.Trim();
                 string targdefi = ParseSelectedTargdefi();
                 string targdefp = ParseSelectedTargdefp();
