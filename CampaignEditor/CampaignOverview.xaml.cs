@@ -66,7 +66,7 @@ namespace CampaignEditor
             IAbstractFactory<Channels> factoryChannels, IAbstractFactory<Spots> factorySpots,
             IAbstractFactory<Goals> factoryGoals, IAbstractFactory<CmpInfo> factoryInfo)
         {
-
+            this.DataContext = this;
             _factoryAssignTargets = factoryAssignTargets;
             _factoryChannels = factoryChannels;
             _factorySpots = factorySpots;
@@ -81,11 +81,11 @@ namespace CampaignEditor
         }
 
         #region Initialization
-        public async Task Initialization(ClientDTO client, CampaignDTO campaign, bool isReadOnly = true)
+        public async Task Initialization(ClientDTO client, CampaignDTO campaign, bool _isReadOnly = true)
         {
             _client = client;
             _campaign = campaign;
-            isReadOnly = isReadOnly;
+            isReadOnly = _isReadOnly;
 
             
 

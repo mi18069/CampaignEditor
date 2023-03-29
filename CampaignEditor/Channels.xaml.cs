@@ -139,7 +139,7 @@ namespace CampaignEditor
                 // Initializing and sorting lists, so it don't have to be sorted later
                 _channelList = new ObservableCollection<ChannelDTO>((await _channelController.GetAllChannels()).OrderBy(c => c.chname));
                 _allPricelistsList = (List<PricelistDTO>)(await _pricelistController.GetAllClientPricelists(_client.clid));
-                _pricelistList = new ObservableCollection<PricelistDTO>((AllPricelistsList).OrderByDescending(p => p.valfrom));
+                _pricelistList = new ObservableCollection<PricelistDTO>((AllPricelistsList).OrderBy(p=>p.clid!=0).ThenByDescending(p => p.valfrom));
                 _activityList = new ObservableCollection<ActivityDTO>((await _activityController.GetAllActivities()).OrderBy(a => a.act));
 
                 // Binding to ListViews

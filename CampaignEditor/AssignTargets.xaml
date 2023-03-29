@@ -20,6 +20,11 @@
                             <EventSetter Event="PreviewMouseUp" Handler="TargetsItem_PreviewMouseUp"/>
                             <EventSetter Event="LostFocus" Handler="ListViewItem_LostFocus"/>
                             <EventSetter Event="MouseDoubleClick" Handler="TargetsItem_MouseDoubleClick"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding targown}" Value="0">
+                                    <Setter Property="FontWeight" Value="Bold"/>
+                                </DataTrigger>
+                            </Style.Triggers>
                         </Style>
                     </ListView.ItemContainerStyle>
                 </ListView>
@@ -64,6 +69,11 @@
                             <EventSetter Event="PreviewMouseMove" Handler="ListViewItem_PreviewMouseMove"/>
                             <EventSetter Event="Drop" Handler="ListViewItem_Drop"/>
                             <EventSetter Event="MouseDoubleClick" Handler="SelectedTargetsItem_MouseDoubleClick"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding targown}" Value="0">
+                                    <Setter Property="FontWeight" Value="Bold"/>
+                                </DataTrigger>
+                            </Style.Triggers>
                         </Style>
                     </ListView.ItemContainerStyle>
                 </ListView>

@@ -32,14 +32,14 @@
             </Border>
             <Border BorderBrush="LightGray" BorderThickness="1" 
                 Width="340" Height="300"
-                HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,100,10,0">
+                HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,120,10,0">
                 <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
                     <TextBlock x:Name="tbSelected" Foreground="Gray" TextWrapping="NoWrap"/>
                 </ScrollViewer>
             </Border>
 
             <Grid Width="330" Height="50" 
-              HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0, 410, 10, 0">
+              HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0, 430, 10, 0">
                 <CheckBox x:Name="cbAgeRange"
                       Width="20" Height="20"
                       HorizontalAlignment="Left" Margin="0, 7, 0, 0"/>
@@ -57,17 +57,20 @@
                      TextChanged="tb_TextChanged"/>
             </Grid>
 
+            <CheckBox x:Name="chbGlobal" Content="Global" VerticalContentAlignment="Center"
+                      HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0, 15, 10, 0"
+                      IsChecked="False"/>
             <Label x:Name="lblName" Content="Name:" FontWeight="Bold"
-               HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,20,240,0"/>
+               HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,40,240,0"/>
             <TextBox x:Name="tbName" MaxLength="25"
             Width="230"
-            HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,25,10,0" 
+            HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,45,10,0" 
             TextWrapping="NoWrap"/>
             <Label x:Name="lblDescription" Content="Description:" FontWeight="Bold"
-               HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,60,240,0"/>
+               HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,80,240,0"/>
             <TextBox x:Name="tbDescription" MaxLength="255"
             Width="230"
-            HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,65,10,0" 
+            HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,85,10,0" 
             TextWrapping="NoWrap"/>
             <Button x:Name="btnSave" Content="Save" 
                 Width="120" Height="50"

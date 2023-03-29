@@ -3,6 +3,7 @@ using CampaignEditor.DTOs.CampaignDTO;
 using Database.DTOs.TargetClassDTO;
 using Database.DTOs.TargetDTO;
 using Database.DTOs.TargetValueDTO;
+using Database.Entities;
 using Database.Repositories;
 using System;
 using System.Collections.Generic;
@@ -47,8 +48,13 @@ namespace CampaignEditor
         public async Task InitializeTree(CampaignDTO campaign)
         {
             _campaign = campaign;
-
             var treeResult = await SetTree();
+
+            bool isAdmin = MainWindow.user.usrlevel == 0;
+            chbGlobal.Visibility = isAdmin ? Visibility.Visible : Visibility.Hidden;
+            if (chbGlobal.Visibility == Visibility.Visible && targetToEdit != null)
+                chbGlobal.IsChecked = targetToEdit.targown == 0;
+
             tvTargets.Items.Clear();
 
             tvTargets.ItemsSource = treeResult;
@@ -99,11 +105,11 @@ namespace CampaignEditor
 
         public async Task<bool> InitializeTargetToEdit(CampaignDTO campaign, TargetDTO target)
         {
+            targetToEdit = target;
             await InitializeTree(campaign);
             tbName.Text = target.targname.Trim();
             tbDescription.Text = target.targdesc.Trim();
-            btnSaveAs.Visibility = Visibility.Visible;
-            targetToEdit = target;
+            btnSaveAs.Visibility = Visibility.Visible;         
             
             var res = await CheckTreeUsingTargetdefi(target.targdefi);
             PrintInTbSelected();
@@ -206,6 +212,8 @@ namespace CampaignEditor
             {
                 string targname = tbName.Text.Trim();
                 int targown = _campaign.clid;
+                if ((bool)chbGlobal.IsChecked)
+                    targown = 0;
                 string targdesc = tbDescription.Text.Trim();
                 string targdefi = ParseSelectedTargdefi();
                 string targdefp = ParseSelectedTargdefp();
@@ -224,6 +232,8 @@ namespace CampaignEditor
                 int targid = targetToEdit.targid;
                 string targname = tbName.Text.Trim();
                 int targown = _campaign.clid;
+                if ((bool)chbGlobal.IsChecked)
+                    targown = 0;
                 string targdesc = tbDescription.Text.Trim();
                 string targdefi = ParseSelectedTargdefi();
                 string targdefp = ParseSelectedTargdefp();

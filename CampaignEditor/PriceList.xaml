@@ -40,7 +40,14 @@
         <Label x:Name="lblName" Content="Price List name: " Grid.Row="1" Grid.Column="1" Margin="0,10,0,10"/>
         <TextBox x:Name="tbName" Grid.Row="1" Grid.Column="2" Margin="0,10,0,10" Grid.ColumnSpan="4"
                  VerticalContentAlignment="Center" TextChanged="tbName_TextChanged" HorizontalAlignment="Left" Width="272"/>
-
+        <CheckBox x:Name="chbGlobal" Content="Global" Grid.Row="1" Grid.Column="5" Grid.ColumnSpan="3"
+                  VerticalAlignment="Center" HorizontalAlignment="Left" Margin="5, 0, 0, 0"
+                  IsChecked="False" Checked="chbSectable2_Checked" Unchecked="chbSectable2_Unchecked"
+                  IsEnabled="{Binding isAdmin}">
+            <CheckBox.LayoutTransform>
+                <ScaleTransform ScaleX="1.5" ScaleY="1.5" />
+            </CheckBox.LayoutTransform>
+        </CheckBox>
         <Label x:Name="lblType" Content="Type: " Grid.Row="2" Grid.Column="1" Margin="0,10,0,10"/>
         <ComboBox x:Name="cbType" Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="5"
                   Margin="0,10" SelectedIndex="0" VerticalAlignment="Center"

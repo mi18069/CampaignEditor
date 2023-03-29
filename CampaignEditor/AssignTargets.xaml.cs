@@ -58,15 +58,13 @@ namespace CampaignEditor
                 _targetsList.Clear();
                 _selectedTargetsList.Clear();
                 var targets = await _targetController.GetAllClientTargets(_campaign.clid);
-                targets = targets.OrderBy(t => t.targname);
-
+                targets = targets.OrderBy(t => t.targown != 0).ThenBy(t => t.targname);
                 var selectedTargets = await _targetCmpController.GetTargetCmpByCmpid(_campaign.cmpid);
                 selectedTargets.OrderBy(s => s.priority);
                 foreach (var selectedTarget in selectedTargets)
                 {
                     _selectedTargetsList.Add(await _targetController.GetTargetById(selectedTarget.targid));
                 }
-
 
                 foreach (var target in targets)
                 {
@@ -77,7 +75,9 @@ namespace CampaignEditor
                             inSelected = true;
                     }
                     if (!inSelected)
+                    {
                         _targetsList.Add(target);
+                    }
                 }
             }
             else
@@ -100,6 +100,7 @@ namespace CampaignEditor
                     }
                 }
             }
+
             targetsModified = false;
         }
 
@@ -140,7 +141,7 @@ namespace CampaignEditor
         private ObservableCollection<TargetDTO> OrderCollection(ObservableCollection<TargetDTO> collection)
         {
             ObservableCollection<TargetDTO> temp;
-            temp = new ObservableCollection<TargetDTO>(collection.OrderBy(p => p.targname));
+            temp = new ObservableCollection<TargetDTO>(collection.OrderBy(t => t.targown != 0).ThenBy(t => t.targname));
             collection.Clear();
             foreach (TargetDTO j in temp) 
                 collection.Add(j);

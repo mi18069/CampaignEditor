@@ -75,6 +75,12 @@ namespace CampaignEditor
         {
             _campaign = campaign;
             _pricelist = pricelist;
+
+            bool isAdmin = MainWindow.user.usrlevel == 0;
+            chbGlobal.Visibility = isAdmin ? Visibility.Visible : Visibility.Collapsed;
+            if (chbGlobal.Visibility == Visibility.Visible && _pricelist != null)
+                chbGlobal.IsChecked = _pricelist.clid == 0;
+
             await FillFields();
             if (_pricelist != null)
             {
@@ -245,7 +251,7 @@ namespace CampaignEditor
         }
         private async Task AssignPricelistValues()
         {
-            tbName.Text = _pricelist.plname;
+            tbName.Text = _pricelist.plname.Trim();
             cbType.SelectedIndex = _pricelist.pltype;
             cbSectable.SelectedItem = await _sectableController.GetSectableById(_pricelist.sectbid);
             cbSectable2.SelectedItem = await _sectableController.GetSectableById(_pricelist.sectbid);
@@ -315,6 +321,8 @@ namespace CampaignEditor
         private async Task CreateOrUpdatePricelist(PricelistDTO pricelist = null)
         {
             int clid = _campaign.clid;
+            if ((bool)chbGlobal.IsChecked)
+                clid = 0;
             string plname = tbName.Text.Trim();
             int pltype = cbType.SelectedIndex; // Place in combobox corresponds to int value
             int chid = 0; // Don't know what this field does
