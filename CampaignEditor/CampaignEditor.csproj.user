@@ -7,9 +7,6 @@
     </ApplicationDefinition>
   </ItemGroup>
   <ItemGroup>
-    <Compile Update="AddCampaign.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Update="AddClient.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -90,9 +87,6 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
-    <Page Update="AddCampaign.xaml">
-      <SubType>Designer</SubType>
-    </Page>
     <Page Update="AddClient.xaml">
       <SubType>Designer</SubType>
     </Page>
