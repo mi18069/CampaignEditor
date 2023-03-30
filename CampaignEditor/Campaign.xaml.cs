@@ -1,9 +1,8 @@
 ﻿using CampaignEditor.Controllers;
 using CampaignEditor.DTOs.CampaignDTO;
-using CampaignEditor.Entities;
 using CampaignEditor.StartupHelpers;
+using CampaignEditor.UserControls;
 using Database.DTOs.ClientDTO;
-using Database.Entities;
 using Database.Repositories;
 using System.Threading.Tasks;
 using System.Windows;
@@ -15,21 +14,24 @@ namespace CampaignEditor
         public string cmpname = "";
         ClientDTO _client = null;
         CampaignDTO _campaign = null;
-        bool isReadOnly = true;
+        bool readOnly = true;
 
         private readonly IAbstractFactory<CampaignOverview> _factoryOverview;
+        private readonly IAbstractFactory<CampaignForecast> _factoryForecast;
 
         private ClientController _clientController;
         private CampaignController _campaignController;
 
         private CampaignOverview factoryCampaignOverview = null;
+        private CampaignForecast factoryCampaignForecast = null;
         private object currentPage = null;
 
 
         public Campaign(IClientRepository clientRepository, ICampaignRepository campaignRepository, 
-            IAbstractFactory<CampaignOverview> factoryOverview)
+            IAbstractFactory<CampaignOverview> factoryOverview, IAbstractFactory<CampaignForecast> factoryForecast)
         {
             _factoryOverview = factoryOverview;
+            _factoryForecast = factoryForecast;
 
             _clientController = new ClientController(clientRepository);
             _campaignController = new CampaignController(campaignRepository);
@@ -43,7 +45,7 @@ namespace CampaignEditor
             cmpname = campaignName;
             _campaign = await _campaignController.GetCampaignByName(campaignName);
             _client = await _clientController.GetClientById(_campaign.clid);
-            isReadOnly = isReadOnly;
+            readOnly = isReadOnly;
             this.Title = "Client: " + _client.clname.Trim() + "  Campaign: " + _campaign.cmpname.Trim();
 
             factoryCampaignOverview = _factoryOverview.Create();
@@ -62,7 +64,16 @@ namespace CampaignEditor
 
         private void btnForecast_Click(object sender, RoutedEventArgs e)
         {
-
+            if (factoryCampaignForecast == null)
+            {
+                factoryCampaignForecast = _factoryForecast.Create();
+                factoryCampaignForecast.Initialize(_client, _campaign);
+            }
+            if (currentPage != factoryCampaignForecast)
+            {
+                currentPage = factoryCampaignForecast;
+                ClientCampaign.Content = currentPage;
+            }
         }
     }
 }

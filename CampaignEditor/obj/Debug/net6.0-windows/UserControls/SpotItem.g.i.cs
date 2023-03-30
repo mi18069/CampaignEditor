@@ -85,7 +85,7 @@ namespace CampaignEditor.UserControls {
                 return;
             }
             _contentLoaded = true;
-            System.Uri resourceLocater = new System.Uri("/CampaignEditor;component/usercontrols/spotitem.xaml", System.UriKind.Relative);
+            System.Uri resourceLocater = new System.Uri("/CampaignEditor;V1.0.0.0;component/usercontrols/spotitem.xaml", System.UriKind.Relative);
             
             #line 1 "..\..\..\..\UserControls\SpotItem.xaml"
             System.Windows.Application.LoadComponent(this, resourceLocater);

@@ -5,6 +5,7 @@ using CampaignEditor.StartupHelpers;
 using Database.Data;
 using System.Globalization;
 using System.Threading;
+using CampaignEditor.UserControls;
 
 namespace CampaignEditor
 {
@@ -26,7 +27,6 @@ namespace CampaignEditor
                     services.AddFormFactory<AddClient>();
                     services.AddFormFactory<Clients>();
                     services.AddFormFactory<ClientsTreeView>();
-                    services.AddFormFactory<AddCampaign>();
                     services.AddFormFactory<NewCampaign>();
                     services.AddFormFactory<NewTarget>();
                     services.AddFormFactory<AssignTargets>();
@@ -41,6 +41,7 @@ namespace CampaignEditor
                     services.AddFormFactory<GroupChannels>();
                     services.AddFormFactory<Campaign>();
                     services.AddFormFactory<CampaignOverview>();
+                    services.AddFormFactory<CampaignForecast>();
                     services.AddScoped<IDataContext, DataContext>();
                     // Add services
                     Extensions.UserExtensions.AddUserExtensions(services);
@@ -67,6 +68,7 @@ namespace CampaignEditor
                     Database.Extensions.ChannelCmpExtensions.AddChannelCmpExtensions(services);
                     Database.Extensions.ChannelGroupExtensions.AddChannelGroupExtensions(services);
                     Database.Extensions.ChannelGroupsExtensions.AddChannelGroupsExtensions(services);
+                    Database.Extensions.SchemaExtensions.AddSchemaExtensions(services);
 
                 }).Build();
 

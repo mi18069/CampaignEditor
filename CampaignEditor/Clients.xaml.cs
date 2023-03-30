@@ -25,7 +25,6 @@ namespace CampaignEditor
         private readonly IAbstractFactory<UsersOfClient> _factoryUsersOfClient;
         private readonly IAbstractFactory<AddClient> _factoryAddClient;
         private readonly IAbstractFactory<ClientsTreeView> _factoryClientsTreeView;
-        private readonly IAbstractFactory<AddCampaign> _factoryAddCampaign;
         private readonly IAbstractFactory<NewCampaign> _factoryNewCampaign;
         private readonly IAbstractFactory<Rename> _factoryRename;
         private readonly IAbstractFactory<Campaign> _factoryCampaign;
@@ -69,8 +68,7 @@ namespace CampaignEditor
         public bool isReadWrite { get; set;  } = false;
         public bool isReadOnly { get; set; } = false;
         public Clients(IAbstractFactory<ClientsTreeView> factoryClientsTreeView, IAbstractFactory<AddUser> factoryAddUser,
-            IAbstractFactory<AddClient> factoryAddClient, IAbstractFactory<AddCampaign> factoryAddCampaign,
-            IAbstractFactory<UsersOfClient> factoryUsersOfClient, IAbstractFactory<NewCampaign> factoryNewCampaign,
+            IAbstractFactory<AddClient> factoryAddClient, IAbstractFactory<UsersOfClient> factoryUsersOfClient, IAbstractFactory<NewCampaign> factoryNewCampaign,
             IAbstractFactory<Rename> factoryRename, IAbstractFactory<Campaign> factoryCampaign)
         {
             InitializeComponent();
@@ -78,7 +76,6 @@ namespace CampaignEditor
             _factoryAddUser = factoryAddUser;
             _factoryAddClient = factoryAddClient;
             _factoryClientsTreeView = factoryClientsTreeView;
-            _factoryAddCampaign = factoryAddCampaign;
             _factoryUsersOfClient = factoryUsersOfClient;
             _factoryNewCampaign = factoryNewCampaign;
             _factoryRename = factoryRename;

@@ -121,3 +121,25 @@ CREATE TABLE IF NOT EXISTS tblcmpchn (
 
 -- rename column in tblchgrchn
 ALTER TABLE tblchgrchn RENAME COLUMN chrdsid TO chid;
+
+-- renaming progschema's attributes
+ALTER TABLE progschema RENAME COLUMN naziv to name;
+ALTER TABLE progschema RENAME COLUMN pozicija TO position;
+ALTER TABLE progschema RENAME COLUMN vremeod TO stime;
+ALTER TABLE progschema RENAME COLUMN vremedo TO etime;
+ALTER TABLE progschema RENAME COLUMN vremerbl TO blocktime;
+ALTER TABLE progschema RENAME COLUMN dani TO days;
+ALTER TABLE progschema RENAME COLUMN tipologija TO type;
+ALTER TABLE progschema RENAME COLUMN specijal TO special;
+ALTER TABLE progschema RENAME COLUMN datumod TO sdate;
+ALTER TABLE progschema RENAME COLUMN datumdo TO edate;
+ALTER TABLE progschema RENAME COLUMN progkoef TO progcoef;
+ALTER TABLE progschema RENAME COLUMN datumkreiranja TO created;
+ALTER TABLE progschema RENAME COLUMN datumizmene TO modified;
+
+
+
+
+
+
+ 

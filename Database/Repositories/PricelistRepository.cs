@@ -108,7 +108,7 @@ namespace Database.Repositories
             var affected = await connection.ExecuteAsync(
                 "UPDATE tblpricelist SET clid = @Clid, plname = @Plname, pltype = @Pltype, " +
                 "sectbid = @Sectbid, seastbid = @Seastbid, plactive = @Plactive, price = @Price, minprice = @Minprice, " +
-                "prgcoef = @Prgcoef, pltarg = @Pltarg, use2 = @Use2, sectbid2 = @sectbid2, " +
+                "prgcoef = @Prgcoef, pltarg = @Pltarg, use2 = @Use2, sectbid2 = @Sectbid2, " +
                 "sectb2st = @Sectb2st, sectb2en = @Sectb2en, valfrom = @Valfrom, valto = @Valto, mgtype = @Mgtype " +
                 "WHERE plid = @Plid",
                 new
