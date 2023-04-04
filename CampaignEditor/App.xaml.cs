@@ -69,6 +69,7 @@ namespace CampaignEditor
                     Database.Extensions.ChannelGroupExtensions.AddChannelGroupExtensions(services);
                     Database.Extensions.ChannelGroupsExtensions.AddChannelGroupsExtensions(services);
                     Database.Extensions.SchemaExtensions.AddSchemaExtensions(services);
+                    Database.Extensions.MediaPlanExtensions.AddMediaPlanExtensions(services);
 
                 }).Build();
 

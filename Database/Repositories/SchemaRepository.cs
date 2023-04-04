@@ -24,12 +24,13 @@ namespace Database.Repositories
             using var connection = _context.GetConnection();
 
             var affected = await connection.ExecuteAsync(
-                "INSERT INTO progschema (chid, name, position, stime, etime, blocktime, " +
-                "days, type, special, sdate, edate, progcoef, created, modified) " +
+                "INSERT INTO progschema (chid, naziv, pozicija, vremeod, vremedo, vremerbl, " +
+                "dani, tipologija, specijal, datumod, datumdo, progkoef, datumkreiranja, datumizmene) " +
                 "VALUES (@Chid, @Name, @Position, @Stime, @Etime, @Blocktime, " +
                 "@Days, @Type, @Special, @Sdate, @Edate, @Progcoef, @Created, @Modified)",
             new
             {
+                Chid = schemaDTO.chid,
                 Name = schemaDTO.name,
                 Position = schemaDTO.position,
                 Stime = schemaDTO.stime,
@@ -64,7 +65,7 @@ namespace Database.Repositories
             using var connection = _context.GetConnection();
 
             var schema = await connection.QueryFirstOrDefaultAsync<Schema>(
-                "SELECT * FROM progschema WHERE name = @Name", new { Name = name });
+                "SELECT * FROM progschema WHERE naziv = @Name", new { Name = name });
 
             return _mapper.Map<SchemaDTO>(schema);
         }
@@ -94,14 +95,15 @@ namespace Database.Repositories
             using var connection = _context.GetConnection();
 
             var affected = await connection.ExecuteAsync(
-                "UPDATE progschema SET id = @Id, name = @Name, position = @Position, " +
-                "stime = @Stime, etime = @Etime, blocktime = @Blocktime, days = @Days, " +
-                "Type = @Type, special = @Special, sdate = @Sdate, edate = @Edate, " +
-                "created = @Created, modified = @Modified " +
+                "UPDATE progschema SET id = @Id, chid = @Chid, naziv = @Name, pozicija = @Position, " +
+                "vremeod = @Stime, vremedo = @Etime, vremerbl = @Blocktime, dani = @Days, " +
+                "tipologija = @Type, specijal = @Special, datumod = @Sdate, datumdo = @Edate, " +
+                "datumkreiranja = @Created, datumizmene = @Modified " +
                 "WHERE id = @Id",
                 new
                 {
                     Id = schemaDTO.id,
+                    Chid = schemaDTO.chid,
                     Name = schemaDTO.name,
                     Position = schemaDTO.position,
                     Stime = schemaDTO.stime,

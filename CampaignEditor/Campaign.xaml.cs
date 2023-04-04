@@ -62,12 +62,12 @@ namespace CampaignEditor
             }
         }
 
-        private void btnForecast_Click(object sender, RoutedEventArgs e)
+        private async void btnForecast_Click(object sender, RoutedEventArgs e)
         {
             if (factoryCampaignForecast == null)
             {
                 factoryCampaignForecast = _factoryForecast.Create();
-                factoryCampaignForecast.Initialize(_client, _campaign);
+                await factoryCampaignForecast.Initialize(_client, _campaign);
             }
             if (currentPage != factoryCampaignForecast)
             {

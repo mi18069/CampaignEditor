@@ -36,8 +36,6 @@ namespace CampaignEditor
 
         private bool isReadOnly = false;
 
-        public static AddCampaign instance;
-
         AssignTargets assignTargetsFactory = null;
         Channels assignChannelsFactory = null;
 

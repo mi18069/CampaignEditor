@@ -122,23 +122,90 @@ CREATE TABLE IF NOT EXISTS tblcmpchn (
 -- rename column in tblchgrchn
 ALTER TABLE tblchgrchn RENAME COLUMN chrdsid TO chid;
 
--- renaming progschema's attributes
-ALTER TABLE progschema RENAME COLUMN naziv to name;
-ALTER TABLE progschema RENAME COLUMN pozicija TO position;
-ALTER TABLE progschema RENAME COLUMN vremeod TO stime;
-ALTER TABLE progschema RENAME COLUMN vremedo TO etime;
-ALTER TABLE progschema RENAME COLUMN vremerbl TO blocktime;
-ALTER TABLE progschema RENAME COLUMN dani TO days;
-ALTER TABLE progschema RENAME COLUMN tipologija TO type;
-ALTER TABLE progschema RENAME COLUMN specijal TO special;
-ALTER TABLE progschema RENAME COLUMN datumod TO sdate;
-ALTER TABLE progschema RENAME COLUMN datumdo TO edate;
-ALTER TABLE progschema RENAME COLUMN progkoef TO progcoef;
-ALTER TABLE progschema RENAME COLUMN datumkreiranja TO created;
-ALTER TABLE progschema RENAME COLUMN datumizmene TO modified;
+-- make table xmp
+CREATE TABLE IF NOT EXISTS xmp (
+   xmpid serial NOT NULL,
+   schid int NOT NULL,
+   cmpid int NOT NULL,
+   chid int NOT NULL,
+   naziv char(40),
+   verzija int,
+   pozicija char(3),
+   vremeod char(5),
+   vremedo char(5),
+   vremerbl char(5),
+   dani char(7),
+   tipologija char(3),
+   specijal bool,
+   datumod date,
+   datumdo date,
+   progkoef numeric(5,2),
+   datumkreiranja date,
+   datumizmene date,
+   amr1 numeric(10,2),
+   amr2 numeric(10,2),
+   amr3 numeric(10,2),
+   amrsale numeric(10,2),
+   amrp1 numeric(12,8),
+   amrp2 numeric(12,8),
+   amrp3 numeric(12,8),
+   amrpsale numeric(12,8),
+   dpkoef numeric(10,8),
+   seaskoef numeric(10,8),
+   price numeric(10,8),
+   active bool,
+   PRIMARY KEY (xmpid),
+   FOREIGN KEY (schid)
+      REFERENCES progschema (id),
+   FOREIGN KEY (cmpid)
+      REFERENCES tblcampaigns (cmpid),
+   FOREIGN KEY (chid)
+      REFERENCES tblchannels (chid)
+);
 
+-- make table xmphist
+CREATE TABLE IF NOT EXISTS xmphist (
+   xmphistid serial NOT NULL,
+   xmpid int NOT NULL,
+   schid int NOT NULL,
+   chid int NOT NULL,
+   naziv char(40),
+   pozicija char(3),
+   vremeod char(5),
+   vremedo char(5),
+   datum date,
+   progkoef numeric(5,2),
+   amr1 numeric(10,2),
+   amr2 numeric(10,2),
+   amr3 numeric(10,2),
+   amrsale numeric(10,2),
+   amrp1 numeric(12,8),
+   amrp2 numeric(12,8),
+   amrp3 numeric(12,8),
+   amrpsale numeric(12,8),
+   active bool,
+   outlier bool,
+   PRIMARY KEY (xmphistid),
+   FOREIGN KEY (xmpid)
+      REFERENCES xmp (xmpid),
+   FOREIGN KEY (schid)
+      REFERENCES progschema (id),
+   FOREIGN KEY (chid)
+      REFERENCES tblchannels (chid)
+);
 
+-- make xmpterm
+CREATE TABLE IF NOT EXISTS xmpterm (
+   xmptermid serial NOT NULL,
+   xmpid int NOT NULL,
+   datum date,
+   spotcode char(1),
+   PRIMARY KEY (xmptermid),
+   FOREIGN KEY (xmpid)
+      REFERENCES xmp (xmpid)
+);
 
+-- delete tblcmpspot and rename tblcmpspot2 to tblcmpspot
 
 
 
