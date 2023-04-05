@@ -1,4 +1,5 @@
 ﻿using Database.DTOs.MediaPlanHistDTO;
+using Database.Entities;
 using Database.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -10,7 +11,7 @@ namespace Database.Extensions
         {
             services.AddScoped<IMediaPlanHistRepository, MediaPlanHistRepository>();
             services.AddAutoMapper(configuration => {
-                configuration.CreateMap<MediaPlanHistDTO, MediaHistPlan>().ReverseMap();
+                configuration.CreateMap<MediaPlanHistDTO, MediaPlanHist>().ReverseMap();
             });
 
         }
