@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System;
 using Database.Repositories;
+using Database.Entities;
 
 namespace CampaignEditor.Controllers
 {
@@ -14,15 +15,30 @@ namespace CampaignEditor.Controllers
         {
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
         }
-        public async Task<bool> CreateMediaPlan(CreateMediaPlanDTO mediaPlanDTO)
+        public async Task<MediaPlanDTO> CreateMediaPlan(CreateMediaPlanDTO mediaPlanDTO)
         {
-            return await _repository.CreateMediaPlan(mediaPlanDTO);
-
+            await _repository.CreateMediaPlan(mediaPlanDTO);
+            return await _repository.GetMediaPlanBySchemaAndCmpId(mediaPlanDTO.schid, mediaPlanDTO.cmpid);
         }
 
         public async Task<MediaPlanDTO> GetMediaPlanById(int id)
         {
             return await _repository.GetMediaPlanById(id);
+        }
+
+        public async Task<MediaPlanDTO> GetMediaPlanBySchemaId(int id)
+        {
+            return await _repository.GetMediaPlanBySchemaId(id);
+        }
+
+        public async Task<MediaPlanDTO> GetMediaPlanBySchemaAndCmpId(int schemaid, int cmpid)
+        {
+            return await _repository.GetMediaPlanBySchemaAndCmpId(schemaid, cmpid);
+        }
+
+        public async Task<MediaPlanDTO> GetMediaPlanByCmpId(int id)
+        {
+            return await _repository.GetMediaPlanByCmpId(id);
         }
 
         public async Task<MediaPlanDTO> GetMediaPlanByName(string name)
@@ -53,6 +69,11 @@ namespace CampaignEditor.Controllers
         public async Task<bool> DeleteMediaPlanById(int id)
         {
             return await _repository.DeleteMediaPlanById(id);
+        }
+
+        public async Task<bool> SetActiveMediaPlanById(int id, bool isActive)
+        {
+            return await _repository.SetActiveMediaPlanById(id, isActive);
         }
     }
 }

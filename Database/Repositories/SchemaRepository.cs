@@ -1,10 +1,12 @@
 ﻿using AutoMapper;
 using Dapper;
 using Database.Data;
+using Database.DTOs.MediaPlanDTO;
 using Database.DTOs.SchemaDTO;
 using Database.Entities;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Database.Repositories
@@ -76,6 +78,37 @@ namespace Database.Repositories
 
             var allSchemas = await connection.QueryAsync<Schema>
                 ("SELECT * FROM progschema WHERE chid = @Chid", new { Chid = chid });
+
+            return _mapper.Map<IEnumerable<SchemaDTO>>(allSchemas);
+        }
+
+        public async Task<IEnumerable<SchemaDTO>> GetAllChannelSchemasWithinDate(int chid, DateOnly sdate, DateOnly edate)
+        {
+            using var connection = _context.GetConnection();
+
+            var allSchemas = await connection.QueryAsync<dynamic>
+                ("SELECT * FROM progschema WHERE chid = @Chid AND " +
+                "datumod <= CAST ( @Edate AS DATE) AND " +
+                "( datumdo >= CAST ( @Sdate as DATE) OR datumdo IS NULL) "
+                , new { Chid = chid, Sdate = sdate.ToString("yyyy-MM-dd"), Edate = edate.ToString("yyyy-MM-dd") });
+            allSchemas = allSchemas.Select(item => new Schema()
+            {
+                id = item.id,
+                chid = item.chid,
+                name = item.naziv,
+                position = item.pozicija,
+                stime = item.vremeod,
+                etime = item.vremedo == null ? null : item.vremedo,
+                blocktime = item.vremerbl == null ? null : item.vremerbl,
+                days = item.dani,
+                type = item.tipologija,
+                special = item.specijal,
+                sdate = DateOnly.FromDateTime(item.datumod),
+                edate = item.datumdo == null ? null : DateOnly.FromDateTime(item.datumdo),
+                progcoef = (float)item.progkoef,
+                created = DateOnly.FromDateTime(item.datumkreiranja),
+                modified = item.datumizmene == null ? null : DateOnly.FromDateTime(item.datumizmene)
+            });
 
             return _mapper.Map<IEnumerable<SchemaDTO>>(allSchemas);
         }

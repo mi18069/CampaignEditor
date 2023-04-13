@@ -1,4 +1,6 @@
-﻿using Database.DTOs.SchemaDTO;
+﻿using Database.DTOs.MediaPlanDTO;
+using Database.DTOs.SchemaDTO;
+using Database.Entities;
 using Database.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -32,6 +34,11 @@ namespace CampaignEditor.Controllers
         public async Task<IEnumerable<SchemaDTO>> GetAllChannelSchemas(int chid)
         {
             return await _repository.GetAllChannelSchemas(chid);
+        }
+
+        public async Task<IEnumerable<SchemaDTO>> GetAllChannelSchemasWithinDate(int chid, DateOnly sdate, DateOnly edate)
+        {
+            return await _repository.GetAllChannelSchemasWithinDate(chid, sdate, edate);
         }
 
         public async Task<IEnumerable<SchemaDTO>> GetAllSchemas()

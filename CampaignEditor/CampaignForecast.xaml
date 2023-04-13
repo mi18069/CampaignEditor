@@ -81,7 +81,8 @@
             </Grid.RowDefinitions>
 
             <ListView x:Name="lvChannels" Grid.Row="1" Grid.Column="1" 
-                      DisplayMemberPath="chname"/>
+                      DisplayMemberPath="chname" MinWidth="250" MinHeight="250"
+                      SelectionMode="Multiple"/>
             <ScrollViewer Grid.Row="1" Grid.Column="2" Grid.RowSpan="2"
                                   VerticalScrollBarVisibility="Auto">
                 <DataGrid x:Name="dgSchema" 

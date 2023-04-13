@@ -4,7 +4,7 @@ namespace Database.DTOs.MediaPlanDTO
 {
     public class BaseMediaPlanDTO
     {
-        public BaseMediaPlanDTO(int schid, int cmpid, int chid, string name, int version, string position, string stime, string etime, string blocktime, string days, string type, bool special, DateOnly sdate, DateOnly edate, float progcoef, DateOnly created, DateOnly modified, double amr1, double amr2, double amr3, double amrsale, double amrp1, double amrp2, double amrp3, double amrpsale, double dpcoef, double seascoef, double price, bool active)
+        public BaseMediaPlanDTO(int schid, int cmpid, int chid, string name, int version, string position, string stime, string? etime, string? blocktime, string days, string type, bool special, DateOnly sdate, DateOnly? edate, float progcoef, DateOnly created, DateOnly? modified, double amr1, double amr2, double amr3, double amrsale, double amrp1, double amrp2, double amrp3, double amrpsale, double dpcoef, double seascoef, double price, bool active)
         {
             this.schid = schid;
             this.cmpid = cmpid;
@@ -44,16 +44,16 @@ namespace Database.DTOs.MediaPlanDTO
         public int version { get; set; }
         public string position { get; set; }
         public string stime { get; set; }
-        public string etime { get; set; }
-        public string blocktime { get; set; }
+        public string? etime { get; set; }
+        public string? blocktime { get; set; }
         public string days { get; set; }
         public string type { get; set; }
         public bool special { get; set; }
         public DateOnly sdate { get; set; }
-        public DateOnly edate { get; set; }
+        public DateOnly? edate { get; set; }
         public float progcoef { get; set; }
         public DateOnly created { get; set; }
-        public DateOnly modified { get; set; }
+        public DateOnly? modified { get; set; }
         public double amr1 { get; set; }
         public double amr2 { get; set; }
         public double amr3 { get; set; }

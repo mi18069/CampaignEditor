@@ -11,7 +11,7 @@ namespace Database.Entities
         public string name { get; set; }
         public string position { get; set; }
         public string stime { get; set; }
-        public string etime { get; set; }
+        public string? etime { get; set; }
         public DateOnly date { get; set; }
         public float progcoef { get; set; }
         public double amr1 { get; set; }

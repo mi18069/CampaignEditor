@@ -12,16 +12,16 @@ namespace Database.Entities
         public int version { get; set; }
         public string position { get; set; }
         public string stime { get; set; }
-        public string etime { get; set; }
-        public string blocktime { get; set; }
+        public string? etime { get; set; }
+        public string? blocktime { get; set; }
         public string days { get; set; }
         public string type { get; set; }
         public bool special { get; set; }
         public DateOnly sdate { get; set; }
-        public DateOnly edate { get; set; }
+        public DateOnly? edate { get; set; }
         public float progcoef { get; set; }
         public DateOnly created { get; set; }
-        public DateOnly modified { get; set; }
+        public DateOnly? modified { get; set; }
         public double amr1 { get; set; }
         public double amr2 { get; set; }
         public double amr3 { get; set; }

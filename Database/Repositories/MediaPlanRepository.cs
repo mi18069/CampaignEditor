@@ -6,6 +6,7 @@ using Database.Entities;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace Database.Repositories
 {
@@ -28,8 +29,8 @@ namespace Database.Repositories
                 "dani, tipologija, specijal, datumod, datumdo, progkoef, datumkreiranja, datumizmene, " +
                 "amr1, amr2, amr3, amrsale, amrp1, amrp2, amrp3, amrpsale, dpkoef, seaskoef, price, active) " +
                 "VALUES (@Schid, @Cmpid, @Chid, @Name, @Version, @Position, @Stime, @Etime, @Blocktime, " +
-                "@Days, @Type, @Special, @Sdate, @Edate, @Progcoef, @Created, @Modified, " +
-                "@Amr1, @Amr2, @Amr3, @Amrsale, @Amrp1, @Amrp2, @Amrp3, @Amrpsale, @Dpkoef, @Seaskoef, @Price, @Active) ",
+                "@Days, @Type, @Special, CAST (@Sdate AS DATE), CAST(@Edate AS DATE), @Progcoef, CAST(@Created AS DATE), CAST(@Modified AS DATE), " +
+                "@Amr1, @Amr2, @Amr3, @Amrsale, @Amrp1, @Amrp2, @Amrp3, @Amrpsale, @Dpcoef, @Seascoef, @Price, @Active) ",
             new
             {
                 Schid = mediaPlanDTO.schid,
@@ -44,11 +45,11 @@ namespace Database.Repositories
                 Days = mediaPlanDTO.days,
                 Type = mediaPlanDTO.type,
                 Special = mediaPlanDTO.special,
-                Sdate = mediaPlanDTO.sdate,
-                Edate = mediaPlanDTO.edate,
+                Sdate = mediaPlanDTO.sdate.ToString("yyyy-MM-dd"),
+                Edate = mediaPlanDTO.edate?.ToString("yyyy-MM-dd"),
                 Progcoef = mediaPlanDTO.progcoef,
-                Created = mediaPlanDTO.created,
-                Modified = mediaPlanDTO.modified,
+                Created = mediaPlanDTO.created.ToString("yyyy-MM-dd"),
+                Modified = mediaPlanDTO.modified?.ToString("yyyy-MM-dd"),
                 Amr1 = mediaPlanDTO.amr1,
                 Amr2 = mediaPlanDTO.amr2,
                 Amr3 = mediaPlanDTO.amr3,
@@ -73,6 +74,37 @@ namespace Database.Repositories
 
             var mediaPlan = await connection.QueryFirstOrDefaultAsync<MediaPlan>(
                 "SELECT * FROM xmp WHERE id = @Id", new { Id = id });
+
+            return _mapper.Map<MediaPlanDTO>(mediaPlan);
+        }
+
+        public async Task<MediaPlanDTO> GetMediaPlanBySchemaId(int id)
+        {
+            using var connection = _context.GetConnection();
+
+            var mediaPlan = await connection.QueryFirstOrDefaultAsync<MediaPlan>(
+                "SELECT * FROM xmp WHERE schid = @Id", new { Id = id });
+
+            return _mapper.Map<MediaPlanDTO>(mediaPlan);
+        }
+
+        public async Task<MediaPlanDTO> GetMediaPlanBySchemaAndCmpId(int schemaid, int cmpid)
+        {
+            using var connection = _context.GetConnection();
+
+            var mediaPlan = await connection.QueryFirstOrDefaultAsync<MediaPlan>(
+                "SELECT * FROM xmp WHERE schid = @Schemaid AND cmpid = @Cmpid", 
+                new { Schemaid = schemaid, Cmpid = cmpid });
+
+            return _mapper.Map<MediaPlanDTO>(mediaPlan);
+        }
+
+        public async Task<MediaPlanDTO> GetMediaPlanByCmpId(int id)
+        {
+            using var connection = _context.GetConnection();
+
+            var mediaPlan = await connection.QueryFirstOrDefaultAsync<MediaPlan>(
+                "SELECT * FROM xmp WHERE cmpid = @Cmpid", new { Cmpid = id });
 
             return _mapper.Map<MediaPlanDTO>(mediaPlan);
         }
@@ -176,5 +208,18 @@ namespace Database.Repositories
 
             return affected != 0;
         }
+
+        public async Task<bool> SetActiveMediaPlanById(int id, bool isActive)
+        {
+            using var connection = _context.GetConnection();
+
+            var affected = await connection.ExecuteAsync(
+                "UPDATE xmp SET active = @Active " +
+                "WHERE xmpid = @Id", new { Active = isActive, Id = id });
+
+            return affected != 0;
+        }
+
+
     }
 }

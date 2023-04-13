@@ -4,7 +4,7 @@ namespace Database.DTOs.MediaPlanHistDTO
 {
     public class BaseMediaPlanHistDTO
     {
-        public BaseMediaPlanHistDTO(int xmpid, int schid, int chid, string name, string position, string stime, string etime, DateOnly date, float progcoef, double amr1, double amr2, double amr3, double amrsale, double amrp1, double amrp2, double amrp3, double amrpsale, bool active, bool outlier)
+        public BaseMediaPlanHistDTO(int xmpid, int schid, int chid, string name, string position, string stime, string? etime, DateOnly date, float progcoef, double amr1, double amr2, double amr3, double amrsale, double amrp1, double amrp2, double amrp3, double amrpsale, bool active, bool outlier)
         {
             this.xmpid = xmpid;
             this.schid = schid;
@@ -33,7 +33,7 @@ namespace Database.DTOs.MediaPlanHistDTO
         public string name { get; set; }
         public string position { get; set; }
         public string stime { get; set; }
-        public string etime { get; set; }
+        public string? etime { get; set; }
         public DateOnly date { get; set; }
         public float progcoef { get; set; }
         public double amr1 { get; set; }
