@@ -82,9 +82,10 @@
 
             <ListView x:Name="lvChannels" Grid.Row="1" Grid.Column="1" 
                       DisplayMemberPath="chname" MinWidth="250" MinHeight="250"
-                      SelectionMode="Multiple"/>
-            <ScrollViewer Grid.Row="1" Grid.Column="2" Grid.RowSpan="2"
-                                  VerticalScrollBarVisibility="Auto">
+                      SelectionMode="Multiple" Margin="0, 0 ,10,0"
+                      SelectionChanged="lvChannels_SelectionChanged"/>
+            <ScrollViewer  Grid.Row="1" Grid.Column="2" Grid.RowSpan="3"
+                           VerticalScrollBarVisibility="Visible">
                 <DataGrid x:Name="dgSchema" 
                           FontSize="15" AlternatingRowBackground="Gray"
                           CanUserAddRows="False"

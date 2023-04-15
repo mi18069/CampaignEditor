@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using Dapper;
 using Database.Data;
-using Database.DTOs.MediaPlanDTO;
 using Database.DTOs.SchemaDTO;
 using Database.Entities;
 using System;

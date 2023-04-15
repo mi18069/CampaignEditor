@@ -32,6 +32,7 @@ namespace CampaignEditor.UserControls
         private Dictionary<ChannelDTO, List<MediaPlanDTO>> _channelMPDict =
             new Dictionary<ChannelDTO, List<MediaPlanDTO>>();
         private List<SchemaDTO> _schemaList = new List<SchemaDTO>();
+        private ObservableCollection<MediaPlanDTO> _showMP = new ObservableCollection<MediaPlanDTO>();
         public CampaignForecast(ISchemaRepository schemaRepository,
             IChannelRepository channelRepository, ICampaignRepository campaignRepository, 
             IChannelCmpRepository channelCmpRepository,
@@ -66,6 +67,7 @@ namespace CampaignEditor.UserControls
                 
             }
 
+            dgSchema.ItemsSource = _showMP;
         }
 
         private async Task InitializeData()
@@ -86,12 +88,13 @@ namespace CampaignEditor.UserControls
                 foreach (var schema in schemas)
                 {
                     MediaPlanDTO mediaPlan = await SchemaToMP(schema);
+                    var b = mediaPlan;
                     mediaPlans.Add(mediaPlan);
                 }
                 _channelMPDict.Add(channel, mediaPlans);
             }
 
-            dgSchema.ItemsSource = _channelMPDict;
+            dgSchema.ItemsSource = _showMP;
 
         }
 
@@ -103,7 +106,7 @@ namespace CampaignEditor.UserControls
             else
             {
                 CreateMediaPlanDTO mediaPlan = new CreateMediaPlanDTO(schema.id, _campaign.cmpid, schema.chid,
-                    schema.name, 1, schema.position, schema.stime, schema.etime, schema.blocktime,
+                    schema.name.Trim(), 1, schema.position, schema.stime, schema.etime, schema.blocktime,
                     schema.days, schema.type, schema.special, schema.sdate, schema.edate, schema.progcoef,
                     schema.created, schema.modified, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, true);
 
@@ -133,7 +136,81 @@ namespace CampaignEditor.UserControls
 
 
         }
-    
-    
+
+        private void lvChannels_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
+            var selectedItems = e.AddedItems;
+            var deselectedItems = e.RemovedItems;
+
+            
+            if (selectedItems.Count>0) 
+            {
+                ChannelDTO selectedItem = selectedItems[0]! as ChannelDTO;
+
+                for (int k = 0; k < _channelMPDict[selectedItem].Count; k++)
+                {
+                    MediaPlanDTO mediaPlan = _channelMPDict[selectedItem][k];
+                    _showMP.Add(mediaPlan);
+                }
+            }
+
+            if (deselectedItems.Count>0)
+            {
+                ChannelDTO deselectedItem = deselectedItems[0]! as ChannelDTO;
+
+                for (int k = 0; k < _channelMPDict[deselectedItem].Count;k++)
+                {
+                    MediaPlanDTO mediaPlan = _channelMPDict[deselectedItem][k];
+                    _showMP.Remove(mediaPlan);
+                }
+            }
+
+            // Adding new MediaPlans if new Channel is selected
+            /*for (int i=0; i< selectedCount; i++) 
+            {
+                ChannelDTO selectedChannel = lvChannels.SelectedItems[i] as ChannelDTO;
+                bool wasPreviouslySelected = false;
+                for (int j=0; j< pSelectedCount; j++) 
+                {
+                    ChannelDTO pSelectedChannel = _previouslySelectedChannels[j];
+                    if (selectedChannel.chid == pSelectedChannel.chid)
+                        wasPreviouslySelected = true;
+                }
+                if (selectedItem )
+                {
+                    _previouslySelectedChannels.Add(selectedChannel);
+                    
+                    for (int k=0; k < _channelMPDict[selectedChannel].Count; k++) 
+                    {
+                        MediaPlanDTO mediaPlan = _channelMPDict[selectedChannel][k];
+                        _showMP.Add(mediaPlan);
+                    }
+                }
+            }
+
+            //Deleting mediaPlans for Channels that are no longer selected
+            for (int i=0; i< pSelectedCount; i++) 
+            {
+                ChannelDTO pSelectedChannel = _previouslySelectedChannels[i];
+                bool wasUnselected = true;
+                for (int j=0; j< selectedCount; j++) 
+                {
+                    ChannelDTO selectedChannel = lvChannels.SelectedItems[j] as ChannelDTO;
+                    if (selectedChannel.chid == pSelectedChannel.chid)
+                        wasUnselected = false;
+                }
+                if (wasUnselected)
+                {
+                    _previouslySelectedChannels.Remove(pSelectedChannel);
+
+                    for (int k=0; k<_channelMPDict[pSelectedChannel].Count; ) 
+                    {
+                        MediaPlanDTO mediaPlan = _channelMPDict[pSelectedChannel][k];
+                        _showMP.Remove(mediaPlan);
+                    }
+                }
+            }*/
+        }
     }
 }

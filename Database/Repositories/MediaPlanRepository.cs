@@ -5,8 +5,8 @@ using Database.DTOs.MediaPlanDTO;
 using Database.Entities;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
-using System.Xml.Linq;
 
 namespace Database.Repositories
 {
@@ -88,15 +88,49 @@ namespace Database.Repositories
             return _mapper.Map<MediaPlanDTO>(mediaPlan);
         }
 
-        public async Task<MediaPlanDTO> GetMediaPlanBySchemaAndCmpId(int schemaid, int cmpid)
+        public async Task<MediaPlanDTO?> GetMediaPlanBySchemaAndCmpId(int schemaid, int cmpid)
         {
             using var connection = _context.GetConnection();
 
-            var mediaPlan = await connection.QueryFirstOrDefaultAsync<MediaPlan>(
+            var mediaPlan = await connection.QueryAsync<dynamic>(
                 "SELECT * FROM xmp WHERE schid = @Schemaid AND cmpid = @Cmpid", 
                 new { Schemaid = schemaid, Cmpid = cmpid });
 
-            return _mapper.Map<MediaPlanDTO>(mediaPlan);
+            mediaPlan = mediaPlan.Select(item => new MediaPlan()
+            {
+                xmpid = item.xmpid,
+                schid = item.schid,
+                cmpid = item.cmpid,
+                chid = item.chid,
+                name = item.naziv,
+                version = item.verzija,
+                position = item.pozicija,
+                stime = item.vremeod,
+                etime = item.vremedo == null ? null : item.vremedo,
+                blocktime = item.vremerbl == null ? null : item.vremerbl,
+                days = item.dani,
+                type = item.tipologija,
+                special = item.specijal,
+                sdate = DateOnly.FromDateTime(item.datumod),
+                edate = item.datumdo == null ? null : DateOnly.FromDateTime(item.datumdo),
+                progcoef = (float)item.progkoef,
+                created = DateOnly.FromDateTime(item.datumkreiranja),
+                modified = item.datumizmene == null ? null : DateOnly.FromDateTime(item.datumizmene),
+                amr1 = (double)item.amr1,
+                amr2 = (double)item.amr2,
+                amr3 = (double)item.amr3,
+                amrsale = (double)item.amrsale,
+                amrp1 = (double)item.amrp1,
+                amrp2 = (double)item.amrp2,
+                amrp3 = (double)item.amrp3,
+                amrpsale = (double)item.amrpsale,
+                dpcoef = (double)item.dpkoef,
+                seascoef = (double)item.seaskoef,
+                price = (double)item.price,
+                active = item.active
+            });
+
+            return _mapper.Map<MediaPlanDTO>(mediaPlan.FirstOrDefault());
         }
 
         public async Task<MediaPlanDTO> GetMediaPlanByCmpId(int id)

@@ -11,7 +11,7 @@ namespace Database.Repositories
         Task<bool> CreateMediaPlan(CreateMediaPlanDTO mediaPlanDTO);
         Task<MediaPlanDTO> GetMediaPlanById(int id);
         Task<MediaPlanDTO> GetMediaPlanBySchemaId(int id);
-        Task<MediaPlanDTO> GetMediaPlanBySchemaAndCmpId(int schemaid, int cmpid);
+        Task<MediaPlanDTO?> GetMediaPlanBySchemaAndCmpId(int schemaid, int cmpid);
         Task<MediaPlanDTO> GetMediaPlanByCmpId(int id);
         Task<MediaPlanDTO> GetMediaPlanByName(string name);
         Task<IEnumerable<MediaPlanDTO>> GetAllMediaPlans();
