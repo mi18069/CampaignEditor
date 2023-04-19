@@ -9,11 +9,16 @@ using Database.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel.DataAnnotations;
+using System.Configuration;
 using System.Linq;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
+using System.Windows.Input;
+using System.Windows.Media;
 
 namespace CampaignEditor.UserControls
 {
@@ -25,6 +30,7 @@ namespace CampaignEditor.UserControls
         private ChannelCmpController _channelCmpController;
         private MediaPlanController _mediaPlanController;
         private MediaPlanTermController _mediaPlanTermController;
+        private SpotController _spotController;
 
         private ClientDTO _client;
         private CampaignDTO _campaign;
@@ -45,7 +51,8 @@ namespace CampaignEditor.UserControls
             IChannelRepository channelRepository, ICampaignRepository campaignRepository, 
             IChannelCmpRepository channelCmpRepository,
             IMediaPlanRepository mediaPlanRepository,
-            IMediaPlanTermRepository mediaPlanTermRepository )
+            IMediaPlanTermRepository mediaPlanTermRepository,
+            ISpotRepository spotRepository)
         {
             _schemaController = new SchemaController(schemaRepository);
             _channelController = new ChannelController(channelRepository);
@@ -53,6 +60,7 @@ namespace CampaignEditor.UserControls
             _channelCmpController = new ChannelCmpController(channelCmpRepository);
             _mediaPlanController = new MediaPlanController(mediaPlanRepository);
             _mediaPlanTermController = new MediaPlanTermController(mediaPlanTermRepository);
+            _spotController = new SpotController(spotRepository);
 
             InitializeComponent();
         }
@@ -139,13 +147,17 @@ namespace CampaignEditor.UserControls
 
             List<DateTime> sorted = availableDates.OrderBy(d => d).ToList();
 
-            for (int i = 0, j = 0; i < n && j < sorted.Count(); i++)
+            for (int i = 0, j = 0; i <= n && j < sorted.Count(); i++)
             {
                 if (started.AddDays(i).Date == sorted[j].Date)
                 {
                     CreateMediaPlanTermDTO mpTerm = new CreateMediaPlanTermDTO(mediaPlan.xmpid, DateOnly.FromDateTime(sorted[j]), null);
                     mediaPlanDates.Add(await _mediaPlanTermController.CreateMediaPlanTerm(mpTerm));
                     j++;
+                }
+                else
+                {
+                    mediaPlanDates.Add(null);
                 }
             }
 
@@ -291,13 +303,64 @@ namespace CampaignEditor.UserControls
                 DataGridTextColumn column = new DataGridTextColumn();
 
                 // Set the column header to the date
-                column.Header = date.ToString("dd/MM/yyyy");
+                column.Header = date.ToString("dd.MM.yy");
 
+                var binding = new Binding($"Item2[{dates.IndexOf(date)}].spotcode");
+                //binding.ValidationRules.Add(new CharLengthValidationRule(1)); // add validation rule to restrict input to a single character
+                column.Binding = binding;
 
+                var cellStyle = new Style(typeof(DataGridCell));
+
+                // to handle max length of 1 character
+                //var keyDownEventSetter = new EventSetter(DataGridCell.PreviewTextInputEvent, new TextCompositionEventHandler(OnCellPreviewTextInput));
+                //cellStyle.Setters.Add(keyDownEventSetter);
+                column.CellStyle = cellStyle;
+
+                var trigger = new DataTrigger();
+                trigger.Binding = new Binding($"Item2[{dates.IndexOf(date)}]");
+                trigger.Value = null;
+                trigger.Setters.Add(new Setter(BackgroundProperty, Brushes.LightGoldenrodYellow)); // Set background to yellow if value is null
+                column.CellStyle.Triggers.Add(trigger);
+                column.CellStyle.Setters.Add(new Setter(BackgroundProperty, Brushes.Green)); // Set background to green if value is not null
+                column.CanUserSort = false;
+                column.CanUserResize = false;
+                column.CanUserReorder = false;
+
+                
                 // Add the column to the DataGrid
                 dgSchema.Columns.Add(column);
             }
 
+
         }
+
+        /*private async void OnCellPreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+
+            List<char> spotCodes = new List<char>();
+            var spots = await _spotController.GetSpotsByCmpid(_campaign.cmpid);
+
+            DataGridCell cell = sender as DataGridCell;
+            var textBox = cell.Content as TextBox;
+
+            for(int i=0; i<spots.Count(); i++)
+            {
+                spotCodes.Add((char)('A' + i));
+            }
+
+            if (spotCodes.Contains(e.Text[0]))
+            {
+                if (textBox.Text[0] == e.Text[0])
+                    e.Handled = true;
+                else
+                {
+                    //await _
+                }
+            }
+            else
+            {
+                e.Handled = true;
+            }
+        }*/
     }
 }

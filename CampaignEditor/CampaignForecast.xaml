@@ -87,11 +87,9 @@
             <ScrollViewer  Grid.Row="1" Grid.Column="2" Grid.RowSpan="3" Grid.ColumnSpan="3"
                            VerticalScrollBarVisibility="Visible">
                 <DataGrid x:Name="dgSchema" 
-                          FontSize="15" AlternatingRowBackground="Gray"
+                          FontSize="13" AlternatingRowBackground="Gray"
                           CanUserAddRows="False"
-                          AutoGenerateColumns="False"
-                          IsReadOnly="True"
-                          >
+                          AutoGenerateColumns="False">
                     <DataGrid.Resources>
                         <Style TargetType="{x:Type DataGridColumnHeader}">
                             <Setter Property="Background" Value="LightGray"/>
@@ -101,13 +99,13 @@
                         </Style>
                     </DataGrid.Resources>
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Program" Binding="{Binding name, Mode=TwoWay}"
+                        <DataGridTextColumn Header="Program" Binding="{Binding Item1.name, Mode=TwoWay}"
                                         IsReadOnly="True" />
-                        <DataGridTextColumn Header="Position" Binding="{Binding position, Mode=TwoWay}"
+                        <DataGridTextColumn Header="Position" Binding="{Binding Item1.position, Mode=TwoWay}"
                                         IsReadOnly="True"/>
-                        <DataGridTextColumn Header="Start time" Binding="{Binding stime, Mode=TwoWay}" 
+                        <DataGridTextColumn Header="Start time" Binding="{Binding Item1.stime, Mode=TwoWay}" 
                                         IsReadOnly="True"/>
-                        <DataGridTextColumn Header="End time" Binding="{Binding etime, Mode=TwoWay}" 
+                        <DataGridTextColumn Header="End time" Binding="{Binding Item1.etime, Mode=TwoWay}" 
                                         IsReadOnly="True"/>
                         <DataGridTextColumn Header="AMR Sale" 
                                             IsReadOnly="True"/>
