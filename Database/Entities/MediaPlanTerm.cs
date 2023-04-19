@@ -7,6 +7,6 @@ namespace Database.Entities
         public int xmptermid { get; set; }
         public int xmpid { get; set; }
         public DateOnly date { get; set; }
-        public string spotcode { get; set; }
+        public string? spotcode { get; set; }
     }
 }

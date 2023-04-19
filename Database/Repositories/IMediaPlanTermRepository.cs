@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Database.DTOs.MediaPlanTermDTO;
 
@@ -8,6 +9,7 @@ namespace Database.Repositories
     {
         Task<bool> CreateMediaPlanTerm(CreateMediaPlanTermDTO mediaPlanTermDTO);
         Task<MediaPlanTermDTO> GetMediaPlanTermById(int id);
+        Task<MediaPlanTermDTO> GetMediaPlanTermByXmpidAndDate(int id, DateOnly date);
         Task<IEnumerable<MediaPlanTermDTO>> GetAllMediaPlanTerms();
         Task<IEnumerable<MediaPlanTermDTO>> GetAllMediaPlanTermsByXmpid(int xmpid);
         Task<bool> UpdateMediaPlanTerm(UpdateMediaPlanTermDTO mediaPlanTermDTO);

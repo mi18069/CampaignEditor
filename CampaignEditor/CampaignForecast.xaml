@@ -84,13 +84,14 @@
                       DisplayMemberPath="chname" MinWidth="250" MinHeight="250"
                       SelectionMode="Multiple" Margin="0, 0 ,10,0"
                       SelectionChanged="lvChannels_SelectionChanged"/>
-            <ScrollViewer  Grid.Row="1" Grid.Column="2" Grid.RowSpan="3"
+            <ScrollViewer  Grid.Row="1" Grid.Column="2" Grid.RowSpan="3" Grid.ColumnSpan="3"
                            VerticalScrollBarVisibility="Visible">
                 <DataGrid x:Name="dgSchema" 
                           FontSize="15" AlternatingRowBackground="Gray"
                           CanUserAddRows="False"
                           AutoGenerateColumns="False"
-                          IsReadOnly="True">
+                          IsReadOnly="True"
+                          >
                     <DataGrid.Resources>
                         <Style TargetType="{x:Type DataGridColumnHeader}">
                             <Setter Property="Background" Value="LightGray"/>
@@ -121,6 +122,7 @@
                         <DataGridTextColumn Header="CPP" 
                                             IsReadOnly="True"/>
                     </DataGrid.Columns>
+                    <DataGrid.FrozenColumnCount>10</DataGrid.FrozenColumnCount>
                 </DataGrid>
             </ScrollViewer>
         </Grid>

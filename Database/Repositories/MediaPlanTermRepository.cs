@@ -1,12 +1,15 @@
 ﻿using AutoMapper;
 using Dapper;
 using Database.Data;
+using Database.DTOs.MediaPlanDTO;
 using Database.DTOs.MediaPlanHistDTO;
 using Database.DTOs.MediaPlanTermDTO;
 using Database.Entities;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Automation.Peers;
 
 namespace Database.Repositories
 {
@@ -26,11 +29,11 @@ namespace Database.Repositories
 
             var affected = await connection.ExecuteAsync(
                 "INSERT INTO xmpterm (xmpid, datum, spotcode) " +
-                "VALUES (@Xmpid, @Date, @Spotcode) ",
+                "VALUES (@Xmpid, CAST (@Date AS DATE), @Spotcode) ",
             new
             {
                 Xmpid = mediaPlanTermDTO.xmpid,
-                Date = mediaPlanTermDTO.date,
+                Date = mediaPlanTermDTO.date.ToString("yyyy-MM-dd"),
                 Spotcode = mediaPlanTermDTO.spotcode
             });
 
@@ -46,6 +49,25 @@ namespace Database.Repositories
                 "SELECT * FROM xmpterm WHERE xmptermid = @Id", new { Id = id });
 
             return _mapper.Map<MediaPlanTermDTO>(mediaPlanTerm);
+        }
+
+        public async Task<MediaPlanTermDTO> GetMediaPlanTermByXmpidAndDate(int id, DateOnly date)
+        {
+            using var connection = _context.GetConnection();
+
+            var mediaPlanTerm = await connection.QueryAsync<dynamic>(
+                "SELECT * FROM xmpterm WHERE xmpid = @Id AND datum= CAST(@Date AS DATE)", 
+                new { Id = id, Date=date.ToString("yyyy-MM-dd") });
+
+            mediaPlanTerm = mediaPlanTerm.Select(item => new MediaPlanTerm()
+            {
+                xmptermid = item.xmptermid,
+                xmpid = item.xmpid,
+                date = DateOnly.FromDateTime(item.datum),
+                spotcode = item.spotcode
+            });
+
+            return _mapper.Map<MediaPlanTermDTO>(mediaPlanTerm.FirstOrDefault());
         }
 
         public async Task<IEnumerable<MediaPlanTermDTO>> GetAllMediaPlanTermsByXmpid(int xmpid)
@@ -95,5 +117,7 @@ namespace Database.Repositories
 
             return affected != 0;
         }
+
+        
     }
 }

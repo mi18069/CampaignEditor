@@ -3,11 +3,13 @@ using CampaignEditor.DTOs.CampaignDTO;
 using Database.DTOs.ChannelDTO;
 using Database.DTOs.ClientDTO;
 using Database.DTOs.MediaPlanDTO;
+using Database.DTOs.MediaPlanTermDTO;
 using Database.DTOs.SchemaDTO;
 using Database.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Channels;
 using System.Threading.Tasks;
 using System.Windows;
@@ -22,6 +24,7 @@ namespace CampaignEditor.UserControls
         private CampaignController _campaignController;
         private ChannelCmpController _channelCmpController;
         private MediaPlanController _mediaPlanController;
+        private MediaPlanTermController _mediaPlanTermController;
 
         private ClientDTO _client;
         private CampaignDTO _campaign;
@@ -29,20 +32,27 @@ namespace CampaignEditor.UserControls
         private DateTime initFrom;
         private DateTime initTo;
 
-        private Dictionary<ChannelDTO, List<MediaPlanDTO>> _channelMPDict =
-            new Dictionary<ChannelDTO, List<MediaPlanDTO>>();
+        // for duration of campaign
+        DateTime startDate;
+        DateTime endDate;
+
+        private Dictionary<ChannelDTO, List<Tuple<MediaPlanDTO, List<MediaPlanTermDTO>>>> _channelMPDict =
+            new Dictionary<ChannelDTO, List<Tuple<MediaPlanDTO, List<MediaPlanTermDTO>>>>();
         private List<SchemaDTO> _schemaList = new List<SchemaDTO>();
-        private ObservableCollection<MediaPlanDTO> _showMP = new ObservableCollection<MediaPlanDTO>();
+        private ObservableCollection<Tuple<MediaPlanDTO, List<MediaPlanTermDTO>>> _showMP 
+            = new ObservableCollection<Tuple<MediaPlanDTO, List<MediaPlanTermDTO>>>();
         public CampaignForecast(ISchemaRepository schemaRepository,
             IChannelRepository channelRepository, ICampaignRepository campaignRepository, 
             IChannelCmpRepository channelCmpRepository,
-            IMediaPlanRepository mediaPlanRepository)
+            IMediaPlanRepository mediaPlanRepository,
+            IMediaPlanTermRepository mediaPlanTermRepository )
         {
             _schemaController = new SchemaController(schemaRepository);
             _channelController = new ChannelController(channelRepository);
             _campaignController = new CampaignController(campaignRepository);
             _channelCmpController = new ChannelCmpController(channelCmpRepository);
             _mediaPlanController = new MediaPlanController(mediaPlanRepository);
+            _mediaPlanTermController = new MediaPlanTermController(mediaPlanTermRepository);
 
             InitializeComponent();
         }
@@ -51,6 +61,9 @@ namespace CampaignEditor.UserControls
         {
             _client = client;
             _campaign = campaign;
+
+            startDate = TimeFormat.YMDStringToDateTime(_campaign.cmpsdate);
+            endDate = TimeFormat.YMDStringToDateTime(_campaign.cmpedate);
 
             if (await _mediaPlanController.GetMediaPlanByCmpId(_campaign.cmpid) == null)
             {
@@ -66,6 +79,7 @@ namespace CampaignEditor.UserControls
 
                 
             }
+            InitializeDateColumns();
 
             dgSchema.ItemsSource = _showMP;
         }
@@ -84,12 +98,12 @@ namespace CampaignEditor.UserControls
 
                 var schemas = await _schemaController.GetAllChannelSchemasWithinDate(channel.chid, DateOnly.FromDateTime(TimeFormat.YMDStringToDateTime(_campaign.cmpsdate)), DateOnly.FromDateTime(TimeFormat.YMDStringToDateTime(_campaign.cmpedate)));
 
-                var mediaPlans = new List<MediaPlanDTO>();
+                var mediaPlans = new List<Tuple<MediaPlanDTO, List<MediaPlanTermDTO>>>();
                 foreach (var schema in schemas)
                 {
                     MediaPlanDTO mediaPlan = await SchemaToMP(schema);
-                    var b = mediaPlan;
-                    mediaPlans.Add(mediaPlan);
+                    var mediaPlanTerms = await MediaPlanToMPTerm(mediaPlan); 
+                    mediaPlans.Add(Tuple.Create(mediaPlan, mediaPlanTerms));
                 }
                 _channelMPDict.Add(channel, mediaPlans);
             }
@@ -112,6 +126,100 @@ namespace CampaignEditor.UserControls
 
                 return await _mediaPlanController.CreateMediaPlan(mediaPlan);
             }
+        }
+
+        private async Task<List<MediaPlanTermDTO>> MediaPlanToMPTerm(MediaPlanDTO mediaPlan)
+        {
+
+            List<DateTime> availableDates = GetAvailableDates(mediaPlan);
+            DateTime started = startDate;
+
+            int n = (int)(endDate - startDate).TotalDays;
+            var mediaPlanDates = new List<MediaPlanTermDTO>();
+
+            List<DateTime> sorted = availableDates.OrderBy(d => d).ToList();
+
+            for (int i = 0, j = 0; i < n && j < sorted.Count(); i++)
+            {
+                if (started.AddDays(i).Date == sorted[j].Date)
+                {
+                    CreateMediaPlanTermDTO mpTerm = new CreateMediaPlanTermDTO(mediaPlan.xmpid, DateOnly.FromDateTime(sorted[j]), null);
+                    mediaPlanDates.Add(await _mediaPlanTermController.CreateMediaPlanTerm(mpTerm));
+                    j++;
+                }
+            }
+
+            return mediaPlanDates;
+        }
+        private List<DateTime> GetAvailableDates(MediaPlanDTO mediaPlan)
+        {
+            List<DateTime> dates = new List<DateTime>();
+
+
+            foreach (char c in mediaPlan.days)
+            {
+                switch (c)
+                {
+                    case '1':
+                        var mondays = GetWeekdaysBetween(startDate, endDate, DayOfWeek.Monday);
+                        foreach (DateTime date in mondays)
+                            dates.Add(date);
+                        break;
+                    case '2':
+                        var tuesdays = GetWeekdaysBetween(startDate, endDate, DayOfWeek.Tuesday);
+                        foreach (DateTime date in tuesdays)
+                            dates.Add(date);
+                        break;
+                    case '3':
+                        var wednesdays = GetWeekdaysBetween(startDate, endDate, DayOfWeek.Wednesday);
+                        foreach (DateTime date in wednesdays)
+                            dates.Add(date);
+                        break;
+                    case '4':
+                        var thursdays = GetWeekdaysBetween(startDate, endDate, DayOfWeek.Thursday);
+                        foreach (DateTime date in thursdays)
+                            dates.Add(date);
+                        break;
+                    case '5':
+                        var fridays = GetWeekdaysBetween(startDate, endDate, DayOfWeek.Friday);
+                        foreach (DateTime date in fridays)
+                            dates.Add(date);
+                        break;
+                    case '6':
+                        var saturdays = GetWeekdaysBetween(startDate, endDate, DayOfWeek.Saturday);
+                        foreach (DateTime date in saturdays)
+                            dates.Add(date);
+                        break;
+                    case '7':
+                        var sundays = GetWeekdaysBetween(startDate, endDate, DayOfWeek.Sunday);
+                        foreach (DateTime date in sundays)
+                            dates.Add(date);
+                        break;
+                }
+
+            }
+            return dates;
+
+        }
+
+        private List<DateTime> GetWeekdaysBetween(DateTime startDate, DateTime endDate, DayOfWeek dayOfWeek)
+        {
+            var dates = new List<DateTime>();
+
+            // calculate the number of days between the start date and the next occurrence of the day of the week
+            var daysToAdd = ((int)dayOfWeek - (int)startDate.DayOfWeek + 7) % 7;
+
+            // get the first date in the range
+            var date = startDate.AddDays(daysToAdd);
+
+            // add the day of the week repeatedly to get all the dates in the range
+            while (date <= endDate)
+            {
+                dates.Add(date);
+                date = date.AddDays(7);
+            }
+
+            return dates;
         }
 
         // When we initialize forecast, we need to do set dates for search
@@ -150,8 +258,8 @@ namespace CampaignEditor.UserControls
 
                 for (int k = 0; k < _channelMPDict[selectedItem].Count; k++)
                 {
-                    MediaPlanDTO mediaPlan = _channelMPDict[selectedItem][k];
-                    _showMP.Add(mediaPlan);
+                    Tuple<MediaPlanDTO, List<MediaPlanTermDTO>> mediaPlanTuple = _channelMPDict[selectedItem][k];
+                    _showMP.Add(mediaPlanTuple);
                 }
             }
 
@@ -161,56 +269,35 @@ namespace CampaignEditor.UserControls
 
                 for (int k = 0; k < _channelMPDict[deselectedItem].Count;k++)
                 {
-                    MediaPlanDTO mediaPlan = _channelMPDict[deselectedItem][k];
-                    _showMP.Remove(mediaPlan);
+                    Tuple<MediaPlanDTO, List<MediaPlanTermDTO>> mediaPlanTuple = _channelMPDict[deselectedItem][k];
+                    _showMP.Remove(mediaPlanTuple);
                 }
             }
+        }
+        private void InitializeDateColumns()
+        {
+            DateTime startDate = TimeFormat.YMDStringToDateTime(_campaign.cmpsdate);
+            DateTime endDate = TimeFormat.YMDStringToDateTime(_campaign.cmpedate);
 
-            // Adding new MediaPlans if new Channel is selected
-            /*for (int i=0; i< selectedCount; i++) 
+            // Get a list of all dates between start and end date, inclusive
+            List<DateTime> dates = Enumerable.Range(0, 1 + endDate.Subtract(startDate).Days)
+            .Select(offset => startDate.AddDays(offset))
+                                  .ToList();
+
+            // Create a column for each date
+            foreach (DateTime date in dates)
             {
-                ChannelDTO selectedChannel = lvChannels.SelectedItems[i] as ChannelDTO;
-                bool wasPreviouslySelected = false;
-                for (int j=0; j< pSelectedCount; j++) 
-                {
-                    ChannelDTO pSelectedChannel = _previouslySelectedChannels[j];
-                    if (selectedChannel.chid == pSelectedChannel.chid)
-                        wasPreviouslySelected = true;
-                }
-                if (selectedItem )
-                {
-                    _previouslySelectedChannels.Add(selectedChannel);
-                    
-                    for (int k=0; k < _channelMPDict[selectedChannel].Count; k++) 
-                    {
-                        MediaPlanDTO mediaPlan = _channelMPDict[selectedChannel][k];
-                        _showMP.Add(mediaPlan);
-                    }
-                }
+                // Create a new DataGridTextColumn
+                DataGridTextColumn column = new DataGridTextColumn();
+
+                // Set the column header to the date
+                column.Header = date.ToString("dd/MM/yyyy");
+
+
+                // Add the column to the DataGrid
+                dgSchema.Columns.Add(column);
             }
 
-            //Deleting mediaPlans for Channels that are no longer selected
-            for (int i=0; i< pSelectedCount; i++) 
-            {
-                ChannelDTO pSelectedChannel = _previouslySelectedChannels[i];
-                bool wasUnselected = true;
-                for (int j=0; j< selectedCount; j++) 
-                {
-                    ChannelDTO selectedChannel = lvChannels.SelectedItems[j] as ChannelDTO;
-                    if (selectedChannel.chid == pSelectedChannel.chid)
-                        wasUnselected = false;
-                }
-                if (wasUnselected)
-                {
-                    _previouslySelectedChannels.Remove(pSelectedChannel);
-
-                    for (int k=0; k<_channelMPDict[pSelectedChannel].Count; ) 
-                    {
-                        MediaPlanDTO mediaPlan = _channelMPDict[pSelectedChannel][k];
-                        _showMP.Remove(mediaPlan);
-                    }
-                }
-            }*/
         }
     }
 }

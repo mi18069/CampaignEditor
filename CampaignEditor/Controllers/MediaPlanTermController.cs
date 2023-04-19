@@ -15,9 +15,10 @@ namespace CampaignEditor.Controllers
         {
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
         }
-        public async Task<bool> CreateMediaPlanTerm(CreateMediaPlanTermDTO mediaPlanTermDTO)
+        public async Task<MediaPlanTermDTO> CreateMediaPlanTerm(CreateMediaPlanTermDTO mediaPlanTermDTO)
         {
-            return await _repository.CreateMediaPlanTerm(mediaPlanTermDTO);
+            await _repository.CreateMediaPlanTerm(mediaPlanTermDTO);
+            return await _repository.GetMediaPlanTermByXmpidAndDate(mediaPlanTermDTO.xmpid, mediaPlanTermDTO.date);
         }
 
         public async Task<MediaPlanTermDTO> GetMediaPlanTermById(int id)

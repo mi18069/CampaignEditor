@@ -4,8 +4,8 @@ namespace Database.DTOs.MediaPlanTermDTO
 {
     public class UpdateMediaPlanTermDTO : BaseIdentityMediaPlanTermDTO
     {
-        public UpdateMediaPlanTermDTO(int cmptermid, int xmpid, DateOnly date, string spotcode) 
-            : base(cmptermid, xmpid, date, spotcode)
+        public UpdateMediaPlanTermDTO(int xmptermid, int xmpid, DateOnly date, string? spotcode) 
+            : base(xmptermid, xmpid, date, spotcode)
         {
         }
     }
