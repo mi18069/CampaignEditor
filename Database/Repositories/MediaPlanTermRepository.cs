@@ -95,13 +95,13 @@ namespace Database.Repositories
             using var connection = _context.GetConnection();
 
             var affected = await connection.ExecuteAsync(
-                "UPDATE xmpterm SET xmptermid = @Xmptermid, xmpid = @Xmpid, datum = @Date, spotcode = @Spotcode " +
+                "UPDATE xmpterm SET xmptermid = @Xmptermid, xmpid = @Xmpid, datum = CAST(@Date AS DATE), spotcode = @Spotcode " +
                 "WHERE xmptermid = @Xmptermid",
                 new
                 {
-                    Xmpterm = mediaPlanTermDTO.xmptermid,
+                    Xmptermid = mediaPlanTermDTO.xmptermid,
                     Xmpid = mediaPlanTermDTO.xmpid,
-                    Date = mediaPlanTermDTO.date,
+                    Date = mediaPlanTermDTO.date.ToString("yyyy-MM-dd"),
                     Spotcode = mediaPlanTermDTO.spotcode
                 });
 

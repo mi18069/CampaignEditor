@@ -89,7 +89,8 @@
                 <DataGrid x:Name="dgSchema" 
                           FontSize="13" AlternatingRowBackground="Gray"
                           CanUserAddRows="False"
-                          AutoGenerateColumns="False">
+                          AutoGenerateColumns="False"
+                          SelectionMode="Single">
                     <DataGrid.Resources>
                         <Style TargetType="{x:Type DataGridColumnHeader}">
                             <Setter Property="Background" Value="LightGray"/>

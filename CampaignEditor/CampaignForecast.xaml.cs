@@ -5,7 +5,9 @@ using Database.DTOs.ClientDTO;
 using Database.DTOs.MediaPlanDTO;
 using Database.DTOs.MediaPlanTermDTO;
 using Database.DTOs.SchemaDTO;
+using Database.Entities;
 using Database.Repositories;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -45,8 +47,8 @@ namespace CampaignEditor.UserControls
         private Dictionary<ChannelDTO, List<Tuple<MediaPlanDTO, List<MediaPlanTermDTO>>>> _channelMPDict =
             new Dictionary<ChannelDTO, List<Tuple<MediaPlanDTO, List<MediaPlanTermDTO>>>>();
         private List<SchemaDTO> _schemaList = new List<SchemaDTO>();
-        private ObservableCollection<Tuple<MediaPlanDTO, List<MediaPlanTermDTO>>> _showMP 
-            = new ObservableCollection<Tuple<MediaPlanDTO, List<MediaPlanTermDTO>>>();
+        private ObservableCollection<Tuple<MediaPlanDTO, ObservableCollection<MediaPlanTermDTO>>> _showMP 
+            = new ObservableCollection<Tuple<MediaPlanDTO, ObservableCollection<MediaPlanTermDTO>>>();
         public CampaignForecast(ISchemaRepository schemaRepository,
             IChannelRepository channelRepository, ICampaignRepository campaignRepository, 
             IChannelCmpRepository channelCmpRepository,
@@ -270,8 +272,12 @@ namespace CampaignEditor.UserControls
 
                 for (int k = 0; k < _channelMPDict[selectedItem].Count; k++)
                 {
-                    Tuple<MediaPlanDTO, List<MediaPlanTermDTO>> mediaPlanTuple = _channelMPDict[selectedItem][k];
-                    _showMP.Add(mediaPlanTuple);
+                    MediaPlanDTO mediaPlanDTO = _channelMPDict[selectedItem][k].Item1;
+                    ObservableCollection<MediaPlanTermDTO> mediaPlanTerms = new ObservableCollection<MediaPlanTermDTO>();
+                    foreach (MediaPlanTermDTO mpTerm in _channelMPDict[selectedItem][k].Item2)
+                        mediaPlanTerms.Add(mpTerm);
+
+                    _showMP.Add(Tuple.Create(mediaPlanDTO, mediaPlanTerms));
                 }
             }
 
@@ -281,8 +287,13 @@ namespace CampaignEditor.UserControls
 
                 for (int k = 0; k < _channelMPDict[deselectedItem].Count;k++)
                 {
-                    Tuple<MediaPlanDTO, List<MediaPlanTermDTO>> mediaPlanTuple = _channelMPDict[deselectedItem][k];
-                    _showMP.Remove(mediaPlanTuple);
+                    /*Tuple<MediaPlanDTO, List<MediaPlanTermDTO>> mediaPlanTuple = _channelMPDict[deselectedItem][k];
+                    _showMP.Remove(mediaPlanTuple);*/
+                    MediaPlanDTO mediaPlanDTO = _channelMPDict[deselectedItem][k].Item1;
+                    ObservableCollection<MediaPlanTermDTO> mediaPlanTerms = new ObservableCollection<MediaPlanTermDTO>();
+                    foreach (MediaPlanTermDTO mpTerm in _channelMPDict[deselectedItem][k].Item2)
+                        mediaPlanTerms.Add(mpTerm);
+                    _showMP.Remove(Tuple.Create(mediaPlanDTO, mediaPlanTerms));
                 }
             }
         }
@@ -313,8 +324,10 @@ namespace CampaignEditor.UserControls
 
                 // to handle max length of 1 character
                 //var keyDownEventSetter = new EventSetter(DataGridCell.PreviewTextInputEvent, new TextCompositionEventHandler(OnCellPreviewTextInput));
-                //cellStyle.Setters.Add(keyDownEventSetter);
+                var keyDownEventSetter = new EventSetter(PreviewTextInputEvent, new TextCompositionEventHandler(OnCellPreviewTextInput));
+                cellStyle.Setters.Add(keyDownEventSetter);
                 column.CellStyle = cellStyle;
+                
 
                 var trigger = new DataTrigger();
                 trigger.Binding = new Binding($"Item2[{dates.IndexOf(date)}]");
@@ -334,33 +347,71 @@ namespace CampaignEditor.UserControls
 
         }
 
-        /*private async void OnCellPreviewTextInput(object sender, TextCompositionEventArgs e)
+        private async void OnCellPreviewTextInput(object sender, TextCompositionEventArgs e)
         {
 
             List<char> spotCodes = new List<char>();
             var spots = await _spotController.GetSpotsByCmpid(_campaign.cmpid);
 
             DataGridCell cell = sender as DataGridCell;
-            var textBox = cell.Content as TextBox;
+            var textBox = cell?.Content as TextBox;
+            
+            
 
-            for(int i=0; i<spots.Count(); i++)
+            for (int i=0; i<spots.Count(); i++)
             {
                 spotCodes.Add((char)('A' + i));
             }
 
-            if (spotCodes.Contains(e.Text[0]))
+            char? spotcode = e.Text.Trim()[0];
+
+            if (spotCodes.Contains(spotcode) || spotcode == null)
             {
-                if (textBox.Text[0] == e.Text[0])
-                    e.Handled = true;
-                else
-                {
-                    //await _
-                }
+                
+                var tuple = dgSchema.SelectedCells[0].Item;
+                var mpTerm = GetSelectedMediaPlanTermDTO(cell);
+
+                await _mediaPlanTermController.UpdateMediaPlanTerm(
+                    new UpdateMediaPlanTermDTO(mpTerm.xmptermid, mpTerm.xmpid, mpTerm.date, spotcode));
+
             }
-            else
+
+            e.Handled = true;
+        }
+
+        private MediaPlanTermDTO GetSelectedMediaPlanTermDTO(DataGridCell cell)
+        {
+            // Traverse the visual tree to find the DataGridRow and DataGridCell that contain the selected cell
+            DependencyObject parent = VisualTreeHelper.GetParent(cell);
+            while (parent != null && !(parent is DataGridRow))
             {
-                e.Handled = true;
+                parent = VisualTreeHelper.GetParent(parent);
             }
-        }*/
+            if (parent == null)
+            {
+                return null; // selected cell is not in a DataGridRow
+            }
+            DataGridRow row = parent as DataGridRow;
+
+            parent = VisualTreeHelper.GetParent(cell);
+
+            var selectedCell = cell;
+            // Get the index of the selected cell in the row
+            int columnIndex = selectedCell.Column.DisplayIndex;
+
+            // Get the bound item for the selected row
+            var tuple = row.Item as Tuple<MediaPlanDTO, ObservableCollection<MediaPlanTermDTO>>;
+            if (tuple == null)
+            {
+                return null; // row is not bound to a tuple
+            }
+            ObservableCollection<MediaPlanTermDTO> mpTerms = tuple.Item2;
+
+            // Get the MediaPlanTerm for the selected cell
+            int rowIndex = row.GetIndex();
+            MediaPlanTermDTO mpTermDTO = mpTerms[rowIndex];
+
+            return mpTermDTO;
+        }
     }
 }
