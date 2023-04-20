@@ -13,6 +13,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel.DataAnnotations;
 using System.Configuration;
+using System.Diagnostics.Metrics;
 using System.Linq;
 using System.Threading.Channels;
 using System.Threading.Tasks;
@@ -333,7 +334,9 @@ namespace CampaignEditor.UserControls
 
                 // to handle max length of 1 character
                 //var keyDownEventSetter = new EventSetter(DataGridCell.PreviewTextInputEvent, new TextCompositionEventHandler(OnCellPreviewTextInput));
-                var keyDownEventSetter = new EventSetter(PreviewTextInputEvent, new TextCompositionEventHandler(OnCellPreviewTextInput));
+                var textInputEventSetter = new EventSetter(PreviewTextInputEvent, new TextCompositionEventHandler(OnCellPreviewTextInput));
+                var keyDownEventSetter = new EventSetter(PreviewKeyDownEvent, new KeyEventHandler(OnCellPreviewKeyDown));
+                cellStyle.Setters.Add(textInputEventSetter);
                 cellStyle.Setters.Add(keyDownEventSetter);
                 column.CellStyle = cellStyle;
                 
@@ -360,23 +363,41 @@ namespace CampaignEditor.UserControls
         {
 
             DataGridCell cell = sender as DataGridCell;
+            TextBox textBox = cell.Content as TextBox;
 
             char? spotcode = e.Text.Trim()[0];
 
-            if (spotcode == null || spotCodes.Contains((char)spotcode))
+            if (spotCodes.Contains((char)spotcode))
             {
+                if (textBox.Text.Trim().Length > 0)
+                    cell.Content = spotcode;
+
+                var mpTerm = GetSelectedMediaPlanTermDTO(cell);
+                await _mediaPlanTermController.UpdateMediaPlanTerm(
+                    new UpdateMediaPlanTermDTO(mpTerm.xmptermid, mpTerm.xmpid, mpTerm.date, spotcode.ToString()));
                 
-                var tuple = dgSchema.SelectedCells[0].Item;
+                mpTerm.spotcode = spotcode.ToString().Trim();
+            }
+
+        }
+
+        private async void OnCellPreviewKeyDown(object sender, KeyEventArgs e)
+        {
+
+            DataGridCell cell = sender as DataGridCell;
+            TextBox text = cell.Content as TextBox;
+
+            if (e.Key == Key.Space)
+                cell.Content = text.Text.ToString().Trim();
+
+            if ((e.Key == Key.Delete || e.Key == Key.Back) && text != null)
+            {
                 var mpTerm = GetSelectedMediaPlanTermDTO(cell);
 
                 await _mediaPlanTermController.UpdateMediaPlanTerm(
-                    new UpdateMediaPlanTermDTO(mpTerm.xmptermid, mpTerm.xmpid, mpTerm.date, spotcode.ToString()));
-
+                    new UpdateMediaPlanTermDTO(mpTerm.xmptermid, mpTerm.xmpid, mpTerm.date, null));
             }
 
-            e.Handled = true;
-            if (cell.Content.ToString().Trim().Length > 1)
-                cell.Content = cell.Content.ToString().Trim()[1];
         }
 
         private MediaPlanTermDTO GetSelectedMediaPlanTermDTO(DataGridCell cell)
