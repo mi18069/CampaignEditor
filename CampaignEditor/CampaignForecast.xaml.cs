@@ -44,6 +44,9 @@ namespace CampaignEditor.UserControls
         DateTime startDate;
         DateTime endDate;
 
+        // for checking if certain character can be written in spot cells
+        HashSet<char> spotCodes = new HashSet<char>();
+
         private Dictionary<ChannelDTO, List<Tuple<MediaPlanDTO, List<MediaPlanTermDTO>>>> _channelMPDict =
             new Dictionary<ChannelDTO, List<Tuple<MediaPlanDTO, List<MediaPlanTermDTO>>>>();
         private List<SchemaDTO> _schemaList = new List<SchemaDTO>();
@@ -92,6 +95,12 @@ namespace CampaignEditor.UserControls
             InitializeDateColumns();
 
             dgSchema.ItemsSource = _showMP;
+
+            var spots = await _spotController.GetSpotsByCmpid(_campaign.cmpid);
+            for (int i = 0; i < spots.Count(); i++)
+            {
+                spotCodes.Add((char)('A' + i));
+            }
         }
 
         private async Task InitializeData()
@@ -285,15 +294,15 @@ namespace CampaignEditor.UserControls
             {
                 ChannelDTO deselectedItem = deselectedItems[0]! as ChannelDTO;
 
-                for (int k = 0; k < _channelMPDict[deselectedItem].Count;k++)
+                for (int i=0; i < _showMP.Count(); i++)
                 {
-                    /*Tuple<MediaPlanDTO, List<MediaPlanTermDTO>> mediaPlanTuple = _channelMPDict[deselectedItem][k];
-                    _showMP.Remove(mediaPlanTuple);*/
-                    MediaPlanDTO mediaPlanDTO = _channelMPDict[deselectedItem][k].Item1;
-                    ObservableCollection<MediaPlanTermDTO> mediaPlanTerms = new ObservableCollection<MediaPlanTermDTO>();
-                    foreach (MediaPlanTermDTO mpTerm in _channelMPDict[deselectedItem][k].Item2)
-                        mediaPlanTerms.Add(mpTerm);
-                    _showMP.Remove(Tuple.Create(mediaPlanDTO, mediaPlanTerms));
+                    var tuple = _showMP[i];
+                    foreach (var channelTuple in _channelMPDict[deselectedItem])
+                        if (channelTuple.Item1 == tuple.Item1)
+                        {
+                            _showMP.Remove(tuple);
+                            i--;
+                        }
                 }
             }
         }
@@ -350,33 +359,24 @@ namespace CampaignEditor.UserControls
         private async void OnCellPreviewTextInput(object sender, TextCompositionEventArgs e)
         {
 
-            List<char> spotCodes = new List<char>();
-            var spots = await _spotController.GetSpotsByCmpid(_campaign.cmpid);
-
             DataGridCell cell = sender as DataGridCell;
-            var textBox = cell?.Content as TextBox;
-            
-            
-
-            for (int i=0; i<spots.Count(); i++)
-            {
-                spotCodes.Add((char)('A' + i));
-            }
 
             char? spotcode = e.Text.Trim()[0];
 
-            if (spotCodes.Contains(spotcode) || spotcode == null)
+            if (spotcode == null || spotCodes.Contains((char)spotcode))
             {
                 
                 var tuple = dgSchema.SelectedCells[0].Item;
                 var mpTerm = GetSelectedMediaPlanTermDTO(cell);
 
                 await _mediaPlanTermController.UpdateMediaPlanTerm(
-                    new UpdateMediaPlanTermDTO(mpTerm.xmptermid, mpTerm.xmpid, mpTerm.date, spotcode));
+                    new UpdateMediaPlanTermDTO(mpTerm.xmptermid, mpTerm.xmpid, mpTerm.date, spotcode.ToString()));
 
             }
 
             e.Handled = true;
+            if (cell.Content.ToString().Trim().Length > 1)
+                cell.Content = cell.Content.ToString().Trim()[1];
         }
 
         private MediaPlanTermDTO GetSelectedMediaPlanTermDTO(DataGridCell cell)
