@@ -8,5 +8,10 @@ namespace Database.DTOs.MediaPlanDTO
             : base(xmpid, schid, cmpid, chid, name, version, position, stime, etime, blocktime, days, type, special, sdate, edate, progcoef, created, modified, amr1, amr2, amr3, amrsale, amrp1, amrp2, amrp3, amrpsale, dpcoef, seascoef, price, active)
         {
         }
+
+        public UpdateMediaPlanDTO(MediaPlanDTO mediaPlan)
+        : base(mediaPlan)
+        {
+        }
     }
 }

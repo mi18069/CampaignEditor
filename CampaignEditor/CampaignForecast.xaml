@@ -84,14 +84,14 @@
                       DisplayMemberPath="chname" MinWidth="250" MinHeight="250"
                       SelectionMode="Multiple" Margin="0, 0 ,10,0"
                       SelectionChanged="lvChannels_SelectionChanged"/>
-            <ScrollViewer  Grid.Row="1" Grid.Column="2" Grid.RowSpan="3" Grid.ColumnSpan="3"
-                           VerticalScrollBarVisibility="Visible">
-                <DataGrid x:Name="dgSchema" 
+                <DataGrid x:Name="dgSchema" Grid.Row="1" Grid.Column="2" Grid.RowSpan="3" Grid.ColumnSpan="3"
+                           VerticalScrollBarVisibility="Visible"
                           FontSize="13" AlternatingRowBackground="Gray"
                           CanUserAddRows="False"
                           AutoGenerateColumns="False"
                           SelectionMode="Single"
                           FrozenColumnCount="{Binding FrozenColumnsNum, Mode=TwoWay}"
+                          HorizontalScrollBarVisibility="Visible"
                           MouseRightButtonDown="dgSchema_MouseRightButtonDown">
                     <DataGrid.Resources>
                         <Style TargetType="{x:Type DataGridColumnHeader}">
@@ -104,8 +104,28 @@
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Program" Binding="{Binding Item1.name, Mode=TwoWay}"
                                         IsReadOnly="True" />
-                        <DataGridTextColumn Header="Position" Binding="{Binding Item1.position, Mode=TwoWay}"
-                                        IsReadOnly="True"/>
+                        <DataGridTemplateColumn Header="Position">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Path=Item1.position, Mode=OneWay}"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                            <DataGridTemplateColumn.CellEditingTemplate>
+                                <DataTemplate>
+                                    <ComboBox x:Name="cbPosition" 
+                                              SelectedItem="{Binding Path=Item1.Position, Mode=OneWay}"
+                                              SelectionChanged="ComboBoxPosition_SelectionChanged">
+                                        <ComboBoxItem>INS</ComboBoxItem>
+                                        <ComboBoxItem>BET</ComboBoxItem>
+                                        <ComboBox.ItemTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Path=Item1.position, Mode=OneWay}" />
+                                            </DataTemplate>
+                                        </ComboBox.ItemTemplate>
+                                    </ComboBox>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellEditingTemplate>
+                        </DataGridTemplateColumn>
                         <DataGridTextColumn Header="Start time" Binding="{Binding Item1.stime, Mode=TwoWay}" 
                                         IsReadOnly="True"/>
                         <DataGridTextColumn Header="End time" Binding="{Binding Item1.etime, Mode=TwoWay}" 
@@ -126,7 +146,6 @@
                                             IsReadOnly="True"/>
                     </DataGrid.Columns>
                 </DataGrid>
-            </ScrollViewer>
         </Grid>
     </Grid>
 </Page>

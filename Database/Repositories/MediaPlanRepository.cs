@@ -192,10 +192,10 @@ namespace Database.Repositories
                 "UPDATE xmp SET xmpid = @Xmpid, schid = @Schid, cmpid = @Cmpid, chid = @Chid, naziv = @Name, " +
                 "verzija = @Version, pozicija = @Position, " +
                 "vremeod = @Stime, vremedo = @Etime, vremerbl = @Blocktime, dani = @Days, " +
-                "tipologija = @Type, specijal = @Special, datumod = @Sdate, datumdo = @Edate, " +
-                "datumkreiranja = @Created, datumizmene = @Modified " +
+                "tipologija = @Type, specijal = @Special, datumod = CAST(@Sdate AS DATE), datumdo = CAST(@Edate AS DATE), " +
+                "datumkreiranja = CAST(@Created AS DATE), datumizmene = CAST(@Modified AS DATE), " +
                 "amr1 = @Amr1, amr2 = @Amr2, amr3 = @Amr3, amrsale = @Amrsale, amrp1 = @Amrp1, amrp2 = @Amrp2, amrp3 = @Amrp3, " +
-                "amr1 = @Amr1,amrpsale = @Amrpsale, dpkoef = @Dpcoef, seaskoef = @Seascoef, price = @Price, active = @Active " +
+                "amrpsale = @Amrpsale, dpkoef = @Dpcoef, seaskoef = @Seascoef, price = @Price, active = @Active " +
                 "WHERE xmpid = @Xmpid",
                 new
                 {
@@ -211,11 +211,11 @@ namespace Database.Repositories
                     Days = mediaPlanDTO.days,
                     Type = mediaPlanDTO.type,
                     Special = mediaPlanDTO.special,
-                    Sdate = mediaPlanDTO.sdate,
-                    Edate = mediaPlanDTO.edate,
+                    Sdate = mediaPlanDTO.sdate.ToString("yyyy-MM-dd"),
+                    Edate = mediaPlanDTO.edate == null ? null : mediaPlanDTO.edate.Value.ToString("yyyy-MM-dd"),
                     Progcoef = mediaPlanDTO.progcoef,
-                    Created = mediaPlanDTO.created,
-                    Modified = mediaPlanDTO.modified,
+                    Created = mediaPlanDTO.created.ToString("yyyy-MM-dd"),
+                    Modified = mediaPlanDTO.modified == null ? null : mediaPlanDTO.modified.Value.ToString("yyyy-MM-dd"),
                     Amr1 = mediaPlanDTO.amr1,
                     Amr2 = mediaPlanDTO.amr2,
                     Amr3 = mediaPlanDTO.amr3,

@@ -1,15 +1,12 @@
 ﻿using AutoMapper;
 using Dapper;
 using Database.Data;
-using Database.DTOs.MediaPlanDTO;
-using Database.DTOs.MediaPlanHistDTO;
 using Database.DTOs.MediaPlanTermDTO;
 using Database.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows.Automation.Peers;
 
 namespace Database.Repositories
 {

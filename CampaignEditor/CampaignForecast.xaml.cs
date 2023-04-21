@@ -5,18 +5,11 @@ using Database.DTOs.ClientDTO;
 using Database.DTOs.MediaPlanDTO;
 using Database.DTOs.MediaPlanTermDTO;
 using Database.DTOs.SchemaDTO;
-using Database.Entities;
 using Database.Repositories;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Windows.Themes;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel.DataAnnotations;
-using System.Configuration;
-using System.Diagnostics.Metrics;
 using System.Linq;
-using System.Threading.Channels;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -31,7 +24,6 @@ namespace CampaignEditor.UserControls
     {
         private SchemaController _schemaController;
         private ChannelController _channelController;
-        private CampaignController _campaignController;
         private ChannelCmpController _channelCmpController;
         private MediaPlanController _mediaPlanController;
         private MediaPlanTermController _mediaPlanTermController;
@@ -63,11 +55,10 @@ namespace CampaignEditor.UserControls
 
         private Dictionary<ChannelDTO, List<Tuple<MediaPlanDTO, List<MediaPlanTermDTO>>>> _channelMPDict =
             new Dictionary<ChannelDTO, List<Tuple<MediaPlanDTO, List<MediaPlanTermDTO>>>>();
-        private List<SchemaDTO> _schemaList = new List<SchemaDTO>();
         private ObservableCollection<Tuple<MediaPlanDTO, ObservableCollection<MediaPlanTermDTO>>> _showMP 
             = new ObservableCollection<Tuple<MediaPlanDTO, ObservableCollection<MediaPlanTermDTO>>>();
         public CampaignForecast(ISchemaRepository schemaRepository,
-            IChannelRepository channelRepository, ICampaignRepository campaignRepository, 
+            IChannelRepository channelRepository, 
             IChannelCmpRepository channelCmpRepository,
             IMediaPlanRepository mediaPlanRepository,
             IMediaPlanTermRepository mediaPlanTermRepository,
@@ -78,7 +69,6 @@ namespace CampaignEditor.UserControls
 
             _schemaController = new SchemaController(schemaRepository);
             _channelController = new ChannelController(channelRepository);
-            _campaignController = new CampaignController(campaignRepository);
             _channelCmpController = new ChannelCmpController(channelCmpRepository);
             _mediaPlanController = new MediaPlanController(mediaPlanRepository);
             _mediaPlanTermController = new MediaPlanTermController(mediaPlanTermRepository);
@@ -89,6 +79,8 @@ namespace CampaignEditor.UserControls
             InitializeComponent();
         }
 
+
+        #region Initialization
         public async Task Initialize(ClientDTO client, CampaignDTO campaign)
         {
             _client = client;
@@ -264,6 +256,8 @@ namespace CampaignEditor.UserControls
             return dates;
         }
 
+        #endregion
+
         // When we initialize forecast, we need to do set dates for search
         private async void Init_Click(object sender, System.Windows.RoutedEventArgs e)
         {
@@ -282,11 +276,9 @@ namespace CampaignEditor.UserControls
             {
                 MessageBox.Show("Invalid dates");
             }
-            
-
-
         }
 
+        #region lvChannels
         private void lvChannels_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
 
@@ -325,6 +317,8 @@ namespace CampaignEditor.UserControls
                 }
             }
         }
+
+        #endregion
 
         #region Date Columns
         private void InitializeDateColumns()
@@ -521,6 +515,7 @@ namespace CampaignEditor.UserControls
 
         #region MediaPlan columns
 
+            #region ContextMenu
         private void dgSchema_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
             // check if it's clicked on header
@@ -561,6 +556,31 @@ namespace CampaignEditor.UserControls
                 header = VisualTreeHelper.GetParent(header);
             }
             return header != null;
+        }
+
+
+
+
+        #endregion
+
+        private async void ComboBoxPosition_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            
+            var tuple = dgSchema.SelectedItems[0] as Tuple<MediaPlanDTO, ObservableCollection<MediaPlanTermDTO>>;
+
+            var comboBox = sender as ComboBox;
+            string newPosition = "INS";
+            if (comboBox.SelectedItem != null)
+            {
+                newPosition = (comboBox.SelectedItem as ComboBoxItem).Content.ToString().Trim();
+            }
+
+            var mediaPlan = tuple.Item1;
+            if (mediaPlan != null)
+            {
+                mediaPlan.position = newPosition;
+                await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(mediaPlan));
+            }
         }
 
         #endregion
