@@ -8,6 +8,7 @@ using Database.DTOs.SchemaDTO;
 using Database.Entities;
 using Database.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Windows.Themes;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -19,6 +20,7 @@ using System.Threading.Channels;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -48,6 +50,17 @@ namespace CampaignEditor.UserControls
         // for checking if certain character can be written in spot cells
         HashSet<char> spotCodes = new HashSet<char>();
 
+        // number of frozen columns
+        int mediaPlanColumns = 11;
+        public int FrozenColumnsNum
+        {
+            get { return (int)GetValue(FrozenColumnsNumProperty); }
+            set { SetValue(FrozenColumnsNumProperty, value); }
+        }
+
+        public static readonly DependencyProperty FrozenColumnsNumProperty =
+            DependencyProperty.Register(nameof(FrozenColumnsNum), typeof(int), typeof(MainWindow), new PropertyMetadata(0));
+
         private Dictionary<ChannelDTO, List<Tuple<MediaPlanDTO, List<MediaPlanTermDTO>>>> _channelMPDict =
             new Dictionary<ChannelDTO, List<Tuple<MediaPlanDTO, List<MediaPlanTermDTO>>>>();
         private List<SchemaDTO> _schemaList = new List<SchemaDTO>();
@@ -60,6 +73,9 @@ namespace CampaignEditor.UserControls
             IMediaPlanTermRepository mediaPlanTermRepository,
             ISpotRepository spotRepository)
         {
+            this.DataContext = this;
+            this.FrozenColumnsNum = 11;
+
             _schemaController = new SchemaController(schemaRepository);
             _channelController = new ChannelController(channelRepository);
             _campaignController = new CampaignController(campaignRepository);
@@ -67,6 +83,8 @@ namespace CampaignEditor.UserControls
             _mediaPlanController = new MediaPlanController(mediaPlanRepository);
             _mediaPlanTermController = new MediaPlanTermController(mediaPlanTermRepository);
             _spotController = new SpotController(spotRepository);
+
+
 
             InitializeComponent();
         }
@@ -307,6 +325,8 @@ namespace CampaignEditor.UserControls
                 }
             }
         }
+
+        #region Date Columns
         private void InitializeDateColumns()
         {
             DateTime startDate = TimeFormat.YMDStringToDateTime(_campaign.cmpsdate);
@@ -332,10 +352,11 @@ namespace CampaignEditor.UserControls
 
                 var cellStyle = new Style(typeof(DataGridCell));
 
-                // to handle max length of 1 character
+                // Adding setters to cells
                 //var keyDownEventSetter = new EventSetter(DataGridCell.PreviewTextInputEvent, new TextCompositionEventHandler(OnCellPreviewTextInput));
                 var textInputEventSetter = new EventSetter(PreviewTextInputEvent, new TextCompositionEventHandler(OnCellPreviewTextInput));
                 var keyDownEventSetter = new EventSetter(PreviewKeyDownEvent, new KeyEventHandler(OnCellPreviewKeyDown));
+
                 cellStyle.Setters.Add(textInputEventSetter);
                 cellStyle.Setters.Add(keyDownEventSetter);
                 column.CellStyle = cellStyle;
@@ -345,6 +366,7 @@ namespace CampaignEditor.UserControls
                 trigger.Binding = new Binding($"Item2[{dates.IndexOf(date)}]");
                 trigger.Value = null;
                 trigger.Setters.Add(new Setter(BackgroundProperty, Brushes.LightGoldenrodYellow)); // Set background to yellow if value is null
+                trigger.Setters.Add(new Setter(FocusableProperty, false));
                 column.CellStyle.Triggers.Add(trigger);
                 column.CellStyle.Setters.Add(new Setter(BackgroundProperty, Brushes.Green)); // Set background to green if value is not null
                 column.CanUserSort = false;
@@ -365,19 +387,27 @@ namespace CampaignEditor.UserControls
             DataGridCell cell = sender as DataGridCell;
             TextBox textBox = cell.Content as TextBox;
 
-            char? spotcode = e.Text.Trim()[0];
+            char? spotcodeNull = e.Text.Trim()[0];
 
-            if (spotCodes.Contains((char)spotcode))
+            e.Handled = true;
+            if (spotcodeNull.HasValue)
             {
-                if (textBox.Text.Trim().Length > 0)
+                char spotcode = Char.ToUpper(spotcodeNull.Value);
+                if (spotCodes.Contains(spotcode))
+                {
+                    //if (!(textBox == null) && textBox.Text.Trim().Length > 0)
                     cell.Content = spotcode;
 
-                var mpTerm = GetSelectedMediaPlanTermDTO(cell);
-                await _mediaPlanTermController.UpdateMediaPlanTerm(
-                    new UpdateMediaPlanTermDTO(mpTerm.xmptermid, mpTerm.xmpid, mpTerm.date, spotcode.ToString()));
-                
-                mpTerm.spotcode = spotcode.ToString().Trim();
+                    var mpTerm = GetSelectedMediaPlanTermDTO(cell);
+                    await _mediaPlanTermController.UpdateMediaPlanTerm(
+                        new UpdateMediaPlanTermDTO(mpTerm.xmptermid, mpTerm.xmpid, mpTerm.date, spotcode.ToString()));
+
+                    mpTerm.spotcode = spotcode.ToString().Trim();
+                    cell.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
+
+                }
             }
+            
 
         }
 
@@ -387,8 +417,11 @@ namespace CampaignEditor.UserControls
             DataGridCell cell = sender as DataGridCell;
             TextBox text = cell.Content as TextBox;
 
-            if (e.Key == Key.Space)
-                cell.Content = text.Text.ToString().Trim();
+            if (e.Key == Key.Space || e.Key == Key.Enter)
+            {
+                e.Handled = true;
+                cell.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
+            }
 
             if ((e.Key == Key.Delete || e.Key == Key.Back) && text != null)
             {
@@ -398,6 +431,55 @@ namespace CampaignEditor.UserControls
                     new UpdateMediaPlanTermDTO(mpTerm.xmptermid, mpTerm.xmpid, mpTerm.date, null));
             }
 
+        }
+
+        public static DataGridCell GetCell(DataGrid dataGrid, int row, int column)
+        {
+            DataGridRow rowContainer = GetRow(dataGrid, row);
+            if (rowContainer != null)
+            {
+                DataGridCellsPresenter presenter = GetVisualChild<DataGridCellsPresenter>(rowContainer);
+                if (presenter == null)
+                {
+                    dataGrid.ScrollIntoView(rowContainer, dataGrid.Columns[column]);
+                    presenter = GetVisualChild<DataGridCellsPresenter>(rowContainer);
+                }
+                DataGridCell cell = (DataGridCell)presenter.ItemContainerGenerator.ContainerFromIndex(column);
+                return cell;
+            }
+            return null;
+        }
+
+        public static T GetVisualChild<T>(Visual parent) where T : Visual
+        {
+            T child = default(T);
+            int numVisuals = VisualTreeHelper.GetChildrenCount(parent);
+            for (int i = 0; i < numVisuals; i++)
+            {
+                Visual visual = (Visual)VisualTreeHelper.GetChild(parent, i);
+                child = visual as T;
+                if (child == null)
+                {
+                    child = GetVisualChild<T>(visual);
+                }
+                if (child != null)
+                {
+                    break;
+                }
+            }
+            return child;
+        }
+
+        public static DataGridRow GetRow(DataGrid dataGrid, int index)
+        {
+            DataGridRow row = (DataGridRow)dataGrid.ItemContainerGenerator.ContainerFromIndex(index);
+            if (row == null)
+            {
+                dataGrid.UpdateLayout();
+                dataGrid.ScrollIntoView(dataGrid.Items[index]);
+                row = (DataGridRow)dataGrid.ItemContainerGenerator.ContainerFromIndex(index);
+            }
+            return row;
         }
 
         private MediaPlanTermDTO GetSelectedMediaPlanTermDTO(DataGridCell cell)
@@ -430,9 +512,59 @@ namespace CampaignEditor.UserControls
 
             // Get the MediaPlanTerm for the selected cell
             int rowIndex = row.GetIndex();
-            MediaPlanTermDTO mpTermDTO = mpTerms[rowIndex];
+            MediaPlanTermDTO mpTermDTO = mpTerms[columnIndex - FrozenColumnsNum]; // we have n freezed columns
 
             return mpTermDTO;
         }
+
+        #endregion
+
+        #region MediaPlan columns
+
+        private void dgSchema_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            // check if it's clicked on header
+            DependencyObject dependencyObject = (DependencyObject)e.OriginalSource;
+
+            if (IsCellInDataGridHeader(dependencyObject))
+            {
+                ContextMenu menu = new ContextMenu();
+                for (int i = 0; i < mediaPlanColumns; i++)
+                {
+                    var column = dgSchema.Columns[i];
+
+                    MenuItem item = new MenuItem();
+                    item.Header = column.Header.ToString().Trim();
+                    item.IsChecked = column.Visibility == Visibility.Visible ? true : false;
+                    item.Click += (obj, ea) =>
+                    {
+                        column.Visibility = item.IsChecked ? Visibility.Hidden : Visibility.Visible;
+                        item.IsChecked = column.Visibility == Visibility.Visible ? true : false;
+                    };
+
+                    menu.Items.Add(item);
+                }
+
+                dgSchema.ContextMenu = menu;
+            }
+            else
+            {
+                dgSchema.ContextMenu = null;
+            }
+        }
+
+        private bool IsCellInDataGridHeader(DependencyObject obj)
+        {
+            var header = obj;
+            while (header != null && header.DependencyObjectType.Name != "DataGridHeaderBorder")
+            {
+                header = VisualTreeHelper.GetParent(header);
+            }
+            return header != null;
+        }
+
+        #endregion
+
+
     }
 }

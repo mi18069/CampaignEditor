@@ -3,7 +3,7 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-      xmlns:local="clr-namespace:CampaignEditor.UserControls"
+      xmlns:local="clr-namespace:CampaignEditor.UserControls" xmlns:treeviewmodels="clr-namespace:TreeViewModels" d:DataContext="{d:DesignInstance Type=treeviewmodels:TreeViewModel}"
       mc:Ignorable="d" 
       d:DesignHeight="700" d:DesignWidth="1200"
       Title="CampaignForecast" Background="White">
@@ -90,7 +90,9 @@
                           FontSize="13" AlternatingRowBackground="Gray"
                           CanUserAddRows="False"
                           AutoGenerateColumns="False"
-                          SelectionMode="Single">
+                          SelectionMode="Single"
+                          FrozenColumnCount="{Binding FrozenColumnsNum, Mode=TwoWay}"
+                          MouseRightButtonDown="dgSchema_MouseRightButtonDown">
                     <DataGrid.Resources>
                         <Style TargetType="{x:Type DataGridColumnHeader}">
                             <Setter Property="Background" Value="LightGray"/>
@@ -120,8 +122,9 @@
                                             IsReadOnly="True"/>
                         <DataGridTextColumn Header="CPP" 
                                             IsReadOnly="True"/>
+                        <DataGridTextColumn Header="Cost" 
+                                            IsReadOnly="True"/>
                     </DataGrid.Columns>
-                    <DataGrid.FrozenColumnCount>10</DataGrid.FrozenColumnCount>
                 </DataGrid>
             </ScrollViewer>
         </Grid>
