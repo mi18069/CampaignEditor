@@ -5,6 +5,7 @@ using Database.DTOs.ClientDTO;
 using Database.DTOs.MediaPlanDTO;
 using Database.DTOs.MediaPlanTermDTO;
 using Database.DTOs.SchemaDTO;
+using Database.Entities;
 using Database.Repositories;
 using System;
 using System.Collections.Generic;
@@ -43,7 +44,7 @@ namespace CampaignEditor.UserControls
         HashSet<char> spotCodes = new HashSet<char>();
 
         // number of frozen columns
-        int mediaPlanColumns = 11;
+        int mediaPlanColumns = 20;
         public int FrozenColumnsNum
         {
             get { return (int)GetValue(FrozenColumnsNumProperty); }
@@ -65,7 +66,7 @@ namespace CampaignEditor.UserControls
             ISpotRepository spotRepository)
         {
             this.DataContext = this;
-            this.FrozenColumnsNum = 11;
+            this.FrozenColumnsNum = mediaPlanColumns;
 
             _schemaController = new SchemaController(schemaRepository);
             _channelController = new ChannelController(channelRepository);
@@ -426,6 +427,7 @@ namespace CampaignEditor.UserControls
             }
 
         }
+        
 
         public static DataGridCell GetCell(DataGrid dataGrid, int row, int column)
         {
@@ -579,6 +581,35 @@ namespace CampaignEditor.UserControls
             if (mediaPlan != null)
             {
                 mediaPlan.position = newPosition;
+                await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(mediaPlan));
+            }
+        }
+
+        private async void SpecialCheckBox_Checked(object sender, RoutedEventArgs e)
+        {
+            var tuple = dgSchema.SelectedItems[0] as Tuple<MediaPlanDTO, ObservableCollection<MediaPlanTermDTO>>;
+
+            var checkBox = sender as CheckBox;
+            
+            if(tuple != null)
+            {
+                var mediaPlan = tuple.Item1;
+                mediaPlan.special = true;
+                await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(mediaPlan));
+            }
+
+        }
+
+        private async void SpecialCheckBox_Unchecked(object sender, RoutedEventArgs e)
+        {
+            var tuple = dgSchema.SelectedItems[0] as Tuple<MediaPlanDTO, ObservableCollection<MediaPlanTermDTO>>;
+
+            var checkBox = sender as CheckBox;
+
+            if (tuple != null)
+            {
+                var mediaPlan = tuple.Item1;
+                mediaPlan.special = false;
                 await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(mediaPlan));
             }
         }
