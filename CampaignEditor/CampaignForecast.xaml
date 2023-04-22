@@ -24,7 +24,7 @@
                 <RowDefinition Height="50" />
             </Grid.RowDefinitions>
             <Label Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" 
-                   Content="Use data within range" 
+                   Content="Use referenced data within range" 
                    FontSize="40" HorizontalAlignment="Center"/>
             <Grid Grid.Row="2" Grid.Column="1">
                 <Grid.ColumnDefinitions>
@@ -96,6 +96,7 @@
             </Grid.RowDefinitions>
 
             <ListView x:Name="lvChannels" Grid.Row="1" Grid.Column="1" 
+                      MaxHeight="300"
                       DisplayMemberPath="chname" MinWidth="250" MinHeight="250"
                       SelectionMode="Multiple" Margin="0, 0 ,10,0"
                       SelectionChanged="lvChannels_SelectionChanged"/>
@@ -158,23 +159,71 @@
                         </DataGridCheckBoxColumn.ElementStyle>
                     </DataGridCheckBoxColumn>
                     <DataGridTextColumn Header="AMR 1" Binding="{Binding Item1.amr1, Mode=TwoWay}" 
-                                            IsReadOnly="True" Visibility="Collapsed"/>
+                                             Visibility="Collapsed">
+                        <DataGridTextColumn.EditingElementStyle>
+                            <Style TargetType="{x:Type TextBox}">
+                                <EventSetter Event="TextChanged" Handler="TextBoxAMR_TextChanged"/>
+                            </Style>
+                        </DataGridTextColumn.EditingElementStyle>
+                    </DataGridTextColumn>
                     <DataGridTextColumn Header="AMR 2" Binding="{Binding Item1.amr2, Mode=TwoWay}" 
-                                            IsReadOnly="True" Visibility="Collapsed"/>
+                                            Visibility="Collapsed">
+                        <DataGridTextColumn.EditingElementStyle>
+                            <Style TargetType="{x:Type TextBox}">
+                                <EventSetter Event="TextChanged" Handler="TextBoxAMR_TextChanged"/>
+                            </Style>
+                        </DataGridTextColumn.EditingElementStyle>
+                    </DataGridTextColumn>
                     <DataGridTextColumn Header="AMR 3" Binding="{Binding Item1.amr3, Mode=TwoWay}" 
-                                            IsReadOnly="True" Visibility="Collapsed"/>
+                                            Visibility="Collapsed">
+                        <DataGridTextColumn.EditingElementStyle>
+                            <Style TargetType="{x:Type TextBox}">
+                                <EventSetter Event="TextChanged" Handler="TextBoxAMR_TextChanged"/>
+                            </Style>
+                        </DataGridTextColumn.EditingElementStyle>
+                    </DataGridTextColumn>
                     <DataGridTextColumn Header="AMR Sale" Binding="{Binding Item1.amrsale, Mode=TwoWay}" 
-                                        IsReadOnly="True"/>
+                                        >
+                        <DataGridTextColumn.EditingElementStyle>
+                            <Style TargetType="{x:Type TextBox}">
+                                <EventSetter Event="TextChanged" Handler="TextBoxAMR_TextChanged"/>
+                            </Style>
+                        </DataGridTextColumn.EditingElementStyle>
+                    </DataGridTextColumn>
                     <DataGridTextColumn Header="AMR Sale Trim" 
-                                        IsReadOnly="True"/>
+                                        />
                     <DataGridTextColumn Header="AMR% 1" Binding="{Binding Item1.amrp1, Mode=TwoWay}" 
-                                            IsReadOnly="True" Visibility="Collapsed"/>
+                                            Visibility="Collapsed">
+                        <DataGridTextColumn.EditingElementStyle>
+                            <Style TargetType="{x:Type TextBox}">
+                                <EventSetter Event="TextChanged" Handler="TextBoxAMR_TextChanged"/>
+                            </Style>
+                        </DataGridTextColumn.EditingElementStyle>
+                    </DataGridTextColumn>
                     <DataGridTextColumn Header="AMR% 2" Binding="{Binding Item1.amrp2, Mode=TwoWay}" 
-                                            IsReadOnly="True" Visibility="Collapsed"/>
+                                            Visibility="Collapsed">
+                        <DataGridTextColumn.EditingElementStyle>
+                            <Style TargetType="{x:Type TextBox}">
+                                <EventSetter Event="TextChanged" Handler="TextBoxAMR_TextChanged"/>
+                            </Style>
+                        </DataGridTextColumn.EditingElementStyle>
+                    </DataGridTextColumn>
                     <DataGridTextColumn Header="AMR% 3" Binding="{Binding Item1.amrp3, Mode=TwoWay}" 
-                                            IsReadOnly="True" Visibility="Collapsed"/>
+                                            Visibility="Collapsed">
+                        <DataGridTextColumn.EditingElementStyle>
+                            <Style TargetType="{x:Type TextBox}">
+                                <EventSetter Event="TextChanged" Handler="TextBoxAMR_TextChanged"/>
+                            </Style>
+                        </DataGridTextColumn.EditingElementStyle>
+                    </DataGridTextColumn>
                     <DataGridTextColumn Header="AMR% Sale" Binding="{Binding Item1.amrpsale, Mode=TwoWay}" 
-                                            IsReadOnly="True" Visibility="Collapsed"/>
+                                            Visibility="Collapsed">
+                        <DataGridTextColumn.EditingElementStyle>
+                            <Style TargetType="{x:Type TextBox}">
+                                <EventSetter Event="TextChanged" Handler="TextBoxAMR_TextChanged"/>
+                            </Style>
+                        </DataGridTextColumn.EditingElementStyle>
+                    </DataGridTextColumn>
                     <DataGridTextColumn Header="Affinity" 
                                             IsReadOnly="True"/>
                     <DataGridTextColumn Header="Coef SP1" 

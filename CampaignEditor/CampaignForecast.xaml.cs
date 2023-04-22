@@ -624,8 +624,127 @@ namespace CampaignEditor.UserControls
             }
         }
 
+
         #endregion
 
+        private async void TextBoxAMR_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            var tuple = dgSchema.SelectedItems[0] as Tuple<MediaPlanDTO, ObservableCollection<MediaPlanTermDTO>>;
+            var textBox = sender as TextBox;
 
+            BindingExpression bindingExpr = textBox.GetBindingExpression(TextBox.TextProperty);
+            string propertyName = bindingExpr?.ResolvedSourcePropertyName;
+
+            if (tuple != null)
+            {
+                var mediaPlan = tuple.Item1;
+                double value = 0.0;
+
+                if (propertyName == "amr1")
+                {
+                    if (textBox != null && (textBox.Text.Trim()=="" || Double.TryParse(textBox.Text.Trim(), out value)))
+                    {
+                        value = textBox.Text.Trim() == "" ? 0 : value;
+                        mediaPlan.amr1 = value;
+                        await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(mediaPlan));
+                    }
+                    else
+                    {
+                        textBox.Text = mediaPlan.amr1.ToString();
+                    }
+                }
+                else if (propertyName == "amr2")
+                {
+                    if (textBox != null && (textBox.Text.Trim() == "" || Double.TryParse(textBox.Text.Trim(), out value)))
+                    {
+                        value = textBox.Text.Trim() == "" ?  0 : value;
+                        mediaPlan.amr2 = value;
+                        await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(mediaPlan));
+                    }
+                    else
+                    {
+                        textBox.Text = mediaPlan.amr2.ToString();
+                    }
+                }
+                else if (propertyName == "amr3")
+                {
+                    if (textBox != null && (textBox.Text.Trim() == "" || Double.TryParse(textBox.Text.Trim(), out value)))
+                    {
+                        value = textBox.Text.Trim() == "" ? 0 : value;
+                        mediaPlan.amr3 = value;
+                        await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(mediaPlan));
+                    }
+                    else
+                    {
+                        textBox.Text = mediaPlan.amr3.ToString();
+                    }
+                }
+                else if (propertyName == "amrsale")
+                {
+                    if (textBox != null && (textBox.Text.Trim() == "" || Double.TryParse(textBox.Text.Trim(), out value)))
+                    {
+                        value = textBox.Text.Trim() == "" ? 0 : value;
+                        mediaPlan.amrsale = value;
+                        await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(mediaPlan));
+                    }
+                    else
+                    {
+                        textBox.Text = mediaPlan.amrsale.ToString();
+                    }
+                }
+                else if (propertyName == "amrp1")
+                {
+                    if (textBox != null && (textBox.Text.Trim() == "" || Double.TryParse(textBox.Text.Trim(), out value)))
+                    {
+                        value = textBox.Text.Trim() == "" ? 0 : value;
+                        mediaPlan.amrp1 = value;
+                        await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(mediaPlan));
+                    }
+                    else
+                    {
+                        textBox.Text = mediaPlan.amrp1.ToString();
+                    }
+                }
+                else if (propertyName == "amrp2")
+                {
+                    if (textBox != null && (textBox.Text.Trim() == "" || Double.TryParse(textBox.Text.Trim(), out value)))
+                    {
+                        value = textBox.Text.Trim() == "" ? 0 : value;
+                        mediaPlan.amrp2 = value;
+                        await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(mediaPlan));
+                    }
+                    else
+                    {
+                        textBox.Text = mediaPlan.amrp2.ToString();
+                    }
+                }
+                else if (propertyName == "amrp3")
+                {
+                    if (textBox != null && (textBox.Text.Trim() == "" || Double.TryParse(textBox.Text.Trim(), out value)))
+                    {
+                        value = textBox.Text.Trim() == "" ? 0 : value;
+                        mediaPlan.amrp3 = value;
+                        await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(mediaPlan));
+                    }
+                    else
+                    {
+                        textBox.Text = mediaPlan.amrp3.ToString();
+                    }
+                }
+                else if (propertyName == "amrpsale")
+                {
+                    if (textBox != null && (textBox.Text.Trim() == "" || Double.TryParse(textBox.Text.Trim(), out value)))
+                    {
+                        value = textBox.Text.Trim() == "" ? 0 : value;
+                        mediaPlan.amrpsale = value;
+                        await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(mediaPlan));
+                    }
+                    else
+                    {
+                        textBox.Text = mediaPlan.amrpsale.ToString();
+                    }
+                }
+            }
+        }
     }
 }
