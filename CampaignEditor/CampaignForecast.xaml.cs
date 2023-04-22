@@ -10,6 +10,7 @@ using Database.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -58,6 +59,7 @@ namespace CampaignEditor.UserControls
             new Dictionary<ChannelDTO, List<Tuple<MediaPlanDTO, List<MediaPlanTermDTO>>>>();
         private ObservableCollection<Tuple<MediaPlanDTO, ObservableCollection<MediaPlanTermDTO>>> _showMP 
             = new ObservableCollection<Tuple<MediaPlanDTO, ObservableCollection<MediaPlanTermDTO>>>();
+
         public CampaignForecast(ISchemaRepository schemaRepository,
             IChannelRepository channelRepository, 
             IChannelCmpRepository channelCmpRepository,
@@ -97,6 +99,7 @@ namespace CampaignEditor.UserControls
                 dpTo.SelectedDate = now;
 
                 gridForecast.Visibility = Visibility.Collapsed;
+                gridLoading.Visibility = Visibility.Collapsed;
                 gridInit.Visibility = Visibility.Visible;
             }
             else
@@ -137,6 +140,7 @@ namespace CampaignEditor.UserControls
                     mediaPlans.Add(Tuple.Create(mediaPlan, mediaPlanTerms));
                 }
                 _channelMPDict.Add(channel, mediaPlans);
+
             }
 
             dgSchema.ItemsSource = _showMP;
@@ -269,15 +273,21 @@ namespace CampaignEditor.UserControls
                 initTo = (DateTime)dpTo.SelectedDate!;
 
                 gridInit.Visibility = Visibility.Hidden;
-                gridForecast.Visibility = Visibility.Visible;
+                gridForecast.Visibility = Visibility.Hidden;
+                gridLoading.Visibility = Visibility.Visible;
 
                 await InitializeData();
+
+                gridLoading.Visibility = Visibility.Hidden;
+                gridInit.Visibility = Visibility.Hidden;
+                gridForecast.Visibility = Visibility.Visible;
             }
             else
             {
                 MessageBox.Show("Invalid dates");
             }
         }
+
 
         #region lvChannels
         private void lvChannels_SelectionChanged(object sender, SelectionChangedEventArgs e)
