@@ -23,9 +23,13 @@ namespace Database.Entities
         public DateOnly created { get; set; }
         public DateOnly? modified { get; set; }
         public double amr1 { get; set; }
+        public double amr1trim { get; set; }
         public double amr2 { get; set; }
+        public double amr2trim { get; set; }
         public double amr3 { get; set; }
+        public double amr3trim { get; set; }
         public double amrsale { get; set; }
+        public double amrsaletrim { get; set; }
         public double amrp1 { get; set; }
         public double amrp2 { get; set; }
         public double amrp3 { get; set; }

@@ -157,7 +157,7 @@ namespace CampaignEditor.UserControls
                 CreateMediaPlanDTO mediaPlan = new CreateMediaPlanDTO(schema.id, _campaign.cmpid, schema.chid,
                     schema.name.Trim(), 1, schema.position, schema.stime, schema.etime, schema.blocktime,
                     schema.days, schema.type, schema.special, schema.sdate, schema.edate, schema.progcoef,
-                    schema.created, schema.modified, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, true);
+                    schema.created, schema.modified, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, true);
 
                 return await _mediaPlanController.CreateMediaPlan(mediaPlan);
             }
@@ -624,9 +624,6 @@ namespace CampaignEditor.UserControls
             }
         }
 
-
-        #endregion
-
         private async void TextBoxAMR_TextChanged(object sender, TextChangedEventArgs e)
         {
             var tuple = dgSchema.SelectedItems[0] as Tuple<MediaPlanDTO, ObservableCollection<MediaPlanTermDTO>>;
@@ -642,7 +639,7 @@ namespace CampaignEditor.UserControls
 
                 if (propertyName == "amr1")
                 {
-                    if (textBox != null && (textBox.Text.Trim()=="" || Double.TryParse(textBox.Text.Trim(), out value)))
+                    if (textBox != null && (textBox.Text.Trim() == "" || Double.TryParse(textBox.Text.Trim(), out value)))
                     {
                         value = textBox.Text.Trim() == "" ? 0 : value;
                         mediaPlan.amr1 = value;
@@ -657,7 +654,7 @@ namespace CampaignEditor.UserControls
                 {
                     if (textBox != null && (textBox.Text.Trim() == "" || Double.TryParse(textBox.Text.Trim(), out value)))
                     {
-                        value = textBox.Text.Trim() == "" ?  0 : value;
+                        value = textBox.Text.Trim() == "" ? 0 : value;
                         mediaPlan.amr2 = value;
                         await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(mediaPlan));
                     }
@@ -746,5 +743,8 @@ namespace CampaignEditor.UserControls
                 }
             }
         }
-    }
+        
+        #endregion
+
+        }
 }

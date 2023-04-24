@@ -4,7 +4,7 @@ namespace Database.DTOs.MediaPlanDTO
 {
     public class BaseMediaPlanDTO
     {
-        public BaseMediaPlanDTO(int schid, int cmpid, int chid, string name, int version, string position, string stime, string? etime, string? blocktime, string days, string type, bool special, DateOnly sdate, DateOnly? edate, float progcoef, DateOnly created, DateOnly? modified, double amr1, double amr2, double amr3, double amrsale, double amrp1, double amrp2, double amrp3, double amrpsale, double dpcoef, double seascoef, double price, bool active)
+        public BaseMediaPlanDTO(int schid, int cmpid, int chid, string name, int version, string position, string stime, string? etime, string? blocktime, string days, string type, bool special, DateOnly sdate, DateOnly? edate, float progcoef, DateOnly created, DateOnly? modified, double amr1, int amr1trim, double amr2, int amr2trim, double amr3, int amr3trim, double amrsale, int amrsaletrim, double amrp1, double amrp2, double amrp3, double amrpsale, double dpcoef, double seascoef, double price, bool active)
         {
             this.schid = schid;
             this.cmpid = cmpid;
@@ -24,9 +24,13 @@ namespace Database.DTOs.MediaPlanDTO
             this.created = created;
             this.modified = modified;
             this.amr1 = amr1;
+            this.amr1trim = amr1trim;
             this.amr2 = amr2;
+            this.amr2trim = amr2trim;
             this.amr3 = amr3;
+            this.amr3trim = amr3trim;
             this.amrsale = amrsale;
+            this.amrsaletrim = amrsaletrim;
             this.amrp1 = amrp1;
             this.amrp2 = amrp2;
             this.amrp3 = amrp3;
@@ -55,9 +59,13 @@ namespace Database.DTOs.MediaPlanDTO
         public DateOnly created { get; set; }
         public DateOnly? modified { get; set; }
         public double amr1 { get; set; }
+        public int amr1trim { get; set; }
         public double amr2 { get; set; }
+        public int amr2trim { get; set; }
         public double amr3 { get; set; }
+        public int amr3trim { get; set; }
         public double amrsale { get; set; }
+        public int amrsaletrim { get; set; }
         public double amrp1 { get; set; }
         public double amrp2 { get; set; }
         public double amrp3 { get; set; }

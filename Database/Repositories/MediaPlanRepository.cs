@@ -27,10 +27,10 @@ namespace Database.Repositories
             var affected = await connection.ExecuteAsync(
                 "INSERT INTO xmp (schid, cmpid, chid, naziv, verzija, pozicija, vremeod, vremedo, vremerbl, " +
                 "dani, tipologija, specijal, datumod, datumdo, progkoef, datumkreiranja, datumizmene, " +
-                "amr1, amr2, amr3, amrsale, amrp1, amrp2, amrp3, amrpsale, dpkoef, seaskoef, price, active) " +
+                "amr1, amr1trim, amr2, amr2trim, amr3, amr3trim, amrsale, amrsaletrim, amrp1, amrp2, amrp3, amrpsale, dpkoef, seaskoef, price, active) " +
                 "VALUES (@Schid, @Cmpid, @Chid, @Name, @Version, @Position, @Stime, @Etime, @Blocktime, " +
                 "@Days, @Type, @Special, CAST (@Sdate AS DATE), CAST(@Edate AS DATE), @Progcoef, CAST(@Created AS DATE), CAST(@Modified AS DATE), " +
-                "@Amr1, @Amr2, @Amr3, @Amrsale, @Amrp1, @Amrp2, @Amrp3, @Amrpsale, @Dpcoef, @Seascoef, @Price, @Active) ",
+                "@Amr1, @Amr1trim, @Amr2, @Amr2trim, @Amr3, @Amr3trim, @Amrsale, @Amrsaletrim, @Amrp1, @Amrp2, @Amrp3, @Amrpsale, @Dpcoef, @Seascoef, @Price, @Active) ",
             new
             {
                 Schid = mediaPlanDTO.schid,
@@ -51,9 +51,13 @@ namespace Database.Repositories
                 Created = mediaPlanDTO.created.ToString("yyyy-MM-dd"),
                 Modified = mediaPlanDTO.modified?.ToString("yyyy-MM-dd"),
                 Amr1 = mediaPlanDTO.amr1,
+                Amr1trim = mediaPlanDTO.amr1trim,
                 Amr2 = mediaPlanDTO.amr2,
+                Amr2trim = mediaPlanDTO.amr2trim,
                 Amr3 = mediaPlanDTO.amr3,
+                Amr3trim = mediaPlanDTO.amr3trim,
                 Amrsale = mediaPlanDTO.amrsale,
+                Amrsaletrim = mediaPlanDTO.amrsaletrim,
                 Amrp1 = mediaPlanDTO.amrp1,
                 Amrp2 = mediaPlanDTO.amrp2,
                 Amrp3 = mediaPlanDTO.amrp3,
@@ -117,9 +121,13 @@ namespace Database.Repositories
                 created = DateOnly.FromDateTime(item.datumkreiranja),
                 modified = item.datumizmene == null ? null : DateOnly.FromDateTime(item.datumizmene),
                 amr1 = (double)item.amr1,
+                amr1trim = (double)item.amr1trim,
                 amr2 = (double)item.amr2,
+                amr2trim = (double)item.amr2trim,
                 amr3 = (double)item.amr3,
+                amr3trim = (double)item.amr3trim,
                 amrsale = (double)item.amrsale,
+                amrsaletrim = (double)item.amrsaletrim,
                 amrp1 = (double)item.amrp1,
                 amrp2 = (double)item.amrp2,
                 amrp3 = (double)item.amrp3,
@@ -194,8 +202,9 @@ namespace Database.Repositories
                 "vremeod = @Stime, vremedo = @Etime, vremerbl = @Blocktime, dani = @Days, " +
                 "tipologija = @Type, specijal = @Special, datumod = CAST(@Sdate AS DATE), datumdo = CAST(@Edate AS DATE), " +
                 "datumkreiranja = CAST(@Created AS DATE), datumizmene = CAST(@Modified AS DATE), " +
-                "amr1 = @Amr1, amr2 = @Amr2, amr3 = @Amr3, amrsale = @Amrsale, amrp1 = @Amrp1, amrp2 = @Amrp2, amrp3 = @Amrp3, " +
-                "amrpsale = @Amrpsale, dpkoef = @Dpcoef, seaskoef = @Seascoef, price = @Price, active = @Active " +
+                "amr1 = @Amr1, amr1trim = @Amr1trim, amr2 = @Amr2, amr2trim = @Amr2trim, amr3 = @Amr3, amr3trim = @Amr3trim, amrsale = @Amrsale, amrsaletrim = @Amrsaletrim, " +
+                "amrp1 = @Amrp1, amrp2 = @Amrp2, amrp3 = @Amrp3, amrpsale = @Amrpsale, " +
+                "dpkoef = @Dpcoef, seaskoef = @Seascoef, price = @Price, active = @Active " +
                 "WHERE xmpid = @Xmpid",
                 new
                 {
@@ -217,9 +226,13 @@ namespace Database.Repositories
                     Created = mediaPlanDTO.created.ToString("yyyy-MM-dd"),
                     Modified = mediaPlanDTO.modified == null ? null : mediaPlanDTO.modified.Value.ToString("yyyy-MM-dd"),
                     Amr1 = mediaPlanDTO.amr1,
+                    Amr1trim = mediaPlanDTO.amr1trim,
                     Amr2 = mediaPlanDTO.amr2,
+                    Amr2trim = mediaPlanDTO.amr2trim,
                     Amr3 = mediaPlanDTO.amr3,
+                    Amr3trim = mediaPlanDTO.amr3trim,
                     Amrsale = mediaPlanDTO.amrsale,
+                    Amrsaletrim = mediaPlanDTO.amrsaletrim,
                     Amrp1 = mediaPlanDTO.amrp1,
                     Amrp2 = mediaPlanDTO.amrp2,
                     Amrp3 = mediaPlanDTO.amrp3,
