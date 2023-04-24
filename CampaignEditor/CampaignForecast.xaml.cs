@@ -3,6 +3,7 @@ using CampaignEditor.DTOs.CampaignDTO;
 using Database.DTOs.ChannelDTO;
 using Database.DTOs.ClientDTO;
 using Database.DTOs.MediaPlanDTO;
+using Database.DTOs.MediaPlanRef;
 using Database.DTOs.MediaPlanTermDTO;
 using Database.DTOs.SchemaDTO;
 using Database.Repositories;
@@ -27,13 +28,12 @@ namespace CampaignEditor.UserControls
         private ChannelCmpController _channelCmpController;
         private MediaPlanController _mediaPlanController;
         private MediaPlanTermController _mediaPlanTermController;
+        private MediaPlanRefController _mediaPlanRefController;
         private SpotController _spotController;
 
         private ClientDTO _client;
         private CampaignDTO _campaign;
-
-        private DateTime initFrom;
-        private DateTime initTo;
+        private MediaPlanRefDTO _mediaPlanRef;
 
         // for duration of campaign
         DateTime startDate;
@@ -63,6 +63,7 @@ namespace CampaignEditor.UserControls
             IChannelCmpRepository channelCmpRepository,
             IMediaPlanRepository mediaPlanRepository,
             IMediaPlanTermRepository mediaPlanTermRepository,
+            IMediaPlanRefRepository mediaPlanRefRepository,
             ISpotRepository spotRepository)
         {
             this.DataContext = this;
@@ -73,6 +74,7 @@ namespace CampaignEditor.UserControls
             _channelCmpController = new ChannelCmpController(channelCmpRepository);
             _mediaPlanController = new MediaPlanController(mediaPlanRepository);
             _mediaPlanTermController = new MediaPlanTermController(mediaPlanTermRepository);
+            _mediaPlanRefController = new MediaPlanRefController(mediaPlanRefRepository);
             _spotController = new SpotController(spotRepository);
 
 
@@ -90,7 +92,8 @@ namespace CampaignEditor.UserControls
             startDate = TimeFormat.YMDStringToDateTime(_campaign.cmpsdate);
             endDate = TimeFormat.YMDStringToDateTime(_campaign.cmpedate);
 
-            if (await _mediaPlanController.GetMediaPlanByCmpId(_campaign.cmpid) == null)
+            int latestVersion = await _mediaPlanRefController.GetLatestRefVersionById(_campaign.cmpid);
+            if ( latestVersion == -1)
             {
                 DateTime now = DateTime.Now;
                 dpFrom.SelectedDate = now;
@@ -105,9 +108,6 @@ namespace CampaignEditor.UserControls
 
                 
             }
-            InitializeDateColumns();
-
-            dgSchema.ItemsSource = _showMP;
 
             var spots = await _spotController.GetSpotsByCmpid(_campaign.cmpid);
             for (int i = 0; i < spots.Count(); i++)
@@ -142,6 +142,7 @@ namespace CampaignEditor.UserControls
             }
 
             dgSchema.ItemsSource = _showMP;
+            InitializeDateColumns();
 
         }
 
@@ -267,12 +268,13 @@ namespace CampaignEditor.UserControls
 
             if ((DateTime)dpFrom.SelectedDate! < (DateTime)dpTo.SelectedDate!)
             {
-                initFrom = (DateTime)dpFrom.SelectedDate!;
-                initTo = (DateTime)dpTo.SelectedDate!;
-
                 gridInit.Visibility = Visibility.Hidden;
                 gridForecast.Visibility = Visibility.Hidden;
                 gridLoading.Visibility = Visibility.Visible;
+
+                _mediaPlanRef = await _mediaPlanRefController.CreateMediaPlanRef(
+                    new MediaPlanRefDTO(_campaign.cmpid, DateOnly.FromDateTime(dpFrom.SelectedDate.Value),
+                    DateOnly.FromDateTime(dpTo.SelectedDate.Value), 1));
 
                 await InitializeData();
 

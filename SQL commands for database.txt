@@ -211,6 +211,12 @@ CREATE TABLE IF NOT EXISTS xmpterm (
 
 -- delete tblcmpspot and rename tblcmpspot2 to tblcmpspot
 
-
+-- make cmpxmpref
+CREATE TABLE IF NOT EXISTS cmpxmpref (
+   cmpid NOT NULL,
+   dateFrom date,
+   dateTo date,
+   version int
+);
 
  
