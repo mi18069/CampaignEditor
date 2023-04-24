@@ -106,6 +106,9 @@ namespace CampaignEditor.UserControls
             }
             else
             {
+                gridForecast.Visibility = Visibility.Collapsed;
+                gridLoading.Visibility = Visibility.Visible;
+                gridInit.Visibility = Visibility.Collapsed;
 
                 // Filling lvChannels and dictionary
                 lvChannels.Items.Clear();
@@ -158,6 +161,10 @@ namespace CampaignEditor.UserControls
 
                 InitializeDateColumns();
                 dgSchema.ItemsSource = _showMP;
+
+                gridForecast.Visibility = Visibility.Visible;
+                gridLoading.Visibility = Visibility.Collapsed;
+                gridInit.Visibility = Visibility.Collapsed;
             }
 
             var spots = await _spotController.GetSpotsByCmpid(_campaign.cmpid);
@@ -180,7 +187,10 @@ namespace CampaignEditor.UserControls
                 ChannelDTO channel = await _channelController.GetChannelById(channelCmp.chid);
                 lvChannels.Items.Add(channel);
 
-                var schemas = await _schemaController.GetAllChannelSchemasWithinDate(channel.chid, DateOnly.FromDateTime(TimeFormat.YMDStringToDateTime(_campaign.cmpsdate)), DateOnly.FromDateTime(TimeFormat.YMDStringToDateTime(_campaign.cmpedate)));
+                var schemas = await _schemaController.GetAllChannelSchemasWithinDateAndTime(
+                    channel.chid, DateOnly.FromDateTime(TimeFormat.YMDStringToDateTime(_campaign.cmpsdate)), 
+                    DateOnly.FromDateTime(TimeFormat.YMDStringToDateTime(_campaign.cmpedate)),
+                    _campaign.cmpstime, _campaign.cmpetime);
 
                 var mediaPlans = new List<Tuple<MediaPlanDTO, List<MediaPlanTermDTO>>>();
                 foreach (var schema in schemas)

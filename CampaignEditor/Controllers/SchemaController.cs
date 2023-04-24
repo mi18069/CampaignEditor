@@ -41,6 +41,21 @@ namespace CampaignEditor.Controllers
             return await _repository.GetAllChannelSchemasWithinDate(chid, sdate, edate);
         }
 
+        public async Task<List<SchemaDTO>> GetAllChannelSchemasWithinDateAndTime(int chid, DateOnly sdate, DateOnly edate, string stime, string etime = null)
+        {
+            var withinDates = await _repository.GetAllChannelSchemasWithinDate(chid, sdate, edate);
+            List<SchemaDTO> withinDateAndTime = new List<SchemaDTO>();
+            foreach (var schema in withinDates)
+            {
+                if (TimeFormat.Time5CharCompare(schema.stime.Substring(0, 5), stime.Substring(0, 5)) >= 0 
+                    && (etime == null || TimeFormat.Time5CharCompare(schema.etime!.Substring(0, 5), etime.Substring(0, 5)) <= 0))
+                {
+                    withinDateAndTime.Add(schema);
+                }
+            }
+            return withinDateAndTime;
+        }
+
         public async Task<IEnumerable<SchemaDTO>> GetAllSchemas()
         {
             return await _repository.GetAllSchemas();

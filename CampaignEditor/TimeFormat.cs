@@ -50,5 +50,27 @@ namespace CampaignEditor
             return day + "." + month + "." + year;
         }
 
+        public static int Time5CharCompare(string time1, string time2)
+        {
+            int dot1Index = time1.IndexOf(':');
+            int h1 = Int32.Parse(time1.Substring(0, dot1Index));
+            int m1 = Int32.Parse(time1.Substring(dot1Index + 1));
+
+            int dot2Index = time2.IndexOf(':');
+            int h2 = Int32.Parse(time2.Substring(0, dot2Index));
+            int m2 = Int32.Parse(time2.Substring(dot2Index + 1));
+
+            if (h1 > h2)
+                return 1;
+            else if (h1 < h2)
+                return -1;
+            else if (h1 == h2 && m1 > m2)
+                return 1;
+            else if (h1 == h2 && m1 < m2)
+                return -1;
+            else
+                return 0;
+        }
+
     }
 }
