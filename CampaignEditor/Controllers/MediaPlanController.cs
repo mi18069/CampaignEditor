@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System;
 using Database.Repositories;
-using Database.Entities;
 
 namespace CampaignEditor.Controllers
 {
@@ -51,14 +50,24 @@ namespace CampaignEditor.Controllers
             return await _repository.GetAllMediaPlans();
         }
 
+        public async Task<IEnumerable<int>> GetAllChannelsByCmpidAndVersion(int cmpid, int version)
+        {
+            return await _repository.GetAllChannelsByCmpidAndVersion(cmpid, version);
+        }
+
+        public async Task<IEnumerable<MediaPlanDTO>> GetAllMediaPlansByCmpidAndVersion(int cmpid, int version)
+        {
+            return await _repository.GetAllMediaPlansByCmpidAndVersion(cmpid, version);
+        }
+
         public async Task<IEnumerable<MediaPlanDTO>> GetAllMediaPlansWithinDate(DateOnly sdate, DateOnly edate)
         {
             return await _repository.GetAllMediaPlansWithinDate(sdate, edate);
         }
 
-        public async Task<IEnumerable<MediaPlanDTO>> GetAllChannelMediaPlans(int chid)
+        public async Task<IEnumerable<MediaPlanDTO>> GetAllChannelMediaPlansByVersion(int chid, int version)
         {
-            return await _repository.GetAllChannelMediaPlans(chid);
+            return await _repository.GetAllChannelMediaPlansByVersion(chid, version);
         }
 
         public async Task<bool> UpdateMediaPlan(UpdateMediaPlanDTO mediaPlanDTO)

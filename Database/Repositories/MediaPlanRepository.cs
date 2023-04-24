@@ -171,6 +171,66 @@ namespace Database.Repositories
             return _mapper.Map<IEnumerable<MediaPlanDTO>>(allMediaPlans);
         }
 
+        public async Task<IEnumerable<int>> GetAllChannelsByCmpidAndVersion(int cmpid, int version)
+        {
+            using var connection = _context.GetConnection();
+
+            var allChannelIds = await connection.QueryAsync<int>
+                ("SELECT chid FROM xmp WHERE cmpid = @Cmpid AND verzija = @Version GROUP BY chid", 
+                new { Cmpid = cmpid, Version = version });
+
+            return _mapper.Map<IEnumerable<int>>(allChannelIds);
+        }
+
+        public async Task<IEnumerable<MediaPlanDTO>> GetAllMediaPlansByCmpidAndVersion(int cmpid, int version)
+        {
+            using var connection = _context.GetConnection();
+
+            var mediaPlans = await connection.QueryAsync<dynamic>(
+                "SELECT * FROM xmp WHERE cmpid = @Cmpid AND version = @Version",
+                new { Cmpid = cmpid, Version = version });
+
+            mediaPlans = mediaPlans.Select(item => new MediaPlan()
+            {
+                xmpid = item.xmpid,
+                schid = item.schid,
+                cmpid = item.cmpid,
+                chid = item.chid,
+                name = item.naziv,
+                version = item.verzija,
+                position = item.pozicija,
+                stime = item.vremeod,
+                etime = item.vremedo == null ? null : item.vremedo,
+                blocktime = item.vremerbl == null ? null : item.vremerbl,
+                days = item.dani,
+                type = item.tipologija,
+                special = item.specijal,
+                sdate = DateOnly.FromDateTime(item.datumod),
+                edate = item.datumdo == null ? null : DateOnly.FromDateTime(item.datumdo),
+                progcoef = (float)item.progkoef,
+                created = DateOnly.FromDateTime(item.datumkreiranja),
+                modified = item.datumizmene == null ? null : DateOnly.FromDateTime(item.datumizmene),
+                amr1 = (double)item.amr1,
+                amr1trim = (double)item.amr1trim,
+                amr2 = (double)item.amr2,
+                amr2trim = (double)item.amr2trim,
+                amr3 = (double)item.amr3,
+                amr3trim = (double)item.amr3trim,
+                amrsale = (double)item.amrsale,
+                amrsaletrim = (double)item.amrsaletrim,
+                amrp1 = (double)item.amrp1,
+                amrp2 = (double)item.amrp2,
+                amrp3 = (double)item.amrp3,
+                amrpsale = (double)item.amrpsale,
+                dpcoef = (double)item.dpkoef,
+                seascoef = (double)item.seaskoef,
+                price = (double)item.price,
+                active = item.active
+            });
+
+            return _mapper.Map<IEnumerable<MediaPlanDTO>>(mediaPlans);
+        }
+
         public async Task<IEnumerable<MediaPlanDTO>> GetAllMediaPlansWithinDate(DateOnly sdate, DateOnly edate)
         {
             using var connection = _context.GetConnection();
@@ -182,14 +242,53 @@ namespace Database.Repositories
             return _mapper.Map<IEnumerable<MediaPlanDTO>>(allMediaPlans);
         }
 
-        public async Task<IEnumerable<MediaPlanDTO>> GetAllChannelMediaPlans(int chid)
+        public async Task<IEnumerable<MediaPlanDTO>> GetAllChannelMediaPlansByVersion(int chid, int version)
         {
             using var connection = _context.GetConnection();
 
-            var allMediaPlans = await connection.QueryAsync<MediaPlan>
-                ("SELECT * FROM xmp WHERE chid=@Chid", new { Chid = chid });
+            var mediaPlans = await connection.QueryAsync<dynamic>(
+                "SELECT * FROM xmp WHERE chid = @Chid AND verzija = @Version",
+                new { Chid = chid, Version = version });
 
-            return _mapper.Map<IEnumerable<MediaPlanDTO>>(allMediaPlans);
+            mediaPlans = mediaPlans.Select(item => new MediaPlan()
+            {
+                xmpid = item.xmpid,
+                schid = item.schid,
+                cmpid = item.cmpid,
+                chid = item.chid,
+                name = item.naziv,
+                version = item.verzija,
+                position = item.pozicija,
+                stime = item.vremeod,
+                etime = item.vremedo == null ? null : item.vremedo,
+                blocktime = item.vremerbl == null ? null : item.vremerbl,
+                days = item.dani,
+                type = item.tipologija,
+                special = item.specijal,
+                sdate = DateOnly.FromDateTime(item.datumod),
+                edate = item.datumdo == null ? null : DateOnly.FromDateTime(item.datumdo),
+                progcoef = (float)item.progkoef,
+                created = DateOnly.FromDateTime(item.datumkreiranja),
+                modified = item.datumizmene == null ? null : DateOnly.FromDateTime(item.datumizmene),
+                amr1 = (double)item.amr1,
+                amr1trim = (double)item.amr1trim,
+                amr2 = (double)item.amr2,
+                amr2trim = (double)item.amr2trim,
+                amr3 = (double)item.amr3,
+                amr3trim = (double)item.amr3trim,
+                amrsale = (double)item.amrsale,
+                amrsaletrim = (double)item.amrsaletrim,
+                amrp1 = (double)item.amrp1,
+                amrp2 = (double)item.amrp2,
+                amrp3 = (double)item.amrp3,
+                amrpsale = (double)item.amrpsale,
+                dpcoef = (double)item.dpkoef,
+                seascoef = (double)item.seaskoef,
+                price = (double)item.price,
+                active = item.active
+            });
+
+            return _mapper.Map<IEnumerable<MediaPlanDTO>>(mediaPlans);
         }
 
         public async Task<bool> UpdateMediaPlan(UpdateMediaPlanDTO mediaPlanDTO)
@@ -266,7 +365,6 @@ namespace Database.Repositories
 
             return affected != 0;
         }
-
 
     }
 }

@@ -71,8 +71,16 @@ namespace Database.Repositories
         {
             using var connection = _context.GetConnection();
 
-            var allMediaPlanTerms = await connection.QueryFirstOrDefaultAsync<MediaPlanTerm>(
-                "SELECT * FROM xmpterm WHERE xmpid = @Xmpid", new { Xmpid = xmpid });
+            var allMediaPlanTerms = await connection.QueryAsync<dynamic>(
+                "SELECT * FROM xmpterm WHERE xmpid = @Xmpid ORDER BY datum", new { Xmpid = xmpid });
+
+            allMediaPlanTerms = allMediaPlanTerms.Select(item => new MediaPlanTerm()
+            {
+                xmptermid = item.xmptermid,
+                xmpid = item.xmpid,
+                date = DateOnly.FromDateTime(item.datum),
+                spotcode = item.spotcode
+            });
 
             return _mapper.Map<IEnumerable<MediaPlanTermDTO>>(allMediaPlanTerms);
         }

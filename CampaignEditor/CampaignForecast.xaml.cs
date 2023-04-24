@@ -10,6 +10,7 @@ using Database.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -106,7 +107,57 @@ namespace CampaignEditor.UserControls
             else
             {
 
-                
+                // Filling lvChannels and dictionary
+                lvChannels.Items.Clear();
+                _channelMPDict.Clear();
+
+                var channelIds = await _mediaPlanController.GetAllChannelsByCmpidAndVersion(_campaign.cmpid, latestVersion);
+                List<ChannelDTO> channels = new List<ChannelDTO>();
+                foreach (var chid in channelIds)
+                {
+                    ChannelDTO channel = await _channelController.GetChannelById(chid);
+                    channels.Add(channel);
+                }
+
+                channels = channels.OrderBy(c => c.chname).ToList();
+
+                foreach (ChannelDTO channel in channels)
+                {
+                    lvChannels.Items.Add(channel);
+                    List<Tuple<MediaPlanDTO, List<MediaPlanTermDTO>>> emptyList = new List<Tuple<MediaPlanDTO, List<MediaPlanTermDTO>>>();
+                    _channelMPDict.Add(channel, emptyList);
+                }
+
+                int n = (int)(endDate - startDate).TotalDays;
+
+
+                foreach (ChannelDTO channel in _channelMPDict.Keys)
+                {
+                    var mediaPlans = await _mediaPlanController.GetAllChannelMediaPlansByVersion(channel.chid, latestVersion);
+                    foreach (MediaPlanDTO mediaPlan in mediaPlans)
+                    {
+                        List<MediaPlanTermDTO> mediaPlanTerms = (List<MediaPlanTermDTO>)await _mediaPlanTermController.GetAllMediaPlanTermsByXmpid(mediaPlan.xmpid);
+                        var mediaPlanDates = new List<MediaPlanTermDTO>();
+                        for (int i = 0, j = 0; i <= n && j < mediaPlanTerms.Count(); i++)
+                        {
+                            if (DateOnly.FromDateTime(startDate.AddDays(i)) == mediaPlanTerms[j].date)
+                            {
+                                mediaPlanDates.Add(mediaPlanTerms[j]);
+                                j++;
+                            }
+                            else
+                            {
+                                mediaPlanDates.Add(null);
+                            }
+                        }
+
+                        Tuple<MediaPlanDTO, List<MediaPlanTermDTO>> row = Tuple.Create(mediaPlan, mediaPlanDates);
+                        _channelMPDict[channel].Add(row);
+                    }
+                }
+
+                InitializeDateColumns();
+                dgSchema.ItemsSource = _showMP;
             }
 
             var spots = await _spotController.GetSpotsByCmpid(_campaign.cmpid);
@@ -114,6 +165,7 @@ namespace CampaignEditor.UserControls
             {
                 spotCodes.Add((char)('A' + i));
             }
+
         }
 
         private async Task InitializeData()
@@ -141,8 +193,8 @@ namespace CampaignEditor.UserControls
 
             }
 
-            dgSchema.ItemsSource = _showMP;
             InitializeDateColumns();
+            dgSchema.ItemsSource = _showMP;
 
         }
 
