@@ -5,12 +5,10 @@ using Database.DTOs.ClientDTO;
 using Database.DTOs.MediaPlanDTO;
 using Database.DTOs.MediaPlanTermDTO;
 using Database.DTOs.SchemaDTO;
-using Database.Entities;
 using Database.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -45,7 +43,7 @@ namespace CampaignEditor.UserControls
         HashSet<char> spotCodes = new HashSet<char>();
 
         // number of frozen columns
-        int mediaPlanColumns = 20;
+        int mediaPlanColumns = 23;
         public int FrozenColumnsNum
         {
             get { return (int)GetValue(FrozenColumnsNumProperty); }
@@ -157,7 +155,7 @@ namespace CampaignEditor.UserControls
                 CreateMediaPlanDTO mediaPlan = new CreateMediaPlanDTO(schema.id, _campaign.cmpid, schema.chid,
                     schema.name.Trim(), 1, schema.position, schema.stime, schema.etime, schema.blocktime,
                     schema.days, schema.type, schema.special, schema.sdate, schema.edate, schema.progcoef,
-                    schema.created, schema.modified, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, true);
+                    schema.created, schema.modified, 0, 100, 0, 100, 0, 100, 0, 100, 0, 0, 0, 0, 1, 1, 0, true);
 
                 return await _mediaPlanController.CreateMediaPlan(mediaPlan);
             }
@@ -575,56 +573,7 @@ namespace CampaignEditor.UserControls
 
         #endregion
 
-        private async void ComboBoxPosition_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            
-            var tuple = dgSchema.SelectedItems[0] as Tuple<MediaPlanDTO, ObservableCollection<MediaPlanTermDTO>>;
-
-            var comboBox = sender as ComboBox;
-            string newPosition = "INS";
-            if (comboBox.SelectedItem != null)
-            {
-                newPosition = (comboBox.SelectedItem as ComboBoxItem).Content.ToString().Trim();
-            }
-
-            var mediaPlan = tuple.Item1;
-            if (mediaPlan != null)
-            {
-                mediaPlan.position = newPosition;
-                await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(mediaPlan));
-            }
-        }
-
-        private async void SpecialCheckBox_Checked(object sender, RoutedEventArgs e)
-        {
-            var tuple = dgSchema.SelectedItems[0] as Tuple<MediaPlanDTO, ObservableCollection<MediaPlanTermDTO>>;
-
-            var checkBox = sender as CheckBox;
-            
-            if(tuple != null)
-            {
-                var mediaPlan = tuple.Item1;
-                mediaPlan.special = true;
-                await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(mediaPlan));
-            }
-
-        }
-
-        private async void SpecialCheckBox_Unchecked(object sender, RoutedEventArgs e)
-        {
-            var tuple = dgSchema.SelectedItems[0] as Tuple<MediaPlanDTO, ObservableCollection<MediaPlanTermDTO>>;
-
-            var checkBox = sender as CheckBox;
-
-            if (tuple != null)
-            {
-                var mediaPlan = tuple.Item1;
-                mediaPlan.special = false;
-                await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(mediaPlan));
-            }
-        }
-
-        private async void TextBoxAMR_TextChanged(object sender, TextChangedEventArgs e)
+        private async void TextBoxAMRTrim_TextChanged(object sender, TextChangedEventArgs e)
         {
             var tuple = dgSchema.SelectedItems[0] as Tuple<MediaPlanDTO, ObservableCollection<MediaPlanTermDTO>>;
             var textBox = sender as TextBox;
@@ -635,110 +584,58 @@ namespace CampaignEditor.UserControls
             if (tuple != null)
             {
                 var mediaPlan = tuple.Item1;
-                double value = 0.0;
+                int value = 0;
 
-                if (propertyName == "amr1")
+                if (propertyName == "amr1trim")
                 {
-                    if (textBox != null && (textBox.Text.Trim() == "" || Double.TryParse(textBox.Text.Trim(), out value)))
+                    if (textBox != null && (textBox.Text.Trim() == "" || Int32.TryParse(textBox.Text.Trim(), out value)))
                     {
                         value = textBox.Text.Trim() == "" ? 0 : value;
-                        mediaPlan.amr1 = value;
+                        mediaPlan.amr1trim = value;
                         await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(mediaPlan));
                     }
                     else
                     {
-                        textBox.Text = mediaPlan.amr1.ToString();
+                        textBox.Text = mediaPlan.amr1trim.ToString();
                     }
                 }
-                else if (propertyName == "amr2")
+                else if (propertyName == "amr2trim")
                 {
-                    if (textBox != null && (textBox.Text.Trim() == "" || Double.TryParse(textBox.Text.Trim(), out value)))
+                    if (textBox != null && (textBox.Text.Trim() == "" || Int32.TryParse(textBox.Text.Trim(), out value)))
                     {
                         value = textBox.Text.Trim() == "" ? 0 : value;
-                        mediaPlan.amr2 = value;
+                        mediaPlan.amr2trim = value;
                         await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(mediaPlan));
                     }
                     else
                     {
-                        textBox.Text = mediaPlan.amr2.ToString();
+                        textBox.Text = mediaPlan.amr2trim.ToString();
                     }
                 }
-                else if (propertyName == "amr3")
+                else if (propertyName == "amr3trim")
                 {
-                    if (textBox != null && (textBox.Text.Trim() == "" || Double.TryParse(textBox.Text.Trim(), out value)))
+                    if (textBox != null && (textBox.Text.Trim() == "" || Int32.TryParse(textBox.Text.Trim(), out value)))
                     {
                         value = textBox.Text.Trim() == "" ? 0 : value;
-                        mediaPlan.amr3 = value;
+                        mediaPlan.amr3trim = value;
                         await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(mediaPlan));
                     }
                     else
                     {
-                        textBox.Text = mediaPlan.amr3.ToString();
+                        textBox.Text = mediaPlan.amr3trim.ToString();
                     }
                 }
-                else if (propertyName == "amrsale")
+                else if (propertyName == "amrsaletrim")
                 {
-                    if (textBox != null && (textBox.Text.Trim() == "" || Double.TryParse(textBox.Text.Trim(), out value)))
+                    if (textBox != null && (textBox.Text.Trim() == "" || Int32.TryParse(textBox.Text.Trim(), out value)))
                     {
                         value = textBox.Text.Trim() == "" ? 0 : value;
-                        mediaPlan.amrsale = value;
+                        mediaPlan.amrsaletrim = value;
                         await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(mediaPlan));
                     }
                     else
                     {
-                        textBox.Text = mediaPlan.amrsale.ToString();
-                    }
-                }
-                else if (propertyName == "amrp1")
-                {
-                    if (textBox != null && (textBox.Text.Trim() == "" || Double.TryParse(textBox.Text.Trim(), out value)))
-                    {
-                        value = textBox.Text.Trim() == "" ? 0 : value;
-                        mediaPlan.amrp1 = value;
-                        await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(mediaPlan));
-                    }
-                    else
-                    {
-                        textBox.Text = mediaPlan.amrp1.ToString();
-                    }
-                }
-                else if (propertyName == "amrp2")
-                {
-                    if (textBox != null && (textBox.Text.Trim() == "" || Double.TryParse(textBox.Text.Trim(), out value)))
-                    {
-                        value = textBox.Text.Trim() == "" ? 0 : value;
-                        mediaPlan.amrp2 = value;
-                        await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(mediaPlan));
-                    }
-                    else
-                    {
-                        textBox.Text = mediaPlan.amrp2.ToString();
-                    }
-                }
-                else if (propertyName == "amrp3")
-                {
-                    if (textBox != null && (textBox.Text.Trim() == "" || Double.TryParse(textBox.Text.Trim(), out value)))
-                    {
-                        value = textBox.Text.Trim() == "" ? 0 : value;
-                        mediaPlan.amrp3 = value;
-                        await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(mediaPlan));
-                    }
-                    else
-                    {
-                        textBox.Text = mediaPlan.amrp3.ToString();
-                    }
-                }
-                else if (propertyName == "amrpsale")
-                {
-                    if (textBox != null && (textBox.Text.Trim() == "" || Double.TryParse(textBox.Text.Trim(), out value)))
-                    {
-                        value = textBox.Text.Trim() == "" ? 0 : value;
-                        mediaPlan.amrpsale = value;
-                        await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(mediaPlan));
-                    }
-                    else
-                    {
-                        textBox.Text = mediaPlan.amrpsale.ToString();
+                        textBox.Text = mediaPlan.amrsaletrim.ToString();
                     }
                 }
             }

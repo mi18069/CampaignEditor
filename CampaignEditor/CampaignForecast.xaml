@@ -120,28 +120,8 @@
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Program" Binding="{Binding Item1.name, Mode=TwoWay}"
                                         IsReadOnly="True" />
-                    <DataGridTemplateColumn Header="Position" SortMemberPath="Item1.position">
-                        <DataGridTemplateColumn.CellTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding Path=Item1.position, Mode=OneWay}"/>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                        <DataGridTemplateColumn.CellEditingTemplate>
-                            <DataTemplate>
-                                <ComboBox x:Name="cbPosition" 
-                                            SelectedItem="{Binding Path=Item1.Position, Mode=OneWay}"
-                                            SelectionChanged="ComboBoxPosition_SelectionChanged">
-                                    <ComboBoxItem>INS</ComboBoxItem>
-                                    <ComboBoxItem>BET</ComboBoxItem>
-                                    <ComboBox.ItemTemplate>
-                                        <DataTemplate>
-                                            <TextBlock Text="{Binding Path=Item1.position, Mode=OneWay}" />
-                                        </DataTemplate>
-                                    </ComboBox.ItemTemplate>
-                                </ComboBox>
-                            </DataTemplate>
-                        </DataGridTemplateColumn.CellEditingTemplate>
-                    </DataGridTemplateColumn>
+                    <DataGridTextColumn Header="Position" Binding="{Binding Item1.position, Mode=TwoWay}" 
+                                        IsReadOnly="True"/>
                     <DataGridTextColumn Header="Start time" Binding="{Binding Item1.stime, Mode=TwoWay}" 
                                         IsReadOnly="True"/>
                     <DataGridTextColumn Header="End time" Binding="{Binding Item1.etime, Mode=TwoWay}" 
@@ -149,81 +129,55 @@
                     <DataGridTextColumn Header="Type" Binding="{Binding Item1.type, Mode=TwoWay}" 
                                         IsReadOnly="True" Visibility="Collapsed"/>
                     <DataGridCheckBoxColumn Header="Special" Binding="{Binding Item1.special, Mode=TwoWay}" 
-                                        Visibility="Collapsed">
-                        <DataGridCheckBoxColumn.ElementStyle>
-                            <Style TargetType="{x:Type CheckBox}">
-                                <Setter Property="HorizontalAlignment" Value="Center"/>
-                                <EventSetter Event="Checked" Handler="SpecialCheckBox_Checked"/>
-                                <EventSetter Event="Unchecked" Handler="SpecialCheckBox_Unchecked"/>
-                            </Style>
-                        </DataGridCheckBoxColumn.ElementStyle>
-                    </DataGridCheckBoxColumn>
+                                        Visibility="Collapsed"/>
                     <DataGridTextColumn Header="AMR 1" Binding="{Binding Item1.amr1, Mode=TwoWay}" 
+                                             IsReadOnly="True" Visibility="Collapsed" />
+                    <DataGridTextColumn Header="AMR 1 Trim" Binding="{Binding Item1.amr1trim, Mode=TwoWay}" 
                                              Visibility="Collapsed">
                         <DataGridTextColumn.EditingElementStyle>
                             <Style TargetType="{x:Type TextBox}">
-                                <EventSetter Event="TextChanged" Handler="TextBoxAMR_TextChanged"/>
+                                <EventSetter Event="TextChanged" Handler="TextBoxAMRTrim_TextChanged"/>
                             </Style>
                         </DataGridTextColumn.EditingElementStyle>
                     </DataGridTextColumn>
                     <DataGridTextColumn Header="AMR 2" Binding="{Binding Item1.amr2, Mode=TwoWay}" 
-                                            Visibility="Collapsed">
+                                            IsReadOnly="True" Visibility="Collapsed"/>
+                    <DataGridTextColumn Header="AMR 2 Trim" Binding="{Binding Item1.amr2trim, Mode=TwoWay}" 
+                                             Visibility="Collapsed">
                         <DataGridTextColumn.EditingElementStyle>
                             <Style TargetType="{x:Type TextBox}">
-                                <EventSetter Event="TextChanged" Handler="TextBoxAMR_TextChanged"/>
+                                <EventSetter Event="TextChanged" Handler="TextBoxAMRTrim_TextChanged"/>
                             </Style>
                         </DataGridTextColumn.EditingElementStyle>
                     </DataGridTextColumn>
                     <DataGridTextColumn Header="AMR 3" Binding="{Binding Item1.amr3, Mode=TwoWay}" 
-                                            Visibility="Collapsed">
+                                            IsReadOnly="True" Visibility="Collapsed"/>
+                    <DataGridTextColumn Header="AMR 3 Trim" Binding="{Binding Item1.amr3trim, Mode=TwoWay}" 
+                                             Visibility="Collapsed">
                         <DataGridTextColumn.EditingElementStyle>
                             <Style TargetType="{x:Type TextBox}">
-                                <EventSetter Event="TextChanged" Handler="TextBoxAMR_TextChanged"/>
+                                <EventSetter Event="TextChanged" Handler="TextBoxAMRTrim_TextChanged"/>
                             </Style>
                         </DataGridTextColumn.EditingElementStyle>
                     </DataGridTextColumn>
-                    <DataGridTextColumn Header="AMR Sale" Binding="{Binding Item1.amrsale, Mode=TwoWay}" 
-                                        >
+                    <DataGridTextColumn Header="AMR Sale" Binding="{Binding Item1.amrsale, Mode=TwoWay}"
+                                        IsReadOnly="True"/>
+                    <DataGridTextColumn Header="AMR Sale Trim" Binding="{Binding Item1.amrsaletrim, Mode=TwoWay}" 
+                                             Visibility="Collapsed">
                         <DataGridTextColumn.EditingElementStyle>
                             <Style TargetType="{x:Type TextBox}">
-                                <EventSetter Event="TextChanged" Handler="TextBoxAMR_TextChanged"/>
+                                <EventSetter Event="TextChanged" Handler="TextBoxAMRTrim_TextChanged"/>
                             </Style>
                         </DataGridTextColumn.EditingElementStyle>
                     </DataGridTextColumn>
-                    <DataGridTextColumn Header="AMR Sale Trim" 
-                                        />
                     <DataGridTextColumn Header="AMR% 1" Binding="{Binding Item1.amrp1, Mode=TwoWay}" 
-                                            Visibility="Collapsed">
-                        <DataGridTextColumn.EditingElementStyle>
-                            <Style TargetType="{x:Type TextBox}">
-                                <EventSetter Event="TextChanged" Handler="TextBoxAMR_TextChanged"/>
-                            </Style>
-                        </DataGridTextColumn.EditingElementStyle>
-                    </DataGridTextColumn>
+                                            IsReadOnly="True" Visibility="Collapsed"/>
                     <DataGridTextColumn Header="AMR% 2" Binding="{Binding Item1.amrp2, Mode=TwoWay}" 
-                                            Visibility="Collapsed">
-                        <DataGridTextColumn.EditingElementStyle>
-                            <Style TargetType="{x:Type TextBox}">
-                                <EventSetter Event="TextChanged" Handler="TextBoxAMR_TextChanged"/>
-                            </Style>
-                        </DataGridTextColumn.EditingElementStyle>
-                    </DataGridTextColumn>
+                                            IsReadOnly="True" Visibility="Collapsed"/>
                     <DataGridTextColumn Header="AMR% 3" Binding="{Binding Item1.amrp3, Mode=TwoWay}" 
-                                            Visibility="Collapsed">
-                        <DataGridTextColumn.EditingElementStyle>
-                            <Style TargetType="{x:Type TextBox}">
-                                <EventSetter Event="TextChanged" Handler="TextBoxAMR_TextChanged"/>
-                            </Style>
-                        </DataGridTextColumn.EditingElementStyle>
-                    </DataGridTextColumn>
+                                            IsReadOnly="True" Visibility="Collapsed"/>
                     <DataGridTextColumn Header="AMR% Sale" Binding="{Binding Item1.amrpsale, Mode=TwoWay}" 
-                                            Visibility="Collapsed">
-                        <DataGridTextColumn.EditingElementStyle>
-                            <Style TargetType="{x:Type TextBox}">
-                                <EventSetter Event="TextChanged" Handler="TextBoxAMR_TextChanged"/>
-                            </Style>
-                        </DataGridTextColumn.EditingElementStyle>
-                    </DataGridTextColumn>
+                                            IsReadOnly="True" Visibility="Collapsed"/>
                     <DataGridTextColumn Header="Affinity" 
                                             IsReadOnly="True"/>
                     <DataGridTextColumn Header="Coef SP1" 
