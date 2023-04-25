@@ -19,6 +19,7 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Xml.Schema;
 
 namespace CampaignEditor.UserControls
 {
@@ -463,7 +464,7 @@ namespace CampaignEditor.UserControls
                 char spotcode = Char.ToUpper(spotcodeNull.Value);
                 if (spotCodes.Contains(spotcode))
                 {
-                    //if (!(textBox == null) && textBox.Text.Trim().Length > 0)
+                    
                     cell.Content = spotcode;
 
                     var mpTerm = GetSelectedMediaPlanTermDTO(cell);
@@ -471,7 +472,29 @@ namespace CampaignEditor.UserControls
                         new UpdateMediaPlanTermDTO(mpTerm.xmptermid, mpTerm.xmpid, mpTerm.date, spotcode.ToString()));
 
                     mpTerm.spotcode = spotcode.ToString().Trim();
+
+
                     cell.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
+
+                }
+                // For entering numbers
+                else if (Char.IsDigit(spotcode))
+                {
+                    int scNum = spotcode - '0';
+                    if (scNum > 0 && scNum <= spotCodes.Count())
+                    {
+                        char spCode = (char)('A' + scNum - 1);
+                        cell.Content = spCode;
+
+                        var mpTerm = GetSelectedMediaPlanTermDTO(cell);
+                        await _mediaPlanTermController.UpdateMediaPlanTerm(
+                            new UpdateMediaPlanTermDTO(mpTerm.xmptermid, mpTerm.xmpid, mpTerm.date, spCode.ToString()));
+
+                        mpTerm.spotcode = spCode.ToString().Trim();
+
+                        cell.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
+
+                    }
 
                 }
             }
@@ -484,16 +507,11 @@ namespace CampaignEditor.UserControls
 
             DataGridCell cell = sender as DataGridCell;
             var textBlock = cell.Content;
-            var t4 = cell.Content as TextBox;
-            var t5 = cell.Content as TextBlock;
+            var tb2 = cell.Content as TextBlock;
             string text = "";
-            if (t4 == null && t5 != null)
+            if (tb2 != null)
             {
-                text = t5.Text;
-            }
-            else if (t4 != null && t5 == null)
-            {
-                text = t4.Text;
+                text = tb2.Text;
             }
             else if (textBlock != null)
             {
