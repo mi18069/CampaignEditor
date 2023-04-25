@@ -6,7 +6,8 @@
       xmlns:local="clr-namespace:CampaignEditor.UserControls" xmlns:treeviewmodels="clr-namespace:TreeViewModels" d:DataContext="{d:DesignInstance Type=treeviewmodels:TreeViewModel}"
       mc:Ignorable="d" 
       d:DesignHeight="700" d:DesignWidth="1200"
-      Title="CampaignForecast" Background="White">
+      Title="CampaignForecast" Background="White"
+      PreviewKeyDown="Page_PreviewKeyDown">
 
     <Grid>
         <Grid x:Name="gridInit" Visibility="Hidden" >
@@ -106,6 +107,7 @@
                           CanUserAddRows="False"
                           AutoGenerateColumns="False"
                           SelectionMode="Single"
+                          CanUserDeleteRows="False"
                           FrozenColumnCount="{Binding FrozenColumnsNum, Mode=TwoWay}"
                           HorizontalScrollBarVisibility="Visible"
                           MouseRightButtonDown="dgSchema_MouseRightButtonDown">

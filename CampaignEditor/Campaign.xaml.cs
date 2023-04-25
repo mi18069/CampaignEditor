@@ -6,6 +6,7 @@ using Database.DTOs.ClientDTO;
 using Database.Repositories;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input;
 
 namespace CampaignEditor
 {
@@ -75,5 +76,6 @@ namespace CampaignEditor
                 ClientCampaign.Content = currentPage;
             }
         }
+
     }
 }

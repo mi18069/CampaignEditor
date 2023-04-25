@@ -424,6 +424,7 @@ namespace CampaignEditor.UserControls
                 var textInputEventSetter = new EventSetter(PreviewTextInputEvent, new TextCompositionEventHandler(OnCellPreviewTextInput));
                 var keyDownEventSetter = new EventSetter(PreviewKeyDownEvent, new KeyEventHandler(OnCellPreviewKeyDown));
 
+
                 cellStyle.Setters.Add(textInputEventSetter);
                 cellStyle.Setters.Add(keyDownEventSetter);
                 column.CellStyle = cellStyle;
@@ -439,6 +440,7 @@ namespace CampaignEditor.UserControls
                 column.CanUserSort = false;
                 column.CanUserResize = false;
                 column.CanUserReorder = false;
+                column.IsReadOnly = true;
 
                 
                 // Add the column to the DataGrid
@@ -456,7 +458,6 @@ namespace CampaignEditor.UserControls
 
             char? spotcodeNull = e.Text.Trim()[0];
 
-            e.Handled = true;
             if (spotcodeNull.HasValue)
             {
                 char spotcode = Char.ToUpper(spotcodeNull.Value);
@@ -482,7 +483,22 @@ namespace CampaignEditor.UserControls
         {
 
             DataGridCell cell = sender as DataGridCell;
-            TextBox text = cell.Content as TextBox;
+            var textBlock = cell.Content;
+            var t4 = cell.Content as TextBox;
+            var t5 = cell.Content as TextBlock;
+            string text = "";
+            if (t4 == null && t5 != null)
+            {
+                text = t5.Text;
+            }
+            else if (t4 != null && t5 == null)
+            {
+                text = t4.Text;
+            }
+            else if (textBlock != null)
+            {
+                text = textBlock.ToString();
+            }
 
             if (e.Key == Key.Space || e.Key == Key.Enter)
             {
@@ -492,10 +508,13 @@ namespace CampaignEditor.UserControls
 
             if ((e.Key == Key.Delete || e.Key == Key.Back) && text != null)
             {
+                e.Handled = true;
                 var mpTerm = GetSelectedMediaPlanTermDTO(cell);
 
                 await _mediaPlanTermController.UpdateMediaPlanTerm(
                     new UpdateMediaPlanTermDTO(mpTerm.xmptermid, mpTerm.xmpid, mpTerm.date, null));
+
+                cell.Content = "";
             }
 
         }
@@ -704,8 +723,26 @@ namespace CampaignEditor.UserControls
                 }
             }
         }
-        
+
         #endregion
 
+        private void Page_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Back && Keyboard.FocusedElement != null)
+            {
+                DependencyObject currentElement = Keyboard.FocusedElement as DependencyObject;
+                while (currentElement != null)
+                {
+                    if (currentElement is DataGridCell)
+                    {
+                        // Focus is on a DataGridCell, do not close the page
+                        return;
+                    }
+                    currentElement = VisualTreeHelper.GetParent(currentElement);
+                }
+                // Focus is not on a DataGridCell, handle event
+                e.Handled = true;
+            }
         }
+    }
 }
