@@ -203,7 +203,7 @@ CREATE TABLE IF NOT EXISTS xmpterm (
    xmptermid serial NOT NULL,
    xmpid int NOT NULL,
    datum date,
-   spotcode char(1),
+   spotcode char(2),
    PRIMARY KEY (xmptermid),
    FOREIGN KEY (xmpid)
       REFERENCES xmp (xmpid)
@@ -213,7 +213,7 @@ CREATE TABLE IF NOT EXISTS xmpterm (
 
 -- make cmpxmpref
 CREATE TABLE IF NOT EXISTS cmpxmpref (
-   cmpid NOT NULL,
+   cmpid int NOT NULL,
    dateFrom date,
    dateTo date,
    version int

@@ -410,9 +410,10 @@ namespace CampaignEditor.UserControls
             {
                 // Create a new DataGridTextColumn
                 DataGridTextColumn column = new DataGridTextColumn();
-
+                
                 // Set the column header to the date
                 column.Header = date.ToString("dd.MM.yy");
+                    
 
                 var binding = new Binding($"Item2[{dates.IndexOf(date)}].spotcode");
                 //binding.ValidationRules.Add(new CharLengthValidationRule(1)); // add validation rule to restrict input to a single character
@@ -425,25 +426,61 @@ namespace CampaignEditor.UserControls
                 var textInputEventSetter = new EventSetter(PreviewTextInputEvent, new TextCompositionEventHandler(OnCellPreviewTextInput));
                 var keyDownEventSetter = new EventSetter(PreviewKeyDownEvent, new KeyEventHandler(OnCellPreviewKeyDown));
 
-
                 cellStyle.Setters.Add(textInputEventSetter);
                 cellStyle.Setters.Add(keyDownEventSetter);
                 column.CellStyle = cellStyle;
-                
 
                 var trigger = new DataTrigger();
                 trigger.Binding = new Binding($"Item2[{dates.IndexOf(date)}]");
                 trigger.Value = null;
                 trigger.Setters.Add(new Setter(BackgroundProperty, Brushes.LightGoldenrodYellow)); // Set background to yellow if value is null
-                trigger.Setters.Add(new Setter(FocusableProperty, false));
+
+                //set background to yellow if column is weekend day
+                if (date.DayOfWeek == DayOfWeek.Saturday)
+                {
+                    // Set the background of the column header to yellow
+                    column.HeaderStyle = new Style(typeof(DataGridColumnHeader));
+                    column.HeaderStyle.Setters.Add(new Setter(Border.BorderThicknessProperty, new Thickness(3, 3, 1.5, 3)));
+                    column.HeaderStyle.Setters.Add(new Setter(Border.BorderBrushProperty, Brushes.OrangeRed));
+                  
+
+                    trigger.Setters.Add(new Setter(Border.BorderThicknessProperty, new Thickness(3, 0, 0, 0)));
+                    trigger.Setters.Add(new Setter(Border.BorderBrushProperty, Brushes.OrangeRed));
+
+                    column.CellStyle.Setters.Add(new Setter(Border.BorderThicknessProperty, new Thickness(3, 0, 0, 0)));
+                    column.CellStyle.Setters.Add(new Setter(Border.BorderBrushProperty, Brushes.OrangeRed));
+
+                    
+                }
+                else if (date.DayOfWeek == DayOfWeek.Sunday)
+                {
+                    // Set the background of the column header to yellow
+                    column.HeaderStyle = new Style(typeof(DataGridColumnHeader));
+                    column.HeaderStyle.Setters.Add(new Setter(Border.BorderThicknessProperty, new Thickness(1.5, 3, 3, 3)));
+                    column.HeaderStyle.Setters.Add(new Setter(Border.BorderBrushProperty, Brushes.OrangeRed));
+
+                    trigger.Setters.Add(new Setter(Border.BorderThicknessProperty, new Thickness(0,0,3,0)));
+                    trigger.Setters.Add(new Setter(Border.BorderBrushProperty, Brushes.OrangeRed));
+
+                    column.CellStyle.Setters.Add(new Setter(Border.BorderThicknessProperty, new Thickness(0,0,3,0)));
+                    column.CellStyle.Setters.Add(new Setter(Border.BorderBrushProperty, Brushes.OrangeRed));
+                }
+
                 column.CellStyle.Triggers.Add(trigger);
-                column.CellStyle.Setters.Add(new Setter(BackgroundProperty, Brushes.Green)); // Set background to green if value is not null
+
+                column.CellStyle.Setters.Add(new Setter(BackgroundProperty, Brushes.LightGreen)); // Set background to green if value is not null
                 column.CanUserSort = false;
                 column.CanUserResize = false;
                 column.CanUserReorder = false;
                 column.IsReadOnly = true;
 
-                
+                // when cell is focused, set background to orange
+                Trigger focusTrigger = new Trigger();
+                focusTrigger.Property = DataGridCell.IsFocusedProperty;
+                focusTrigger.Value = true;
+                focusTrigger.Setters.Add(new Setter(BackgroundProperty, Brushes.Orange));
+                column.CellStyle.Triggers.Add(focusTrigger);
+
                 // Add the column to the DataGrid
                 dgSchema.Columns.Add(column);
             }
@@ -455,7 +492,7 @@ namespace CampaignEditor.UserControls
         {
 
             DataGridCell cell = sender as DataGridCell;
-            TextBox textBox = cell.Content as TextBox;
+            TextBlock textBlock = cell.Content as TextBlock;
 
             char? spotcodeNull = e.Text.Trim()[0];
 
@@ -464,17 +501,27 @@ namespace CampaignEditor.UserControls
                 char spotcode = Char.ToUpper(spotcodeNull.Value);
                 if (spotCodes.Contains(spotcode))
                 {
-                    
-                    cell.Content = spotcode;
+                    // if cell already have 2 spots, delete them and write only one, else add spotcode
+                    if (cell.Content.ToString().Length == 2 || 
+                        (textBlock != null && textBlock.Text.Trim().Length == 2))
+                    {
+                        cell.Content = spotcode;
+                    }
+                    else if (textBlock != null)
+                    {
+                        cell.Content = textBlock.Text.Trim() + spotcode.ToString();
+                    }
+                    else if (textBlock == null)
+                    {
+                        cell.Content += spotcode.ToString();
+                    }
+                      
 
                     var mpTerm = GetSelectedMediaPlanTermDTO(cell);
                     await _mediaPlanTermController.UpdateMediaPlanTerm(
-                        new UpdateMediaPlanTermDTO(mpTerm.xmptermid, mpTerm.xmpid, mpTerm.date, spotcode.ToString()));
+                        new UpdateMediaPlanTermDTO(mpTerm.xmptermid, mpTerm.xmpid, mpTerm.date, cell.Content.ToString()));
 
-                    mpTerm.spotcode = spotcode.ToString().Trim();
-
-
-                    cell.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
+                    mpTerm.spotcode = cell.Content.ToString().Trim();
 
                 }
                 // For entering numbers
@@ -484,15 +531,19 @@ namespace CampaignEditor.UserControls
                     if (scNum > 0 && scNum <= spotCodes.Count())
                     {
                         char spCode = (char)('A' + scNum - 1);
-                        cell.Content = spCode;
+                        // if cell already have 2 spots, delete them and write only one, else add spotcode
+                        if (cell.Content.ToString().Length == 2)
+                            cell.Content = spCode;
+                        else
+                            cell.Content = spotcode.ToString();
 
                         var mpTerm = GetSelectedMediaPlanTermDTO(cell);
                         await _mediaPlanTermController.UpdateMediaPlanTerm(
-                            new UpdateMediaPlanTermDTO(mpTerm.xmptermid, mpTerm.xmpid, mpTerm.date, spCode.ToString()));
+                            new UpdateMediaPlanTermDTO(mpTerm.xmptermid, mpTerm.xmpid, mpTerm.date, cell.Content.ToString().Trim()));
 
-                        mpTerm.spotcode = spCode.ToString().Trim();
+                        mpTerm.spotcode = cell.Content.ToString().Trim();
 
-                        cell.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
+                        //cell.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
 
                     }
 
@@ -506,6 +557,24 @@ namespace CampaignEditor.UserControls
         {
 
             DataGridCell cell = sender as DataGridCell;
+            
+            // Allow navigation with arrows
+            if (e.Key == Key.Left || e.Key == Key.Right || e.Key == Key.Up || e.Key == Key.Down)
+            {
+                return;
+            }
+
+            // if cell is not binded to mediaPlanTerm, disable editing
+            var tuple = (Tuple<MediaPlanDTO, ObservableCollection<MediaPlanTermDTO>>)cell.DataContext;
+            var mpTerms = tuple.Item2;
+            var index = cell.Column.DisplayIndex - mediaPlanColumns;
+            var mpT = mpTerms[index];
+            if (mpT == null)
+            {
+                e.Handled = true;
+            }
+
+            // edit cell
             var textBlock = cell.Content;
             var tb2 = cell.Content as TextBlock;
             string text = "";
@@ -518,6 +587,7 @@ namespace CampaignEditor.UserControls
                 text = textBlock.ToString();
             }
 
+            // move focus to the next available cell in a row
             if (e.Key == Key.Space || e.Key == Key.Enter)
             {
                 e.Handled = true;
@@ -528,11 +598,22 @@ namespace CampaignEditor.UserControls
             {
                 e.Handled = true;
                 var mpTerm = GetSelectedMediaPlanTermDTO(cell);
-
-                await _mediaPlanTermController.UpdateMediaPlanTerm(
+                string? spotcode = mpTerm.spotcode.Trim();
+                if (spotcode == null || spotcode.Length == 1)
+                {
+                    await _mediaPlanTermController.UpdateMediaPlanTerm(
                     new UpdateMediaPlanTermDTO(mpTerm.xmptermid, mpTerm.xmpid, mpTerm.date, null));
 
-                cell.Content = "";
+                    cell.Content = "";
+                }
+                else if (spotcode.Length == 2)
+                {
+                    await _mediaPlanTermController.UpdateMediaPlanTerm(
+                    new UpdateMediaPlanTermDTO(mpTerm.xmptermid, mpTerm.xmpid, mpTerm.date, spotcode[0].ToString().Trim()));
+
+                    cell.Content = spotcode[0];
+                }
+                
             }
 
         }

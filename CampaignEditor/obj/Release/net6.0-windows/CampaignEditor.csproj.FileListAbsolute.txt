@@ -64,7 +64,6 @@ C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\bin\Release\net6.0-wi
 C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\bin\Release\net6.0-windows\Database.pdb
 C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Release\net6.0-windows\CampaignEditor.csproj.AssemblyReference.cache
 C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Release\net6.0-windows\NewTarget.baml
-C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Release\net6.0-windows\AddCampaign.g.cs
 C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Release\net6.0-windows\AddClient.g.cs
 C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Release\net6.0-windows\AddUser.g.cs
 C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Release\net6.0-windows\AssignTargets.g.cs
@@ -92,7 +91,6 @@ C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Release\net6.0-wi
 C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Release\net6.0-windows\GeneratedInternalTypeHelper.g.cs
 C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Release\net6.0-windows\CampaignEditor_MarkupCompile.cache
 C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Release\net6.0-windows\CampaignEditor_MarkupCompile.lref
-C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Release\net6.0-windows\AddCampaign.baml
 C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Release\net6.0-windows\AddClient.baml
 C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Release\net6.0-windows\AddUser.baml
 C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Release\net6.0-windows\AssignTargets.baml
@@ -132,3 +130,5 @@ C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Release\net6.0-wi
 C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Release\net6.0-windows\CampaignOverview.g.cs
 C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Release\net6.0-windows\Campaign.baml
 C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Release\net6.0-windows\CampaignOverview.baml
+C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Release\net6.0-windows\CampaignForecast.g.cs
+C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Release\net6.0-windows\CampaignForecast.baml

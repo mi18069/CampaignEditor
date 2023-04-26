@@ -103,7 +103,7 @@
                       SelectionChanged="lvChannels_SelectionChanged"/>
                 <DataGrid x:Name="dgSchema" Grid.Row="1" Grid.Column="2" Grid.RowSpan="3" Grid.ColumnSpan="3"
                            VerticalScrollBarVisibility="Visible"
-                          FontSize="13" AlternatingRowBackground="Gray"
+                          FontSize="13" AlternatingRowBackground="LightGoldenrodYellow"
                           CanUserAddRows="False"
                           AutoGenerateColumns="False"
                           SelectionMode="Single"
@@ -111,7 +111,16 @@
                           FrozenColumnCount="{Binding FrozenColumnsNum, Mode=TwoWay}"
                           HorizontalScrollBarVisibility="Visible"
                           MouseRightButtonDown="dgSchema_MouseRightButtonDown">
-                    <DataGrid.Resources>
+                <DataGrid.CellStyle>
+                    <Style TargetType="DataGridCell">
+                        <Style.Triggers>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter Property="Background" Value="Orange"/>
+                            </Trigger>
+                        </Style.Triggers>
+                    </Style>
+                </DataGrid.CellStyle>
+                <DataGrid.Resources>
                         <Style TargetType="{x:Type DataGridColumnHeader}">
                             <Setter Property="Background" Value="LightGray"/>
                             <Setter Property="FontWeight" Value="SemiBold"/>
