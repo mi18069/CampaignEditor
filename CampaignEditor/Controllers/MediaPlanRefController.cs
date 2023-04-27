@@ -17,17 +17,12 @@ namespace CampaignEditor.Controllers
         public async Task<MediaPlanRefDTO> CreateMediaPlanRef(MediaPlanRefDTO mediaPlanRefDTO)
         {
             await _repository.CreateMediaPlanRef(mediaPlanRefDTO);
-            return await _repository.GetMediaPlanRefByIdAndVersion(mediaPlanRefDTO.cmpid, mediaPlanRefDTO.version);
+            return await _repository.GetMediaPlanRef(mediaPlanRefDTO.cmpid);
         }
 
-        public async Task<int> GetLatestRefVersionById(int id)
+        public async Task<MediaPlanRefDTO> GetMediaPlanRef(int id)
         {
-            return await _repository.GetLatestRefVersionById(id);
-        }
-
-        public async Task<MediaPlanRefDTO> GetMediaPlanRefByIdAndVersion(int id, int version)
-        {
-            return await _repository.GetMediaPlanRefByIdAndVersion(id, version);
+            return await _repository.GetMediaPlanRef(id);
         }
 
         public async Task<bool> UpdateMediaPlanRef(MediaPlanRefDTO mediaPlanRefDTO)
@@ -40,9 +35,5 @@ namespace CampaignEditor.Controllers
             return await _repository.DeleteMediaPlanRefById(id);
         }
 
-        public async Task<bool> DeleteMediaPlanRefByIdAndVersion(int id, int version)
-        {
-            return await _repository.DeleteMediaPlanRefByIdAndVersion(id, version);
-        }
     }
 }

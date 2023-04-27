@@ -50,14 +50,14 @@ namespace CampaignEditor.Controllers
             return await _repository.GetAllMediaPlans();
         }
 
-        public async Task<IEnumerable<int>> GetAllChannelsByCmpidAndVersion(int cmpid, int version)
+        public async Task<IEnumerable<int>> GetAllChannelsByCmpid(int cmpid)
         {
-            return await _repository.GetAllChannelsByCmpidAndVersion(cmpid, version);
+            return await _repository.GetAllChannelsByCmpid(cmpid);
         }
 
-        public async Task<IEnumerable<MediaPlanDTO>> GetAllMediaPlansByCmpidAndVersion(int cmpid, int version)
+        public async Task<IEnumerable<MediaPlanDTO>> GetAllMediaPlansByCmpid(int cmpid)
         {
-            return await _repository.GetAllMediaPlansByCmpidAndVersion(cmpid, version);
+            return await _repository.GetAllMediaPlansByCmpid(cmpid);
         }
 
         public async Task<IEnumerable<MediaPlanDTO>> GetAllMediaPlansWithinDate(DateOnly sdate, DateOnly edate)
@@ -65,9 +65,9 @@ namespace CampaignEditor.Controllers
             return await _repository.GetAllMediaPlansWithinDate(sdate, edate);
         }
 
-        public async Task<IEnumerable<MediaPlanDTO>> GetAllChannelMediaPlansByVersion(int chid, int version)
+        public async Task<IEnumerable<MediaPlanDTO>> GetAllChannelMediaPlans(int chid)
         {
-            return await _repository.GetAllChannelMediaPlansByVersion(chid, version);
+            return await _repository.GetAllChannelMediaPlans(chid);
         }
 
         public async Task<bool> UpdateMediaPlan(UpdateMediaPlanDTO mediaPlanDTO)

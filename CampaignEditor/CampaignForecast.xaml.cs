@@ -10,7 +10,6 @@ using Database.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -19,7 +18,6 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Xml.Schema;
 
 namespace CampaignEditor.UserControls
 {
@@ -35,7 +33,6 @@ namespace CampaignEditor.UserControls
 
         private ClientDTO _client;
         private CampaignDTO _campaign;
-        private MediaPlanRefDTO _mediaPlanRef;
 
         // for duration of campaign
         DateTime startDate;
@@ -94,8 +91,8 @@ namespace CampaignEditor.UserControls
             startDate = TimeFormat.YMDStringToDateTime(_campaign.cmpsdate);
             endDate = TimeFormat.YMDStringToDateTime(_campaign.cmpedate);
 
-            int latestVersion = await _mediaPlanRefController.GetLatestRefVersionById(_campaign.cmpid);
-            if ( latestVersion == -1)
+            var exists = (await _mediaPlanRefController.GetMediaPlanRef(_campaign.cmpid) != null);
+            if ( !exists )
             {
                 DateTime now = DateTime.Now;
                 dpFrom.SelectedDate = now;
@@ -115,7 +112,7 @@ namespace CampaignEditor.UserControls
                 lvChannels.Items.Clear();
                 _channelMPDict.Clear();
 
-                var channelIds = await _mediaPlanController.GetAllChannelsByCmpidAndVersion(_campaign.cmpid, latestVersion);
+                var channelIds = await _mediaPlanController.GetAllChannelsByCmpid(_campaign.cmpid);
                 List<ChannelDTO> channels = new List<ChannelDTO>();
                 foreach (var chid in channelIds)
                 {
@@ -137,7 +134,7 @@ namespace CampaignEditor.UserControls
 
                 foreach (ChannelDTO channel in _channelMPDict.Keys)
                 {
-                    var mediaPlans = await _mediaPlanController.GetAllChannelMediaPlansByVersion(channel.chid, latestVersion);
+                    var mediaPlans = await _mediaPlanController.GetAllChannelMediaPlans(channel.chid);
                     foreach (MediaPlanDTO mediaPlan in mediaPlans)
                     {
                         List<MediaPlanTermDTO> mediaPlanTerms = (List<MediaPlanTermDTO>)await _mediaPlanTermController.GetAllMediaPlanTermsByXmpid(mediaPlan.xmpid);
@@ -335,11 +332,21 @@ namespace CampaignEditor.UserControls
                 gridForecast.Visibility = Visibility.Hidden;
                 gridLoading.Visibility = Visibility.Visible;
 
-                _mediaPlanRef = await _mediaPlanRefController.CreateMediaPlanRef(
-                    new MediaPlanRefDTO(_campaign.cmpid, DateOnly.FromDateTime(dpFrom.SelectedDate.Value),
-                    DateOnly.FromDateTime(dpTo.SelectedDate.Value), 1));
+                int? ymdFrom = TimeFormat.DPToYMDInt(dpFrom);
+                int? ymdTo = TimeFormat.DPToYMDInt(dpTo);
 
-                await InitializeData();
+                if (ymdFrom.HasValue && ymdTo.HasValue)
+                {
+                    await _mediaPlanRefController.CreateMediaPlanRef(
+                    new MediaPlanRefDTO(_campaign.cmpid, ymdFrom.Value, ymdTo.Value));
+
+                    await InitializeData();
+                }
+                else
+                {
+                    return;
+                }
+                
 
                 gridLoading.Visibility = Visibility.Hidden;
                 gridInit.Visibility = Visibility.Hidden;
@@ -444,10 +451,10 @@ namespace CampaignEditor.UserControls
                     column.HeaderStyle.Setters.Add(new Setter(Border.BorderBrushProperty, Brushes.OrangeRed));
                   
 
-                    trigger.Setters.Add(new Setter(Border.BorderThicknessProperty, new Thickness(3, 0, 0, 0)));
+                    trigger.Setters.Add(new Setter(Border.BorderThicknessProperty, new Thickness(3, 1, 1, 1)));
                     trigger.Setters.Add(new Setter(Border.BorderBrushProperty, Brushes.OrangeRed));
 
-                    column.CellStyle.Setters.Add(new Setter(Border.BorderThicknessProperty, new Thickness(3, 0, 0, 0)));
+                    column.CellStyle.Setters.Add(new Setter(Border.BorderThicknessProperty, new Thickness(3, 1, 1, 1)));
                     column.CellStyle.Setters.Add(new Setter(Border.BorderBrushProperty, Brushes.OrangeRed));
 
                     
@@ -459,10 +466,10 @@ namespace CampaignEditor.UserControls
                     column.HeaderStyle.Setters.Add(new Setter(Border.BorderThicknessProperty, new Thickness(1.5, 3, 3, 3)));
                     column.HeaderStyle.Setters.Add(new Setter(Border.BorderBrushProperty, Brushes.OrangeRed));
 
-                    trigger.Setters.Add(new Setter(Border.BorderThicknessProperty, new Thickness(0,0,3,0)));
+                    trigger.Setters.Add(new Setter(Border.BorderThicknessProperty, new Thickness(1, 1, 3, 1)));
                     trigger.Setters.Add(new Setter(Border.BorderBrushProperty, Brushes.OrangeRed));
 
-                    column.CellStyle.Setters.Add(new Setter(Border.BorderThicknessProperty, new Thickness(0,0,3,0)));
+                    column.CellStyle.Setters.Add(new Setter(Border.BorderThicknessProperty, new Thickness(1, 1, 3, 1)));
                     column.CellStyle.Setters.Add(new Setter(Border.BorderBrushProperty, Brushes.OrangeRed));
                 }
 

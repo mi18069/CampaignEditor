@@ -171,24 +171,24 @@ namespace Database.Repositories
             return _mapper.Map<IEnumerable<MediaPlanDTO>>(allMediaPlans);
         }
 
-        public async Task<IEnumerable<int>> GetAllChannelsByCmpidAndVersion(int cmpid, int version)
+        public async Task<IEnumerable<int>> GetAllChannelsByCmpid(int cmpid)
         {
             using var connection = _context.GetConnection();
 
             var allChannelIds = await connection.QueryAsync<int>
-                ("SELECT chid FROM xmp WHERE cmpid = @Cmpid AND verzija = @Version GROUP BY chid", 
-                new { Cmpid = cmpid, Version = version });
+                ("SELECT chid FROM xmp WHERE cmpid = @Cmpid GROUP BY chid", 
+                new { Cmpid = cmpid });
 
             return _mapper.Map<IEnumerable<int>>(allChannelIds);
         }
 
-        public async Task<IEnumerable<MediaPlanDTO>> GetAllMediaPlansByCmpidAndVersion(int cmpid, int version)
+        public async Task<IEnumerable<MediaPlanDTO>> GetAllMediaPlansByCmpid(int cmpid)
         {
             using var connection = _context.GetConnection();
 
             var mediaPlans = await connection.QueryAsync<dynamic>(
-                "SELECT * FROM xmp WHERE cmpid = @Cmpid AND version = @Version",
-                new { Cmpid = cmpid, Version = version });
+                "SELECT * FROM xmp WHERE cmpid = @Cmpid",
+                new { Cmpid = cmpid });
 
             mediaPlans = mediaPlans.Select(item => new MediaPlan()
             {
@@ -242,13 +242,13 @@ namespace Database.Repositories
             return _mapper.Map<IEnumerable<MediaPlanDTO>>(allMediaPlans);
         }
 
-        public async Task<IEnumerable<MediaPlanDTO>> GetAllChannelMediaPlansByVersion(int chid, int version)
+        public async Task<IEnumerable<MediaPlanDTO>> GetAllChannelMediaPlans(int chid)
         {
             using var connection = _context.GetConnection();
 
             var mediaPlans = await connection.QueryAsync<dynamic>(
-                "SELECT * FROM xmp WHERE chid = @Chid AND verzija = @Version",
-                new { Chid = chid, Version = version });
+                "SELECT * FROM xmp WHERE chid = @Chid",
+                new { Chid = chid });
 
             mediaPlans = mediaPlans.Select(item => new MediaPlan()
             {
