@@ -10,6 +10,7 @@ using Database.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -18,6 +19,7 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace CampaignEditor.UserControls
 {
@@ -42,7 +44,11 @@ namespace CampaignEditor.UserControls
         HashSet<char> spotCodes = new HashSet<char>();
 
         // number of frozen columns
-        int mediaPlanColumns = 23;
+        int mediaPlanColumns = 24;
+
+        // For Plus Icon
+        private string appPath = Directory.GetCurrentDirectory();
+        private string imgGreenPlusPath = "\\images\\GreenPlus.png";
         public int FrozenColumnsNum
         {
             get { return (int)GetValue(FrozenColumnsNumProperty); }
@@ -94,13 +100,15 @@ namespace CampaignEditor.UserControls
             var exists = (await _mediaPlanRefController.GetMediaPlanRef(_campaign.cmpid) != null);
             if ( !exists )
             {
-                DateTime now = DateTime.Now;
+                /*DateTime now = DateTime.Now;
                 dpFrom.SelectedDate = now;
-                dpTo.SelectedDate = now;
+                dpTo.SelectedDate = now;*/
 
                 gridForecast.Visibility = Visibility.Collapsed;
                 gridLoading.Visibility = Visibility.Collapsed;
                 gridInit.Visibility = Visibility.Visible;
+
+                InitializeRanges();
             }
             else
             {
@@ -171,6 +179,54 @@ namespace CampaignEditor.UserControls
                 spotCodes.Add((char)('A' + i));
             }
 
+        }
+
+        private void InitializeRanges()
+        {
+            lbDateRanges.Items.Add(new DateRangeItem());
+            Button addButton = MakeAddButton();
+            lbDateRanges.Items.Add(addButton);
+
+            ResizeDateRangeItems();
+        }
+
+        private Button MakeAddButton()
+        {
+            Button btnAddDP = new Button();
+            btnAddDP.Click += new RoutedEventHandler(btnAddDP_Click);
+            Image imgGreenPlus = new Image();
+            imgGreenPlus.Source = new BitmapImage(new Uri(appPath + imgGreenPlusPath));
+            btnAddDP.Content = imgGreenPlus;
+            btnAddDP.Width = 50;
+            btnAddDP.Height = 50;
+            btnAddDP.Background = Brushes.White;
+            btnAddDP.BorderThickness = new Thickness(0);
+            btnAddDP.HorizontalAlignment = HorizontalAlignment.Right;
+
+            return btnAddDP;
+        }
+
+        private void btnAddDP_Click(object sender, RoutedEventArgs e)
+        {
+            lbDateRanges.Items.Insert(lbDateRanges.Items.Count-1, new DateRangeItem());
+            ResizeDateRangeItems();
+        }
+
+        private void lbDateRanges_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            ResizeDateRangeItems();
+        }
+
+        private void ResizeDateRangeItems()
+        {
+            int n = lbDateRanges.Items.Count;
+            for (int i = 0; i < n - 1; i++)
+            {
+                DateRangeItem dateRangeItem = lbDateRanges.Items[i] as DateRangeItem;
+                dateRangeItem.Width = lbDateRanges.ActualWidth;
+            }
+            Button button = lbDateRanges.Items[n-1] as Button;
+            button.Width = lbDateRanges.ActualWidth;
         }
 
         private async Task InitializeData()
@@ -322,40 +378,61 @@ namespace CampaignEditor.UserControls
 
         #endregion
 
-        // When we initialize forecast, we need to do set dates for search
+        // When we initialize forecast, we need to set dates for search
         private async void Init_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-
-            if ((DateTime)dpFrom.SelectedDate! < (DateTime)dpTo.SelectedDate!)
+            // no range entered
+            if (lbDateRanges.Items.Count == 1)
             {
-                gridInit.Visibility = Visibility.Hidden;
-                gridForecast.Visibility = Visibility.Hidden;
-                gridLoading.Visibility = Visibility.Visible;
+                MessageBox.Show("Enter date range");
+                return;
+            }
 
-                int? ymdFrom = TimeFormat.DPToYMDInt(dpFrom);
-                int? ymdTo = TimeFormat.DPToYMDInt(dpTo);
+            for (int i=0; i<lbDateRanges.Items.Count-1; i++)
+            {
+                DateRangeItem dri = lbDateRanges.Items[i] as DateRangeItem;
+                var a = dri.dpFrom;
+                var b = dri.dpTo;
+                if (!dri.CheckValidity())
+                {
+                    MessageBox.Show("Invalid dates");
+                    return;
+                }
+                for (int j=i+1; j<lbDateRanges.Items.Count-1; j++)
+                {
+                    DateRangeItem dri2 = lbDateRanges.Items[j] as DateRangeItem;
+                    if (dri.checkIntercepting(dri2))
+                    {
+                        MessageBox.Show("Dates are intercepting");
+                        return;
+                    }
+                }
+                    
+            }
+
+            for (int i=0; i<lbDateRanges.Items.Count-1; i++)
+            {
+                DateRangeItem dri = lbDateRanges.Items[i] as DateRangeItem;
+
+                int? ymdFrom = TimeFormat.DPToYMDInt(dri.dpFrom);
+                int? ymdTo = TimeFormat.DPToYMDInt(dri.dpTo);
 
                 if (ymdFrom.HasValue && ymdTo.HasValue)
                 {
                     await _mediaPlanRefController.CreateMediaPlanRef(
                     new MediaPlanRefDTO(_campaign.cmpid, ymdFrom.Value, ymdTo.Value));
-
-                    await InitializeData();
                 }
-                else
-                {
-                    return;
-                }
-                
+            }
 
-                gridLoading.Visibility = Visibility.Hidden;
-                gridInit.Visibility = Visibility.Hidden;
-                gridForecast.Visibility = Visibility.Visible;
-            }
-            else
-            {
-                MessageBox.Show("Invalid dates");
-            }
+            gridInit.Visibility = Visibility.Hidden;
+            gridForecast.Visibility = Visibility.Hidden;
+            gridLoading.Visibility = Visibility.Visible;
+
+            await InitializeData();
+
+            gridLoading.Visibility = Visibility.Hidden;
+            gridInit.Visibility = Visibility.Hidden;
+            gridForecast.Visibility = Visibility.Visible;
         }
 
 
@@ -491,8 +568,6 @@ namespace CampaignEditor.UserControls
                 // Add the column to the DataGrid
                 dgSchema.Columns.Add(column);
             }
-
-
         }
 
         private async void OnCellPreviewTextInput(object sender, TextCompositionEventArgs e)
@@ -539,10 +614,19 @@ namespace CampaignEditor.UserControls
                     {
                         char spCode = (char)('A' + scNum - 1);
                         // if cell already have 2 spots, delete them and write only one, else add spotcode
-                        if (cell.Content.ToString().Length == 2)
+                        if (cell.Content.ToString().Length == 2 ||
+                            (textBlock != null && textBlock.Text.Trim().Length == 2))
+                        {
                             cell.Content = spCode;
-                        else
-                            cell.Content = spotcode.ToString();
+                        }
+                        else if (textBlock != null)
+                        {
+                            cell.Content = textBlock.Text.Trim() + spCode.ToString();
+                        }
+                        else if (textBlock == null)
+                        {
+                            cell.Content += spCode.ToString();
+                        }
 
                         var mpTerm = GetSelectedMediaPlanTermDTO(cell);
                         await _mediaPlanTermController.UpdateMediaPlanTerm(
@@ -558,9 +642,9 @@ namespace CampaignEditor.UserControls
             }
             
 
-        }
+        }     
 
-        private async void OnCellPreviewKeyDown(object sender, KeyEventArgs e)
+            private async void OnCellPreviewKeyDown(object sender, KeyEventArgs e)
         {
 
             DataGridCell cell = sender as DataGridCell;
@@ -575,8 +659,8 @@ namespace CampaignEditor.UserControls
             var tuple = (Tuple<MediaPlanDTO, ObservableCollection<MediaPlanTermDTO>>)cell.DataContext;
             var mpTerms = tuple.Item2;
             var index = cell.Column.DisplayIndex - mediaPlanColumns;
-            var mpT = mpTerms[index];
-            if (mpT == null)
+            var mpTerm = mpTerms[index];
+            if (mpTerm == null)
             {
                 e.Handled = true;
             }
@@ -604,13 +688,14 @@ namespace CampaignEditor.UserControls
             if ((e.Key == Key.Delete || e.Key == Key.Back) && text != null)
             {
                 e.Handled = true;
-                var mpTerm = GetSelectedMediaPlanTermDTO(cell);
+
                 string? spotcode = mpTerm.spotcode.Trim();
                 if (spotcode == null || spotcode.Length == 1)
                 {
                     await _mediaPlanTermController.UpdateMediaPlanTerm(
                     new UpdateMediaPlanTermDTO(mpTerm.xmptermid, mpTerm.xmpid, mpTerm.date, null));
 
+                    mpTerm.spotcode = null;
                     cell.Content = "";
                 }
                 else if (spotcode.Length == 2)
@@ -618,9 +703,10 @@ namespace CampaignEditor.UserControls
                     await _mediaPlanTermController.UpdateMediaPlanTerm(
                     new UpdateMediaPlanTermDTO(mpTerm.xmptermid, mpTerm.xmpid, mpTerm.date, spotcode[0].ToString().Trim()));
 
+                    mpTerm.spotcode = spotcode[0].ToString();
                     cell.Content = spotcode[0];
                 }
-                
+
             }
 
         }
@@ -830,8 +916,43 @@ namespace CampaignEditor.UserControls
             }
         }
 
+        private async void TextBoxCoef_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            var tuple = dgSchema.SelectedItems[0] as Tuple<MediaPlanDTO, ObservableCollection<MediaPlanTermDTO>>;
+            var textBox = sender as TextBox;
+
+            BindingExpression bindingExpr = textBox.GetBindingExpression(TextBox.TextProperty);
+            string propertyName = bindingExpr?.ResolvedSourcePropertyName;
+
+            if (tuple != null)
+            {
+                var mediaPlan = tuple.Item1;
+                float value = 0f;
+
+                if (propertyName == "progcoef")
+                {
+                    if (textBox != null && (textBox.Text.Trim() == "" || float.TryParse(textBox.Text.Trim(), out value)))
+                    {
+                        value = textBox.Text.Trim() == "" ? 0 : value;
+                        mediaPlan.progcoef = value;
+                        await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(mediaPlan));
+
+                        // also should update value in progschema
+                        var schema = await _schemaController.GetSchemaById(mediaPlan.schid);
+                        schema.progcoef = mediaPlan.progcoef;
+                        await _schemaController.UpdateSchema(new UpdateSchemaDTO(schema));
+                    }
+                    else
+                    {
+                        textBox.Text = mediaPlan.progcoef.ToString();
+                    }
+                }
+            }
+        }
+
         #endregion
 
+        // to prevent page from closing this page on backspace 
         private void Page_PreviewKeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Back && Keyboard.FocusedElement != null)
@@ -850,5 +971,7 @@ namespace CampaignEditor.UserControls
                 e.Handled = true;
             }
         }
+
+
     }
 }

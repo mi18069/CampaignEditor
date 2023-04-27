@@ -58,6 +58,9 @@
     <Compile Update="CampaignForecast.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="UserControls\DateRangeItem.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="UserControls\SeasonalitiesItem.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -139,6 +142,9 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="CampaignForecast.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UserControls\DateRangeItem.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="UserControls\SeasonalitiesItem.xaml">

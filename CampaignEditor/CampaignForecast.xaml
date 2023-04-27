@@ -10,55 +10,23 @@
       PreviewKeyDown="Page_PreviewKeyDown">
 
     <Grid>
-        <Grid x:Name="gridInit" Visibility="Hidden" >
+        <Grid x:Name="gridInit" Visibility="Visible" >
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="50" />
-                <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="50" />
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="50" />
-                <RowDefinition Height="auto" />
+                <RowDefinition Height="0.3*" />
                 <RowDefinition Height="*" />
-                <RowDefinition Height="60" />
                 <RowDefinition Height="50" />
             </Grid.RowDefinitions>
-            <Label Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" 
-                   Content="Use referenced data within range" 
+            <Label Grid.Row="1" Grid.Column="1" 
+                   Content="Use referenced data within ranges" 
                    FontSize="40" HorizontalAlignment="Center"/>
-            <Grid Grid.Row="2" Grid.Column="1">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="0.3*"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                <Label Grid.Column="0" 
-                   Content="From" FontSize="30" 
-                   VerticalAlignment="Center"/>
-                <DatePicker x:Name="dpFrom" Grid.Column="1"
-                        VerticalAlignment="Center">
-                    <DatePicker.LayoutTransform>
-                        <ScaleTransform ScaleX="2.3" ScaleY="2.3" />
-                    </DatePicker.LayoutTransform>
-                </DatePicker>
-            </Grid>
-
-            <Grid Grid.Row="2" Grid.Column="2">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="0.3*"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                <Label Grid.Column="0" 
-                       Content="To" FontSize="30" 
-                       VerticalAlignment="Center"
-                       HorizontalAlignment="Right"/>
-                <DatePicker x:Name="dpTo" Grid.Column="1"
-                            VerticalAlignment="Center">
-                    <DatePicker.LayoutTransform>
-                        <ScaleTransform ScaleX="2.3" ScaleY="2.3" />
-                    </DatePicker.LayoutTransform>
-                </DatePicker>
-            </Grid>
+            <ListBox Grid.Row="2" Grid.Column="1" x:Name="lbDateRanges" 
+                     SizeChanged="lbDateRanges_SizeChanged"/>
             <Button x:Name="Init" Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2"
                     Content="Initialize" FontSize="20" Margin="10" Width="100"
                     HorizontalAlignment="Right"
@@ -79,7 +47,7 @@
                    HorizontalAlignment="Center" VerticalAlignment="Center">
             </Label>
         </Grid>
-        <Grid x:Name="gridForecast" Visibility="Visible" >
+        <Grid x:Name="gridForecast" Visibility="Hidden" >
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="10"/>
                 <ColumnDefinition Width="auto"/>
@@ -141,6 +109,14 @@
                                         IsReadOnly="True" Visibility="Collapsed"/>
                     <DataGridCheckBoxColumn Header="Special" Binding="{Binding Item1.special, Mode=TwoWay}" 
                                         Visibility="Collapsed"/>
+                    <DataGridTextColumn Header="Prog Coef" Binding="{Binding Item1.progcoef, Mode=TwoWay}" 
+                                        IsReadOnly="True" Visibility="Collapsed" >
+                        <DataGridTextColumn.EditingElementStyle>
+                            <Style TargetType="{x:Type TextBox}">
+                                <EventSetter Event="TextChanged" Handler="TextBoxCoef_TextChanged"/>
+                            </Style>
+                        </DataGridTextColumn.EditingElementStyle>
+                    </DataGridTextColumn>
                     <DataGridTextColumn Header="AMR 1" Binding="{Binding Item1.amr1, Mode=TwoWay}" 
                                              IsReadOnly="True" Visibility="Collapsed" />
                     <DataGridTextColumn Header="AMR 1 Trim" Binding="{Binding Item1.amr1trim, Mode=TwoWay}" 

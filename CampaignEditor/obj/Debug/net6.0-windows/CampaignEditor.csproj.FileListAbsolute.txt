@@ -220,3 +220,5 @@ C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Debug\net6.0-wind
 C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Debug\net6.0-windows\CampaignOverview.baml
 C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Debug\net6.0-windows\CampaignForecast.g.cs
 C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Debug\net6.0-windows\CampaignForecast.baml
+C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Debug\net6.0-windows\UserControls\DateRangeItem.g.cs
+C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Debug\net6.0-windows\UserControls\DateRangeItem.baml
