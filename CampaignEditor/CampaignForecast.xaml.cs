@@ -1,17 +1,20 @@
 ﻿using CampaignEditor.Controllers;
 using CampaignEditor.DTOs.CampaignDTO;
+using Database.DTOs.ChannelCmpDTO;
 using Database.DTOs.ChannelDTO;
 using Database.DTOs.ClientDTO;
 using Database.DTOs.MediaPlanDTO;
 using Database.DTOs.MediaPlanRef;
 using Database.DTOs.MediaPlanTermDTO;
 using Database.DTOs.SchemaDTO;
+using Database.Entities;
 using Database.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -46,9 +49,6 @@ namespace CampaignEditor.UserControls
         // number of frozen columns
         int mediaPlanColumns = 24;
 
-        // For Plus Icon
-        private string appPath = Directory.GetCurrentDirectory();
-        private string imgGreenPlusPath = "\\images\\GreenPlus.png";
         public int FrozenColumnsNum
         {
             get { return (int)GetValue(FrozenColumnsNumProperty); }
@@ -100,15 +100,12 @@ namespace CampaignEditor.UserControls
             var exists = (await _mediaPlanRefController.GetMediaPlanRef(_campaign.cmpid) != null);
             if ( !exists )
             {
-                /*DateTime now = DateTime.Now;
-                dpFrom.SelectedDate = now;
-                dpTo.SelectedDate = now;*/
 
                 gridForecast.Visibility = Visibility.Collapsed;
                 gridLoading.Visibility = Visibility.Collapsed;
                 gridInit.Visibility = Visibility.Visible;
 
-                InitializeRanges();
+                lbDateRanges.Initialize(new DateRangeItem());
             }
             else
             {
@@ -117,53 +114,9 @@ namespace CampaignEditor.UserControls
                 gridInit.Visibility = Visibility.Collapsed;
 
                 // Filling lvChannels and dictionary
-                lvChannels.Items.Clear();
-                _channelMPDict.Clear();
 
-                var channelIds = await _mediaPlanController.GetAllChannelsByCmpid(_campaign.cmpid);
-                List<ChannelDTO> channels = new List<ChannelDTO>();
-                foreach (var chid in channelIds)
-                {
-                    ChannelDTO channel = await _channelController.GetChannelById(chid);
-                    channels.Add(channel);
-                }
-
-                channels = channels.OrderBy(c => c.chname).ToList();
-
-                foreach (ChannelDTO channel in channels)
-                {
-                    lvChannels.Items.Add(channel);
-                    List<Tuple<MediaPlanDTO, List<MediaPlanTermDTO>>> emptyList = new List<Tuple<MediaPlanDTO, List<MediaPlanTermDTO>>>();
-                    _channelMPDict.Add(channel, emptyList);
-                }
-
-                int n = (int)(endDate - startDate).TotalDays;
-
-
-                foreach (ChannelDTO channel in _channelMPDict.Keys)
-                {
-                    var mediaPlans = await _mediaPlanController.GetAllChannelMediaPlans(channel.chid);
-                    foreach (MediaPlanDTO mediaPlan in mediaPlans)
-                    {
-                        List<MediaPlanTermDTO> mediaPlanTerms = (List<MediaPlanTermDTO>)await _mediaPlanTermController.GetAllMediaPlanTermsByXmpid(mediaPlan.xmpid);
-                        var mediaPlanDates = new List<MediaPlanTermDTO>();
-                        for (int i = 0, j = 0; i <= n && j < mediaPlanTerms.Count(); i++)
-                        {
-                            if (DateOnly.FromDateTime(startDate.AddDays(i)) == mediaPlanTerms[j].date)
-                            {
-                                mediaPlanDates.Add(mediaPlanTerms[j]);
-                                j++;
-                            }
-                            else
-                            {
-                                mediaPlanDates.Add(null);
-                            }
-                        }
-
-                        Tuple<MediaPlanDTO, List<MediaPlanTermDTO>> row = Tuple.Create(mediaPlan, mediaPlanDates);
-                        _channelMPDict[channel].Add(row);
-                    }
-                }
+                await FillLvChannels();
+                await FillDictionary();
 
                 InitializeDateColumns();
                 dgSchema.ItemsSource = _showMP;
@@ -181,52 +134,63 @@ namespace CampaignEditor.UserControls
 
         }
 
-        private void InitializeRanges()
+        private async Task FillLvChannels()
         {
-            lbDateRanges.Items.Add(new DateRangeItem());
-            Button addButton = MakeAddButton();
-            lbDateRanges.Items.Add(addButton);
-
-            ResizeDateRangeItems();
-        }
-
-        private Button MakeAddButton()
-        {
-            Button btnAddDP = new Button();
-            btnAddDP.Click += new RoutedEventHandler(btnAddDP_Click);
-            Image imgGreenPlus = new Image();
-            imgGreenPlus.Source = new BitmapImage(new Uri(appPath + imgGreenPlusPath));
-            btnAddDP.Content = imgGreenPlus;
-            btnAddDP.Width = 50;
-            btnAddDP.Height = 50;
-            btnAddDP.Background = Brushes.White;
-            btnAddDP.BorderThickness = new Thickness(0);
-            btnAddDP.HorizontalAlignment = HorizontalAlignment.Right;
-
-            return btnAddDP;
-        }
-
-        private void btnAddDP_Click(object sender, RoutedEventArgs e)
-        {
-            lbDateRanges.Items.Insert(lbDateRanges.Items.Count-1, new DateRangeItem());
-            ResizeDateRangeItems();
-        }
-
-        private void lbDateRanges_SizeChanged(object sender, SizeChangedEventArgs e)
-        {
-            ResizeDateRangeItems();
-        }
-
-        private void ResizeDateRangeItems()
-        {
-            int n = lbDateRanges.Items.Count;
-            for (int i = 0; i < n - 1; i++)
+            lvChannels.Items.Clear();
+            
+            var channelIds = await _mediaPlanController.GetAllChannelsByCmpid(_campaign.cmpid);
+            List<ChannelDTO> channels = new List<ChannelDTO>();
+            foreach (var chid in channelIds)
             {
-                DateRangeItem dateRangeItem = lbDateRanges.Items[i] as DateRangeItem;
-                dateRangeItem.Width = lbDateRanges.ActualWidth;
+                ChannelDTO channel = await _channelController.GetChannelById(chid);
+                channels.Add(channel);
             }
-            Button button = lbDateRanges.Items[n-1] as Button;
-            button.Width = lbDateRanges.ActualWidth;
+
+            channels = channels.OrderBy(c => c.chname).ToList();
+
+            foreach (ChannelDTO channel in channels)
+            {
+                lvChannels.Items.Add(channel);
+            }
+
+        }
+
+        private async Task FillDictionary()
+        {
+            _channelMPDict.Clear();
+
+            foreach (ChannelDTO channel in lvChannels.Items)
+            {
+                List<Tuple<MediaPlanDTO, List<MediaPlanTermDTO>>> emptyList = new List<Tuple<MediaPlanDTO, List<MediaPlanTermDTO>>>();
+                _channelMPDict.Add(channel, emptyList);
+            }
+
+            int n = (int)(endDate - startDate).TotalDays;
+
+            foreach (ChannelDTO channel in _channelMPDict.Keys)
+            {
+                var mediaPlans = await _mediaPlanController.GetAllChannelMediaPlans(channel.chid);
+                foreach (MediaPlanDTO mediaPlan in mediaPlans)
+                {
+                    List<MediaPlanTermDTO> mediaPlanTerms = (List<MediaPlanTermDTO>)await _mediaPlanTermController.GetAllMediaPlanTermsByXmpid(mediaPlan.xmpid);
+                    var mediaPlanDates = new List<MediaPlanTermDTO>();
+                    for (int i = 0, j = 0; i <= n && j < mediaPlanTerms.Count(); i++)
+                    {
+                        if (DateOnly.FromDateTime(startDate.AddDays(i)) == mediaPlanTerms[j].date)
+                        {
+                            mediaPlanDates.Add(mediaPlanTerms[j]);
+                            j++;
+                        }
+                        else
+                        {
+                            mediaPlanDates.Add(null);
+                        }
+                    }
+
+                    Tuple<MediaPlanDTO, List<MediaPlanTermDTO>> row = Tuple.Create(mediaPlan, mediaPlanDates);
+                    _channelMPDict[channel].Add(row);
+                }
+            }
         }
 
         private async Task InitializeData()
@@ -236,29 +200,54 @@ namespace CampaignEditor.UserControls
             _channelMPDict.Clear();
 
             var channelCmps = await _channelCmpController.GetChannelCmpsByCmpid(_campaign.cmpid);
+            
+            List<Thread> threads = new List<Thread>();
+
             foreach (var channelCmp in channelCmps)
             {
                 ChannelDTO channel = await _channelController.GetChannelById(channelCmp.chid);
                 lvChannels.Items.Add(channel);
 
-                var schemas = await _schemaController.GetAllChannelSchemasWithinDateAndTime(
-                    channel.chid, DateOnly.FromDateTime(TimeFormat.YMDStringToDateTime(_campaign.cmpsdate)), 
-                    DateOnly.FromDateTime(TimeFormat.YMDStringToDateTime(_campaign.cmpedate)),
-                    _campaign.cmpstime, _campaign.cmpetime);
+                Thread newThread = new Thread(() => ChannelToDictItem(channel));
+                newThread.Start();
+                threads.Add(newThread);
+            }
 
-                var mediaPlans = new List<Tuple<MediaPlanDTO, List<MediaPlanTermDTO>>>();
-                foreach (var schema in schemas)
-                {
-                    MediaPlanDTO mediaPlan = await SchemaToMP(schema);
-                    var mediaPlanTerms = await MediaPlanToMPTerm(mediaPlan); 
-                    mediaPlans.Add(Tuple.Create(mediaPlan, mediaPlanTerms));
-                }
-                _channelMPDict.Add(channel, mediaPlans);
+            foreach (Thread thread in threads)
+            {
+                thread.Join();
+            }
 
+            bool allThreadsCompletedSuccessfully = threads.All(t => t.ThreadState == ThreadState.Stopped);
+
+            if (!allThreadsCompletedSuccessfully)
+            {
+                MessageBox.Show("Error loading data");
+                // handle this case
             }
 
             InitializeDateColumns();
             dgSchema.ItemsSource = _showMP;
+
+        }
+
+        private async Task ChannelToDictItem(ChannelDTO channel)
+        {
+
+            var schemas = await _schemaController.GetAllChannelSchemasWithinDateAndTime(
+                channel.chid, DateOnly.FromDateTime(TimeFormat.YMDStringToDateTime(_campaign.cmpsdate)),
+                DateOnly.FromDateTime(TimeFormat.YMDStringToDateTime(_campaign.cmpedate)),
+                _campaign.cmpstime, _campaign.cmpetime);
+
+            var mediaPlans = new List<Tuple<MediaPlanDTO, List<MediaPlanTermDTO>>>();
+            foreach (var schema in schemas)
+            {
+                MediaPlanDTO mediaPlan = await SchemaToMP(schema);
+                var mediaPlanTerms = await MediaPlanToMPTerm(mediaPlan);
+                mediaPlans.Add(Tuple.Create(mediaPlan, mediaPlanTerms));
+            }
+
+            _channelMPDict.Add(channel, mediaPlans);
 
         }
 

@@ -12,9 +12,9 @@ TRACE;DEBUG;NET;NET6_0;NETCOREAPP
 C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\App.xaml
 28314634424
 
-73-2075470141
+74-243799615
 245919750172
 AddClient.xaml;AddUser.xaml;AssignTargets.xaml;AssignUser.xaml;Campaign.xaml;CampaignForecast.xaml;CampaignOverview.xaml;Channels.xaml;Clients.xaml;CmpInfo.xaml;Goals.xaml;GroupChannels.xaml;MainWindow.xaml;NewCampaign.xaml;NewTarget.xaml;PriceList.xaml;Rename.xaml;Seasonality.xaml;Sectable.xaml;Spots.xaml;UserControls\DateRangeItem.xaml;UserControls\SeasonalitiesItem.xaml;UserControls\SpotItem.xaml;UserControls\TargetDPItem.xaml;UserControls\TreeViewCampaignsItem.xaml;UserControls\TreeViewClientsItem.xaml;UserControls\UsersListItem.xaml;UsersOfClient.xaml;
 
-True
+False
 

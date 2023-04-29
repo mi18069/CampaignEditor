@@ -3,7 +3,8 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-      xmlns:local="clr-namespace:CampaignEditor.UserControls" xmlns:treeviewmodels="clr-namespace:TreeViewModels" d:DataContext="{d:DesignInstance Type=treeviewmodels:TreeViewModel}"
+      xmlns:local="clr-namespace:CampaignEditor.UserControls" 
+      xmlns:treeviewmodels="clr-namespace:TreeViewModels" d:DataContext="{d:DesignInstance Type=treeviewmodels:TreeViewModel}"
       mc:Ignorable="d" 
       d:DesignHeight="700" d:DesignWidth="1200"
       Title="CampaignForecast" Background="White"
@@ -25,8 +26,9 @@
             <Label Grid.Row="1" Grid.Column="1" 
                    Content="Use referenced data within ranges" 
                    FontSize="40" HorizontalAlignment="Center"/>
-            <ListBox Grid.Row="2" Grid.Column="1" x:Name="lbDateRanges" 
-                     SizeChanged="lbDateRanges_SizeChanged"/>
+            <!-- <ListBox Grid.Row="2" Grid.Column="1" x:Name="lbDateRanges" 
+                     SizeChanged="lbDateRanges_SizeChanged"/> -->
+            <local:ListBoxAddButton Grid.Row="2" Grid.Column="1" x:Name="lbDateRanges"/>
             <Button x:Name="Init" Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2"
                     Content="Initialize" FontSize="20" Margin="10" Width="100"
                     HorizontalAlignment="Right"
