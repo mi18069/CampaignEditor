@@ -12,6 +12,7 @@ using Database.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -119,7 +120,12 @@ namespace CampaignEditor.UserControls
                 await FillDictionary();
 
                 InitializeDateColumns();
-                dgSchema.ItemsSource = _showMP;
+
+                ICollectionView myDataView = CollectionViewSource.GetDefaultView(_showMP);
+                dgSchema.ItemsSource = myDataView;
+
+                myDataView.SortDescriptions.Add(new SortDescription("Item1.name", ListSortDirection.Ascending));
+                myDataView.Filter = d => ((Tuple<MediaPlanDTO, ObservableCollection<MediaPlanTermDTO>>)d).Item1.active == true;
 
                 gridForecast.Visibility = Visibility.Visible;
                 gridLoading.Visibility = Visibility.Collapsed;
@@ -201,33 +207,27 @@ namespace CampaignEditor.UserControls
 
             var channelCmps = await _channelCmpController.GetChannelCmpsByCmpid(_campaign.cmpid);
             
-            List<Thread> threads = new List<Thread>();
+            List<Task> tasks = new List<Task>();
 
             foreach (var channelCmp in channelCmps)
             {
                 ChannelDTO channel = await _channelController.GetChannelById(channelCmp.chid);
                 lvChannels.Items.Add(channel);
 
-                Thread newThread = new Thread(() => ChannelToDictItem(channel));
-                newThread.Start();
-                threads.Add(newThread);
+                Task task = Task.Run(() => ChannelToDictItem(channel));
+                tasks.Add(task);
             }
 
-            foreach (Thread thread in threads)
-            {
-                thread.Join();
-            }
-
-            bool allThreadsCompletedSuccessfully = threads.All(t => t.ThreadState == ThreadState.Stopped);
-
-            if (!allThreadsCompletedSuccessfully)
-            {
-                MessageBox.Show("Error loading data");
-                // handle this case
-            }
+            // waiting for all tasks to finish
+            await Task.WhenAll(tasks);
 
             InitializeDateColumns();
-            dgSchema.ItemsSource = _showMP;
+
+            ICollectionView myDataView = CollectionViewSource.GetDefaultView(_showMP);
+            dgSchema.ItemsSource = myDataView;
+
+            myDataView.SortDescriptions.Add(new SortDescription("Item1.name", ListSortDirection.Ascending));
+            myDataView.Filter = d => ((Tuple<MediaPlanDTO, ObservableCollection<MediaPlanTermDTO>>)d).Item1.active == false;
 
         }
 
@@ -380,8 +380,6 @@ namespace CampaignEditor.UserControls
             for (int i=0; i<lbDateRanges.Items.Count-1; i++)
             {
                 DateRangeItem dri = lbDateRanges.Items[i] as DateRangeItem;
-                var a = dri.dpFrom;
-                var b = dri.dpTo;
                 if (!dri.CheckValidity())
                 {
                     MessageBox.Show("Invalid dates");
@@ -652,6 +650,7 @@ namespace CampaignEditor.UserControls
             if (mpTerm == null)
             {
                 e.Handled = true;
+                return;
             }
 
             // edit cell
@@ -678,7 +677,7 @@ namespace CampaignEditor.UserControls
             {
                 e.Handled = true;
 
-                string? spotcode = mpTerm.spotcode.Trim();
+                string? spotcode = mpTerm.spotcode;
                 if (spotcode == null || spotcode.Length == 1)
                 {
                     await _mediaPlanTermController.UpdateMediaPlanTerm(
@@ -816,9 +815,24 @@ namespace CampaignEditor.UserControls
 
                 dgSchema.ContextMenu = menu;
             }
-            else
+            else 
             {
-                dgSchema.ContextMenu = null;
+                ContextMenu menu = new ContextMenu();
+                MenuItem deleteItem = new MenuItem();
+                deleteItem.Header = "Delete MediaPlan";
+                deleteItem.Click += async (obj, ea) =>
+                {
+                    var mediaPlanTuple = dgSchema.SelectedItem as Tuple<MediaPlanDTO, ObservableCollection<MediaPlanTermDTO>>;
+                    if (mediaPlanTuple != null)
+                    {
+                        var mediaPlan = mediaPlanTuple.Item1;
+                        mediaPlan.active = false;
+                        await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(mediaPlan));
+                        //dgSchema.Items.Remove(dgSchema.SelectedItem);
+                    }
+                };
+                menu.Items.Add(deleteItem);
+                dgSchema.ContextMenu = menu;
             }
         }
 
