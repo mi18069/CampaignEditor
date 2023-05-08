@@ -8,7 +8,6 @@ using Database.DTOs.MediaPlanDTO;
 using Database.DTOs.MediaPlanRef;
 using Database.DTOs.MediaPlanTermDTO;
 using Database.DTOs.SchemaDTO;
-using Database.Entities;
 using Database.Repositories;
 using System;
 using System.Collections.Generic;
@@ -130,9 +129,7 @@ namespace CampaignEditor.UserControls
             }
             else
             {
-                gridForecast.Visibility = Visibility.Collapsed;
-                gridLoading.Visibility = Visibility.Collapsed;
-                gridInit.Visibility = Visibility.Visible;
+                SetGrid(gridInit);
 
                 lbDateRanges.Initialize(new DateRangeItem());
                 // waiting for function Init_Click to activate LoadData function
@@ -142,15 +139,14 @@ namespace CampaignEditor.UserControls
 
         private async Task LoadData()
         {
-            gridForecast.Visibility = Visibility.Collapsed;
-            gridLoading.Visibility = Visibility.Visible;
-            gridInit.Visibility = Visibility.Collapsed;
+            SetGrid(gridLoading);
 
             // Filling lvChannels and dictionary
 
             await FillLvChannels();
             await FillDictionary();
             await FillGoals();
+            await FillLoadedDateRanges();
 
             InitializeDateColumns();
 
@@ -160,10 +156,76 @@ namespace CampaignEditor.UserControls
             myDataView.SortDescriptions.Add(new SortDescription("Item1.name", ListSortDirection.Ascending));
             myDataView.Filter = d => ((Tuple<MediaPlanDTO, ObservableCollection<MediaPlanTermDTO>>)d).Item1.active == true;
 
-            gridForecast.Visibility = Visibility.Visible;
-            gridLoading.Visibility = Visibility.Collapsed;
-            gridInit.Visibility = Visibility.Collapsed;
+            SetGrid(gridForecast);
         }
+
+        #region GridInit
+        // When we initialize forecast, we need to set dates for search
+        private async void Init_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+
+            bool validRanges = CheckDateRanges();
+            if (!validRanges)
+            {
+                return;
+            }
+
+
+            for (int i = 0; i < lbDateRanges.Items.Count - 1; i++)
+            {
+                DateRangeItem dri = lbDateRanges.Items[i] as DateRangeItem;
+
+                int? ymdFrom = TimeFormat.DPToYMDInt(dri.dpFrom);
+                int? ymdTo = TimeFormat.DPToYMDInt(dri.dpTo);
+
+                if (ymdFrom.HasValue && ymdTo.HasValue)
+                {
+                    await _mediaPlanRefController.CreateMediaPlanRef(
+                    new MediaPlanRefDTO(_campaign.cmpid, ymdFrom.Value, ymdTo.Value));
+                }
+            }
+
+            SetGrid(gridLoading);
+
+            await InsertAndLoadData();
+
+            SetGrid(gridForecast);
+
+        }
+
+        private bool CheckDateRanges()
+        {
+            // no range entered
+            if (lbDateRanges.Items.Count == 1)
+            {
+                MessageBox.Show("Enter date range");
+                return false;
+            }
+
+            // check intercepting or invalid date values
+            for (int i = 0; i < lbDateRanges.Items.Count - 1; i++)
+            {
+                DateRangeItem dri = lbDateRanges.Items[i] as DateRangeItem;
+                if (!dri.CheckValidity())
+                {
+                    MessageBox.Show("Invalid dates");
+                    return false;
+                }
+                for (int j = i + 1; j < lbDateRanges.Items.Count - 1; j++)
+                {
+                    DateRangeItem dri2 = lbDateRanges.Items[j] as DateRangeItem;
+                    if (dri.checkIntercepting(dri2))
+                    {
+                        MessageBox.Show("Dates are intercepting");
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+        }
+
+        #endregion
 
         private async Task InsertAndLoadData()
         {
@@ -184,67 +246,6 @@ namespace CampaignEditor.UserControls
             await LoadData();
 
         }
-
-        #region Filling lists
-        private async Task FillLvChannels()
-        {
-            lvChannels.Items.Clear();
-            
-            var channelIds = await _mediaPlanController.GetAllChannelsByCmpid(_campaign.cmpid);
-            List<ChannelDTO> channels = new List<ChannelDTO>();
-            foreach (var chid in channelIds)
-            {
-                ChannelDTO channel = await _channelController.GetChannelById(chid);
-                channels.Add(channel);
-            }
-
-            channels = channels.OrderBy(c => c.chname).ToList();
-
-            foreach (ChannelDTO channel in channels)
-            {
-                lvChannels.Items.Add(channel);
-            }
-
-        }
-
-        private async Task FillDictionary()
-        {
-            _channelMPDict.Clear();
-
-            foreach (ChannelDTO channel in lvChannels.Items)
-            {
-                List<Tuple<MediaPlanDTO, List<MediaPlanTermDTO>>> emptyList = new List<Tuple<MediaPlanDTO, List<MediaPlanTermDTO>>>();
-                _channelMPDict.Add(channel, emptyList);
-            }
-
-            int n = (int)(endDate - startDate).TotalDays;
-
-            foreach (ChannelDTO channel in _channelMPDict.Keys)
-            {
-                var mediaPlans = await _mediaPlanController.GetAllChannelMediaPlans(channel.chid);
-                foreach (MediaPlanDTO mediaPlan in mediaPlans)
-                {
-                    List<MediaPlanTermDTO> mediaPlanTerms = (List<MediaPlanTermDTO>)await _mediaPlanTermController.GetAllMediaPlanTermsByXmpid(mediaPlan.xmpid);
-                    var mediaPlanDates = new List<MediaPlanTermDTO>();
-                    for (int i = 0, j = 0; i <= n && j < mediaPlanTerms.Count(); i++)
-                    {
-                        if (DateOnly.FromDateTime(startDate.AddDays(i)) == mediaPlanTerms[j].date)
-                        {
-                            mediaPlanDates.Add(mediaPlanTerms[j]);
-                            j++;
-                        }
-                        else
-                        {
-                            mediaPlanDates.Add(null);
-                        }
-                    }
-
-                    Tuple<MediaPlanDTO, List<MediaPlanTermDTO>> row = Tuple.Create(mediaPlan, mediaPlanDates);
-                    _channelMPDict[channel].Add(row);
-                }
-            }
-        }
-        #endregion
 
         #region Inserting in database
         private async Task InsertInDatabase(int chid)
@@ -379,78 +380,100 @@ namespace CampaignEditor.UserControls
             return dates;
         }
 
-            #endregion
+        #endregion
+
+        #region Filling lists
+        private async Task FillLvChannels()
+        {
+            lvChannels.Items.Clear();
+            
+            var channelIds = await _mediaPlanController.GetAllChannelsByCmpid(_campaign.cmpid);
+            List<ChannelDTO> channels = new List<ChannelDTO>();
+            foreach (var chid in channelIds)
+            {
+                ChannelDTO channel = await _channelController.GetChannelById(chid);
+                channels.Add(channel);
+            }
+
+            channels = channels.OrderBy(c => c.chname).ToList();
+
+            foreach (ChannelDTO channel in channels)
+            {
+                lvChannels.Items.Add(channel);
+            }
+
+        }
+
+        private async Task FillDictionary()
+        {
+            _channelMPDict.Clear();
+
+            foreach (ChannelDTO channel in lvChannels.Items)
+            {
+                List<Tuple<MediaPlanDTO, List<MediaPlanTermDTO>>> emptyList = new List<Tuple<MediaPlanDTO, List<MediaPlanTermDTO>>>();
+                _channelMPDict.Add(channel, emptyList);
+            }
+
+            int n = (int)(endDate - startDate).TotalDays;
+
+            foreach (ChannelDTO channel in _channelMPDict.Keys)
+            {
+                var mediaPlans = await _mediaPlanController.GetAllChannelMediaPlans(channel.chid);
+                foreach (MediaPlanDTO mediaPlan in mediaPlans)
+                {
+                    List<MediaPlanTermDTO> mediaPlanTerms = (List<MediaPlanTermDTO>)await _mediaPlanTermController.GetAllMediaPlanTermsByXmpid(mediaPlan.xmpid);
+                    var mediaPlanDates = new List<MediaPlanTermDTO>();
+                    for (int i = 0, j = 0; i <= n && j < mediaPlanTerms.Count(); i++)
+                    {
+                        if (DateOnly.FromDateTime(startDate.AddDays(i)) == mediaPlanTerms[j].date)
+                        {
+                            mediaPlanDates.Add(mediaPlanTerms[j]);
+                            j++;
+                        }
+                        else
+                        {
+                            mediaPlanDates.Add(null);
+                        }
+                    }
+
+                    Tuple<MediaPlanDTO, List<MediaPlanTermDTO>> row = Tuple.Create(mediaPlan, mediaPlanDates);
+                    _channelMPDict[channel].Add(row);
+                }
+            }
+        }
+        #endregion
 
         #endregion
 
-        // When we initialize forecast, we need to set dates for search
-        private async void Init_Click(object sender, System.Windows.RoutedEventArgs e)
+        #region LoadedDateRanges
+
+        private async Task FillLoadedDateRanges()
         {
+            var dateRanges = await _mediaPlanRefController.GetAllMediaPlanRefsByCmpid(_campaign.cmpid);
 
-            bool validRanges = CheckDateRanges();
-            if (!validRanges)
+            foreach (var dateRange in dateRanges) 
             {
-                return;
+
+                string start = TimeFormat.YMDStringToRepresentative(dateRange.datestart.ToString());
+                string end = TimeFormat.YMDStringToRepresentative(dateRange.dateend.ToString());
+
+                Label label = new Label();
+                label.Content = start + " - " + end;
+                label.FontWeight = FontWeights.Bold;
+                label.FontSize = 18;
+                label.HorizontalContentAlignment = HorizontalAlignment.Center;
+
+                spLoadedDateRanges.Children.Add(label);
+
             }
-            
-
-            for (int i=0; i<lbDateRanges.Items.Count-1; i++)
-            {
-                DateRangeItem dri = lbDateRanges.Items[i] as DateRangeItem;
-
-                int? ymdFrom = TimeFormat.DPToYMDInt(dri.dpFrom);
-                int? ymdTo = TimeFormat.DPToYMDInt(dri.dpTo);
-
-                if (ymdFrom.HasValue && ymdTo.HasValue)
-                {
-                    await _mediaPlanRefController.CreateMediaPlanRef(
-                    new MediaPlanRefDTO(_campaign.cmpid, ymdFrom.Value, ymdTo.Value));
-                }
-            }
-
-            gridInit.Visibility = Visibility.Hidden;
-            gridForecast.Visibility = Visibility.Hidden;
-            gridLoading.Visibility = Visibility.Visible;
-
-            await InsertAndLoadData();
-
-            gridLoading.Visibility = Visibility.Hidden;
-            gridInit.Visibility = Visibility.Hidden;
-            gridForecast.Visibility = Visibility.Visible;
         }
 
-        private bool CheckDateRanges()
+        private void btnResetDates_Click(object sender, RoutedEventArgs e)
         {
-            // no range entered
-            if (lbDateRanges.Items.Count == 1)
-            {
-                MessageBox.Show("Enter date range");
-                return false;
-            }
 
-            // check intercepting or invalid date values
-            for (int i = 0; i < lbDateRanges.Items.Count - 1; i++)
-            {
-                DateRangeItem dri = lbDateRanges.Items[i] as DateRangeItem;
-                if (!dri.CheckValidity())
-                {
-                    MessageBox.Show("Invalid dates");
-                    return false;
-                }
-                for (int j = i + 1; j < lbDateRanges.Items.Count - 1; j++)
-                {
-                    DateRangeItem dri2 = lbDateRanges.Items[j] as DateRangeItem;
-                    if (dri.checkIntercepting(dri2))
-                    {
-                        MessageBox.Show("Dates are intercepting");
-                        return false;
-                    }
-                }
-            }
-
-            return true;
         }
 
+        #endregion
 
         #region lvChannels
         private void lvChannels_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -1145,6 +1168,23 @@ namespace CampaignEditor.UserControls
 
         #region Page
 
+        // setting one visible Grid
+
+        private void SetGrid(Grid grid)
+        {
+            gridInit.Visibility = Visibility.Hidden;
+            gridLoading.Visibility = Visibility.Hidden;
+            gridForecast.Visibility = Visibility.Hidden;
+
+            if (grid.Name == "gridInit")
+                gridInit.Visibility = Visibility.Visible;
+            if (grid.Name == "gridLoading")
+                gridLoading.Visibility = Visibility.Visible;
+            if (grid.Name == "gridForecast")
+                gridForecast.Visibility = Visibility.Visible;
+
+        }
+
         // to prevent page from closing this page on backspace 
         private void Page_PreviewKeyDown(object sender, KeyEventArgs e)
         {
@@ -1166,6 +1206,7 @@ namespace CampaignEditor.UserControls
         }
 
         #endregion
+
 
     }
 }

@@ -62,16 +62,18 @@
                 <RowDefinition Height="10"/>
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="10"/>
             </Grid.RowDefinitions>
 
             <ListView x:Name="lvChannels" Grid.Row="1" Grid.Column="1" 
-                      MaxHeight="320"
-                      DisplayMemberPath="chname" MinWidth="250" MinHeight="250"
+                      MaxHeight="200"
+                      DisplayMemberPath="chname" MinWidth="250" MinHeight="150"
                       SelectionMode="Multiple" Margin="0, 0 ,10,0"
                       SelectionChanged="lvChannels_SelectionChanged"/>
-                <DataGrid x:Name="dgSchema" Grid.Row="1" Grid.Column="2" Grid.RowSpan="3" Grid.ColumnSpan="3"
+                <DataGrid x:Name="dgSchema" Grid.Row="1" Grid.Column="2" Grid.RowSpan="5" Grid.ColumnSpan="3"
                            VerticalScrollBarVisibility="Visible"
                           FontSize="13" AlternatingRowBackground="LightGoldenrodYellow"
                           CanUserAddRows="False"
@@ -179,8 +181,35 @@
                                         IsReadOnly="True" Visibility="Collapsed"/>
                 </DataGrid.Columns>
             </DataGrid>
-            
+
             <Border Grid.Row="2" Grid.Column="1" 
+                BorderBrush="LightGray" BorderThickness="1" Margin="0, 10, 10, 10">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="10" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="10" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="10" />
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="10" />
+                    </Grid.RowDefinitions>
+
+                    <Label Grid.Row="1" Grid.Column="1" Content="Referenced dates" 
+                           FontWeight="Light" HorizontalAlignment="Center"/>
+                    <StackPanel Grid.Row="2" Grid.Column="1" x:Name="spLoadedDateRanges"
+                                HorizontalAlignment="Center"/>
+                    <Button Grid.Row="3" Grid.Column="1" x:Name="btnResetDates" Content="Initialize"
+                            Margin="0, 10"
+                            Click="btnResetDates_Click"/>
+                </Grid>
+            </Border>
+
+            <Border Grid.Row="3" Grid.Column="1" 
                 BorderBrush="LightGray" BorderThickness="1" Margin="0, 10, 10, 10">
                 <Grid>
                     <Grid.ColumnDefinitions>

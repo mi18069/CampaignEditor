@@ -4,6 +4,7 @@ using Database.Data;
 using Database.DTOs.MediaPlanRef;
 using Database.Entities;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Database.Repositories
@@ -49,6 +50,17 @@ namespace Database.Repositories
             return _mapper.Map<MediaPlanRefDTO>(mediaPlanRef);
         }
 
+        public async Task<IEnumerable<MediaPlanRefDTO>> GetAllMediaPlanRefsByCmpid(int cmpid)
+        {
+            using var connection = _context.GetConnection();
+
+            var mediaPlanRefs = await connection.QueryAsync<MediaPlanRef>(
+                "SELECT * FROM tblmplper WHERE cmpid = @Id",
+                new { Id = cmpid });
+
+            return _mapper.Map<IEnumerable<MediaPlanRefDTO>>(mediaPlanRefs);
+        }
+
         public async Task<bool> UpdateMediaPlanRef(MediaPlanRefDTO mediaPlanRefDTO)
         {
             using var connection = _context.GetConnection();
@@ -76,5 +88,7 @@ namespace Database.Repositories
 
             return affected != 0;
         }
+
+
     }
 }

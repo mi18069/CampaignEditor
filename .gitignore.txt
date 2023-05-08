@@ -157,6 +157,12 @@ AppPackages/
 
 # Others
 sql/
+*.vsidx
+*.v2
+*.suo
+*.dll
+*.props
+*.cache
 *.Cache
 ClientBin/
 [Ss]tyle[Cc]op.*

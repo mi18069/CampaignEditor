@@ -78,9 +78,12 @@ namespace CampaignEditor.UserControls
                 }
             }
 
-            if (items[n - 1] is FrameworkElement button)
+            if (n > 0)
             {
-                button.Width = this.ActualWidth;
+                if (items[n - 1] is FrameworkElement button)
+                {
+                    button.Width = this.ActualWidth;
+                }
             }
         }
     }

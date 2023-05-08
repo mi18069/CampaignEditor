@@ -5,13 +5,32 @@ namespace CampaignEditor.UserControls
 {
     public partial class DateRangeItem : UserControl
     {
-
-        DateTime today = DateTime.Now;
+       
         public DateRangeItem()
         {
             InitializeComponent();
-            dpFrom.SelectedDate = today;
-            dpTo.SelectedDate = today;
+            SetDates();
+        }
+
+        public void SetDates(DateTime? first = null, DateTime? second = null)
+        {
+            if (first == null)
+            {
+                DateTime today = DateTime.Now;
+                dpFrom.SelectedDate = today;
+                dpTo.SelectedDate = today;
+            }
+            else if (first != null && second == null)
+            {
+                dpFrom.SelectedDate = first.Value;
+                dpTo.SelectedDate = first.Value;
+            }
+            else
+            {
+                dpFrom.SelectedDate = first.Value;
+                dpTo.SelectedDate = second.Value;
+            }
+
         }
 
         // For checking validity of date order

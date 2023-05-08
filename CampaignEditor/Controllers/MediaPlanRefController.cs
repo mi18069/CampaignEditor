@@ -1,7 +1,9 @@
 ﻿using Database.DTOs.MediaPlanRef;
+using Database.Entities;
 using Database.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace CampaignEditor.Controllers
@@ -23,6 +25,11 @@ namespace CampaignEditor.Controllers
         public async Task<MediaPlanRefDTO> GetMediaPlanRef(int id)
         {
             return await _repository.GetMediaPlanRef(id);
+        }
+
+        public async Task<IEnumerable<MediaPlanRefDTO>> GetAllMediaPlanRefsByCmpid(int cmpid)
+        {
+            return await _repository.GetAllMediaPlanRefsByCmpid(cmpid);
         }
 
         public async Task<bool> UpdateMediaPlanRef(MediaPlanRefDTO mediaPlanRefDTO)
