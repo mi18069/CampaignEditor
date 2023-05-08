@@ -1,8 +1,9 @@
 ﻿using CampaignEditor.Controllers;
 using CampaignEditor.DTOs.CampaignDTO;
-using Database.DTOs.ChannelCmpDTO;
+using CampaignEditor.StartupHelpers;
 using Database.DTOs.ChannelDTO;
 using Database.DTOs.ClientDTO;
+using Database.DTOs.GoalsDTO;
 using Database.DTOs.MediaPlanDTO;
 using Database.DTOs.MediaPlanRef;
 using Database.DTOs.MediaPlanTermDTO;
@@ -13,9 +14,9 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.IO;
 using System.Linq;
-using System.Threading;
+using System.Runtime.Intrinsics.Arm;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -23,7 +24,6 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 
 namespace CampaignEditor.UserControls
 {
@@ -36,6 +36,14 @@ namespace CampaignEditor.UserControls
         private MediaPlanTermController _mediaPlanTermController;
         private MediaPlanRefController _mediaPlanRefController;
         private SpotController _spotController;
+        private GoalsController _goalsController;
+        private PricelistController _pricelistController;
+        private SeasonalityController _seasonalityController;
+        private SectableController _sectableController;
+
+        private readonly IAbstractFactory<AddSchema> _factoryAddSchema;
+        private readonly IAbstractFactory<AMRTrim> _factoryAmrTrim;
+
 
         private ClientDTO _client;
         private CampaignDTO _campaign;
@@ -70,7 +78,13 @@ namespace CampaignEditor.UserControls
             IMediaPlanRepository mediaPlanRepository,
             IMediaPlanTermRepository mediaPlanTermRepository,
             IMediaPlanRefRepository mediaPlanRefRepository,
-            ISpotRepository spotRepository)
+            ISpotRepository spotRepository,
+            IGoalsRepository goalsRepository,
+            IPricelistRepository pricelistRepository,
+            ISeasonalityRepository seasonalityRepository,
+            ISectableRepository sectableRepository,
+            IAbstractFactory<AddSchema> factoryAddSchema,
+            IAbstractFactory<AMRTrim> factoryAmrTrim)
         {
             this.DataContext = this;
             this.FrozenColumnsNum = mediaPlanColumns;
@@ -82,8 +96,13 @@ namespace CampaignEditor.UserControls
             _mediaPlanTermController = new MediaPlanTermController(mediaPlanTermRepository);
             _mediaPlanRefController = new MediaPlanRefController(mediaPlanRefRepository);
             _spotController = new SpotController(spotRepository);
+            _goalsController = new GoalsController(goalsRepository);
+            _pricelistController = new PricelistController(pricelistRepository);
+            _seasonalityController = new SeasonalityController(seasonalityRepository);
+            _sectableController = new SectableController(sectableRepository);
 
-
+            _factoryAddSchema = factoryAddSchema;
+            _factoryAmrTrim = factoryAmrTrim;
 
             InitializeComponent();
         }
@@ -98,48 +117,75 @@ namespace CampaignEditor.UserControls
             startDate = TimeFormat.YMDStringToDateTime(_campaign.cmpsdate);
             endDate = TimeFormat.YMDStringToDateTime(_campaign.cmpedate);
 
-            var exists = (await _mediaPlanRefController.GetMediaPlanRef(_campaign.cmpid) != null);
-            if ( !exists )
-            {
-
-                gridForecast.Visibility = Visibility.Collapsed;
-                gridLoading.Visibility = Visibility.Collapsed;
-                gridInit.Visibility = Visibility.Visible;
-
-                lbDateRanges.Initialize(new DateRangeItem());
-            }
-            else
-            {
-                gridForecast.Visibility = Visibility.Collapsed;
-                gridLoading.Visibility = Visibility.Visible;
-                gridInit.Visibility = Visibility.Collapsed;
-
-                // Filling lvChannels and dictionary
-
-                await FillLvChannels();
-                await FillDictionary();
-
-                InitializeDateColumns();
-
-                ICollectionView myDataView = CollectionViewSource.GetDefaultView(_showMP);
-                dgSchema.ItemsSource = myDataView;
-
-                myDataView.SortDescriptions.Add(new SortDescription("Item1.name", ListSortDirection.Ascending));
-                myDataView.Filter = d => ((Tuple<MediaPlanDTO, ObservableCollection<MediaPlanTermDTO>>)d).Item1.active == true;
-
-                gridForecast.Visibility = Visibility.Visible;
-                gridLoading.Visibility = Visibility.Collapsed;
-                gridInit.Visibility = Visibility.Collapsed;
-            }
-
             var spots = await _spotController.GetSpotsByCmpid(_campaign.cmpid);
             for (int i = 0; i < spots.Count(); i++)
             {
                 spotCodes.Add((char)('A' + i));
             }
 
+            var exists = (await _mediaPlanRefController.GetMediaPlanRef(_campaign.cmpid) != null);
+            if ( exists )
+            {
+                await LoadData();
+            }
+            else
+            {
+                gridForecast.Visibility = Visibility.Collapsed;
+                gridLoading.Visibility = Visibility.Collapsed;
+                gridInit.Visibility = Visibility.Visible;
+
+                lbDateRanges.Initialize(new DateRangeItem());
+                // waiting for function Init_Click to activate LoadData function
+            }
+
         }
 
+        private async Task LoadData()
+        {
+            gridForecast.Visibility = Visibility.Collapsed;
+            gridLoading.Visibility = Visibility.Visible;
+            gridInit.Visibility = Visibility.Collapsed;
+
+            // Filling lvChannels and dictionary
+
+            await FillLvChannels();
+            await FillDictionary();
+            await FillGoals();
+
+            InitializeDateColumns();
+
+            ICollectionView myDataView = CollectionViewSource.GetDefaultView(_showMP);
+            dgSchema.ItemsSource = myDataView;
+
+            myDataView.SortDescriptions.Add(new SortDescription("Item1.name", ListSortDirection.Ascending));
+            myDataView.Filter = d => ((Tuple<MediaPlanDTO, ObservableCollection<MediaPlanTermDTO>>)d).Item1.active == true;
+
+            gridForecast.Visibility = Visibility.Visible;
+            gridLoading.Visibility = Visibility.Collapsed;
+            gridInit.Visibility = Visibility.Collapsed;
+        }
+
+        private async Task InsertAndLoadData()
+        {
+
+            var channelCmps = await _channelCmpController.GetChannelCmpsByCmpid(_campaign.cmpid);
+
+            List<Task> tasks = new List<Task>();
+
+            foreach (var channelCmp in channelCmps)
+            {
+                Task task = Task.Run(() => InsertInDatabase(channelCmp.chid));
+                tasks.Add(task);
+            }
+
+            // waiting for all tasks to finish
+            await Task.WhenAll(tasks);
+
+            await LoadData();
+
+        }
+
+        #region Filling lists
         private async Task FillLvChannels()
         {
             lvChannels.Items.Clear();
@@ -198,57 +244,20 @@ namespace CampaignEditor.UserControls
                 }
             }
         }
+        #endregion
 
-        private async Task InitializeData()
+        #region Inserting in database
+        private async Task InsertInDatabase(int chid)
         {
-            // Filling lvChannels and dictionary
-            lvChannels.Items.Clear();
-            _channelMPDict.Clear();
-
-            var channelCmps = await _channelCmpController.GetChannelCmpsByCmpid(_campaign.cmpid);
-            
-            List<Task> tasks = new List<Task>();
-
-            foreach (var channelCmp in channelCmps)
-            {
-                ChannelDTO channel = await _channelController.GetChannelById(channelCmp.chid);
-                lvChannels.Items.Add(channel);
-
-                Task task = Task.Run(() => ChannelToDictItem(channel));
-                tasks.Add(task);
-            }
-
-            // waiting for all tasks to finish
-            await Task.WhenAll(tasks);
-
-            InitializeDateColumns();
-
-            ICollectionView myDataView = CollectionViewSource.GetDefaultView(_showMP);
-            dgSchema.ItemsSource = myDataView;
-
-            myDataView.SortDescriptions.Add(new SortDescription("Item1.name", ListSortDirection.Ascending));
-            myDataView.Filter = d => ((Tuple<MediaPlanDTO, ObservableCollection<MediaPlanTermDTO>>)d).Item1.active == false;
-
-        }
-
-        private async Task ChannelToDictItem(ChannelDTO channel)
-        {
-
             var schemas = await _schemaController.GetAllChannelSchemasWithinDateAndTime(
-                channel.chid, DateOnly.FromDateTime(TimeFormat.YMDStringToDateTime(_campaign.cmpsdate)),
-                DateOnly.FromDateTime(TimeFormat.YMDStringToDateTime(_campaign.cmpedate)),
+                chid, DateOnly.FromDateTime(startDate), DateOnly.FromDateTime(endDate),
                 _campaign.cmpstime, _campaign.cmpetime);
 
-            var mediaPlans = new List<Tuple<MediaPlanDTO, List<MediaPlanTermDTO>>>();
             foreach (var schema in schemas)
             {
                 MediaPlanDTO mediaPlan = await SchemaToMP(schema);
                 var mediaPlanTerms = await MediaPlanToMPTerm(mediaPlan);
-                mediaPlans.Add(Tuple.Create(mediaPlan, mediaPlanTerms));
             }
-
-            _channelMPDict.Add(channel, mediaPlans);
-
         }
 
         // reaching or creating mediaPlan
@@ -258,6 +267,11 @@ namespace CampaignEditor.UserControls
                 return await _mediaPlanController.GetMediaPlanBySchemaAndCmpId(schema.id, _campaign.cmpid);
             else
             {
+                /*var channelCmp = await _channelCmpController.GetChannelCmpByIds(_campaign.cmpid, schema.chid);
+                var pricelist = await _pricelistController.GetPricelistById(channelCmp.plid);
+                var seasonality = await _seasonalityController.GetSeasonalityById(pricelist.seastbid);
+                var sectable = await _sectableController.GetSectableById(pricelist.sectbid);*/
+
                 CreateMediaPlanDTO mediaPlan = new CreateMediaPlanDTO(schema.id, _campaign.cmpid, schema.chid,
                     schema.name.Trim(), 1, schema.position, schema.stime, schema.etime, schema.blocktime,
                     schema.days, schema.type, schema.special, schema.sdate, schema.edate, schema.progcoef,
@@ -365,37 +379,20 @@ namespace CampaignEditor.UserControls
             return dates;
         }
 
+            #endregion
+
         #endregion
 
         // When we initialize forecast, we need to set dates for search
         private async void Init_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            // no range entered
-            if (lbDateRanges.Items.Count == 1)
+
+            bool validRanges = CheckDateRanges();
+            if (!validRanges)
             {
-                MessageBox.Show("Enter date range");
                 return;
             }
-
-            for (int i=0; i<lbDateRanges.Items.Count-1; i++)
-            {
-                DateRangeItem dri = lbDateRanges.Items[i] as DateRangeItem;
-                if (!dri.CheckValidity())
-                {
-                    MessageBox.Show("Invalid dates");
-                    return;
-                }
-                for (int j=i+1; j<lbDateRanges.Items.Count-1; j++)
-                {
-                    DateRangeItem dri2 = lbDateRanges.Items[j] as DateRangeItem;
-                    if (dri.checkIntercepting(dri2))
-                    {
-                        MessageBox.Show("Dates are intercepting");
-                        return;
-                    }
-                }
-                    
-            }
+            
 
             for (int i=0; i<lbDateRanges.Items.Count-1; i++)
             {
@@ -415,11 +412,43 @@ namespace CampaignEditor.UserControls
             gridForecast.Visibility = Visibility.Hidden;
             gridLoading.Visibility = Visibility.Visible;
 
-            await InitializeData();
+            await InsertAndLoadData();
 
             gridLoading.Visibility = Visibility.Hidden;
             gridInit.Visibility = Visibility.Hidden;
             gridForecast.Visibility = Visibility.Visible;
+        }
+
+        private bool CheckDateRanges()
+        {
+            // no range entered
+            if (lbDateRanges.Items.Count == 1)
+            {
+                MessageBox.Show("Enter date range");
+                return false;
+            }
+
+            // check intercepting or invalid date values
+            for (int i = 0; i < lbDateRanges.Items.Count - 1; i++)
+            {
+                DateRangeItem dri = lbDateRanges.Items[i] as DateRangeItem;
+                if (!dri.CheckValidity())
+                {
+                    MessageBox.Show("Invalid dates");
+                    return false;
+                }
+                for (int j = i + 1; j < lbDateRanges.Items.Count - 1; j++)
+                {
+                    DateRangeItem dri2 = lbDateRanges.Items[j] as DateRangeItem;
+                    if (dri.checkIntercepting(dri2))
+                    {
+                        MessageBox.Show("Dates are intercepting");
+                        return false;
+                    }
+                }
+            }
+
+            return true;
         }
 
 
@@ -459,6 +488,59 @@ namespace CampaignEditor.UserControls
                             _showMP.Remove(tuple);
                             i--;
                         }
+                }
+            }
+        }
+
+        #endregion
+
+        #region Goals
+
+        private async Task FillGoals()
+        {
+            GoalsDTO goals = await _goalsController.GetGoalsByCmpid(_campaign.cmpid);
+
+            if (goals != null)
+            {
+                if (goals.budget == 0)
+                {
+                    bBudget.Visibility = Visibility.Collapsed;
+                }
+                else
+                {
+                    bBudget.Visibility = Visibility.Visible;
+                    lblBudgetTarget.Content = "/" + goals.budget.ToString();
+                }
+
+                if (goals.grp == 0)
+                {
+                    bGRP.Visibility = Visibility.Collapsed;
+                }
+                else
+                {
+                    bGRP.Visibility = Visibility.Visible;
+                    lblGRPTarget.Content = "/" + goals.grp.ToString();
+                }
+
+                if (goals.ins == 0)
+                {
+                    bInsertations.Visibility = Visibility.Collapsed;
+                }
+                else
+                {
+                    bInsertations.Visibility = Visibility.Visible;
+                    lblInsertationsTarget.Content = "/" + goals.ins.ToString();
+                }
+
+                if (goals.rch == 0)
+                {
+                    bReach.Visibility = Visibility.Collapsed;
+                }
+                else
+                {
+                    bReach.Visibility = Visibility.Visible;
+                    lblReachTarget.Content = "/" + "from " + goals.rch_f1.ToString().Trim() + " to " + goals.rch_f2.ToString().Trim() +
+                    " , " + goals.rch.ToString().Trim() + " %";
                 }
             }
         }
@@ -789,7 +871,7 @@ namespace CampaignEditor.UserControls
         #region MediaPlan columns
 
             #region ContextMenu
-        private void dgSchema_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        private async void dgSchema_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
             // check if it's clicked on header
             DependencyObject dependencyObject = (DependencyObject)e.OriginalSource;
@@ -832,8 +914,114 @@ namespace CampaignEditor.UserControls
                     }
                 };
                 menu.Items.Add(deleteItem);
+
+                MenuItem addMediaPlanItem = new MenuItem();
+                addMediaPlanItem.Header = "Add MediaPlan";
+                addMediaPlanItem.Click += async (obj, ea) =>
+                {
+                    var f = _factoryAddSchema.Create();
+                    await f.Initialize(_campaign);
+                    f.ShowDialog();
+                    if (f._schema != null)
+                    {
+                        /*MediaPlanDTO mediaPlan = await SchemaToMP(f._schema);
+                        var mediaPlanTerms = await MediaPlanToMPTerm(mediaPlan);
+                        var channel = await _channelController.GetChannelById(mediaPlan.chid);
+                        _channelMPDict[channel].Add(Tuple.Create(mediaPlan, mediaPlanTerms));*/
+                    }
+                };
+                menu.Items.Add(addMediaPlanItem);
+
+                // Traverse the visual tree to get the clicked DataGridCell object
+                while ((dependencyObject != null) && !(dependencyObject is DataGridCell))
+                {
+                    dependencyObject = VisualTreeHelper.GetParent(dependencyObject);
+                }
+
+                if (dependencyObject == null)
+                {
+                    return;
+                }
+
+                DataGridCell cell = dependencyObject as DataGridCell;
+
+                var mediaPlanTuple = dgSchema.SelectedItem as Tuple<MediaPlanDTO, ObservableCollection<MediaPlanTermDTO>>;
+                if (mediaPlanTuple == null)
+                {
+                    return;
+                }
+                var mediaPlan = mediaPlanTuple.Item1;
+
+                MenuItem trimAmr = new MenuItem();
+                // Check if the clicked cell is in the "AMR" columns
+                if (cell.Column.Header.ToString() == "AMR 1")
+                {           
+                    trimAmr.Header = "Trim Amr1";
+                    trimAmr.Click += await TrimAmrAsync(mediaPlan, "Trim AMR 1", "amr1trim", mediaPlan.amr1trim);
+                }
+                else if (cell.Column.Header.ToString() == "AMR 2")
+                {
+                    trimAmr.Header = "Trim Amr2";
+                    trimAmr.Click += await TrimAmrAsync(mediaPlan, "Trim AMR 2", "amr2trim", mediaPlan.amr2trim);
+                }
+                else if (cell.Column.Header.ToString() == "AMR 3")
+                {
+                    trimAmr.Header = "Trim Amr3";
+                    trimAmr.Click += await TrimAmrAsync(mediaPlan, "Trim AMR 3", "amr3trim", mediaPlan.amr3trim);
+                }
+                else if (cell.Column.Header.ToString() == "AMR Sale")
+                {
+                    trimAmr.Header = "Trim Amr Sale";
+                    trimAmr.Click += await TrimAmrAsync(mediaPlan, "Trim AMR Sale", "amrsaletrim", mediaPlan.amrsaletrim);
+                }
+                else
+                {
+                    trimAmr.Header = "Trim All Amrs";
+                    trimAmr.Click += await TrimAmrAsync(mediaPlan, "Trim AMRs", "amrtrimall", null);
+                }
+                menu.Items.Add(trimAmr);
                 dgSchema.ContextMenu = menu;
             }
+        }
+
+        private async Task<RoutedEventHandler> TrimAmrAsync(MediaPlanDTO mediaPlan, string message, string attr,  int? trimValue)
+        {
+            async void handler(object sender, RoutedEventArgs e)
+            {
+                var f = _factoryAmrTrim.Create();
+                f.Initialize(message, trimValue);
+                f.ShowDialog();
+                if (f.changed)
+                {
+                    switch (attr)
+                    {
+                        case "amr1trim":
+                            mediaPlan.amr1trim = f.newValue;
+                            break;
+                        case "amr2trim":
+                            mediaPlan.amr2trim = f.newValue;
+                            break;
+                        case "amr3trim":
+                            mediaPlan.amr3trim = f.newValue;
+                            break;
+                        case "amrsaletrim":
+                            mediaPlan.amrsaletrim = f.newValue;
+                            break;
+                        case "amrtrimall":
+                            mediaPlan.amr1trim = f.newValue;
+                            mediaPlan.amr2trim = f.newValue;
+                            mediaPlan.amr3trim = f.newValue;
+                            mediaPlan.amrsaletrim = f.newValue;
+                            break;
+                        default:
+                            break;
+                    }
+                    
+                    await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(mediaPlan));
+                }
+            }
+
+            return handler;
         }
 
         private bool IsCellInDataGridHeader(DependencyObject obj)
@@ -955,6 +1143,8 @@ namespace CampaignEditor.UserControls
 
         #endregion
 
+        #region Page
+
         // to prevent page from closing this page on backspace 
         private void Page_PreviewKeyDown(object sender, KeyEventArgs e)
         {
@@ -975,6 +1165,7 @@ namespace CampaignEditor.UserControls
             }
         }
 
+        #endregion
 
     }
 }

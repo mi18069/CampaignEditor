@@ -40,13 +40,13 @@ namespace Database.Repositories
             return affected != 0;
         }
 
-        public async Task<ChannelCmpDTO> GetChannelCmpByIds(int cmpid, int plid)
+        public async Task<ChannelCmpDTO> GetChannelCmpByIds(int cmpid, int chid)
         {
             using var connection = _context.GetConnection();
 
             var channelCmp = await connection.QueryFirstOrDefaultAsync<ChannelCmp>(
-                "SELECT * FROM tblcmpchn WHERE cmpid = @Cmpid AND plid = @Plid",
-                new { Cmpid = cmpid, Plid = plid });
+                "SELECT * FROM tblcmpchn WHERE cmpid = @Cmpid AND chid = @Chid",
+                new { Cmpid = cmpid, Chid = chid });
 
             return _mapper.Map<ChannelCmpDTO>(channelCmp);
         }

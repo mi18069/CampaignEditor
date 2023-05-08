@@ -132,3 +132,9 @@ C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Release\net6.0-wi
 C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Release\net6.0-windows\CampaignOverview.baml
 C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Release\net6.0-windows\CampaignForecast.g.cs
 C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Release\net6.0-windows\CampaignForecast.baml
+C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Release\net6.0-windows\AddSchema.g.cs
+C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Release\net6.0-windows\AMRTrim.g.cs
+C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Release\net6.0-windows\UserControls\DateRangeItem.g.cs
+C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Release\net6.0-windows\AddSchema.baml
+C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Release\net6.0-windows\AMRTrim.baml
+C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Release\net6.0-windows\UserControls\DateRangeItem.baml

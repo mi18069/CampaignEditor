@@ -1,7 +1,9 @@
 ﻿C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\obj\Release\net6.0-windows\GeneratedInternalTypeHelper.g.i.cs
 
 FC:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\AddClient.xaml;;
+FC:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\AddSchema.xaml;;
 FC:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\AddUser.xaml;;
+FC:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\AMRTrim.xaml;;
 FC:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\AssignTargets.xaml;;
 FC:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\AssignUser.xaml;;
 FC:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\Campaign.xaml;;
@@ -19,6 +21,7 @@ FC:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\Rename.xaml;;
 FC:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\Seasonality.xaml;;
 FC:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\Sectable.xaml;;
 FC:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\Spots.xaml;;
+FC:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\UserControls\DateRangeItem.xaml;;
 FC:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\UserControls\SeasonalitiesItem.xaml;;
 FC:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\UserControls\SpotItem.xaml;;
 FC:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\UserControls\TargetDPItem.xaml;;

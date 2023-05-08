@@ -10,7 +10,13 @@
     <Compile Update="AddClient.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="AddSchema.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="AddUser.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="AMRTrim.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="AssignTargets.xaml.cs">
@@ -93,7 +99,13 @@
     <Page Update="AddClient.xaml">
       <SubType>Designer</SubType>
     </Page>
+    <Page Update="AddSchema.xaml">
+      <SubType>Designer</SubType>
+    </Page>
     <Page Update="AddUser.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="AMRTrim.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="AssignTargets.xaml">

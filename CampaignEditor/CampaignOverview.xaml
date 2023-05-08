@@ -312,9 +312,6 @@
                        HorizontalContentAlignment="Right" FontWeight="DemiBold"/>
                     </Grid>
                 </Border>
-
-
-
             </Grid>
         </Border>
 

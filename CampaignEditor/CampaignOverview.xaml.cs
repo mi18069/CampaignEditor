@@ -15,6 +15,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace CampaignEditor
 {
@@ -311,7 +312,11 @@ namespace CampaignEditor
 
         private void btnCancel_Click(object sender, RoutedEventArgs e)
         {
-            //this.Close();
+            // Get the parent window of the page
+            Window parentWindow = Window.GetWindow(this);
+
+            // Close the parent window
+            parentWindow.Close();
         }
 
         private async void btnSave_Click(object sender, RoutedEventArgs e)
