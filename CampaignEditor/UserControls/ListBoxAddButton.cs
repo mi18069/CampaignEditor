@@ -67,7 +67,7 @@ namespace CampaignEditor.UserControls
             ResizeItems(this.Items);
         }
 
-        private void ResizeItems(ItemCollection items)
+        public void ResizeItems(ItemCollection items)
         {
             int n = items.Count;
             for (int i = 0; i < n - 1; i++)

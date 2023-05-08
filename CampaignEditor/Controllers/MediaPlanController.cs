@@ -80,6 +80,11 @@ namespace CampaignEditor.Controllers
             return await _repository.DeleteMediaPlanById(id);
         }
 
+        public async Task<bool> DeleteMediaPlanByCmpId(int id)
+        {
+            return await _repository.DeleteMediaPlanByCmpId(id);
+        }
+
         public async Task<bool> SetActiveMediaPlanById(int id, bool isActive)
         {
             return await _repository.SetActiveMediaPlanById(id, isActive);

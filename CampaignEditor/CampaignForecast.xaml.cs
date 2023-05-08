@@ -13,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.DirectoryServices;
 using System.Linq;
 using System.Runtime.Intrinsics.Arm;
 using System.Threading.Channels;
@@ -56,6 +57,7 @@ namespace CampaignEditor.UserControls
 
         // number of frozen columns
         int mediaPlanColumns = 24;
+        bool resetRefData = false;
 
         public int FrozenColumnsNum
         {
@@ -170,6 +172,10 @@ namespace CampaignEditor.UserControls
                 return;
             }
 
+            if (resetRefData)
+            {
+                await DeleteData();
+            }
 
             for (int i = 0; i < lbDateRanges.Items.Count - 1; i++)
             {
@@ -191,6 +197,19 @@ namespace CampaignEditor.UserControls
 
             SetGrid(gridForecast);
 
+        }
+
+        private async Task DeleteData()
+        {
+            await _mediaPlanRefController.DeleteMediaPlanRefById(_campaign.cmpid);
+            var mediaPlans = await _mediaPlanController.GetAllMediaPlansByCmpid(_campaign.cmpid);
+
+            foreach (var mediaPlan in mediaPlans)
+            {
+                await _mediaPlanTermController.DeleteMediaPlanTermByXmpId(mediaPlan.xmpid);
+                await _mediaPlanController.DeleteMediaPlanById(mediaPlan.xmpid);
+            }
+            
         }
 
         private bool CheckDateRanges()
@@ -449,6 +468,8 @@ namespace CampaignEditor.UserControls
 
         private async Task FillLoadedDateRanges()
         {
+            spLoadedDateRanges.Children.Clear();
+
             var dateRanges = await _mediaPlanRefController.GetAllMediaPlanRefsByCmpid(_campaign.cmpid);
 
             foreach (var dateRange in dateRanges) 
@@ -470,7 +491,43 @@ namespace CampaignEditor.UserControls
 
         private void btnResetDates_Click(object sender, RoutedEventArgs e)
         {
+            resetRefData = true;
+            SetGrid(gridInit);
+            LoadGridInit();
+        }
 
+        private async void LoadGridInit()
+        {
+            lbDateRanges.Items.Clear();
+            lbDateRanges.Initialize(new DateRangeItem());
+            var dateRanges = await _mediaPlanRefController.GetAllMediaPlanRefsByCmpid(_campaign.cmpid);
+
+            bool first = true;
+            foreach (var dateRange in dateRanges)
+            {
+                DateTime start = TimeFormat.YMDStringToDateTime(dateRange.datestart.ToString());
+                DateTime end = TimeFormat.YMDStringToDateTime(dateRange.dateend.ToString());
+
+                if (first)
+                {
+                    DateRangeItem dri = lbDateRanges.Items[0] as DateRangeItem;
+                    dri.SetDates(start, end);
+                    first = false;
+                }
+                else
+                {
+                    DateRangeItem dri = new DateRangeItem();
+                    dri.SetDates(start, end);
+                    lbDateRanges.Items.Insert(lbDateRanges.Items.Count - 1, dri);
+                }                                              
+            }
+            
+            btnInitCancel.Visibility = Visibility.Visible;
+        }
+
+        private void btnInitCancel_Click(object sender, RoutedEventArgs e)
+        {
+            SetGrid(gridForecast);
         }
 
         #endregion
@@ -736,7 +793,7 @@ namespace CampaignEditor.UserControls
 
         }     
 
-            private async void OnCellPreviewKeyDown(object sender, KeyEventArgs e)
+        private async void OnCellPreviewKeyDown(object sender, KeyEventArgs e)
         {
 
             DataGridCell cell = sender as DataGridCell;
@@ -1205,8 +1262,8 @@ namespace CampaignEditor.UserControls
             }
         }
 
-        #endregion
 
+        #endregion
 
     }
 }

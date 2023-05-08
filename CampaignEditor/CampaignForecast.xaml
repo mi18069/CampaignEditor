@@ -11,7 +11,7 @@
       PreviewKeyDown="Page_PreviewKeyDown">
 
     <Grid>
-        <Grid x:Name="gridInit" Visibility="Hidden" >
+        <Grid x:Name="gridInit" Visibility="Visible" >
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="50" />
                 <ColumnDefinition Width="*" />
@@ -33,6 +33,10 @@
                     Content="Initialize" FontSize="20" Margin="10" Width="100"
                     HorizontalAlignment="Right"
                     Click="Init_Click"/>
+            <Button x:Name="btnInitCancel" Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2"
+                    Content="Cancel" FontSize="20" Margin="10, 10, 120, 10" Width="100"
+                    HorizontalAlignment="Right" Visibility="Hidden"
+                    Click="btnInitCancel_Click"/>
         </Grid>
         <Grid x:Name="gridLoading" Visibility="Hidden">
             <Grid.ColumnDefinitions>
@@ -49,7 +53,7 @@
                    HorizontalAlignment="Center" VerticalAlignment="Center">
             </Label>
         </Grid>
-        <Grid x:Name="gridForecast" Visibility="Visible" >
+        <Grid x:Name="gridForecast" Visibility="Hidden" >
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="10"/>
                 <ColumnDefinition Width="auto"/>

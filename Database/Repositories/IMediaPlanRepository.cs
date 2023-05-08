@@ -21,6 +21,7 @@ namespace Database.Repositories
         Task<IEnumerable<MediaPlanDTO>> GetAllMediaPlansWithinDate(DateOnly sdate, DateOnly edate);
         Task<bool> UpdateMediaPlan(UpdateMediaPlanDTO mediaPlanDTO);
         Task<bool> DeleteMediaPlanById(int id);
+        Task<bool> DeleteMediaPlanByCmpId(int id);
         Task<bool> SetActiveMediaPlanById(int id, bool isActive);
     }
 }

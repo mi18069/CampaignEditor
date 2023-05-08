@@ -45,5 +45,10 @@ namespace CampaignEditor.Controllers
         {
             return await _repository.DeleteMediaPlanTermById(id);
         }
+
+        public async Task<bool> DeleteMediaPlanTermByXmpId(int id)
+        {
+            return await _repository.DeleteMediaPlanTermByXmpId(id);
+        }
     }
 }

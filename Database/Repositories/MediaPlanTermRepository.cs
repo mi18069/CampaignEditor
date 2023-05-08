@@ -123,6 +123,14 @@ namespace Database.Repositories
             return affected != 0;
         }
 
-        
+        public async Task<bool> DeleteMediaPlanTermByXmpId(int id)
+        {
+            using var connection = _context.GetConnection();
+
+            var affected = await connection.ExecuteAsync(
+                "DELETE FROM xmpterm WHERE xmpid = @Id", new { Id = id });
+
+            return affected != 0;
+        }
     }
 }
