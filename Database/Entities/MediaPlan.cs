@@ -1,8 +1,10 @@
 ﻿using System;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace Database.Entities
 {
-    public class MediaPlan
+    public class MediaPlan : INotifyPropertyChanged
     {
         public int xmpid { get; set; }
         public int schid { get; set; }
@@ -39,5 +41,11 @@ namespace Database.Entities
         public double price { get; set; }
         public bool active { get; set; }
 
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        public void OnPropertyChanged([CallerMemberName] string propertyname = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyname));
+        }
     }
 }

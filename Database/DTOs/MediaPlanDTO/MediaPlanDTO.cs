@@ -8,5 +8,6 @@ namespace Database.DTOs.MediaPlanDTO
             : base(xmpid, schid, cmpid, chid, name, version, position, stime, etime, blocktime, days, type, special, sdate, edate, progcoef, created, modified, amr1, amr1trim, amr2, amr2trim, amr3, amr3trim, amrsale, amrsaletrim, amrp1, amrp2, amrp3, amrpsale, dpcoef, seascoef, price, active)
         {
         }
+
     }
 }

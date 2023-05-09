@@ -521,6 +521,8 @@ namespace CampaignEditor.UserControls
                     lbDateRanges.Items.Insert(lbDateRanges.Items.Count - 1, dri);
                 }                                              
             }
+
+            lbDateRanges.ResizeItems(lbDateRanges.Items);
             
             btnInitCancel.Visibility = Visibility.Visible;
         }

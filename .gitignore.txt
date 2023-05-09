@@ -161,6 +161,7 @@ sql/
 *.v2
 *.suo
 *.dll
+*.pdb
 *.props
 *.cache
 *.Cache
