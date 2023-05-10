@@ -261,7 +261,14 @@ namespace CampaignEditor
             tbCP.Text = _pricelist.price.ToString();
             tbMinGRP.Text = _pricelist.minprice.ToString();
             chbGRP.IsChecked = _pricelist.mgtype;
-            cbTarget.SelectedItem = await _targetController.GetTargetById(_pricelist.pltarg);
+            var target = await _targetController.GetTargetById(_pricelist.pltarg);
+            for (int i=0; i<cbTarget.Items.Count; i++)
+            {
+                var targ = cbTarget.Items[i] as TargetDTO;
+                if (targ != null && targ.targid == target.targid)
+                    cbTarget.SelectedIndex = i;
+            }
+            //cbTarget.SelectedItem = await _targetController.GetTargetById(_pricelist.pltarg);
             dpValidityFrom.SelectedDate = TimeFormat.YMDStringToDateTime(_pricelist.valfrom.ToString());
             dpValidityTo.SelectedDate = TimeFormat.YMDStringToDateTime(_pricelist.valto.ToString());
         }
