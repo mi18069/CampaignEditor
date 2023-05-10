@@ -8,10 +8,12 @@ using Database.DTOs.MediaPlanDTO;
 using Database.DTOs.MediaPlanRef;
 using Database.DTOs.MediaPlanTermDTO;
 using Database.DTOs.SchemaDTO;
+using Database.Entities;
 using Database.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.DirectoryServices;
 using System.Linq;
@@ -70,8 +72,8 @@ namespace CampaignEditor.UserControls
 
         private Dictionary<ChannelDTO, List<Tuple<MediaPlanDTO, List<MediaPlanTermDTO>>>> _channelMPDict =
             new Dictionary<ChannelDTO, List<Tuple<MediaPlanDTO, List<MediaPlanTermDTO>>>>();
-        private ObservableCollection<Tuple<MediaPlanDTO, ObservableCollection<MediaPlanTermDTO>>> _showMP 
-            = new ObservableCollection<Tuple<MediaPlanDTO, ObservableCollection<MediaPlanTermDTO>>>();
+        private ObservableCollection<MediaPlanTuple> _showMP 
+            = new ObservableCollection<MediaPlanTuple>();
 
         public CampaignForecast(ISchemaRepository schemaRepository,
             IChannelRepository channelRepository, 
@@ -155,10 +157,20 @@ namespace CampaignEditor.UserControls
             ICollectionView myDataView = CollectionViewSource.GetDefaultView(_showMP);
             dgSchema.ItemsSource = myDataView;
 
-            myDataView.SortDescriptions.Add(new SortDescription("Item1.name", ListSortDirection.Ascending));
-            myDataView.Filter = d => ((Tuple<MediaPlanDTO, ObservableCollection<MediaPlanTermDTO>>)d).Item1.active == true;
+            myDataView.SortDescriptions.Add(new SortDescription("MediaPlan.name", ListSortDirection.Ascending));
+            myDataView.Filter = d => ((MediaPlanTuple)d).MediaPlan.active == true;
+
+            _showMP.CollectionChanged += OnCollectionChanged;
 
             SetGrid(gridForecast);
+        }
+
+        // Method to handle the CollectionChanged event
+        private void OnCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
+        {
+            // Call Refresh() on the view to update it
+            ICollectionView view = CollectionViewSource.GetDefaultView(_showMP);
+            view.Refresh();
         }
 
         #region GridInit
@@ -283,22 +295,55 @@ namespace CampaignEditor.UserControls
         // reaching or creating mediaPlan
         private async Task<MediaPlanDTO> SchemaToMP(SchemaDTO schema)
         {
-            if (await _mediaPlanController.GetMediaPlanBySchemaAndCmpId(schema.id, _campaign.cmpid) != null)
-                return await _mediaPlanController.GetMediaPlanBySchemaAndCmpId(schema.id, _campaign.cmpid);
-            else
+            MediaPlanDTO mediaPlan = null;
+            if ((mediaPlan = await _mediaPlanController.GetMediaPlanBySchemaAndCmpId(schema.id, _campaign.cmpid)) != null)
             {
-                /*var channelCmp = await _channelCmpController.GetChannelCmpByIds(_campaign.cmpid, schema.chid);
+                if (AreEqualMediaPlanAndSchema(mediaPlan, schema))
+                    return mediaPlan;
+                else
+                {
+                    for (int i = 0; i < _showMP.Count(); i++)
+                    {
+                        if (AreMediaPlansEqual(_showMP[i].MediaPlan, mediaPlan))
+                        {
+                            _showMP.RemoveAt(i);
+                        }
+                    }
+
+                    foreach (var channel in _channelMPDict.Keys)
+                    {
+                        if (channel.chid == mediaPlan.chid)
+                        {
+                            for (int i = 0; i < _channelMPDict[channel].Count(); i++)
+                            {
+                                if (AreMediaPlansEqual(_channelMPDict[channel][i].Item1, mediaPlan))
+                                {
+                                    _channelMPDict[channel].RemoveAt(i);
+                                }
+                            }
+
+                            await _mediaPlanTermController.DeleteMediaPlanTermByXmpId(mediaPlan.xmpid);
+                            await _mediaPlanController.DeleteMediaPlanById(mediaPlan.xmpid);
+                        }
+                    }
+                    
+                    
+                }
+                    
+            }
+            /*var channelCmp = await _channelCmpController.GetChannelCmpByIds(_campaign.cmpid, schema.chid);
                 var pricelist = await _pricelistController.GetPricelistById(channelCmp.plid);
                 var seasonality = await _seasonalityController.GetSeasonalityById(pricelist.seastbid);
                 var sectable = await _sectableController.GetSectableById(pricelist.sectbid);*/
 
-                CreateMediaPlanDTO mediaPlan = new CreateMediaPlanDTO(schema.id, _campaign.cmpid, schema.chid,
-                    schema.name.Trim(), 1, schema.position, schema.stime, schema.etime, schema.blocktime,
-                    schema.days, schema.type, schema.special, schema.sdate, schema.edate, schema.progcoef,
-                    schema.created, schema.modified, 0, 100, 0, 100, 0, 100, 0, 100, 0, 0, 0, 0, 1, 1, 0, true);
+            CreateMediaPlanDTO createMediaPlan = new CreateMediaPlanDTO(schema.id, _campaign.cmpid, schema.chid,
+            schema.name.Trim(), 1, schema.position, schema.stime, schema.etime, schema.blocktime,
+            schema.days, schema.type, schema.special, schema.sdate, schema.edate, schema.progcoef,
+            schema.created, schema.modified, 0, 100, 0, 100, 0, 100, 0, 100, 0, 0, 0, 0, 1, 1, 0, true);
 
-                return await _mediaPlanController.CreateMediaPlan(mediaPlan);
-            }
+            return await _mediaPlanController.CreateMediaPlan(createMediaPlan);
+              
+
         }
 
         private async Task<List<MediaPlanTermDTO>> MediaPlanToMPTerm(MediaPlanDTO mediaPlan)
@@ -553,7 +598,7 @@ namespace CampaignEditor.UserControls
                     foreach (MediaPlanTermDTO mpTerm in _channelMPDict[selectedItem][k].Item2)
                         mediaPlanTerms.Add(mpTerm);
 
-                    _showMP.Add(Tuple.Create(mediaPlanDTO, mediaPlanTerms));
+                    _showMP.Add(new MediaPlanTuple(mediaPlanDTO, mediaPlanTerms));
                 }
             }
 
@@ -565,7 +610,7 @@ namespace CampaignEditor.UserControls
                 {
                     var tuple = _showMP[i];
                     foreach (var channelTuple in _channelMPDict[deselectedItem])
-                        if (channelTuple.Item1 == tuple.Item1)
+                        if (channelTuple.Item1 == tuple.MediaPlan)
                         {
                             _showMP.Remove(tuple);
                             i--;
@@ -650,7 +695,7 @@ namespace CampaignEditor.UserControls
                 column.Header = date.ToString("dd.MM.yy");
                     
 
-                var binding = new Binding($"Item2[{dates.IndexOf(date)}].spotcode");
+                var binding = new Binding($"Terms[{dates.IndexOf(date)}].spotcode");
                 //binding.ValidationRules.Add(new CharLengthValidationRule(1)); // add validation rule to restrict input to a single character
                 column.Binding = binding;
 
@@ -666,7 +711,7 @@ namespace CampaignEditor.UserControls
                 column.CellStyle = cellStyle;
 
                 var trigger = new DataTrigger();
-                trigger.Binding = new Binding($"Item2[{dates.IndexOf(date)}]");
+                trigger.Binding = new Binding($"Terms[{dates.IndexOf(date)}]");
                 trigger.Value = null;
                 trigger.Setters.Add(new Setter(BackgroundProperty, Brushes.LightGoldenrodYellow)); // Set background to yellow if value is null
 
@@ -807,8 +852,8 @@ namespace CampaignEditor.UserControls
             }
 
             // if cell is not binded to mediaPlanTerm, disable editing
-            var tuple = (Tuple<MediaPlanDTO, ObservableCollection<MediaPlanTermDTO>>)cell.DataContext;
-            var mpTerms = tuple.Item2;
+            var tuple = (MediaPlanTuple)cell.DataContext;
+            var mpTerms = tuple.Terms;
             var index = cell.Column.DisplayIndex - mediaPlanColumns;
             var mpTerm = mpTerms[index];
             if (mpTerm == null)
@@ -934,12 +979,12 @@ namespace CampaignEditor.UserControls
             int columnIndex = selectedCell.Column.DisplayIndex;
 
             // Get the bound item for the selected row
-            var tuple = row.Item as Tuple<MediaPlanDTO, ObservableCollection<MediaPlanTermDTO>>;
+            var tuple = row.Item as MediaPlanTuple;
             if (tuple == null)
             {
                 return null; // row is not bound to a tuple
             }
-            ObservableCollection<MediaPlanTermDTO> mpTerms = tuple.Item2;
+            ObservableCollection<MediaPlanTermDTO> mpTerms = tuple.Terms;
 
             // Get the MediaPlanTerm for the selected cell
             int rowIndex = row.GetIndex();
@@ -986,13 +1031,13 @@ namespace CampaignEditor.UserControls
                 deleteItem.Header = "Delete MediaPlan";
                 deleteItem.Click += async (obj, ea) =>
                 {
-                    var mediaPlanTuple = dgSchema.SelectedItem as Tuple<MediaPlanDTO, ObservableCollection<MediaPlanTermDTO>>;
+                    var mediaPlanTuple = dgSchema.SelectedItem as MediaPlanTuple;
                     if (mediaPlanTuple != null)
                     {
-                        var mediaPlan = mediaPlanTuple.Item1;
-                        mediaPlan.active = false;
+                        mediaPlanTuple.MediaPlan.active = false;
+                        _showMP.Remove(mediaPlanTuple);
+                        var mediaPlan = mediaPlanTuple.MediaPlan;                        
                         await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(mediaPlan));
-                        //dgSchema.Items.Remove(dgSchema.SelectedItem);
                     }
                 };
                 menu.Items.Add(deleteItem);
@@ -1006,10 +1051,17 @@ namespace CampaignEditor.UserControls
                     f.ShowDialog();
                     if (f._schema != null)
                     {
-                        /*MediaPlanDTO mediaPlan = await SchemaToMP(f._schema);
-                        var mediaPlanTerms = await MediaPlanToMPTerm(mediaPlan);
-                        var channel = await _channelController.GetChannelById(mediaPlan.chid);
-                        _channelMPDict[channel].Add(Tuple.Create(mediaPlan, mediaPlanTerms));*/
+                        var schema = await _schemaController.CreateGetSchema(f._schema);
+                        MediaPlanDTO mediaPlan = await SchemaToMP(schema);
+                        var channel = _channelMPDict.Keys.First(ch => ch.chid == mediaPlan.chid);
+
+                        if (!MPInList(mediaPlan, _channelMPDict[channel]))
+                        {
+                            var mediaPlanTerms = await MediaPlanToMPTerm(mediaPlan);
+                            var tuple = Tuple.Create(mediaPlan, mediaPlanTerms);
+                            _channelMPDict[channel].Add(tuple);
+                            _showMP.Add(new MediaPlanTuple(mediaPlan, new ObservableCollection<MediaPlanTermDTO>(mediaPlanTerms)));
+                        }
                     }
                 };
                 menu.Items.Add(addMediaPlanItem);
@@ -1027,12 +1079,12 @@ namespace CampaignEditor.UserControls
 
                 DataGridCell cell = dependencyObject as DataGridCell;
 
-                var mediaPlanTuple = dgSchema.SelectedItem as Tuple<MediaPlanDTO, ObservableCollection<MediaPlanTermDTO>>;
+                var mediaPlanTuple = dgSchema.SelectedItem as MediaPlanTuple;
                 if (mediaPlanTuple == null)
                 {
                     return;
                 }
-                var mediaPlan = mediaPlanTuple.Item1;
+                var mediaPlan = mediaPlanTuple.MediaPlan;
 
                 MenuItem trimAmr = new MenuItem();
                 // Check if the clicked cell is in the "AMR" columns
@@ -1064,6 +1116,50 @@ namespace CampaignEditor.UserControls
                 menu.Items.Add(trimAmr);
                 dgSchema.ContextMenu = menu;
             }
+        }
+
+        private bool MPInList(MediaPlanDTO mediaPlan, List<Tuple<MediaPlanDTO, List<MediaPlanTermDTO>>> list)
+        {
+            foreach (var mpTuple in list) 
+            {
+              
+                var mp = mpTuple.Item1;
+               
+                if (AreMediaPlansEqual(mediaPlan, mp))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        public bool AreMediaPlansEqual(MediaPlanDTO plan1, MediaPlanDTO plan2)
+        {
+            return plan1.xmpid == plan2.xmpid &&
+                   plan1.schid == plan2.schid &&
+                   plan1.cmpid == plan2.cmpid &&
+                   plan1.chid == plan2.chid &&
+                   plan1.name == plan2.name &&
+                   plan1.position == plan2.position &&
+                   plan1.stime == plan2.stime &&
+                   plan1.etime == plan2.etime &&
+                   plan1.blocktime == plan2.blocktime &&
+                   plan1.days == plan2.days &&
+                   plan1.sdate == plan2.sdate &&
+                   plan1.edate == plan2.edate;                  
+        }
+
+        public bool AreEqualMediaPlanAndSchema(MediaPlanDTO plan1, SchemaDTO schema)
+        {
+            return plan1.schid == schema.id &&
+                   plan1.chid == schema.chid &&
+                   plan1.name == schema.name &&
+                   plan1.position == schema.position &&
+                   plan1.stime == schema.stime &&
+                   plan1.etime == schema.etime &&
+                   plan1.blocktime == schema.blocktime &&
+                   plan1.days == schema.days &&
+                   plan1.sdate == schema.sdate &&
+                   plan1.edate == schema.edate;
         }
 
         private async Task<RoutedEventHandler> TrimAmrAsync(MediaPlanDTO mediaPlan, string message, string attr,  int? trimValue)
@@ -1123,7 +1219,7 @@ namespace CampaignEditor.UserControls
 
         private async void TextBoxAMRTrim_TextChanged(object sender, TextChangedEventArgs e)
         {
-            var tuple = dgSchema.SelectedItems[0] as Tuple<MediaPlanDTO, ObservableCollection<MediaPlanTermDTO>>;
+            var tuple = dgSchema.SelectedItems[0] as MediaPlanTuple;
             var textBox = sender as TextBox;
 
             BindingExpression bindingExpr = textBox.GetBindingExpression(TextBox.TextProperty);
@@ -1131,7 +1227,7 @@ namespace CampaignEditor.UserControls
 
             if (tuple != null)
             {
-                var mediaPlan = tuple.Item1;
+                var mediaPlan = tuple.MediaPlan;
                 int value = 0;
 
                 if (propertyName == "amr1trim")
@@ -1191,7 +1287,7 @@ namespace CampaignEditor.UserControls
 
         private async void TextBoxCoef_TextChanged(object sender, TextChangedEventArgs e)
         {
-            var tuple = dgSchema.SelectedItems[0] as Tuple<MediaPlanDTO, ObservableCollection<MediaPlanTermDTO>>;
+            var tuple = dgSchema.SelectedItems[0] as MediaPlanTuple;
             var textBox = sender as TextBox;
 
             BindingExpression bindingExpr = textBox.GetBindingExpression(TextBox.TextProperty);
@@ -1199,7 +1295,7 @@ namespace CampaignEditor.UserControls
 
             if (tuple != null)
             {
-                var mediaPlan = tuple.Item1;
+                var mediaPlan = tuple.MediaPlan;
                 float value = 0f;
 
                 if (propertyName == "progcoef")

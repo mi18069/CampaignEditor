@@ -21,6 +21,11 @@ namespace CampaignEditor.Controllers
             return await _repository.CreateSchema(schemaDTO);
         }
 
+        public async Task<SchemaDTO> CreateGetSchema(CreateSchemaDTO schemaDTO)
+        {
+            return await _repository.CreateGetSchema(schemaDTO);
+        }
+
         public async Task<SchemaDTO> GetSchemaById(int id)
         {
             return await _repository.GetSchemaById(id);

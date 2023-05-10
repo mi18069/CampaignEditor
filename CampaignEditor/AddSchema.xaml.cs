@@ -20,7 +20,7 @@ namespace CampaignEditor
         private ChannelController _channelController;
         private MediaPlanController _mediaPlanController;
 
-        public SchemaDTO _schema = null;
+        public CreateSchemaDTO _schema = null;
 
 
         public AddSchema(IChannelRepository channelRepository,
@@ -112,7 +112,7 @@ namespace CampaignEditor
             }
         }
 
-        private SchemaDTO MakeSchemaDTO()
+        private CreateSchemaDTO MakeSchemaDTO()
         {
             var channelItem = cbChannels.SelectedItem as ChannelDTO;
             int chid = channelItem.chid;
@@ -133,7 +133,7 @@ namespace CampaignEditor
             float progcoef = 1.0f;
             DateOnly created = DateOnly.FromDateTime(DateTime.Now);
 
-            return new SchemaDTO(0, chid, name, position, timeFrom, timeTo, blockTime, days, type,
+            return new CreateSchemaDTO(chid, name, position, timeFrom, timeTo, blockTime, days, type,
                 special, dateFrom, dateTo, progcoef, created, null);
         }
 

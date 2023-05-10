@@ -8,6 +8,7 @@ namespace Database.Repositories
     public interface ISchemaRepository
     {
         Task<bool> CreateSchema(CreateSchemaDTO schemaDTO);
+        Task<SchemaDTO> CreateGetSchema(CreateSchemaDTO schemaDTO);
         Task<SchemaDTO> GetSchemaById(int id);
         Task<SchemaDTO> GetSchemaByName(string name);
         Task<IEnumerable<SchemaDTO>> GetAllSchemas();

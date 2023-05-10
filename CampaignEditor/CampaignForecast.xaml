@@ -11,7 +11,7 @@
       PreviewKeyDown="Page_PreviewKeyDown">
 
     <Grid>
-        <Grid x:Name="gridInit" Visibility="Visible" >
+        <Grid x:Name="gridInit" Visibility="Hidden" >
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="50" />
                 <ColumnDefinition Width="*" />
@@ -53,7 +53,7 @@
                    HorizontalAlignment="Center" VerticalAlignment="Center">
             </Label>
         </Grid>
-        <Grid x:Name="gridForecast" Visibility="Hidden" >
+        <Grid x:Name="gridForecast" Visibility="Visible" >
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="10"/>
                 <ColumnDefinition Width="auto"/>
@@ -105,19 +105,19 @@
                         </Style>
                     </DataGrid.Resources>
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Program" Binding="{Binding Item1.name, Mode=TwoWay}"
+                    <DataGridTextColumn Header="Program" Binding="{Binding MediaPlan.name, Mode=TwoWay}"
                                         IsReadOnly="True" />
-                    <DataGridTextColumn Header="Position" Binding="{Binding Item1.position, Mode=TwoWay}" 
+                    <DataGridTextColumn Header="Position" Binding="{Binding MediaPlan.position, Mode=TwoWay}" 
                                         IsReadOnly="True"/>
-                    <DataGridTextColumn Header="Start time" Binding="{Binding Item1.stime, Mode=TwoWay}" 
+                    <DataGridTextColumn Header="Start time" Binding="{Binding MediaPlan.stime, Mode=TwoWay}" 
                                         IsReadOnly="True"/>
-                    <DataGridTextColumn Header="End time" Binding="{Binding Item1.etime, Mode=TwoWay}" 
+                    <DataGridTextColumn Header="End time" Binding="{Binding MediaPlan.etime, Mode=TwoWay}" 
                                         IsReadOnly="True"/>
-                    <DataGridTextColumn Header="Type" Binding="{Binding Item1.type, Mode=TwoWay}" 
+                    <DataGridTextColumn Header="Type" Binding="{Binding MediaPlan.type, Mode=TwoWay}" 
                                         IsReadOnly="True" Visibility="Collapsed"/>
-                    <DataGridCheckBoxColumn Header="Special" Binding="{Binding Item1.special, Mode=TwoWay}" 
+                    <DataGridCheckBoxColumn Header="Special" Binding="{Binding MediaPlan.special, Mode=TwoWay}" 
                                         Visibility="Collapsed"/>
-                    <DataGridTextColumn Header="Prog Coef" Binding="{Binding Item1.progcoef, Mode=TwoWay}" 
+                    <DataGridTextColumn Header="Prog Coef" Binding="{Binding MediaPlan.progcoef, Mode=TwoWay}" 
                                         IsReadOnly="True" Visibility="Collapsed" >
                         <DataGridTextColumn.EditingElementStyle>
                             <Style TargetType="{x:Type TextBox}">
@@ -125,9 +125,9 @@
                             </Style>
                         </DataGridTextColumn.EditingElementStyle>
                     </DataGridTextColumn>
-                    <DataGridTextColumn Header="AMR 1" Binding="{Binding Item1.amr1, Mode=TwoWay}" 
+                    <DataGridTextColumn Header="AMR 1" Binding="{Binding MediaPlan.amr1, Mode=TwoWay}" 
                                              IsReadOnly="True" Visibility="Collapsed" />
-                    <DataGridTextColumn Header="AMR 1 Trim" Binding="{Binding Item1.amr1trim, Mode=TwoWay}" 
+                    <DataGridTextColumn Header="AMR 1 Trim" Binding="{Binding MediaPlan.amr1trim, Mode=TwoWay}" 
                                              Visibility="Collapsed">
                         <DataGridTextColumn.EditingElementStyle>
                             <Style TargetType="{x:Type TextBox}">
@@ -135,9 +135,9 @@
                             </Style>
                         </DataGridTextColumn.EditingElementStyle>
                     </DataGridTextColumn>
-                    <DataGridTextColumn Header="AMR 2" Binding="{Binding Item1.amr2, Mode=TwoWay}" 
+                    <DataGridTextColumn Header="AMR 2" Binding="{Binding MediaPlan.amr2, Mode=TwoWay}" 
                                             IsReadOnly="True" Visibility="Collapsed"/>
-                    <DataGridTextColumn Header="AMR 2 Trim" Binding="{Binding Item1.amr2trim, Mode=TwoWay}" 
+                    <DataGridTextColumn Header="AMR 2 Trim" Binding="{Binding MediaPlan.amr2trim, Mode=TwoWay}" 
                                              Visibility="Collapsed">
                         <DataGridTextColumn.EditingElementStyle>
                             <Style TargetType="{x:Type TextBox}">
@@ -145,9 +145,9 @@
                             </Style>
                         </DataGridTextColumn.EditingElementStyle>
                     </DataGridTextColumn>
-                    <DataGridTextColumn Header="AMR 3" Binding="{Binding Item1.amr3, Mode=TwoWay}" 
+                    <DataGridTextColumn Header="AMR 3" Binding="{Binding MediaPlan.amr3, Mode=TwoWay}" 
                                             IsReadOnly="True" Visibility="Collapsed"/>
-                    <DataGridTextColumn Header="AMR 3 Trim" Binding="{Binding Item1.amr3trim, Mode=TwoWay}" 
+                    <DataGridTextColumn Header="AMR 3 Trim" Binding="{Binding MediaPlan.amr3trim, Mode=TwoWay}" 
                                              Visibility="Collapsed">
                         <DataGridTextColumn.EditingElementStyle>
                             <Style TargetType="{x:Type TextBox}">
@@ -155,9 +155,9 @@
                             </Style>
                         </DataGridTextColumn.EditingElementStyle>
                     </DataGridTextColumn>
-                    <DataGridTextColumn Header="AMR Sale" Binding="{Binding Item1.amrsale, Mode=TwoWay}"
+                    <DataGridTextColumn Header="AMR Sale" Binding="{Binding MediaPlan.amrsale, Mode=TwoWay}"
                                         IsReadOnly="True"/>
-                    <DataGridTextColumn Header="AMR Sale Trim" Binding="{Binding Item1.amrsaletrim, Mode=TwoWay}" 
+                    <DataGridTextColumn Header="AMR Sale Trim" Binding="{Binding MediaPlan.amrsaletrim, Mode=TwoWay}" 
                                              Visibility="Collapsed">
                         <DataGridTextColumn.EditingElementStyle>
                             <Style TargetType="{x:Type TextBox}">
@@ -165,13 +165,13 @@
                             </Style>
                         </DataGridTextColumn.EditingElementStyle>
                     </DataGridTextColumn>
-                    <DataGridTextColumn Header="AMR% 1" Binding="{Binding Item1.amrp1, Mode=TwoWay}" 
+                    <DataGridTextColumn Header="AMR% 1" Binding="{Binding MediaPlan.amrp1, Mode=TwoWay}" 
                                             IsReadOnly="True" Visibility="Collapsed"/>
-                    <DataGridTextColumn Header="AMR% 2" Binding="{Binding Item1.amrp2, Mode=TwoWay}" 
+                    <DataGridTextColumn Header="AMR% 2" Binding="{Binding MediaPlan.amrp2, Mode=TwoWay}" 
                                             IsReadOnly="True" Visibility="Collapsed"/>
-                    <DataGridTextColumn Header="AMR% 3" Binding="{Binding Item1.amrp3, Mode=TwoWay}" 
+                    <DataGridTextColumn Header="AMR% 3" Binding="{Binding MediaPlan.amrp3, Mode=TwoWay}" 
                                             IsReadOnly="True" Visibility="Collapsed"/>
-                    <DataGridTextColumn Header="AMR% Sale" Binding="{Binding Item1.amrpsale, Mode=TwoWay}" 
+                    <DataGridTextColumn Header="AMR% Sale" Binding="{Binding MediaPlan.amrpsale, Mode=TwoWay}" 
                                             IsReadOnly="True" Visibility="Collapsed"/>
                     <DataGridTextColumn Header="Affinity" 
                                             IsReadOnly="True"/>

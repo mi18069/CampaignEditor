@@ -5,6 +5,7 @@ namespace Database.Entities
 {
     public class Schema
     {
+        
         [Column("id")]
         public int id { get; set; }
         [Column("chid")]

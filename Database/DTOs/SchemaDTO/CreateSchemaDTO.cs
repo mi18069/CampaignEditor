@@ -8,5 +8,10 @@ namespace Database.DTOs.SchemaDTO
             : base(chid, name, position, stime, etime, blocktime, days, type, special, sdate, edate, progcoef, created, modified)
         {
         }
+
+        public CreateSchemaDTO(SchemaDTO schemaDTO)
+            : base(schemaDTO.chid, schemaDTO.name, schemaDTO.position, schemaDTO.stime, schemaDTO.etime, schemaDTO.blocktime, schemaDTO.days, schemaDTO.type, schemaDTO.special, schemaDTO.sdate, schemaDTO.edate, schemaDTO.progcoef, schemaDTO.created, schemaDTO.modified)
+        {
+        }
     }
 }
