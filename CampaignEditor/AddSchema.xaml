@@ -24,6 +24,7 @@
             <RowDefinition Height="auto" />
             <RowDefinition Height="auto" />
             <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="50" />
             <RowDefinition Height="10" />
@@ -45,39 +46,43 @@
 
         <Label Grid.Row="3" Grid.Column="4" Content="Type: " Margin="0, 10"/>
         <TextBox Grid.Row="3" Grid.Column="5" x:Name="tbType" Margin="0, 10"
-                 Width="70" VerticalContentAlignment="Center" MaxLength="3"/>
+                 Width="70" VerticalContentAlignment="Center" MaxLength="3"
+                 TextChanged="tbType_TextChanged"/>
 
-        <Label Grid.Row="4" Grid.Column="1" Content="From: " Margin="0, 10"/>
-        <DatePicker Grid.Row="4" Grid.Column="2" x:Name="dpFrom" Margin="0, 10"/>
+        <TextBlock Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="5" x:Name="tbTypeDesc"
+               Text="" FontWeight="DemiBold" HorizontalAlignment="Right"/>
 
-        <Label Grid.Row="4" Grid.Column="4" Content="To: " Margin="0, 10"/>
-        <DatePicker Grid.Row="4" Grid.Column="5" x:Name="dpTo" Margin="0, 10"/>
+        <Label Grid.Row="5" Grid.Column="1" Content="From: " Margin="0, 10"/>
+        <DatePicker Grid.Row="5" Grid.Column="2" x:Name="dpFrom" Margin="0, 10"/>
+
+        <Label Grid.Row="5" Grid.Column="4" Content="To: " Margin="0, 10"/>
+        <DatePicker Grid.Row="5" Grid.Column="5" x:Name="dpTo" Margin="0, 10"/>
         
-        <Label Grid.Row="5" Grid.Column="1" Content="Time from: " Margin="0, 10"/>
-        <TextBox Grid.Row="5" Grid.Column="2" x:Name="tbTimeFrom" MaxLength="5" Margin="0, 10"
+        <Label Grid.Row="6" Grid.Column="1" Content="Time from: " Margin="0, 10"/>
+        <TextBox Grid.Row="6" Grid.Column="2" x:Name="tbTimeFrom" MaxLength="5" Margin="0, 10"
                  Width="70" VerticalContentAlignment="Center"/>
 
-        <Label Grid.Row="5" Grid.Column="4" Content="Time to: " Margin="0, 10"/>
-        <TextBox Grid.Row="5" Grid.Column="5" x:Name="tbTimeTo" MaxLength="5" Margin="0, 10"
+        <Label Grid.Row="6" Grid.Column="4" Content="Time to: " Margin="0, 10"/>
+        <TextBox Grid.Row="6" Grid.Column="5" x:Name="tbTimeTo" MaxLength="5" Margin="0, 10"
                  Width="70" VerticalContentAlignment="Center"/>
 
-        <Label Grid.Row="6" Grid.Column="1" Content="Block time: " Margin="0, 10"/>
-        <TextBox Grid.Row="6" Grid.Column="2" x:Name="tbBlockTime" MaxLength="5" Margin="0, 10"
+        <Label Grid.Row="7" Grid.Column="1" Content="Block time: " Margin="0, 10"/>
+        <TextBox Grid.Row="7" Grid.Column="2" x:Name="tbBlockTime" MaxLength="5" Margin="0, 10"
                  Width="70" VerticalContentAlignment="Center"/>
 
-        <Label Grid.Row="7" Grid.Column="1" Content="Days: " Margin="0, 10"/>
-        <ListBox Grid.Row="7" Grid.Column="2" x:Name="lbDays" Margin="0, 10"
+        <Label Grid.Row="8" Grid.Column="1" Content="Days: " Margin="0, 10"/>
+        <ListBox Grid.Row="8" Grid.Column="2" x:Name="lbDays" Margin="0, 10"
                  Grid.ColumnSpan="3" SelectionMode="Multiple">
             
         </ListBox>
 
-        <CheckBox Grid.Row="6" Grid.Column="5" x:Name="chbSpecial" Content="IsSpecial: "
+        <CheckBox Grid.Row="7" Grid.Column="5" x:Name="chbSpecial" Content="IsSpecial: "
                   VerticalAlignment="Center" Margin="0, 10" IsChecked="False"/>
 
-        <Button Grid.Row="8" Grid.Column="1" Grid.ColumnSpan="6" Margin="10" 
+        <Button Grid.Row="9" Grid.Column="1" Grid.ColumnSpan="6" Margin="10" 
                 Width="100" HorizontalAlignment="Right" x:Name="btnSave" Content="Save" 
                 Click="btnSave_Click"/>
-        <Button Grid.Row="8" Grid.Column="1" Grid.ColumnSpan="6" Margin="10, 10, 120, 10" 
+        <Button Grid.Row="9" Grid.Column="1" Grid.ColumnSpan="6" Margin="10, 10, 120, 10" 
                 Width="100" HorizontalAlignment="Right" x:Name="btnCancel" Content="Cancel" 
                 Click="btnCancel_Click"/>
     </Grid>

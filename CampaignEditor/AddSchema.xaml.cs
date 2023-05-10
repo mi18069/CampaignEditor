@@ -1,6 +1,7 @@
 ﻿using CampaignEditor.Controllers;
 using CampaignEditor.DTOs.CampaignDTO;
 using Database.DTOs.ChannelDTO;
+using Database.DTOs.EmsTypesDTO;
 using Database.DTOs.SchemaDTO;
 using Database.Repositories;
 using System;
@@ -19,18 +20,20 @@ namespace CampaignEditor
 
         private ChannelController _channelController;
         private MediaPlanController _mediaPlanController;
+        private EmsTypesController _emsTypesController;
 
         public CreateSchemaDTO _schema = null;
 
 
         public AddSchema(IChannelRepository channelRepository,
-            IMediaPlanRepository mediaPlanRepository)
+            IMediaPlanRepository mediaPlanRepository,
+            IEmsTypesRepository emsTypesRepository)
         {
             InitializeComponent();
 
             _channelController = new ChannelController(channelRepository);
             _mediaPlanController = new MediaPlanController(mediaPlanRepository);
-
+            _emsTypesController = new EmsTypesController(emsTypesRepository);
         }
 
         public async Task Initialize(CampaignDTO campaign)
@@ -103,9 +106,9 @@ namespace CampaignEditor
             this.Close();
         }
 
-        private void btnSave_Click(object sender, RoutedEventArgs e)
+        private async void btnSave_Click(object sender, RoutedEventArgs e)
         {
-            if (CheckFields())
+            if (await CheckFields())
             {
                 _schema = MakeSchemaDTO();
                 this.Close();
@@ -126,7 +129,7 @@ namespace CampaignEditor
             {
                 days += day.Item2.ToString();
             }
-            string? type = tbType.Text.Trim().Length > 0 ? tbType.Text.Trim() : null;
+            string? type = tbType.Text.Trim().Length > 0 ? tbType.Text.ToUpper() : null;
             bool special = (bool)chbSpecial.IsChecked;
             DateOnly dateFrom = DateOnly.FromDateTime(dpFrom.SelectedDate.Value);
             DateOnly dateTo = DateOnly.FromDateTime(dpTo.SelectedDate.Value);
@@ -137,7 +140,7 @@ namespace CampaignEditor
                 special, dateFrom, dateTo, progcoef, created, null);
         }
 
-        private bool CheckFields()
+        private async Task<bool> CheckFields()
         {
             var timeRegex = new Regex(@"^[0-9]{2}:[0-9]{2}$");
 
@@ -154,6 +157,11 @@ namespace CampaignEditor
             else if (cbPosition.SelectedIndex == -1)
             {
                 MessageBox.Show("Assign position");
+                return false;
+            }
+            else if (await _emsTypesController.GetEmsTypesByCode(tbType.Text.Trim()) == null)
+            {
+                MessageBox.Show("Invalid type value");
                 return false;
             }
             else if (dpFrom.SelectedDate > dpTo.SelectedDate)
@@ -189,6 +197,26 @@ namespace CampaignEditor
             else
             {
                 return true;
+            }
+        }
+
+        private async void tbType_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        {
+            if (tbType.Text.Length == 3)
+            {
+                EmsTypesDTO emsType = null;
+                if ((emsType = await _emsTypesController.GetEmsTypesByCode(tbType.Text.ToUpper())) != null)
+                {
+                    tbTypeDesc.Text = emsType.typoname.ToString().Trim();
+                }
+                else
+                {
+                    tbTypeDesc.Text = "";
+                }
+            }
+            else
+            {
+                tbTypeDesc.Text = "";
             }
         }
     }
