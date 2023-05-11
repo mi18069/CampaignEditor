@@ -122,8 +122,20 @@ namespace CampaignEditor
             string name = tbProgram.Text.Trim();
             string position = cbPosition.Text.Trim();
             string timeFrom = tbTimeFrom.Text.Trim();
+            if (!timeFrom.Contains(':'))
+            {
+                timeFrom = timeFrom.Insert(2, ":");
+            }
             string? timeTo = tbTimeTo.Text.Trim().Length > 0 ? tbTimeTo.Text.Trim() : null;
+            if (timeTo != null && !timeTo.Contains(':'))
+            {
+                timeTo = timeTo.Insert(2, ":");
+            }
             string? blockTime = tbBlockTime.Text.Trim().Length > 0 ? tbBlockTime.Text.Trim() : null;
+            if (blockTime != null && !blockTime.Contains(':'))
+            {
+                blockTime = blockTime.Insert(2, ":");
+            }
             string days = "";
             foreach (Tuple<string, int> day in lbDays.SelectedItems)
             {
@@ -142,7 +154,8 @@ namespace CampaignEditor
 
         private async Task<bool> CheckFields()
         {
-            var timeRegex = new Regex(@"^[0-9]{2}:[0-9]{2}$");
+            var timeRegex1 = new Regex(@"^[0-9]{2}:[0-9]{2}$");
+            var timeRegex2 = new Regex(@"^[0-9]{4}$");
 
             if (cbChannels.SelectedIndex == -1)
             {
@@ -174,19 +187,21 @@ namespace CampaignEditor
                 MessageBox.Show("Assign time from");
                 return false;
             }
-            else if (!timeRegex.IsMatch(tbTimeFrom.Text))
+            else if (!timeRegex1.IsMatch(tbTimeFrom.Text.Trim()) && !timeRegex2.IsMatch(tbTimeFrom.Text.Trim()))
             {
-                MessageBox.Show("Invalid time from value");
+                MessageBox.Show("Invalid time from value\nPossible formats: HH:mm or HHmm");
                 return false;
             }
-            else if ( tbTimeTo.Text.Trim().Length > 0 && !timeRegex.IsMatch(tbTimeTo.Text))
+            else if ( tbTimeTo.Text.Trim().Length > 0 && 
+                !timeRegex1.IsMatch(tbTimeTo.Text.Trim()) && !timeRegex2.IsMatch(tbTimeFrom.Text.Trim()))
             {
-                MessageBox.Show("Invalid time to value");
+                MessageBox.Show("Invalid time from value\nPossible formats: HH:mm or HHmm");
                 return false;
             }
-            else if (tbBlockTime.Text.Trim().Length > 0 && !timeRegex.IsMatch(tbBlockTime.Text))
+            else if (tbBlockTime.Text.Trim().Length > 0 && 
+                !timeRegex1.IsMatch(tbBlockTime.Text) && !timeRegex2.IsMatch(tbTimeFrom.Text.Trim()))
             {
-                MessageBox.Show("Invalid block time value");
+                MessageBox.Show("Invalid time from value\nPossible formats: HH:mm or HHmm");
                 return false;
             }
             else if (lbDays.SelectedItems.Count == 0)
