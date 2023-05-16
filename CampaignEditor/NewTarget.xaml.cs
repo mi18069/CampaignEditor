@@ -301,7 +301,7 @@ namespace CampaignEditor
                 return "";
         }
 
-        private string ParseSelectedTargdefp()
+        /*private string ParseSelectedTargdefp()
         {
             StringBuilder sbTargetdefp = new StringBuilder("I;#;Y;N;&;");
             int i = 0;
@@ -342,8 +342,53 @@ namespace CampaignEditor
                 return "I;";
 
             return sbTargetdefp.ToString();
-        }
+        }*/
 
+        private string ParseSelectedTargdefp()
+        {
+            StringBuilder sbTargetdefp = new StringBuilder("I;#;Y;N;"); 
+            bool firstOver10 = true;
+            foreach (TreeViewModel parent in treeViewList)
+            {
+                bool firstValue = true;
+                foreach (TreeViewModel child in parent.Children)
+                {
+
+                    int parentid = (parent.Item as TargetClassDTO).demoid;
+                    if (parentid > 10 && firstOver10) // because there are no parent with demoid == 10
+                    {
+                        string AgeRange = ParseAgeRangeTargetdefp();
+                        if (AgeRange != "")
+                        {
+                            sbTargetdefp.Append("&;" + AgeRange);
+                        }
+                        firstOver10 = false;
+                    }
+
+                    if (child.IsChecked != false)
+                    {
+                        if (firstValue)
+                        {
+                            int id = ConvertToPlaceInTargetdefp(parentid);
+                            string childid = (child.Item as TargetValueDTO).value;
+                            sbTargetdefp.Append("&;C;" + id + ",1" + ";INL," + childid + ";100;");
+                            firstValue = false;
+                        }
+                        else
+                        {
+                            sbTargetdefp.Length = sbTargetdefp.Length - 5; // removing ";100;"
+                            string childid = (child.Item as TargetValueDTO).value;
+                            sbTargetdefp.Append("," + childid + ";100;");
+                        }
+
+                    }
+                }
+            }
+            if (sbTargetdefp.ToString() == "I;#;Y;N;&;")
+                return "I;";
+
+            return sbTargetdefp.ToString();
+        }
         private string ParseAgeRangeTargetdefp()
         {
             if ((bool)cbAgeRange.IsChecked == true)
