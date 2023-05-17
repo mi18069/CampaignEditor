@@ -71,22 +71,7 @@ namespace CampaignEditor
             setting.SaveConnectionString("cs", connectionString);
             MessageBox.Show("Connection succesfully saved", "Message", MessageBoxButton.OK, MessageBoxImage.Information);
             this.Close();
-            /*try
-            {
-                PgHelper helper = new PgHelper(connectionString);
-                if (helper.isConnection)
-                {
-                    AppSetting setting = new AppSetting();
-                    setting.SaveConnectionString("cs", connectionString);
-                    MessageBox.Show("Connection succesfully saved", "Message", MessageBoxButton.OK, MessageBoxImage.Information);
-                    this.Close();
-                }
-             
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message, "Message", MessageBoxButton.OK, MessageBoxImage.Error);
-            }*/
+
         }
     }
 }

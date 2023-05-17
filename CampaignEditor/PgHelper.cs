@@ -10,6 +10,7 @@ namespace CampaignEditor
             cn = new NpgsqlConnection(connectionString);
         }
 
+        // for checking if connecting is successful
         public bool isConnection
         {
             get
@@ -19,5 +20,6 @@ namespace CampaignEditor
                 return true;
             }
         }
+
     }
 }
