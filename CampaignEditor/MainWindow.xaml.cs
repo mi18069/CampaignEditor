@@ -2,7 +2,9 @@
 using CampaignEditor.DTOs.UserDTO;
 using CampaignEditor.Repositories;
 using CampaignEditor.StartupHelpers;
+using Database;
 using System;
+using System.Configuration;
 using System.IO;
 using System.Windows;
 using System.Windows.Input;
@@ -15,6 +17,7 @@ namespace CampaignEditor
     {
         private readonly IUserRepository _userRepository;
         private readonly IAbstractFactory<Clients> _factoryClients;
+        private readonly IAbstractFactory<Config> _factoryConfig;
         private UserController _userController;
 
         private string appPath = Directory.GetCurrentDirectory();
@@ -23,16 +26,22 @@ namespace CampaignEditor
 
         public static UserDTO user = null;
         private bool onlyOne = false; // To ensure that only one window is shown
-        public MainWindow(IUserRepository userRepository, IAbstractFactory<Clients> factoryClients)
+        public MainWindow(IUserRepository userRepository, IAbstractFactory<Clients> factoryClients,
+            IAbstractFactory<Config> factoryConfig)
         {
             
             InitializeComponent();
             _userRepository = userRepository;
             _factoryClients = factoryClients;
+            _factoryConfig = factoryConfig;
 
             _userController = new UserController(_userRepository);
 
             PassShowHide.Source = new BitmapImage(new Uri(appPath + imgPeekPath));
+
+            Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+            string connectionString = config.ConnectionStrings.ConnectionStrings["cs"].ConnectionString;
+            AppSettings.ConnectionString = connectionString;
         }
 
         // Checks if the username and password are typed correctly
@@ -135,6 +144,11 @@ namespace CampaignEditor
             {
                 e.Handled = true;
             }
+        }
+
+        private void btnConfigDatabase_Click(object sender, RoutedEventArgs e)
+        {
+            _factoryConfig.Create().ShowDialog();
         }
     }
 }

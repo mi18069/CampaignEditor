@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Npgsql;
 using System;
+using CampaignEditor;
+using System.Configuration;
 
 namespace Database.Data
 {
@@ -17,7 +19,8 @@ namespace Database.Data
         {
             //string connectionString = "Server=localhost;port=5433;user id=postgres;password=jovan1999;database=mplaner;";
             //string connectionString = "Server=localhost;port=5432;user id=postgres;password=Peca;database=mplaner;";
-            var connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["csDevel"].ConnectionString;
+            //var connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["cs"].ConnectionString;
+            var connectionString = AppSettings.ConnectionString;
             var connection = new NpgsqlConnection();
             connection.ConnectionString = connectionString;
             return connection;

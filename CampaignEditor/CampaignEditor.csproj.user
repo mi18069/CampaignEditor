@@ -40,6 +40,9 @@
     <Compile Update="CmpInfo.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Config.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Goals.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -127,6 +130,9 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="CmpInfo.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Config.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Goals.xaml">

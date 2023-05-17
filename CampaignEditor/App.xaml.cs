@@ -44,6 +44,7 @@ namespace CampaignEditor
                     services.AddFormFactory<CampaignForecast>();
                     services.AddFormFactory<AddSchema>();
                     services.AddFormFactory<AMRTrim>();
+                    services.AddFormFactory<Config>();
                     services.AddScoped<IDataContext, DataContext>();
                     // Add services
                     Extensions.UserExtensions.AddUserExtensions(services);
