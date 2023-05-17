@@ -46,7 +46,7 @@
         <PasswordBox x:Name="pbPassword" Grid.Row="5" Grid.Column="2" Margin="10"/>
 
         <Button x:Name="btnConnect" Grid.Row="7" Grid.Column="2" 
-                HorizontalAlignment="Right" Width="100" Content="Connect" Margin="10, 10, 120, 10"
+                HorizontalAlignment="Right" Width="100" Content="Test" Margin="10, 10, 120, 10"
                 Click="btnConnect_Click"/>
         <Button x:Name="btnSave" Grid.Row="7" Grid.Column="2" 
                 HorizontalAlignment="Right" Width="100" Content="Save" Margin="10, 10, 10, 10"

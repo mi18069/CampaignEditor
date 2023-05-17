@@ -24,20 +24,24 @@ namespace CampaignEditor
 
         private void FillFields()
         {
-            Regex regPort = new Regex("port=\\d+");
-            Regex regUsername = new Regex("user id=\\w+");
-            Regex regPassword = new Regex("password=\\w+");
-            Regex regDatabase = new Regex("database=\\w+");
+            Regex regPort = new Regex("port=\\d*;");
+            Regex regUsername = new Regex("user id=\\w*;");
+            Regex regPassword = new Regex("password=\\w*;");
+            Regex regDatabase = new Regex("database=\\w*;");
             string connectionString = AppSettings.ConnectionString;
             
             string portString = regPort.Match(connectionString).Value;
-            tbPort.Text = portString.Substring(portString.IndexOf("=")+1);
+            string portValue = portString.Substring(portString.IndexOf("=") + 1);
+            tbPort.Text = portValue.Remove(portValue.Length-1, 1);
             string usernameString = regUsername.Match(connectionString).Value;
-            tbUsername.Text = usernameString.Substring(usernameString.IndexOf("=")+1);
+            string usernameValue = usernameString.Substring(usernameString.IndexOf("=") + 1);
+            tbUsername.Text = usernameValue.Remove(usernameValue.Length - 1, 1);
             string passwordString = regPassword.Match(connectionString).Value;
-            pbPassword.Password = passwordString.Substring(passwordString.IndexOf("=")+1);
+            string passwordValue = passwordString.Substring(passwordString.IndexOf("=") + 1);
+            pbPassword.Password = passwordValue.Remove(passwordValue.Length - 1, 1);
             string databaseString = regDatabase.Match(connectionString).Value;
-            tbDatabase.Text = databaseString.Substring(databaseString.IndexOf("=")+1);
+            string databaseValue = databaseString.Substring(databaseString.IndexOf("=") + 1);
+            tbDatabase.Text = databaseValue.Remove(databaseValue.Length - 1, 1);
         }
 
         private void btnConnect_Click(object sender, RoutedEventArgs e)
@@ -61,8 +65,13 @@ namespace CampaignEditor
         {
             string connectionString = string.Format("Server={0};port={1};user id={2};password={3};database={4};",
                 cbServer.Text.Trim(), tbPort.Text.Trim(), tbUsername.Text.Trim(), pbPassword.Password.ToString().Trim(), tbDatabase.Text.Trim());
-
-            try
+            
+            // Saving without checkings
+            AppSetting setting = new AppSetting();
+            setting.SaveConnectionString("cs", connectionString);
+            MessageBox.Show("Connection succesfully saved", "Message", MessageBoxButton.OK, MessageBoxImage.Information);
+            this.Close();
+            /*try
             {
                 PgHelper helper = new PgHelper(connectionString);
                 if (helper.isConnection)
@@ -77,7 +86,7 @@ namespace CampaignEditor
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message, "Message", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+            }*/
         }
     }
 }

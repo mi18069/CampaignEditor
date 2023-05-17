@@ -1,8 +1,6 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Npgsql;
 using System;
-using CampaignEditor;
-using System.Configuration;
 
 namespace Database.Data
 {

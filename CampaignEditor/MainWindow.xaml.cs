@@ -47,12 +47,26 @@ namespace CampaignEditor
         // Checks if the username and password are typed correctly
         private async void btnCheckCredentials_Click(object sender, RoutedEventArgs e)
         {
+            btnCheckCredentials.IsEnabled = false;
             lblError.Content = "";
 
             string username = tbUsername.Text.Trim();
             string password = pbPassword.Password.ToString().Trim();
 
-            var userFound = await _userController.CheckCredentials(username, password);
+            bool userFound = false;
+            try
+            {
+                userFound = await _userController.CheckCredentials(username, password);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Database error: " + ex.Message, "Message", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+            finally
+            {
+                btnCheckCredentials.IsEnabled = true;
+            }
 
             if (userFound == false)
             {
