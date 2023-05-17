@@ -105,6 +105,11 @@ namespace CampaignEditor.UserControls
             _factoryAmrTrim = factoryAmrTrim;
 
             InitializeComponent();
+
+            if (MainWindow.user.usrlevel == 2)
+            {
+                this.IsEnabled = false;
+            }
         }
 
 

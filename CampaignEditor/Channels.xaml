@@ -39,13 +39,17 @@
         <Label Content="Channels" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"
                HorizontalAlignment="Center"/>
         <ListView x:Name="lvChannels" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Grid.RowSpan="2"
-                  MinWidth="250" Margin="0, 0, 0, 20"
+                  MinWidth="250" 
                   DisplayMemberPath="chname" SelectionMode="Multiple"
                   SelectionChanged="lvChannels_SelectionChanged"/>
+        <ListBox x:Name="lbSelectedChannels" Grid.Row="4" Grid.Column="4" Grid.ColumnSpan="2"
+                 DisplayMemberPath="chname" Height="100"
+                 SelectionMode="Single" Margin="0, 10, 0, 0"
+                 MouseDoubleClick="lbSelectedChannels_MouseDoubleClick"/>
         <ListBox x:Name="lbChannelGroups" Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2"
-                 DisplayMemberPath="chgrname" MaxHeight="150"
+                 DisplayMemberPath="chgrname" Height="100"
                  SelectionChanged="lbChannelGroups_SelectionChanged"
-                 SelectionMode="Multiple"/>
+                 SelectionMode="Multiple" Margin="0,10, 0, 0"/>
         <Button x:Name="btnEditChannelGroups" Grid.Row="5" Grid.Column="1" 
                 Margin="20"  Width="30" Height="30" BorderThickness="0" Background="White"
                 Click="btnEditChannelGroups_Click">
@@ -59,7 +63,7 @@
                   HorizontalAlignment="Right" VerticalAlignment="Center"
                   Checked="chbActivePricelists_Checked"
                   Unchecked="chbActivePricelists_Unchecked"/>
-        <ListView x:Name="lvPricelists" Grid.Row="2" Grid.Column="4" Grid.ColumnSpan="2" Grid.RowSpan="3"
+        <ListView x:Name="lvPricelists" Grid.Row="2" Grid.Column="4" Grid.ColumnSpan="2" Grid.RowSpan="2"
                 MinWidth="250" 
                 DisplayMemberPath="plname"
                 SelectionMode="Single"

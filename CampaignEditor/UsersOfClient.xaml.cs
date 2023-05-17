@@ -36,6 +36,11 @@ namespace CampaignEditor
             _factoryUsersAndClients = factoryUsersAndClients;
             _factoryAssignUser = factoryAssignUser; 
             _clientController = new ClientController(clientRepository);
+
+            if (MainWindow.user.usrlevel == 2)
+            {
+                this.IsEnabled = false;
+            }
         }
 
 

@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CampaignEditor"
         mc:Ignorable="d"
-        Title="AddClient" Height="300" Width="400"
+        Title="AddClient" Height="300" Width="400" ResizeMode="NoResize"
         FontSize="20">
     <Grid>
         <Label x:Name="lblClientName" Content="Client name:"

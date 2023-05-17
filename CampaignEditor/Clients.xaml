@@ -31,7 +31,7 @@
                         <MenuItem Header="Delete client" Click="btnDeleteClient_Click"  IsEnabled="{Binding Path=CanBeDeleted}"/>
                     </ContextMenu>
                     <ContextMenu x:Key="CampaignContext"  StaysOpen="true">
-                        <MenuItem Header="Edit campaign" Click="btnAddCampaign_Click" IsEnabled="{Binding Path=isReadWrite}"/>
+                        <MenuItem Header="Edit campaign" Click="btnAddCampaign_Click"/>
                         <MenuItem Header="Rename campaign" Click="btnRenameCampaign_Click" IsEnabled="{Binding Path=isReadWrite}"/>
                         <MenuItem Header="Delete campaign" IsEnabled="{Binding Path=isAdministrator}"/>
                     </ContextMenu>

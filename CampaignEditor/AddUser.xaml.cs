@@ -61,14 +61,6 @@ namespace CampaignEditor
             }
         }
 
-        // TODO needs to check for instances in userClients table first, this method shouldn't be in this class
-        private async void btnDeleteUser_Click(object sender, RoutedEventArgs e)
-        {
-            string username = tbUsername.Text.Trim();
-
-            await _userController.DeleteUserByUsername(username);
-        }
-
         private async Task<bool> CheckRegistrationCredentialsAsync(string username, string password, string passwordConfirmed, string phone)
         {
             if (username.Length == 0)

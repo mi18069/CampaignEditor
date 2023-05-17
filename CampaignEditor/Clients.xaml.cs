@@ -132,18 +132,18 @@ namespace CampaignEditor
 
         }
 
-        private void tbSearchClients_TextChanged(object sender, TextChangedEventArgs e)
+        private async void tbSearchClients_TextChanged(object sender, TextChangedEventArgs e)
         {
             if (tbSearchClients.Text.Length >= 3 && tbSearchClients.Text != searchClientsString)
             {
-                _clientsTree.UpdateTree();
+                await _clientsTree.UpdateTree();
                 clientsUpdated = true;
             }
             else
             {
                 if (clientsUpdated)
                 {
-                    _clientsTree.UpdateTree();
+                    await _clientsTree.UpdateTree();
                     clientsUpdated = false;
                 }
 

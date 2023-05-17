@@ -77,6 +77,11 @@ namespace CampaignEditor
             _targetCmpController = new TargetCmpController(targetCmpRepository);
             InitializeComponent();
 
+            if (MainWindow.user.usrid == 2)
+            {
+                btnSave.IsEnabled = false;
+            }
+
         }
 
         #region Initialization

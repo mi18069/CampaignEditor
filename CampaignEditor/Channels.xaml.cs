@@ -282,6 +282,17 @@ namespace CampaignEditor
             {
                 lastSelected = lvPricelists.SelectedItem as PricelistDTO;
             }
+
+            if (lvChannels.SelectedItems.Count > 0)
+            {
+                lbSelectedChannels.Items.Clear();
+                foreach (var channel in lvChannels.SelectedItems)
+                {
+                    lbSelectedChannels.Items.Add(channel);
+                }
+                lastSelected = lvPricelists.SelectedItem as PricelistDTO;
+            }
+
             PricelistList.Clear();
             // Making lists of integers for faster transition of elements
             List<int> plids = new List<int>();
@@ -511,5 +522,22 @@ namespace CampaignEditor
         }
 
         #endregion
+
+        private void lbSelectedChannels_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (lbSelectedChannels.SelectedItems.Count < 1)
+                return;
+
+            var channel = lbSelectedChannels.SelectedItems[0] as ChannelDTO;
+            for (int i=0; i<lbSelectedChannels.Items.Count; i++)
+            {
+                ChannelDTO ch = lbSelectedChannels.Items[i] as ChannelDTO;
+                if (ch.chid == channel.chid)
+                {
+                    lbSelectedChannels.Items.Remove(channel);
+                    lvChannels.SelectedItems.Remove(ch);
+                }
+            }
+        }
     }
 }
