@@ -25,19 +25,19 @@ namespace CampaignEditor.Controllers
             return await _repository.GetMediaPlanHistById(id);
         }
 
-        public async Task<MediaPlanHistDTO> GetMediaPlanHistByName(string name)
+        public async Task<IEnumerable<MediaPlanHistDTO>> GetAllMediaPlanHistsByXmpid(int xmpid)
         {
-            return await _repository.GetMediaPlanHistByName(name);
+            return await _repository.GetAllMediaPlanHistsByXmpid(xmpid);
+        }
+
+        public async Task<IEnumerable<MediaPlanHistDTO>> GetAllMediaPlanHistsBySchid(int schid)
+        {
+            return await _repository.GetAllMediaPlanHistsBySchid(schid);
         }
 
         public async Task<IEnumerable<MediaPlanHistDTO>> GetAllMediaPlanHists()
         {
             return await _repository.GetAllMediaPlanHists();
-        }
-
-        public async Task<IEnumerable<MediaPlanHistDTO>> GetAllMediaPlanHistsWithinDate(DateOnly sdate, DateOnly edate)
-        {
-            return await _repository.GetAllMediaPlanHistsWithinDate(sdate, edate);
         }
 
         public async Task<IEnumerable<MediaPlanHistDTO>> GetAllChannelMediaPlanHists(int chid)

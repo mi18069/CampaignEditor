@@ -33,6 +33,7 @@ namespace CampaignEditor.UserControls
         private ChannelCmpController _channelCmpController;
         private MediaPlanController _mediaPlanController;
         private MediaPlanTermController _mediaPlanTermController;
+        private MediaPlanHistController _mediaPlanHistController;
         private MediaPlanRefController _mediaPlanRefController;
         private SpotController _spotController;
         private GoalsController _goalsController;
@@ -77,6 +78,7 @@ namespace CampaignEditor.UserControls
             IChannelCmpRepository channelCmpRepository,
             IMediaPlanRepository mediaPlanRepository,
             IMediaPlanTermRepository mediaPlanTermRepository,
+            IMediaPlanHistRepository mediaPlanHistRepository,
             IMediaPlanRefRepository mediaPlanRefRepository,
             ISpotRepository spotRepository,
             IGoalsRepository goalsRepository,
@@ -94,6 +96,7 @@ namespace CampaignEditor.UserControls
             _channelCmpController = new ChannelCmpController(channelCmpRepository);
             _mediaPlanController = new MediaPlanController(mediaPlanRepository);
             _mediaPlanTermController = new MediaPlanTermController(mediaPlanTermRepository);
+            _mediaPlanHistController = new MediaPlanHistController(mediaPlanHistRepository);
             _mediaPlanRefController = new MediaPlanRefController(mediaPlanRefRepository);
             _spotController = new SpotController(spotRepository);
             _goalsController = new GoalsController(goalsRepository);
@@ -1363,7 +1366,23 @@ namespace CampaignEditor.UserControls
         }
 
 
+
         #endregion
 
+        private async void dgSchema_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            dgHist.Items.Clear();
+            if (dgSchema.SelectedItems.Count == 0)
+                return;
+            else
+            {
+                var mediaPlanTuple = dgSchema.SelectedItems[0] as MediaPlanTuple;
+                var mediaPlan = mediaPlanTuple.MediaPlan;
+
+                var mediaPlanHists = await _mediaPlanHistController.GetAllMediaPlanHistsBySchid(mediaPlan.schid);
+                foreach (var mediaPlanHist in mediaPlanHists)
+                    dgHist.Items.Add(mediaPlanHist);
+            }
+        }
     }
 }

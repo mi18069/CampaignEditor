@@ -9,10 +9,10 @@ namespace Database.Repositories
     {
         Task<bool> CreateMediaPlanHist(CreateMediaPlanHistDTO mediaPlanHistDTO);
         Task<MediaPlanHistDTO> GetMediaPlanHistById(int id);
-        Task<MediaPlanHistDTO> GetMediaPlanHistByName(string name);
+        Task<IEnumerable<MediaPlanHistDTO>> GetAllMediaPlanHistsByXmpid(int xmpid);
+        Task<IEnumerable<MediaPlanHistDTO>> GetAllMediaPlanHistsBySchid(int schid);
         Task<IEnumerable<MediaPlanHistDTO>> GetAllMediaPlanHists();
         Task<IEnumerable<MediaPlanHistDTO>> GetAllChannelMediaPlanHists(int chid);
-        Task<IEnumerable<MediaPlanHistDTO>> GetAllMediaPlanHistsWithinDate(DateOnly sdate, DateOnly edate);
         Task<bool> UpdateMediaPlanHist(UpdateMediaPlanHistDTO mediaPlanHistDTO);
         Task<bool> DeleteMediaPlanHistById(int id);
     }

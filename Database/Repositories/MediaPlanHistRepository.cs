@@ -1,11 +1,11 @@
 ﻿using AutoMapper;
 using Dapper;
 using Database.Data;
-using Database.DTOs.MediaPlanDTO;
 using Database.DTOs.MediaPlanHistDTO;
 using Database.Entities;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Database.Repositories
@@ -28,7 +28,7 @@ namespace Database.Repositories
                 "INSERT INTO xmphsit (xmpid, schid, chid, naziv, pozicija, vremeod, vremedo, " +
                 "datum, progkoef, amr1, amr2, amr3, amrsale, amrp1, amrp2, amrp3, amrpsale, active, outlier) " +
                 "VALUES (@Xmpid, @Schid, @Chid, @Name, @Position, @Stime, @Etime, " +
-                "@Date, @Progcoef, @Amr1, @Amr2, @Amr3, @Amrsale, @Amrp1, @Amrp2, @Amrp3, @Amrpsale, @Active, @Outlier) ",
+                "CAST(@Date AS DATE), @Progcoef, @Amr1, @Amr2, @Amr3, @Amrsale, @Amrp1, @Amrp2, @Amrp3, @Amrpsale, @Active, @Outlier) ",
             new
             {
                 Xmpid = mediaPlanHistDTO.xmpid,
@@ -38,7 +38,7 @@ namespace Database.Repositories
                 Position = mediaPlanHistDTO.position,
                 Stime = mediaPlanHistDTO.stime,
                 Etime = mediaPlanHistDTO.etime,
-                Date = mediaPlanHistDTO.date,
+                Date = mediaPlanHistDTO.date.ToString("yyyy-MM-dd"),
                 Progcoef = mediaPlanHistDTO.progcoef,
                 Amr1 = mediaPlanHistDTO.amr1,
                 Amr2 = mediaPlanHistDTO.amr2,
@@ -60,39 +60,134 @@ namespace Database.Repositories
         {
             using var connection = _context.GetConnection();
 
-            var mediaPlanHist = await connection.QueryFirstOrDefaultAsync<MediaPlanHist>(
+            var mediaPlanHist = await connection.QueryAsync<dynamic>(
                 "SELECT * FROM xmphist WHERE xmphistid = @Id", new { Id = id });
 
-            return _mapper.Map<MediaPlanHistDTO>(mediaPlanHist);
+            mediaPlanHist = mediaPlanHist.Select(item => new MediaPlanHist()
+            {
+                xmphistid = item.xmphistid,
+                xmpid = item.xmpid,
+                schid = item.schid,
+                chid = item.chid,
+                name = item.naziv,
+                position = item.pozicija,
+                stime = item.vremeod,
+                etime = item.vremedo == null ? null : item.vremedo,
+                date = item.datum,
+                progcoef = (float)item.progkoef,
+                amr1 = (double)item.amr1,
+                amr2 = (double)item.amr2,
+                amr3 = (double)item.amr3,
+                amrsale = (double)item.amrsale,
+                amrp1 = (double)item.amrp1,
+                amrp2 = (double)item.amrp2,
+                amrp3 = (double)item.amrp3,
+                amrpsale = (double)item.amrpsale,
+                active = item.active,
+                outlier = item.outlier
+            });
+
+            return _mapper.Map<IEnumerable<MediaPlanHistDTO>>(mediaPlanHist.FirstOrDefault());
         }
 
-        public async Task<MediaPlanHistDTO> GetMediaPlanHistByName(string name)
+        public async Task<IEnumerable<MediaPlanHistDTO>> GetAllMediaPlanHistsByXmpid(int xmpid)
         {
             using var connection = _context.GetConnection();
 
-            var mediaPlanHist = await connection.QueryFirstOrDefaultAsync<MediaPlanHist>(
-                "SELECT * FROM xmphist WHERE naziv = @Name", new { Name = name });
+            var allMediaPlanHists = await connection.QueryAsync<dynamic>(
+                "SELECT * FROM xmphist WHERE xmpid = @Xmpid", new { Xmpid = xmpid });
 
-            return _mapper.Map<MediaPlanHistDTO>(mediaPlanHist);
+            allMediaPlanHists = allMediaPlanHists.Select(item => new MediaPlanHist()
+            {
+                xmphistid = item.xmphistid,
+                xmpid = item.xmpid,
+                schid = item.schid,
+                chid = item.chid,
+                name = item.naziv,
+                position = item.pozicija,
+                stime = item.vremeod,
+                etime = item.vremedo == null ? null : item.vremedo,
+                date = DateOnly.FromDateTime(item.datum),
+                progcoef = (float)item.progkoef,
+                amr1 = (double)item.amr1,
+                amr2 = (double)item.amr2,
+                amr3 = (double)item.amr3,
+                amrsale = (double)item.amrsale,
+                amrp1 = (double)item.amrp1,
+                amrp2 = (double)item.amrp2,
+                amrp3 = (double)item.amrp3,
+                amrpsale = (double)item.amrpsale,
+                active = item.active,
+                outlier = item.outlier
+            });
+
+            return _mapper.Map<IEnumerable<MediaPlanHistDTO>>(allMediaPlanHists);
+        }
+
+        public async Task<IEnumerable<MediaPlanHistDTO>> GetAllMediaPlanHistsBySchid(int schid)
+        {
+            using var connection = _context.GetConnection();
+
+            var allMediaPlanHists = await connection.QueryAsync<dynamic>(
+                "SELECT * FROM xmphist WHERE schid = @Schid", new { Schid = schid });
+
+            allMediaPlanHists = allMediaPlanHists.Select(item => new MediaPlanHist()
+            {
+                xmphistid = item.xmphistid,
+                xmpid = item.xmpid,
+                schid = item.schid,
+                chid = item.chid,
+                name = item.naziv,
+                position = item.pozicija,
+                stime = item.vremeod,
+                etime = item.vremedo == null ? null : item.vremedo,
+                date = DateOnly.FromDateTime(item.datum),
+                progcoef = (float)item.progkoef,
+                amr1 = (double)item.amr1,
+                amr2 = (double)item.amr2,
+                amr3 = (double)item.amr3,
+                amrsale = (double)item.amrsale,
+                amrp1 = (double)item.amrp1,
+                amrp2 = (double)item.amrp2,
+                amrp3 = (double)item.amrp3,
+                amrpsale = (double)item.amrpsale,
+                active = item.active,
+                outlier = item.outlier
+            });
+
+            return _mapper.Map<IEnumerable<MediaPlanHistDTO>>(allMediaPlanHists);
         }
 
         public async Task<IEnumerable<MediaPlanHistDTO>> GetAllMediaPlanHists()
         {
             using var connection = _context.GetConnection();
 
-            var allMediaPlanHists = await connection.QueryAsync<MediaPlanHist>
+            var allMediaPlanHists = await connection.QueryAsync<dynamic>
                 ("SELECT * FROM xmphist");
 
-            return _mapper.Map<IEnumerable<MediaPlanHistDTO>>(allMediaPlanHists);
-        }
-
-        public async Task<IEnumerable<MediaPlanHistDTO>> GetAllMediaPlanHistsWithinDate(DateOnly sdate, DateOnly edate)
-        {
-            using var connection = _context.GetConnection();
-
-            var allMediaPlanHists = await connection.QueryAsync<MediaPlanHist>
-                ("SELECT * FROM xmphist WHERE datumod <= @Edate AND datumdo >= @Sdate "
-                , new { Sdate = sdate, Edate = edate });
+            allMediaPlanHists = allMediaPlanHists.Select(item => new MediaPlanHist()
+            {
+                xmphistid = item.xmphistid,
+                xmpid = item.xmpid,
+                schid = item.schid,
+                chid = item.chid,
+                name = item.naziv,
+                position = item.pozicija,
+                stime = item.vremeod,
+                etime = item.vremedo == null ? null : item.vremedo,
+                date = DateOnly.FromDateTime(item.datum),
+                progcoef = (float)item.progkoef,
+                amr1 = (double)item.amr1,
+                amr2 = (double)item.amr2,
+                amr3 = (double)item.amr3,
+                amrsale = (double)item.amrsale,
+                amrp1 = (double)item.amrp1,
+                amrp2 = (double)item.amrp2,
+                amrp3 = (double)item.amrp3,
+                amrpsale = (double)item.amrpsale,
+                active = item.active,
+                outlier = item.outlier
+            });
 
             return _mapper.Map<IEnumerable<MediaPlanHistDTO>>(allMediaPlanHists);
         }
@@ -113,7 +208,7 @@ namespace Database.Repositories
 
             var affected = await connection.ExecuteAsync(
                 "UPDATE xmphist SET xmphistid = @Xmphistid, xmpid = @Xmpid, schid = @Schid, chid = @Chid, naziv = @Name, " +
-                "pozicija = @Position,vremeod = @Stime, vremedo = @Etime, datum = @Date, progkoef = @Progcoef " +
+                "pozicija = @Position,vremeod = CAST@Stime, vremedo = @Etime, datum = CAST(@Date AS DATE), progkoef = @Progcoef " +
                 "amr1 = @Amr1, amr2 = @Amr2, amr3 = @Amr3, amrsale = @Amrsale, amrp1 = @Amrp1, amrp2 = @Amrp2, amrp3 = @Amrp3, " +
                 "amr1 = @Amr1,amrpsale = @Amrpsale, active = @Active, outlier = @Outlier " +
                 "WHERE xmphistid = @Xmphistid",
@@ -127,7 +222,7 @@ namespace Database.Repositories
                     Position = mediaPlanHistDTO.position,
                     Stime = mediaPlanHistDTO.stime,
                     Etime = mediaPlanHistDTO.etime,
-                    Date = mediaPlanHistDTO.date,
+                    Date = mediaPlanHistDTO.date.ToString("yyyy-MM-dd"),
                     Progcoef = mediaPlanHistDTO.progcoef,
                     Amr1 = mediaPlanHistDTO.amr1,
                     Amr2 = mediaPlanHistDTO.amr2,

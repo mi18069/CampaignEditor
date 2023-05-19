@@ -69,6 +69,7 @@
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="*"/>
+                <RowDefinition Height="200"/>
                 <RowDefinition Height="10"/>
             </Grid.RowDefinitions>
 
@@ -77,8 +78,8 @@
                       DisplayMemberPath="chname" MinWidth="250" MinHeight="150"
                       SelectionMode="Multiple" Margin="0, 0 ,10,0"
                       SelectionChanged="lvChannels_SelectionChanged"/>
-                <DataGrid x:Name="dgSchema" Grid.Row="1" Grid.Column="2" Grid.RowSpan="5" Grid.ColumnSpan="3"
-                           VerticalScrollBarVisibility="Visible"
+            <DataGrid x:Name="dgSchema" Grid.Row="1" Grid.Column="2" Grid.RowSpan="5" Grid.ColumnSpan="3"
+                          VerticalScrollBarVisibility="Visible"
                           FontSize="13" AlternatingRowBackground="LightGoldenrodYellow"
                           CanUserAddRows="False"
                           AutoGenerateColumns="False"
@@ -86,7 +87,8 @@
                           SelectionMode="Single"
                           FrozenColumnCount="{Binding FrozenColumnsNum, Mode=TwoWay}"
                           HorizontalScrollBarVisibility="Visible"
-                          MouseRightButtonDown="dgSchema_MouseRightButtonDown">
+                          MouseRightButtonDown="dgSchema_MouseRightButtonDown"
+                      SelectionChanged="dgSchema_SelectionChanged">
                 <DataGrid.CellStyle>
                     <Style TargetType="DataGridCell">
                         <Style.Triggers>
@@ -185,6 +187,58 @@
                                         IsReadOnly="True" Visibility="Collapsed"/>
                 </DataGrid.Columns>
             </DataGrid>
+
+            <TabControl Grid.Row="6" Grid.Column="2" Grid.ColumnSpan="3" Margin="0, 10, 0, 0">
+                <TabItem Header="Goals" />
+                <TabItem Header="Data">
+                    <DataGrid x:Name="dgHist" 
+                      VerticalScrollBarVisibility="Visible"
+                      FontSize="13" AlternatingRowBackground="LightGoldenrodYellow"
+                      CanUserAddRows="False"
+                      AutoGenerateColumns="False"
+                      CanUserDeleteRows="False"
+                      SelectionMode="Single"
+                      HorizontalScrollBarVisibility="Visible">
+                        <DataGrid.CellStyle>
+                            <Style TargetType="DataGridCell">
+                                <Style.Triggers>
+                                    <Trigger Property="IsFocused" Value="True">
+                                        <Setter Property="Background" Value="Orange"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGrid.CellStyle>
+                        <DataGrid.Resources>
+                            <Style TargetType="{x:Type DataGridColumnHeader}">
+                                <Setter Property="Background" Value="LightGray"/>
+                                <Setter Property="FontWeight" Value="SemiBold"/>
+                                <Setter Property="BorderThickness" Value="1,1,1,2"/>
+                                <Setter Property="BorderBrush" Value="black"/>
+                            </Style>
+                        </DataGrid.Resources>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Program" Binding="{Binding name, Mode=TwoWay}"
+                                        IsReadOnly="True" />
+                            <DataGridTextColumn Header="Datum" Binding="{Binding date, Mode=TwoWay, StringFormat=d}" 
+                                        IsReadOnly="True"/>
+                            <DataGridTextColumn Header="Start time" Binding="{Binding stime, Mode=TwoWay}" 
+                                        IsReadOnly="True"/>
+                            <DataGridTextColumn Header="End time" Binding="{Binding etime, Mode=TwoWay}" 
+                                        IsReadOnly="True"/>
+                            <DataGridTextColumn Header="AMR 1" Binding="{Binding amr1, Mode=TwoWay}" 
+                                             IsReadOnly="True"  />
+                            <DataGridTextColumn Header="AMR 2" Binding="{Binding amr2, Mode=TwoWay}" 
+                                             IsReadOnly="True" />
+                            <DataGridTextColumn Header="AMR 3" Binding="{Binding amr3, Mode=TwoWay}" 
+                                             IsReadOnly="True" />
+                            <DataGridTextColumn Header="AMR Sale" Binding="{Binding amrsale, Mode=TwoWay}" 
+                                             IsReadOnly="True" />
+                            <DataGridCheckBoxColumn Header="Include" Binding="{Binding outlier, Mode=TwoWay}"/>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </TabItem>
+            </TabControl>
+            
 
             <Border Grid.Row="2" Grid.Column="1" 
                 BorderBrush="LightGray" BorderThickness="1" Margin="0, 10, 10, 10">
