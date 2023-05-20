@@ -248,5 +248,15 @@ namespace Database.Repositories
 
             return affected != 0;
         }
+
+        public async Task<bool> DeleteMediaPlanHistByXmpid(int xmpid)
+        {
+            using var connection = _context.GetConnection();
+
+            var affected = await connection.ExecuteAsync(
+                "DELETE FROM xmphist WHERE xmpid = @Xmpid", new { Xmpid = xmpid });
+
+            return affected != 0;
+        }
     }
 }

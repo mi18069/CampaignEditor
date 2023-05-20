@@ -32,8 +32,17 @@ namespace CampaignEditor
             int toM;
             double coef;
 
+            if(tbCoef.Text.Trim() == "")
+            {
+                tbCoef.Text = (1.00).ToString();
+            }
 
-            if (!int.TryParse(tbFromH.Text.Trim(), out fromH) ||
+            if (tbFromH.Text.Trim() == "" &&
+                tbFromM.Text.Trim() == "" &&
+                tbToH.Text.Trim() == "" &&
+                tbToM.Text.Trim() == "")
+                return "empty";
+            else if (!int.TryParse(tbFromH.Text.Trim(), out fromH) ||
                 !int.TryParse(tbFromM.Text.Trim(), out fromM) ||
                 !int.TryParse(tbToH.Text.Trim(), out toH) ||
                 !int.TryParse(tbToM.Text.Trim(), out toM))

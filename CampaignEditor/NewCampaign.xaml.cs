@@ -82,9 +82,10 @@ namespace CampaignEditor
             string sostring = "1;999;F;01234;012345";
             int activity = 0;
             DatePicker dpNow = new DatePicker();
-            dpNow.SelectedDate = DateTime.Now;
+            var dateTimeNow = DateTime.Now;
+            dpNow.SelectedDate = dateTimeNow;
             int cmpaddedon = int.Parse(TimeFormat.DPToYMDString(dpNow));
-            int cmpaddedat = int.Parse(TimeFormat.DPToTimeString(dpNow)); 
+            int cmpaddedat = int.Parse(TimeFormat.DTToTimeString(dateTimeNow)); 
             bool active = true;
             bool forcec = false;
 

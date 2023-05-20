@@ -220,9 +220,10 @@ namespace CampaignEditor.UserControls
         {
             await _mediaPlanRefController.DeleteMediaPlanRefById(_campaign.cmpid);
             var mediaPlans = await _mediaPlanController.GetAllMediaPlansByCmpid(_campaign.cmpid);
-
+            
             foreach (var mediaPlan in mediaPlans)
             {
+                await _mediaPlanHistController.DeleteMediaPlanHistByXmpid(mediaPlan.xmpid);
                 await _mediaPlanTermController.DeleteMediaPlanTermByXmpId(mediaPlan.xmpid);
                 await _mediaPlanController.DeleteMediaPlanById(mediaPlan.xmpid);
             }

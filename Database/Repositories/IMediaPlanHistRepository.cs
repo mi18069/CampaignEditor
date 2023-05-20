@@ -15,5 +15,6 @@ namespace Database.Repositories
         Task<IEnumerable<MediaPlanHistDTO>> GetAllChannelMediaPlanHists(int chid);
         Task<bool> UpdateMediaPlanHist(UpdateMediaPlanHistDTO mediaPlanHistDTO);
         Task<bool> DeleteMediaPlanHistById(int id);
+        Task<bool> DeleteMediaPlanHistByXmpid(int xmpid);
     }
 }

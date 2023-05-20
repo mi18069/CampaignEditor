@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 
@@ -88,9 +89,19 @@ namespace CampaignEditor
 
                 foreach (ClientDTO client in clients)
                 {
-                    campaigns = await _campaignController.GetCampaignsByClientId(client.clid);
-                    campaigns = campaigns.OrderByDescending(c => c.cmpsdate);
-                    _clientCampaignsDict[client] = campaigns;
+                    if (client.clid == 10)
+                    {
+                        campaigns = await _campaignController.GetCampaignsByClientId(client.clid);
+                        campaigns = campaigns.OrderByDescending(c => c.cmpsdate);
+                        _clientCampaignsDict[client] = campaigns;
+                    }
+                    else
+                    {
+                        campaigns = await _campaignController.GetCampaignsByClientId(client.clid);
+                        campaigns = campaigns.OrderByDescending(c => c.cmpsdate);
+                        _clientCampaignsDict[client] = campaigns;
+                    }
+                    
                 }
 
             }
@@ -143,11 +154,17 @@ namespace CampaignEditor
                     TreeViewItem newCampaign = new TreeViewItem();
                     if (IsCampaignExpired(campaign))
                     {
-                        newCampaign.Foreground = Brushes.Gray;
+                        newCampaign.Foreground = Brushes.DarkRed;
                         newCampaign.Header = campaign.cmpname;
                     }
                     else if (IsCampaignStarted(campaign))
                     {
+                        newCampaign.Foreground = Brushes.Green;
+                        newCampaign.Header = campaign.cmpname;
+                    }
+                    else
+                    {
+                        newCampaign.Foreground = Brushes.Orange;
                         newCampaign.Header = campaign.cmpname;
                     }
                     newCampaign.Tag = "Campaign";
@@ -217,7 +234,8 @@ namespace CampaignEditor
                 if (active)
                 {
                     ClientDTO client = clientCampaignsDict.ElementAt(i).Key;
-                    clientCampaignsDict[client] = clientCampaignsDict[client].Where(cmp => !cmp.active);
+                    clientCampaignsDict[client] = clientCampaignsDict[client].Where(cmp => !cmp.active ||
+                    !(ParseDateTime(cmp.cmpsdate, cmp.cmpstime) < DateTime.Now));
                 }
                 if (notStarted)
                 {
@@ -229,7 +247,7 @@ namespace CampaignEditor
                 {
                     ClientDTO client = clientCampaignsDict.ElementAt(i).Key;
                     clientCampaignsDict[client] = clientCampaignsDict[client].
-                        Where(cmp => ParseDateTime(cmp.cmpsdate, cmp.cmpstime) > DateTime.Now && !cmp.active);
+                        Where(cmp => ParseDateTime(cmp.cmpedate, cmp.cmpetime) > DateTime.Now || cmp.active);
                 }
             }
 

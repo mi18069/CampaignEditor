@@ -514,7 +514,12 @@ namespace CampaignEditor
         {
             DateTime? fromDate = dpValidityFrom.SelectedDate;
             DateTime? toDate = dpValidityTo.SelectedDate;
-            if (!fromDate.HasValue || !toDate.HasValue)
+            if (toDate == null)
+            {
+                toDate = new DateTime(2999, 01, 01);
+                dpValidityTo.SelectedDate = toDate;
+            }
+            if (!fromDate.HasValue)
             {
                 MessageBox.Show("Select Date Range");
                 return false;
@@ -532,6 +537,7 @@ namespace CampaignEditor
         private bool CheckDPs()
         {
             bool success = true;
+            bool atLeastOne = false;
 
             for (int i=0; i<wpDayParts.Children.Count -1; i++)
             {
@@ -539,11 +545,35 @@ namespace CampaignEditor
                 string validity = "";
                 if ((validity = item.CheckValidity()) != "")
                 {
+                    if (validity == "empty")
+                    {
+                        continue;
+                    }
                     MessageBox.Show(validity);
                     success = false;
                     break;
                 }
+                else
+                {
+                    atLeastOne = true;
+                }
             }
+
+            // If there are no values entered in dpItems, clear and add one, and fill it with default values
+            if (!atLeastOne)
+            {
+                wpDayParts.Children.Clear();
+                wpDayParts.Children.Add(MakeDPItem());
+                wpDayParts.Children.Add(MakeAddButton());
+
+                var item = wpDayParts.Children[0] as TargetDPItem;
+                item.tbFromH.Text = "02";
+                item.tbFromM.Text = "00";
+                item.tbToH.Text = "25";
+                item.tbToM.Text = "59";
+                item.tbCoef.Text = "1.00";
+            }
+
             return success;
         }
         // Every CheckBox needs to be selected (except cbSectable2)
@@ -777,7 +807,7 @@ namespace CampaignEditor
         }
 
         private void dpValidityTo_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
-        {
+        {   
             pricelistModified = true;
         }
 

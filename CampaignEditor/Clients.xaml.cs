@@ -6,12 +6,8 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
 using System.Windows.Media;
-using CampaignEditor.DTOs.CampaignDTO;
-using CampaignEditor.Entities;
 using CampaignEditor.StartupHelpers;
-using Database.DTOs.ClientDTO;
 
 namespace CampaignEditor
 {
