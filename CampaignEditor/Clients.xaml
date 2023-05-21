@@ -33,7 +33,7 @@
                     <ContextMenu x:Key="CampaignContext"  StaysOpen="true">
                         <MenuItem Header="Edit campaign" Click="btnAddCampaign_Click"/>
                         <MenuItem Header="Rename campaign" Click="btnRenameCampaign_Click" IsEnabled="{Binding Path=isReadWrite}"/>
-                        <MenuItem Header="Delete campaign" IsEnabled="{Binding Path=isAdministrator}"/>
+                        <MenuItem Header="Delete campaign" Click="btnDeleteCampaign_Click"  IsEnabled="{Binding Path=isAdministrator}"/>
                     </ContextMenu>
                 </TreeView.Resources>
             </TreeView>
@@ -64,7 +64,7 @@
                 Width="300" Height="260"
                 HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0, 107, 20, 0">
             <Grid>
-                <Label x:Name="lblFilter" Content="  Filters  " Background="White"
+                <Label x:Name="lblFilter" Content="  Show  " Background="White"
                        HorizontalAlignment="Center" Margin="0, -20, 0, 0"/>
                 <DatePicker x:Name="dpStartDate" 
                     Width="150" Height="40"

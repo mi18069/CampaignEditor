@@ -72,7 +72,7 @@ namespace Database.Repositories
         {
             using var connection = _context.GetConnection();
 
-            var allSpots = await connection.QueryAsync<Spot>("SELECT * FROM tblcmpspot2");
+            var allSpots = await connection.QueryAsync<Spot>("SELECT * FROM tblcmpspot");
 
             return _mapper.Map<IEnumerable<SpotDTO>>(allSpots);
         }
@@ -82,7 +82,7 @@ namespace Database.Repositories
             using var connection = _context.GetConnection();
 
             var affected = await connection.ExecuteAsync(
-                "UPDATE tblcmpspot2 SET cmpid = @Cmpid, spotcode = @Spotcode, spotname = @Spotname, " +
+                "UPDATE tblcmpspot SET cmpid = @Cmpid, spotcode = @Spotcode, spotname = @Spotname, " +
                 "spotlength = @Spotlength, ignore = @Ignore " +
                 "WHERE spotname = @Spotname",
                 new
@@ -102,7 +102,7 @@ namespace Database.Repositories
             using var connection = _context.GetConnection();
 
             var affected = await connection.ExecuteAsync(
-                "DELETE FROM tblcmpspot2 WHERE cmpid = @Id", new { Id = id });
+                "DELETE FROM tblcmpspot WHERE cmpid = @Id", new { Id = id });
 
             return affected != 0;
         }
@@ -112,7 +112,7 @@ namespace Database.Repositories
             using var connection = _context.GetConnection();
 
             var affected = await connection.ExecuteAsync(
-                "DELETE FROM tblcmpspot2 WHERE cmpid = @Id AND spotcode = @Spotcode", 
+                "DELETE FROM tblcmpspot WHERE cmpid = @Id AND spotcode = @Spotcode", 
                 new { Id = id, Spotcode = code });
 
             return affected != 0;

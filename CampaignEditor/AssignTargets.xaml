@@ -81,7 +81,9 @@
             <Border BorderBrush="Gray" BorderThickness="1"
             Width="300" Height="200" 
              HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0, 150, 10, 0">
-                <TextBlock x:Name="tbTargetFilters" Foreground="Gray" FontSize="18"/>
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Hidden">
+                    <TextBlock x:Name="tbTargetFilters" Foreground="Gray" FontSize="18"/>
+                </ScrollViewer>
             </Border>
             <Button x:Name="btnSave" Content="Assign"
                 Width="100" Height="40"

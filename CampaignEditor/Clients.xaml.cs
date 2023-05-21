@@ -7,7 +7,10 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using CampaignEditor.Controllers;
+using CampaignEditor.DTOs.CampaignDTO;
 using CampaignEditor.StartupHelpers;
+using Database.Repositories;
 
 namespace CampaignEditor
 {
@@ -24,6 +27,8 @@ namespace CampaignEditor
         private readonly IAbstractFactory<NewCampaign> _factoryNewCampaign;
         private readonly IAbstractFactory<Rename> _factoryRename;
         private readonly IAbstractFactory<Campaign> _factoryCampaign;
+        private CampaignController _campaignController;
+
 
         private ClientsTreeView _clientsTree;
 
@@ -65,7 +70,7 @@ namespace CampaignEditor
         public bool isReadOnly { get; set; } = false;
         public Clients(IAbstractFactory<ClientsTreeView> factoryClientsTreeView, IAbstractFactory<AddUser> factoryAddUser,
             IAbstractFactory<AddClient> factoryAddClient, IAbstractFactory<UsersOfClient> factoryUsersOfClient, IAbstractFactory<NewCampaign> factoryNewCampaign,
-            IAbstractFactory<Rename> factoryRename, IAbstractFactory<Campaign> factoryCampaign)
+            IAbstractFactory<Rename> factoryRename, IAbstractFactory<Campaign> factoryCampaign, ICampaignRepository campaignRepository)
         {
             InitializeComponent();
             this.DataContext = this;
@@ -76,6 +81,7 @@ namespace CampaignEditor
             _factoryNewCampaign = factoryNewCampaign;
             _factoryRename = factoryRename;
             _factoryCampaign = factoryCampaign;
+            _campaignController = new CampaignController(campaignRepository);
             instance = this;
 
             _clientsTree = factoryClientsTreeView.Create();
@@ -381,6 +387,31 @@ namespace CampaignEditor
                 await _clientsTree.InitializeTree();
             }
         }
+
+        private async void btnDeleteCampaign_Click(object sender, RoutedEventArgs e)
+        {
+            if (tvClients.SelectedItem != null)
+            {
+                var item = tvClients.SelectedItem as TreeViewItem;
+                if (item != null)
+                {
+                    var name = item.Header.ToString().Trim();
+                    var campaign = await _campaignController.GetCampaignByName(name);
+                    if (campaign != null)
+                    {
+                        if (!campaign.active)
+                        {
+                            await _campaignController.DeleteCampaignById(campaign.cmpid);
+                        }
+                        else
+                        {
+                            MessageBox.Show("Cannot delete active campaign", "Message", MessageBoxButton.OK);
+                        }
+                    }
+                }
+            }
+        }
+
 
         #endregion
 

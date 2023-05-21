@@ -18,6 +18,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Media;
 
 namespace CampaignEditor
@@ -275,8 +276,16 @@ namespace CampaignEditor
 
         private async void lvChannels_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
+            if (lvChannels.SelectedItems.Count == 0)
+            {
+                lbSelectedChannels.Items.Clear();
+            }
+
             if (!changePricelist && lvChannels.SelectedItems.Count > 0)
+            {
                 return;
+            }
+                
             PricelistDTO lastSelected = null;
             if (lvPricelists.SelectedItems.Count > 0)
             {
@@ -334,10 +343,19 @@ namespace CampaignEditor
             // Clearing and filling with the available pricelists for selected channels
             // == 0 because when more channels are selected, only one should modify lvPricelists
             int selectedIndex = 0;
+            List<PricelistDTO> pricelists = new List<PricelistDTO>();
 
             foreach (int plid in plIds)
             {
                 PricelistDTO pricelist = await _pricelistController.GetPricelistById(plid);
+                pricelists.Add(pricelist);               
+            }
+
+            PricelistComparer comparer = new PricelistComparer();
+            pricelists.Sort((a, b) => comparer.Compare(a, b));
+
+            foreach (var pricelist in pricelists)
+            {
                 PricelistList.Add(pricelist);
                 if (lastSelected != null && lastSelected.plid == pricelist.plid)
                 {
@@ -345,9 +363,11 @@ namespace CampaignEditor
                 }
                 selectedIndex++;
             }
+            
+
         }
 
-            // In order to select ListView on mouse right click
+        // In order to select ListView on mouse right click
         private void lvPricelists_PreviewMouseRightButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             ListViewItem listViewItem = VisualUpwardSearch(e.OriginalSource as DependencyObject);
@@ -383,7 +403,7 @@ namespace CampaignEditor
             f.ShowDialog();
             if (f.pricelistChanged)
             {
-                _allPricelistsList = (List<PricelistDTO>)(await _pricelistController.GetAllClientPricelists(_client.clid)); 
+                _allPricelistsList = ((await _pricelistController.GetAllClientPricelists(_client.clid))).ToList<PricelistDTO>();
                 lvChannels_SelectionChanged(lvChannels, null);
             }
         }
@@ -537,6 +557,34 @@ namespace CampaignEditor
                     lbSelectedChannels.Items.Remove(channel);
                     lvChannels.SelectedItems.Remove(ch);
                 }
+            }
+        }
+
+        public class PricelistComparer : IComparer<PricelistDTO>
+        {
+            public int Compare(PricelistDTO x, PricelistDTO y)
+            {
+                // First, compare the clid values
+                int clidComparison = x.clid.CompareTo(y.clid);
+
+                // If clid values are not equal, sort by clid in ascending order
+                if (clidComparison != 0)
+                {
+                    return clidComparison;
+                }
+
+                // If clid values are equal, check the condition p.clid != 0
+                bool xClidNotZero = x.clid != 0;
+                bool yClidNotZero = y.clid != 0;
+
+                // If both have clid != 0 or both have clid == 0, sort by valfrom in descending order
+                if (xClidNotZero == yClidNotZero)
+                {
+                    return y.valfrom.CompareTo(x.valfrom);
+                }
+
+                // Sort by clid != 0 in descending order
+                return yClidNotZero.CompareTo(xClidNotZero);
             }
         }
     }

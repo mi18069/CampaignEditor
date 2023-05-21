@@ -123,7 +123,7 @@ namespace CampaignEditor
         private void btnToSelected_Click(object sender, RoutedEventArgs e)
         {
             var selectedList = lbTargets.SelectedItems;
-            for (int i=0; i<maxSelected; i++) 
+            for (int i=0; i<maxSelected && i<selectedList.Count; i++) 
             {
                 MoveTargetToSelected(selectedList[i] as TargetDTO);
             }
@@ -132,9 +132,9 @@ namespace CampaignEditor
         private void btnFromSelected_Click(object sender, RoutedEventArgs e)
         {
             var selectedList = lbSelectedTargets.SelectedItems;
-            foreach (var selected in selectedList)
+            for (int i = 0;  i < selectedList.Count; i++)
             {
-                MoveTargetFromSelected(selected as TargetDTO);
+                MoveTargetFromSelected(selectedList[i] as TargetDTO);
             }
         }
         
