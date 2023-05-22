@@ -7,11 +7,27 @@
         mc:Ignorable="d"
         Title="AssignUser" Height="150" Width="300" ResizeMode="NoResize">
     <Grid>
-        <ComboBox x:Name="cbRemainingUsers" 
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="10"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="10"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="10"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="10"/>
+        </Grid.RowDefinitions>
+        <ComboBox x:Name="cbRemainingUsers" Grid.Row="1" Grid.Column="1"
                   Width="220"
-                  HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,20,0,0" />
-        <Button x:Name="btnAssign" Content="Assign"
-                Width="70" Height="30"
-                HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,40,20" Click="btnAssign_Click"/>
+                  HorizontalAlignment="Center" VerticalAlignment="Center" />
+        <Button x:Name="btnAssign" Content="Assign" Grid.Row="2" Grid.Column="1"
+                Width="70"
+                HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="10, 10, 30, 10" 
+                Click="btnAssign_Click"/>
+        <Button x:Name="btnCancel" Content="Cancel" Grid.Row="2" Grid.Column="1"
+                Width="70"
+                HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="10, 10, 120, 10" 
+                Click="btnCancel_Click"/>
     </Grid>
 </Window>

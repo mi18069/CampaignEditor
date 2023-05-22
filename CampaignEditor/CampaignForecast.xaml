@@ -53,7 +53,7 @@
                    HorizontalAlignment="Center" VerticalAlignment="Center">
             </Label>
         </Grid>
-        <Grid x:Name="gridForecast" Visibility="Visible" >
+        <Grid x:Name="gridForecast" Visibility="Hidden" >
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="10"/>
                 <ColumnDefinition Width="auto"/>

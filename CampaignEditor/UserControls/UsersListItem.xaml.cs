@@ -1,8 +1,5 @@
-﻿using System;
-using System.ComponentModel;
-using System.IO;
+﻿using System.ComponentModel;
 using System.Windows.Controls;
-using System.Windows.Media.Imaging;
 
 
 namespace CampaignEditor
@@ -13,12 +10,7 @@ namespace CampaignEditor
         public UsersListItem()
         {      
             InitializeComponent();
-            SetImages();
         }
-
-        private string appPath = Directory.GetCurrentDirectory();
-        private string imgUserIconPath = "\\images\\UserIcon.png";
-        private string imgRedXPath = "\\images\\Red_X.png";
 
         #region Properties
 
@@ -26,6 +18,8 @@ namespace CampaignEditor
         private string _userlevel;
         private Image _userIcon;
         private Button _btnUnassign;
+
+        public bool authorizationChanged = false;
 
         [Category("Custom Props")]
         public string Username
@@ -38,7 +32,7 @@ namespace CampaignEditor
         public string Userlevel
         {
             get { return _userlevel; }      
-            set { _userlevel = value; lblUserLevel.Content = value; }
+            set { _userlevel = value; cbUserLevel.SelectedIndex = value == "0" ? 0 : value == "1" ? 1 : 2; }
         }
 
         [Category("Custom Props")]
@@ -57,18 +51,9 @@ namespace CampaignEditor
 
         #endregion
 
-        private void SetImages()
+        private void cbUserLevel_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            imgUserIcon.Source = new BitmapImage(new Uri(appPath + imgUserIconPath));
-
-            Image imgRedX = new Image();
-            imgRedX.Source = new BitmapImage(new Uri(appPath + imgRedXPath));
-            btnUnassign.Content = imgRedX;
-        }
-
-        private void btnUnassign_Click(object sender, System.Windows.RoutedEventArgs e)
-        {
-            UsersOfClient.instance.UnassignUser_Click(Username);
+            authorizationChanged = true;
         }
     }
 

@@ -1,4 +1,7 @@
-﻿using CampaignEditor.StartupHelpers;
+﻿using CampaignEditor.Controllers;
+using CampaignEditor.DTOs.UserDTO;
+using CampaignEditor.Repositories;
+using CampaignEditor.StartupHelpers;
 using Database.DTOs.ClientDTO;
 using System.ComponentModel.Design;
 using System.Linq;
@@ -10,11 +13,18 @@ namespace CampaignEditor
     {
 
         private readonly IAbstractFactory<UsersAndClients> _factoryUsersAndClients;
+        private UserController _userController;
 
         private ClientDTO _client;
-        public AssignUser(IAbstractFactory<UsersAndClients> factoryUsersAndClients)
+
+        public bool isAssigned = false;
+        public UserDTO user;
+        public AssignUser(IAbstractFactory<UsersAndClients> factoryUsersAndClients,
+            IUserRepository userRepository)
         {
+            this.DataContext = this;
             _factoryUsersAndClients = factoryUsersAndClients;
+            _userController = new UserController(userRepository);
             InitializeComponent();
         }
 
@@ -41,10 +51,22 @@ namespace CampaignEditor
                 btnAssign.IsEnabled = false;
         }
 
-        private void btnAssign_Click(object sender, RoutedEventArgs e)
+        private async void btnAssign_Click(object sender, RoutedEventArgs e)
         {
-            var item = cbRemainingUsers.SelectedItem.ToString()!;
-            UsersOfClient.instance.AssignUser(cbRemainingUsers.SelectedItem.ToString()!);
+            var username = cbRemainingUsers.SelectedItem.ToString()!.Trim();
+            if (username != null)
+            {
+                //UsersOfClient.instance.AssignUser(cbRemainingUsers.SelectedItem.ToString()!);
+                user = await _userController.GetUserByUsername(username);
+                isAssigned = true;
+                this.Close();
+            }
+
+            
+        }
+
+        private void btnCancel_Click(object sender, RoutedEventArgs e)
+        {
             this.Close();
         }
     }

@@ -86,7 +86,7 @@ namespace CampaignEditor.Repositories
 
             var affected = await connection.ExecuteAsync(
                 "UPDATE tblusers SET usrname = @Usrname, usrpass = @Usrpass, usrlevel = @Usrlevel, " +
-                "email = @Email, telefon = @Telefon, enabled = @Enabled, father = @Father, buy = @Buy" +
+                "email = @Email, telefon = @Telefon, enabled = @Enabled, father = @Father, buy = @Buy " +
                 "WHERE usrid = @Usrid",
                 new
                 {

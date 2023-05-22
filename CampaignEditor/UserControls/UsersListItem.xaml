@@ -5,19 +5,38 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:CampaignEditor"
              mc:Ignorable="d" 
-             d:DesignHeight="70" d:DesignWidth="600">
+             d:DesignHeight="70" d:DesignWidth="450"
+             HorizontalAlignment="Stretch" Width="auto">
     <Grid Background="White">
-        <Image x:Name="imgUserIcon" 
-               Width="80" Height="70"
-               HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,0,0,0"/>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="5"/>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="35"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="10"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="10"/>
+        </Grid.RowDefinitions>
+        <Image x:Name="imgUserIcon" Grid.Row="1" Grid.Column="1" 
+               Source="\images\UserIcon.png" Width="45" Height="45"/>
         <Label x:Name="lblUsername" Content="Username" FontWeight="Bold"
-               Width="200"
-               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="100,0,0,0"/>
-        <Label x:Name="lblUserLevel" Content="User level" FontStyle="Italic"
-               Width="100"
-               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="320,0,0,0"/>
+               Grid.Row="1" Grid.Column="2"
+               HorizontalAlignment="Left" VerticalAlignment="Center"/>
+        <ComboBox x:Name="cbUserLevel" FontStyle="Italic"
+               Grid.Row="1" Grid.Column="3"
+               VerticalAlignment="Center" Margin="10, 0" SelectionChanged="cbUserLevel_SelectionChanged">
+            <ComboBoxItem Content="Administrator"/>
+            <ComboBoxItem Content="Read Write"/>
+            <ComboBoxItem Content="Read only"/>
+        </ComboBox>
         <Button x:Name="btnUnassign" Background="White" BorderThickness="0"
-                Width="25" Height="25"
-                HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,50,0" Click="btnUnassign_Click"/>
+                Grid.Row="1" Grid.Column="4"
+                HorizontalAlignment="Right" VerticalAlignment="Center">
+            <Image Source="\images\red_X.png" Width="25" Height="25"></Image>
+        </Button>
     </Grid>
 </UserControl>

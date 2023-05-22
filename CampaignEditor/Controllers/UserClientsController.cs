@@ -20,9 +20,9 @@ namespace CampaignEditor.Controllers
 
         public async Task<UserClientsDTO> CreateUserClients(UserClientsDTO userClientsDTO)
         {
-            await _repository.CreateUserClients(userClientsDTO);
-            var userClient = await _repository.GetUserClientsByUserId(userClientsDTO.usrid);
-            return userClient;
+                await _repository.CreateUserClients(userClientsDTO);
+                var userClient = await _repository.GetUserClientsByUserId(userClientsDTO.usrid);
+                return userClient;
         }
         public async Task<UserClientsDTO> GetUserByUserId(int id)
         {

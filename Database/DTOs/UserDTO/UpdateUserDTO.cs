@@ -7,5 +7,9 @@ namespace CampaignEditor.DTOs.UserDTO
             : base(usrid, usrname, usrpass, usrlevel, email, telefon, enabled, father, buy)
         {
         }
+        public UpdateUserDTO(UserDTO userDTO)
+            : base(userDTO.usrid, userDTO.usrname, userDTO.usrpass, userDTO.usrlevel, userDTO.email, userDTO.telefon, userDTO.enabled, userDTO.father, userDTO.buy)
+        {
+        }
     }
 }

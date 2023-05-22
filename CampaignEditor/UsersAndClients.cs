@@ -66,16 +66,15 @@ namespace CampaignEditor
 
         public async Task AssignUserToClient(string username)
         {
-            UserDTO user = await _userController.GetUserByUsername(username);
-            ClientDTO client = await _clientController.GetClientByName(_client.clname.Trim());
-            var userClient = new UserClientsDTO(client.clid, user.usrid);
+            UserDTO user = await _userController.GetUserByUsername(username.Trim());
+            var userClient = new UserClientsDTO(_client.clid, user.usrid);
             await _userClientsController.CreateUserClients(userClient);
         }
 
         public async Task UnassignUserFromClient(string username, string clientname)
         {
-            UserDTO user = await _userController.GetUserByUsername(username);
-            ClientDTO client = await _clientController.GetClientByName(clientname);
+            UserDTO user = await _userController.GetUserByUsername(username.Trim());
+            ClientDTO client = await _clientController.GetClientByName(clientname.Trim());
             await _userClientsController.DeleteUserClients(user.usrid, client.clid);
         }
 
