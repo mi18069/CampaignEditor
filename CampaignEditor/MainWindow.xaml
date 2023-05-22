@@ -40,10 +40,12 @@
                 PreviewMouseDown="PassShowHide_PreviewMouseDown"
                 PreviewMouseUp="PassShowHide_PreviewMouseUp"
                 MouseLeave="PassShowHide_MouseLeave"/>
-        <Button x:Name="btnConfigDatabase" Content="Config" HorizontalContentAlignment="Center" 
-                Width="150" Height="40"
-                VerticalAlignment="Top" HorizontalAlignment="Left" Margin="100,300,0,0" 
-                Click="btnConfigDatabase_Click"/>
+        <Button x:Name="btnConfigDatabase" HorizontalContentAlignment="Center" 
+                BorderThickness="0" Background="White" IsTabStop="False"
+                VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,30,30,0" 
+                Click="btnConfigDatabase_Click">
+            <Image Source="\images\config_icon.png" Width="30" Height="30" ></Image>
+        </Button>
         <Button x:Name="btnCheckCredentials" Content="Log in" HorizontalContentAlignment="Center" 
                 Width="200" Height="40"
                 VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,300,100,0" 
