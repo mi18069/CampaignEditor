@@ -7,5 +7,9 @@ namespace CampaignEditor.DTOs.UserDTO
             : base(usrname, usrpass, usrlevel, email, telefon, enabled, father, buy)
         {
         }
+        public CreateUserDTO(UserDTO userDTO)
+            : base(userDTO.usrname, userDTO.usrpass, userDTO.usrlevel, userDTO.email, userDTO.telefon, userDTO.enabled, userDTO.father, userDTO.buy)
+        {
+        }
     }
 }

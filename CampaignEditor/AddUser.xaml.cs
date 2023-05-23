@@ -1,7 +1,6 @@
 ﻿using CampaignEditor.Controllers;
 using CampaignEditor.DTOs.UserDTO;
 using CampaignEditor.Repositories;
-using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -12,15 +11,15 @@ namespace CampaignEditor
 {
     public partial class AddUser : Window
     {
-        private readonly IUserRepository _userRepository;
         private UserController _userController;
 
+        public bool isAdded = false;
+        public UserDTO user = null;
         public AddUser(IUserRepository userRepository)
         {
             InitializeComponent();
 
-            _userRepository = userRepository;
-            _userController = new UserController(_userRepository);
+            _userController = new UserController(userRepository);
 
             // If user don't have administrator privileges, he shouldn't be able to add users to client
             if (MainWindow.user.usrlevel != 0)
@@ -29,12 +28,28 @@ namespace CampaignEditor
             }
         }
 
+        public void Initialize(UserDTO user)
+        {
+            this.user = user;
+            FillFields(user);
+        }
+
+        private void FillFields(UserDTO user)
+        {
+            tbUsername.Text = user.usrname.ToString().Trim();
+            pbPassword.Password = user.usrpass.ToString().Trim();   
+            pbPasswordConfirm.Password = user.usrpass.ToString().Trim();
+            cbAuthorization.SelectedIndex = user.usrlevel;
+            tbEmail.Text = user.email.Trim();
+            tbPhone.Text = user.telefon.Trim();
+        }
+
         private async void btnAddUser_Click(object sender, RoutedEventArgs e)
         {
             string username = tbUsername.Text.Trim();
             string password = pbPassword.Password.ToString().Trim();
             string passwordConfirmed = pbPasswordConfirm.Password.ToString().Trim();
-            int authorization = (cbAuthorization.Items.Count - 1) - cbAuthorization.SelectedIndex;
+            int authorization = cbAuthorization.SelectedIndex;
             string email = tbEmail.Text.Trim();
             string phone = tbPhone.Text.Trim();
             int enabled = 1;
@@ -43,8 +58,24 @@ namespace CampaignEditor
 
             if ( await CheckRegistrationCredentialsAsync(username, password, passwordConfirmed, phone) )
             {
-                await _userController.CreateUser(new CreateUserDTO
-                    (username, password, authorization, email, phone, enabled, father, buy));
+                if (user != null)
+                {
+                    user.usrname = username;
+                    user.usrpass = password;
+                    user.usrlevel = authorization;
+                    user.email = email;
+                    user.telefon = phone;
+                    user.enabled = enabled;
+                    // not updating user father
+                    user.buy = buy;
+                    await _userController.UpdateUser(new UpdateUserDTO(user));
+                }
+                else
+                {
+                    user = await _userController.CreateUser(new CreateUserDTO
+                        (username, password, authorization, email, phone, enabled, father, buy));                    
+                }
+                isAdded = true;
                 this.Close();
             }
 
@@ -65,47 +96,48 @@ namespace CampaignEditor
         {
             if (username.Length == 0)
             {
-                lblError.Content = "Enter username";
+                MessageBox.Show("Enter username", "Message", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
             else if (password.Length == 0)
             {
-                lblError.Content = "Enter password";
+                MessageBox.Show("Enter password", "Message", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
             else if (passwordConfirmed.Length == 0)
             {
-                lblError.Content = "Confirm password";
+                MessageBox.Show("Confirm password", "Message", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
             else if (username.Contains(@"\s") || password.Contains(@"\s"))
             {
-                lblError.Content = "Username and password can't contain spaces";
+                MessageBox.Show("Username and password can't contain spaces", "Message", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
             else if (username.Any(c => !(char.IsLetter(c) || char.IsDigit(c) || char.IsWhiteSpace(c))))
             {
-                lblError.Content = "Username can't contain special characters";
+                MessageBox.Show("Username can't contain special characters", "Message", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
             else if (username.Any(c => char.IsUpper(c)))
             {
-                lblError.Content = "Username can't contain uppercase Letters";
+                MessageBox.Show("Username can't contain uppercase Letters", "Message", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
             else if (password != passwordConfirmed)
             {
-                lblError.Content = "Passwords not matching";
+                MessageBox.Show("Passwords not matching", "Message", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
             else if (phone.Any(c => char.IsLetter(c)))
             {
-                lblError.Content = "Unsupported phone format";
+                MessageBox.Show("Unsupported phone format", "Message", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
-            else if (await _userController.GetUserByUsername(username) != null)
+            // this condition is checking only if we're creating new user
+            else if (user == null && await _userController.GetUserByUsername(username) != null)
             {
-                lblError.Content = "Username already exist";
+                MessageBox.Show("Username already exists", "Message", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
             else

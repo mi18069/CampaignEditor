@@ -16,6 +16,9 @@
     <Compile Update="AddUser.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="AllUsers.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="AMRTrim.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -106,6 +109,9 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="AddUser.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="AllUsers.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="AMRTrim.xaml">

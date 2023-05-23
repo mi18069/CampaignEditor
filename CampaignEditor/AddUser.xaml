@@ -42,9 +42,9 @@
         <ComboBox x:Name="cbAuthorization" HorizontalContentAlignment="Center" FontSize="18"
                   Width="270" Height="30"
                   HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0, 205, 100, 0" SelectedIndex="0">
-            <ComboBoxItem>Read only</ComboBoxItem>
-            <ComboBoxItem>Read and Write</ComboBoxItem>
             <ComboBoxItem>Administrator</ComboBoxItem>
+            <ComboBoxItem>Read and Write</ComboBoxItem>
+            <ComboBoxItem>Read Only</ComboBoxItem>
         </ComboBox>
 
         <Label x:Name="lblEmail" Content="E-mail: " HorizontalContentAlignment="Right" 

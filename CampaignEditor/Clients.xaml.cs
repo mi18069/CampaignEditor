@@ -27,6 +27,7 @@ namespace CampaignEditor
         private readonly IAbstractFactory<NewCampaign> _factoryNewCampaign;
         private readonly IAbstractFactory<Rename> _factoryRename;
         private readonly IAbstractFactory<Campaign> _factoryCampaign;
+        private readonly IAbstractFactory<AllUsers> _factoryAllUsers;
         private CampaignController _campaignController;
 
 
@@ -70,7 +71,7 @@ namespace CampaignEditor
         public bool isReadOnly { get; set; } = false;
         public Clients(IAbstractFactory<ClientsTreeView> factoryClientsTreeView, IAbstractFactory<AddUser> factoryAddUser,
             IAbstractFactory<AddClient> factoryAddClient, IAbstractFactory<UsersOfClient> factoryUsersOfClient, IAbstractFactory<NewCampaign> factoryNewCampaign,
-            IAbstractFactory<Rename> factoryRename, IAbstractFactory<Campaign> factoryCampaign, ICampaignRepository campaignRepository)
+            IAbstractFactory<Rename> factoryRename, IAbstractFactory<Campaign> factoryCampaign, ICampaignRepository campaignRepository, IAbstractFactory<AllUsers> factoryAllUsers)
         {
             InitializeComponent();
             this.DataContext = this;
@@ -99,7 +100,7 @@ namespace CampaignEditor
             tbSearchClients.Text = searchClientsString;
 
             FillFilterByUsersComboBox();
-
+            _factoryAllUsers = factoryAllUsers;
         }
 
         #region Filter ComboBox
@@ -343,6 +344,14 @@ namespace CampaignEditor
             await f.Initialize(clientname);
             f.ShowDialog();
         }
+
+        private async void BtnAllUsers_Click(object sender, RoutedEventArgs e)
+        {
+            var f = _factoryAllUsers.Create();
+            await f.Initialize();
+            f.ShowDialog();
+        }
+
         private void btnAddUser_Click(object sender, RoutedEventArgs e)
         {
             var f = _factoryAddUser.Create();
@@ -411,6 +420,7 @@ namespace CampaignEditor
                 }
             }
         }
+
 
 
         #endregion

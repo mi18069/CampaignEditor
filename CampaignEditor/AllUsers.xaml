@@ -1,11 +1,11 @@
-﻿<Window x:Class="CampaignEditor.UsersOfClient"
+﻿<Window x:Class="CampaignEditor.AllUsers"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CampaignEditor.UserControls" 
         mc:Ignorable="d"
-        Title="UsersOfClient" Height="450" Width="600" ResizeMode="CanResize">
+        Title="AllUsers" Height="450" Width="800">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="10"/>
@@ -20,14 +20,11 @@
             <RowDefinition Height="10"/>
         </Grid.RowDefinitions>
 
-        <Label x:Name="lblUsersOfClient" Content="Users of client " FontSize="22" 
-               HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Row="1" Grid.Column="1"/>
+        <Label Grid.Row="1" Grid.Column="1" Content="All users"
+               VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="26" FontWeight="Bold"/>
         <local:ListBoxAddButton Grid.Row="2" Grid.Column="1" x:Name="lbUsers"/>
-        <Button x:Name="btnSave" Grid.Row="3" Grid.Column="1" Content="Save"
-                Width="100" HorizontalAlignment="Right" Margin="10" 
-                IsEnabled="{Binding Path=isModified, Mode=TwoWay}"
-                Click="btnSave_Click"/>
-        <Button x:Name="btnClose" Grid.Row="3" Grid.Column="1" Content="Close"
-                Width="100" HorizontalAlignment="Right" Margin="10, 10, 120, 10" Click="btnClose_Click"/>
+        <Button Grid.Row="3" Grid.Column="1" x:Name="btnClose" Content="Close"
+                Width="100" Margin="10" HorizontalAlignment="Right"
+                Click="btnClose_Click"/>
     </Grid>
 </Window>

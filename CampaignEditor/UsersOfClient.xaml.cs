@@ -7,6 +7,7 @@ using Database.Repositories;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -15,7 +16,7 @@ using System.Windows.Media;
 
 namespace CampaignEditor
 {
-    public partial class UsersOfClient : Window
+    public partial class UsersOfClient : Window, INotifyPropertyChanged
     {
         public static UsersOfClient instance;
         private ClientDTO _client = null;
@@ -29,15 +30,34 @@ namespace CampaignEditor
         List<string> _unassigned = new List<string>();
         List<string> _assigned = new List<string>();
 
-        private bool isModified = false;
+        private bool _isModified;
+        public bool isModified
+        {
+            get { return _isModified; }
+            set
+            {
+                if (_isModified != value)
+                {
+                    _isModified = value;
+                    OnPropertyChanged(nameof(isModified));
+                }
+            }
+        }
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected virtual void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
         public UsersOfClient(IAbstractFactory<UsersAndClients> factoryUsersAndClients,
                              IAbstractFactory<AssignUser> factoryAssignUser,
                              IClientRepository clientRepository,
                              IUserRepository userRepository)
         {
-            this.DataContext = this;
+            
             instance = this;
             InitializeComponent();
+            this.DataContext = this;
             _factoryUsersAndClients = factoryUsersAndClients;
             _factoryAssignUser = factoryAssignUser; 
 
@@ -54,7 +74,7 @@ namespace CampaignEditor
         public async Task Initialize(string clientname)
         {
             _client = await _clientController.GetClientByName(clientname);
-            PopulateItems();
+            await PopulateItems();
 
         }
 
@@ -212,4 +232,5 @@ namespace CampaignEditor
             this.Close();
         }
     }
+
 }

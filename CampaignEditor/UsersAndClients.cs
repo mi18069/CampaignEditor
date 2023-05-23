@@ -80,6 +80,7 @@ namespace CampaignEditor
 
         #endregion
 
+
         #region Delete Users and Clients
         public async void DeleteUserByUsername(string username)
         {          

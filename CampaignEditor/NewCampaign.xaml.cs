@@ -96,6 +96,11 @@ namespace CampaignEditor
 
         private async Task<bool> CheckCampaign()
         {
+            if (tbName.Text.Trim() == "")
+            {
+                lblError.Content = "Enter campaign name";
+                return false;
+            }
             if (await _campaignController.GetCampaignByName(tbName.Text.Trim()) != null)
             {
                 lblError.Content = "Already exists campaign with this name";
