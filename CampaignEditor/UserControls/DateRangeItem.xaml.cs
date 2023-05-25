@@ -1,15 +1,15 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Windows.Controls;
 
 namespace CampaignEditor.UserControls
 {
     public partial class DateRangeItem : UserControl
     {
-       
         public DateRangeItem()
         {
             InitializeComponent();
-            SetDates();
+            SetDates();              
         }
 
         public void SetDates(DateTime? first = null, DateTime? second = null)
@@ -29,6 +29,30 @@ namespace CampaignEditor.UserControls
             {
                 dpFrom.SelectedDate = first.Value;
                 dpTo.SelectedDate = second.Value;
+            }
+
+        }
+
+        public void DisableDates(List<DateTime> disabledDates)
+        {
+
+            dpFrom.DisplayDateStart = new DateTime(2019, 01, 01);
+            dpTo.DisplayDateStart = new DateTime(2019, 01, 01);
+
+            dpFrom.DisplayDateEnd = DateTime.Now;
+            dpTo.DisplayDateEnd = DateTime.Now;
+
+            foreach (DateTime date in disabledDates) 
+            {
+                try
+                {
+                    dpFrom.BlackoutDates.Add(new CalendarDateRange(date));
+                    dpTo.BlackoutDates.Add(new CalendarDateRange(date));
+                }
+                catch
+                {
+                    continue;
+                }
             }
 
         }

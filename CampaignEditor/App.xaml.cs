@@ -78,6 +78,7 @@ namespace CampaignEditor
                     Database.Extensions.MediaPlanTermExtensions.AddMediaPlanTermExtensions(services);
                     Database.Extensions.MediaPlanRefExtensions.AddMediaPlanRefExtensions(services);
                     Database.Extensions.EmsTypesExtensions.AddEmsTypesExtensions(services);
+                    Database.Extensions.DatabaseFunctionsExtensions.AddDatabaseFunctionsExtensions(services);
 
                 }).Build();
 

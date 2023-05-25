@@ -1,18 +1,16 @@
 ﻿using System;
-using System.Linq;
 using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
 using System.Windows.Media;
 using System.IO;
-using System.Collections.Generic;
 
 namespace CampaignEditor.UserControls
 {
     public class ListBoxAddButton : ListBox
     {
-        private Object objectToAdd = null;
+        protected Object objectToAdd = null;
 
         // For Plus Icon
         private string appPath = Directory.GetCurrentDirectory();
@@ -53,7 +51,7 @@ namespace CampaignEditor.UserControls
             return btnAddDP;
         }
 
-        private void btnAddDP_Click(object sender, RoutedEventArgs e)
+        virtual protected void btnAddDP_Click(object sender, RoutedEventArgs e)
         {
             Type objectType = objectToAdd.GetType();
             ConstructorInfo constructor = objectType.GetConstructor(Type.EmptyTypes);

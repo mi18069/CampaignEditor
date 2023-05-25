@@ -16,6 +16,5 @@ namespace Database.Repositories
         Task<bool> DeleteMediaPlanHistById(int id);
         Task<bool> DeleteMediaPlanHistByXmpid(int xmpid);
 
-        Task<bool> StartAMRCalculation(int cmpid, int minusTime, int plusTime);
     }
 }

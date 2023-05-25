@@ -40,6 +40,7 @@ namespace CampaignEditor.UserControls
         private PricelistController _pricelistController;
         private SeasonalityController _seasonalityController;
         private SectableController _sectableController;
+        private DatabaseFunctionsController _databaseFunctionsController;
 
         private readonly IAbstractFactory<AddSchema> _factoryAddSchema;
         private readonly IAbstractFactory<AMRTrim> _factoryAmrTrim;
@@ -73,6 +74,8 @@ namespace CampaignEditor.UserControls
         private ObservableCollection<MediaPlanTuple> _showMP 
             = new ObservableCollection<MediaPlanTuple>();
 
+        List<DateTime> unavailableDates = new List<DateTime>();
+
         public CampaignForecast(ISchemaRepository schemaRepository,
             IChannelRepository channelRepository, 
             IChannelCmpRepository channelCmpRepository,
@@ -85,8 +88,10 @@ namespace CampaignEditor.UserControls
             IPricelistRepository pricelistRepository,
             ISeasonalityRepository seasonalityRepository,
             ISectableRepository sectableRepository,
+            IDatabaseFunctionsRepository databaseFunctionsRepository,
             IAbstractFactory<AddSchema> factoryAddSchema,
-            IAbstractFactory<AMRTrim> factoryAmrTrim)
+            IAbstractFactory<AMRTrim> factoryAmrTrim
+            )
         {
             this.DataContext = this;
             this.FrozenColumnsNum = mediaPlanColumns;
@@ -103,6 +108,7 @@ namespace CampaignEditor.UserControls
             _pricelistController = new PricelistController(pricelistRepository);
             _seasonalityController = new SeasonalityController(seasonalityRepository);
             _sectableController = new SectableController(sectableRepository);
+            _databaseFunctionsController = new DatabaseFunctionsController(databaseFunctionsRepository);
 
             _factoryAddSchema = factoryAddSchema;
             _factoryAmrTrim = factoryAmrTrim;
@@ -125,6 +131,14 @@ namespace CampaignEditor.UserControls
             startDate = TimeFormat.YMDStringToDateTime(_campaign.cmpsdate);
             endDate = TimeFormat.YMDStringToDateTime(_campaign.cmpedate);
 
+            await _databaseFunctionsController.RunUpdateUnavailableDates();
+            var uDates = await _databaseFunctionsController.GetAllUnavailableDates();
+            
+            foreach (var uDate in uDates ) 
+            {
+                unavailableDates.Add(uDate);
+            }
+
             var spots = await _spotController.GetSpotsByCmpid(_campaign.cmpid);
             for (int i = 0; i < spots.Count(); i++)
             {
@@ -140,7 +154,8 @@ namespace CampaignEditor.UserControls
             {
                 SetGrid(gridInit);
 
-                lbDateRanges.Initialize(new DateRangeItem());
+                var dri = new DateRangeItem();
+                lbDateRanges.Initialize(unavailableDates, new DateRangeItem());
                 // waiting for function Init_Click to activate LoadData function
             }
 
@@ -197,6 +212,8 @@ namespace CampaignEditor.UserControls
             for (int i = 0; i < lbDateRanges.Items.Count - 1; i++)
             {
                 DateRangeItem dri = lbDateRanges.Items[i] as DateRangeItem;
+
+                dri.DisableDates(unavailableDates);
 
                 int? ymdFrom = TimeFormat.DPToYMDInt(dri.dpFrom);
                 int? ymdTo = TimeFormat.DPToYMDInt(dri.dpTo);
@@ -280,7 +297,7 @@ namespace CampaignEditor.UserControls
             // waiting for all tasks to finish
             await Task.WhenAll(tasks);
 
-            await _mediaPlanHistController.StartAMRCalculation(_campaign.cmpid, 40, 40);
+            await _databaseFunctionsController.StartAMRCalculation(_campaign.cmpid, 40, 40);
             //await _updateValues();
 
             await LoadData();
@@ -554,7 +571,7 @@ namespace CampaignEditor.UserControls
         private async void LoadGridInit()
         {
             lbDateRanges.Items.Clear();
-            lbDateRanges.Initialize(new DateRangeItem());
+            lbDateRanges.Initialize(unavailableDates, new DateRangeItem());
             var dateRanges = await _mediaPlanRefController.GetAllMediaPlanRefsByCmpid(_campaign.cmpid);
 
             bool first = true;
@@ -567,14 +584,17 @@ namespace CampaignEditor.UserControls
                 {
                     DateRangeItem dri = lbDateRanges.Items[0] as DateRangeItem;
                     dri.SetDates(start, end);
+                    dri.DisableDates(unavailableDates);
                     first = false;
                 }
                 else
                 {
                     DateRangeItem dri = new DateRangeItem();
                     dri.SetDates(start, end);
+                    dri.DisableDates(unavailableDates);
                     lbDateRanges.Items.Insert(lbDateRanges.Items.Count - 1, dri);
-                }                                              
+                }        
+                
             }
 
             lbDateRanges.ResizeItems(lbDateRanges.Items);

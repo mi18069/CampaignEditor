@@ -259,28 +259,5 @@ namespace Database.Repositories
             return affected != 0;
         }
 
-        public async Task<bool> StartAMRCalculation(int cmpid, int minusTime, int plusTime)
-        {
-            /*using var connection = _context.GetConnection();
-
-            var affected = await connection.ExecuteAsync(
-                "SELECT public.obrada_amr(@Cmpid, @MinusTime, @PlusTime); " +
-                "UPDATE xmphist SET outlier = false",
-                new { Cmpid = cmpid, MinusTime = minusTime, PlusTime = plusTime});
-
-            return affected != 0;*/
-            using var connection = _context.GetConnection();
-
-            var commandTimeout = 900; // Set the timeout value in seconds
-
-            var affected = await connection.ExecuteAsync(
-                new CommandDefinition(
-                    "SELECT public.obrada_amr(@Cmpid, @MinusTime, @PlusTime); " +
-                    "UPDATE xmphist SET outlier = false",
-                    new { Cmpid = cmpid, MinusTime = minusTime, PlusTime = plusTime },
-                    commandTimeout: commandTimeout));
-
-            return affected != 0;
-        }
     }
 }

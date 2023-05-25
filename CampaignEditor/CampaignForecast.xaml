@@ -29,7 +29,7 @@
             <Label Grid.Row="1" Grid.Column="1" 
                    Content="Use referenced data within ranges" 
                    FontSize="40" HorizontalAlignment="Center"/>
-            <local:ListBoxAddButton Grid.Row="2" Grid.Column="1" x:Name="lbDateRanges"/>
+            <local:DRIListBoxAddButton Grid.Row="2" Grid.Column="1" x:Name="lbDateRanges"/>
             <Button x:Name="Init" Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2"
                     Content="Initialize" FontSize="20" Margin="10" Width="100"
                     HorizontalAlignment="Right"
@@ -234,7 +234,8 @@
                                              IsReadOnly="True" Width="*"/>
                             <DataGridTextColumn Header="AMR Sale" Binding="{Binding amrsale, Mode=TwoWay}" 
                                              IsReadOnly="True" Width="*"/>
-                            <DataGridCheckBoxColumn Header="Include" Binding="{Binding outlier, Mode=TwoWay, Converter={StaticResource InvertBoolConverter}}"/>
+                            <DataGridCheckBoxColumn Header="Include" Binding="{Binding outlier, Mode=TwoWay, Converter={StaticResource InvertBoolConverter}}"
+                                                    />
                         </DataGrid.Columns>
                     </DataGrid>
                 </TabItem>
