@@ -5,6 +5,7 @@ using Database.DTOs.ChannelDTO;
 using Database.DTOs.ClientDTO;
 using Database.DTOs.GoalsDTO;
 using Database.DTOs.MediaPlanDTO;
+using Database.DTOs.MediaPlanHistDTO;
 using Database.DTOs.MediaPlanRef;
 using Database.DTOs.MediaPlanTermDTO;
 using Database.DTOs.SchemaDTO;
@@ -74,6 +75,8 @@ namespace CampaignEditor.UserControls
         private ObservableCollection<MediaPlanTuple> _showMP 
             = new ObservableCollection<MediaPlanTuple>();
 
+        private ObservableCollection<MediaPlanHist> _showMPHist = new ObservableCollection<MediaPlanHist>();
+
         List<DateTime> unavailableDates = new List<DateTime>();
 
         public CampaignForecast(ISchemaRepository schemaRepository,
@@ -133,6 +136,8 @@ namespace CampaignEditor.UserControls
 
             await _databaseFunctionsController.RunUpdateUnavailableDates();
             var uDates = await _databaseFunctionsController.GetAllUnavailableDates();
+
+            dgHist.ItemsSource = _showMPHist;
             
             foreach (var uDate in uDates ) 
             {
@@ -1396,7 +1401,7 @@ namespace CampaignEditor.UserControls
 
         private async void dgSchema_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            dgHist.Items.Clear();
+            _showMPHist.Clear();
             if (dgSchema.SelectedItems.Count == 0)
                 return;
             else
@@ -1406,8 +1411,23 @@ namespace CampaignEditor.UserControls
 
                 var mediaPlanHists = await _mediaPlanHistController.GetAllMediaPlanHistsBySchid(mediaPlan.schid);
                 foreach (var mediaPlanHist in mediaPlanHists)
-                    dgHist.Items.Add(mediaPlanHist);
+                    _showMPHist.Add(mediaPlanHist);
             }
         }
+
+        private async void DgSchemaChbCell_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is DataGridCell cell && cell.DataContext is MediaPlanHist mediaPlanHist)
+            {
+
+                // Retrieve the corresponding MediaPlanHist object from the DataContext of the row                
+                mediaPlanHist.Outlier = !mediaPlanHist.Outlier;
+
+                // TODO: Update the object in the database
+                await _mediaPlanHistController.UpdateMediaPlanHist(new UpdateMediaPlanHistDTO(_mediaPlanHistController.ConvertToDTO(mediaPlanHist)));
+            }
+        }
+
+        
     }
 }

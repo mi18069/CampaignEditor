@@ -8,5 +8,10 @@ namespace Database.DTOs.MediaPlanHistDTO
             : base(xmphistid, xmpid, schid, chid, name, position, stime, etime, date, progcoef, amr1, amr2, amr3, amrsale, amrp1, amrp2, amrp3, amrpsale, active, outlier)
         {
         }
+
+        public UpdateMediaPlanHistDTO(MediaPlanHistDTO mediaPlanHistDTO)
+            : base(mediaPlanHistDTO.xmphistid, mediaPlanHistDTO.xmpid, mediaPlanHistDTO.schid, mediaPlanHistDTO.chid, mediaPlanHistDTO.name, mediaPlanHistDTO.position, mediaPlanHistDTO.stime, mediaPlanHistDTO.etime, mediaPlanHistDTO.date, mediaPlanHistDTO.progcoef, mediaPlanHistDTO.amr1, mediaPlanHistDTO.amr2, mediaPlanHistDTO.amr3, mediaPlanHistDTO.amrsale, mediaPlanHistDTO.amrp1, mediaPlanHistDTO.amrp2, mediaPlanHistDTO.amrp3, mediaPlanHistDTO.amrpsale, mediaPlanHistDTO.active, mediaPlanHistDTO.outlier.Value)
+        {
+        }
     }
 }

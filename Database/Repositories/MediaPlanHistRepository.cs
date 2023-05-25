@@ -90,7 +90,7 @@ namespace Database.Repositories
             return _mapper.Map<IEnumerable<MediaPlanHistDTO>>(mediaPlanHist.FirstOrDefault());
         }
 
-        public async Task<IEnumerable<MediaPlanHistDTO>> GetAllMediaPlanHistsByXmpid(int xmpid)
+        public async Task<IEnumerable<MediaPlanHist>> GetAllMediaPlanHistsByXmpid(int xmpid)
         {
             using var connection = _context.GetConnection();
 
@@ -121,10 +121,10 @@ namespace Database.Repositories
                 outlier = item.outlier
             });
 
-            return _mapper.Map<IEnumerable<MediaPlanHistDTO>>(allMediaPlanHists);
+            return (IEnumerable<MediaPlanHist>)allMediaPlanHists;
         }
 
-        public async Task<IEnumerable<MediaPlanHistDTO>> GetAllMediaPlanHistsBySchid(int schid)
+        public async Task<IEnumerable<MediaPlanHist>> GetAllMediaPlanHistsBySchid(int schid)
         {
             using var connection = _context.GetConnection();
 
@@ -155,7 +155,7 @@ namespace Database.Repositories
                 outlier = item.outlier
             });
 
-            return _mapper.Map<IEnumerable<MediaPlanHistDTO>>(allMediaPlanHists);
+            return (IEnumerable<MediaPlanHist>)allMediaPlanHists;
         }
 
         public async Task<IEnumerable<MediaPlanHistDTO>> GetAllMediaPlanHists()
@@ -208,9 +208,9 @@ namespace Database.Repositories
 
             var affected = await connection.ExecuteAsync(
                 "UPDATE xmphist SET xmphistid = @Xmphistid, xmpid = @Xmpid, schid = @Schid, chid = @Chid, naziv = @Name, " +
-                "pozicija = @Position,vremeod = CAST@Stime, vremedo = @Etime, datum = CAST(@Date AS DATE), progkoef = @Progcoef " +
+                "pozicija = @Position,vremeod = @Stime, vremedo = @Etime, datum = CAST(@Date AS DATE), progkoef = @Progcoef, " +
                 "amr1 = @Amr1, amr2 = @Amr2, amr3 = @Amr3, amrsale = @Amrsale, amrp1 = @Amrp1, amrp2 = @Amrp2, amrp3 = @Amrp3, " +
-                "amr1 = @Amr1,amrpsale = @Amrpsale, active = @Active, outlier = @Outlier " +
+                "amrpsale = @Amrpsale, active = @Active, outlier = @Outlier " +
                 "WHERE xmphistid = @Xmphistid AND amrsale is not null",
                 new
                 {
@@ -259,5 +259,14 @@ namespace Database.Repositories
             return affected != 0;
         }
 
+        public MediaPlanHist ConvertFromDTO(MediaPlanHistDTO mediaPlanHistDTO)
+        {
+            return _mapper.Map<MediaPlanHist>(mediaPlanHistDTO);
+        }
+
+        public MediaPlanHistDTO ConvertToDTO(MediaPlanHist mediaPlanHist)
+        {
+            return _mapper.Map<MediaPlanHistDTO>(mediaPlanHist);
+        }
     }
 }

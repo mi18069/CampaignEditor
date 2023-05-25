@@ -1,9 +1,24 @@
 ﻿using System;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace Database.Entities
 {
-    public class MediaPlanHist
+    public class MediaPlanHist : INotifyPropertyChanged
     {
+        public bool Outlier
+        {
+            get { return outlier; }
+            set
+            {
+                if (outlier != value)
+                {
+                    outlier = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
         public int xmphistid { get; set; }
         public int xmpid { get; set; }
         public int schid { get; set; }
@@ -24,5 +39,12 @@ namespace Database.Entities
         public double amrpsale { get; set; }
         public bool active { get; set; }
         public bool outlier { get; set; }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
     }
 }

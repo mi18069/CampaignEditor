@@ -25,12 +25,12 @@ namespace CampaignEditor.Controllers
             return await _repository.GetMediaPlanHistById(id);
         }
 
-        public async Task<IEnumerable<MediaPlanHistDTO>> GetAllMediaPlanHistsByXmpid(int xmpid)
+        public async Task<IEnumerable<MediaPlanHist>> GetAllMediaPlanHistsByXmpid(int xmpid)
         {
             return await _repository.GetAllMediaPlanHistsByXmpid(xmpid);
         }
 
-        public async Task<IEnumerable<MediaPlanHistDTO>> GetAllMediaPlanHistsBySchid(int schid)
+        public async Task<IEnumerable<MediaPlanHist>> GetAllMediaPlanHistsBySchid(int schid)
         {
             return await _repository.GetAllMediaPlanHistsBySchid(schid);
         }
@@ -58,6 +58,16 @@ namespace CampaignEditor.Controllers
         public async Task<bool> DeleteMediaPlanHistByXmpid(int xmpid)
         {
             return await _repository.DeleteMediaPlanHistByXmpid(xmpid);
+        }
+
+        public MediaPlanHist ConvertFromDTO(MediaPlanHistDTO mediaPlanHistDTO)
+        {
+            return _repository.ConvertFromDTO(mediaPlanHistDTO);
+        }
+
+        public MediaPlanHistDTO ConvertToDTO(MediaPlanHist mediaPlanHist)
+        {
+            return _repository.ConvertToDTO(mediaPlanHist);
         }
     }
 }

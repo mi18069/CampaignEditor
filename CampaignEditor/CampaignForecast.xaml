@@ -235,7 +235,13 @@
                             <DataGridTextColumn Header="AMR Sale" Binding="{Binding amrsale, Mode=TwoWay}" 
                                              IsReadOnly="True" Width="*"/>
                             <DataGridCheckBoxColumn Header="Include" Binding="{Binding outlier, Mode=TwoWay, Converter={StaticResource InvertBoolConverter}}"
-                                                    />
+                                                    IsReadOnly="True">
+                                <DataGridCheckBoxColumn.CellStyle>
+                                    <Style TargetType="DataGridCell">
+                                        <EventSetter Event="PreviewMouseDown" Handler="DgSchemaChbCell_PreviewMouseDown" />
+                                    </Style>
+                                </DataGridCheckBoxColumn.CellStyle>
+                            </DataGridCheckBoxColumn>
                         </DataGrid.Columns>
                     </DataGrid>
                 </TabItem>
