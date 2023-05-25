@@ -4,12 +4,15 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:CampaignEditor.UserControls" 
-      xmlns:treeviewmodels="clr-namespace:TreeViewModels" d:DataContext="{d:DesignInstance Type=treeviewmodels:TreeViewModel}"
+      xmlns:converters="clr-namespace:CampaignEditor.Converters"
       mc:Ignorable="d" 
       d:DesignHeight="700" d:DesignWidth="1200"
       Title="CampaignForecast" Background="White"
       PreviewKeyDown="Page_PreviewKeyDown">
-
+    <Page.Resources>
+        <converters:InvertBoolConverter x:Key="InvertBoolConverter" />
+        <converters:SecIntConverter x:Key="SecIntConverter" />
+    </Page.Resources>
     <Grid>
         <Grid x:Name="gridInit" Visibility="Hidden" >
             <Grid.ColumnDefinitions>
@@ -26,8 +29,6 @@
             <Label Grid.Row="1" Grid.Column="1" 
                    Content="Use referenced data within ranges" 
                    FontSize="40" HorizontalAlignment="Center"/>
-            <!-- <ListBox Grid.Row="2" Grid.Column="1" x:Name="lbDateRanges" 
-                     SizeChanged="lbDateRanges_SizeChanged"/> -->
             <local:ListBoxAddButton Grid.Row="2" Grid.Column="1" x:Name="lbDateRanges"/>
             <Button x:Name="Init" Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2"
                     Content="Initialize" FontSize="20" Margin="10" Width="100"
@@ -53,7 +54,7 @@
                    HorizontalAlignment="Center" VerticalAlignment="Center">
             </Label>
         </Grid>
-        <Grid x:Name="gridForecast" Visibility="Hidden" >
+        <Grid x:Name="gridForecast" Visibility="Visible" >
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="10"/>
                 <ColumnDefinition Width="auto"/>
@@ -198,7 +199,7 @@
                       AutoGenerateColumns="False"
                       CanUserDeleteRows="False"
                       SelectionMode="Single"
-                      HorizontalScrollBarVisibility="Visible">
+                      HorizontalScrollBarVisibility="Hidden">
                         <DataGrid.CellStyle>
                             <Style TargetType="DataGridCell">
                                 <Style.Triggers>
@@ -221,19 +222,19 @@
                                         IsReadOnly="True" />
                             <DataGridTextColumn Header="Datum" Binding="{Binding date, Mode=TwoWay, StringFormat=d}" 
                                         IsReadOnly="True"/>
-                            <DataGridTextColumn Header="Start time" Binding="{Binding stime, Mode=TwoWay}" 
+                            <DataGridTextColumn Header="Start time" Binding="{Binding stime, Mode=TwoWay, Converter={StaticResource SecIntConverter}}" 
                                         IsReadOnly="True"/>
-                            <DataGridTextColumn Header="End time" Binding="{Binding etime, Mode=TwoWay}" 
+                            <DataGridTextColumn Header="End time" Binding="{Binding etime, Mode=TwoWay, Converter={StaticResource SecIntConverter}}" 
                                         IsReadOnly="True"/>
                             <DataGridTextColumn Header="AMR 1" Binding="{Binding amr1, Mode=TwoWay}" 
-                                             IsReadOnly="True"  />
+                                             IsReadOnly="True" Width="*" />
                             <DataGridTextColumn Header="AMR 2" Binding="{Binding amr2, Mode=TwoWay}" 
-                                             IsReadOnly="True" />
+                                             IsReadOnly="True" Width="*"/>
                             <DataGridTextColumn Header="AMR 3" Binding="{Binding amr3, Mode=TwoWay}" 
-                                             IsReadOnly="True" />
+                                             IsReadOnly="True" Width="*"/>
                             <DataGridTextColumn Header="AMR Sale" Binding="{Binding amrsale, Mode=TwoWay}" 
-                                             IsReadOnly="True" />
-                            <DataGridCheckBoxColumn Header="Include" Binding="{Binding outlier, Mode=TwoWay}"/>
+                                             IsReadOnly="True" Width="*"/>
+                            <DataGridCheckBoxColumn Header="Include" Binding="{Binding outlier, Mode=TwoWay, Converter={StaticResource InvertBoolConverter}}"/>
                         </DataGrid.Columns>
                     </DataGrid>
                 </TabItem>

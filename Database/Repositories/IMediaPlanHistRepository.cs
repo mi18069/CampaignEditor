@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using System;
 using Database.DTOs.MediaPlanHistDTO;
 
 namespace Database.Repositories
@@ -16,5 +15,7 @@ namespace Database.Repositories
         Task<bool> UpdateMediaPlanHist(UpdateMediaPlanHistDTO mediaPlanHistDTO);
         Task<bool> DeleteMediaPlanHistById(int id);
         Task<bool> DeleteMediaPlanHistByXmpid(int xmpid);
+
+        Task<bool> StartAMRCalculation(int cmpid, int minusTime, int plusTime);
     }
 }

@@ -59,5 +59,10 @@ namespace CampaignEditor.Controllers
         {
             return await _repository.DeleteMediaPlanHistByXmpid(xmpid);
         }
+
+        public async Task<bool> StartAMRCalculation(int cmpid, int minusTime, int plusTime)
+        {
+            return await _repository.StartAMRCalculation(cmpid, minusTime, plusTime);
+        }
     }
 }

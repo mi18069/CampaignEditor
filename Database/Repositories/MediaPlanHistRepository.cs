@@ -61,7 +61,7 @@ namespace Database.Repositories
             using var connection = _context.GetConnection();
 
             var mediaPlanHist = await connection.QueryAsync<dynamic>(
-                "SELECT * FROM xmphist WHERE xmphistid = @Id", new { Id = id });
+                "SELECT * FROM xmphist WHERE xmphistid = @Id AND amrsale is not null", new { Id = id });
 
             mediaPlanHist = mediaPlanHist.Select(item => new MediaPlanHist()
             {
@@ -95,7 +95,7 @@ namespace Database.Repositories
             using var connection = _context.GetConnection();
 
             var allMediaPlanHists = await connection.QueryAsync<dynamic>(
-                "SELECT * FROM xmphist WHERE xmpid = @Xmpid", new { Xmpid = xmpid });
+                "SELECT * FROM xmphist WHERE xmpid = @Xmpid AND amrsale is not null", new { Xmpid = xmpid });
 
             allMediaPlanHists = allMediaPlanHists.Select(item => new MediaPlanHist()
             {
@@ -129,7 +129,7 @@ namespace Database.Repositories
             using var connection = _context.GetConnection();
 
             var allMediaPlanHists = await connection.QueryAsync<dynamic>(
-                "SELECT * FROM xmphist WHERE schid = @Schid", new { Schid = schid });
+                "SELECT * FROM xmphist WHERE schid = @Schid AND amrsale is not null", new { Schid = schid });
 
             allMediaPlanHists = allMediaPlanHists.Select(item => new MediaPlanHist()
             {
@@ -163,7 +163,7 @@ namespace Database.Repositories
             using var connection = _context.GetConnection();
 
             var allMediaPlanHists = await connection.QueryAsync<dynamic>
-                ("SELECT * FROM xmphist");
+                ("SELECT * FROM xmphist WHERE amrsale is not null");
 
             allMediaPlanHists = allMediaPlanHists.Select(item => new MediaPlanHist()
             {
@@ -197,7 +197,7 @@ namespace Database.Repositories
             using var connection = _context.GetConnection();
 
             var allMediaPlanHists = await connection.QueryAsync<MediaPlanHist>
-                ("SELECT * FROM xmphist WHERE chid=@Chid", new { Chid = chid });
+                ("SELECT * FROM xmphist WHERE chid=@Chid AND amrsale is not null", new { Chid = chid });
 
             return _mapper.Map<IEnumerable<MediaPlanHistDTO>>(allMediaPlanHists);
         }
@@ -211,7 +211,7 @@ namespace Database.Repositories
                 "pozicija = @Position,vremeod = CAST@Stime, vremedo = @Etime, datum = CAST(@Date AS DATE), progkoef = @Progcoef " +
                 "amr1 = @Amr1, amr2 = @Amr2, amr3 = @Amr3, amrsale = @Amrsale, amrp1 = @Amrp1, amrp2 = @Amrp2, amrp3 = @Amrp3, " +
                 "amr1 = @Amr1,amrpsale = @Amrpsale, active = @Active, outlier = @Outlier " +
-                "WHERE xmphistid = @Xmphistid",
+                "WHERE xmphistid = @Xmphistid AND amrsale is not null",
                 new
                 {
                     Xmphistid = mediaPlanHistDTO.xmphistid,
@@ -255,6 +255,30 @@ namespace Database.Repositories
 
             var affected = await connection.ExecuteAsync(
                 "DELETE FROM xmphist WHERE xmpid = @Xmpid", new { Xmpid = xmpid });
+
+            return affected != 0;
+        }
+
+        public async Task<bool> StartAMRCalculation(int cmpid, int minusTime, int plusTime)
+        {
+            /*using var connection = _context.GetConnection();
+
+            var affected = await connection.ExecuteAsync(
+                "SELECT public.obrada_amr(@Cmpid, @MinusTime, @PlusTime); " +
+                "UPDATE xmphist SET outlier = false",
+                new { Cmpid = cmpid, MinusTime = minusTime, PlusTime = plusTime});
+
+            return affected != 0;*/
+            using var connection = _context.GetConnection();
+
+            var commandTimeout = 900; // Set the timeout value in seconds
+
+            var affected = await connection.ExecuteAsync(
+                new CommandDefinition(
+                    "SELECT public.obrada_amr(@Cmpid, @MinusTime, @PlusTime); " +
+                    "UPDATE xmphist SET outlier = false",
+                    new { Cmpid = cmpid, MinusTime = minusTime, PlusTime = plusTime },
+                    commandTimeout: commandTimeout));
 
             return affected != 0;
         }

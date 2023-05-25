@@ -280,6 +280,9 @@ namespace CampaignEditor.UserControls
             // waiting for all tasks to finish
             await Task.WhenAll(tasks);
 
+            await _mediaPlanHistController.StartAMRCalculation(_campaign.cmpid, 40, 40);
+            //await _updateValues();
+
             await LoadData();
 
         }
@@ -296,6 +299,7 @@ namespace CampaignEditor.UserControls
                 MediaPlanDTO mediaPlan = await SchemaToMP(schema);
                 var mediaPlanTerms = await MediaPlanToMPTerm(mediaPlan);
             }
+
         }
 
         // reaching or creating mediaPlan

@@ -83,5 +83,13 @@ namespace CampaignEditor
                 return 0;
         }
 
+        public static string SecIntToReporesentative(int secInt)
+        {
+            int hours = secInt / 3600; // Calculate the number of hours
+            int minutes = (secInt % 3600) / 60; // Calculate the remaining minutes
+
+            return hours.ToString().PadLeft(2, '0') + " : " + minutes.ToString().PadLeft(2, '0');
+        }
+
     }
 }

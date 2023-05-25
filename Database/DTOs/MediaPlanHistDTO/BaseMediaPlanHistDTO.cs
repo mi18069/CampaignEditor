@@ -45,6 +45,6 @@ namespace Database.DTOs.MediaPlanHistDTO
         public double amrp3 { get; set; }
         public double amrpsale { get; set; }
         public bool active { get; set; }
-        public bool outlier { get; set; }
+        public bool? outlier { get; set; }
     }
 }
