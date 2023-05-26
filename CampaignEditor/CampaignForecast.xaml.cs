@@ -160,7 +160,8 @@ namespace CampaignEditor.UserControls
                 SetGrid(gridInit);
 
                 var dri = new DateRangeItem();
-                lbDateRanges.Initialize(unavailableDates, new DateRangeItem());
+                dri.DisableDates(unavailableDates);
+                lbDateRanges.Initialize(unavailableDates, dri);
                 // waiting for function Init_Click to activate LoadData function
             }
 
@@ -217,8 +218,6 @@ namespace CampaignEditor.UserControls
             for (int i = 0; i < lbDateRanges.Items.Count - 1; i++)
             {
                 DateRangeItem dri = lbDateRanges.Items[i] as DateRangeItem;
-
-                dri.DisableDates(unavailableDates);
 
                 int? ymdFrom = TimeFormat.DPToYMDInt(dri.dpFrom);
                 int? ymdTo = TimeFormat.DPToYMDInt(dri.dpTo);

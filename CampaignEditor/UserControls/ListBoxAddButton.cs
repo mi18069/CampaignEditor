@@ -24,10 +24,10 @@ namespace CampaignEditor.UserControls
         public void Initialize(object objToAdd)
         {
             objectToAdd = objToAdd;
-            Type objectType = objectToAdd.GetType();
-            ConstructorInfo constructor = objectType.GetConstructor(Type.EmptyTypes);
-            object newObject = constructor.Invoke(new object[] { });
-            this.Items.Add(newObject);
+            //Type objectType = objectToAdd.GetType();
+            //ConstructorInfo constructor = objectType.GetConstructor(Type.EmptyTypes);
+            //object newObject = constructor.Invoke(new object[] { });
+            this.Items.Add(objToAdd);
 
             Button addButton = MakeAddButton();
             this.Items.Add(addButton);
