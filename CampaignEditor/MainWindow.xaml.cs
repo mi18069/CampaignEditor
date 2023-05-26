@@ -164,5 +164,15 @@ namespace CampaignEditor
         {
             _factoryConfig.Create().ShowDialog();
         }
+
+        private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            // Check if the Enter key is pressed
+            if (e.Key == Key.Enter && btnCheckCredentials.IsEnabled)
+            {
+                btnCheckCredentials_Click(sender, e);
+                e.Handled = true;
+            }
+        }
     }
 }

@@ -302,10 +302,30 @@ namespace CampaignEditor.UserControls
             await Task.WhenAll(tasks);
 
             await _databaseFunctionsController.StartAMRCalculation(_campaign.cmpid, 40, 40);
-            //await _updateValues();
+            await UpdateXMPValues();
 
             await LoadData();
 
+        }
+
+        private async Task UpdateXMPValues()
+        {
+            var mediaPlans = await _mediaPlanController.GetAllMediaPlansByCmpid(_campaign.cmpid);
+            foreach (var mediaPlan in mediaPlans) 
+            {
+                var related = await _mediaPlanHistController.GetAllMediaPlanHistsByXmpid(mediaPlan.xmpid);
+                mediaPlan.amr1 = MathFunctions.ArithmeticMean(related.Select(r => r.amr1));
+                mediaPlan.amr2 = MathFunctions.ArithmeticMean(related.Select(r => r.amr2));
+                mediaPlan.amr3 = MathFunctions.ArithmeticMean(related.Select(r => r.amr3));
+                mediaPlan.amrsale = MathFunctions.ArithmeticMean(related.Select(r => r.amrsale));
+                mediaPlan.amrp1 = MathFunctions.ArithmeticMean(related.Select(r => r.amrp1));
+                mediaPlan.amrp2 = MathFunctions.ArithmeticMean(related.Select(r => r.amrp2));
+                mediaPlan.amrp3 = MathFunctions.ArithmeticMean(related.Select(r => r.amrp3));
+                mediaPlan.amrpsale = MathFunctions.ArithmeticMean(related.Select(r => r.amrpsale));
+
+                await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(mediaPlan));
+            }
+            
         }
 
         #region Inserting in database
@@ -366,6 +386,7 @@ namespace CampaignEditor.UserControls
                 var pricelist = await _pricelistController.GetPricelistById(channelCmp.plid);
                 var seasonality = await _seasonalityController.GetSeasonalityById(pricelist.seastbid);
                 var sectable = await _sectableController.GetSectableById(pricelist.sectbid);*/
+
 
             CreateMediaPlanDTO createMediaPlan = new CreateMediaPlanDTO(schema.id, _campaign.cmpid, schema.chid,
             schema.name.Trim(), 1, schema.position, schema.stime, schema.etime, schema.blocktime,
@@ -1408,7 +1429,7 @@ namespace CampaignEditor.UserControls
                 var mediaPlanTuple = dgSchema.SelectedItems[0] as MediaPlanTuple;
                 var mediaPlan = mediaPlanTuple.MediaPlan;
 
-                var mediaPlanHists = await _mediaPlanHistController.GetAllMediaPlanHistsBySchid(mediaPlan.schid);
+                var mediaPlanHists = await _mediaPlanHistController.GetAllMediaPlanHistsByXmpid(mediaPlan.xmpid);
                 foreach (var mediaPlanHist in mediaPlanHists)
                     _showMPHist.Add(mediaPlanHist);
             }
