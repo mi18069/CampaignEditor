@@ -58,7 +58,7 @@ namespace CampaignEditor.UserControls
         HashSet<char> spotCodes = new HashSet<char>();
 
         // number of frozen columns
-        int mediaPlanColumns = 24;
+        int mediaPlanColumns = 25;
         bool resetRefData = false;
 
         public int FrozenColumnsNum
@@ -383,9 +383,9 @@ namespace CampaignEditor.UserControls
                     
             }
             /*var channelCmp = await _channelCmpController.GetChannelCmpByIds(_campaign.cmpid, schema.chid);
-                var pricelist = await _pricelistController.GetPricelistById(channelCmp.plid);
-                var seasonality = await _seasonalityController.GetSeasonalityById(pricelist.seastbid);
-                var sectable = await _sectableController.GetSectableById(pricelist.sectbid);*/
+            var pricelist = await _pricelistController.GetPricelistById(channelCmp.plid);
+            var seasonality = await _seasonalityController.GetSeasonalityById(pricelist.seastbid);
+            var sectable = await _sectableController.GetSectableById(pricelist.sectbid);*/
 
 
             CreateMediaPlanDTO createMediaPlan = new CreateMediaPlanDTO(schema.id, _campaign.cmpid, schema.chid,
@@ -1340,6 +1340,7 @@ namespace CampaignEditor.UserControls
             }
         }
 
+        // Don't need 
         private async void TextBoxCoef_TextChanged(object sender, TextChangedEventArgs e)
         {
             var tuple = dgSchema.SelectedItems[0] as MediaPlanTuple;

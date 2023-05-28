@@ -369,6 +369,7 @@ namespace CampaignEditor
         {
             string clientname = ((HeaderedItemsControl)tvClients.SelectedItem).Header.ToString()!.Trim();
             await _clientsTree.DeleteClient(clientname);
+            
         }
 
         private async void btnRenameClient_Click(object sender, RoutedEventArgs e)
@@ -411,6 +412,7 @@ namespace CampaignEditor
                         if (!campaign.active)
                         {
                             await _campaignController.DeleteCampaignById(campaign.cmpid);
+                            await _clientsTree.InitializeTree();
                         }
                         else
                         {

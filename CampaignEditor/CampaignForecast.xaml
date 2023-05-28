@@ -120,16 +120,10 @@
                                         IsReadOnly="True" Visibility="Collapsed"/>
                     <DataGridCheckBoxColumn Header="Special" Binding="{Binding MediaPlan.special, Mode=TwoWay}" 
                                         Visibility="Collapsed"/>
-                    <DataGridTextColumn Header="Prog Coef" Binding="{Binding MediaPlan.progcoef, Mode=TwoWay}" 
-                                        IsReadOnly="True" Visibility="Collapsed" >
-                        <DataGridTextColumn.EditingElementStyle>
-                            <Style TargetType="{x:Type TextBox}">
-                                <EventSetter Event="TextChanged" Handler="TextBoxCoef_TextChanged"/>
-                            </Style>
-                        </DataGridTextColumn.EditingElementStyle>
-                    </DataGridTextColumn>
                     <DataGridTextColumn Header="AMR 1" Binding="{Binding MediaPlan.amr1, Mode=TwoWay}" 
                                              IsReadOnly="True" Visibility="Collapsed" />
+                    <DataGridTextColumn Header="AMR% 1" Binding="{Binding MediaPlan.amrp1, Mode=TwoWay, StringFormat=N2}" 
+                                            IsReadOnly="True"/>
                     <DataGridTextColumn Header="AMR 1 Trim" Binding="{Binding MediaPlan.amr1trim, Mode=TwoWay}" 
                                              Visibility="Collapsed">
                         <DataGridTextColumn.EditingElementStyle>
@@ -139,6 +133,8 @@
                         </DataGridTextColumn.EditingElementStyle>
                     </DataGridTextColumn>
                     <DataGridTextColumn Header="AMR 2" Binding="{Binding MediaPlan.amr2, Mode=TwoWay}" 
+                                            IsReadOnly="True" Visibility="Collapsed"/>
+                    <DataGridTextColumn Header="AMR% 2" Binding="{Binding MediaPlan.amrp2, Mode=TwoWay, StringFormat=N2}" 
                                             IsReadOnly="True" Visibility="Collapsed"/>
                     <DataGridTextColumn Header="AMR 2 Trim" Binding="{Binding MediaPlan.amr2trim, Mode=TwoWay}" 
                                              Visibility="Collapsed">
@@ -150,6 +146,8 @@
                     </DataGridTextColumn>
                     <DataGridTextColumn Header="AMR 3" Binding="{Binding MediaPlan.amr3, Mode=TwoWay}" 
                                             IsReadOnly="True" Visibility="Collapsed"/>
+                    <DataGridTextColumn Header="AMR% 3" Binding="{Binding MediaPlan.amrp3, Mode=TwoWay, StringFormat=N2}" 
+                                            IsReadOnly="True" Visibility="Collapsed"/>
                     <DataGridTextColumn Header="AMR 3 Trim" Binding="{Binding MediaPlan.amr3trim, Mode=TwoWay}" 
                                              Visibility="Collapsed">
                         <DataGridTextColumn.EditingElementStyle>
@@ -159,7 +157,9 @@
                         </DataGridTextColumn.EditingElementStyle>
                     </DataGridTextColumn>
                     <DataGridTextColumn Header="AMR Sale" Binding="{Binding MediaPlan.amrsale, Mode=TwoWay}"
-                                        IsReadOnly="True"/>
+                                        IsReadOnly="True" Visibility="Collapsed"/>
+                    <DataGridTextColumn Header="AMR% Sale" Binding="{Binding MediaPlan.amrpsale, Mode=TwoWay, StringFormat=N2}" 
+                                            IsReadOnly="True"/>
                     <DataGridTextColumn Header="AMR Sale Trim" Binding="{Binding MediaPlan.amrsaletrim, Mode=TwoWay}" 
                                              Visibility="Collapsed">
                         <DataGridTextColumn.EditingElementStyle>
@@ -168,24 +168,26 @@
                             </Style>
                         </DataGridTextColumn.EditingElementStyle>
                     </DataGridTextColumn>
-                    <DataGridTextColumn Header="AMR% 1" Binding="{Binding MediaPlan.amrp1, Mode=TwoWay}" 
-                                            IsReadOnly="True" Visibility="Collapsed"/>
-                    <DataGridTextColumn Header="AMR% 2" Binding="{Binding MediaPlan.amrp2, Mode=TwoWay}" 
-                                            IsReadOnly="True" Visibility="Collapsed"/>
-                    <DataGridTextColumn Header="AMR% 3" Binding="{Binding MediaPlan.amrp3, Mode=TwoWay}" 
-                                            IsReadOnly="True" Visibility="Collapsed"/>
-                    <DataGridTextColumn Header="AMR% Sale" Binding="{Binding MediaPlan.amrpsale, Mode=TwoWay}" 
-                                            IsReadOnly="True" Visibility="Collapsed"/>
                     <DataGridTextColumn Header="Affinity" 
                                             IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Prog Coef" Binding="{Binding MediaPlan.progcoef, Mode=TwoWay, StringFormat=N2}" 
+                                        IsReadOnly="True" >
+                        <DataGridTextColumn.EditingElementStyle>
+                            <Style TargetType="{x:Type TextBox}">
+                                <EventSetter Event="TextChanged" Handler="TextBoxCoef_TextChanged"/>
+                            </Style>
+                        </DataGridTextColumn.EditingElementStyle>
+                    </DataGridTextColumn>
                     <DataGridTextColumn Header="Coef SP1" 
                                         IsReadOnly="True"/>
                     <DataGridTextColumn Header="Coef SP2" 
                                         IsReadOnly="True"/>
                     <DataGridTextColumn Header="CPP" 
                                         IsReadOnly="True"/>
+                    <DataGridTextColumn Header="Insertations" 
+                                        IsReadOnly="True"/>
                     <DataGridTextColumn Header="Cost" 
-                                        IsReadOnly="True" Visibility="Collapsed"/>
+                                        IsReadOnly="True"/>
                 </DataGrid.Columns>
             </DataGrid>
 
@@ -226,13 +228,13 @@
                                         IsReadOnly="True"/>
                             <DataGridTextColumn Header="End time" Binding="{Binding etime, Mode=TwoWay, Converter={StaticResource SecIntConverter}}" 
                                         IsReadOnly="True"/>
-                            <DataGridTextColumn Header="AMR 1" Binding="{Binding amr1, Mode=TwoWay}" 
+                            <DataGridTextColumn Header="AMR% 1" Binding="{Binding amrp1, Mode=TwoWay, StringFormat=N2}" 
                                              IsReadOnly="True" Width="*" />
-                            <DataGridTextColumn Header="AMR 2" Binding="{Binding amr2, Mode=TwoWay}" 
+                            <DataGridTextColumn Header="AMR% 2" Binding="{Binding amrp2, Mode=TwoWay, StringFormat=N2}" 
                                              IsReadOnly="True" Width="*"/>
-                            <DataGridTextColumn Header="AMR 3" Binding="{Binding amr3, Mode=TwoWay}" 
+                            <DataGridTextColumn Header="AMR% 3" Binding="{Binding amrp3, Mode=TwoWay, StringFormat=N2}" 
                                              IsReadOnly="True" Width="*"/>
-                            <DataGridTextColumn Header="AMR Sale" Binding="{Binding amrsale, Mode=TwoWay}" 
+                            <DataGridTextColumn Header="AMR% Sale" Binding="{Binding amrsale, Mode=TwoWay}" 
                                              IsReadOnly="True" Width="*"/>
                             <DataGridCheckBoxColumn Header="Include" Binding="{Binding outlier, Mode=TwoWay, Converter={StaticResource InvertBoolConverter}}"
                                                     IsReadOnly="True">
