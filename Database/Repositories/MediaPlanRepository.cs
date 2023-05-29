@@ -27,10 +27,10 @@ namespace Database.Repositories
             var affected = await connection.ExecuteAsync(
                 "INSERT INTO xmp (schid, cmpid, chid, naziv, verzija, pozicija, vremeod, vremedo, vremerbl, " +
                 "dani, tipologija, specijal, datumod, datumdo, progkoef, datumkreiranja, datumizmene, " +
-                "amr1, amr1trim, amr2, amr2trim, amr3, amr3trim, amrsale, amrsaletrim, amrp1, amrp2, amrp3, amrpsale, dpkoef, seaskoef, price, active) " +
+                "amr1, amr1trim, amr2, amr2trim, amr3, amr3trim, amrsale, amrsaletrim, amrp1, amrp2, amrp3, amrpsale, dpkoef, seaskoef, seckoef, price, active) " +
                 "VALUES (@Schid, @Cmpid, @Chid, @Name, @Version, @Position, @Stime, @Etime, @Blocktime, " +
                 "@Days, @Type, @Special, CAST (@Sdate AS DATE), CAST(@Edate AS DATE), @Progcoef, CAST(@Created AS DATE), CAST(@Modified AS DATE), " +
-                "@Amr1, @Amr1trim, @Amr2, @Amr2trim, @Amr3, @Amr3trim, @Amrsale, @Amrsaletrim, @Amrp1, @Amrp2, @Amrp3, @Amrpsale, @Dpcoef, @Seascoef, @Price, @Active) ",
+                "@Amr1, @Amr1trim, @Amr2, @Amr2trim, @Amr3, @Amr3trim, @Amrsale, @Amrsaletrim, @Amrp1, @Amrp2, @Amrp3, @Amrpsale, @Dpcoef, @Seascoef, @Seccoef, @Price, @Active) ",
             new
             {
                 Schid = mediaPlanDTO.schid,
@@ -64,6 +64,7 @@ namespace Database.Repositories
                 Amrpsale = mediaPlanDTO.amrpsale,
                 Dpcoef = mediaPlanDTO.dpcoef,
                 Seascoef = mediaPlanDTO.seascoef,
+                Seccoef = mediaPlanDTO.seccoef,
                 Price = mediaPlanDTO.price,
                 Active = mediaPlanDTO.active
             });
@@ -113,6 +114,7 @@ namespace Database.Repositories
                 amrpsale = (double)item.amrpsale,
                 dpcoef = (double)item.dpkoef,
                 seascoef = (double)item.seaskoef,
+                seccoef = (double)item.seckoef,
                 price = (double)item.price,
                 active = item.active
             });
@@ -161,6 +163,7 @@ namespace Database.Repositories
                 amrpsale = (double)item.amrpsale,
                 dpcoef = (double)item.dpkoef,
                 seascoef = (double)item.seaskoef,
+                seccoef = (double)item.seckoef,
                 price = (double)item.price,
                 active = item.active
             });
@@ -210,6 +213,7 @@ namespace Database.Repositories
                 amrpsale = (double)item.amrpsale,
                 dpcoef = (double)item.dpkoef,
                 seascoef = (double)item.seaskoef,
+                seccoef = (double)item.seckoef,
                 price = (double)item.price,
                 active = item.active
             });
@@ -258,6 +262,7 @@ namespace Database.Repositories
                 amrpsale = (double)item.amrpsale,
                 dpcoef = (double)item.dpkoef,
                 seascoef = (double)item.seaskoef,
+                seccoef = (double)item.seckoef,
                 price = (double)item.price,
                 active = item.active
             });
@@ -306,6 +311,7 @@ namespace Database.Repositories
                 amrpsale = (double)item.amrpsale,
                 dpcoef = (double)item.dpkoef,
                 seascoef = (double)item.seaskoef,
+                seccoef = (double)item.seckoef,
                 price = (double)item.price,
                 active = item.active
             });
@@ -354,6 +360,7 @@ namespace Database.Repositories
                 amrpsale = (double)item.amrpsale,
                 dpcoef = (double)item.dpkoef,
                 seascoef = (double)item.seaskoef,
+                seccoef = (double)item.seckoef,
                 price = (double)item.price,
                 active = item.active
             });
@@ -414,6 +421,7 @@ namespace Database.Repositories
                 amrpsale = (double)item.amrpsale,
                 dpcoef = (double)item.dpkoef,
                 seascoef = (double)item.seaskoef,
+                seccoef = (double)item.seckoef,
                 price = (double)item.price,
                 active = item.active
             });
@@ -463,6 +471,7 @@ namespace Database.Repositories
                 amrpsale = (double)item.amrpsale,
                 dpcoef = (double)item.dpkoef,
                 seascoef = (double)item.seaskoef,
+                seccoef = (double)item.seckoef,
                 price = (double)item.price,
                 active = item.active
             });
@@ -512,6 +521,7 @@ namespace Database.Repositories
                 amrpsale = (double)item.amrpsale,
                 dpcoef = (double)item.dpkoef,
                 seascoef = (double)item.seaskoef,
+                seccoef = (double)item.seckoef,
                 price = (double)item.price,
                 active = item.active
             });
@@ -531,7 +541,7 @@ namespace Database.Repositories
                 "datumkreiranja = CAST(@Created AS DATE), datumizmene = CAST(@Modified AS DATE), " +
                 "amr1 = @Amr1, amr1trim = @Amr1trim, amr2 = @Amr2, amr2trim = @Amr2trim, amr3 = @Amr3, amr3trim = @Amr3trim, amrsale = @Amrsale, amrsaletrim = @Amrsaletrim, " +
                 "amrp1 = @Amrp1, amrp2 = @Amrp2, amrp3 = @Amrp3, amrpsale = @Amrpsale, " +
-                "dpkoef = @Dpcoef, seaskoef = @Seascoef, price = @Price, active = @Active " +
+                "dpkoef = @Dpcoef, seaskoef = @Seascoef, seckoef = @Seccoef, price = @Price, active = @Active " +
                 "WHERE xmpid = @Xmpid",
                 new
                 {
@@ -566,6 +576,7 @@ namespace Database.Repositories
                     Amrpsale = mediaPlanDTO.amrpsale,
                     Dpcoef = mediaPlanDTO.dpcoef,
                     Seascoef = mediaPlanDTO.seascoef,
+                    Seccoef = mediaPlanDTO.seccoef,
                     Price = mediaPlanDTO.price,
                     Active = mediaPlanDTO.active
                 });

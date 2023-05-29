@@ -46,6 +46,7 @@ namespace CampaignEditor
                     services.AddFormFactory<AMRTrim>();
                     services.AddFormFactory<Config>();
                     services.AddFormFactory<AllUsers>();
+                    services.AddFormFactory<MediaPlanConverter>();
                     services.AddScoped<IDataContext, DataContext>();
                     // Add services
                     Extensions.UserExtensions.AddUserExtensions(services);

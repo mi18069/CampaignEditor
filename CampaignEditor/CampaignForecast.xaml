@@ -168,7 +168,7 @@
                             </Style>
                         </DataGridTextColumn.EditingElementStyle>
                     </DataGridTextColumn>
-                    <DataGridTextColumn Header="Affinity" 
+                    <DataGridTextColumn Header="Affinity" Binding="{Binding MediaPlan.Affinity, StringFormat=N2}"
                                             IsReadOnly="True"/>
                     <DataGridTextColumn Header="Prog Coef" Binding="{Binding MediaPlan.progcoef, Mode=TwoWay, StringFormat=N2}" 
                                         IsReadOnly="True" >
@@ -178,15 +178,15 @@
                             </Style>
                         </DataGridTextColumn.EditingElementStyle>
                     </DataGridTextColumn>
-                    <DataGridTextColumn Header="Coef SP1" 
+                    <DataGridTextColumn Header="Seas Coef" Binding="{Binding MediaPlan.Seascoef, StringFormat=N2}"
                                         IsReadOnly="True"/>
-                    <DataGridTextColumn Header="Coef SP2" 
+                    <DataGridTextColumn Header="Sec Coef" Binding="{Binding MediaPlan.Seccoef, StringFormat=N2}"
                                         IsReadOnly="True"/>
-                    <DataGridTextColumn Header="CPP" 
+                    <DataGridTextColumn Header="CPP" Binding="{Binding MediaPlan.Cpp, StringFormat=N2}"
                                         IsReadOnly="True"/>
-                    <DataGridTextColumn Header="Insertations" 
+                    <DataGridTextColumn Header="Insertations" Binding="{Binding MediaPlan.Insertations}"
                                         IsReadOnly="True"/>
-                    <DataGridTextColumn Header="Cost" 
+                    <DataGridTextColumn Header="Cost" Binding="{Binding MediaPlan.Price, StringFormat=N2}"
                                         IsReadOnly="True"/>
                 </DataGrid.Columns>
             </DataGrid>

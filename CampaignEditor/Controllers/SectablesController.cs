@@ -1,4 +1,5 @@
 ﻿using Database.DTOs.SectablesDTO;
+using Database.Entities;
 using Database.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -38,6 +39,11 @@ namespace CampaignEditor.Controllers
             {
                 await _repository.UpdateSectables(new UpdateSectablesDTO(id, sec, coef));
             }
+            return await _repository.GetSectablesByIdAndSec(id, sec);
+        }
+
+        public async Task<SectablesDTO?> GetSectablesByIdAndSec(int id, int sec)
+        {
             return await _repository.GetSectablesByIdAndSec(id, sec);
         }
 

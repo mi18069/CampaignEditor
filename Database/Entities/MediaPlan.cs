@@ -1,5 +1,10 @@
-﻿using System;
+﻿using Database.DTOs.MediaPlanTermDTO;
+using Database.DTOs.SpotDTO;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using System.Runtime.CompilerServices;
 
 namespace Database.Entities
@@ -38,8 +43,233 @@ namespace Database.Entities
         public double amrpsale { get; set; }
         public double dpcoef { get; set; }
         public double seascoef { get; set; }
+        public double seccoef { get; set; }
         public double price { get; set; }
         public bool active { get; set; }
+
+        private double cpp;
+
+        private double _length;
+
+        private int _insertations;
+
+        public double Affinity
+        {
+            get { return amrpsale != 0 ? (amrp1/amrpsale) * 100 : 0; }
+        }
+
+        public double Amr1
+        {
+            get { return amr1; }
+            set
+            {
+                amr1 = value;
+                OnPropertyChanged(nameof(Amrp1));
+
+            }
+        }
+
+        public double Amr2
+        {
+            get { return amr2; }
+            set
+            {
+                amr2 = value;
+                OnPropertyChanged(nameof(Amrp2));
+
+            }
+        }
+
+        public double Amr3
+        {
+            get { return amr3; }
+            set
+            {
+                amr3 = value;
+                OnPropertyChanged(nameof(Amrp3));
+
+            }
+        }
+
+        public double Amrsale
+        {
+            get { return amrsale; }
+            set
+            {
+                amrsale = value;
+                OnPropertyChanged(nameof(Amrpsale));
+
+            }
+        }
+
+        public double Amrp1
+        {
+            get { return amrp1; }
+            set
+            {
+                amrp1 = value;
+                OnPropertyChanged(nameof(Affinity));
+                OnPropertyChanged(nameof(Price));
+            }
+        }
+
+        public double Amrp2
+        {
+            get { return amrp2; }
+            set
+            {
+                amrp2 = value;
+                OnPropertyChanged(nameof(Price));
+            }
+        }
+
+        public double Amrp3
+        {
+            get { return amrp3; }
+            set
+            {
+                amrp3 = value;
+                OnPropertyChanged(nameof(Price));
+            }
+        }
+
+        public double Amrpsale
+        {
+            get { return amrpsale; }
+            set
+            {
+                amrpsale = value;
+                OnPropertyChanged(nameof(Affinity));
+                OnPropertyChanged(nameof(Price));
+            }
+        }
+
+        public double Amr1trim
+        {
+            get { return amr1trim; }
+            set
+            {
+                amr1trim = value;
+                amr1 *= amr1trim;
+                amrp1 *= amr1trim;
+                OnPropertyChanged(nameof(amr1));
+                OnPropertyChanged(nameof(amrp1));
+            }
+        }
+
+        public double Amr2trim
+        {
+            get { return amr2trim; }
+            set
+            {
+                amr2trim = value;
+                amr2 *= amr2trim;
+                amrp2 *= amr2trim;
+                OnPropertyChanged(nameof(amr2));
+                OnPropertyChanged(nameof(amrp2));
+            }
+        }
+
+        public double Amr3trim
+        {
+            get { return amr3trim; }
+            set
+            {
+                amr3trim = value;
+                amr3 *= amr3trim;
+                amrp3 *= amr3trim;
+                OnPropertyChanged(nameof(amr3));
+                OnPropertyChanged(nameof(amrp3));
+            }
+        }
+
+        public double Amrsaletrim
+        {
+            get { return amrsaletrim; }
+            set
+            {
+                amrsaletrim = value;
+                amrsale *= amrsaletrim;
+                amrpsale *= amrsaletrim;
+                OnPropertyChanged(nameof(amrsale));
+                OnPropertyChanged(nameof(amrpsale));
+            }
+        }
+
+        public int Insertations
+        {
+            get { return _insertations; }
+            set
+            {
+                _insertations = value;
+            }
+        }
+
+        public double Dpcoef
+        {
+            get { return dpcoef; }
+            set
+            {
+                dpcoef = value;
+                OnPropertyChanged(nameof(Price));
+            }
+        }
+
+        public float Progcoef
+        {
+            get { return progcoef; }
+            set
+            {
+                progcoef = value;
+                OnPropertyChanged(nameof(Price));
+            }
+        }
+
+        public double Seascoef
+        {
+            get { return seascoef; }
+            set
+            {
+                seascoef = value;
+                OnPropertyChanged(nameof(Price));
+            }
+        }
+
+        public double Seccoef
+        {
+            get { return seccoef; }
+            set
+            {
+                seccoef = value;
+                OnPropertyChanged(nameof(Price));
+            }
+        }
+
+        public double Length
+        {
+            get { return _length; }
+            set 
+            { 
+                _length = value;
+                OnPropertyChanged(nameof(Price));
+            }
+        }
+
+        public double Cpp 
+        { 
+            get { return cpp; }
+            set 
+            { 
+                cpp = value;
+                OnPropertyChanged(nameof(Price));
+            } 
+        }
+
+        public double Price
+        {
+            get { return price == null ? 0 : price; }
+            set { price = Cpp * amrpsale * progcoef * dpcoef * seascoef * seccoef * Length; }
+        }
 
         public event PropertyChangedEventHandler? PropertyChanged;
 

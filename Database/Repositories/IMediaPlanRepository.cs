@@ -1,5 +1,4 @@
 ﻿using Database.DTOs.MediaPlanDTO;
-using Database.DTOs.SchemaDTO;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
