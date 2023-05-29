@@ -1,9 +1,13 @@
 ﻿using AutoMapper;
 using CampaignEditor.Controllers;
 using Database.DTOs.MediaPlanDTO;
+using Database.DTOs.MediaPlanTermDTO;
+using Database.DTOs.PricelistDTO;
 using Database.Entities;
 using Database.Repositories;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
@@ -60,47 +64,42 @@ namespace CampaignEditor
             return mediaPlan;
         }
 
-        private async Task ComputeExtraProperties(MediaPlan mediaPlan)
+        public async Task<MediaPlan> ConvertFirstFromDTO(MediaPlanDTO mediaPlanDTO)
         {
-            var terms = await _mediaPlanTermController.GetAllMediaPlanTermsByXmpid(mediaPlan.xmpid);
+            var mediaPlan = _mapper.Map<MediaPlan>(mediaPlanDTO);
+
+            // Perform additional computations and set extra properties
+            await CalculateFirst(mediaPlan);
+
+            return mediaPlan;
+        }
+
+        private async Task CalculateAMRs(MediaPlan mediaPlan)
+        {
             var hists = await _mediaPlanHistController.GetAllMediaPlanHistsByXmpid(mediaPlan.xmpid);
 
-            mediaPlan.amr1 = MathFunctions.ArithmeticMean(hists.Select(h => h.amr1));
-            mediaPlan.amr2 = MathFunctions.ArithmeticMean(hists.Select(h => h.amr2));
-            mediaPlan.amr3 = MathFunctions.ArithmeticMean(hists.Select(h => h.amr3));
-            mediaPlan.amrsale = MathFunctions.ArithmeticMean(hists.Select(h => h.amrsale));
-            mediaPlan.amrp1 = MathFunctions.ArithmeticMean(hists.Select(h => h.amrp1));
-            mediaPlan.amrp2 = MathFunctions.ArithmeticMean(hists.Select(h => h.amrp2));
-            mediaPlan.amrp3 = MathFunctions.ArithmeticMean(hists.Select(h => h.amrp3));
-            mediaPlan.amrpsale = MathFunctions.ArithmeticMean(hists.Select(h => h.amrpsale));
+            var filteredHists = hists.Where(h => h.active);
+            mediaPlan.amr1 = MathFunctions.ArithmeticMean(filteredHists.Select(h => h.amr1));
+            mediaPlan.amr2 = MathFunctions.ArithmeticMean(filteredHists.Select(h => h.amr2));
+            mediaPlan.amr3 = MathFunctions.ArithmeticMean(filteredHists.Select(h => h.amr3));
+            mediaPlan.amrsale = MathFunctions.ArithmeticMean(filteredHists.Select(h => h.amrsale));
+            mediaPlan.amrp1 = MathFunctions.ArithmeticMean(filteredHists.Select(h => h.amrp1));
+            mediaPlan.amrp2 = MathFunctions.ArithmeticMean(filteredHists.Select(h => h.amrp2));
+            mediaPlan.amrp3 = MathFunctions.ArithmeticMean(filteredHists.Select(h => h.amrp3));
+            mediaPlan.amrpsale = MathFunctions.ArithmeticMean(filteredHists.Select(h => h.amrpsale));
+        }
 
-            var insertations = 0;
-            var length = 0;
-            foreach (var term in terms)
-            {
-                if (term != null && term.spotcode != null && term.spotcode.Length > 0)
-                {
-                    foreach (var spotcode in term.spotcode)
-                    {                       
-                        var spot = await _spotController.GetSpotsByCmpidAndCode(mediaPlan.cmpid, spotcode.ToString());
-                        if (spot != null)
-                        {
-                            length += spot.spotlength;
-                            insertations += 1;
-                        }
-                        
-                    }
-                }
-
-            }
-
-            mediaPlan.Insertations = insertations;
-            mediaPlan.Length = insertations == 0 ? 0 : (double)length / insertations;
-
-            var channelCmp = await _channelCmpController.GetChannelCmpByIds(mediaPlan.cmpid, mediaPlan.chid);
-            var pricelist = await _pricelistController.GetPricelistById(channelCmp.plid);
-            var seasonality = await _seasonalityController.GetSeasonalityById(pricelist.seastbid);
+        private async Task CalculateSeccoef(MediaPlan mediaPlan, PricelistDTO pricelist)
+        {
             var sectable = await _sectableController.GetSectableById(pricelist.sectbid);
+            var sectables = await _sectablesController.GetSectablesByIdAndSec(sectable.sctid, (int)Math.Ceiling(mediaPlan.AvgLength));
+            var seccoef = sectables == null ? 1 : sectables.coef;
+            mediaPlan.seccoef = seccoef;
+        }
+
+        private async Task CalculateSeascoef(MediaPlan mediaPlan, PricelistDTO pricelist, IEnumerable<MediaPlanTermDTO> terms)
+        {
+            var seasonality = await _seasonalityController.GetSeasonalityById(pricelist.seastbid);
 
             var seasonalities = await _seasonalitiesController.GetSeasonalitiesById(seasonality.seasid);
             double seasCoef = 0;
@@ -115,30 +114,78 @@ namespace CampaignEditor
                         seasCount += 1;
                         seasCoef += seas.coef;
                     }
-                }               
+                }
             }
             mediaPlan.seascoef = seasCount == 0 ? 1 : seasCoef / seasCount;
+        }
 
-            var sectables = await _sectablesController.GetSectablesByIdAndSec(sectable.sctid, length);
-            var seccoef = sectables == null ? 1 : sectables.coef;
-            mediaPlan.seccoef = seccoef;
+        private async Task CalculateLengthAndInsertations(MediaPlan mediaPlan, IEnumerable<MediaPlanTermDTO> terms)
+        {
+            var insertations = 0;
+            var length = 0;
+            foreach (var term in terms)
+            {
+                if (term != null && term.spotcode != null && term.spotcode.Length > 0)
+                {
+                    foreach (var spotcode in term.spotcode)
+                    {
+                        var spot = await _spotController.GetSpotsByCmpidAndCode(mediaPlan.cmpid, spotcode.ToString());
+                        if (spot != null)
+                        {
+                            length += spot.spotlength;
+                            insertations += 1;
+                        }
 
-            mediaPlan.Cpp = pricelist.price;
+                    }
+                }
+
+            }
+
+            mediaPlan.Insertations = insertations;
+            mediaPlan.Length = length;
+        }
+
+        private async Task CalculateDPCoef(MediaPlan mediaPlan, PricelistDTO pricelist)
+        {
             float dpCoef = 1;
             var prices = await _pricesController.GetAllPricesByPlId(pricelist.plid);
             foreach (var price in prices)
             {
                 if (TimeFormat.CompareReporesentative(mediaPlan.stime, price.dps) != -1 &&
-                    (mediaPlan.etime == null || 
+                    (mediaPlan.etime == null ||
                     TimeFormat.CompareReporesentative(mediaPlan.etime, price.dpe) != 1))
                 {
                     dpCoef = price.price;
                 }
             }
             mediaPlan.dpcoef = dpCoef;
+        }
+
+        private async Task CalculateFirst(MediaPlan mediaPlan)
+        {
+            var channelCmp = await _channelCmpController.GetChannelCmpByIds(mediaPlan.cmpid, mediaPlan.chid);
+            var pricelist = await _pricelistController.GetPricelistById(channelCmp.plid);
+            var terms = await _mediaPlanTermController.GetAllMediaPlanTermsByXmpid(mediaPlan.xmpid);
+
+            await CalculateAMRs(mediaPlan);
+            await CalculateSeccoef(mediaPlan, pricelist);
+            await CalculateSeascoef(mediaPlan, pricelist, terms);
+            await CalculateDPCoef(mediaPlan, pricelist);
+            await ComputeExtraProperties(mediaPlan);
+            
 
             mediaPlan.price = mediaPlan.Cpp * mediaPlan.Amrpsale * mediaPlan.Progcoef *
-                mediaPlan.Dpcoef * mediaPlan.Seascoef * mediaPlan.Seccoef * mediaPlan.Length;
+                mediaPlan.Dpcoef * mediaPlan.Seascoef * mediaPlan.Seccoef * mediaPlan.AvgLength;
+        }
+
+        private async Task ComputeExtraProperties(MediaPlan mediaPlan)
+        {
+            var channelCmp = await _channelCmpController.GetChannelCmpByIds(mediaPlan.cmpid, mediaPlan.chid);
+            var pricelist = await _pricelistController.GetPricelistById(channelCmp.plid);
+            var terms = await _mediaPlanTermController.GetAllMediaPlanTermsByXmpid(mediaPlan.xmpid);
+
+            await CalculateLengthAndInsertations(mediaPlan, terms);
+            mediaPlan.Cpp = pricelist.price;
 
         }
 

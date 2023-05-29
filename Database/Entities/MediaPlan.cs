@@ -49,7 +49,7 @@ namespace Database.Entities
 
         private double cpp;
 
-        private double _length;
+        private int _length;
 
         private int _insertations;
 
@@ -245,14 +245,19 @@ namespace Database.Entities
             }
         }
 
-        public double Length
+        public int Length
         {
             get { return _length; }
             set 
             { 
                 _length = value;
-                OnPropertyChanged(nameof(Price));
+                OnPropertyChanged(nameof(AvgLength));
             }
+        }
+
+        public double AvgLength
+        {
+            get { return (double)_length / (Insertations == 0 ? 1 : Insertations) ; }
         }
 
         public double Cpp 
@@ -267,8 +272,8 @@ namespace Database.Entities
 
         public double Price
         {
-            get { return price == null ? 0 : price; }
-            set { price = Cpp * amrpsale * progcoef * dpcoef * seascoef * seccoef * Length; }
+            get { return Cpp * amrpsale * progcoef * dpcoef * seascoef * seccoef * AvgLength;}
+            set { price = value; }
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;

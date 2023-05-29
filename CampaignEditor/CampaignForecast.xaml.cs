@@ -301,19 +301,19 @@ namespace CampaignEditor.UserControls
             await Task.WhenAll(tasks);
 
             await _databaseFunctionsController.StartAMRCalculation(_campaign.cmpid, 40, 40);
-            await UpdateMPValues();
+            await CalculateMPValues();
 
             await LoadData();
 
         }
 
-        private async Task UpdateMPValues()
+        private async Task CalculateMPValues()
         {
             var mediaPlansDTO = await _mediaPlanController.GetAllMediaPlansByCmpid(_campaign.cmpid);
 
             foreach (var mediaPlanDTO in mediaPlansDTO) 
             {
-                var mediaPlan = await _converter.ConvertFromDTO(mediaPlanDTO);
+                var mediaPlan = await _converter.ConvertFirstFromDTO(mediaPlanDTO);
                 await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(_converter.ConvertToDTO(mediaPlan)));
             }
             
