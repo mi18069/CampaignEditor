@@ -64,8 +64,7 @@ namespace Database.Entities
             set
             {
                 amr1 = value;
-                OnPropertyChanged(nameof(Amrp1));
-
+                OnPropertyChanged();
             }
         }
 
@@ -75,8 +74,7 @@ namespace Database.Entities
             set
             {
                 amr2 = value;
-                OnPropertyChanged(nameof(Amrp2));
-
+                OnPropertyChanged();
             }
         }
 
@@ -86,8 +84,7 @@ namespace Database.Entities
             set
             {
                 amr3 = value;
-                OnPropertyChanged(nameof(Amrp3));
-
+                OnPropertyChanged();
             }
         }
 
@@ -97,8 +94,7 @@ namespace Database.Entities
             set
             {
                 amrsale = value;
-                OnPropertyChanged(nameof(Amrpsale));
-
+                OnPropertyChanged();
             }
         }
 
@@ -108,6 +104,7 @@ namespace Database.Entities
             set
             {
                 amrp1 = value;
+                OnPropertyChanged();
                 OnPropertyChanged(nameof(Affinity));
                 OnPropertyChanged(nameof(Price));
             }
@@ -119,6 +116,7 @@ namespace Database.Entities
             set
             {
                 amrp2 = value;
+                OnPropertyChanged();
                 OnPropertyChanged(nameof(Price));
             }
         }
@@ -129,6 +127,7 @@ namespace Database.Entities
             set
             {
                 amrp3 = value;
+                OnPropertyChanged();
                 OnPropertyChanged(nameof(Price));
             }
         }
@@ -139,6 +138,7 @@ namespace Database.Entities
             set
             {
                 amrpsale = value;
+                OnPropertyChanged();
                 OnPropertyChanged(nameof(Affinity));
                 OnPropertyChanged(nameof(Price));
             }
@@ -150,10 +150,10 @@ namespace Database.Entities
             set
             {
                 amr1trim = value;
-                amr1 *= amr1trim;
-                amrp1 *= amr1trim;
-                OnPropertyChanged(nameof(amr1));
-                OnPropertyChanged(nameof(amrp1));
+                amr1 *= amr1trim/100;
+                amrp1 *= amr1trim/100;
+                OnPropertyChanged(nameof(Amr1));
+                OnPropertyChanged(nameof(Amrp1));
             }
         }
 
@@ -163,10 +163,10 @@ namespace Database.Entities
             set
             {
                 amr2trim = value;
-                amr2 *= amr2trim;
-                amrp2 *= amr2trim;
-                OnPropertyChanged(nameof(amr2));
-                OnPropertyChanged(nameof(amrp2));
+                amr2 *= amr2trim/100;
+                amrp2 *= amr2trim/100;
+                OnPropertyChanged(nameof(Amr2));
+                OnPropertyChanged(nameof(Amrp2));
             }
         }
 
@@ -176,10 +176,10 @@ namespace Database.Entities
             set
             {
                 amr3trim = value;
-                amr3 *= amr3trim;
-                amrp3 *= amr3trim;
-                OnPropertyChanged(nameof(amr3));
-                OnPropertyChanged(nameof(amrp3));
+                amr3 *= amr3trim/100;
+                amrp3 *= amr3trim/100;
+                OnPropertyChanged(nameof(Amr3));
+                OnPropertyChanged(nameof(Amrp3));
             }
         }
 
@@ -189,10 +189,10 @@ namespace Database.Entities
             set
             {
                 amrsaletrim = value;
-                amrsale *= amrsaletrim;
-                amrpsale *= amrsaletrim;
-                OnPropertyChanged(nameof(amrsale));
-                OnPropertyChanged(nameof(amrpsale));
+                amrsale *= amrsaletrim/100;
+                amrpsale *= amrsaletrim/100;
+                OnPropertyChanged(nameof(Amrsale));
+                OnPropertyChanged(nameof(Amrpsale));
             }
         }
 
@@ -201,6 +201,7 @@ namespace Database.Entities
             get { return _insertations; }
             set
             {
+                OnPropertyChanged();
                 _insertations = value;
             }
         }
@@ -241,6 +242,7 @@ namespace Database.Entities
             set
             {
                 seccoef = value;
+                OnPropertyChanged();
                 OnPropertyChanged(nameof(Price));
             }
         }
@@ -251,6 +253,7 @@ namespace Database.Entities
             set 
             { 
                 _length = value;
+                OnPropertyChanged();
                 OnPropertyChanged(nameof(AvgLength));
             }
         }
@@ -273,7 +276,11 @@ namespace Database.Entities
         public double Price
         {
             get { return Cpp * amrpsale * progcoef * dpcoef * seascoef * seccoef * AvgLength;}
-            set { price = value; }
+            set 
+            { 
+                OnPropertyChanged();
+                price = value;
+            }
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;

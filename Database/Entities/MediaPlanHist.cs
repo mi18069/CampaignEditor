@@ -6,16 +6,13 @@ namespace Database.Entities
 {
     public class MediaPlanHist : INotifyPropertyChanged
     {
-        public bool Outlier
+        public bool Active
         {
-            get { return outlier; }
+            get { return active; }
             set
             {
-                if (outlier != value)
-                {
-                    outlier = value;
-                    OnPropertyChanged();
-                }
+                active = value;
+                OnPropertyChanged();
             }
         }
 

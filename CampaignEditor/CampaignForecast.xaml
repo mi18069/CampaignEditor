@@ -120,11 +120,11 @@
                                         IsReadOnly="True" Visibility="Collapsed"/>
                     <DataGridCheckBoxColumn Header="Special" Binding="{Binding MediaPlan.special, Mode=TwoWay}" 
                                         Visibility="Collapsed"/>
-                    <DataGridTextColumn Header="AMR 1" Binding="{Binding MediaPlan.amr1, Mode=TwoWay}" 
+                    <DataGridTextColumn Header="AMR 1" Binding="{Binding MediaPlan.Amr1, Mode=TwoWay, StringFormat=N2}" 
                                              IsReadOnly="True" Visibility="Collapsed" />
-                    <DataGridTextColumn Header="AMR% 1" Binding="{Binding MediaPlan.amrp1, Mode=TwoWay, StringFormat=N2}" 
+                    <DataGridTextColumn Header="AMR% 1" Binding="{Binding MediaPlan.Amrp1, Mode=TwoWay, StringFormat=N2}" 
                                             IsReadOnly="True"/>
-                    <DataGridTextColumn Header="AMR 1 Trim" Binding="{Binding MediaPlan.amr1trim, Mode=TwoWay}" 
+                    <DataGridTextColumn Header="AMR 1 Trim" Binding="{Binding MediaPlan.Amr1trim, Mode=TwoWay}" 
                                              Visibility="Collapsed">
                         <DataGridTextColumn.EditingElementStyle>
                             <Style TargetType="{x:Type TextBox}">
@@ -132,11 +132,11 @@
                             </Style>
                         </DataGridTextColumn.EditingElementStyle>
                     </DataGridTextColumn>
-                    <DataGridTextColumn Header="AMR 2" Binding="{Binding MediaPlan.amr2, Mode=TwoWay}" 
+                    <DataGridTextColumn Header="AMR 2" Binding="{Binding MediaPlan.Amr2, Mode=TwoWay, StringFormat=N2}" 
                                             IsReadOnly="True" Visibility="Collapsed"/>
-                    <DataGridTextColumn Header="AMR% 2" Binding="{Binding MediaPlan.amrp2, Mode=TwoWay, StringFormat=N2}" 
+                    <DataGridTextColumn Header="AMR% 2" Binding="{Binding MediaPlan.Amrp2, Mode=TwoWay, StringFormat=N2}" 
                                             IsReadOnly="True" Visibility="Collapsed"/>
-                    <DataGridTextColumn Header="AMR 2 Trim" Binding="{Binding MediaPlan.amr2trim, Mode=TwoWay}" 
+                    <DataGridTextColumn Header="AMR 2 Trim" Binding="{Binding MediaPlan.Amr2trim, Mode=TwoWay}" 
                                              Visibility="Collapsed">
                         <DataGridTextColumn.EditingElementStyle>
                             <Style TargetType="{x:Type TextBox}">
@@ -144,11 +144,11 @@
                             </Style>
                         </DataGridTextColumn.EditingElementStyle>
                     </DataGridTextColumn>
-                    <DataGridTextColumn Header="AMR 3" Binding="{Binding MediaPlan.amr3, Mode=TwoWay}" 
+                    <DataGridTextColumn Header="AMR 3" Binding="{Binding MediaPlan.Amr3, Mode=TwoWay, StringFormat=N2}" 
                                             IsReadOnly="True" Visibility="Collapsed"/>
-                    <DataGridTextColumn Header="AMR% 3" Binding="{Binding MediaPlan.amrp3, Mode=TwoWay, StringFormat=N2}" 
+                    <DataGridTextColumn Header="AMR% 3" Binding="{Binding MediaPlan.Amrp3, Mode=TwoWay, StringFormat=N2}" 
                                             IsReadOnly="True" Visibility="Collapsed"/>
-                    <DataGridTextColumn Header="AMR 3 Trim" Binding="{Binding MediaPlan.amr3trim, Mode=TwoWay}" 
+                    <DataGridTextColumn Header="AMR 3 Trim" Binding="{Binding MediaPlan.Amr3trim, Mode=TwoWay}" 
                                              Visibility="Collapsed">
                         <DataGridTextColumn.EditingElementStyle>
                             <Style TargetType="{x:Type TextBox}">
@@ -156,11 +156,11 @@
                             </Style>
                         </DataGridTextColumn.EditingElementStyle>
                     </DataGridTextColumn>
-                    <DataGridTextColumn Header="AMR Sale" Binding="{Binding MediaPlan.amrsale, Mode=TwoWay}"
+                    <DataGridTextColumn Header="AMR Sale" Binding="{Binding MediaPlan.Amrsale, Mode=TwoWay, StringFormat=N2}"
                                         IsReadOnly="True" Visibility="Collapsed"/>
-                    <DataGridTextColumn Header="AMR% Sale" Binding="{Binding MediaPlan.amrpsale, Mode=TwoWay, StringFormat=N2}" 
+                    <DataGridTextColumn Header="AMR% Sale" Binding="{Binding MediaPlan.Amrpsale, Mode=TwoWay, StringFormat=N2}" 
                                             IsReadOnly="True"/>
-                    <DataGridTextColumn Header="AMR Sale Trim" Binding="{Binding MediaPlan.amrsaletrim, Mode=TwoWay}" 
+                    <DataGridTextColumn Header="AMR Sale Trim" Binding="{Binding MediaPlan.Amrsaletrim, Mode=TwoWay}" 
                                              Visibility="Collapsed">
                         <DataGridTextColumn.EditingElementStyle>
                             <Style TargetType="{x:Type TextBox}">
@@ -236,11 +236,11 @@
                                              IsReadOnly="True" Width="*"/>
                             <DataGridTextColumn Header="AMR% Sale" Binding="{Binding amrsale, Mode=TwoWay}" 
                                              IsReadOnly="True" Width="*"/>
-                            <DataGridCheckBoxColumn Header="Include" Binding="{Binding outlier, Mode=TwoWay, Converter={StaticResource InvertBoolConverter}}"
+                            <DataGridCheckBoxColumn Header="Include" Binding="{Binding Active, Mode=TwoWay}"
                                                     IsReadOnly="True">
                                 <DataGridCheckBoxColumn.CellStyle>
                                     <Style TargetType="DataGridCell">
-                                        <EventSetter Event="PreviewMouseDown" Handler="DgSchemaChbCell_PreviewMouseDown" />
+                                        <EventSetter Event="PreviewMouseDown" Handler="DgHistsChbCell_PreviewMouseDown" />
                                     </Style>
                                 </DataGridCheckBoxColumn.CellStyle>
                             </DataGridCheckBoxColumn>

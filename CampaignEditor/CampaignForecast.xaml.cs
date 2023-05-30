@@ -1422,16 +1422,27 @@ namespace CampaignEditor.UserControls
             }
         }
 
-        private async void DgSchemaChbCell_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        private async void DgHistsChbCell_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
             if (sender is DataGridCell cell && cell.DataContext is MediaPlanHist mediaPlanHist)
             {
 
                 // Retrieve the corresponding MediaPlanHist object from the DataContext of the row                
-                mediaPlanHist.Outlier = !mediaPlanHist.Outlier;
+                mediaPlanHist.Active = !mediaPlanHist.Active;
 
                 // TODO: Update the object in the database
                 await _mediaPlanHistController.UpdateMediaPlanHist(new UpdateMediaPlanHistDTO(_mediaPlanHistController.ConvertToDTO(mediaPlanHist)));
+
+                // Update MediaPlan accordingly
+                var mediaPlanTuple = dgSchema.SelectedItem as MediaPlanTuple;
+                if (mediaPlanTuple != null)
+                {
+                    var mediaPlan = mediaPlanTuple.MediaPlan;
+
+                    await _converter.CalculateAMRs(mediaPlan);
+
+                    await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(_converter.ConvertToDTO(mediaPlan)));
+                }
             }
         }
 
