@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Controls.Primitives;
 
 namespace Database.Repositories
 {
@@ -24,7 +25,7 @@ namespace Database.Repositories
             using var connection = _context.GetConnection();
 
             var allRecords = await connection.QueryAsync<DateTime>(
-                "SELECT CAST(dateimport AS DATE) FROM emsfiles.norecords ");
+                "SELECT CAST(date AS DATE) FROM emsfiles.norecords ");
 
             return allRecords;
         }
@@ -37,24 +38,38 @@ namespace Database.Repositories
 
             var affected = await connection.ExecuteAsync(
             new CommandDefinition(
-                    "WITH RECURSIVE all_dates AS ( " +
-                    "SELECT COALESCE(MAX(dateimport), CAST('2019-04-19' AS TIMESTAMP)) AS dateimport " +
-                    "FROM emsfiles.norecords " +
-                    "UNION ALL " +
-                    "SELECT dateimport + INTERVAL '1' DAY " +
-                    "FROM all_dates " +
-                    "WHERE dateimport < CURRENT_DATE " +
+                      "WITH RECURSIVE all_dates AS( " +
+                      "SELECT COALESCE(MAX(date), CAST('2019-04-19' AS TIMESTAMP)) AS date " +
+                      "FROM emsfiles.norecords " +
+                      "UNION ALL " +
+                      "SELECT date + INTERVAL '1' DAY " +
+                      "FROM all_dates " +
+                      "WHERE date < CURRENT_DATE " +
                     ") " +
-                    "INSERT INTO emsfiles.norecords(dateimport) " +
-                    "SELECT dateimport::DATE " +
+                    "INSERT INTO emsfiles.norecords(date) " +
+                    "SELECT date::DATE " +
                     "FROM all_dates " +
                     "WHERE NOT EXISTS( " +
-                      "SELECT 1 FROM tblemsfileslist WHERE dateimport::DATE = all_dates.dateimport::DATE " +
-                                ") AND NOT EXISTS( " +
-                      "SELECT 1 FROM tblop4fileslist WHERE dateimport::DATE = all_dates.dateimport::DATE " +
-                                ") AND NOT EXISTS( " +
-                      "SELECT 1 FROM tbltv4fileslist WHERE dateimport::DATE = all_dates.dateimport::DATE " +
-                    ")",
+                      "SELECT 1 " +
+                      "FROM tblemsfileslist " +
+                      "WHERE TO_DATE(SUBSTRING(filename, 1, 8), 'yyyyMMdd') = all_dates.date::DATE " +
+                    ") " +
+                      "OR NOT EXISTS( " +
+                        "SELECT 1 " +
+                        "FROM tblop4fileslist " +
+                        "WHERE TO_DATE(SUBSTRING(filename, 1, 8), 'yyyyMMdd') = all_dates.date::DATE " +
+                      ") " +
+                      "OR NOT EXISTS( " +
+                        "SELECT 1 " +
+                        "FROM tbltv4fileslist " +
+                        "WHERE TO_DATE(SUBSTRING(filename, 1, 8), 'yyyyMMdd') = all_dates.date::DATE " +
+                      ") " +
+                      "AND NOT EXISTS( " +
+                        "SELECT 1 " +
+                        "FROM emsfiles.norecords " +
+                        "WHERE date::DATE = all_dates.date::DATE " +
+                      "); "
+                    ,
                     commandTimeout: commandTimeout));
 
             return affected != 0;

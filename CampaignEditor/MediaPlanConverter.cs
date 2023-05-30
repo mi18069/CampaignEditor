@@ -101,10 +101,8 @@ namespace CampaignEditor
             mediaPlan.Amrpsale = MathFunctions.ArithmeticMean(filteredHists.Select(h => h.amrpsale)) * mediaPlan.amrsaletrim/100;
         }
 
-        private async Task CalculateSeccoef(MediaPlan mediaPlan)
+        private async Task CalculateSeccoef(MediaPlan mediaPlan, PricelistDTO pricelist)
         {
-            var channelCmp = await _channelCmpController.GetChannelCmpByIds(mediaPlan.cmpid, mediaPlan.chid);
-            var pricelist = await _pricelistController.GetPricelistById(channelCmp.plid);
 
             var sectable = await _sectableController.GetSectableById(pricelist.sectbid);
             var sectables = await _sectablesController.GetSectablesByIdAndSec(sectable.sctid, (int)Math.Ceiling(mediaPlan.AvgLength));
@@ -155,7 +153,6 @@ namespace CampaignEditor
                 }
 
             }
-            CalculateSeccoef(mediaPlan);
             mediaPlan.Insertations = insertations;
             mediaPlan.Length = length;
         }
@@ -183,23 +180,25 @@ namespace CampaignEditor
             var terms = await _mediaPlanTermController.GetAllMediaPlanTermsByXmpid(mediaPlan.xmpid);
 
             await CalculateAMRs(mediaPlan);
-            await CalculateSeascoef(mediaPlan, pricelist, terms);
             await CalculateDPCoef(mediaPlan, pricelist);
             await ComputeExtraProperties(mediaPlan);
             
-
-            mediaPlan.price = mediaPlan.Cpp * mediaPlan.Amrpsale * mediaPlan.Progcoef *
-                mediaPlan.Dpcoef * mediaPlan.Seascoef * mediaPlan.Seccoef * mediaPlan.AvgLength;
         }
 
-        private async Task ComputeExtraProperties(MediaPlan mediaPlan)
+        public async Task ComputeExtraProperties(MediaPlan mediaPlan)
         {
             var channelCmp = await _channelCmpController.GetChannelCmpByIds(mediaPlan.cmpid, mediaPlan.chid);
             var pricelist = await _pricelistController.GetPricelistById(channelCmp.plid);
             var terms = await _mediaPlanTermController.GetAllMediaPlanTermsByXmpid(mediaPlan.xmpid);
 
             await CalculateLengthAndInsertations(mediaPlan, terms);
+            await CalculateSeccoef(mediaPlan, pricelist);
+            await CalculateSeascoef(mediaPlan, pricelist, terms);
+
             mediaPlan.Cpp = pricelist.price;
+
+            mediaPlan.price = mediaPlan.Cpp * mediaPlan.Amrpsale * mediaPlan.Progcoef *
+                mediaPlan.Dpcoef * mediaPlan.Seascoef * mediaPlan.Seccoef * mediaPlan.AvgLength;
 
         }
 

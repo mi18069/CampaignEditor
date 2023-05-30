@@ -254,6 +254,7 @@ namespace Database.Entities
             { 
                 _length = value;
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(Price));
                 OnPropertyChanged(nameof(AvgLength));
             }
         }

@@ -840,6 +840,15 @@ namespace CampaignEditor.UserControls
                     await _mediaPlanTermController.UpdateMediaPlanTerm(
                         new UpdateMediaPlanTermDTO(mpTerm.xmptermid, mpTerm.xmpid, mpTerm.date, cell.Content.ToString()));
 
+                    /*var mediaPlanTuple = dgSchema.SelectedItem as MediaPlanTuple;
+                    if (mediaPlanTuple != null)
+                    {
+                        var mediaPlan = mediaPlanTuple.MediaPlan;
+                        await _converter.ComputeExtraProperties(mediaPlan);
+                        await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(_converter.ConvertToDTO(mediaPlan)));
+                    }*/
+
+
                     mpTerm.spotcode = cell.Content.ToString().Trim();
 
                 }
@@ -1385,6 +1394,9 @@ namespace CampaignEditor.UserControls
         // to prevent page from closing this page on backspace 
         private void Page_PreviewKeyDown(object sender, KeyEventArgs e)
         {
+            if (gridInit.Visibility == Visibility.Visible)
+                return;
+
             if (e.Key == Key.Back && Keyboard.FocusedElement != null)
             {
                 DependencyObject currentElement = Keyboard.FocusedElement as DependencyObject;
