@@ -16,7 +16,6 @@ namespace CampaignEditor
 {
     public class MediaPlanConverter
     {
-        private readonly IMapper _mapperToDTO;
         private readonly IMapper _mapperFromDTO;
 
         private MediaPlanHistController _mediaPlanHistController;
@@ -50,21 +49,6 @@ namespace CampaignEditor
                 .ForMember(dest => dest.Amrsaletrim, opt => opt.Ignore());
             });
             _mapperFromDTO = configurationFromDTO.CreateMapper();
-
-            var configurationToDTO = new MapperConfiguration(cfg =>
-            {
-                cfg.CreateMap<MediaPlan, MediaPlanDTO>()
-                .ForMember(dest => dest.amr1, opt => opt.MapFrom(src => src.Amr1))
-                .ForMember(dest => dest.amr2, opt => opt.MapFrom(src => src.Amr2))
-                .ForMember(dest => dest.amr3, opt => opt.MapFrom(src => src.Amr3))
-                .ForMember(dest => dest.amrsale, opt => opt.MapFrom(src => src.Amrsale))
-                .ForMember(dest => dest.amrp1, opt => opt.MapFrom(src => src.Amrp1))
-                .ForMember(dest => dest.amrp2, opt => opt.MapFrom(src => src.Amrp2))
-                .ForMember(dest => dest.amrp3, opt => opt.MapFrom(src => src.Amrp3))
-                .ForMember(dest => dest.amrpsale, opt => opt.MapFrom(src => src.Amrpsale));
-
-            });
-            _mapperToDTO = configurationToDTO.CreateMapper();
 
             _mediaPlanHistController = new MediaPlanHistController(mediaPlanHistRepository);
             _mediaPlanTermController = new MediaPlanTermController(mediaPlanTermRepository);
@@ -218,7 +202,15 @@ namespace CampaignEditor
 
         public MediaPlanDTO ConvertToDTO(MediaPlan mediaPlan)
         {
-            var mediaPlanDTO = _mapperToDTO.Map<MediaPlan, MediaPlanDTO>(mediaPlan);
+            MediaPlanDTO mediaPlanDTO = new MediaPlanDTO(mediaPlan.xmpid, mediaPlan.schid, mediaPlan.cmpid,
+                mediaPlan.chid, mediaPlan.name, mediaPlan.version, mediaPlan.position, mediaPlan.stime, 
+                mediaPlan.etime, mediaPlan.blocktime, mediaPlan.days, mediaPlan.type, mediaPlan.special, 
+                mediaPlan.sdate, mediaPlan.edate, mediaPlan.Progcoef, mediaPlan.created, mediaPlan.modified, 
+                mediaPlan.Amr1, mediaPlan.Amr1trim, mediaPlan.Amr2, mediaPlan.Amr2trim, mediaPlan.Amr3, 
+                mediaPlan.Amr3trim, mediaPlan.Amrsale, mediaPlan.Amrsaletrim, mediaPlan.Amrp1, mediaPlan.Amrp2,
+                mediaPlan.Amrp3, mediaPlan.Amrpsale, mediaPlan.Dpcoef, mediaPlan.Seascoef, mediaPlan.Seccoef,
+                mediaPlan.Price, mediaPlan.active);
+
             return mediaPlanDTO;
         }
     }

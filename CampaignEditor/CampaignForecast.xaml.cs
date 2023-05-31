@@ -715,6 +715,8 @@ namespace CampaignEditor.UserControls
 
         #endregion
 
+        #region DgSchema
+
         #region Date Columns
         private void InitializeDateColumns()
         {
@@ -1053,6 +1055,16 @@ namespace CampaignEditor.UserControls
             // check if it's clicked on header
             DependencyObject dependencyObject = (DependencyObject)e.OriginalSource;
 
+            DataGridRow row = FindParent<DataGridRow>(dependencyObject);
+            if (row != null)
+            {
+                // Set the DataGrid's SelectedItem property to the right-clicked item
+                dgSchema.SelectedItem = row.DataContext;
+
+                // Add your logic to customize the context menu based on the selected item
+                // For example, you can dynamically build the context menu or set specific menu options
+            }
+
             if (IsCellInDataGridHeader(dependencyObject))
             {
                 ContextMenu menu = new ContextMenu();
@@ -1166,6 +1178,18 @@ namespace CampaignEditor.UserControls
                 menu.Items.Add(trimAmr);
                 dgSchema.ContextMenu = menu;
             }
+        }
+
+        private static T FindParent<T>(DependencyObject child) where T : DependencyObject
+        {
+            DependencyObject parent = VisualTreeHelper.GetParent(child);
+            if (parent == null)
+                return null;
+
+            if (parent is T)
+                return parent as T;
+            else
+                return FindParent<T>(parent);
         }
 
         private bool MPInList(MediaPlanDTO mediaPlan, List<Tuple<MediaPlan, List<MediaPlanTermDTO>>> list)
@@ -1378,6 +1402,8 @@ namespace CampaignEditor.UserControls
 
         #endregion
 
+        #endregion
+
         #region Page
 
         // setting one visible Grid
@@ -1463,7 +1489,5 @@ namespace CampaignEditor.UserControls
                 }
             }
         }
-
-        
     }
 }
