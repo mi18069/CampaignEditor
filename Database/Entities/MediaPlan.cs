@@ -197,8 +197,8 @@ namespace Database.Entities
             get { return _insertations; }
             set
             {
-                OnPropertyChanged();
                 _insertations = value;
+                OnPropertyChanged();
             }
         }
 
@@ -272,7 +272,7 @@ namespace Database.Entities
 
         public double Price
         {
-            get { return Cpp * amrpsale * progcoef * dpcoef * seascoef * seccoef * AvgLength;}
+            get { return Cpp * Insertations * amrpsale * progcoef * dpcoef * seascoef * seccoef * AvgLength;}
             set 
             { 
                 OnPropertyChanged();

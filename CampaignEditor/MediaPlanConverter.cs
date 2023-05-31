@@ -195,7 +195,7 @@ namespace CampaignEditor
 
             mediaPlan.Cpp = pricelist.price;
 
-            mediaPlan.price = mediaPlan.Cpp * mediaPlan.Amrpsale * mediaPlan.Progcoef *
+            mediaPlan.price = mediaPlan.Insertations * mediaPlan.Cpp * mediaPlan.Amrpsale * mediaPlan.Progcoef *
                 mediaPlan.Dpcoef * mediaPlan.Seascoef * mediaPlan.Seccoef * mediaPlan.AvgLength;
 
         }
@@ -209,7 +209,7 @@ namespace CampaignEditor
                 mediaPlan.Amr1, mediaPlan.Amr1trim, mediaPlan.Amr2, mediaPlan.Amr2trim, mediaPlan.Amr3, 
                 mediaPlan.Amr3trim, mediaPlan.Amrsale, mediaPlan.Amrsaletrim, mediaPlan.Amrp1, mediaPlan.Amrp2,
                 mediaPlan.Amrp3, mediaPlan.Amrpsale, mediaPlan.Dpcoef, mediaPlan.Seascoef, mediaPlan.Seccoef,
-                mediaPlan.Price, mediaPlan.active);
+                0, mediaPlan.active);
 
             return mediaPlanDTO;
         }

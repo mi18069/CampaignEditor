@@ -49,6 +49,8 @@ namespace CampaignEditor.UserControls
         private ClientDTO _client;
         private CampaignDTO _campaign;
 
+        string lastSpotCell = ""; // for mouse click event
+
         // for duration of campaign
         DateTime startDate;
         DateTime endDate;
@@ -748,9 +750,11 @@ namespace CampaignEditor.UserControls
                 //var keyDownEventSetter = new EventSetter(DataGridCell.PreviewTextInputEvent, new TextCompositionEventHandler(OnCellPreviewTextInput));
                 var textInputEventSetter = new EventSetter(PreviewTextInputEvent, new TextCompositionEventHandler(OnCellPreviewTextInput));
                 var keyDownEventSetter = new EventSetter(PreviewKeyDownEvent, new KeyEventHandler(OnCellPreviewKeyDown));
+                var mouseLeftButtonDownEventSetter = new EventSetter(MouseLeftButtonDownEvent, new MouseButtonEventHandler(OnMouseLeftButtonDown));
 
                 cellStyle.Setters.Add(textInputEventSetter);
                 cellStyle.Setters.Add(keyDownEventSetter);
+                cellStyle.Setters.Add(mouseLeftButtonDownEventSetter);
                 column.CellStyle = cellStyle;
 
                 var trigger = new DataTrigger();
@@ -809,6 +813,22 @@ namespace CampaignEditor.UserControls
             }
         }
 
+        private void SimulateTextInput(string text)
+        {
+
+            foreach (char c in text)
+            {
+                var inputEvent = new TextCompositionEventArgs(Keyboard.PrimaryDevice, new TextComposition(InputManager.Current, this, c.ToString()));
+                inputEvent.RoutedEvent = UIElement.PreviewTextInputEvent;
+                InputManager.Current.ProcessInput(inputEvent);
+            }
+        }
+
+        private void OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            SimulateTextInput(lastSpotCell);
+        }
+
         private async void OnCellPreviewTextInput(object sender, TextCompositionEventArgs e)
         {
 
@@ -820,6 +840,7 @@ namespace CampaignEditor.UserControls
             if (spotcodeNull.HasValue)
             {
                 char spotcode = Char.ToUpper(spotcodeNull.Value);
+                lastSpotCell = spotcode.ToString();
                 if (spotCodes.Contains(spotcode))
                 {
                     // if cell already have 2 spots, delete them and write only one, else add spotcode
@@ -836,19 +857,18 @@ namespace CampaignEditor.UserControls
                     {
                         cell.Content += spotcode.ToString();
                     }
-                      
 
                     var mpTerm = GetSelectedMediaPlanTermDTO(cell);
                     await _mediaPlanTermController.UpdateMediaPlanTerm(
                         new UpdateMediaPlanTermDTO(mpTerm.xmptermid, mpTerm.xmpid, mpTerm.date, cell.Content.ToString()));
 
-                    /*var mediaPlanTuple = dgSchema.SelectedItem as MediaPlanTuple;
+                    var mediaPlanTuple = dgSchema.SelectedItem as MediaPlanTuple;
                     if (mediaPlanTuple != null)
                     {
                         var mediaPlan = mediaPlanTuple.MediaPlan;
                         await _converter.ComputeExtraProperties(mediaPlan);
                         await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(_converter.ConvertToDTO(mediaPlan)));
-                    }*/
+                    }
 
 
                     mpTerm.spotcode = cell.Content.ToString().Trim();
@@ -880,7 +900,16 @@ namespace CampaignEditor.UserControls
                         await _mediaPlanTermController.UpdateMediaPlanTerm(
                             new UpdateMediaPlanTermDTO(mpTerm.xmptermid, mpTerm.xmpid, mpTerm.date, cell.Content.ToString().Trim()));
 
+                        var mediaPlanTuple = dgSchema.SelectedItem as MediaPlanTuple;
+                        if (mediaPlanTuple != null)
+                        {
+                            var mediaPlan = mediaPlanTuple.MediaPlan;
+                            await _converter.ComputeExtraProperties(mediaPlan);
+                            await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(_converter.ConvertToDTO(mediaPlan)));
+                        }
+
                         mpTerm.spotcode = cell.Content.ToString().Trim();
+                        lastSpotCell = mpTerm.spotcode;
 
                         //cell.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
 
@@ -901,6 +930,18 @@ namespace CampaignEditor.UserControls
             if (e.Key == Key.Left || e.Key == Key.Right || e.Key == Key.Up || e.Key == Key.Down)
             {
                 return;
+            }
+
+            // Disable copy-paste mechanism
+            if (e.Key == Key.C && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+            {
+                // Disable copy (Ctrl + C) operation
+                e.Handled = true;
+            }
+            else if (e.Key == Key.V && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+            {
+                // Disable paste (Ctrl + V) operation
+                e.Handled = true;
             }
 
             // if cell is not binded to mediaPlanTerm, disable editing
@@ -954,6 +995,14 @@ namespace CampaignEditor.UserControls
 
                     mpTerm.spotcode = spotcode[0].ToString();
                     cell.Content = spotcode[0];
+                }
+
+                var mediaPlanTuple = dgSchema.SelectedItem as MediaPlanTuple;
+                if (mediaPlanTuple != null)
+                {
+                    var mediaPlan = mediaPlanTuple.MediaPlan;
+                    await _converter.ComputeExtraProperties(mediaPlan);
+                    await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(_converter.ConvertToDTO(mediaPlan)));
                 }
 
             }
