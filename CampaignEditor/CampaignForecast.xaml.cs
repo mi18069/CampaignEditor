@@ -1134,26 +1134,26 @@ namespace CampaignEditor.UserControls
                 {
                     return;
                 }
-                var mediaPlan = _converter.ConvertToDTO(mediaPlanTuple.MediaPlan);
+                var mediaPlan = mediaPlanTuple.MediaPlan;
 
                 MenuItem trimAmr = new MenuItem();
                 // Check if the clicked cell is in the "AMR" columns
-                if (cell.Column.Header.ToString() == "AMR 1")
+                if (cell.Column.Header.ToString() == "AMR 1" || cell.Column.Header.ToString() == "AMR% 1")
                 {           
                     trimAmr.Header = "Trim Amr1";
                     trimAmr.Click += await TrimAmrAsync(mediaPlan, "Trim AMR 1", "amr1trim", mediaPlan.amr1trim);
                 }
-                else if (cell.Column.Header.ToString() == "AMR 2")
+                else if (cell.Column.Header.ToString() == "AMR 2" || cell.Column.Header.ToString() == "AMR% 2")
                 {
                     trimAmr.Header = "Trim Amr2";
                     trimAmr.Click += await TrimAmrAsync(mediaPlan, "Trim AMR 2", "amr2trim", mediaPlan.amr2trim);
                 }
-                else if (cell.Column.Header.ToString() == "AMR 3")
+                else if (cell.Column.Header.ToString() == "AMR 3" || cell.Column.Header.ToString() == "AMR% 3")
                 {
                     trimAmr.Header = "Trim Amr3";
                     trimAmr.Click += await TrimAmrAsync(mediaPlan, "Trim AMR 3", "amr3trim", mediaPlan.amr3trim);
                 }
-                else if (cell.Column.Header.ToString() == "AMR Sale")
+                else if (cell.Column.Header.ToString() == "AMR Sale" || cell.Column.Header.ToString() == "AMR% Sale")
                 {
                     trimAmr.Header = "Trim Amr Sale";
                     trimAmr.Click += await TrimAmrAsync(mediaPlan, "Trim AMR Sale", "amrsaletrim", mediaPlan.amrsaletrim);
@@ -1212,7 +1212,7 @@ namespace CampaignEditor.UserControls
                    plan1.edate == schema.edate;
         }
 
-        private async Task<RoutedEventHandler> TrimAmrAsync(MediaPlanDTO mediaPlan, string message, string attr,  int? trimValue)
+        private async Task<RoutedEventHandler> TrimAmrAsync(MediaPlan mediaPlan, string message, string attr,  int? trimValue)
         {
             async void handler(object sender, RoutedEventArgs e)
             {
@@ -1224,28 +1224,34 @@ namespace CampaignEditor.UserControls
                     switch (attr)
                     {
                         case "amr1trim":
-                            mediaPlan.amr1trim = f.newValue;
+                            mediaPlan.Amr1trim = f.newValue;
                             break;
                         case "amr2trim":
-                            mediaPlan.amr2trim = f.newValue;
+                            mediaPlan.Amr2trim = f.newValue;
                             break;
                         case "amr3trim":
-                            mediaPlan.amr3trim = f.newValue;
+                            mediaPlan.Amr3trim = f.newValue;
                             break;
                         case "amrsaletrim":
-                            mediaPlan.amrsaletrim = f.newValue;
+                            mediaPlan.Amrsaletrim = f.newValue;
                             break;
                         case "amrtrimall":
-                            mediaPlan.amr1trim = f.newValue;
-                            mediaPlan.amr2trim = f.newValue;
-                            mediaPlan.amr3trim = f.newValue;
-                            mediaPlan.amrsaletrim = f.newValue;
+                            mediaPlan.Amr1trim = f.newValue;
+                            mediaPlan.Amr2trim = f.newValue;
+                            mediaPlan.Amr3trim = f.newValue;
+                            mediaPlan.Amrsaletrim = f.newValue;
                             break;
                         default:
                             break;
                     }
-                    
-                    await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(mediaPlan));
+                    var d = mediaPlan.Amrp1;
+                    var g = mediaPlan.amrp1;
+                    var h = mediaPlan.amr1trim;
+                    var h1 = mediaPlan.Amr1trim;
+                    var mpDTO = _converter.ConvertToDTO(mediaPlan);
+                    var a = mpDTO.amrp1;
+
+                    await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(mpDTO));
                 }
             }
 
@@ -1280,7 +1286,7 @@ namespace CampaignEditor.UserControls
                 var mediaPlan = tuple.MediaPlan;
                 int value = 0;
 
-                if (propertyName == "amr1trim")
+                if (propertyName == "Amr1trim")
                 {
                     if (textBox != null && (textBox.Text.Trim() == "" || Int32.TryParse(textBox.Text.Trim(), out value)))
                     {
@@ -1293,7 +1299,7 @@ namespace CampaignEditor.UserControls
                         textBox.Text = mediaPlan.amr1trim.ToString();
                     }
                 }
-                else if (propertyName == "amr2trim")
+                else if (propertyName == "Amr2trim")
                 {
                     if (textBox != null && (textBox.Text.Trim() == "" || Int32.TryParse(textBox.Text.Trim(), out value)))
                     {
@@ -1306,7 +1312,7 @@ namespace CampaignEditor.UserControls
                         textBox.Text = mediaPlan.amr2trim.ToString();
                     }
                 }
-                else if (propertyName == "amr3trim")
+                else if (propertyName == "Amr3trim")
                 {
                     if (textBox != null && (textBox.Text.Trim() == "" || Int32.TryParse(textBox.Text.Trim(), out value)))
                     {
@@ -1319,7 +1325,7 @@ namespace CampaignEditor.UserControls
                         textBox.Text = mediaPlan.amr3trim.ToString();
                     }
                 }
-                else if (propertyName == "amrsaletrim")
+                else if (propertyName == "Amrsaletrim")
                 {
                     if (textBox != null && (textBox.Text.Trim() == "" || Int32.TryParse(textBox.Text.Trim(), out value)))
                     {

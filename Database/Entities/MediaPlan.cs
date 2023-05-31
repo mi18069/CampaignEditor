@@ -30,13 +30,13 @@ namespace Database.Entities
         public DateOnly created { get; set; }
         public DateOnly? modified { get; set; }
         public double amr1 { get; set; }
-        public double amr1trim { get; set; }
+        public int amr1trim { get; set; }
         public double amr2 { get; set; }
-        public double amr2trim { get; set; }
+        public int amr2trim { get; set; }
         public double amr3 { get; set; }
-        public double amr3trim { get; set; }
+        public int amr3trim { get; set; }
         public double amrsale { get; set; }
-        public double amrsaletrim { get; set; }
+        public int amrsaletrim { get; set; }
         public double amrp1 { get; set; }
         public double amrp2 { get; set; }
         public double amrp3 { get; set; }
@@ -60,17 +60,17 @@ namespace Database.Entities
 
         public double Amr1
         {
-            get { return amr1; }
+            get { return amr1 * ((double)amr1trim / 100); }
             set
             {
-                amr1 = value;
+                amr1 = (value*100)/(double)amr1trim;
                 OnPropertyChanged();
             }
         }
 
         public double Amr2
         {
-            get { return amr2; }
+            get { return amr2 * ((double)amr2trim / 100); }
             set
             {
                 amr2 = value;
@@ -80,7 +80,7 @@ namespace Database.Entities
 
         public double Amr3
         {
-            get { return amr3; }
+            get { return amr3 * ((double)amr3trim / 100); }
             set
             {
                 amr3 = value;
@@ -90,7 +90,7 @@ namespace Database.Entities
 
         public double Amrsale
         {
-            get { return amrsale; }
+            get { return amrsale * ((double)amrsaletrim / 100); }
             set
             {
                 amrsale = value;
@@ -100,10 +100,10 @@ namespace Database.Entities
 
         public double Amrp1
         {
-            get { return amrp1; }
+            get { return amrp1 * ((double)amr1trim / 100); }
             set
             {
-                amrp1 = value;
+                amrp1 = (value * 100) / (double)amr1trim;
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(Affinity));
                 OnPropertyChanged(nameof(Price));
@@ -112,7 +112,7 @@ namespace Database.Entities
 
         public double Amrp2
         {
-            get { return amrp2; }
+            get { return amrp2 * ((double)amr2trim / 100); }
             set
             {
                 amrp2 = value;
@@ -123,7 +123,7 @@ namespace Database.Entities
 
         public double Amrp3
         {
-            get { return amrp3; }
+            get { return amrp3 * ((double)amr3trim / 100); }
             set
             {
                 amrp3 = value;
@@ -134,7 +134,7 @@ namespace Database.Entities
 
         public double Amrpsale
         {
-            get { return amrpsale; }
+            get { return amrpsale * ((double)amrsaletrim /100); }
             set
             {
                 amrpsale = value;
@@ -144,53 +144,49 @@ namespace Database.Entities
             }
         }
 
-        public double Amr1trim
+        public int Amr1trim
         {
             get { return amr1trim; }
             set
             {
                 amr1trim = value;
-                amr1 *= amr1trim/100;
-                amrp1 *= amr1trim/100;
+                OnPropertyChanged();
                 OnPropertyChanged(nameof(Amr1));
                 OnPropertyChanged(nameof(Amrp1));
             }
         }
 
-        public double Amr2trim
+        public int Amr2trim
         {
             get { return amr2trim; }
             set
             {
                 amr2trim = value;
-                amr2 *= amr2trim/100;
-                amrp2 *= amr2trim/100;
+                OnPropertyChanged();
                 OnPropertyChanged(nameof(Amr2));
                 OnPropertyChanged(nameof(Amrp2));
             }
         }
 
-        public double Amr3trim
+        public int Amr3trim
         {
             get { return amr3trim; }
             set
             {
                 amr3trim = value;
-                amr3 *= amr3trim/100;
-                amrp3 *= amr3trim/100;
+                OnPropertyChanged();
                 OnPropertyChanged(nameof(Amr3));
                 OnPropertyChanged(nameof(Amrp3));
             }
         }
 
-        public double Amrsaletrim
+        public int Amrsaletrim
         {
             get { return amrsaletrim; }
             set
             {
                 amrsaletrim = value;
-                amrsale *= amrsaletrim/100;
-                amrpsale *= amrsaletrim/100;
+                OnPropertyChanged();
                 OnPropertyChanged(nameof(Amrsale));
                 OnPropertyChanged(nameof(Amrpsale));
             }

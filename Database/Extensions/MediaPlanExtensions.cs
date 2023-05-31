@@ -1,4 +1,5 @@
-﻿using Database.DTOs.MediaPlanDTO;
+﻿using AutoMapper;
+using Database.DTOs.MediaPlanDTO;
 using Database.Entities;
 using Database.Repositories;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,7 +14,6 @@ namespace Database.Extensions
             services.AddAutoMapper(configuration => {
                 configuration.CreateMap<MediaPlanDTO, MediaPlan>().ReverseMap();
             });
-
         }
     }
 }

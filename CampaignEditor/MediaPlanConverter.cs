@@ -16,8 +16,8 @@ namespace CampaignEditor
 {
     public class MediaPlanConverter
     {
-        private readonly IMapper _mapper;
-        private readonly IMapper mapperFromDTO;
+        private readonly IMapper _mapperToDTO;
+        private readonly IMapper _mapperFromDTO;
 
         private MediaPlanHistController _mediaPlanHistController;
         private MediaPlanTermController _mediaPlanTermController;
@@ -33,7 +33,7 @@ namespace CampaignEditor
 
 
 
-        public MediaPlanConverter(IMapper mapper, IMediaPlanHistRepository mediaPlanHistRepository,
+        public MediaPlanConverter(IMediaPlanHistRepository mediaPlanHistRepository,
             IMediaPlanTermRepository mediaPlanTermRepository, ISpotRepository spotRepository,
             IChannelCmpRepository channelCmpRepository, IPricelistRepository pricelistRepository,
             ISeasonalityRepository seasonalityRepository, ISectableRepository sectableRepository,
@@ -41,8 +41,7 @@ namespace CampaignEditor
             IPricesRepository pricesRepository)
         {
 
-            _mapper = mapper;
-            var configuration = new MapperConfiguration(cfg =>
+            var configurationFromDTO = new MapperConfiguration(cfg =>
             {
                 cfg.CreateMap<MediaPlanDTO, MediaPlan>()
                 .ForMember(dest => dest.Amr1trim, opt => opt.Ignore())
@@ -50,7 +49,22 @@ namespace CampaignEditor
                 .ForMember(dest => dest.Amr3trim, opt => opt.Ignore())
                 .ForMember(dest => dest.Amrsaletrim, opt => opt.Ignore());
             });
-            mapperFromDTO = configuration.CreateMapper();
+            _mapperFromDTO = configurationFromDTO.CreateMapper();
+
+            var configurationToDTO = new MapperConfiguration(cfg =>
+            {
+                cfg.CreateMap<MediaPlan, MediaPlanDTO>()
+                .ForMember(dest => dest.amr1, opt => opt.MapFrom(src => src.Amr1))
+                .ForMember(dest => dest.amr2, opt => opt.MapFrom(src => src.Amr2))
+                .ForMember(dest => dest.amr3, opt => opt.MapFrom(src => src.Amr3))
+                .ForMember(dest => dest.amrsale, opt => opt.MapFrom(src => src.Amrsale))
+                .ForMember(dest => dest.amrp1, opt => opt.MapFrom(src => src.Amrp1))
+                .ForMember(dest => dest.amrp2, opt => opt.MapFrom(src => src.Amrp2))
+                .ForMember(dest => dest.amrp3, opt => opt.MapFrom(src => src.Amrp3))
+                .ForMember(dest => dest.amrpsale, opt => opt.MapFrom(src => src.Amrpsale));
+
+            });
+            _mapperToDTO = configurationToDTO.CreateMapper();
 
             _mediaPlanHistController = new MediaPlanHistController(mediaPlanHistRepository);
             _mediaPlanTermController = new MediaPlanTermController(mediaPlanTermRepository);
@@ -68,7 +82,7 @@ namespace CampaignEditor
         public async Task<MediaPlan> ConvertFromDTO(MediaPlanDTO mediaPlanDTO)
         {
 
-            var mediaPlan = mapperFromDTO.Map<MediaPlanDTO, MediaPlan>(mediaPlanDTO);
+            var mediaPlan = _mapperFromDTO.Map<MediaPlanDTO, MediaPlan>(mediaPlanDTO);
 
             // Perform additional computations and set extra properties
             await ComputeExtraProperties(mediaPlan);
@@ -78,7 +92,7 @@ namespace CampaignEditor
 
         public async Task<MediaPlan> ConvertFirstFromDTO(MediaPlanDTO mediaPlanDTO)
         {
-            var mediaPlan = _mapper.Map<MediaPlan>(mediaPlanDTO);
+            var mediaPlan = _mapperFromDTO.Map<MediaPlanDTO, MediaPlan>(mediaPlanDTO);
 
             // Perform additional computations and set extra properties
             await CalculateFirst(mediaPlan);
@@ -204,7 +218,7 @@ namespace CampaignEditor
 
         public MediaPlanDTO ConvertToDTO(MediaPlan mediaPlan)
         {
-            var mediaPlanDTO = _mapper.Map<MediaPlanDTO>(mediaPlan);
+            var mediaPlanDTO = _mapperToDTO.Map<MediaPlan, MediaPlanDTO>(mediaPlan);
             return mediaPlanDTO;
         }
     }
