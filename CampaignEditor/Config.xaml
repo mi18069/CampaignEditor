@@ -27,7 +27,7 @@
 
         <Label Grid.Row="1" Grid.Column="1" Content="Server: "
                HorizontalAlignment="Right" Margin="10"/>
-        <ComboBox Grid.Row="1" Grid.Column="2" Name="cbServer" Margin="10"/>
+        <TextBox Grid.Row="1" Grid.Column="2" Name="tbServer" Margin="10"/>
 
         <Label Grid.Row="2" Grid.Column="1" Content="Database: "
                HorizontalAlignment="Right" Margin="10"/>
