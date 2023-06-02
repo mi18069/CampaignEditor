@@ -83,8 +83,7 @@ namespace Database.Repositories
 
             var affected = await connection.ExecuteAsync(
                 new CommandDefinition(
-                    "SELECT public.obrada_amr(@Cmpid, @MinusTime, @PlusTime); " +
-                    "UPDATE xmphist SET outlier = false",
+                    "SELECT public.obrada_amr(@Cmpid, @MinusTime, @PlusTime);",
                     new { Cmpid = cmpid, MinusTime = minusTime, PlusTime = plusTime },
                     commandTimeout: commandTimeout));
 

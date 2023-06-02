@@ -1515,6 +1515,7 @@ namespace CampaignEditor.UserControls
             }
         }
 
+        #region DgHist
         private async void DgHistsChbCell_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
             if (sender is DataGridCell cell && cell.DataContext is MediaPlanHist mediaPlanHist)
@@ -1538,5 +1539,7 @@ namespace CampaignEditor.UserControls
                 }
             }
         }
+
+        #endregion
     }
 }

@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using CampaignEditor.Controllers;
 using Database.DTOs.MediaPlanDTO;
+using Database.DTOs.MediaPlanHistDTO;
 using Database.DTOs.MediaPlanTermDTO;
 using Database.DTOs.PricelistDTO;
 using Database.Entities;
@@ -87,6 +88,8 @@ namespace CampaignEditor
         public async Task CalculateAMRs(MediaPlan mediaPlan)
         {
             var hists = await _mediaPlanHistController.GetAllMediaPlanHistsByXmpid(mediaPlan.xmpid);
+
+            await SetOutliers(hists);
 
             var filteredHists = hists.Where(h => h.active);
             mediaPlan.Amr1 = MathFunctions.ArithmeticMean(filteredHists.Select(h => h.amr1)) * mediaPlan.amr1trim/100;
@@ -212,6 +215,45 @@ namespace CampaignEditor
                 0, mediaPlan.active);
 
             return mediaPlanDTO;
+        }
+
+        public async Task SetOutliers(IEnumerable<MediaPlanHist> mediaPlanHistList)
+        {
+            // Calculate the median and median absolute deviation (MAD) of the amrp1 attribute
+            double median = CalculateMedian(mediaPlanHistList.Select(x => x.amrp1).ToList());
+            double mad = CalculateMAD(mediaPlanHistList.Select(x => x.amrp1).ToList(), median);
+
+            // Set the threshold for outlier detection
+            double threshold = 3.5; // Adjust this value based on your requirements
+
+            // Find the outliers in the list
+            List<MediaPlanHist> outliers = mediaPlanHistList.Where(x =>
+                Math.Abs(x.amrp1 - median) / mad > threshold).ToList();
+
+            foreach (var outlier in outliers)
+            {
+                outlier.outlier = true;
+                await _mediaPlanHistController.UpdateMediaPlanHist(new UpdateMediaPlanHistDTO(outlier));
+            }
+        }
+
+        public double CalculateMedian(List<double> values)
+        {
+            List<double> sortedValues = values.OrderBy(x => x).ToList();
+            int count = sortedValues.Count;
+
+            if (count % 2 == 0)
+                return (sortedValues[count / 2 - 1] + sortedValues[count / 2]) / 2.0;
+            else
+                return sortedValues[count / 2];
+        }
+
+        public double CalculateMAD(List<double> values, double median)
+        {
+            List<double> absoluteDeviations = values.Select(x => Math.Abs(x - median)).ToList();
+            double mad = CalculateMedian(absoluteDeviations);
+
+            return mad;
         }
     }
 }

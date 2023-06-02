@@ -82,6 +82,7 @@
             <DataGrid x:Name="dgSchema" Grid.Row="1" Grid.Column="2" Grid.RowSpan="5" Grid.ColumnSpan="3"
                           VerticalScrollBarVisibility="Visible"
                           FontSize="13" AlternatingRowBackground="LightGoldenrodYellow"
+                          HeadersVisibility="Column"
                           CanUserAddRows="False"
                           AutoGenerateColumns="False"
                           CanUserDeleteRows="False"
@@ -197,11 +198,25 @@
                     <DataGrid x:Name="dgHist" 
                       VerticalScrollBarVisibility="Visible"
                       FontSize="13" AlternatingRowBackground="LightGoldenrodYellow"
+                      EnableRowVirtualization="False"
+                      HeadersVisibility="Column"
                       CanUserAddRows="False"
                       AutoGenerateColumns="False"
                       CanUserDeleteRows="False"
                       SelectionMode="Single"
                       HorizontalScrollBarVisibility="Hidden">
+                        <DataGrid.RowStyle>
+                            <Style TargetType="DataGridRow">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding outlier}" Value="True">
+                                        <Setter Property="Background" Value="Red"/>
+                                        <!--<Setter Property="BorderBrush" Value="Red"/>
+                                        <Setter Property="BorderThickness" Value="3"/>
+                                        <Setter Property="Margin" Value="-3, 0"/>-->
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGrid.RowStyle>
                         <DataGrid.CellStyle>
                             <Style TargetType="DataGridCell">
                                 <Style.Triggers>
