@@ -479,13 +479,13 @@ namespace Database.Repositories
             return _mapper.Map<IEnumerable<MediaPlanDTO>>(allMediaPlans);
         }
 
-        public async Task<IEnumerable<MediaPlanDTO>> GetAllChannelMediaPlans(int chid)
+        public async Task<IEnumerable<MediaPlanDTO>> GetAllChannelCmpMediaPlans(int chid, int cmpid)
         {
             using var connection = _context.GetConnection();
 
             var mediaPlans = await connection.QueryAsync<dynamic>(
-                "SELECT * FROM xmp WHERE chid = @Chid",
-                new { Chid = chid });
+                "SELECT * FROM xmp WHERE chid = @Chid AND cmpid = @Cmpid",
+                new { Chid = chid, Cmpid = cmpid });
 
             mediaPlans = mediaPlans.Select(item => new MediaPlan()
             {

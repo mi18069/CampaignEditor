@@ -209,10 +209,10 @@
                             <Style TargetType="DataGridRow">
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding outlier}" Value="True">
-                                        <Setter Property="Background" Value="Red"/>
-                                        <!--<Setter Property="BorderBrush" Value="Red"/>
+                                        <!--<Setter Property="Background" Value="Red"/>-->
+                                        <Setter Property="BorderBrush" Value="Red"/>
                                         <Setter Property="BorderThickness" Value="3"/>
-                                        <Setter Property="Margin" Value="-3, 0"/>-->
+                                        <Setter Property="Margin" Value="-3, 0"/>
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
@@ -237,7 +237,7 @@
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Program" Binding="{Binding name, Mode=TwoWay}"
                                         IsReadOnly="True" />
-                            <DataGridTextColumn Header="Datum" Binding="{Binding date, Mode=TwoWay, StringFormat=d}" 
+                            <DataGridTextColumn Header="Datum" Binding="{Binding date, Mode=TwoWay, StringFormat=d, ConverterCulture=en-GB}" 
                                         IsReadOnly="True"/>
                             <DataGridTextColumn Header="Start time" Binding="{Binding stime, Mode=TwoWay, Converter={StaticResource SecIntConverter}}" 
                                         IsReadOnly="True"/>

@@ -7,9 +7,7 @@ using Database.DTOs.PricelistDTO;
 using Database.Entities;
 using Database.Repositories;
 using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -198,8 +196,8 @@ namespace CampaignEditor
 
             mediaPlan.Cpp = pricelist.price;
 
-            mediaPlan.price = mediaPlan.Insertations * mediaPlan.Cpp * mediaPlan.Amrpsale * mediaPlan.Progcoef *
-                mediaPlan.Dpcoef * mediaPlan.Seascoef * mediaPlan.Seccoef * mediaPlan.AvgLength;
+            mediaPlan.price = (mediaPlan.Cpp/30) * mediaPlan.Length * mediaPlan.Amrpsale * mediaPlan.Progcoef *
+                mediaPlan.Dpcoef * mediaPlan.Seascoef * mediaPlan.Seccoef;
 
         }
 
@@ -212,7 +210,7 @@ namespace CampaignEditor
                 mediaPlan.Amr1, mediaPlan.Amr1trim, mediaPlan.Amr2, mediaPlan.Amr2trim, mediaPlan.Amr3, 
                 mediaPlan.Amr3trim, mediaPlan.Amrsale, mediaPlan.Amrsaletrim, mediaPlan.Amrp1, mediaPlan.Amrp2,
                 mediaPlan.Amrp3, mediaPlan.Amrpsale, mediaPlan.Dpcoef, mediaPlan.Seascoef, mediaPlan.Seccoef,
-                0, mediaPlan.active);
+                mediaPlan.Price, mediaPlan.active);
 
             return mediaPlanDTO;
         }

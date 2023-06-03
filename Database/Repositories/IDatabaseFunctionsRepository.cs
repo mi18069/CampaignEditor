@@ -8,7 +8,7 @@ namespace Database.Repositories
     {
         Task<bool> RunUpdateUnavailableDates();
         Task<IEnumerable<DateTime>> GetAllUnavailableDates();
-        Task<bool> StartAMRCalculation(int cmpid, int minusTime, int plusTime);
+        Task<bool> StartAMRCalculation(int cmpid, int minusTime, int plusTime, int xmpid);
 
     }
 }

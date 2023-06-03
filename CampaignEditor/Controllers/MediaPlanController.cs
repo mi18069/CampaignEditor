@@ -65,9 +65,9 @@ namespace CampaignEditor.Controllers
             return await _repository.GetAllMediaPlansWithinDate(sdate, edate);
         }
 
-        public async Task<IEnumerable<MediaPlanDTO>> GetAllChannelMediaPlans(int chid)
+        public async Task<IEnumerable<MediaPlanDTO>> GetAllChannelCmpMediaPlans(int chid, int cmpid)
         {
-            return await _repository.GetAllChannelMediaPlans(chid);
+            return await _repository.GetAllChannelCmpMediaPlans(chid, cmpid);
         }
 
         public async Task<bool> UpdateMediaPlan(UpdateMediaPlanDTO mediaPlanDTO)

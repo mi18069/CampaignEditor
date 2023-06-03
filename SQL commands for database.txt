@@ -156,6 +156,7 @@ CREATE TABLE IF NOT EXISTS xmp (
    amrpsale numeric(12,8),
    dpkoef numeric(10,8),
    seaskoef numeric(10,8),
+   seccoef numeric(10,2),
    price numeric(10,8),
    active bool,
    PRIMARY KEY (xmpid),

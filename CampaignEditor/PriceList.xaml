@@ -75,7 +75,7 @@
                   DisplayMemberPath="sctname" SelectedIndex="0" VerticalAlignment="Center"
                   SelectionChanged="cbSectable2_SelectionChanged"/>
         <CheckBox x:Name="chbSectable2" Content="" Grid.Row="4" Grid.Column="5"
-                  VerticalAlignment="Center" HorizontalAlignment="Center"
+                  VerticalAlignment="Center" HorizontalAlignment="Center" IsEnabled="False"
                   IsChecked="False" Checked="chbSectable2_Checked" Unchecked="chbSectable2_Unchecked">
             <CheckBox.LayoutTransform>
                 <ScaleTransform ScaleX="1.5" ScaleY="1.5" />

@@ -213,7 +213,15 @@ namespace CampaignEditor.UserControls
 
             if (resetRefData)
             {
-                await DeleteData();
+                if (MessageBox.Show("All data will be lost\n are you sure you want to initialize?", "Message: ", 
+                    MessageBoxButton.OKCancel, MessageBoxImage.Warning) == MessageBoxResult.OK)
+                {
+                    await DeleteData();
+                }
+                else
+                {
+                    return;
+                }
             }
 
             for (int i = 0; i < lbDateRanges.Items.Count - 1; i++)
@@ -367,6 +375,7 @@ namespace CampaignEditor.UserControls
                             }
 
                             await _mediaPlanTermController.DeleteMediaPlanTermByXmpId(mediaPlan.xmpid);
+                            await _mediaPlanHistController.DeleteMediaPlanHistByXmpid(mediaPlan.xmpid);
                             await _mediaPlanController.DeleteMediaPlanById(mediaPlan.xmpid);
                         }
                     }
@@ -522,7 +531,7 @@ namespace CampaignEditor.UserControls
 
             foreach (ChannelDTO channel in _channelMPDict.Keys)
             {
-                var mediaPlans = await _mediaPlanController.GetAllChannelMediaPlans(channel.chid);
+                var mediaPlans = await _mediaPlanController.GetAllChannelCmpMediaPlans(channel.chid, _campaign.cmpid);
                 foreach (MediaPlanDTO mediaPlan in mediaPlans)
                 { 
                     List<MediaPlanTermDTO> mediaPlanTerms = (List<MediaPlanTermDTO>)await _mediaPlanTermController.GetAllMediaPlanTermsByXmpid(mediaPlan.xmpid);
@@ -1163,15 +1172,18 @@ namespace CampaignEditor.UserControls
                     if (f._schema != null)
                     {
                         var schema = await _schemaController.CreateGetSchema(f._schema);
-                        MediaPlanDTO mediaPlan = await SchemaToMP(schema);
+                        MediaPlanDTO mediaPlanDTO = await SchemaToMP(schema);
+
+                        await _databaseFunctionsController.StartAMRCalculation(_campaign.cmpid, 40, 40, mediaPlanDTO.xmpid);
+                        var mediaPlan = await _converter.ConvertFirstFromDTO(mediaPlanDTO);
                         var channel = _channelMPDict.Keys.First(ch => ch.chid == mediaPlan.chid);
 
-                        if (!MPInList(mediaPlan, _channelMPDict[channel]))
+                        if (!MPInList(mediaPlanDTO, _channelMPDict[channel]))
                         {
-                            var mediaPlanTerms = await MediaPlanToMPTerm(mediaPlan);
-                            var tuple = Tuple.Create(await _converter.ConvertFromDTO(mediaPlan), mediaPlanTerms);
+                            var mediaPlanTerms = await MediaPlanToMPTerm(mediaPlanDTO);
+                            var tuple = Tuple.Create(mediaPlan, mediaPlanTerms);
                             _channelMPDict[channel].Add(tuple);
-                            _showMP.Add(new MediaPlanTuple(await _converter.ConvertFromDTO(mediaPlan), new ObservableCollection<MediaPlanTermDTO>(mediaPlanTerms)));
+                            _showMP.Add(new MediaPlanTuple(mediaPlan, new ObservableCollection<MediaPlanTermDTO>(mediaPlanTerms)));
                         }
                     }
                 };
@@ -1510,6 +1522,7 @@ namespace CampaignEditor.UserControls
                 var mediaPlan = mediaPlanTuple.MediaPlan;
 
                 var mediaPlanHists = await _mediaPlanHistController.GetAllMediaPlanHistsByXmpid(mediaPlan.xmpid);
+                mediaPlanHists = mediaPlanHists.OrderBy(m => m.date).ThenBy(m => m.stime);
                 foreach (var mediaPlanHist in mediaPlanHists)
                     _showMPHist.Add(mediaPlanHist);
             }

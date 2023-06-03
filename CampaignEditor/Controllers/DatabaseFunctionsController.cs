@@ -24,9 +24,9 @@ namespace CampaignEditor.Controllers
             return await _repository.GetAllUnavailableDates();
         }
 
-        public async Task<bool> StartAMRCalculation(int cmpid, int minusTime, int plusTime)
+        public async Task<bool> StartAMRCalculation(int cmpid, int minusTime, int plusTime, int xmpid=-1)
         {
-            return await _repository.StartAMRCalculation(cmpid, minusTime, plusTime);
+            return await _repository.StartAMRCalculation(cmpid, minusTime, plusTime, xmpid);
         }
 
     }
