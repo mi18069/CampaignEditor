@@ -1,5 +1,4 @@
-﻿using AutoMapper;
-using CampaignEditor.Controllers;
+﻿using CampaignEditor.Controllers;
 using CampaignEditor.DTOs.CampaignDTO;
 using CampaignEditor.StartupHelpers;
 using Database.DTOs.ChannelDTO;
@@ -12,6 +11,7 @@ using Database.DTOs.MediaPlanTermDTO;
 using Database.DTOs.SchemaDTO;
 using Database.Entities;
 using Database.Repositories;
+using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -71,10 +71,10 @@ namespace CampaignEditor.UserControls
         public static readonly DependencyProperty FrozenColumnsNumProperty =
             DependencyProperty.Register(nameof(FrozenColumnsNum), typeof(int), typeof(MainWindow), new PropertyMetadata(0));
 
-        private Dictionary<ChannelDTO, List<Tuple<MediaPlan, List<MediaPlanTermDTO>>>> _channelMPDict =
-            new Dictionary<ChannelDTO, List<Tuple<MediaPlan, List<MediaPlanTermDTO>>>>();
-        private ObservableCollection<MediaPlanTuple> _showMP 
-            = new ObservableCollection<MediaPlanTuple>();
+        private ObservableCollection<MediaPlanTuple> _allMediaPlans =
+            new ObservableCollection<MediaPlanTuple>();
+
+        private ObservableCollection<ChannelDTO> _selectedChannels = new ObservableCollection<ChannelDTO>();
 
         private ObservableCollection<MediaPlanHist> _showMPHist = new ObservableCollection<MediaPlanHist>();
 
@@ -181,13 +181,19 @@ namespace CampaignEditor.UserControls
 
             InitializeDateColumns();
 
-            ICollectionView myDataView = CollectionViewSource.GetDefaultView(_showMP);
+            ICollectionView myDataView = CollectionViewSource.GetDefaultView(_allMediaPlans);
             dgSchema.ItemsSource = myDataView;
 
             myDataView.SortDescriptions.Add(new SortDescription("MediaPlan.name", ListSortDirection.Ascending));
-            myDataView.Filter = d => ((MediaPlanTuple)d).MediaPlan.active == true;
+            myDataView.Filter = d =>
+            {
+                var mediaPlan = ((MediaPlanTuple)d).MediaPlan;
+                
+                return mediaPlan.active && _selectedChannels.Any(c => c.chid == mediaPlan.chid);
+            };
 
-            _showMP.CollectionChanged += OnCollectionChanged;
+            _allMediaPlans.CollectionChanged += OnCollectionChanged;
+            _selectedChannels.CollectionChanged += OnCollectionChanged;
 
             SetGrid(gridForecast);
         }
@@ -196,7 +202,7 @@ namespace CampaignEditor.UserControls
         private void OnCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             // Call Refresh() on the view to update it
-            ICollectionView view = CollectionViewSource.GetDefaultView(_showMP);
+            ICollectionView view = CollectionViewSource.GetDefaultView(_allMediaPlans);
             view.Refresh();
         }
 
@@ -348,39 +354,22 @@ namespace CampaignEditor.UserControls
         private async Task<MediaPlanDTO> SchemaToMP(SchemaDTO schema)
         {
             MediaPlanDTO mediaPlan = null;
+            // if already exist, fix conflicts
             if ((mediaPlan = await _mediaPlanController.GetMediaPlanBySchemaAndCmpId(schema.id, _campaign.cmpid)) != null)
             {
+                // if mediaPlan already exists, return that one
                 if (AreEqualMediaPlanAndSchema(mediaPlan, schema))
                     return mediaPlan;
                 else
                 {
-                    for (int i = 0; i < _showMP.Count(); i++)
-                    {
-                        if (AreMediaPlansEqual(_converter.ConvertToDTO(_showMP[i].MediaPlan), mediaPlan))
-                        {
-                            _showMP.RemoveAt(i);
-                        }
-                    }
 
-                    foreach (var channel in _channelMPDict.Keys)
-                    {
-                        if (channel.chid == mediaPlan.chid)
-                        {
-                            for (int i = 0; i < _channelMPDict[channel].Count(); i++)
-                            {
-                                if (AreMediaPlansEqual(_converter.ConvertToDTO(_channelMPDict[channel][i].Item1), mediaPlan))
-                                {
-                                    _channelMPDict[channel].RemoveAt(i);
-                                }
-                            }
+                    await _mediaPlanTermController.DeleteMediaPlanTermByXmpId(mediaPlan.xmpid);
+                    await _mediaPlanHistController.DeleteMediaPlanHistByXmpid(mediaPlan.xmpid);
+                    await _mediaPlanController.DeleteMediaPlanById(mediaPlan.xmpid);
 
-                            await _mediaPlanTermController.DeleteMediaPlanTermByXmpId(mediaPlan.xmpid);
-                            await _mediaPlanHistController.DeleteMediaPlanHistByXmpid(mediaPlan.xmpid);
-                            await _mediaPlanController.DeleteMediaPlanById(mediaPlan.xmpid);
-                        }
-                    }
-                    
-                    
+                    var itemToRemove = _allMediaPlans.Where(item => item.MediaPlan.schid == schema.id).First();
+                    _allMediaPlans.Remove(itemToRemove);
+
                 }
                     
             }
@@ -519,40 +508,32 @@ namespace CampaignEditor.UserControls
 
         private async Task FillDictionary()
         {
-            _channelMPDict.Clear();
-
-            foreach (ChannelDTO channel in lvChannels.Items)
-            {
-                List<Tuple<MediaPlan, List<MediaPlanTermDTO>>> emptyList = new List<Tuple<MediaPlan, List<MediaPlanTermDTO>>>();
-                _channelMPDict.Add(channel, emptyList);
-            }
+            _allMediaPlans.Clear();
 
             int n = (int)(endDate - startDate).TotalDays;
 
-            foreach (ChannelDTO channel in _channelMPDict.Keys)
-            {
-                var mediaPlans = await _mediaPlanController.GetAllChannelCmpMediaPlans(channel.chid, _campaign.cmpid);
-                foreach (MediaPlanDTO mediaPlan in mediaPlans)
-                { 
-                    List<MediaPlanTermDTO> mediaPlanTerms = (List<MediaPlanTermDTO>)await _mediaPlanTermController.GetAllMediaPlanTermsByXmpid(mediaPlan.xmpid);
-                    var mediaPlanDates = new List<MediaPlanTermDTO>();
-                    for (int i = 0, j = 0; i <= n && j < mediaPlanTerms.Count(); i++)
+            var mediaPlans = await _mediaPlanController.GetAllMediaPlansByCmpid(_campaign.cmpid);
+            foreach (MediaPlanDTO mediaPlan in mediaPlans)
+            { 
+                List<MediaPlanTermDTO> mediaPlanTerms = (List<MediaPlanTermDTO>)await _mediaPlanTermController.GetAllMediaPlanTermsByXmpid(mediaPlan.xmpid);
+                var mediaPlanDates = new ObservableCollection<MediaPlanTermDTO>();
+                for (int i = 0, j = 0; i <= n && j < mediaPlanTerms.Count(); i++)
+                {
+                    if (DateOnly.FromDateTime(startDate.AddDays(i)) == mediaPlanTerms[j].date)
                     {
-                        if (DateOnly.FromDateTime(startDate.AddDays(i)) == mediaPlanTerms[j].date)
-                        {
-                            mediaPlanDates.Add(mediaPlanTerms[j]);
-                            j++;
-                        }
-                        else
-                        {
-                            mediaPlanDates.Add(null);
-                        }
+                        mediaPlanDates.Add(mediaPlanTerms[j]);
+                        j++;
                     }
-
-                    Tuple<MediaPlan, List<MediaPlanTermDTO>> row = Tuple.Create(await _converter.ConvertFromDTO(mediaPlan), mediaPlanDates);
-                    _channelMPDict[channel].Add(row);
+                    else
+                    {
+                        mediaPlanDates.Add(null);
+                    }
                 }
+
+                MediaPlanTuple mpTuple = new MediaPlanTuple(await _converter.ConvertFromDTO(mediaPlan), mediaPlanDates);
+                _allMediaPlans.Add(mpTuple);
             }
+            
         }
         #endregion
 
@@ -635,40 +616,12 @@ namespace CampaignEditor.UserControls
         private void lvChannels_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
 
-            var selectedItems = e.AddedItems;
-            var deselectedItems = e.RemovedItems;
-
+            _selectedChannels.Clear();
+            foreach (ChannelDTO channel in lvChannels.SelectedItems)
+            {
+                _selectedChannels.Add(channel);
+            }
             
-            if (selectedItems.Count>0) 
-            {
-                ChannelDTO selectedItem = selectedItems[0]! as ChannelDTO;
-
-                for (int k = 0; k < _channelMPDict[selectedItem].Count; k++)
-                {
-                    MediaPlan mediaPlan = _channelMPDict[selectedItem][k].Item1;
-                    ObservableCollection<MediaPlanTermDTO> mediaPlanTerms = new ObservableCollection<MediaPlanTermDTO>();
-                    foreach (MediaPlanTermDTO mpTerm in _channelMPDict[selectedItem][k].Item2)
-                        mediaPlanTerms.Add(mpTerm);
-
-                    _showMP.Add(new MediaPlanTuple(mediaPlan, mediaPlanTerms));
-                }
-            }
-
-            if (deselectedItems.Count>0)
-            {
-                ChannelDTO deselectedItem = deselectedItems[0]! as ChannelDTO;
-
-                for (int i=0; i < _showMP.Count(); i++)
-                {
-                    var tuple = _showMP[i];
-                    foreach (var channelTuple in _channelMPDict[deselectedItem])
-                        if (channelTuple.Item1 == tuple.MediaPlan)
-                        {
-                            _showMP.Remove(tuple);
-                            i--;
-                        }
-                }
-            }
         }
 
         #endregion
@@ -1155,7 +1108,7 @@ namespace CampaignEditor.UserControls
                     if (mediaPlanTuple != null)
                     {
                         mediaPlanTuple.MediaPlan.active = false;
-                        _showMP.Remove(mediaPlanTuple);
+                        _allMediaPlans.Remove(mediaPlanTuple);
                         var mediaPlan = mediaPlanTuple.MediaPlan;                        
                         await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(_converter.ConvertToDTO(mediaPlan)));
                     }
@@ -1176,15 +1129,11 @@ namespace CampaignEditor.UserControls
 
                         await _databaseFunctionsController.StartAMRCalculation(_campaign.cmpid, 40, 40, mediaPlanDTO.xmpid);
                         var mediaPlan = await _converter.ConvertFirstFromDTO(mediaPlanDTO);
-                        var channel = _channelMPDict.Keys.First(ch => ch.chid == mediaPlan.chid);
 
-                        if (!MPInList(mediaPlanDTO, _channelMPDict[channel]))
-                        {
-                            var mediaPlanTerms = await MediaPlanToMPTerm(mediaPlanDTO);
-                            var tuple = Tuple.Create(mediaPlan, mediaPlanTerms);
-                            _channelMPDict[channel].Add(tuple);
-                            _showMP.Add(new MediaPlanTuple(mediaPlan, new ObservableCollection<MediaPlanTermDTO>(mediaPlanTerms)));
-                        }
+                        var mediaPlanTerms = await MediaPlanToMPTerm(mediaPlanDTO);
+                        var mpTuple = new MediaPlanTuple(mediaPlan, new ObservableCollection<MediaPlanTermDTO>(mediaPlanTerms));
+                        _allMediaPlans.Add(mpTuple);
+
                     }
                 };
                 menu.Items.Add(addMediaPlanItem);
