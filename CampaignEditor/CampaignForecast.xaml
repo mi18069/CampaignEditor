@@ -318,8 +318,8 @@
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
                             <Label x:Name="lblBudget" Content="Budget: " Grid.Column="0"/>
-                            <Label x:Name="lblBudgetValue" Grid.Column="1" 
-                           HorizontalContentAlignment="Center" FontWeight="DemiBold"/>
+                            <Label x:Name="lblBudgetValue" Grid.Column="1" Content="{Binding Budget}"
+                           HorizontalContentAlignment="Right" FontWeight="DemiBold"/>
                             <Label x:Name="lblBudgetTarget" Grid.Column="2" 
                            HorizontalContentAlignment="Right" FontWeight="Light"/>
                         </Grid>
@@ -333,8 +333,8 @@
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
                             <Label x:Name="lblGRP" Content="GRP: " Grid.Column="0"/>
-                            <Label x:Name="lblGRPValue" Grid.Column="1" 
-                       HorizontalContentAlignment="Center" FontWeight="DemiBold"/>
+                            <Label x:Name="lblGRPValue" Grid.Column="1" Content="{Binding Grp}"
+                       HorizontalContentAlignment="Right" FontWeight="DemiBold"/>
                             <Label x:Name="lblGRPTarget" Grid.Column="2" 
                        HorizontalContentAlignment="Right" FontWeight="Light"/>
                         </Grid>
@@ -348,8 +348,8 @@
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
                             <Label x:Name="lblInsertations" Content="Insertations: " Grid.Column="0"/>
-                            <Label x:Name="lblInsertationsValue" Grid.Column="1" 
-                       HorizontalContentAlignment="Center" FontWeight="DemiBold"/>
+                            <Label x:Name="lblInsertationsValue" Grid.Column="1" Content="{Binding Insertations}"
+                       HorizontalContentAlignment="Right" FontWeight="DemiBold"/>
                             <Label x:Name="lblInsertationsTarget" Grid.Column="2" 
                        HorizontalContentAlignment="Right" FontWeight="Light"/>
                         </Grid>
@@ -364,7 +364,7 @@
                             </Grid.ColumnDefinitions>
                             <Label x:Name="lblReach" Content="Reach: " Grid.Column="0"/>
                             <Label x:Name="lblReachValue" Grid.Column="1" 
-                       HorizontalContentAlignment="Center" FontWeight="DemiBold"/>
+                       HorizontalContentAlignment="Right" FontWeight="DemiBold"/>
                             <Label x:Name="lblReachTarget" Grid.Column="2" 
                        HorizontalContentAlignment="Right" FontWeight="Light"/>
                         </Grid>

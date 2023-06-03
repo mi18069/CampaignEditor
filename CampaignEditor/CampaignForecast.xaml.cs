@@ -11,13 +11,13 @@ using Database.DTOs.MediaPlanTermDTO;
 using Database.DTOs.SchemaDTO;
 using Database.Entities;
 using Database.Repositories;
-using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -77,6 +77,8 @@ namespace CampaignEditor.UserControls
         private ObservableCollection<ChannelDTO> _selectedChannels = new ObservableCollection<ChannelDTO>();
 
         private ObservableCollection<MediaPlanHist> _showMPHist = new ObservableCollection<MediaPlanHist>();
+
+        private MPGoals mpGoals = new MPGoals();
 
         List<DateTime> unavailableDates = new List<DateTime>();
 
@@ -175,7 +177,7 @@ namespace CampaignEditor.UserControls
             // Filling lvChannels and dictionary
 
             await FillLvChannels();
-            await FillDictionary();
+            await FillMPList();
             await FillGoals();
             await FillLoadedDateRanges();
 
@@ -506,7 +508,7 @@ namespace CampaignEditor.UserControls
 
         }
 
-        private async Task FillDictionary()
+        private async Task FillMPList()
         {
             _allMediaPlans.Clear();
 
@@ -631,6 +633,7 @@ namespace CampaignEditor.UserControls
         private async Task FillGoals()
         {
             GoalsDTO goals = await _goalsController.GetGoalsByCmpid(_campaign.cmpid);
+            mpGoals.MediaPlans = new ObservableCollection<MediaPlan>(_allMediaPlans.Select(mp => mp.MediaPlan));
 
             if (goals != null)
             {
@@ -642,6 +645,7 @@ namespace CampaignEditor.UserControls
                 {
                     bBudget.Visibility = Visibility.Visible;
                     lblBudgetTarget.Content = "/" + goals.budget.ToString();
+                    lblBudgetValue.DataContext = mpGoals;
                 }
 
                 if (goals.grp == 0)
@@ -652,6 +656,7 @@ namespace CampaignEditor.UserControls
                 {
                     bGRP.Visibility = Visibility.Visible;
                     lblGRPTarget.Content = "/" + goals.grp.ToString();
+                    lblGRPValue.DataContext = mpGoals;
                 }
 
                 if (goals.ins == 0)
@@ -662,6 +667,7 @@ namespace CampaignEditor.UserControls
                 {
                     bInsertations.Visibility = Visibility.Visible;
                     lblInsertationsTarget.Content = "/" + goals.ins.ToString();
+                    lblInsertationsValue.DataContext = mpGoals;
                 }
 
                 if (goals.rch == 0)
@@ -673,6 +679,7 @@ namespace CampaignEditor.UserControls
                     bReach.Visibility = Visibility.Visible;
                     lblReachTarget.Content = "/" + "from " + goals.rch_f1.ToString().Trim() + " to " + goals.rch_f2.ToString().Trim() +
                     " , " + goals.rch.ToString().Trim() + " %";
+                    lblReachValue.DataContext = mpGoals;
                 }
             }
         }
@@ -738,7 +745,6 @@ namespace CampaignEditor.UserControls
 
                     column.CellStyle.Setters.Add(new Setter(Border.BorderThicknessProperty, new Thickness(3, 1, 1, 1)));
                     column.CellStyle.Setters.Add(new Setter(Border.BorderBrushProperty, Brushes.OrangeRed));
-
                     
                 }
                 else if (date.DayOfWeek == DayOfWeek.Sunday)
@@ -895,7 +901,7 @@ namespace CampaignEditor.UserControls
             }
 
             // Disable copy-paste mechanism
-            if (e.Key == Key.C && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+            /*if (e.Key == Key.C && (Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
             {
                 // Disable copy (Ctrl + C) operation
                 e.Handled = true;
@@ -904,7 +910,13 @@ namespace CampaignEditor.UserControls
             {
                 // Disable paste (Ctrl + V) operation
                 e.Handled = true;
+            }*/
+            // Disable usual mechanisms
+            if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
+            {
+                e.Handled = true;
             }
+            
 
             // if cell is not binded to mediaPlanTerm, disable editing
             var tuple = (MediaPlanTuple)cell.DataContext;
@@ -941,7 +953,7 @@ namespace CampaignEditor.UserControls
             {
                 e.Handled = true;
 
-                string? spotcode = mpTerm.spotcode;
+                string? spotcode = mpTerm.spotcode.Trim();
                 if (spotcode == null || spotcode.Length == 1)
                 {
                     await _mediaPlanTermController.UpdateMediaPlanTerm(

@@ -1,11 +1,8 @@
 ﻿using CampaignEditor.Controllers;
 using CampaignEditor.DTOs.CampaignDTO;
 using Database.DTOs.GoalsDTO;
-using Database.Entities;
 using Database.Repositories;
-using System;
 using System.ComponentModel;
-using System.ComponentModel.Design;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
