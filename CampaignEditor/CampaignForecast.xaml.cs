@@ -17,7 +17,6 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -953,7 +952,9 @@ namespace CampaignEditor.UserControls
             {
                 e.Handled = true;
 
-                string? spotcode = mpTerm.spotcode.Trim();
+                string? spotcode = mpTerm.spotcode;
+                if (spotcode != null)
+                    spotcode = spotcode.Trim();
                 if (spotcode == null || spotcode.Length == 1)
                 {
                     await _mediaPlanTermController.UpdateMediaPlanTerm(

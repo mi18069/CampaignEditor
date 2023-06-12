@@ -14,7 +14,7 @@ namespace Database.Entities
 
         public double Grp
         {
-            get { return Math.Round(grp); }
+            get { return Math.Round(grp, 2); }
             set
             {
                 grp = value;

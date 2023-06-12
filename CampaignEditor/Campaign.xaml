@@ -3,26 +3,19 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:CampaignEditor"
+        xmlns:local="clr-namespace:CampaignEditor.Converters"
         mc:Ignorable="d"
         Title="Campaign" 
         Height="750" Width="1200" MinWidth="1000" MinHeight="700">
+    <Window.Resources>
+        <local:ToHalfConverterM4 x:Key="toHalfConverter" />
+    </Window.Resources>
     <Grid>
-        <UniformGrid Columns="4" Height="40" 
-                    VerticalAlignment="Top" HorizontalAlignment="Stretch">
-            <Button x:Name="btnOverview" Content="Overview" 
-                    MinWidth="100" 
-                    Click="btnOverview_Click"/>
-            <Button x:Name="btnForecast" Content="Forecast" 
-                    MinWidth="100"
-                    Click="btnForecast_Click"/>
-            <Button x:Name="btnPlan" Content="Plan" 
-                    MinWidth="100"
-                    />
-            <Button x:Name="btnReports" Content="Reports" 
-                    MinWidth="100"
-                    />
-        </UniformGrid>
-        <Frame x:Name="ClientCampaign" Margin="0, 40, 0, 0" NavigationUIVisibility="Hidden"/>
+        <TabControl x:Name="tcTabs" SizeChanged="tcTabs_SizeChanged" >
+            <TabItem x:Name="tiOverview" Header="Overview"
+                     Height="50"  Width="{Binding ElementName=tcTabs, Path=ActualWidth, Converter={StaticResource toHalfConverter}}"/>
+            <TabItem x:Name="tiForecast" Header="Forecast" Width="{Binding ElementName=tcTabs, Path=ActualWidth, Converter={StaticResource toHalfConverter}}"
+                     Height="50"/>
+        </TabControl>
     </Grid>
 </Window>

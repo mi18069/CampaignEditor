@@ -4,14 +4,19 @@ using CampaignEditor.StartupHelpers;
 using CampaignEditor.UserControls;
 using Database.DTOs.ClientDTO;
 using Database.Repositories;
+using System;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 
 namespace CampaignEditor
 {
     public partial class Campaign : Window
     {
+        bool isFirstRender = true;
+
         public string cmpname = "";
         ClientDTO _client = null;
         CampaignDTO _campaign = null;
@@ -23,9 +28,6 @@ namespace CampaignEditor
         private ClientController _clientController;
         private CampaignController _campaignController;
 
-        private CampaignOverview factoryCampaignOverview = null;
-        private CampaignForecast factoryCampaignForecast = null;
-        private object currentPage = null;
 
 
         public Campaign(IClientRepository clientRepository, ICampaignRepository campaignRepository, 
@@ -49,33 +51,35 @@ namespace CampaignEditor
             readOnly = isReadOnly;
             this.Title = "Client: " + _client.clname.Trim() + "  Campaign: " + _campaign.cmpname.Trim();
 
-            factoryCampaignOverview = _factoryOverview.Create();
-            factoryCampaignOverview.Initialization(_client, _campaign, isReadOnly);
-            btnOverview_Click(btnOverview, null);
+            await AssignPagesToTabs();
+            
         }
 
-        private void btnOverview_Click(object sender, RoutedEventArgs e)
+        private async Task AssignPagesToTabs()
         {
-            if (currentPage != factoryCampaignOverview)
-            {
-                currentPage = factoryCampaignOverview;
-                ClientCampaign.Content = currentPage;
-            }
+            var factoryCampaignOverview = _factoryOverview.Create();
+            await factoryCampaignOverview.Initialization(_client, _campaign, readOnly);
+
+            var factoryCampaignForecast = _factoryForecast.Create();
+            await factoryCampaignForecast.Initialize(_client, _campaign);
+
+            TabItem tabOverview = (TabItem)tcTabs.FindName("tiOverview");
+            tabOverview.Content = factoryCampaignOverview.Content;
+
+            TabItem tabForecast = (TabItem)tcTabs.FindName("tiForecast");
+            tabForecast.Content = factoryCampaignForecast.Content;
         }
 
-        private async void btnForecast_Click(object sender, RoutedEventArgs e)
+        // For resizing tabItems width
+        private void tcTabs_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            if (factoryCampaignForecast == null)
-            {
-                factoryCampaignForecast = _factoryForecast.Create();
-                await factoryCampaignForecast.Initialize(_client, _campaign);
-            }
-            if (currentPage != factoryCampaignForecast)
-            {
-                currentPage = factoryCampaignForecast;
-                ClientCampaign.Content = currentPage;
-            }
-        }
+          /* int n = tcTabs.Items.Count;
 
+            double tabSize = tcTabs.ActualWidth / n;
+            foreach (TabItem tab in tcTabs.Items)
+            {
+                tab.Width = tabSize-5;
+            }*/
+        }
     }
 }
