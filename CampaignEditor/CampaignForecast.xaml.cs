@@ -1498,7 +1498,6 @@ namespace CampaignEditor.UserControls
             }
         }
 
-        // Don't need 
         private async void TextBoxCoef_TextChanged(object sender, TextChangedEventArgs e)
         {
             var tuple = dgSchema.SelectedItems[0] as MediaPlanTuple;
@@ -1517,7 +1516,7 @@ namespace CampaignEditor.UserControls
                     if (textBox != null && (textBox.Text.Trim() == "" || float.TryParse(textBox.Text.Trim(), out value)))
                     {
                         value = textBox.Text.Trim() == "" ? 0 : value;
-                        mediaPlan.progcoef = value;
+                        mediaPlan.Progcoef = value;
                         await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(_converter.ConvertToDTO(mediaPlan)));
 
                         // also should update value in progschema

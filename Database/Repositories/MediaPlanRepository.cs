@@ -541,7 +541,7 @@ namespace Database.Repositories
                 "datumkreiranja = CAST(@Created AS DATE), datumizmene = CAST(@Modified AS DATE), " +
                 "amr1 = @Amr1, amr1trim = @Amr1trim, amr2 = @Amr2, amr2trim = @Amr2trim, amr3 = @Amr3, amr3trim = @Amr3trim, amrsale = @Amrsale, amrsaletrim = @Amrsaletrim, " +
                 "amrp1 = @Amrp1, amrp2 = @Amrp2, amrp3 = @Amrp3, amrpsale = @Amrpsale, " +
-                "dpkoef = @Dpcoef, seaskoef = @Seascoef, seckoef = @Seccoef, price = @Price, active = @Active " +
+                "dpkoef = @Dpcoef, progkoef = @Progcoef, seaskoef = @Seascoef, seckoef = @Seccoef, price = @Price, active = @Active " +
                 "WHERE xmpid = @Xmpid",
                 new
                 {

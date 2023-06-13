@@ -174,7 +174,7 @@
                     <DataGridTextColumn Header="Affinity" Binding="{Binding MediaPlan.Affinity, StringFormat=N2}"
                                             IsReadOnly="True"/>
                     <DataGridTextColumn Header="Prog Coef" Binding="{Binding MediaPlan.progcoef, Mode=TwoWay, StringFormat=N2}" 
-                                        IsReadOnly="True" >
+                                        >
                         <DataGridTextColumn.EditingElementStyle>
                             <Style TargetType="{x:Type TextBox}">
                                 <EventSetter Event="TextChanged" Handler="TextBoxCoef_TextChanged"/>

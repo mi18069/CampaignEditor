@@ -189,7 +189,7 @@ namespace Database.Repositories
                 etime = item.vremedo,
                 blocktime = item.vremerbl,
                 days = item.dani,
-                type = item.tiopologija,
+                type = item.tipologija,
                 special = item.specijal,
                 sdate = DateOnly.FromDateTime(item.datumod),
                 edate = item.datumdo == null ? null : DateOnly.FromDateTime(item.datumdo),
@@ -327,8 +327,8 @@ namespace Database.Repositories
             var affected = await connection.ExecuteAsync(
                 "UPDATE progschema SET id = @Id, chid = @Chid, naziv = @Name, pozicija = @Position, " +
                 "vremeod = @Stime, vremedo = @Etime, vremerbl = @Blocktime, dani = @Days, " +
-                "tipologija = @Type, specijal = @Special, datumod = @Sdate, datumdo = @Edate, " +
-                "datumkreiranja = @Created, datumizmene = @Modified " +
+                "tipologija = @Type, specijal = @Special, datumod = CAST(@Sdate AS DATE), datumdo = CAST(@Edate AS DATE), " +
+                "datumkreiranja = CAST(@Created AS DATE), datumizmene = CAST(@Modified AS DATE) " +
                 "WHERE id = @Id",
                 new
                 {
@@ -342,11 +342,11 @@ namespace Database.Repositories
                     Days = schemaDTO.days,
                     Type = schemaDTO.type,
                     Special = schemaDTO.special,
-                    Sdate = schemaDTO.sdate,
-                    Edate = schemaDTO.edate,
+                    Sdate = schemaDTO.sdate.ToString("yyyy-MM-dd"),
+                    Edate = schemaDTO.edate?.ToString("yyyy-MM-dd"),
                     Progcoef = schemaDTO.progcoef,
-                    Created = schemaDTO.created,
-                    Modified = schemaDTO.modified
+                    Created = schemaDTO.created.ToString("yyyy-MM-dd"),
+                    Modified = schemaDTO.modified?.ToString("yyyy-MM-dd")
                 });
 
             return affected != 0;
