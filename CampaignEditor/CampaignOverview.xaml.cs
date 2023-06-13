@@ -11,8 +11,9 @@ using Database.DTOs.TargetDTO;
 using Database.Repositories;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
-using System.Threading;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -28,18 +29,10 @@ namespace CampaignEditor
         private readonly IAbstractFactory<Goals> _factoryGoals;
         private readonly IAbstractFactory<CmpInfo> _factoryInfo;
 
-
-        private CampaignController _campaignController;
-        private ClientController _clientController;
-        private TargetCmpController _targetCmpController;
-
         public ClientDTO _client = null;
         private CampaignDTO _campaign = null;
 
         private bool isReadOnly = false;
-
-        AssignTargets assignTargetsFactory = null;
-        Channels assignChannelsFactory = null;
 
         private bool spotsModified = false;
         private Spots fSpots = null;
@@ -61,8 +54,8 @@ namespace CampaignEditor
         private CmpInfo fInfo = null;
         private CampaignDTO _campaignInfo = null;
 
-        public CampaignOverview(ICampaignRepository campaignRepository, ITargetCmpRepository targetCmpRepository,
-            IClientRepository clientRepository, IAbstractFactory<AssignTargets> factoryAssignTargets,
+
+        public CampaignOverview(IAbstractFactory<AssignTargets> factoryAssignTargets,
             IAbstractFactory<Channels> factoryChannels, IAbstractFactory<Spots> factorySpots,
             IAbstractFactory<Goals> factoryGoals, IAbstractFactory<CmpInfo> factoryInfo)
         {
@@ -73,9 +66,6 @@ namespace CampaignEditor
             _factoryGoals = factoryGoals;
             _factoryInfo = factoryInfo;
 
-            _campaignController = new CampaignController(campaignRepository);
-            _clientController = new ClientController(clientRepository);
-            _targetCmpController = new TargetCmpController(targetCmpRepository);
             InitializeComponent();
 
             if (MainWindow.user.usrid == 2)
@@ -165,6 +155,7 @@ namespace CampaignEditor
                 infoModified = true;
                 FillInfo(_campaignInfo);
                 fInfo.infoModified = false;
+                btnSave.IsEnabled = true;
             }
         }
         private void FillInfo(CampaignDTO campaign = null)
@@ -203,6 +194,7 @@ namespace CampaignEditor
                 FillDGTargets(_targetlist);
                 targetsModified = true;
                 fTargets.targetsModified = false;
+                btnSave.IsEnabled = true;
             }
         }
         private void FillDGTargets(List<TargetDTO> selectedTargetsList)
@@ -237,6 +229,7 @@ namespace CampaignEditor
                 dgChannels.ItemsSource = _channels;
                 channelsModified = true;
                 fChannels.channelsModified = false;
+                btnSave.IsEnabled = true;
             }
         }
         #endregion
@@ -251,6 +244,7 @@ namespace CampaignEditor
                 _spotlist = fSpots.Spotlist.ToList();
                 spotsModified = true;
                 fSpots.spotsModified = false;
+                btnSave.IsEnabled = true;
             }
         }
         #endregion
@@ -266,6 +260,7 @@ namespace CampaignEditor
                 goalsModified = true;
                 FillGoals(_goals);
                 fGoals.goalsModified = false;
+                btnSave.IsEnabled = true;
             }
         }
 
@@ -341,23 +336,30 @@ namespace CampaignEditor
             if (targetsModified)
             {
                 await fTargets.UpdateDatabase(_targetlist);
+                targetsModified = false;
             }
             if (spotsModified)
             {
                 await fSpots.UpdateDatabase(_spotlist);
+                spotsModified = false;
             }
             if (goalsModified)
             {
                 await fGoals.UpdateDatabase(_goals);
+                goalsModified = false;
             }
             if (channelsModified)
             {
                 await fChannels.UpdateDatabase(_channels);
+                channelsModified = false;
             }
             if (infoModified)
             {
                 await fInfo.UpdateDatabase(_campaignInfo);
+                infoModified = false;
             }
+            MessageBox.Show("Changes successfully saved", "Message", MessageBoxButton.OK, MessageBoxImage.Asterisk);
+            btnSave.IsEnabled = false;
         }
 
         private void dgSpots_Loaded(object sender, RoutedEventArgs e)

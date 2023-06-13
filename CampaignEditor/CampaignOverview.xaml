@@ -369,6 +369,7 @@
         </Border>
 
         <Button x:Name="btnSave" Content="Save" Grid.Row="5" Grid.Column="8"
+                IsEnabled="False"
                 Width="100" Height="40"
                 HorizontalAlignment="Right" 
                 Click="btnSave_Click"/>
