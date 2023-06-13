@@ -4,8 +4,6 @@ using CampaignEditor.Repositories;
 using CampaignEditor.StartupHelpers;
 using Database.DTOs.ClientDTO;
 using Database.Repositories;
-using Newtonsoft.Json.Linq;
-using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -31,6 +29,9 @@ namespace CampaignEditor
         List<string> _assigned = new List<string>();
 
         private bool _isModified;
+        private bool _isUpdated = false;
+
+        public bool IsUpdated { get; }
         public bool isModified
         {
             get { return _isModified; }
@@ -228,6 +229,7 @@ namespace CampaignEditor
                         await _userController.UpdateUser(new UpdateUserDTO(user));
                     }
                 }
+                _isUpdated = true;
             }
             this.Close();
         }

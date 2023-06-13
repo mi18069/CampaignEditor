@@ -17,6 +17,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -44,6 +45,7 @@ namespace CampaignEditor.UserControls
         private readonly IAbstractFactory<AddSchema> _factoryAddSchema;
         private readonly IAbstractFactory<AMRTrim> _factoryAmrTrim;
 
+        private SelectedMPGoals SelectedMediaPlan = new SelectedMPGoals(); 
 
         private ClientDTO _client;
         private CampaignDTO _campaign;
@@ -83,6 +85,12 @@ namespace CampaignEditor.UserControls
 
         MediaPlanConverter _converter;
 
+        public event PropertyChangedEventHandler? PropertyChanged;
+        public void OnPropertyChanged([CallerMemberName] string propertyname = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyname));
+        }
+
         public CampaignForecast(ISchemaRepository schemaRepository,
             IChannelRepository channelRepository,
             IChannelCmpRepository channelCmpRepository,
@@ -99,6 +107,7 @@ namespace CampaignEditor.UserControls
             IAbstractFactory<MediaPlanConverter> factoryConverter)
         {
             this.DataContext = this;
+            var a = DataContext;
             this.FrozenColumnsNum = mediaPlanColumns;
 
             _schemaController = new SchemaController(schemaRepository);
@@ -639,39 +648,50 @@ namespace CampaignEditor.UserControls
                 if (goals.budget == 0)
                 {
                     bBudget.Visibility = Visibility.Collapsed;
+                    bpBudget.Visibility = Visibility.Collapsed;
                 }
                 else
                 {
                     bBudget.Visibility = Visibility.Visible;
                     lblBudgetTarget.Content = "/" + goals.budget.ToString();
                     lblBudgetValue.DataContext = mpGoals;
+
+                    // for selectedMP values
+                    lblpBudgetValue.DataContext = SelectedMediaPlan;
                 }
 
                 if (goals.grp == 0)
                 {
                     bGRP.Visibility = Visibility.Collapsed;
+                    bpGRP.Visibility = Visibility.Collapsed;
                 }
                 else
                 {
                     bGRP.Visibility = Visibility.Visible;
                     lblGRPTarget.Content = "/" + goals.grp.ToString();
                     lblGRPValue.DataContext = mpGoals;
+                    lblpGRPValue.DataContext = SelectedMediaPlan;
+
                 }
 
                 if (goals.ins == 0)
                 {
                     bInsertations.Visibility = Visibility.Collapsed;
+                    bpInsertations.Visibility = Visibility.Collapsed;
                 }
                 else
                 {
                     bInsertations.Visibility = Visibility.Visible;
                     lblInsertationsTarget.Content = "/" + goals.ins.ToString();
                     lblInsertationsValue.DataContext = mpGoals;
+                    lblpInsertationsValue.DataContext = SelectedMediaPlan;
+
                 }
 
                 if (goals.rch == 0)
                 {
                     bReach.Visibility = Visibility.Collapsed;
+                    bpReach.Visibility = Visibility.Collapsed;
                 }
                 else
                 {
@@ -1477,7 +1497,11 @@ namespace CampaignEditor.UserControls
         {
             _showMPHist.Clear();
             if (dgSchema.SelectedItems.Count == 0)
+            {
+                pGoals.Visibility = Visibility.Collapsed;
                 return;
+            }
+                
             else
             {
                 var mediaPlanTuple = dgSchema.SelectedItems[0] as MediaPlanTuple;
@@ -1487,6 +1511,9 @@ namespace CampaignEditor.UserControls
                 mediaPlanHists = mediaPlanHists.OrderBy(m => m.date).ThenBy(m => m.stime);
                 foreach (var mediaPlanHist in mediaPlanHists)
                     _showMPHist.Add(mediaPlanHist);
+
+                pGoals.Visibility = Visibility.Visible;
+                SelectedMediaPlan.MediaPlan = mediaPlan;
             }
         }
 

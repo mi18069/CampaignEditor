@@ -9,8 +9,6 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using CampaignEditor.Controllers;
-using CampaignEditor.DTOs.CampaignDTO;
-using CampaignEditor.Helpers;
 using CampaignEditor.StartupHelpers;
 using Database.Repositories;
 
@@ -109,7 +107,9 @@ namespace CampaignEditor
         private async void FillFilterByUsersComboBox()
         {
             cbUsers.Items.Add("All");
-            foreach (string username in await _clientsTree.GetSupervisedUsernames())
+            var usernames = await _clientsTree.GetSupervisedUsernames();
+            usernames = usernames.OrderBy(u => u);
+            foreach (string username in usernames)
             {
                 cbUsers.Items.Add(username);
             }
@@ -345,6 +345,9 @@ namespace CampaignEditor
             string clientname = ((HeaderedItemsControl)tvClients.SelectedItem).Header.ToString()!.Trim();
             await f.Initialize(clientname);
             f.ShowDialog();
+            if (f.IsUpdated)
+                await _clientsTree.InitializeTree();
+
         }
 
         private async void BtnAllUsers_Click(object sender, RoutedEventArgs e)
