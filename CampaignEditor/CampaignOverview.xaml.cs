@@ -12,6 +12,7 @@ using Database.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -91,13 +92,14 @@ namespace CampaignEditor
             _campaign = campaign;
             isReadOnly = _isReadOnly;
 
-            
+
 
             InitializeInfo();
             await InitializeTargets();
             await InitializeSpots();
             await InitializeGoals();
             await InitializeChannels();
+
         }
 
         private async Task InitializeTargets()
@@ -317,11 +319,21 @@ namespace CampaignEditor
 
         private void btnCancel_Click(object sender, RoutedEventArgs e)
         {
-            // Get the parent window of the page
-            Window parentWindow = Window.GetWindow(this);
+            // Get the parent of the button (sender)
+            DependencyObject button = (DependencyObject)sender;
 
-            // Close the parent window
-            parentWindow.Close();
+            // Traverse up the visual tree to find the parent Window
+            DependencyObject parentWindow = VisualTreeHelper.GetParent(button);
+            while (parentWindow != null && !(parentWindow is Window))
+            {
+                parentWindow = VisualTreeHelper.GetParent(parentWindow);
+            }
+
+            // Close the parent window if it is found
+            if (parentWindow is Window window)
+            {
+                window.Close();
+            }
         }
 
         private async void btnSave_Click(object sender, RoutedEventArgs e)

@@ -52,6 +52,12 @@
     <Compile Update="GroupChannels.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Helpers\LabelWindow.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Helpers\LoadingPage.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="NewCampaign.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -145,6 +151,12 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="GroupChannels.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Helpers\LabelWindow.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Helpers\LoadingPage.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="MainWindow.xaml">

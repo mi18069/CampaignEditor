@@ -1,5 +1,6 @@
 ﻿using CampaignEditor.Controllers;
 using CampaignEditor.DTOs.CampaignDTO;
+using CampaignEditor.Helpers;
 using CampaignEditor.StartupHelpers;
 using CampaignEditor.UserControls;
 using Database.DTOs.ClientDTO;
@@ -16,6 +17,7 @@ namespace CampaignEditor
     public partial class Campaign : Window
     {
         bool isFirstRender = true;
+        bool loaded = false;
 
         public string cmpname = "";
         ClientDTO _client = null;
@@ -51,23 +53,29 @@ namespace CampaignEditor
             readOnly = isReadOnly;
             this.Title = "Client: " + _client.clname.Trim() + "  Campaign: " + _campaign.cmpname.Trim();
 
-            await AssignPagesToTabs();
+
+            AssignPagesToTabs();
             
         }
 
         private async Task AssignPagesToTabs()
         {
+            //Placing loading page
+            var loadingPage = new LoadingPage();
+
+            TabItem tabOverview = (TabItem)tcTabs.FindName("tiOverview");
+            tabOverview.Content = loadingPage.Content;
+
+            TabItem tabForecast = (TabItem)tcTabs.FindName("tiForecast");
+            tabForecast.Content = loadingPage.Content;
+
             var factoryCampaignOverview = _factoryOverview.Create();
             await factoryCampaignOverview.Initialization(_client, _campaign, readOnly);
+            tabOverview.Content = factoryCampaignOverview.Content;
 
             var factoryCampaignForecast = _factoryForecast.Create();
             // Don't want to await this, as this will just slow down our campaign
-            factoryCampaignForecast.Initialize(_client, _campaign);
-
-            TabItem tabOverview = (TabItem)tcTabs.FindName("tiOverview");
-            tabOverview.Content = factoryCampaignOverview.Content;
-
-            TabItem tabForecast = (TabItem)tcTabs.FindName("tiForecast");
+            await factoryCampaignForecast.Initialize(_client, _campaign);
             tabForecast.Content = factoryCampaignForecast.Content;
         }
 

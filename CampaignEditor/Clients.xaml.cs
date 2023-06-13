@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using CampaignEditor.Controllers;
 using CampaignEditor.DTOs.CampaignDTO;
+using CampaignEditor.Helpers;
 using CampaignEditor.StartupHelpers;
 using Database.Repositories;
 
@@ -312,7 +314,7 @@ namespace CampaignEditor
             else
             {
                 var f = _factoryCampaign.Create();
-                await f.Initialize(campaignName, isReadOnly);
+                f.Initialize(campaignName, isReadOnly);
                 openCampaignWindows.Add(f);
                 f.Closed += CampaignWindow_Closed;
                 f.Show();
