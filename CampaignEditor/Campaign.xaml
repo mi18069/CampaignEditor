@@ -11,7 +11,7 @@
         <local:ToHalfConverterM4 x:Key="toHalfConverter" />
     </Window.Resources>
     <Grid>
-        <TabControl x:Name="tcTabs" SizeChanged="tcTabs_SizeChanged" >
+        <TabControl x:Name="tcTabs" >
             <TabItem x:Name="tiOverview" Header="Overview"
                      Height="50"  Width="{Binding ElementName=tcTabs, Path=ActualWidth, Converter={StaticResource toHalfConverter}}"/>
             <TabItem x:Name="tiForecast" Header="Forecast" Width="{Binding ElementName=tcTabs, Path=ActualWidth, Converter={StaticResource toHalfConverter}}"

@@ -61,7 +61,8 @@ namespace CampaignEditor
             await factoryCampaignOverview.Initialization(_client, _campaign, readOnly);
 
             var factoryCampaignForecast = _factoryForecast.Create();
-            await factoryCampaignForecast.Initialize(_client, _campaign);
+            // Don't want to await this, as this will just slow down our campaign
+            factoryCampaignForecast.Initialize(_client, _campaign);
 
             TabItem tabOverview = (TabItem)tcTabs.FindName("tiOverview");
             tabOverview.Content = factoryCampaignOverview.Content;
@@ -70,16 +71,5 @@ namespace CampaignEditor
             tabForecast.Content = factoryCampaignForecast.Content;
         }
 
-        // For resizing tabItems width
-        private void tcTabs_SizeChanged(object sender, SizeChangedEventArgs e)
-        {
-          /* int n = tcTabs.Items.Count;
-
-            double tabSize = tcTabs.ActualWidth / n;
-            foreach (TabItem tab in tcTabs.Items)
-            {
-                tab.Width = tabSize-5;
-            }*/
-        }
     }
 }

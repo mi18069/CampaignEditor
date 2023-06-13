@@ -173,6 +173,7 @@
                           FontSize="15"
                           CanUserSortColumns="False"
                           AutoGenerateColumns="False"
+                          HeadersVisibility="Column"
                           IsReadOnly="True">
                         <DataGrid.Resources>
                             <Style TargetType="{x:Type DataGridColumnHeader}">
@@ -219,6 +220,7 @@
                           FontSize="15"
                           CanUserSortColumns="False"
                           AutoGenerateColumns="False"
+                          HeadersVisibility="Column"
                           IsReadOnly="True"
                         Loaded="dgSpots_Loaded">
                         <DataGrid.Resources>
@@ -343,6 +345,7 @@
                           FontSize="15"
                           CanUserSortColumns="False"
                           AutoGenerateColumns="False"
+                          HeadersVisibility="Column"
                           IsReadOnly="True">
                         <DataGrid.Resources>
                             <Style TargetType="{x:Type DataGridColumnHeader}">
