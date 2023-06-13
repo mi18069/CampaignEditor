@@ -634,6 +634,100 @@ namespace CampaignEditor.UserControls
             
         }
 
+        #region ContextMenu
+
+        /*private void lvChannels_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+
+            ListView listView = sender as ListView;
+            var dataContext = listView.DataContext;
+            ListViewItem clickedListViewItem = listView.ItemsControlFromItemContainer(dataContext) as ChannelDTO;
+
+            ContextMenu menu = new ContextMenu();
+            MenuItem trimAmrs = new MenuItem();
+            trimAmrs.Header = "Trim All Channel Amrs";
+            trimAmrs.Click += async (obj, ea) =>
+            {
+                var channel = lvChannels.SelectedItem as ChannelDTO;
+                var chname = channel.chname;
+
+                var f = _factoryAmrTrim.Create();
+                f.Initialize("Trim all Amrs for Channel " + chname, 100);
+                f.ShowDialog();
+                if (f.changed)
+                {
+                    var mediaPlans = _allMediaPlans.Where(mpTuple => mpTuple.MediaPlan.chid == channel.chid).Select(mpTuple => mpTuple.MediaPlan);
+                    foreach (MediaPlan mediaPlan in mediaPlans)
+                    {
+                        var mpDTO = _converter.ConvertToDTO(mediaPlan);
+                        await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(mpDTO));
+                    }
+
+                }
+            };
+            menu.Items.Add(trimAmrs);
+
+            lvChannels.ContextMenu = menu;
+        }*/
+
+        private void lvChannels_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            ListViewItem clickedItem = FindAncestor<ListViewItem>((DependencyObject)e.OriginalSource);
+            if (clickedItem != null)
+            {
+                // Do something with the clicked item
+                var channel = clickedItem.DataContext as ChannelDTO;
+                // Call your function for the item
+
+                ContextMenu menu = new ContextMenu();
+                MenuItem trimAmrs = new MenuItem();
+                trimAmrs.Header = "Trim All Channel Amrs";
+                trimAmrs.Click += async (obj, ea) =>
+                {
+                    var chname = channel.chname;
+
+                    var f = _factoryAmrTrim.Create();
+                    f.Initialize("Trim all Amrs for Channel " + chname, 100);
+                    f.ShowDialog();
+                    if (f.changed)
+                    {
+                        var mediaPlans = _allMediaPlans.Where(mpTuple => mpTuple.MediaPlan.chid == channel.chid).Select(mpTuple => mpTuple.MediaPlan);
+                        foreach (MediaPlan mediaPlan in mediaPlans)
+                        {
+                            mediaPlan.Amr1trim = f.newValue;
+                            mediaPlan.Amr2trim = f.newValue;
+                            mediaPlan.Amr3trim = f.newValue;
+                            mediaPlan.Amrsaletrim = f.newValue;
+                            var mpDTO = _converter.ConvertToDTO(mediaPlan);
+                            await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(mpDTO));
+                        }
+
+                    }
+                };
+                menu.Items.Add(trimAmrs);
+
+                lvChannels.ContextMenu = menu;
+            }
+
+            // Prevent selection and deselection
+            e.Handled = true;
+        }
+
+        private static T FindAncestor<T>(DependencyObject current) where T : DependencyObject
+        {
+            do
+            {
+                if (current is T ancestor)
+                {
+                    return ancestor;
+                }
+                current = VisualTreeHelper.GetParent(current);
+            } while (current != null);
+            return null;
+        }
+
+        #endregion
+
         #endregion
 
         #region Goals
@@ -1311,12 +1405,8 @@ namespace CampaignEditor.UserControls
                         default:
                             break;
                     }
-                    var d = mediaPlan.Amrp1;
-                    var g = mediaPlan.amrp1;
-                    var h = mediaPlan.amr1trim;
-                    var h1 = mediaPlan.Amr1trim;
+
                     var mpDTO = _converter.ConvertToDTO(mediaPlan);
-                    var a = mpDTO.amrp1;
 
                     await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(mpDTO));
                 }
@@ -1541,6 +1631,7 @@ namespace CampaignEditor.UserControls
                 }
             }
         }
+
 
         #endregion
     }

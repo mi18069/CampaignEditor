@@ -23,9 +23,10 @@
 
         <Label Grid.Row="1" Grid.Column="1" 
             x:Name="lblMessage" FontWeight="Bold" Content="Trim "
-               HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="30"/>
-        <TextBox Grid.Row="2" Grid.Column="1" x:Name="tbAmr" FontSize="40"
-                 Width="200" Height="70" TextChanged="tbAmr_TextChanged"/>
+               HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="15"/>
+        <TextBox Grid.Row="2" Grid.Column="1" x:Name="tbAmr" FontSize="20"
+                 Width="200" Height="50" TextChanged="tbAmr_TextChanged"
+                 MaxLength="4"/>
         <Button Grid.Row="3" Grid.Column="1" 
                 x:Name="btnSave" Content="Save" 
                 Width="100" HorizontalAlignment="Center" Margin="120, 10, 0, 10"
