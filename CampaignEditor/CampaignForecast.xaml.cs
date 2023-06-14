@@ -44,33 +44,33 @@ namespace CampaignEditor.UserControls
 
         private readonly IAbstractFactory<AddSchema> _factoryAddSchema;
         private readonly IAbstractFactory<AMRTrim> _factoryAmrTrim;
+        private readonly IAbstractFactory<MediaPlanGrid> _factoryMediaPlanGrid;
 
         private SelectedMPGoals SelectedMediaPlan = new SelectedMPGoals(); 
 
         private ClientDTO _client;
-        private CampaignDTO _campaign;
-
-        string lastSpotCell = ""; // for mouse click event
+        private CampaignDTO _campaign;      
 
         // for duration of campaign
         DateTime startDate;
         DateTime endDate;
 
         // for checking if certain character can be written in spot cells
-        HashSet<char> spotCodes = new HashSet<char>();
+         HashSet<char> spotCodes = new HashSet<char>();
+         string lastSpotCell = ""; // for mouse click event
+         // number of frozen columns
+         int mediaPlanColumns = 25;
+         bool resetRefData = false;
 
-        // number of frozen columns
-        int mediaPlanColumns = 25;
-        bool resetRefData = false;
+         public int FrozenColumnsNum
+         {
+             get { return (int)GetValue(FrozenColumnsNumProperty); }
+             set { SetValue(FrozenColumnsNumProperty, value); }
+         }
 
-        public int FrozenColumnsNum
-        {
-            get { return (int)GetValue(FrozenColumnsNumProperty); }
-            set { SetValue(FrozenColumnsNumProperty, value); }
-        }
-
-        public static readonly DependencyProperty FrozenColumnsNumProperty =
-            DependencyProperty.Register(nameof(FrozenColumnsNum), typeof(int), typeof(MainWindow), new PropertyMetadata(0));
+         public static readonly DependencyProperty FrozenColumnsNumProperty =
+             DependencyProperty.Register(nameof(FrozenColumnsNum), typeof(int), typeof(MainWindow), new PropertyMetadata(0));
+        
 
         private ObservableCollection<MediaPlanTuple> _allMediaPlans =
             new ObservableCollection<MediaPlanTuple>();
@@ -90,7 +90,6 @@ namespace CampaignEditor.UserControls
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyname));
         }
-
         public CampaignForecast(ISchemaRepository schemaRepository,
             IChannelRepository channelRepository,
             IChannelCmpRepository channelCmpRepository,
@@ -100,11 +99,11 @@ namespace CampaignEditor.UserControls
             IMediaPlanRefRepository mediaPlanRefRepository,
             ISpotRepository spotRepository,
             IGoalsRepository goalsRepository,
-
             IDatabaseFunctionsRepository databaseFunctionsRepository,
             IAbstractFactory<AddSchema> factoryAddSchema,
             IAbstractFactory<AMRTrim> factoryAmrTrim,
-            IAbstractFactory<MediaPlanConverter> factoryConverter)
+            IAbstractFactory<MediaPlanConverter> factoryConverter,
+            IAbstractFactory<MediaPlanGrid> mediaPlanGrid)
         {
             this.DataContext = this;
             var a = DataContext;
@@ -124,11 +123,12 @@ namespace CampaignEditor.UserControls
 
             _factoryAddSchema = factoryAddSchema;
             _factoryAmrTrim = factoryAmrTrim;
+            _factoryMediaPlanGrid = mediaPlanGrid;
 
             _converter = factoryConverter.Create();
 
             InitializeComponent();
-
+            
             if (MainWindow.user.usrlevel == 2)
             {
                 this.IsEnabled = false;
@@ -188,6 +188,8 @@ namespace CampaignEditor.UserControls
             await FillMPList();
             await FillGoals();
             await FillLoadedDateRanges();
+
+            //dgMediaPlans.Initialize(_campaign, _allMediaPlans);
 
             InitializeDateColumns();
 
@@ -635,40 +637,6 @@ namespace CampaignEditor.UserControls
         }
 
         #region ContextMenu
-
-        /*private void lvChannels_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
-        {
-
-            ListView listView = sender as ListView;
-            var dataContext = listView.DataContext;
-            ListViewItem clickedListViewItem = listView.ItemsControlFromItemContainer(dataContext) as ChannelDTO;
-
-            ContextMenu menu = new ContextMenu();
-            MenuItem trimAmrs = new MenuItem();
-            trimAmrs.Header = "Trim All Channel Amrs";
-            trimAmrs.Click += async (obj, ea) =>
-            {
-                var channel = lvChannels.SelectedItem as ChannelDTO;
-                var chname = channel.chname;
-
-                var f = _factoryAmrTrim.Create();
-                f.Initialize("Trim all Amrs for Channel " + chname, 100);
-                f.ShowDialog();
-                if (f.changed)
-                {
-                    var mediaPlans = _allMediaPlans.Where(mpTuple => mpTuple.MediaPlan.chid == channel.chid).Select(mpTuple => mpTuple.MediaPlan);
-                    foreach (MediaPlan mediaPlan in mediaPlans)
-                    {
-                        var mpDTO = _converter.ConvertToDTO(mediaPlan);
-                        await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(mpDTO));
-                    }
-
-                }
-            };
-            menu.Items.Add(trimAmrs);
-
-            lvChannels.ContextMenu = menu;
-        }*/
 
         private void lvChannels_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {

@@ -81,7 +81,7 @@
                       SelectionMode="Multiple" Margin="0, 0 ,10,0"
                       SelectionChanged="lvChannels_SelectionChanged"
                       PreviewMouseRightButtonDown="lvChannels_PreviewMouseRightButtonDown"/>
-            <DataGrid x:Name="dgSchema" Grid.Row="1" Grid.Column="2" Grid.RowSpan="5" Grid.ColumnSpan="3"
+            <!-- <DataGrid x:Name="dgSchema" Grid.Row="1" Grid.Column="2" Grid.RowSpan="5" Grid.ColumnSpan="3"
                           VerticalScrollBarVisibility="Visible"
                           FontSize="13" AlternatingRowBackground="LightGoldenrodYellow"
                           HeadersVisibility="Column"
@@ -192,8 +192,10 @@
                     <DataGridTextColumn Header="Cost" Binding="{Binding MediaPlan.Price, StringFormat=N2}"
                                         IsReadOnly="True"/>
                 </DataGrid.Columns>
-            </DataGrid>
+            </DataGrid> -->
 
+            <local:MediaPlanGrid x:Name="dgMediaPlans" 
+                                 Grid.Row="1" Grid.Column="2" Grid.RowSpan="5" Grid.ColumnSpan="3" />
             <TabControl Grid.Row="6" Grid.Column="2" Grid.ColumnSpan="3" Margin="0, 10, 0, 0">
                 <TabItem Header="Goals" />
                 <TabItem Header="Data">
