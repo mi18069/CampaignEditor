@@ -20,45 +20,45 @@ using Database.Repositories;
 using System.ComponentModel;
 using System.Collections.Specialized;
 using Database.DTOs.ChannelDTO;
+using System.Windows.Threading;
 
 namespace CampaignEditor.UserControls
 {
     public partial class MediaPlanGrid : UserControl
     {
 
-        private readonly IAbstractFactory<AddSchema> _factoryAddSchema;
-        private readonly IAbstractFactory<AMRTrim> _factoryAmrTrim;
+        public IAbstractFactory<AddSchema> _factoryAddSchema { get; set; }
+        public IAbstractFactory<AMRTrim> _factoryAmrTrim { get; set; }
 
 
-        private SchemaController _schemaController;
-        private MediaPlanController _mediaPlanController;
-        private MediaPlanTermController _mediaPlanTermController;
-        private SpotController _spotController;
+        public SchemaController _schemaController { get; set; }
+        public MediaPlanController _mediaPlanController { get; set; }
+        public MediaPlanTermController _mediaPlanTermController { get; set; }
+        public SpotController _spotController { get; set; }
 
         // for checking if certain character can be written in spot cells
-        HashSet<char> spotCodes;
+        HashSet<char> spotCodes = new HashSet<char>();
         // for mouse click event
         string lastSpotCell = "";
 
         // number of frozen columns
         int mediaPlanColumns = 25;
-        bool resetRefData = false;
 
-        public int FrozenColumnsNum
+        private int frozenColumnsNum
         {
-            get { return (int)GetValue(FrozenColumnsNumProperty); }
-            set { SetValue(FrozenColumnsNumProperty, value); }
+            get { return (int)GetValue(frozenColumnsNumProperty); }
+            set { SetValue(frozenColumnsNumProperty, value); }
         }
 
-        public static readonly DependencyProperty FrozenColumnsNumProperty =
-            DependencyProperty.Register(nameof(FrozenColumnsNum), typeof(int), typeof(MainWindow), new PropertyMetadata(0));
+        public static readonly DependencyProperty frozenColumnsNumProperty =
+            DependencyProperty.Register(nameof(frozenColumnsNum), typeof(int), typeof(MainWindow), new PropertyMetadata(0));
 
         public ObservableCollection<MediaPlanTuple> _allMediaPlans =
             new ObservableCollection<MediaPlanTuple>();
 
         public ObservableCollection<ChannelDTO> _selectedChannels = new ObservableCollection<ChannelDTO>();
 
-        MediaPlanConverter _converter;
+        public MediaPlanConverter _converter { get; set; }
         CampaignDTO _campaign;
 
         // for duration of campaign
@@ -69,32 +69,21 @@ namespace CampaignEditor.UserControls
         {
             InitializeComponent();
         }
-        public MediaPlanGrid(IAbstractFactory<MediaPlanConverter> factoryConverter,
-                            IAbstractFactory<AddSchema> factoryAddSchema,
-                            IAbstractFactory<AMRTrim> factoryAmrTrim,
-                            ISchemaRepository schemaRepository,
-                            IMediaPlanRepository mediaPlanRepository,
-                            IMediaPlanTermRepository mediaPlanTermRepository,
-                            ISpotRepository spotRepository)
+
+        
+        public DataGrid Schema
         {
-
-            _converter = factoryConverter.Create();
-
-            _mediaPlanController = new MediaPlanController(mediaPlanRepository);
-            _mediaPlanTermController = new MediaPlanTermController(mediaPlanTermRepository);
-            _schemaController = new SchemaController(schemaRepository);
-            _spotController = new SpotController(spotRepository);
-
-            _factoryAddSchema = factoryAddSchema;
-            _factoryAmrTrim = factoryAmrTrim;
-
-            this.FrozenColumnsNum = mediaPlanColumns;
-            //InitializeComponent();
+            get { return dgMediaPlans; }
         }
 
-        public async Task Initialize(CampaignDTO campaign, ObservableCollection<MediaPlanTuple> mediaPlanTuples)
+        public async Task Initialize(CampaignDTO campaign)
         {
+
+            this.frozenColumnsNum = mediaPlanColumns;
+
             _campaign = campaign;
+            //this._allMediaPlans = _allMediaPlans;
+
             startDate = TimeFormat.YMDStringToDateTime(_campaign.cmpsdate);
             endDate = TimeFormat.YMDStringToDateTime(_campaign.cmpedate);
 
@@ -106,9 +95,9 @@ namespace CampaignEditor.UserControls
             {
                 spotCodes.Add((char)('A' + i));
             }
-
+            
             ICollectionView myDataView = CollectionViewSource.GetDefaultView(_allMediaPlans);
-            dgSchema.ItemsSource = myDataView;
+            dgMediaPlans.ItemsSource = myDataView;
 
             myDataView.SortDescriptions.Add(new SortDescription("MediaPlan.name", ListSortDirection.Ascending));
             myDataView.Filter = d =>
@@ -131,7 +120,24 @@ namespace CampaignEditor.UserControls
             view.Refresh();
         }
 
-        #region DgSchema
+        public event EventHandler<SelectionChangedEventArgs> SelectionChanged;
+
+        private void DataGrid_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            // Raise the SelectionChanged event
+            SelectionChanged?.Invoke(sender, e);
+        }
+
+        public event EventHandler<MouseButtonEventArgs> MouseRightButtonDown;
+
+        private void DataGrid_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            // Raise the SelectionChanged event
+            MouseRightButtonDown?.Invoke(sender, e);
+        }
+
+
+        #region DgMediaPlans
 
         #region Date Columns
         private void InitializeDateColumns()
@@ -222,7 +228,7 @@ namespace CampaignEditor.UserControls
                 column.CellStyle.Triggers.Add(focusTrigger);
 
                 // Add the column to the DataGrid
-                dgSchema.Columns.Add(column);
+                dgMediaPlans.Columns.Add(column);
             }
         }
 
@@ -275,7 +281,7 @@ namespace CampaignEditor.UserControls
                     await _mediaPlanTermController.UpdateMediaPlanTerm(
                     new UpdateMediaPlanTermDTO(mpTerm.xmptermid, mpTerm.xmpid, mpTerm.date, cell.Content.ToString()));
 
-                    var mediaPlanTuple = dgSchema.SelectedItem as MediaPlanTuple;
+                    var mediaPlanTuple = dgMediaPlans.SelectedItem as MediaPlanTuple;
                     if (mediaPlanTuple != null)
                     {
                         var mediaPlan = mediaPlanTuple.MediaPlan;
@@ -313,7 +319,7 @@ namespace CampaignEditor.UserControls
                         await _mediaPlanTermController.UpdateMediaPlanTerm(
                         new UpdateMediaPlanTermDTO(mpTerm.xmptermid, mpTerm.xmpid, mpTerm.date, cell.Content.ToString().Trim()));
 
-                        var mediaPlanTuple = dgSchema.SelectedItem as MediaPlanTuple;
+                        var mediaPlanTuple = dgMediaPlans.SelectedItem as MediaPlanTuple;
                         if (mediaPlanTuple != null)
                         {
                             var mediaPlan = mediaPlanTuple.MediaPlan;
@@ -406,7 +412,7 @@ namespace CampaignEditor.UserControls
                     cell.Content = spotcode[0];
                 }
 
-                var mediaPlanTuple = dgSchema.SelectedItem as MediaPlanTuple;
+                var mediaPlanTuple = dgMediaPlans.SelectedItem as MediaPlanTuple;
                 if (mediaPlanTuple != null)
                 {
                     var mediaPlan = mediaPlanTuple.MediaPlan;
@@ -498,18 +504,18 @@ namespace CampaignEditor.UserControls
 
             // Get the MediaPlanTerm for the selected cell
             int rowIndex = row.GetIndex();
-            MediaPlanTermDTO mpTermDTO = mpTerms[columnIndex - FrozenColumnsNum];
+            MediaPlanTermDTO mpTermDTO = mpTerms[columnIndex - frozenColumnsNum];
 
             return mpTermDTO;
         }
 
         #endregion
 
-        #region MediaPlan columns       
+        #region MediaPlan columns  
 
         private async void TextBoxAMRTrim_TextChanged(object sender, TextChangedEventArgs e)
         {
-            var tuple = dgSchema.SelectedItems[0] as MediaPlanTuple;
+            var tuple = dgMediaPlans.SelectedItems[0] as MediaPlanTuple;
             var textBox = sender as TextBox;
 
             BindingExpression bindingExpr = textBox.GetBindingExpression(TextBox.TextProperty);
@@ -576,7 +582,7 @@ namespace CampaignEditor.UserControls
 
         private async void TextBoxCoef_TextChanged(object sender, TextChangedEventArgs e)
         {
-            var tuple = dgSchema.SelectedItems[0] as MediaPlanTuple;
+            var tuple = dgMediaPlans.SelectedItems[0] as MediaPlanTuple;
             var textBox = sender as TextBox;
 
             BindingExpression bindingExpr = textBox.GetBindingExpression(TextBox.TextProperty);

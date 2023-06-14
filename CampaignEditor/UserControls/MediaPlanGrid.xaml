@@ -7,7 +7,7 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800" Background="White">
     <Grid>
-        <DataGrid x:Name="dgSchema" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+        <DataGrid x:Name="dgMediaPlans" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                     VerticalScrollBarVisibility="Visible"
                     FontSize="13" AlternatingRowBackground="LightGoldenrodYellow"
                     HeadersVisibility="Column"
@@ -16,7 +16,9 @@
                     CanUserDeleteRows="False"
                     SelectionMode="Single"
                     FrozenColumnCount="{Binding FrozenColumnsNum, Mode=TwoWay}"
-                    HorizontalScrollBarVisibility="Visible">
+                    HorizontalScrollBarVisibility="Visible"
+                  SelectionChanged="DataGrid_SelectionChanged"
+                  MouseRightButtonDown="DataGrid_MouseRightButtonDown">
             <DataGrid.CellStyle>
                 <Style TargetType="DataGridCell">
                     <Style.Triggers>

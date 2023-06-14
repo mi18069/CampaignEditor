@@ -195,7 +195,9 @@
             </DataGrid> -->
 
             <local:MediaPlanGrid x:Name="dgMediaPlans" 
-                                 Grid.Row="1" Grid.Column="2" Grid.RowSpan="5" Grid.ColumnSpan="3" />
+                                 Grid.Row="1" Grid.Column="2" Grid.RowSpan="5" Grid.ColumnSpan="3" 
+                                 SelectionChanged="dgMediaPlans_SelectionChanged"
+                                 MouseRightButtonDown="dgMediaPlans_MouseRightButtonDown"/>
             <TabControl Grid.Row="6" Grid.Column="2" Grid.ColumnSpan="3" Margin="0, 10, 0, 0">
                 <TabItem Header="Goals" />
                 <TabItem Header="Data">
