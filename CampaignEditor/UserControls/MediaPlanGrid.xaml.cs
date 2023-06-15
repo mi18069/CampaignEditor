@@ -16,11 +16,9 @@ using System.Windows.Input;
 using System.Windows.Media;
 using CampaignEditor.DTOs.CampaignDTO;
 using CampaignEditor.StartupHelpers;
-using Database.Repositories;
 using System.ComponentModel;
 using System.Collections.Specialized;
 using Database.DTOs.ChannelDTO;
-using System.Windows.Threading;
 
 namespace CampaignEditor.UserControls
 {

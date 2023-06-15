@@ -31,6 +31,12 @@
     <Compile Update="Campaign.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="CampaignForecastDates.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="CampaignForecastView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="CampaignOverview.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -133,6 +139,12 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Campaign.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="CampaignForecastDates.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="CampaignForecastView.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="CampaignOverview.xaml">

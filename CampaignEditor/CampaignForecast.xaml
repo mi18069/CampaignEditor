@@ -15,47 +15,7 @@
         <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
     </Page.Resources>
     <Grid>
-        <Grid x:Name="gridInit" Visibility="Hidden" >
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="50" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="50" />
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="50" />
-                <RowDefinition Height="0.3*" />
-                <RowDefinition Height="*" />
-                <RowDefinition Height="50" />
-            </Grid.RowDefinitions>
-            <Label Grid.Row="1" Grid.Column="1" 
-                   Content="Use referenced data within ranges" 
-                   FontSize="40" HorizontalAlignment="Center"/>
-            <local:DRIListBoxAddButton Grid.Row="2" Grid.Column="1" x:Name="lbDateRanges"/>
-            <Button x:Name="Init" Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2"
-                    Content="Initialize" FontSize="20" Margin="10" Width="100"
-                    HorizontalAlignment="Right"
-                    Click="Init_Click"/>
-            <Button x:Name="btnInitCancel" Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2"
-                    Content="Cancel" FontSize="20" Margin="10, 10, 120, 10" Width="100"
-                    HorizontalAlignment="Right" Visibility="Hidden"
-                    Click="btnInitCancel_Click"/>
-        </Grid>
-        <Grid x:Name="gridLoading" Visibility="Hidden">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="50" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="50" />
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="50" />
-                <RowDefinition Height="*" />
-                <RowDefinition Height="50" />
-            </Grid.RowDefinitions>
-            <Label Grid.Row="1" Grid.Column="1" Content="LOADING..." Foreground="LightGray" FontSize="60"
-                   HorizontalAlignment="Center" VerticalAlignment="Center">
-            </Label>
-        </Grid>
-        <Grid x:Name="gridForecast" Visibility="Visible" >
+        <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="10"/>
                 <ColumnDefinition Width="auto"/>
@@ -294,7 +254,7 @@
                                 HorizontalAlignment="Center"/>
                     <Button Grid.Row="3" Grid.Column="1" x:Name="btnResetDates" Content="Initialize"
                             Margin="0, 10"
-                            Click="btnResetDates_Click"/>
+                            Click="InitializeButton_Click"/>
                 </Grid>
             </Border>
 
