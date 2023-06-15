@@ -1,11 +1,9 @@
 ﻿using CampaignEditor.Controllers;
 using CampaignEditor.DTOs.CampaignDTO;
-using CampaignEditor.Entities;
 using CampaignEditor.UserControls;
 using Database.DTOs.MediaPlanRef;
 using Database.Repositories;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -14,15 +12,13 @@ using System.Windows.Controls;
 
 namespace CampaignEditor
 {
-    /// <summary>
-    /// Interaction logic for CampaignForecastDates.xaml
-    /// </summary>
     public partial class CampaignForecastDates : Page
     {
 
         MediaPlanRefController _mediaPlanRefController;
 
         private List<DateTime> unavailableDates = new List<DateTime>();
+
         private CampaignDTO _campaign;
 
         public CampaignForecastDates(IMediaPlanRefRepository mediaPlanRefRepository)
@@ -100,17 +96,50 @@ namespace CampaignEditor
             {
                 DateRangeItem dri = lbDateRanges.Items[i] as DateRangeItem;
 
-                int? ymdFrom = TimeFormat.DPToYMDInt(dri.dpFrom);
-                int? ymdTo = TimeFormat.DPToYMDInt(dri.dpTo);
+                DateTime start = dri.dpFrom.SelectedDate.Value;
+                DateTime end = dri.dpTo.SelectedDate.Value;
 
-                if (ymdFrom.HasValue && ymdTo.HasValue)
+                while (start < end)
                 {
+                    DateTime consecutiveEnd = FindConsecutiveEnd(start, end);
+
+                    int ymdFrom = TimeFormat.DateTimeToInt(start);
+                    int ymdTo = TimeFormat.DateTimeToInt(consecutiveEnd);
+
                     await _mediaPlanRefController.CreateMediaPlanRef(
-                    new MediaPlanRefDTO(_campaign.cmpid, ymdFrom.Value, ymdTo.Value));
-                }
+                        new MediaPlanRefDTO(_campaign.cmpid, ymdFrom, ymdTo));
+
+                    start = FindConsecutiveStart(consecutiveEnd.AddDays(1), end);
+                } 
             }
 
             return true;
+        }
+
+        private DateTime FindConsecutiveEnd(DateTime startDate, DateTime endDate) 
+        {
+            for (DateTime date = startDate; date <= endDate; date = date.AddDays(1))
+            {
+                // Check if the date is in the list of unavailable dates
+                if (unavailableDates.Contains(date))
+                {
+                    return date.AddDays(-1);
+                }
+            }
+            return endDate;
+        }
+
+        private DateTime FindConsecutiveStart(DateTime startDate, DateTime endDate)
+        {
+            for (DateTime date = startDate; date <= endDate; date = date.AddDays(1))
+            {
+                // Check if the date is in the list of unavailable dates
+                if (!unavailableDates.Contains(date))
+                {
+                    return date;
+                }
+            }
+            return endDate;
         }
 
         private bool CheckDateRanges()
@@ -160,7 +189,7 @@ namespace CampaignEditor
 
         public event EventHandler InitializeButtonClicked;
 
-        private void OnInitializeButtonClicked()
+        private async void OnInitializeButtonClicked()
         {
             InitializeButtonClicked?.Invoke(this, EventArgs.Empty);
         }

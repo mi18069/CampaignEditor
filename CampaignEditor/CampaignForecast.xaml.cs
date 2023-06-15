@@ -51,8 +51,6 @@ namespace CampaignEditor.UserControls
         
         int mediaPlanColumns = 25;
 
-        bool resetRefData = false;
-
         private ObservableCollection<MediaPlanTuple> _allMediaPlans =
             new ObservableCollection<MediaPlanTuple>();
 
@@ -455,7 +453,7 @@ namespace CampaignEditor.UserControls
                 Label label = new Label();
                 label.Content = start + " - " + end;
                 label.FontWeight = FontWeights.Bold;
-                label.FontSize = 18;
+                label.FontSize = 12;
                 label.HorizontalContentAlignment = HorizontalAlignment.Center;
 
                 spLoadedDateRanges.Children.Add(label);

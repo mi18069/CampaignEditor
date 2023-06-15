@@ -56,7 +56,7 @@ namespace CampaignEditor
             unavailableDates = (await _databaseFunctionsController.GetAllUnavailableDates()).ToList();
 
             _forecast = _factoryForecast.Create();
-            await _forecast.Initialize(_campaign, unavailableDates);
+            await _forecast.Initialize(_campaign);
             _forecast.InitializeButtonClicked += Forecast_InitializeButtonClicked;
 
             _forecastDates = _factoryForecastDates.Create();
@@ -119,6 +119,7 @@ namespace CampaignEditor
                                 MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
+
             await _forecast.InsertAndLoadData();
         }
 
@@ -128,5 +129,7 @@ namespace CampaignEditor
             await _forecastDates.LoadGridInit();
             tabForecast.Content = _forecastDates.Content;
         }
+
+
     }
 }
