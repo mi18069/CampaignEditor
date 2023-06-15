@@ -44,8 +44,7 @@
 
             <local:MediaPlanGrid x:Name="dgMediaPlans" 
                                  Grid.Row="1" Grid.Column="2" Grid.RowSpan="5" Grid.ColumnSpan="3" 
-                                 SelectionChanged="dgMediaPlans_SelectionChanged"
-                                 MouseRightButtonDown="dgMediaPlans_MouseRightButtonDown"/>
+                                 SelectionChanged="dgMediaPlans_SelectionChanged"/>
             
             <TabControl Grid.Row="6" Grid.Column="2" Grid.ColumnSpan="3">
                 <TabItem Header="Goals" />

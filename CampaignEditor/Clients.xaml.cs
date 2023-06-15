@@ -314,7 +314,7 @@ namespace CampaignEditor
             else
             {
                 var f = _factoryCampaign.Create();
-                f.Initialize(campaignName, isReadOnly);
+                await f.Initialize(campaignName, isReadOnly);
                 openCampaignWindows.Add(f);
                 f.Closed += CampaignWindow_Closed;
                 f.Show();

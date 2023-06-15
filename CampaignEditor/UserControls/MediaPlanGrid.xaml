@@ -15,7 +15,6 @@
                     AutoGenerateColumns="False"
                     CanUserDeleteRows="False"
                     SelectionMode="Single"
-                    FrozenColumnCount="{Binding FrozenColumnsNum, Mode=TwoWay}"
                     HorizontalScrollBarVisibility="Visible"
                   SelectionChanged="DataGrid_SelectionChanged"
                   MouseRightButtonDown="DataGrid_MouseRightButtonDown">

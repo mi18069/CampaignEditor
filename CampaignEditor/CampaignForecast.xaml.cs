@@ -170,6 +170,9 @@ namespace CampaignEditor.UserControls
             dgMediaPlans._spotController = _spotController;
             dgMediaPlans._selectedChannels = _selectedChannels;
             dgMediaPlans._allMediaPlans = _allMediaPlans;
+            dgMediaPlans.AddMediaPlanClicked += dgMediaPlans_AddMediaPlanClicked;
+            dgMediaPlans.DeleteMediaPlanClicked += dgMediaPlans_DeleteMediaPlanClicked;
+
             await dgMediaPlans.Initialize(_campaign);
         }
 
@@ -195,11 +198,16 @@ namespace CampaignEditor.UserControls
 
             foreach (var mediaPlan in mediaPlans)
             {
-                await _mediaPlanHistController.DeleteMediaPlanHistByXmpid(mediaPlan.xmpid);
-                await _mediaPlanTermController.DeleteMediaPlanTermByXmpId(mediaPlan.xmpid);
-                await _mediaPlanController.DeleteMediaPlanById(mediaPlan.xmpid);
+                await DeleteMPById(mediaPlan.xmpid);
             }
 
+        }
+
+        private async Task DeleteMPById(int xmpid)
+        {
+            await _mediaPlanHistController.DeleteMediaPlanHistByXmpid(xmpid);
+            await _mediaPlanTermController.DeleteMediaPlanTermByXmpId(xmpid);
+            await _mediaPlanController.DeleteMediaPlanById(xmpid);
         }
 
 
@@ -607,215 +615,6 @@ namespace CampaignEditor.UserControls
 
         #region dgMediaPlans
 
-            #region ContextMenu
-        private async void dgMediaPlans_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            // check if it's clicked on header
-            DependencyObject dependencyObject = (DependencyObject)e.OriginalSource;
-
-            DataGridRow row = FindParent<DataGridRow>(dependencyObject);
-            if (row != null)
-            {
-                // Set the DataGrid's SelectedItem property to the right-clicked item
-                dgMediaPlans.Schema.SelectedItem = row.DataContext;
-
-            }
-
-            if (IsCellInDataGridHeader(dependencyObject))
-            {
-                ContextMenu menu = new ContextMenu();
-                for (int i = 0; i < mediaPlanColumns; i++)
-                {
-                    var column = dgMediaPlans.Schema.Columns[i];
-
-                    MenuItem item = new MenuItem();
-                    item.Header = column.Header.ToString().Trim();
-                    item.IsChecked = column.Visibility == Visibility.Visible ? true : false;
-                    item.Click += (obj, ea) =>
-                    {
-                        column.Visibility = item.IsChecked ? Visibility.Hidden : Visibility.Visible;
-                        item.IsChecked = column.Visibility == Visibility.Visible ? true : false;
-                    };
-
-                    menu.Items.Add(item);
-                }
-
-                dgMediaPlans.Schema.ContextMenu = menu;
-            }
-            else 
-            {
-                ContextMenu menu = new ContextMenu();
-                MenuItem deleteItem = new MenuItem();
-                deleteItem.Header = "Delete MediaPlan";
-                deleteItem.Click += async (obj, ea) =>
-                {
-                    var mediaPlanTuple = dgMediaPlans.Schema.SelectedItem as MediaPlanTuple;
-                    if (mediaPlanTuple != null)
-                    {
-                        mediaPlanTuple.MediaPlan.active = false;
-                        _allMediaPlans.Remove(mediaPlanTuple);
-                        var mediaPlan = mediaPlanTuple.MediaPlan;                        
-                        await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(_converter.ConvertToDTO(mediaPlan)));
-                    }
-                };
-                menu.Items.Add(deleteItem);
-
-                MenuItem addMediaPlanItem = new MenuItem();
-                addMediaPlanItem.Header = "Add MediaPlan";
-                addMediaPlanItem.Click += async (obj, ea) =>
-                {
-                    var f = _factoryAddSchema.Create();
-                    await f.Initialize(_campaign);
-                    f.ShowDialog();
-                    if (f._schema != null)
-                    {
-                        var schema = await _schemaController.CreateGetSchema(f._schema);
-                        MediaPlanDTO mediaPlanDTO = await SchemaToMP(schema);
-
-                        await _databaseFunctionsController.StartAMRCalculation(_campaign.cmpid, 40, 40, mediaPlanDTO.xmpid);
-                        var mediaPlan = await _converter.ConvertFirstFromDTO(mediaPlanDTO);
-
-                        var mediaPlanTerms = await MediaPlanToMPTerm(mediaPlanDTO);
-                        var mpTuple = new MediaPlanTuple(mediaPlan, new ObservableCollection<MediaPlanTermDTO>(mediaPlanTerms));
-                        _allMediaPlans.Add(mpTuple);
-
-                    }
-                };
-                menu.Items.Add(addMediaPlanItem);
-
-                // Traverse the visual tree to get the clicked DataGridCell object
-                while ((dependencyObject != null) && !(dependencyObject is DataGridCell))
-                {
-                    dependencyObject = VisualTreeHelper.GetParent(dependencyObject);
-                }
-
-                if (dependencyObject == null)
-                {
-                    return;
-                }
-
-                DataGridCell cell = dependencyObject as DataGridCell;
-
-                var mediaPlanTuple = dgMediaPlans.Schema.SelectedItem as MediaPlanTuple;
-                if (mediaPlanTuple == null)
-                {
-                    return;
-                }
-                var mediaPlan = mediaPlanTuple.MediaPlan;
-
-                MenuItem trimAmr = new MenuItem();
-                // Check if the clicked cell is in the "AMR" columns
-                if (cell.Column.Header.ToString() == "AMR 1" || cell.Column.Header.ToString() == "AMR% 1")
-                {           
-                    trimAmr.Header = "Trim Amr1";
-                    trimAmr.Click += await TrimAmrAsync(mediaPlan, "Trim AMR 1", "amr1trim", mediaPlan.amr1trim);
-                }
-                else if (cell.Column.Header.ToString() == "AMR 2" || cell.Column.Header.ToString() == "AMR% 2")
-                {
-                    trimAmr.Header = "Trim Amr2";
-                    trimAmr.Click += await TrimAmrAsync(mediaPlan, "Trim AMR 2", "amr2trim", mediaPlan.amr2trim);
-                }
-                else if (cell.Column.Header.ToString() == "AMR 3" || cell.Column.Header.ToString() == "AMR% 3")
-                {
-                    trimAmr.Header = "Trim Amr3";
-                    trimAmr.Click += await TrimAmrAsync(mediaPlan, "Trim AMR 3", "amr3trim", mediaPlan.amr3trim);
-                }
-                else if (cell.Column.Header.ToString() == "AMR Sale" || cell.Column.Header.ToString() == "AMR% Sale")
-                {
-                    trimAmr.Header = "Trim Amr Sale";
-                    trimAmr.Click += await TrimAmrAsync(mediaPlan, "Trim AMR Sale", "amrsaletrim", mediaPlan.amrsaletrim);
-                }
-                else
-                {
-                    trimAmr.Header = "Trim All Amrs";
-                    trimAmr.Click += await TrimAmrAsync(mediaPlan, "Trim AMRs", "amrtrimall", null);
-                }
-                menu.Items.Add(trimAmr);
-                dgMediaPlans.Schema.ContextMenu = menu;
-            }
-        }
-
-        private static T FindParent<T>(DependencyObject child) where T : DependencyObject
-        {
-            DependencyObject parent = VisualTreeHelper.GetParent(child);
-            if (parent == null)
-                return null;
-
-            if (parent is T)
-                return parent as T;
-            else
-                return FindParent<T>(parent);
-        }
-        public bool AreMediaPlansEqual(MediaPlanDTO plan1, MediaPlanDTO plan2)
-        {
-            return plan1.xmpid == plan2.xmpid &&
-                   plan1.schid == plan2.schid &&
-                   plan1.cmpid == plan2.cmpid &&
-                   plan1.chid == plan2.chid &&
-                   plan1.name == plan2.name &&
-                   plan1.position == plan2.position &&
-                   plan1.stime == plan2.stime &&
-                   plan1.etime == plan2.etime &&
-                   plan1.blocktime == plan2.blocktime &&
-                   plan1.days == plan2.days &&
-                   plan1.sdate == plan2.sdate &&
-                   plan1.edate == plan2.edate;                  
-        }
-
-        private async Task<RoutedEventHandler> TrimAmrAsync(MediaPlan mediaPlan, string message, string attr,  int? trimValue)
-        {
-            async void handler(object sender, RoutedEventArgs e)
-            {
-                var f = _factoryAmrTrim.Create();
-                f.Initialize(message, trimValue);
-                f.ShowDialog();
-                if (f.changed)
-                {
-                    switch (attr)
-                    {
-                        case "amr1trim":
-                            mediaPlan.Amr1trim = f.newValue;
-                            break;
-                        case "amr2trim":
-                            mediaPlan.Amr2trim = f.newValue;
-                            break;
-                        case "amr3trim":
-                            mediaPlan.Amr3trim = f.newValue;
-                            break;
-                        case "amrsaletrim":
-                            mediaPlan.Amrsaletrim = f.newValue;
-                            break;
-                        case "amrtrimall":
-                            mediaPlan.Amr1trim = f.newValue;
-                            mediaPlan.Amr2trim = f.newValue;
-                            mediaPlan.Amr3trim = f.newValue;
-                            mediaPlan.Amrsaletrim = f.newValue;
-                            break;
-                        default:
-                            break;
-                    }
-
-                    var mpDTO = _converter.ConvertToDTO(mediaPlan);
-
-                    await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(mpDTO));
-                }
-            }
-
-            return handler;
-        }
-
-        private bool IsCellInDataGridHeader(DependencyObject obj)
-        {
-            var header = obj;
-            while (header != null && header.DependencyObjectType.Name != "DataGridHeaderBorder")
-            {
-                header = VisualTreeHelper.GetParent(header);
-            }
-            return header != null;
-        }
-
-        #endregion
-
         private async void dgMediaPlans_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             _showMPHist.Clear();
@@ -837,6 +636,37 @@ namespace CampaignEditor.UserControls
 
                 pGoals.Visibility = Visibility.Visible;
                 SelectedMediaPlan.MediaPlan = mediaPlan;
+            }
+        }
+
+        private async void dgMediaPlans_AddMediaPlanClicked(object? sender, EventArgs e)
+        {
+            var f = _factoryAddSchema.Create();
+            await f.Initialize(_campaign);
+            f.ShowDialog();
+            if (f._schema != null)
+            {
+                var schema = await _schemaController.CreateGetSchema(f._schema);
+                MediaPlanDTO mediaPlanDTO = await SchemaToMP(schema);
+
+                await _databaseFunctionsController.StartAMRCalculation(_campaign.cmpid, 40, 40, mediaPlanDTO.xmpid);
+                var mediaPlan = await _converter.ConvertFirstFromDTO(mediaPlanDTO);
+
+                var mediaPlanTerms = await MediaPlanToMPTerm(mediaPlanDTO);
+                var mpTuple = new MediaPlanTuple(mediaPlan, new ObservableCollection<MediaPlanTermDTO>(mediaPlanTerms));
+                _allMediaPlans.Add(mpTuple);
+
+            }
+        }
+
+        private async void dgMediaPlans_DeleteMediaPlanClicked(object? sender, EventArgs e)
+        {
+            var mediaPlanTuple = dgMediaPlans.Schema.SelectedItem as MediaPlanTuple;
+            if (mediaPlanTuple != null)
+            {
+                _allMediaPlans.Remove(mediaPlanTuple);
+                var mediaPlan = mediaPlanTuple.MediaPlan;
+                await DeleteMPById(mediaPlan.xmpid);
             }
         }
 

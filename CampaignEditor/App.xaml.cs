@@ -100,6 +100,7 @@ namespace CampaignEditor
             startupForm.Show();
 
             base.OnStartup(e);
+
         }
 
         protected override async void OnExit(ExitEventArgs e)
