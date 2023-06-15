@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Windows.Controls;
 
 namespace CampaignEditor
@@ -104,5 +105,29 @@ namespace CampaignEditor
             return 2;
         }
 
+        public static DateTime? IntToDateTime(int date)
+        {
+
+            string dateString = date.ToString("00000000"); // Convert the int to a zero-padded string
+
+            DateTime dateTime;
+            if (DateTime.TryParseExact(dateString, "yyyyMMdd", CultureInfo.InvariantCulture, DateTimeStyles.None, out dateTime))
+            {
+                // Parsing successful, 'dateTime' variable now holds the parsed date
+                return dateTime;
+            }
+            else
+            {
+                // Parsing failed
+                Console.WriteLine("Invalid date");
+                return null;
+            }
+        }
+
+        public static int DateTimeToInt(DateTime date)
+        {
+            return int.Parse(date.ToString("yyyyMMdd"));
+
+        }
     }
 }

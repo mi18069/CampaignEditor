@@ -217,6 +217,9 @@ namespace CampaignEditor
 
         public async Task SetOutliers(IEnumerable<MediaPlanHist> mediaPlanHistList)
         {
+            if (mediaPlanHistList.Count() == 0)
+                return;
+
             // Calculate the median and median absolute deviation (MAD) of the amrp1 attribute
             double median = CalculateMedian(mediaPlanHistList.Select(x => x.amrp1).ToList());
             double mad = CalculateMAD(mediaPlanHistList.Select(x => x.amrp1).ToList(), median);

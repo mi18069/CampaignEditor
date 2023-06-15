@@ -15,47 +15,7 @@
         <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
     </Page.Resources>
     <Grid>
-        <Grid x:Name="gridInit" Visibility="Hidden" >
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="50" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="50" />
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="50" />
-                <RowDefinition Height="0.3*" />
-                <RowDefinition Height="*" />
-                <RowDefinition Height="50" />
-            </Grid.RowDefinitions>
-            <Label Grid.Row="1" Grid.Column="1" 
-                   Content="Use referenced data within ranges" 
-                   FontSize="40" HorizontalAlignment="Center"/>
-            <local:DRIListBoxAddButton Grid.Row="2" Grid.Column="1" x:Name="lbDateRanges"/>
-            <Button x:Name="Init" Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2"
-                    Content="Initialize" FontSize="20" Margin="10" Width="100"
-                    HorizontalAlignment="Right"
-                    Click="Init_Click"/>
-            <Button x:Name="btnInitCancel" Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2"
-                    Content="Cancel" FontSize="20" Margin="10, 10, 120, 10" Width="100"
-                    HorizontalAlignment="Right" Visibility="Hidden"
-                    Click="btnInitCancel_Click"/>
-        </Grid>
-        <Grid x:Name="gridLoading" Visibility="Hidden">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="50" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="50" />
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="50" />
-                <RowDefinition Height="*" />
-                <RowDefinition Height="50" />
-            </Grid.RowDefinitions>
-            <Label Grid.Row="1" Grid.Column="1" Content="LOADING..." Foreground="LightGray" FontSize="60"
-                   HorizontalAlignment="Center" VerticalAlignment="Center">
-            </Label>
-        </Grid>
-        <Grid x:Name="gridForecast" Visibility="Visible" >
+        <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="10"/>
                 <ColumnDefinition Width="auto"/>
@@ -81,120 +41,13 @@
                       SelectionMode="Multiple" Margin="0, 0 ,10,0"
                       SelectionChanged="lvChannels_SelectionChanged"
                       PreviewMouseRightButtonDown="lvChannels_PreviewMouseRightButtonDown"/>
-            <DataGrid x:Name="dgSchema" Grid.Row="1" Grid.Column="2" Grid.RowSpan="5" Grid.ColumnSpan="3"
-                          VerticalScrollBarVisibility="Visible"
-                          FontSize="13" AlternatingRowBackground="LightGoldenrodYellow"
-                          HeadersVisibility="Column"
-                          CanUserAddRows="False"
-                          AutoGenerateColumns="False"
-                          CanUserDeleteRows="False"
-                          SelectionMode="Single"
-                          FrozenColumnCount="{Binding FrozenColumnsNum, Mode=TwoWay}"
-                          HorizontalScrollBarVisibility="Visible"
-                          MouseRightButtonDown="dgSchema_MouseRightButtonDown"                     
-                      SelectionChanged="dgSchema_SelectionChanged">
-                <DataGrid.CellStyle>
-                    <Style TargetType="DataGridCell">
-                        <Style.Triggers>
-                            <Trigger Property="IsFocused" Value="True">
-                                <Setter Property="Background" Value="Orange"/>
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </DataGrid.CellStyle>
-                <DataGrid.Resources>
-                    <Style TargetType="{x:Type DataGridColumnHeader}">
-                        <Setter Property="Background" Value="LightGray"/>
-                        <Setter Property="FontWeight" Value="SemiBold"/>
-                        <Setter Property="BorderThickness" Value="1,1,1,2"/>
-                        <Setter Property="BorderBrush" Value="black"/>
-                    </Style>
-                </DataGrid.Resources>
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="Program" Binding="{Binding MediaPlan.name, Mode=TwoWay}"
-                                        IsReadOnly="True" />
-                    <DataGridTextColumn Header="Position" Binding="{Binding MediaPlan.position, Mode=TwoWay}" 
-                                        IsReadOnly="True"/>
-                    <DataGridTextColumn Header="Start time" Binding="{Binding MediaPlan.stime, Mode=TwoWay}" 
-                                        IsReadOnly="True"/>
-                    <DataGridTextColumn Header="End time" Binding="{Binding MediaPlan.etime, Mode=TwoWay}" 
-                                        IsReadOnly="True"/>
-                    <DataGridTextColumn Header="Type" Binding="{Binding MediaPlan.type, Mode=TwoWay}" 
-                                        IsReadOnly="True" Visibility="Collapsed"/>
-                    <DataGridCheckBoxColumn Header="Special" Binding="{Binding MediaPlan.special, Mode=TwoWay}" 
-                                        Visibility="Collapsed"/>
-                    <DataGridTextColumn Header="AMR 1" Binding="{Binding MediaPlan.Amr1, Mode=TwoWay, StringFormat=N2}" 
-                                             IsReadOnly="True" Visibility="Collapsed" />
-                    <DataGridTextColumn Header="AMR% 1" Binding="{Binding MediaPlan.Amrp1, Mode=TwoWay, StringFormat=N2}" 
-                                            IsReadOnly="True"/>
-                    <DataGridTextColumn Header="AMR 1 Trim" Binding="{Binding MediaPlan.Amr1trim, Mode=TwoWay}" 
-                                             Visibility="Collapsed">
-                        <DataGridTextColumn.EditingElementStyle>
-                            <Style TargetType="{x:Type TextBox}">
-                                <EventSetter Event="TextChanged" Handler="TextBoxAMRTrim_TextChanged"/>
-                            </Style>
-                        </DataGridTextColumn.EditingElementStyle>
-                    </DataGridTextColumn>
-                    <DataGridTextColumn Header="AMR 2" Binding="{Binding MediaPlan.Amr2, Mode=TwoWay, StringFormat=N2}" 
-                                            IsReadOnly="True" Visibility="Collapsed"/>
-                    <DataGridTextColumn Header="AMR% 2" Binding="{Binding MediaPlan.Amrp2, Mode=TwoWay, StringFormat=N2}" 
-                                            IsReadOnly="True" Visibility="Collapsed"/>
-                    <DataGridTextColumn Header="AMR 2 Trim" Binding="{Binding MediaPlan.Amr2trim, Mode=TwoWay}" 
-                                             Visibility="Collapsed">
-                        <DataGridTextColumn.EditingElementStyle>
-                            <Style TargetType="{x:Type TextBox}">
-                                <EventSetter Event="TextChanged" Handler="TextBoxAMRTrim_TextChanged"/>
-                            </Style>
-                        </DataGridTextColumn.EditingElementStyle>
-                    </DataGridTextColumn>
-                    <DataGridTextColumn Header="AMR 3" Binding="{Binding MediaPlan.Amr3, Mode=TwoWay, StringFormat=N2}" 
-                                            IsReadOnly="True" Visibility="Collapsed"/>
-                    <DataGridTextColumn Header="AMR% 3" Binding="{Binding MediaPlan.Amrp3, Mode=TwoWay, StringFormat=N2}" 
-                                            IsReadOnly="True" Visibility="Collapsed"/>
-                    <DataGridTextColumn Header="AMR 3 Trim" Binding="{Binding MediaPlan.Amr3trim, Mode=TwoWay}" 
-                                             Visibility="Collapsed">
-                        <DataGridTextColumn.EditingElementStyle>
-                            <Style TargetType="{x:Type TextBox}">
-                                <EventSetter Event="TextChanged" Handler="TextBoxAMRTrim_TextChanged"/>
-                            </Style>
-                        </DataGridTextColumn.EditingElementStyle>
-                    </DataGridTextColumn>
-                    <DataGridTextColumn Header="AMR Sale" Binding="{Binding MediaPlan.Amrsale, Mode=TwoWay, StringFormat=N2}"
-                                        IsReadOnly="True" Visibility="Collapsed"/>
-                    <DataGridTextColumn Header="AMR% Sale" Binding="{Binding MediaPlan.Amrpsale, Mode=TwoWay, StringFormat=N2}" 
-                                            IsReadOnly="True"/>
-                    <DataGridTextColumn Header="AMR Sale Trim" Binding="{Binding MediaPlan.Amrsaletrim, Mode=TwoWay}" 
-                                             Visibility="Collapsed">
-                        <DataGridTextColumn.EditingElementStyle>
-                            <Style TargetType="{x:Type TextBox}">
-                                <EventSetter Event="TextChanged" Handler="TextBoxAMRTrim_TextChanged"/>
-                            </Style>
-                        </DataGridTextColumn.EditingElementStyle>
-                    </DataGridTextColumn>
-                    <DataGridTextColumn Header="Affinity" Binding="{Binding MediaPlan.Affinity, StringFormat=N2}"
-                                            IsReadOnly="True"/>
-                    <DataGridTextColumn Header="Prog Coef" Binding="{Binding MediaPlan.progcoef, Mode=TwoWay, StringFormat=N2}" 
-                                        >
-                        <DataGridTextColumn.EditingElementStyle>
-                            <Style TargetType="{x:Type TextBox}">
-                                <EventSetter Event="TextChanged" Handler="TextBoxCoef_TextChanged"/>
-                            </Style>
-                        </DataGridTextColumn.EditingElementStyle>
-                    </DataGridTextColumn>
-                    <DataGridTextColumn Header="Seas Coef" Binding="{Binding MediaPlan.Seascoef, StringFormat=N2}"
-                                        IsReadOnly="True"/>
-                    <DataGridTextColumn Header="Sec Coef" Binding="{Binding MediaPlan.Seccoef, StringFormat=N2}"
-                                        IsReadOnly="True"/>
-                    <DataGridTextColumn Header="CPP" Binding="{Binding MediaPlan.Cpp, StringFormat=N2}"
-                                        IsReadOnly="True"/>
-                    <DataGridTextColumn Header="Insertations" Binding="{Binding MediaPlan.Insertations}"
-                                        IsReadOnly="True"/>
-                    <DataGridTextColumn Header="Cost" Binding="{Binding MediaPlan.Price, StringFormat=N2}"
-                                        IsReadOnly="True"/>
-                </DataGrid.Columns>
-            </DataGrid>
 
-            <TabControl Grid.Row="6" Grid.Column="2" Grid.ColumnSpan="3" Margin="0, 10, 0, 0">
+            <local:MediaPlanGrid x:Name="dgMediaPlans" 
+                                 Grid.Row="1" Grid.Column="2" Grid.RowSpan="5" Grid.ColumnSpan="3" 
+                                 SelectionChanged="dgMediaPlans_SelectionChanged"
+                                 MouseRightButtonDown="dgMediaPlans_MouseRightButtonDown"/>
+            
+            <TabControl Grid.Row="6" Grid.Column="2" Grid.ColumnSpan="3">
                 <TabItem Header="Goals" />
                 <TabItem Header="Data">
                     <DataGrid x:Name="dgHist" 
@@ -286,16 +139,19 @@
 
                     <Label Grid.Row="1" Grid.Column="1" Content="Referenced dates" 
                            FontWeight="Light" HorizontalAlignment="Center"/>
-                    <StackPanel Grid.Row="2" Grid.Column="1" x:Name="spLoadedDateRanges"
-                                HorizontalAlignment="Center"/>
+                    <ScrollViewer Grid.Row="2" Grid.Column="1" Height="70" VerticalScrollBarVisibility="Auto">
+                        <StackPanel  x:Name="spLoadedDateRanges"
+                                    HorizontalAlignment="Center"/>
+                    </ScrollViewer>
                     <Button Grid.Row="3" Grid.Column="1" x:Name="btnResetDates" Content="Initialize"
                             Margin="0, 10"
-                            Click="btnResetDates_Click"/>
+                            Click="InitializeButton_Click"/>
                 </Grid>
             </Border>
 
             <Border Grid.Row="3" Grid.Column="1" 
-                BorderBrush="LightGray" BorderThickness="1" Margin="0, 10, 10, 10">
+                BorderBrush="LightGray" BorderThickness="1" 
+                    VerticalAlignment="Top" Margin="0, 10, 10, 10">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="10" />
@@ -375,86 +231,93 @@
                 </Grid>
             </Border>
 
-            <Border x:Name="pGoals" Grid.Row="4" Grid.RowSpan="3" Grid.Column="1" Visibility="Collapsed"
-                BorderBrush="LightGray" BorderThickness="1" Margin="0, 10, 10, 10">
-                <Grid Name="progGoals">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="10" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="10" />
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="10" />
-                        <RowDefinition Height="auto" />
-                        <RowDefinition Height="auto" />
-                        <RowDefinition Height="auto" />
-                        <RowDefinition Height="auto" />
-                        <RowDefinition Height="*" />
-                        <RowDefinition Height="10" />
-                    </Grid.RowDefinitions>
-                    <Border x:Name="bpBudget" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" 
+            <Grid Grid.Row="4" Grid.Column="1" Grid.RowSpan="3">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto"/>
+                </Grid.RowDefinitions>
+                <Border x:Name="pGoals" Grid.Row="1" Visibility="Collapsed"
+                BorderBrush="LightGray" BorderThickness="1" 
+                    Margin="0, 10, 10, 0">
+                    <Grid Name="progGoals">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="10" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="10" />
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="10" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="10" />
+                        </Grid.RowDefinitions>
+                        <Border x:Name="bpBudget" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" 
                         BorderThickness="0, 0, 0, 1" BorderBrush="Black">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="29*" />
-                                <ColumnDefinition Width="51*"/>
-                                <ColumnDefinition Width="79*" />
-                                <ColumnDefinition Width="79*" />
-                            </Grid.ColumnDefinitions>
-                            <Label x:Name="lblpBudget" Content="Budget: " Grid.Column="0" Grid.ColumnSpan="2"/>
-                            <Label x:Name="lblpBudgetValue" Grid.Column="1" Content="{Binding Budget}"
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="29*" />
+                                    <ColumnDefinition Width="51*"/>
+                                    <ColumnDefinition Width="79*" />
+                                    <ColumnDefinition Width="79*" />
+                                </Grid.ColumnDefinitions>
+                                <Label x:Name="lblpBudget" Content="Budget: " Grid.Column="0" Grid.ColumnSpan="2"/>
+                                <Label x:Name="lblpBudgetValue" Grid.Column="1" Content="{Binding Budget}"
                            HorizontalContentAlignment="Right" FontWeight="DemiBold" Grid.ColumnSpan="3" Margin="50,0,79,0"/>
-                            <Label x:Name="lblpBudgetTarget" Grid.Column="3" 
+                                <Label x:Name="lblpBudgetTarget" Grid.Column="3" 
                            HorizontalContentAlignment="Right" FontWeight="Light"/>
-                        </Grid>
-                    </Border>
-                    <Border x:Name="bpGRP" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3" 
+                            </Grid>
+                        </Border>
+                        <Border x:Name="bpGRP" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3" 
                         BorderThickness="0, 0, 0, 1" BorderBrush="Black">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <Label x:Name="lblpGRP" Content="GRP: " Grid.Column="0"/>
-                            <Label x:Name="lblpGRPValue" Grid.Column="1" Content="{Binding Grp}"
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Label x:Name="lblpGRP" Content="GRP: " Grid.Column="0"/>
+                                <Label x:Name="lblpGRPValue" Grid.Column="1" Content="{Binding Grp}"
                        HorizontalContentAlignment="Right" FontWeight="DemiBold"/>
-                            <Label x:Name="lblpGRPTarget" Grid.Column="2" 
+                                <Label x:Name="lblpGRPTarget" Grid.Column="2" 
                        HorizontalContentAlignment="Right" FontWeight="Light"/>
-                        </Grid>
-                    </Border>
-                    <Border x:Name="bpInsertations" Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="3" 
+                            </Grid>
+                        </Border>
+                        <Border x:Name="bpInsertations" Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="3" 
                         BorderThickness="0, 0, 0, 1" BorderBrush="Black">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <Label x:Name="lblpInsertations" Content="Insertations: " Grid.Column="0"/>
-                            <Label x:Name="lblpInsertationsValue" Grid.Column="1" Content="{Binding Insertations}"
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Label x:Name="lblpInsertations" Content="Insertations: " Grid.Column="0"/>
+                                <Label x:Name="lblpInsertationsValue" Grid.Column="1" Content="{Binding Insertations}"
                        HorizontalContentAlignment="Right" FontWeight="DemiBold"/>
-                            <Label x:Name="lblpInsertationsTarget" Grid.Column="2" 
+                                <Label x:Name="lblpInsertationsTarget" Grid.Column="2" 
                        HorizontalContentAlignment="Right" FontWeight="Light"/>
-                        </Grid>
-                    </Border>
-                    <Border x:Name="bpReach" Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="3" 
+                            </Grid>
+                        </Border>
+                        <Border x:Name="bpReach" Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="3" 
                         BorderThickness="0, 0, 0, 1" BorderBrush="Black">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <Label x:Name="lblpReach" Content="Reach: " Grid.Column="0"/>
-                            <Label x:Name="lblpReachValue" Grid.Column="1" 
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Label x:Name="lblpReach" Content="Reach: " Grid.Column="0"/>
+                                <Label x:Name="lblpReachValue" Grid.Column="1" 
                        HorizontalContentAlignment="Right" FontWeight="DemiBold"/>
-                            <Label x:Name="lblpReachTarget" Grid.Column="2" 
+                                <Label x:Name="lblpReachTarget" Grid.Column="2" 
                        HorizontalContentAlignment="Right" FontWeight="Light"/>
-                        </Grid>
-                    </Border>
-                </Grid>
-            </Border>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </Border>
+            </Grid>
+            
         </Grid>
     </Grid>
 </Page>

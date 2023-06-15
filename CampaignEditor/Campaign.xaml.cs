@@ -5,12 +5,9 @@ using CampaignEditor.StartupHelpers;
 using CampaignEditor.UserControls;
 using Database.DTOs.ClientDTO;
 using Database.Repositories;
-using System;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
-using System.Windows.Media;
 
 namespace CampaignEditor
 {
@@ -25,7 +22,7 @@ namespace CampaignEditor
         bool readOnly = true;
 
         private readonly IAbstractFactory<CampaignOverview> _factoryOverview;
-        private readonly IAbstractFactory<CampaignForecast> _factoryForecast;
+        private readonly IAbstractFactory<CampaignForecastView> _factoryForecastView;
 
         private ClientController _clientController;
         private CampaignController _campaignController;
@@ -33,10 +30,10 @@ namespace CampaignEditor
 
 
         public Campaign(IClientRepository clientRepository, ICampaignRepository campaignRepository, 
-            IAbstractFactory<CampaignOverview> factoryOverview, IAbstractFactory<CampaignForecast> factoryForecast)
+            IAbstractFactory<CampaignOverview> factoryOverview, IAbstractFactory<CampaignForecastView> factoryForecastView)
         {
             _factoryOverview = factoryOverview;
-            _factoryForecast = factoryForecast;
+            _factoryForecastView = factoryForecastView;
 
             _clientController = new ClientController(clientRepository);
             _campaignController = new CampaignController(campaignRepository);
@@ -73,10 +70,10 @@ namespace CampaignEditor
             await factoryCampaignOverview.Initialization(_client, _campaign, readOnly);
             tabOverview.Content = factoryCampaignOverview.Content;
 
-            var factoryCampaignForecast = _factoryForecast.Create();
+            var factoryCampaignForecastView = _factoryForecastView.Create();
+            factoryCampaignForecastView.tabForecast = tabForecast;
             // Don't want to await this, as this will just slow down our campaign
-            await factoryCampaignForecast.Initialize(_client, _campaign);
-            tabForecast.Content = factoryCampaignForecast.Content;
+            await factoryCampaignForecastView.Initialize(_campaign);
         }
 
     }
