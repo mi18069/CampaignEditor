@@ -127,14 +127,6 @@ namespace CampaignEditor.UserControls
             SelectionChanged?.Invoke(sender, e);
         }
 
-        /*public event EventHandler<MouseButtonEventArgs> MouseRightButtonDown;
-
-        private void DataGrid_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            // Raise the SelectionChanged event
-            MouseRightButtonDown?.Invoke(sender, e);
-        }*/
-
 
         #region DgMediaPlans
 

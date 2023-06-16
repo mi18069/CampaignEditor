@@ -320,43 +320,46 @@ namespace CampaignEditor.UserControls
         {
             List<DateTime> dates = new List<DateTime>();
 
+            var sDate = startDate > mediaPlan.sdate.ToDateTime(TimeOnly.MinValue) ? startDate : mediaPlan.sdate.ToDateTime(TimeOnly.MinValue);
+            var eDate = !mediaPlan.edate.HasValue ? endDate : 
+                        endDate < mediaPlan.edate.Value.ToDateTime(TimeOnly.MinValue) ? endDate : mediaPlan.edate.Value.ToDateTime(TimeOnly.MinValue);
 
             foreach (char c in mediaPlan.days)
             {
                 switch (c)
                 {
                     case '1':
-                        var mondays = GetWeekdaysBetween(startDate, endDate, DayOfWeek.Monday);
+                        var mondays = GetWeekdaysBetween(sDate, eDate, DayOfWeek.Monday);
                         foreach (DateTime date in mondays)
                             dates.Add(date);
                         break;
                     case '2':
-                        var tuesdays = GetWeekdaysBetween(startDate, endDate, DayOfWeek.Tuesday);
+                        var tuesdays = GetWeekdaysBetween(sDate, eDate, DayOfWeek.Tuesday);
                         foreach (DateTime date in tuesdays)
                             dates.Add(date);
                         break;
                     case '3':
-                        var wednesdays = GetWeekdaysBetween(startDate, endDate, DayOfWeek.Wednesday);
+                        var wednesdays = GetWeekdaysBetween(sDate, eDate, DayOfWeek.Wednesday);
                         foreach (DateTime date in wednesdays)
                             dates.Add(date);
                         break;
                     case '4':
-                        var thursdays = GetWeekdaysBetween(startDate, endDate, DayOfWeek.Thursday);
+                        var thursdays = GetWeekdaysBetween(sDate, eDate, DayOfWeek.Thursday);
                         foreach (DateTime date in thursdays)
                             dates.Add(date);
                         break;
                     case '5':
-                        var fridays = GetWeekdaysBetween(startDate, endDate, DayOfWeek.Friday);
+                        var fridays = GetWeekdaysBetween(sDate, eDate, DayOfWeek.Friday);
                         foreach (DateTime date in fridays)
                             dates.Add(date);
                         break;
                     case '6':
-                        var saturdays = GetWeekdaysBetween(startDate, endDate, DayOfWeek.Saturday);
+                        var saturdays = GetWeekdaysBetween(sDate, eDate, DayOfWeek.Saturday);
                         foreach (DateTime date in saturdays)
                             dates.Add(date);
                         break;
                     case '7':
-                        var sundays = GetWeekdaysBetween(startDate, endDate, DayOfWeek.Sunday);
+                        var sundays = GetWeekdaysBetween(sDate, eDate, DayOfWeek.Sunday);
                         foreach (DateTime date in sundays)
                             dates.Add(date);
                         break;

@@ -144,7 +144,7 @@ namespace CampaignEditor
             string? type = tbType.Text.Trim().Length > 0 ? tbType.Text.ToUpper() : null;
             bool special = (bool)chbSpecial.IsChecked;
             DateOnly dateFrom = DateOnly.FromDateTime(dpFrom.SelectedDate.Value);
-            DateOnly dateTo = DateOnly.FromDateTime(dpTo.SelectedDate.Value);
+            DateOnly? dateTo = dpTo.SelectedDate.HasValue ? DateOnly.FromDateTime(dpTo.SelectedDate.Value) : null;
             float progcoef = 1.0f;
             DateOnly created = DateOnly.FromDateTime(DateTime.Now);
 
@@ -175,6 +175,11 @@ namespace CampaignEditor
             else if (await _emsTypesController.GetEmsTypesByCode(tbType.Text.Trim()) == null)
             {
                 MessageBox.Show("Invalid type value");
+                return false;
+            }
+            else if (!dpFrom.SelectedDate.HasValue)
+            {
+                MessageBox.Show("Enter start date");
                 return false;
             }
             else if (dpFrom.SelectedDate > dpTo.SelectedDate)
