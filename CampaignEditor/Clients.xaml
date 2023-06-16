@@ -13,6 +13,12 @@
         <local:ToHalfConverterM30 x:Key="toHalfConverter" />
     </Window.Resources>
     <Grid>
+        <Button x:Name="btnPassChange" 
+                    Background="White" IsTabStop="False" BorderThickness="0"
+                    HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0, 10, 20, 0"
+                    Click="btnPassChange_Click">
+            <Image Source="\images\ChangePassIcon.png" Width="40" Height="40" ></Image>
+        </Button>
         <Grid x:Name="GridLeft"
             Margin="10,10,350,10">
             <Label x:Name="lblUsername" Content="user: " FontWeight="Bold"
@@ -20,12 +26,6 @@
             <TextBlock x:Name="tbUsername" 
                        Width="200"
                        HorizontalAlignment="Left" VerticalAlignment="Top" Margin="100, 5, 0, 0"/>
-            <Button x:Name="btnPassChange" 
-                    Background="White" IsTabStop="False" BorderThickness="0"
-                    HorizontalAlignment="Left" VerticalAlignment="Top" Margin="320, 10, 0, 0"
-                    Click="btnPassChange_Click">
-                <Image Source="\images\ChangePassIcon.png" Width="30" Height="30" ></Image>
-            </Button>
             <TreeView x:Name="tvClients" 
                   Margin="10, 100, 10, 100"
                   IsTextSearchCaseSensitive="False" IsTextSearchEnabled="True"
