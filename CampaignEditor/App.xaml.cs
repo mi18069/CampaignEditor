@@ -95,6 +95,7 @@ namespace CampaignEditor
         protected override async void OnStartup(StartupEventArgs e)
         {
             await AppHost!.StartAsync();
+            ShutdownMode = ShutdownMode.OnLastWindowClose;
 
             var startupForm = AppHost.Services.GetRequiredService<MainWindow>();
             startupForm.Show();

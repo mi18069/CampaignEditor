@@ -7,7 +7,8 @@
         mc:Ignorable="d"
         Title="Clients" Height="800" Width="900"
         MinHeight="600" MinWidth="800"
-        FontSize="20">
+        FontSize="20"
+        Closing="Window_Closing">
     <Window.Resources>
         <local:ToHalfConverterM30 x:Key="toHalfConverter" />
     </Window.Resources>

@@ -4,6 +4,7 @@ using CampaignEditor.Helpers;
 using CampaignEditor.StartupHelpers;
 using Database.DTOs.ClientDTO;
 using Database.Repositories;
+using System;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -75,5 +76,9 @@ namespace CampaignEditor
             await factoryCampaignForecastView.Initialize(_campaign);
         }
 
+        private void Window_Closed(object sender, EventArgs e)
+        {
+            var a = Application.Current.Windows.Count;
+        }
     }
 }

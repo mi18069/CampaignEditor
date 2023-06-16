@@ -1,11 +1,7 @@
 ﻿using CampaignEditor.Controllers;
 using CampaignEditor.DTOs.CampaignDTO;
 using Database.DTOs.ClientDTO;
-using Database.Entities;
 using Database.Repositories;
-using System.Diagnostics;
-using System.Net.NetworkInformation;
-using System;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -22,6 +18,7 @@ namespace CampaignEditor
         private CampaignController _campaignController;
 
         public bool infoModified = false;
+        private bool isModified = false;
         public CampaignDTO Campaign {
             get { return _campaign; }
             set { _campaign = value; }
@@ -49,6 +46,7 @@ namespace CampaignEditor
 
                 FillTBTextBoxes();
             }
+            isModified = false;
         }
 
         private void FillTBTextBoxes()
@@ -69,27 +67,28 @@ namespace CampaignEditor
                 e.Handled = true;
                 ue.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
             }
-            infoModified = true;
+            isModified = true;
         }
 
         private void tb_TextChanged(object sender, TextChangedEventArgs e)
         {
-            infoModified = true;
+            isModified = true;
         }
 
         private void dp_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
         {
-            infoModified = true;
+            isModified = true;
         }
 
         private void cb_Checked(object sender, RoutedEventArgs e)
         {
-            infoModified = true;
+            isModified = true;
         }
 
         #region Save and Cancel buttons
         private async void btnSave_Click(object sender, RoutedEventArgs e)
         {
+            infoModified = isModified;
             if (infoModified)
             {
                 int cmpid = Campaign.cmpid;

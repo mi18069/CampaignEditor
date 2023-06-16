@@ -9,6 +9,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using CampaignEditor.Controllers;
+using CampaignEditor.Helpers;
 using CampaignEditor.StartupHelpers;
 using Database.Repositories;
 
@@ -307,9 +308,9 @@ namespace CampaignEditor
                     window.WindowState = WindowState.Normal;
                 }
 
-                window.Topmost = true;
-                window.Activate();
                 window.Topmost = false;
+                window.Activate();
+                window.Topmost = true;
             }
             else
             {
@@ -322,6 +323,7 @@ namespace CampaignEditor
             }
 
         }
+
         // remove from list of opened campaigns
         private void CampaignWindow_Closed(object sender, EventArgs e)
         {
@@ -382,7 +384,7 @@ namespace CampaignEditor
             var f = _factoryRename.Create();
             MenuItem menuItem = (MenuItem)sender;
             string name = ((TreeViewItem)tvClients.SelectedValue).Header.ToString().Trim();
-            f.RenameClient(name);
+            await f.RenameClient(name);
             f.ShowDialog();
             if (f.renamed)
             {
@@ -395,7 +397,7 @@ namespace CampaignEditor
             var f = _factoryRename.Create();
             MenuItem menuItem = (MenuItem)sender;
             string name = ((TreeViewItem)tvClients.SelectedValue).Header.ToString().Trim();
-            f.RenameCampaign(name);
+            await f.RenameCampaign(name);
             f.ShowDialog();
             if (f.renamed)
             {
@@ -430,8 +432,22 @@ namespace CampaignEditor
 
 
 
+
         #endregion
 
 
+        private void Window_Closing(object sender, CancelEventArgs e)
+        {
+            if (MessageBox.Show("Application will close\nAre you sure you want to exit?", "Message: ",
+                MessageBoxButton.OKCancel, MessageBoxImage.Warning) == MessageBoxResult.OK)
+            {
+                Application.Current.Shutdown();
+            }
+            else
+            {
+                e.Cancel = true;
+            }
+
+        }
     }
 }
