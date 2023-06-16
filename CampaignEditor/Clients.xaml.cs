@@ -29,6 +29,8 @@ namespace CampaignEditor
         private readonly IAbstractFactory<Rename> _factoryRename;
         private readonly IAbstractFactory<Campaign> _factoryCampaign;
         private readonly IAbstractFactory<AllUsers> _factoryAllUsers;
+        private readonly IAbstractFactory<ChangePassword> _factoryChangePassword;
+
         private CampaignController _campaignController;
 
 
@@ -72,7 +74,8 @@ namespace CampaignEditor
         public bool isReadOnly { get; set; } = false;
         public Clients(IAbstractFactory<ClientsTreeView> factoryClientsTreeView, IAbstractFactory<AddUser> factoryAddUser,
             IAbstractFactory<AddClient> factoryAddClient, IAbstractFactory<UsersOfClient> factoryUsersOfClient, IAbstractFactory<NewCampaign> factoryNewCampaign,
-            IAbstractFactory<Rename> factoryRename, IAbstractFactory<Campaign> factoryCampaign, ICampaignRepository campaignRepository, IAbstractFactory<AllUsers> factoryAllUsers)
+            IAbstractFactory<Rename> factoryRename, IAbstractFactory<Campaign> factoryCampaign, ICampaignRepository campaignRepository, IAbstractFactory<AllUsers> factoryAllUsers,
+            IAbstractFactory<ChangePassword> factoryChangePassword)
         {
             InitializeComponent();
             this.DataContext = this;
@@ -95,13 +98,14 @@ namespace CampaignEditor
             isReadWrite = MainWindow.user.usrlevel == 1 ? true : isAdministrator;
             isReadOnly = MainWindow.user.usrlevel == 2;
 
-            lblUsername.Content += MainWindow.user.usrname;
+            tbUsername.Text = MainWindow.user.usrname.Trim();
 
             tbSearchCampaigns.Text = searchCampaignsString;
             tbSearchClients.Text = searchClientsString;
 
             FillFilterByUsersComboBox();
             _factoryAllUsers = factoryAllUsers;
+            _factoryChangePassword = factoryChangePassword;
         }
 
         #region Filter ComboBox
@@ -448,6 +452,13 @@ namespace CampaignEditor
                 e.Cancel = true;
             }
 
+        }
+
+        private void btnPassChange_Click(object sender, RoutedEventArgs e)
+        {
+            var f = _factoryChangePassword.Create();
+            f.Initialize(MainWindow.user);
+            f.ShowDialog();
         }
     }
 }

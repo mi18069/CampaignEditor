@@ -50,6 +50,7 @@ namespace CampaignEditor
                     services.AddFormFactory<MediaPlanGrid>();
                     services.AddFormFactory<CampaignForecastView>();
                     services.AddFormFactory<CampaignForecastDates>();
+                    services.AddFormFactory<ChangePassword>();
                     services.AddScoped<IDataContext, DataContext>();
                     // Add services
                     Extensions.UserExtensions.AddUserExtensions(services);

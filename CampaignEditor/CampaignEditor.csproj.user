@@ -40,6 +40,9 @@
     <Compile Update="CampaignOverview.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="ChangePassword.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Channels.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -148,6 +151,9 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="CampaignOverview.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="ChangePassword.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Channels.xaml">

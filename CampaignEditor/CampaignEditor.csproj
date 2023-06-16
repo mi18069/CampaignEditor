@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="images\ChangePassIcon.png" />
     <None Remove="images\config_icon.png" />
     <None Remove="images\EditIcon.png" />
     <None Remove="images\Edit_Icon.png" />
@@ -33,6 +34,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="images\ChangePassIcon.png" />
     <Resource Include="images\config_icon.png" />
     <Resource Include="images\Edit_Icon2.png" />
     <Resource Include="images\GreenPlus.png" />
