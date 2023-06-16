@@ -236,6 +236,14 @@ namespace CampaignEditor.UserControls
 
         private void OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
+            DataGridCell cell = sender as DataGridCell;
+            if (cell == null)
+                return;
+            var mpTerm = GetSelectedMediaPlanTermDTO(cell);
+            if (mpTerm == null)
+            {
+                return;
+            }
             SimulateTextInput(lastSpotCell);
         }
 
@@ -269,6 +277,10 @@ namespace CampaignEditor.UserControls
                     }
 
                     var mpTerm = GetSelectedMediaPlanTermDTO(cell);
+                    if (mpTerm == null)
+                    {
+                        return;
+                    }
                     await _mediaPlanTermController.UpdateMediaPlanTerm(
                     new UpdateMediaPlanTermDTO(mpTerm.xmptermid, mpTerm.xmpid, mpTerm.date, cell.Content.ToString()));
 
