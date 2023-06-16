@@ -27,8 +27,6 @@ namespace CampaignEditor
         private ClientController _clientController;
         private CampaignController _campaignController;
 
-
-
         public Campaign(IClientRepository clientRepository, ICampaignRepository campaignRepository, 
             IAbstractFactory<CampaignOverview> factoryOverview, IAbstractFactory<CampaignForecastView> factoryForecastView)
         {
@@ -76,9 +74,5 @@ namespace CampaignEditor
             await factoryCampaignForecastView.Initialize(_campaign);
         }
 
-        private void Window_Closed(object sender, EventArgs e)
-        {
-            var a = Application.Current.Windows.Count;
-        }
     }
 }
