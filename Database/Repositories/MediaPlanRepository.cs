@@ -533,7 +533,7 @@ namespace Database.Repositories
         {
             using var connection = _context.GetConnection();
 
-            var affected = await connection.ExecuteAsync(
+           var affected = await connection.ExecuteAsync(
                 "UPDATE xmp SET xmpid = @Xmpid, schid = @Schid, cmpid = @Cmpid, chid = @Chid, naziv = @Name, " +
                 "verzija = @Version, pozicija = @Position, " +
                 "vremeod = @Stime, vremedo = @Etime, vremerbl = @Blocktime, dani = @Days, " +

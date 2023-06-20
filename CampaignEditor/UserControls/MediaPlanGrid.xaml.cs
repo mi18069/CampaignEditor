@@ -532,10 +532,18 @@ namespace CampaignEditor.UserControls
                 {
                     if (textBox != null && (textBox.Text.Trim() == "" || Int32.TryParse(textBox.Text.Trim(), out value)))
                     {
-                        value = textBox.Text.Trim() == "" ? 0 : value;
-                        mediaPlan.amr1trim = value;
-                        await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(_converter.ConvertToDTO(mediaPlan)));
+                        if (value > 999)
+                        {
+                            textBox.Text = mediaPlan.amr1trim.ToString();
+                        }
+                        else
+                        {
+                            value = textBox.Text.Trim() == "" ? 0 : value;
+                            mediaPlan.amr1trim = value;
+                            await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(_converter.ConvertToDTO(mediaPlan)));
+                        }
                     }
+            
                     else
                     {
                         textBox.Text = mediaPlan.amr1trim.ToString();
@@ -545,9 +553,17 @@ namespace CampaignEditor.UserControls
                 {
                     if (textBox != null && (textBox.Text.Trim() == "" || Int32.TryParse(textBox.Text.Trim(), out value)))
                     {
-                        value = textBox.Text.Trim() == "" ? 0 : value;
-                        mediaPlan.amr2trim = value;
-                        await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(_converter.ConvertToDTO(mediaPlan)));
+                        if (value > 999)
+                        {
+                            textBox.Text = mediaPlan.amr2trim.ToString();
+                        }
+                        else
+                        {
+                            value = textBox.Text.Trim() == "" ? 0 : value;
+                            mediaPlan.amr2trim = value;
+                            await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(_converter.ConvertToDTO(mediaPlan)));
+                        }
+                        
                     }
                     else
                     {
@@ -558,9 +574,17 @@ namespace CampaignEditor.UserControls
                 {
                     if (textBox != null && (textBox.Text.Trim() == "" || Int32.TryParse(textBox.Text.Trim(), out value)))
                     {
-                        value = textBox.Text.Trim() == "" ? 0 : value;
-                        mediaPlan.amr3trim = value;
-                        await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(_converter.ConvertToDTO(mediaPlan)));
+                        if (value > 999)
+                        {
+                            textBox.Text = mediaPlan.amr3trim.ToString();
+                        }
+                        else
+                        {
+                            value = textBox.Text.Trim() == "" ? 0 : value;
+                            mediaPlan.amr3trim = value;
+                            await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(_converter.ConvertToDTO(mediaPlan)));
+                        }
+                       
                     }
                     else
                     {
@@ -571,9 +595,18 @@ namespace CampaignEditor.UserControls
                 {
                     if (textBox != null && (textBox.Text.Trim() == "" || Int32.TryParse(textBox.Text.Trim(), out value)))
                     {
-                        value = textBox.Text.Trim() == "" ? 0 : value;
-                        mediaPlan.amrsaletrim = value;
-                        await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(_converter.ConvertToDTO(mediaPlan)));
+                        if (value > 999)
+                        {
+                            textBox.Text = mediaPlan.amrsaletrim.ToString();
+                        }
+                        else
+                        {
+                            value = textBox.Text.Trim() == "" ? 0 : value;
+                            mediaPlan.amrsaletrim = value;
+                            await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(_converter.ConvertToDTO(mediaPlan)));
+                        }
+
+                       
                     }
                     else
                     {
@@ -599,6 +632,12 @@ namespace CampaignEditor.UserControls
                 {
                     if (textBox != null && (textBox.Text.Trim() == "" || float.TryParse(textBox.Text.Trim(), out value)))
                     {
+                        if(value > 10)
+                        {
+                            textBox.Text = mediaPlan.progcoef.ToString();
+                            e.Handled = true;
+                            return;
+                        }
                         value = textBox.Text.Trim() == "" ? 0 : value;
                         mediaPlan.Progcoef = value;
                         await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(_converter.ConvertToDTO(mediaPlan)));
