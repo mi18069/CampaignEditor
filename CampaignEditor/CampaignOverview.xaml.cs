@@ -50,12 +50,14 @@ namespace CampaignEditor
         private CmpInfo fInfo = null;
         private CampaignDTO _campaignInfo = null;
 
+        bool clickedOnClose = false;
 
         public CampaignOverview(IAbstractFactory<AssignTargets> factoryAssignTargets,
             IAbstractFactory<Channels> factoryChannels, IAbstractFactory<Spots> factorySpots,
             IAbstractFactory<Goals> factoryGoals, IAbstractFactory<CmpInfo> factoryInfo)
         {
             this.DataContext = this;
+            
             _factoryAssignTargets = factoryAssignTargets;
             _factoryChannels = factoryChannels;
             _factorySpots = factorySpots;
@@ -310,6 +312,7 @@ namespace CampaignEditor
 
         private void btnCancel_Click(object sender, RoutedEventArgs e)
         {
+            clickedOnClose = true;
             // Get the parent of the button (sender)
             DependencyObject button = (DependencyObject)sender;
 
@@ -361,6 +364,28 @@ namespace CampaignEditor
         private void dgSpots_Loaded(object sender, RoutedEventArgs e)
         {
             svSpots.MaxHeight = dgSpots.ActualHeight;
+        }
+
+        public bool Window_Closing()
+        {
+            if (clickedOnClose)
+            {
+                clickedOnClose = false;
+                return true;
+            }
+            if (btnSave.IsEnabled)
+            {
+                if (MessageBox.Show("You have unsaved changes in overview\nIf you exit changes will be lost", "Message",
+                    MessageBoxButton.OKCancel, MessageBoxImage.Question) == MessageBoxResult.OK)
+                {
+                    return true;
+                }
+                else
+                {
+                    return false;
+                }
+            }
+            return true;
         }
     }
 }

@@ -6,7 +6,8 @@
         xmlns:local="clr-namespace:CampaignEditor.Converters"
         mc:Ignorable="d"
         Title="Campaign" 
-        Height="750" Width="1200" MinWidth="1000" MinHeight="700">
+        Height="750" Width="1200" MinWidth="1000" MinHeight="700"
+        Closing="Window_Closing">
     <Window.Resources>
         <local:ToHalfConverterM4 x:Key="toHalfConverter" />
     </Window.Resources>

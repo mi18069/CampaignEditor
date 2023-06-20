@@ -5,6 +5,7 @@ using CampaignEditor.StartupHelpers;
 using Database.DTOs.ClientDTO;
 using Database.Repositories;
 using System;
+using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -27,6 +28,7 @@ namespace CampaignEditor
         private ClientController _clientController;
         private CampaignController _campaignController;
 
+        CampaignOverview factoryCampaignOverview;
         public Campaign(IClientRepository clientRepository, ICampaignRepository campaignRepository, 
             IAbstractFactory<CampaignOverview> factoryOverview, IAbstractFactory<CampaignForecastView> factoryForecastView)
         {
@@ -64,7 +66,7 @@ namespace CampaignEditor
             TabItem tabForecast = (TabItem)tcTabs.FindName("tiForecast");
             tabForecast.Content = loadingPage.Content;
 
-            var factoryCampaignOverview = _factoryOverview.Create();
+            factoryCampaignOverview = _factoryOverview.Create();
             await factoryCampaignOverview.Initialization(_client, _campaign, readOnly);
             tabOverview.Content = factoryCampaignOverview.Content;
 
@@ -74,5 +76,13 @@ namespace CampaignEditor
             await factoryCampaignForecastView.Initialize(_campaign);
         }
 
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+           bool shouldClose = factoryCampaignOverview.Window_Closing();
+            if (!shouldClose)
+            {
+                e.Cancel = true;
+            }
+        }
     }
 }
