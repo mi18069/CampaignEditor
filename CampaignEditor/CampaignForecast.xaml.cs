@@ -558,46 +558,82 @@ namespace CampaignEditor.UserControls
             {
                 if (goals.budget == 0)
                 {
-                    bBudget.Visibility = Visibility.Collapsed;
-                    bpBudget.Visibility = Visibility.Collapsed;
+                    lblBudget.FontWeight = FontWeights.Light;
+                    lblBudgetTarget.FontWeight = FontWeights.Light;
+                    lblBudgetValue.FontWeight = FontWeights.Light;
+
+                    lblpBudget.FontWeight = FontWeights.Light;
+                    lblpBudgetTarget.FontWeight = FontWeights.Light;
+                    lblpBudgetValue.FontWeight = FontWeights.Light;
                 }
                 else
                 {
-                    bBudget.Visibility = Visibility.Visible;
-                    lblBudgetTarget.Content = "/" + goals.budget.ToString();
-                    lblBudgetValue.DataContext = mpGoals;
+                    lblBudget.FontWeight = FontWeights.Bold;
+                    lblBudgetTarget.FontWeight = FontWeights.Bold;
+                    lblBudgetValue.FontWeight = FontWeights.Bold;
 
-                    // for selectedMP values
-                    lblpBudgetValue.DataContext = SelectedMediaPlan;
+                    lblpBudget.FontWeight = FontWeights.Bold;
+                    lblpBudgetTarget.FontWeight = FontWeights.Bold;
+                    lblpBudgetValue.FontWeight = FontWeights.Bold;
                 }
+
+                lblBudgetTarget.Content = "/" + (goals.budget != 0 ? goals.budget.ToString() : " - ");
+                lblBudgetValue.DataContext = mpGoals;
+                // for selectedMP values
+                lblpBudgetValue.DataContext = SelectedMediaPlan;
+                
 
                 if (goals.grp == 0)
                 {
-                    bGRP.Visibility = Visibility.Collapsed;
-                    bpGRP.Visibility = Visibility.Collapsed;
+                    lblGRP.FontWeight = FontWeights.Light;
+                    lblGRPTarget.FontWeight = FontWeights.Light;
+                    lblGRPValue.FontWeight = FontWeights.Light;
+
+                    lblpGRP.FontWeight = FontWeights.Light;
+                    lblpGRPTarget.FontWeight = FontWeights.Light;
+                    lblpGRPValue.FontWeight = FontWeights.Light;
                 }
                 else
                 {
-                    bGRP.Visibility = Visibility.Visible;
-                    lblGRPTarget.Content = "/" + goals.grp.ToString();
-                    lblGRPValue.DataContext = mpGoals;
-                    lblpGRPValue.DataContext = SelectedMediaPlan;
+                    lblGRP.FontWeight = FontWeights.Bold;
+                    lblGRPTarget.FontWeight = FontWeights.Bold;
+                    lblGRPValue.FontWeight = FontWeights.Bold;
 
+                    lblpGRP.FontWeight = FontWeights.Bold;
+                    lblpGRPTarget.FontWeight = FontWeights.Bold;
+                    lblpGRPValue.FontWeight = FontWeights.Bold;
                 }
+
+                lblGRPTarget.Content = "/" + (goals.grp != 0 ? goals.grp.ToString() : " - ");
+                lblGRPValue.DataContext = mpGoals;
+                lblpGRPValue.DataContext = SelectedMediaPlan;
+
 
                 if (goals.ins == 0)
                 {
-                    bInsertations.Visibility = Visibility.Collapsed;
-                    bpInsertations.Visibility = Visibility.Collapsed;
+                    lblInsertations.FontWeight = FontWeights.Light;
+                    lblInsertationsTarget.FontWeight = FontWeights.Light;
+                    lblInsertationsValue.FontWeight = FontWeights.Light;
+
+                    lblpInsertations.FontWeight = FontWeights.Light;
+                    lblpInsertationsTarget.FontWeight = FontWeights.Light;
+                    lblpInsertationsValue.FontWeight = FontWeights.Light;
                 }
                 else
                 {
-                    bInsertations.Visibility = Visibility.Visible;
-                    lblInsertationsTarget.Content = "/" + goals.ins.ToString();
-                    lblInsertationsValue.DataContext = mpGoals;
-                    lblpInsertationsValue.DataContext = SelectedMediaPlan;
+                    lblInsertations.FontWeight = FontWeights.Bold;
+                    lblInsertationsTarget.FontWeight = FontWeights.Bold;
+                    lblInsertationsValue.FontWeight = FontWeights.Bold;
 
+                    lblpInsertations.FontWeight = FontWeights.Bold;
+                    lblpInsertationsTarget.FontWeight = FontWeights.Bold;
+                    lblpInsertationsValue.FontWeight = FontWeights.Bold;
                 }
+
+                lblInsertationsTarget.Content = "/" + (goals.ins != 0 ? goals.ins.ToString() : " - ");
+                lblInsertationsValue.DataContext = mpGoals;
+                lblpInsertationsValue.DataContext = SelectedMediaPlan;
+
 
                 if (goals.rch == 0)
                 {
