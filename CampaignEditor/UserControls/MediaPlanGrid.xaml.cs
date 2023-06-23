@@ -630,7 +630,7 @@ namespace CampaignEditor.UserControls
 
                 if (propertyName == "progcoef")
                 {
-                    if (textBox != null && (textBox.Text.Trim() == "" || float.TryParse(textBox.Text.Trim(), out value)))
+                    if (textBox != null && (textBox.Text.Trim() == "" || float.TryParse(textBox.Text, out value)))
                     {
                         if(value > 10)
                         {

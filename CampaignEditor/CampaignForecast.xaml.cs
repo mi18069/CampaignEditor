@@ -156,7 +156,18 @@ namespace CampaignEditor.UserControls
             await FillLoadedDateRanges();
             // For dgMediaPlans
             await InitializeDataGrid();
+            await InitializeSGGrid();
 
+        }
+
+        private async Task InitializeSGGrid()
+        {
+            sgGrid._mediaPlanController = _mediaPlanController;
+            sgGrid._mediaPlanTermController = _mediaPlanTermController;
+            sgGrid._spotController = _spotController;
+            sgGrid._channelController = _channelController;
+
+            await sgGrid.Initialize(_campaign);
         }
 
         private async Task InitializeDataGrid()

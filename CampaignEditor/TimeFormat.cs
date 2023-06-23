@@ -129,5 +129,7 @@ namespace CampaignEditor
             return int.Parse(date.ToString("yyyyMMdd"));
 
         }
+
+
     }
 }
