@@ -136,7 +136,7 @@ namespace Database.Repositories
                 // If key constraints don't allow to create schema, update the one that's making conflict
                 catch
                 {
-                    id = await connection.ExecuteScalarAsync<int>(
+                    /*id = await connection.ExecuteScalarAsync<int>(
                     "UPDATE progschema SET chid = @Chid, naziv = @Name, pozicija = @Position, " +
                     "vremeod = @Stime, vremedo = @Etime, vremerbl = @Blocktime, dani = @Days, " +
                     "tipologija = @Type, specijal = @Special, datumod = CAST(@Sdate AS DATE), datumdo = CAST(@Edate AS DATE), " +
@@ -147,6 +147,15 @@ namespace Database.Repositories
                     "datumod = CAST(@Sdate as DATE) AND " +
                     "(datumdo = CAST(@Edate as DATE) OR datumdo IS NULL AND CAST(@Edate AS DATE) IS NULL) AND " +
                     "progkoef = @Progcoef " +
+                    "RETURNING id",*/
+                    id = await connection.ExecuteScalarAsync<int>(
+                    "UPDATE progschema SET chid = @Chid, naziv = @Name, pozicija = @Position, " +
+                    "vremeod = @Stime, vremedo = @Etime, vremerbl = @Blocktime, dani = @Days, " +
+                    "tipologija = @Type, specijal = @Special, datumod = CAST(@Sdate AS DATE), datumdo = CAST(@Edate AS DATE), " +
+                    "progkoef = @Progcoef, datumizmene = CAST(@NewModified AS DATE) " +
+                    "WHERE chid = @Chid AND pozicija = @Position AND " +
+                    "vremeod = @Stime  AND " +
+                    "dani = @Days AND specijal = @Special " +
                     "RETURNING id",
                     new
                     {

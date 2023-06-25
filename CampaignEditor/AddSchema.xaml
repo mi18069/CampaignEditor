@@ -70,14 +70,14 @@
         <TextBox Grid.Row="7" Grid.Column="2" x:Name="tbBlockTime" MaxLength="5" Margin="0, 10"
                  Width="70" VerticalContentAlignment="Center"/>
 
+        <CheckBox Grid.Row="7" Grid.Column="5" x:Name="chbSpecial" Content="IsSpecial: "
+                  HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0, 10" IsChecked="False"/>
+        
         <Label Grid.Row="8" Grid.Column="1" Content="Days: " Margin="0, 10"/>
         <ListBox Grid.Row="8" Grid.Column="2" x:Name="lbDays" Margin="0, 10"
                  Grid.ColumnSpan="3" SelectionMode="Multiple">
-            
-        </ListBox>
 
-        <CheckBox Grid.Row="7" Grid.Column="5" x:Name="chbSpecial" Content="IsSpecial: "
-                  VerticalAlignment="Center" Margin="0, 10" IsChecked="False"/>
+        </ListBox>
 
         <Button Grid.Row="9" Grid.Column="1" Grid.ColumnSpan="6" Margin="10" 
                 Width="100" HorizontalAlignment="Right" x:Name="btnSave" Content="Save" 

@@ -255,8 +255,14 @@ namespace CampaignEditor.UserControls
             DataGridCell cell = sender as DataGridCell;
             TextBlock textBlock = cell.Content as TextBlock;
 
-            char? spotcodeNull = e.Text.Trim()[0];
+            DateTime currentDate = new DateTime(2023, 05, 20);
+            var mpTerm = GetSelectedMediaPlanTermDTO(cell);
+            if (mpTerm == null || mpTerm.date < DateOnly.FromDateTime(currentDate))
+            {
+                return;
+            }
 
+            char? spotcodeNull = e.Text.Trim()[0];
             if (spotcodeNull.HasValue)
             {
                 char spotcode = Char.ToUpper(spotcodeNull.Value);
@@ -278,11 +284,6 @@ namespace CampaignEditor.UserControls
                         cell.Content += spotcode.ToString();
                     }
 
-                    var mpTerm = GetSelectedMediaPlanTermDTO(cell);
-                    if (mpTerm == null)
-                    {
-                        return;
-                    }
                     await _mediaPlanTermController.UpdateMediaPlanTerm(
                     new UpdateMediaPlanTermDTO(mpTerm.xmptermid, mpTerm.xmpid, mpTerm.date, cell.Content.ToString()));
 
@@ -320,7 +321,6 @@ namespace CampaignEditor.UserControls
                             cell.Content += spCode.ToString();
                         }
 
-                        var mpTerm = GetSelectedMediaPlanTermDTO(cell);
                         await _mediaPlanTermController.UpdateMediaPlanTerm(
                         new UpdateMediaPlanTermDTO(mpTerm.xmptermid, mpTerm.xmpid, mpTerm.date, cell.Content.ToString().Trim()));
 
@@ -509,7 +509,16 @@ namespace CampaignEditor.UserControls
 
             // Get the MediaPlanTerm for the selected cell
             int rowIndex = row.GetIndex();
-            MediaPlanTermDTO mpTermDTO = mpTerms[columnIndex - frozenColumnsNum];
+            MediaPlanTermDTO mpTermDTO = null;
+            try
+            {
+                mpTermDTO = mpTerms[columnIndex - frozenColumnsNum];
+            
+            }
+            catch
+            {
+                return null;
+            }
 
             return mpTermDTO;
         }

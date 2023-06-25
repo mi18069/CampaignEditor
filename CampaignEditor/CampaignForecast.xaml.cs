@@ -696,15 +696,25 @@ namespace CampaignEditor.UserControls
             f.ShowDialog();
             if (f._schema != null)
             {
-                var schema = await _schemaController.CreateGetSchema(f._schema);
-                MediaPlanDTO mediaPlanDTO = await SchemaToMP(schema);
+                try
+                {
+                    var schema = await _schemaController.CreateGetSchema(f._schema);
+                    if (schema != null)
+                    {
+                        MediaPlanDTO mediaPlanDTO = await SchemaToMP(schema);
 
-                await _databaseFunctionsController.StartAMRCalculation(_campaign.cmpid, 40, 40, mediaPlanDTO.xmpid);
-                var mediaPlan = await _converter.ConvertFirstFromDTO(mediaPlanDTO);
+                        await _databaseFunctionsController.StartAMRCalculation(_campaign.cmpid, 40, 40, mediaPlanDTO.xmpid);
+                        var mediaPlan = await _converter.ConvertFirstFromDTO(mediaPlanDTO);
 
-                var mediaPlanTerms = await MediaPlanToMPTerm(mediaPlanDTO);
-                var mpTuple = new MediaPlanTuple(mediaPlan, new ObservableCollection<MediaPlanTermDTO>(mediaPlanTerms));
-                _allMediaPlans.Add(mpTuple);
+                        var mediaPlanTerms = await MediaPlanToMPTerm(mediaPlanDTO);
+                        var mpTuple = new MediaPlanTuple(mediaPlan, new ObservableCollection<MediaPlanTermDTO>(mediaPlanTerms));
+                        _allMediaPlans.Add(mpTuple);
+                    }
+                }
+                catch
+                {
+                    MessageBox.Show("Unable to create Media Plan", "Message", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
 
             }
         }

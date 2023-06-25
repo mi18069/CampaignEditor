@@ -24,7 +24,6 @@ namespace CampaignEditor
 
         public CreateSchemaDTO _schema = null;
 
-
         public AddSchema(IChannelRepository channelRepository,
             IMediaPlanRepository mediaPlanRepository,
             IEmsTypesRepository emsTypesRepository)
@@ -111,6 +110,7 @@ namespace CampaignEditor
             if (await CheckFields())
             {
                 _schema = MakeSchemaDTO();
+
                 this.Close();
             }
         }
