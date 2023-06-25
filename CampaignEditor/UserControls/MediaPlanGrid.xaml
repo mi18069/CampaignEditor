@@ -99,10 +99,12 @@
                 <DataGridTextColumn Header="Affinity" Binding="{Binding MediaPlan.Affinity, StringFormat=N2}"
                                             IsReadOnly="True"/>
                 <DataGridTextColumn Header="Prog Coef" Binding="{Binding MediaPlan.progcoef, Mode=TwoWay, StringFormat=N2}" 
-                                        >
+                                    >
                     <DataGridTextColumn.EditingElementStyle>
                         <Style TargetType="{x:Type TextBox}">
-                            <EventSetter Event="TextChanged" Handler="TextBoxCoef_TextChanged"/>
+                            <EventSetter Event="TextChanged" Handler="ProgCoef_TextChanged"/>
+                            <EventSetter Event="PreviewGotKeyboardFocus" Handler="ProgCoef_PreviewGotKeyboardFocus"/>
+                            <EventSetter Event="PreviewLostKeyboardFocus" Handler="ProgCoef_PreviewLostKeyboardFocus"/>
                         </Style>
                     </DataGridTextColumn.EditingElementStyle>
                 </DataGridTextColumn>

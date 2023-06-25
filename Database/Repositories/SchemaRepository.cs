@@ -328,7 +328,7 @@ namespace Database.Repositories
                 "UPDATE progschema SET id = @Id, chid = @Chid, naziv = @Name, pozicija = @Position, " +
                 "vremeod = @Stime, vremedo = @Etime, vremerbl = @Blocktime, dani = @Days, " +
                 "tipologija = @Type, specijal = @Special, datumod = CAST(@Sdate AS DATE), datumdo = CAST(@Edate AS DATE), " +
-                "datumkreiranja = CAST(@Created AS DATE), datumizmene = CAST(@Modified AS DATE) " +
+                "progkoef = @Progcoef, datumkreiranja = CAST(@Created AS DATE), datumizmene = CAST(@Modified AS DATE) " +
                 "WHERE id = @Id",
                 new
                 {

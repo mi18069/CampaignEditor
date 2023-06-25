@@ -63,12 +63,15 @@ namespace CampaignEditor.UserControls
         DateTime startDate;
         DateTime endDate;
 
+        float progCoefPreFocus = 0.0f; // for saving progcoef value before changing
+        MediaPlan focusedMediaPlan;
+
         public MediaPlanGrid()
         {
             InitializeComponent();
         }
 
-        
+
         public DataGrid Schema
         {
             get { return dgMediaPlans; }
@@ -94,7 +97,7 @@ namespace CampaignEditor.UserControls
             {
                 spotCodes.Add((char)('A' + i));
             }
-            
+
             ICollectionView myDataView = CollectionViewSource.GetDefaultView(_allMediaPlans);
             dgMediaPlans.ItemsSource = myDataView;
 
@@ -158,7 +161,6 @@ namespace CampaignEditor.UserControls
                 var cellStyle = new Style(typeof(DataGridCell));
 
                 // Adding setters to cells
-                //var keyDownEventSetter = new EventSetter(DataGridCell.PreviewTextInputEvent, new TextCompositionEventHandler(OnCellPreviewTextInput));
                 var textInputEventSetter = new EventSetter(PreviewTextInputEvent, new TextCompositionEventHandler(OnCellPreviewTextInput));
                 var keyDownEventSetter = new EventSetter(PreviewKeyDownEvent, new KeyEventHandler(OnCellPreviewKeyDown));
                 var mouseLeftButtonDownEventSetter = new EventSetter(MouseLeftButtonDownEvent, new MouseButtonEventHandler(OnMouseLeftButtonDown));
@@ -616,43 +618,70 @@ namespace CampaignEditor.UserControls
             }
         }
 
-        private async void TextBoxCoef_TextChanged(object sender, TextChangedEventArgs e)
+        private void ProgCoef_PreviewGotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
             var tuple = dgMediaPlans.SelectedItems[0] as MediaPlanTuple;
+            var mediaPlan = tuple.MediaPlan;
+            progCoefPreFocus = mediaPlan.progcoef;
+            focusedMediaPlan = mediaPlan;
+        }
+
+        private async void ProgCoef_TextChanged(object sender, TextChangedEventArgs e)
+        {
+
             var textBox = sender as TextBox;
-
-            BindingExpression bindingExpr = textBox.GetBindingExpression(TextBox.TextProperty);
-            string propertyName = bindingExpr?.ResolvedSourcePropertyName;
-            if (tuple != null)
+            if (textBox != null && focusedMediaPlan != null)
             {
-                var mediaPlan = tuple.MediaPlan;
-                float value = 0f;
-
-                if (propertyName == "progcoef")
+                float value = 0.0f;
+                if (float.TryParse(textBox.Text, out value))
                 {
-                    if (textBox != null && (textBox.Text.Trim() == "" || float.TryParse(textBox.Text, out value)))
+                    if (value < 0 || value >= 10.0f)
                     {
-                        if(value > 10)
-                        {
-                            textBox.Text = mediaPlan.progcoef.ToString();
-                            e.Handled = true;
-                            return;
-                        }
-                        value = textBox.Text.Trim() == "" ? 0 : value;
-                        mediaPlan.Progcoef = value;
-                        await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(_converter.ConvertToDTO(mediaPlan)));
-
-                        // also should update value in progschema
-                        var schema = await _schemaController.GetSchemaById(mediaPlan.schid);
-                        schema.progcoef = mediaPlan.progcoef;
-                        await _schemaController.UpdateSchema(new UpdateSchemaDTO(schema));
+                        textBox.Text = focusedMediaPlan.Progcoef.ToString();
+                        e.Handled = true;
+                        return;
                     }
                     else
                     {
-                        textBox.Text = mediaPlan.progcoef.ToString();
+                        focusedMediaPlan.Progcoef = value;
                     }
                 }
             }
+        }
+
+        private async void ProgCoef_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            var textBox = sender as TextBox;
+            var profCoefPreFocusText = progCoefPreFocus.ToString();
+            if (textBox != null && focusedMediaPlan != null && focusedMediaPlan.Progcoef != progCoefPreFocus)
+            {
+                var response = MessageBox.Show("Do you want to change progCoef globally for this program?", "Message",
+    MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
+
+                switch (response)
+                {
+                    case MessageBoxResult.Cancel:
+                        textBox.Text = profCoefPreFocusText;
+                        break;
+
+                    case MessageBoxResult.No:
+                        await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(_converter.ConvertToDTO(focusedMediaPlan)));
+                        break;
+
+                    case MessageBoxResult.Yes:
+                        await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(_converter.ConvertToDTO(focusedMediaPlan)));
+                        var schema = await _schemaController.GetSchemaById(focusedMediaPlan.schid);
+                        schema.progcoef = focusedMediaPlan.progcoef;
+                        await _schemaController.UpdateSchema(new UpdateSchemaDTO(schema));
+                        break;
+
+                    default:
+                        break;
+                }
+
+
+            }
+
         }
 
         #endregion
@@ -860,6 +889,7 @@ namespace CampaignEditor.UserControls
         {
             DeleteMediaPlanClicked?.Invoke(this, EventArgs.Empty);
         }
+
 
     }
 }
