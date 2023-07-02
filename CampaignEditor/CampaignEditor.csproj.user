@@ -103,6 +103,9 @@
     <Compile Update="UserControls\SpotGoalsGrid.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="UserControls\SpotGoalsSubGrid.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="UserControls\SpotItem.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -220,6 +223,9 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="UserControls\SpotGoalsGrid.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UserControls\SpotGoalsSubGrid.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="UserControls\SpotItem.xaml">

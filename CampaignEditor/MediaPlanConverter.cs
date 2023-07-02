@@ -62,13 +62,13 @@ namespace CampaignEditor
             _pricesController = new PricesController(pricesRepository);
         }
 
-        public async Task<MediaPlan> ConvertFromDTO(MediaPlanDTO mediaPlanDTO)
+        public async Task<MediaPlan> ConvertFromDTO(MediaPlanDTO mediaPlanDTO, IEnumerable<MediaPlanTermDTO> terms = null)
         {
 
             var mediaPlan = _mapperFromDTO.Map<MediaPlanDTO, MediaPlan>(mediaPlanDTO);
 
             // Perform additional computations and set extra properties
-            await ComputeExtraProperties(mediaPlan);
+            await ComputeExtraProperties(mediaPlan, terms);
 
             return mediaPlan;
         }
@@ -176,7 +176,6 @@ namespace CampaignEditor
         {
             var channelCmp = await _channelCmpController.GetChannelCmpByIds(mediaPlan.cmpid, mediaPlan.chid);
             var pricelist = await _pricelistController.GetPricelistById(channelCmp.plid);
-            var terms = await _mediaPlanTermController.GetAllMediaPlanTermsByXmpid(mediaPlan.xmpid);
 
             await CalculateAMRs(mediaPlan);
             await CalculateDPCoef(mediaPlan, pricelist);
@@ -184,11 +183,14 @@ namespace CampaignEditor
             
         }
 
-        public async Task ComputeExtraProperties(MediaPlan mediaPlan)
+        public async Task ComputeExtraProperties(MediaPlan mediaPlan, IEnumerable<MediaPlanTermDTO> terms = null)
         {
             var channelCmp = await _channelCmpController.GetChannelCmpByIds(mediaPlan.cmpid, mediaPlan.chid);
             var pricelist = await _pricelistController.GetPricelistById(channelCmp.plid);
-            var terms = await _mediaPlanTermController.GetAllMediaPlanTermsByXmpid(mediaPlan.xmpid);
+            if (terms == null)
+            {
+                terms = await _mediaPlanTermController.GetAllMediaPlanTermsByXmpid(mediaPlan.xmpid);
+            }
 
             await CalculateLengthAndInsertations(mediaPlan, terms);
             await CalculateSeccoef(mediaPlan, pricelist);

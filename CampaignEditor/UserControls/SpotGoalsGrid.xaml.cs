@@ -70,6 +70,7 @@ namespace CampaignEditor.UserControls
             _channels = channels.OrderBy(c => c.chname).ToList();
 
             CreateOutboundHeaders();
+            SetWidth();
 
         }
 
@@ -193,6 +194,7 @@ namespace CampaignEditor.UserControls
                 ugSpots.Children.Add(border);
                 
             }
+
         }
         private int GetWeekOfYear(DateTime date)
         {
@@ -202,6 +204,17 @@ namespace CampaignEditor.UserControls
                 CultureInfo.CurrentCulture.DateTimeFormat.CalendarWeekRule,
                 CultureInfo.CurrentCulture.DateTimeFormat.FirstDayOfWeek
             );
+        }
+
+        private void SetWidth()
+        {
+            double weekWidth = 200;
+            int weeksNum = ugWeeks.Children.Count;
+            double headerWidth = weeksNum * weekWidth;
+
+            ugWeeks.Width = headerWidth;
+            ugChannels.Width = headerWidth;
+            ugGoals.Width = headerWidth;
         }
     }
 }
