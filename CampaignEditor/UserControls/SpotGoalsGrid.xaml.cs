@@ -12,6 +12,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Media;
 
 namespace CampaignEditor.UserControls
@@ -81,7 +82,7 @@ namespace CampaignEditor.UserControls
 
             // Add headers
             // Weeks
-            ugWeeks.Columns = lastWeekNum - firstWeekNum + 1;
+            ugWeeks.Columns = lastWeekNum - firstWeekNum + 1 + 1; // last + 1 is for Header Total
             for (int i = firstWeekNum; i <= lastWeekNum; i++)
             {
 
@@ -107,16 +108,26 @@ namespace CampaignEditor.UserControls
                 ugWeeks.Children.Add(border);
             }
 
+            AddWeeksHeaderTotal();
+
             //Channels
-            ugChannels.Columns = _channels.Count * ugWeeks.Columns;
+            ugChannels.Columns = (_channels.Count + 1) * ugWeeks.Columns;
             for (int j = 0; j < ugWeeks.Columns; j++)
             {
-                for (int i = 0; i < _channels.Count; i++)
+                for (int i = 0; i < _channels.Count + 1; i++)
                 {
 
                     Border border = new Border();
                     border.BorderBrush = Brushes.Black;
-                    border.Background = Brushes.LightGoldenrodYellow;
+                    if ( i == _channels.Count || j == ugWeeks.Columns - 1 )
+                    {
+                        border.Background = Brushes.Yellow;
+                    }
+                    else
+                    {
+                        border.Background = Brushes.LightGoldenrodYellow;
+                    }
+
                     if (i == 0 && j == 0)
                     {
                         border.BorderThickness = new Thickness(3, 1, 3, 1);
@@ -129,14 +140,23 @@ namespace CampaignEditor.UserControls
 
                     textBlock.HorizontalAlignment = HorizontalAlignment.Center;
                     textBlock.VerticalAlignment = VerticalAlignment.Center;
-                    textBlock.Text = _channels[i].chname.Trim();
+                    
+                    if (i == _channels.Count)
+                    {
+                        textBlock.Text = "Total";
+                    }
+                    else
+                    {
+                        textBlock.Text = _channels[i].chname.Trim();
+                    }
+                    
                     border.Child = textBlock;
 
                     ugChannels.Children.Add(border);
 
                 }
-            }
 
+            }
 
             //Goals
             ugGoals.Columns = ugChannels.Columns * 3;
@@ -162,13 +182,13 @@ namespace CampaignEditor.UserControls
                     switch (i % 3)
                     {
                         case 0:
-                            textBlock.Text = "INS";
+                            textBlock.Text = "BUD";
                             break;
                         case 1:
                             textBlock.Text = "GRP";
                             break;
                         case 2:
-                            textBlock.Text = "LEN";
+                            textBlock.Text = "INS";
                             break;
                     }
                     border.Child = textBlock;
@@ -196,6 +216,26 @@ namespace CampaignEditor.UserControls
             }
 
         }
+
+        private void AddWeeksHeaderTotal()
+        {
+            Border border = new Border();
+            border.BorderBrush = Brushes.Black;
+            border.Background = Brushes.Yellow;
+
+            border.BorderThickness = new Thickness(1, 3, 3, 1);
+
+            TextBlock textBlock = new TextBlock();
+
+            textBlock.HorizontalAlignment = HorizontalAlignment.Center;
+            textBlock.VerticalAlignment = VerticalAlignment.Center;
+            textBlock.Text = "Total";
+
+            border.Child = textBlock;
+
+            ugWeeks.Children.Add(border);
+        }
+
         private int GetWeekOfYear(DateTime date)
         {
             System.Globalization.Calendar calendar = CultureInfo.CurrentCulture.Calendar;
@@ -208,9 +248,11 @@ namespace CampaignEditor.UserControls
 
         private void SetWidth()
         {
-            double weekWidth = 200;
             int weeksNum = ugWeeks.Children.Count;
-            double headerWidth = weeksNum * weekWidth;
+            int channelsNum = ugChannels.Children.Count;
+
+            double weekWidth = 100;
+            double headerWidth = weeksNum * weekWidth * (_channels.Count + 1);
 
             ugWeeks.Width = headerWidth;
             ugChannels.Width = headerWidth;
