@@ -7,17 +7,24 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800" Background="White">
     <Grid>
-        <DataGrid HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
+        <DataGrid x:Name="dgGrid" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
+                  HorizontalContentAlignment="Center" AutoGenerateColumns="False"
+                  HeadersVisibility="None"
                   CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="False"
                   CanUserSortColumns="False" CanUserResizeRows="False">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="INS" Width="*"
-                                    IsReadOnly="True"/>
-                <DataGridTextColumn Header="BDG" Width="*"
-                                    IsReadOnly="True"/>
-                <DataGridTextColumn Header="GRP" Width="*"
-                                    IsReadOnly="True"/>
+                <DataGridTextColumn Width="*"
+                                    IsReadOnly="True" Binding="{Binding Insertations, Mode=TwoWay}"/>
+                <DataGridTextColumn Width="*"
+                                    IsReadOnly="True" Binding="{Binding Grp, Mode=TwoWay}"/>
+                <DataGridTextColumn Width="*"
+                                    IsReadOnly="True" Binding="{Binding Budget, Mode=TwoWay}"/>
             </DataGrid.Columns>
+            <DataGrid.RowStyle>
+                <Style TargetType="DataGridRow">
+                    <Setter Property="VerticalContentAlignment" Value="Stretch"/>
+                </Style>
+            </DataGrid.RowStyle>
         </DataGrid>
     </Grid>
 </UserControl>

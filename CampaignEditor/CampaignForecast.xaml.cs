@@ -166,6 +166,7 @@ namespace CampaignEditor.UserControls
             sgGrid._mediaPlanTermController = _mediaPlanTermController;
             sgGrid._spotController = _spotController;
             sgGrid._channelController = _channelController;
+            sgGrid._allMediaPlans = _allMediaPlans;
 
             await sgGrid.Initialize(_campaign);
         }

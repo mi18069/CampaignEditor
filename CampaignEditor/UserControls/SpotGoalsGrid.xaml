@@ -25,13 +25,21 @@
                      HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Rows="1"/>
         <UniformGrid x:Name="ugChannels" Grid.Row="1" Grid.Column="1" 
                      HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Rows="1"/>
-        <UniformGrid x:Name="ugGoals" Grid.Row="2" Grid.Column="1" 
-                     HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Rows="1"/>
-        <UniformGrid x:Name="ugSpots" Grid.Row="3" Grid.Column="0" 
-                     HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Columns="1"/>
-        <DataGrid x:Name="dgGoals" Grid.Row="3" Grid.Column="1" 
+        <UniformGrid x:Name="ugGoals" Grid.Row="2" Grid.Column="1"
+                     HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+
+        <DataGrid x:Name="dgSpots" Grid.Row="3" Grid.Column="0" 
                   HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                  HeadersVisibility="None" 
-                  CanUserReorderColumns="False" CanUserResizeColumns="False" CanUserResizeRows="False"/>
+                  HeadersVisibility="None" AutoGenerateColumns="False" CanUserSortColumns="False"
+                  CanUserResizeRows="False">
+            <DataGrid.Columns>
+                <DataGridTextColumn Width="auto" IsReadOnly="True" Binding="{Binding Label}"
+                                    FontWeight="Bold"/>
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <UniformGrid x:Name="ugGrid" Grid.Row="3" Grid.Column="1" Rows="1"
+                     HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+
     </Grid>
 </UserControl>

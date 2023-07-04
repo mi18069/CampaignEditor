@@ -1,6 +1,7 @@
 ﻿using CampaignEditor.Controllers;
 using CampaignEditor.DTOs.CampaignDTO;
 using Database.DTOs.ChannelDTO;
+using Database.DTOs.MediaPlanTermDTO;
 using Database.DTOs.SpotDTO;
 using Database.Entities;
 using System;
@@ -9,6 +10,7 @@ using System.Collections.ObjectModel;
 using System.Data;
 using System.Globalization;
 using System.Linq;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -32,8 +34,7 @@ namespace CampaignEditor.UserControls
         List<SpotDTO> _spots = new List<SpotDTO>();
         List<ChannelDTO> _channels = new List<ChannelDTO>();
 
-        public ObservableCollection<MediaPlanTuple> _allMediaPlans =
-            new ObservableCollection<MediaPlanTuple>();
+        public ObservableCollection<MediaPlanTuple> _allMediaPlans;
 
         CampaignDTO _campaign;
 
@@ -77,8 +78,8 @@ namespace CampaignEditor.UserControls
 
         private void CreateOutboundHeaders()
         {
-            var firstWeekNum = GetWeekOfYear(startDate);
-            var lastWeekNum = GetWeekOfYear(endDate);
+            int firstWeekNum = GetWeekOfYear(startDate);
+            int lastWeekNum = GetWeekOfYear(endDate);
 
             // Add headers
             // Weeks
@@ -182,39 +183,92 @@ namespace CampaignEditor.UserControls
                     switch (i % 3)
                     {
                         case 0:
-                            textBlock.Text = "BUD";
+                            textBlock.Text = "INS";
                             break;
                         case 1:
                             textBlock.Text = "GRP";
                             break;
                         case 2:
-                            textBlock.Text = "INS";
+                            textBlock.Text = "BUD";
                             break;
                     }
                     border.Child = textBlock;
                     ugGoals.Children.Add(border);
                 }
-            }       
-
-            //Spot
-            ugSpots.Rows = _spots.Count();
-            for (int i = 0; i < _spots.Count; i++)
-            {
-                Border border = new Border();
-                border.BorderBrush = Brushes.Black;
-                border.Background = Brushes.LightGoldenrodYellow;
-                border.BorderThickness = new Thickness(3, 3, 3, 3);
-                TextBlock textBlock = new TextBlock();
-
-                textBlock.VerticalAlignment = VerticalAlignment.Center;
-                textBlock.Text = _spots[i].spotcode + ": " + _spots[i].spotname.Trim();
-
-                border.Child = textBlock;
-
-                ugSpots.Children.Add(border);
-                
             }
 
+            // Grid Goals
+            for (int i=0; i < ugWeeks.Children.Count; i++)
+            {
+                int weekNum = firstWeekNum + i;
+
+                for (int j=0; j <= _channels.Count; j++)
+                {
+                    // Filtering mediaPlans by channels 
+                    ObservableCollection<MediaPlanTuple> channelMpTuples;
+                    if (j == _channels.Count)
+                    {
+                        channelMpTuples = new ObservableCollection<MediaPlanTuple>(_allMediaPlans);                     
+                    }
+                    else
+                    {
+                        int channelId = _channels[j].chid;
+                        channelMpTuples = new ObservableCollection<MediaPlanTuple>(_allMediaPlans.Where(tuple => tuple.MediaPlan.chid == channelId));
+                    }
+
+                    var mpTuples = new List<MediaPlanTuple>();
+                    foreach (var mpTuple in channelMpTuples)
+                    {
+                        var allMpTerms = mpTuple.Terms;
+                        ObservableCollection<MediaPlanTermDTO> mpTerms;
+                        
+                        if (weekNum <= lastWeekNum)
+                        {
+                            mpTerms = new ObservableCollection<MediaPlanTermDTO>(mpTuple.Terms.Where(t => t != null &&
+                                        GetWeekOfYear(t.date.ToDateTime(TimeOnly.Parse("00:00 AM"))) == weekNum));
+                        }
+                        else
+                        {
+                            mpTerms = new ObservableCollection<MediaPlanTermDTO>(mpTuple.Terms.Where(t => t != null));
+                        }
+                        mpTuples.Add(new MediaPlanTuple(mpTuple.MediaPlan, mpTerms));
+                    }
+                    var subGrid = new SpotGoalsSubGrid(_spots, mpTuples);
+                    ugGrid.Children.Add(subGrid);
+                }
+            }
+
+            // Spots
+            foreach (SpotDTO spot in _spots)
+            {
+                string label = spot.spotcode.Trim() + ": " + spot.spotname.Trim();
+                dgSpots.Items.Add(new SpotLabel { Label = label });
+            }
+           
+
+        }
+
+        public class SpotLabel
+        {
+            public string Label { get; set; }
+        }
+
+        private ObservableCollection<MediaPlanTermDTO> GetTermsWithinWeek(ObservableCollection<MediaPlanTermDTO> allMpTerms, int weekNum)
+        {
+            ObservableCollection<MediaPlanTermDTO> mpTerms = new ObservableCollection<MediaPlanTermDTO>();
+
+            foreach (var mpTerm in allMpTerms)
+            {
+                if (mpTerm != null)
+                {
+                    if (GetWeekOfYear(mpTerm.date.ToDateTime(TimeOnly.Parse("00:00 AM"))) == weekNum)
+                    {
+                        mpTerms.Add(mpTerm);
+                    }
+                }              
+            }
+
+            return mpTerms;
         }
 
         private void AddWeeksHeaderTotal()
@@ -251,12 +305,14 @@ namespace CampaignEditor.UserControls
             int weeksNum = ugWeeks.Children.Count;
             int channelsNum = ugChannels.Children.Count;
 
-            double weekWidth = 100;
+            double weekWidth = 140;
             double headerWidth = weeksNum * weekWidth * (_channels.Count + 1);
 
             ugWeeks.Width = headerWidth;
             ugChannels.Width = headerWidth;
             ugGoals.Width = headerWidth;
+            ugGrid.Width = headerWidth;
+            ugGrid.Height = dgSpots.Height;
         }
     }
 }
