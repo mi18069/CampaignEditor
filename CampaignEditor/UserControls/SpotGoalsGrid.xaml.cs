@@ -216,7 +216,7 @@ namespace CampaignEditor.UserControls
                         channelMpTuples = new ObservableCollection<MediaPlanTuple>(_allMediaPlans.Where(tuple => tuple.MediaPlan.chid == channelId));
                     }
 
-                    var mpTuples = new List<MediaPlanTuple>();
+                    var mpTuples = new ObservableCollection<MediaPlanTuple>();
                     foreach (var mpTuple in channelMpTuples)
                     {
                         var allMpTerms = mpTuple.Terms;

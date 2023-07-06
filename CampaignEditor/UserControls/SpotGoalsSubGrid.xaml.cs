@@ -1,10 +1,13 @@
 ﻿using CampaignEditor.Controllers;
+using CampaignEditor.Helpers;
 using Database.DTOs.ChannelDTO;
 using Database.DTOs.MediaPlanTermDTO;
 using Database.DTOs.SpotDTO;
 using Database.Entities;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Windows.Controls;
 
 namespace CampaignEditor.UserControls
@@ -15,8 +18,9 @@ namespace CampaignEditor.UserControls
     public partial class SpotGoalsSubGrid : UserControl
     {
 
-        private Dictionary<Char, SpotGoals> _dictionary = new Dictionary<Char, SpotGoals>();
-        private IEnumerable<MediaPlanTuple> _mpTuples;
+        private Dictionary<Char, SpotGoals> _dictionary = new Dictionary<char, SpotGoals>();
+        private ObservableCollection<SpotGoals> _values;
+        private ObservableCollection<MediaPlanTuple> _mpTuples;
         private Dictionary<Char, int> _spotLengths = new Dictionary<char, int>();
 
         public Dictionary<Char, SpotGoals> Dict
@@ -24,23 +28,26 @@ namespace CampaignEditor.UserControls
             get { return _dictionary; }
         }
 
-        public SpotGoalsSubGrid(IEnumerable<SpotDTO> spots, IEnumerable<MediaPlanTuple> mpTuples)
+        public SpotGoalsSubGrid(IEnumerable<SpotDTO> spots, ObservableCollection<MediaPlanTuple> mpTuples)
         {
             InitializeComponent();
             _mpTuples = mpTuples;
+
             foreach (var spot in spots)
             {
                 _dictionary.Add(spot.spotcode[0], new SpotGoals());
                 _spotLengths.Add(spot.spotcode[0], spot.spotlength);
             }
 
-            CalculateProperties();
+            CalculateGoals();
+            SubscribeToMediaPlanTerms();
 
             dgGrid.ItemsSource = _dictionary.Values;
         }
 
-        private void CalculateProperties()
+        private void CalculateGoals()
         {
+            ResetDictionaryValues();
             foreach (var mpTuple in _mpTuples)
             {
                 var mediaPlan = mpTuple.MediaPlan;
@@ -63,7 +70,39 @@ namespace CampaignEditor.UserControls
                     }
                 }
             }
+            _values = new ObservableCollection<SpotGoals>(_dictionary.Values);
+            dgGrid.ItemsSource = _values;
 
         }
+
+        private void ResetDictionaryValues()
+        {
+            foreach (SpotGoals spotGoal in _dictionary.Values)
+            {
+                spotGoal.Grp = 0;
+                spotGoal.Insertations = 0;
+                spotGoal.Budget = 0;
+            }
+        }
+
+
+        public void SubscribeToMediaPlanTerms()
+        {
+            foreach (MediaPlanTuple mediaPlanTuple in _mpTuples)
+            {
+                foreach (MediaPlanTerm mpTerm in mediaPlanTuple.Terms)
+                {
+                    mpTerm.PropertyChanged += MediaPlanTerm_PropertyChanged;
+                }             
+            }
+        }
+
+        private void MediaPlanTerm_PropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            // Handle the changes in the MediaPlanTerm attributes here
+            CalculateGoals();
+
+        }
+
     }
 }

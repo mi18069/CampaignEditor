@@ -255,9 +255,10 @@ namespace CampaignEditor.UserControls
             DataGridCell cell = sender as DataGridCell;
             TextBlock textBlock = cell.Content as TextBlock;
 
-            DateTime currentDate = new DateTime(2023, 05, 20);
+            DateTime currentDate = DateTime.Now;
             var mpTerm = GetSelectedMediaPlanTerm(cell);
-            if (mpTerm == null || mpTerm.Date < DateOnly.FromDateTime(currentDate))
+            var a = mpTerm.Date;
+            if (mpTerm == null || mpTerm.Date <= DateOnly.FromDateTime(currentDate))
             {
                 return;
             }
