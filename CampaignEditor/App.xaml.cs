@@ -47,6 +47,7 @@ namespace CampaignEditor
                     services.AddFormFactory<Config>();
                     services.AddFormFactory<AllUsers>();
                     services.AddFormFactory<MediaPlanConverter>();
+                    services.AddFormFactory<MediaPlanTermConverter>();
                     services.AddFormFactory<MediaPlanGrid>();
                     services.AddFormFactory<CampaignForecastView>();
                     services.AddFormFactory<CampaignForecastDates>();

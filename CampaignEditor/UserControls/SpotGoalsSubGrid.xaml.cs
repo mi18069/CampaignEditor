@@ -46,7 +46,7 @@ namespace CampaignEditor.UserControls
                 var mediaPlan = mpTuple.MediaPlan;
                 foreach (var mpTerm in mpTuple.Terms)
                 {
-                    var spotcodes = mpTerm.spotcode;
+                    var spotcodes = mpTerm.Spotcode;
 
                     if (spotcodes != null && spotcodes.Length > 0)
                     {

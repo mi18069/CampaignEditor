@@ -58,10 +58,10 @@ namespace Database.Repositories
 
             mediaPlanTerm = mediaPlanTerm.Select(item => new MediaPlanTerm()
             {
-                xmptermid = item.xmptermid,
-                xmpid = item.xmpid,
-                date = DateOnly.FromDateTime(item.datum),
-                spotcode = item.spotcode
+                Xmptermid = item.xmptermid,
+                Xmpid = item.xmpid,
+                Date = DateOnly.FromDateTime(item.datum),
+                Spotcode = item.spotcode
             });
 
             return _mapper.Map<MediaPlanTermDTO>(mediaPlanTerm.FirstOrDefault());
@@ -76,10 +76,10 @@ namespace Database.Repositories
 
             allMediaPlanTerms = allMediaPlanTerms.Select(item => new MediaPlanTerm()
             {
-                xmptermid = item.xmptermid,
-                xmpid = item.xmpid,
-                date = DateOnly.FromDateTime(item.datum),
-                spotcode = item.spotcode
+                Xmptermid = item.xmptermid,
+                Xmpid = item.xmpid,
+                Date = DateOnly.FromDateTime(item.datum),
+                Spotcode = item.spotcode
             });
 
             return _mapper.Map<IEnumerable<MediaPlanTermDTO>>(allMediaPlanTerms);
