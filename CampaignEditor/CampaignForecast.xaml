@@ -48,9 +48,14 @@
                                  SelectionChanged="dgMediaPlans_SelectionChanged"/>
 
             <TabControl Grid.Row="6" Grid.Column="2" Grid.ColumnSpan="3">
-                <TabItem Header="Goals" >
+                <TabItem Header="Spots Goals" >
                     <ScrollViewer HorizontalScrollBarVisibility="Visible">
                         <local:SpotGoalsGrid x:Name="sgGrid" />
+                    </ScrollViewer>
+                </TabItem>
+                <TabItem Header="Channels Goals" >
+                    <ScrollViewer HorizontalScrollBarVisibility="Visible">
+
                     </ScrollViewer>
                 </TabItem>
                 <TabItem Header="Data">

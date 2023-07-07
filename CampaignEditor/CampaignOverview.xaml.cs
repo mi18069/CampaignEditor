@@ -44,7 +44,7 @@ namespace CampaignEditor
 
         private bool channelsModified = false;
         private Channels fChannels = null;
-        private List<Tuple<ChannelDTO, PricelistDTO, ActivityDTO>> _channels = null;
+        private List<Tuple<Database.DTOs.ChannelDTO.ChannelDTO, PricelistDTO, ActivityDTO>> _channels = null;
 
         private bool infoModified = false;
         private CmpInfo fInfo = null;
