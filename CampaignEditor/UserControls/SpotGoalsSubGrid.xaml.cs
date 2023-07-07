@@ -1,7 +1,4 @@
-﻿using CampaignEditor.Controllers;
-using CampaignEditor.Helpers;
-using Database.DTOs.ChannelDTO;
-using Database.DTOs.MediaPlanTermDTO;
+﻿using CampaignEditor.Helpers;
 using Database.DTOs.SpotDTO;
 using Database.Entities;
 using System;
@@ -19,13 +16,18 @@ namespace CampaignEditor.UserControls
     {
 
         private Dictionary<Char, SpotGoals> _dictionary = new Dictionary<char, SpotGoals>();
-        private ObservableCollection<SpotGoals> _values;
+        private ObservableRangeCollection<SpotGoals> _values = new ObservableRangeCollection<SpotGoals>();
         private ObservableCollection<MediaPlanTuple> _mpTuples;
         private Dictionary<Char, int> _spotLengths = new Dictionary<char, int>();
 
         public Dictionary<Char, SpotGoals> Dict
         {
             get { return _dictionary; }
+        }
+
+        public ObservableCollection<SpotGoals> Values
+        {
+            get { return _values; }
         }
 
         public SpotGoalsSubGrid(IEnumerable<SpotDTO> spots, ObservableCollection<MediaPlanTuple> mpTuples)
@@ -41,7 +43,6 @@ namespace CampaignEditor.UserControls
 
             CalculateGoals();
             SubscribeToMediaPlanTerms();
-
             dgGrid.ItemsSource = _dictionary.Values;
         }
 
@@ -70,7 +71,7 @@ namespace CampaignEditor.UserControls
                     }
                 }
             }
-            _values = new ObservableCollection<SpotGoals>(_dictionary.Values);
+            _values.ReplaceRange(_dictionary.Values);
             dgGrid.ItemsSource = _values;
 
         }

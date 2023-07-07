@@ -201,6 +201,12 @@ namespace CampaignEditor.UserControls
             for (int i=0; i < ugWeeks.Children.Count; i++)
             {
                 int weekNum = firstWeekNum + i;
+                
+                if (i == ugWeeks.Children.Count - 1)
+                {
+                    AddTotalSubGrids();
+                    continue;
+                }
 
                 for (int j=0; j <= _channels.Count; j++)
                 {
@@ -208,7 +214,17 @@ namespace CampaignEditor.UserControls
                     ObservableCollection<MediaPlanTuple> channelMpTuples;
                     if (j == _channels.Count)
                     {
-                        channelMpTuples = new ObservableCollection<MediaPlanTuple>(_allMediaPlans);                     
+                        ObservableCollection<ObservableCollection<SpotGoals>> valuesList = new ObservableCollection<ObservableCollection<SpotGoals>>();
+                        int n = ugGrid.Children.Count;
+                        for (int k=0; k<_channels.Count; k++)
+                        { 
+                            SpotGoalsSubGrid sg = ugGrid.Children[n-1-k] as SpotGoalsSubGrid;
+                            ObservableCollection<SpotGoals> dg = sg.Values;
+                            valuesList.Add(dg);
+                        }
+                        var totalSubGrid = new SpotGoalsTotalSubGrid(valuesList);
+                        ugGrid.Children.Add(totalSubGrid);
+                        continue;
                     }
                     else
                     {
@@ -253,22 +269,39 @@ namespace CampaignEditor.UserControls
             public string Label { get; set; }
         }
 
-        private ObservableCollection<MediaPlanTermDTO> GetTermsWithinWeek(ObservableCollection<MediaPlanTermDTO> allMpTerms, int weekNum)
+        private void AddTotalSubGrids()
         {
-            ObservableCollection<MediaPlanTermDTO> mpTerms = new ObservableCollection<MediaPlanTermDTO>();
-
-            foreach (var mpTerm in allMpTerms)
+            for (int j = 0; j <= _channels.Count; j++)
             {
-                if (mpTerm != null)
-                {
-                    if (GetWeekOfYear(mpTerm.date.ToDateTime(TimeOnly.Parse("00:00 AM"))) == weekNum)
-                    {
-                        mpTerms.Add(mpTerm);
-                    }
-                }              
-            }
 
-            return mpTerms;
+                if (j == _channels.Count)
+                {
+                    ObservableCollection<ObservableCollection<SpotGoals>> totalValuesList = new ObservableCollection<ObservableCollection<SpotGoals>>();
+                    int m = ugGrid.Children.Count;
+                    for (int k = 0; k < _channels.Count; k++)
+                    {
+                        SpotGoalsTotalSubGrid tsg = ugGrid.Children[m - 1 - k] as SpotGoalsTotalSubGrid;
+                        ObservableCollection<SpotGoals> totalValues = tsg.Values;
+                        totalValuesList.Add(totalValues);
+                    }
+                    var totalsSubGrid = new SpotGoalsTotalSubGrid(totalValuesList);
+                    ugGrid.Children.Add(totalsSubGrid);
+                }
+                else
+                {
+                    ObservableCollection<ObservableCollection<SpotGoals>> valuesList = new ObservableCollection<ObservableCollection<SpotGoals>>();
+                    int n = ugGrid.Children.Count;
+
+                    for (int k =  n - (_channels.Count + 1); k >= 0; k -= _channels.Count + 1)
+                    {
+                        SpotGoalsSubGrid sg = ugGrid.Children[k] as SpotGoalsSubGrid;
+                        ObservableCollection<SpotGoals> values = sg.Values;
+                        valuesList.Add(values);
+                    }
+                    var totalSubGrid = new SpotGoalsTotalSubGrid(valuesList);
+                    ugGrid.Children.Add(totalSubGrid);
+                }             
+            }
         }
 
         private void AddWeeksHeaderTotal()

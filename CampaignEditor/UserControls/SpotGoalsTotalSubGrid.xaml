@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="CampaignEditor.UserControls.SpotGoalsSubGrid"
+﻿<UserControl x:Class="CampaignEditor.UserControls.SpotGoalsTotalSubGrid"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -11,10 +11,10 @@
                   HorizontalContentAlignment="Center" AutoGenerateColumns="False"
                   HeadersVisibility="None"
                   CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="False"
-                  CanUserSortColumns="False" CanUserResizeRows="False" >
+                  CanUserSortColumns="False" CanUserResizeRows="False">
             <DataGrid.Columns>
                 <DataGridTextColumn Width="*"
-                                    IsReadOnly="True" Binding="{Binding Insertations, NotifyOnTargetUpdated=True, Mode=TwoWay}" />
+                                    IsReadOnly="True" Binding="{Binding Insertations, Mode=TwoWay}"/>
                 <DataGridTextColumn Width="*"
                                     IsReadOnly="True" Binding="{Binding Grp, Mode=TwoWay}"/>
                 <DataGridTextColumn Width="*"

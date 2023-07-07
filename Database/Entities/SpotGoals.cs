@@ -2,15 +2,19 @@
 using Database.DTOs.MediaPlanTermDTO;
 using Database.DTOs.SpotDTO;
 using System;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 
 namespace Database.Entities
 {
-    public class SpotGoals
+    public class SpotGoals : INotifyPropertyChanged
     {
 
         private int insertations;
         private double grp;
         private double budget;
+
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         public int Insertations
         {
@@ -36,6 +40,9 @@ namespace Database.Entities
             Budget = 0;
         }
 
-        
+        public void OnPropertyChanged([CallerMemberName] string propertyname = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyname));
+        }
     }
 }
