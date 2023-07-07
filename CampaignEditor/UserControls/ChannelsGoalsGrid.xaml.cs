@@ -10,18 +10,21 @@ using System.Windows.Controls;
 namespace CampaignEditor.UserControls
 {
     /// <summary>
-    /// Interaction logic for ProgramGoalsGrid.xaml
+    /// Interaction logic for ChannelsGoalsGrid.xaml
     /// </summary>
-    public partial class ProgramGoalsGrid : UserControl
+    public partial class ChannelsGoalsGrid : UserControl
     {
         Dictionary<int, ProgramGoals> _dictionary = new Dictionary<int, ProgramGoals>();
         ObservableRangeCollection<ProgramGoals> _values = new ObservableRangeCollection<ProgramGoals>();
         ObservableCollection<MediaPlan> _mediaPlans;
 
-        public ProgramGoalsGrid(ObservableCollection<MediaPlan> mediaPlans, List<ChannelDTO> channels)
+        public ChannelsGoalsGrid()
         {
-            InitializeComponent();
+            InitializeComponent();         
+        }
 
+        public void Initialize(ObservableCollection<MediaPlan> mediaPlans, List<ChannelDTO> channels)
+        {
             _mediaPlans = mediaPlans;
             foreach (ChannelDTO channel in channels)
             {
@@ -38,9 +41,9 @@ namespace CampaignEditor.UserControls
             foreach (MediaPlan mediaPlan in _mediaPlans)
             {
                 int chid = mediaPlan.chid;
-                _dictionary[chid].Budget += mediaPlan.price;
+                _dictionary[chid].Insertations += mediaPlan.Insertations;
                 _dictionary[chid].Grp += mediaPlan.Insertations * (mediaPlan.Amrp1 + mediaPlan.Amrp2 + mediaPlan.Amrp3);
-                _dictionary[chid].Insertations = mediaPlan.Insertations;
+                _dictionary[chid].Budget += mediaPlan.price;
             }
 
             _values.ReplaceRange(_dictionary.Values);
@@ -53,9 +56,9 @@ namespace CampaignEditor.UserControls
             var mediaPlans = _mediaPlans.Where(mp => mp.chid == chid);
             foreach (MediaPlan mediaPlan in mediaPlans)
             {
-                _dictionary[chid].Budget += mediaPlan.price;
+                _dictionary[chid].Insertations += mediaPlan.Insertations;
                 _dictionary[chid].Grp += mediaPlan.Insertations * (mediaPlan.Amrp1 + mediaPlan.Amrp2 + mediaPlan.Amrp3);
-                _dictionary[chid].Insertations = mediaPlan.Insertations;
+                _dictionary[chid].Budget += mediaPlan.price;           
             }
             _values.ReplaceRange(_dictionary.Values);
             dgGrid.ItemsSource = _values;

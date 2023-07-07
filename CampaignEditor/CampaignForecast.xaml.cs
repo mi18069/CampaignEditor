@@ -1,5 +1,6 @@
 ﻿using CampaignEditor.Controllers;
 using CampaignEditor.DTOs.CampaignDTO;
+using CampaignEditor.Helpers;
 using CampaignEditor.StartupHelpers;
 using Database.DTOs.ChannelDTO;
 using Database.DTOs.GoalsDTO;
@@ -160,7 +161,23 @@ namespace CampaignEditor.UserControls
             // For dgMediaPlans
             await InitializeDataGrid();
             await InitializeSGGrid();
+            InitializeCGGrid();
 
+        }
+
+        private void InitializeCGGrid()
+        {
+            ObservableCollection<MediaPlan> mediaPlans = new ObservableCollection<MediaPlan>();
+            foreach (var mpTuple in _allMediaPlans)
+            {
+                mediaPlans.Add(mpTuple.MediaPlan);
+            }
+            List<ChannelDTO> channels = new List<ChannelDTO>();
+            foreach (ChannelDTO channel in lvChannels.Items) 
+            {
+                channels.Add(channel);
+            }
+            cgGrid.Initialize(mediaPlans, channels);
         }
 
         private async Task InitializeSGGrid()

@@ -53,10 +53,8 @@
                         <local:SpotGoalsGrid x:Name="sgGrid" />
                     </ScrollViewer>
                 </TabItem>
-                <TabItem Header="Channels Goals" >
-                    <ScrollViewer HorizontalScrollBarVisibility="Visible">
-
-                    </ScrollViewer>
+                <TabItem Header="Channels Goals" Height="20" VerticalAlignment="Top" >
+                    <local:ChannelsGoalsGrid x:Name="cgGrid"/>
                 </TabItem>
                 <TabItem Header="Data">
                     <DataGrid x:Name="dgHist" 
