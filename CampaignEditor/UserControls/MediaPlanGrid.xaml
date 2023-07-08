@@ -16,6 +16,8 @@
                     CanUserDeleteRows="False"
                     SelectionMode="Single"
                     HorizontalScrollBarVisibility="Visible"
+                  EnableRowVirtualization="True"
+                  EnableColumnVirtualization="True"
                   SelectionChanged="DataGrid_SelectionChanged"
                   MouseRightButtonDown="DataGrid_MouseRightButtonDown">
             <DataGrid.CellStyle>

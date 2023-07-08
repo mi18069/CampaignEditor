@@ -55,7 +55,7 @@ namespace CampaignEditor.UserControls
         private ObservableCollection<MediaPlanTuple> _allMediaPlans =
             new ObservableCollection<MediaPlanTuple>();
 
-        private ObservableCollection<ChannelDTO> _selectedChannels = new ObservableCollection<ChannelDTO>();
+        private ObservableRangeCollection<ChannelDTO> _selectedChannels = new ObservableRangeCollection<ChannelDTO>();
 
         private ObservableCollection<MediaPlanHist> _showMPHist = new ObservableCollection<MediaPlanHist>();
 
@@ -153,7 +153,6 @@ namespace CampaignEditor.UserControls
         public async Task LoadData()
         {
             // Filling lvChannels and dictionary
-
             await FillLvChannels();
             await FillMPList();
             await FillGoals();
@@ -509,12 +508,12 @@ namespace CampaignEditor.UserControls
         #region lvChannels
         private void lvChannels_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-
-            _selectedChannels.Clear();
+            List<ChannelDTO> channels = new List<ChannelDTO>();
             foreach (ChannelDTO channel in lvChannels.SelectedItems)
             {
-                _selectedChannels.Add(channel);
+                channels.Add(channel);
             }
+            _selectedChannels.ReplaceRange(channels);
         }
 
         #region ContextMenu

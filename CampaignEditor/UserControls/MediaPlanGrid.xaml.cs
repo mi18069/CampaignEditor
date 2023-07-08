@@ -19,6 +19,7 @@ using CampaignEditor.StartupHelpers;
 using System.ComponentModel;
 using System.Collections.Specialized;
 using Database.DTOs.ChannelDTO;
+using CampaignEditor.Helpers;
 
 namespace CampaignEditor.UserControls
 {
@@ -76,7 +77,7 @@ namespace CampaignEditor.UserControls
         {
             get { return dgMediaPlans; }
         }
-
+        ICollectionView myDataView;
         public async Task Initialize(CampaignDTO campaign)
         {
 
@@ -98,14 +99,14 @@ namespace CampaignEditor.UserControls
                 spotCodes.Add((char)('A' + i));
             }
 
-            ICollectionView myDataView = CollectionViewSource.GetDefaultView(_allMediaPlans);
+            myDataView = CollectionViewSource.GetDefaultView(_allMediaPlans);
             dgMediaPlans.ItemsSource = myDataView;
 
-            myDataView.SortDescriptions.Add(new SortDescription("MediaPlan.name", ListSortDirection.Ascending));
+            myDataView.SortDescriptions.Add(new SortDescription("MediaPlan.stime", ListSortDirection.Ascending));
             myDataView.Filter = d =>
             {
                 var mediaPlan = ((MediaPlanTuple)d).MediaPlan;
-
+           
                 return mediaPlan.active && _selectedChannels.Any(c => c.chid == mediaPlan.chid);
             };
 
@@ -117,9 +118,7 @@ namespace CampaignEditor.UserControls
         // Method to handle the CollectionChanged event
         private void OnCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
-            // Call Refresh() on the view to update it
-            ICollectionView view = CollectionViewSource.GetDefaultView(_allMediaPlans);
-            view.Refresh();
+            myDataView.Refresh();
         }
 
         public event EventHandler<SelectionChangedEventArgs> SelectionChanged;
