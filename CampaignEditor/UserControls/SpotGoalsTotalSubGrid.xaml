@@ -11,7 +11,9 @@
                   HorizontalContentAlignment="Center" AutoGenerateColumns="False"
                   HeadersVisibility="None"
                   CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="False"
-                  CanUserSortColumns="False" CanUserResizeRows="False">
+                  CanUserSortColumns="False" CanUserResizeRows="False" IsHitTestVisible="False"
+                  AlternatingRowBackground="LightGoldenrodYellow" BorderBrush="Black"
+                  EnableRowVirtualization="False" EnableColumnVirtualization="False">
             <DataGrid.Columns>
                 <DataGridTextColumn Width="*"
                                     IsReadOnly="True" Binding="{Binding Insertations, Mode=TwoWay}"/>

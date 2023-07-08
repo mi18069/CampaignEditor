@@ -257,7 +257,6 @@ namespace CampaignEditor.UserControls
 
             DateTime currentDate = DateTime.Now;
             var mpTerm = GetSelectedMediaPlanTerm(cell);
-            var a = mpTerm.Date;
             if (mpTerm == null || mpTerm.Date <= DateOnly.FromDateTime(currentDate))
             {
                 return;
@@ -369,7 +368,9 @@ namespace CampaignEditor.UserControls
             var mpTerms = tuple.Terms;
             var index = cell.Column.DisplayIndex - mediaPlanColumns;
             var mpTerm = mpTerms[index];
-            if (mpTerm == null)
+            DateTime currentDate = DateTime.Now;
+
+            if (mpTerm == null || mpTerm.Date <= DateOnly.FromDateTime(currentDate))
             {
                 e.Handled = true;
                 return;

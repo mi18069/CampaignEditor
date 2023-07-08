@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Linq;
 using System.Windows.Controls;
 
 namespace CampaignEditor.UserControls
@@ -40,7 +41,7 @@ namespace CampaignEditor.UserControls
                 _dictionary.Add(spot.spotcode[0], new SpotGoals());
                 _spotLengths.Add(spot.spotcode[0], spot.spotlength);
             }
-
+            _dictionary.OrderBy(kv => kv.Key);
             CalculateGoals();
             SubscribeToMediaPlanTerms();
             dgGrid.ItemsSource = _dictionary.Values;

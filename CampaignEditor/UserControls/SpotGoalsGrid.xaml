@@ -18,7 +18,7 @@
             <RowDefinition Height="0.2*"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <Rectangle Grid.Row="0" Grid.Column="0" Grid.RowSpan="3" Fill="Gray"/>
+        <Rectangle Grid.Row="0" Grid.Column="0" Grid.RowSpan="3" Fill="LightGray"/>
         <UniformGrid x:Name="ugWeeks" Grid.Row="0" Grid.Column="1" 
                      HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Rows="1"/>
         <UniformGrid x:Name="ugChannels" Grid.Row="1" Grid.Column="1" 
@@ -29,10 +29,16 @@
         <DataGrid x:Name="dgSpots" Grid.Row="3" Grid.Column="0" 
                   HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                   HeadersVisibility="None" AutoGenerateColumns="False" CanUserSortColumns="False"
-                  CanUserResizeRows="False">
+                  CanUserResizeRows="False" IsHitTestVisible="False" BorderBrush="Black">
             <DataGrid.Columns>
                 <DataGridTextColumn Width="auto" IsReadOnly="True" Binding="{Binding Label}"
-                                    FontWeight="Bold"/>
+                                    FontWeight="Bold">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="{x:Type TextBlock}">
+                            <Setter Property="Background" Value="LightGoldenrodYellow" />
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
             </DataGrid.Columns>
         </DataGrid>
 
