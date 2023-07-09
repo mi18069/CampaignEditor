@@ -23,6 +23,7 @@ namespace CampaignEditor
         private SpotController _spotController;
 
         public bool spotsModified = false;
+        public bool shouldClose = false;
         private ObservableCollection<SpotDTO> _spotlist = new ObservableCollection<SpotDTO>();
         private CampaignDTO _campaign;
 
@@ -258,8 +259,12 @@ namespace CampaignEditor
         // Overriding OnClosing because click on x button should only hide window
         protected override void OnClosing(CancelEventArgs e)
         {
-            e.Cancel = true;
-            Hide();
+            if (!shouldClose)
+            {
+                e.Cancel = true;
+                Hide();
+            }
+
         }
    
     }

@@ -28,6 +28,7 @@ namespace CampaignEditor
         }
 
         public bool goalsModified = false;
+        public bool shouldClose = false;
         public Goals(IGoalsRepository goalsRepository)
         {
             _goalsController = new GoalsController(goalsRepository);
@@ -231,8 +232,12 @@ namespace CampaignEditor
         // Overriding OnClosing because click on x button should only hide window
         protected override void OnClosing(CancelEventArgs e)
         {
-            e.Cancel = true;
-            Hide();
+            if (!shouldClose)
+            {
+                e.Cancel = true;
+                Hide();
+            }
+
         }
 
     }

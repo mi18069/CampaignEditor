@@ -31,6 +31,7 @@ namespace CampaignEditor
         {
             
             InitializeComponent();
+
             _userRepository = userRepository;
             _factoryClients = factoryClients;
             _factoryConfig = factoryConfig;
@@ -42,11 +43,13 @@ namespace CampaignEditor
             Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
             string connectionString = config.ConnectionStrings.ConnectionStrings["cs"].ConnectionString;
             AppSettings.ConnectionString = connectionString;
+
         }
 
         // Checks if the username and password are typed correctly
         private async void btnCheckCredentials_Click(object sender, RoutedEventArgs e)
         {
+
             btnCheckCredentials.IsEnabled = false;
             lblError.Content = "";
 
@@ -78,9 +81,12 @@ namespace CampaignEditor
                 {
                     onlyOne = true;
                     user = await _userController.GetUserByUsername(username);
+
                     var f = _factoryClients.Create();
                     f.Show();
+
                     this.Close();
+
                 }
             }
                 
@@ -163,16 +169,19 @@ namespace CampaignEditor
         private void btnConfigDatabase_Click(object sender, RoutedEventArgs e)
         {
             _factoryConfig.Create().ShowDialog();
+
         }
 
         private void Window_PreviewKeyDown(object sender, KeyEventArgs e)
         {
+
             // Check if the Enter key is pressed
             if (e.Key == Key.Enter && btnCheckCredentials.IsEnabled)
             {
                 btnCheckCredentials_Click(sender, e);
                 e.Handled = true;
             }
+
         }
     }
 }

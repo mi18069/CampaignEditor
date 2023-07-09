@@ -37,6 +37,8 @@ namespace CampaignEditor
         private readonly IAbstractFactory<PriceList> _factoryPriceList;
         private readonly IAbstractFactory<GroupChannels> _factoryGroupChannels;
 
+        GroupChannels fGroupChannels;
+
         private List<ChannelDTO> _allChannelList;
         private ObservableCollection<ChannelDTO> _channelList;
         // This list will serve to get all Pricelists for client
@@ -52,6 +54,7 @@ namespace CampaignEditor
         private List<PricelistDTO> _pricelistsToBeDeleted = new List<PricelistDTO>();
 
         public bool channelsModified = false;
+        public bool shouldClose = false;
         public bool canEdit = false;
         private bool onlyActive = false; // For chbActive
         private bool changePricelist = true;
@@ -435,9 +438,9 @@ namespace CampaignEditor
 
         private async Task FillChannelGroups()
         {
-            var f = _factoryGroupChannels.Create();
-            await f.Initialize(_client, _campaign);
-            lbChannelGroups.ItemsSource = f.ChannelGroupList;
+            fGroupChannels = _factoryGroupChannels.Create();
+            await fGroupChannels.Initialize(_client, _campaign);
+            lbChannelGroups.ItemsSource = fGroupChannels.ChannelGroupList;
         }
         private async void btnEditChannelGroups_Click(object sender, RoutedEventArgs e)
         {
@@ -525,13 +528,6 @@ namespace CampaignEditor
             }
         }
 
-        // Overriding OnClosing because click on x button should only hide window
-        protected override void OnClosing(CancelEventArgs e)
-        {
-            e.Cancel = true;
-            Hide();
-        }
-
         #region Context Menu
         private async void miDeletePricelist_Click(object sender, RoutedEventArgs e)
         {
@@ -586,6 +582,22 @@ namespace CampaignEditor
                 // Sort by clid != 0 in descending order
                 return yClidNotZero.CompareTo(xClidNotZero);
             }
+        }
+
+        // Overriding OnClosing because click on x button should only hide window
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            if (!shouldClose)
+            {
+                e.Cancel = true;
+                Hide();
+            }
+            else
+            {
+                fGroupChannels.shouldClose = true;
+                fGroupChannels.Close();
+            }
+
         }
     }
 }

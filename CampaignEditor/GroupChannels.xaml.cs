@@ -32,6 +32,7 @@ namespace CampaignEditor
                                 new ObservableCollection<Tuple<ChannelDTO, ChannelGroupDTO>>();
 
         private bool channelsModified = false;
+        public bool shouldClose = false;
 
         private string tbNewChGrStr = "New Channel Group";
         private bool emptyTb = true;
@@ -267,8 +268,11 @@ namespace CampaignEditor
         // Overriding OnClosing because click on x button should only hide window
         protected override void OnClosing(CancelEventArgs e)
         {
-            e.Cancel = true;
-            Hide();
+            if (!shouldClose)
+            {
+                e.Cancel = true;
+                Hide();
+            }
         }
 
         private async void lvChannelGroups_SelectionChanged(object sender, SelectionChangedEventArgs e)

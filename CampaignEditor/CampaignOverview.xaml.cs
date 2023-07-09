@@ -9,6 +9,7 @@ using Database.DTOs.SpotDTO;
 using Database.DTOs.TargetDTO;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -28,7 +29,7 @@ namespace CampaignEditor
         public ClientDTO _client = null;
         private CampaignDTO _campaign = null;
 
-        private bool isReadOnly = false;
+        public bool isReadOnly = false;
 
         private bool spotsModified = false;
         private Spots fSpots = null;
@@ -81,7 +82,6 @@ namespace CampaignEditor
             isReadOnly = _isReadOnly;
 
 
-
             InitializeInfo();
             await InitializeTargets();
             await InitializeSpots();
@@ -111,12 +111,14 @@ namespace CampaignEditor
         }
         private void InitializeInfo()
         {
+
             if (isReadOnly)
                 btnCmpInfo.IsEnabled = false;
             fInfo = _factoryInfo.Create();
             fInfo.Initialize(_client, _campaign);
             _campaignInfo = fInfo.Campaign;
             FillInfo(_campaignInfo);
+
         }
 
         private async Task InitializeGoals()
@@ -147,6 +149,7 @@ namespace CampaignEditor
         {
             fInfo.Initialize(_client, _campaign);
             fInfo.ShowDialog();
+
             if (fInfo.infoModified)
             {
                 _campaignInfo = fInfo.Campaign;
@@ -368,6 +371,22 @@ namespace CampaignEditor
 
         public bool Window_Closing()
         {
+
+            fInfo.shouldClose = true;
+            fInfo.Close();
+
+            fGoals.shouldClose = true;
+            fGoals.Close();
+
+            fTargets.shouldClose = true;
+            fTargets.Close();
+
+            fSpots.shouldClose = true;
+            fSpots.Close();
+
+            fChannels.shouldClose = true;
+            fChannels.Close();
+
             if (clickedOnClose)
             {
                 clickedOnClose = false;
@@ -387,5 +406,7 @@ namespace CampaignEditor
             }
             return true;
         }
+
+
     }
 }

@@ -19,6 +19,7 @@ namespace CampaignEditor
 
         public bool infoModified = false;
         private bool isModified = false;
+        public bool shouldClose = false;
         public CampaignDTO Campaign {
             get { return _campaign; }
             set { _campaign = value; }
@@ -134,8 +135,13 @@ namespace CampaignEditor
         // Overriding OnClosing because click on x button should only hide window
         protected override void OnClosing(CancelEventArgs e)
         {
-            e.Cancel = true;
-            Hide();
+            if (!shouldClose)
+            {
+                e.Cancel = true;
+                Hide();
+            }
+
         }
+
     }
 }

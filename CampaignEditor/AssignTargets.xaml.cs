@@ -24,6 +24,7 @@ namespace CampaignEditor
         private TargetController _targetController;
         private TargetCmpController _targetCmpController;
         public bool targetsModified = false;
+        public bool shouldClose = false;
 
         private ObservableCollection<TargetDTO> _targetsList = new ObservableCollection<TargetDTO>();
         private ObservableCollection<TargetDTO> _selectedTargetsList = new ObservableCollection<TargetDTO>();
@@ -311,8 +312,12 @@ namespace CampaignEditor
         // Overriding OnClosing because click on x button should only hide window
         protected override void OnClosing(CancelEventArgs e)
         {
-            e.Cancel = true;
-            Hide();
+            if (!shouldClose)
+            {
+                e.Cancel = true;
+                Hide();
+            }
+
         }
     }
 

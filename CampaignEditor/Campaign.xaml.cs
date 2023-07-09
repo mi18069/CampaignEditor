@@ -4,7 +4,6 @@ using CampaignEditor.Helpers;
 using CampaignEditor.StartupHelpers;
 using Database.DTOs.ClientDTO;
 using Database.Repositories;
-using System;
 using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Windows;
@@ -32,6 +31,7 @@ namespace CampaignEditor
         public Campaign(IClientRepository clientRepository, ICampaignRepository campaignRepository, 
             IAbstractFactory<CampaignOverview> factoryOverview, IAbstractFactory<CampaignForecastView> factoryForecastView)
         {
+
             _factoryOverview = factoryOverview;
             _factoryForecastView = factoryForecastView;
 
@@ -39,11 +39,13 @@ namespace CampaignEditor
             _campaignController = new CampaignController(campaignRepository);
 
             InitializeComponent();
-            
+
+
         }
 
         public async Task Initialize(string campaignName, bool isReadOnly)
         {
+
             cmpname = campaignName;
             _campaign = await _campaignController.GetCampaignByName(campaignName);
             _client = await _clientController.GetClientById(_campaign.clid);
@@ -52,11 +54,12 @@ namespace CampaignEditor
 
 
             AssignPagesToTabs();
-            
+
         }
 
         private async Task AssignPagesToTabs()
         {
+
             //Placing loading page
             var loadingPage = new LoadingPage();
 
@@ -72,17 +75,20 @@ namespace CampaignEditor
 
             var factoryCampaignForecastView = _factoryForecastView.Create();
             factoryCampaignForecastView.tabForecast = tabForecast;
-            // Don't want to await this, as this will just slow down our campaign
             await factoryCampaignForecastView.Initialize(_campaign);
+
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-           bool shouldClose = factoryCampaignOverview.Window_Closing();
+
+            bool shouldClose = factoryCampaignOverview.Window_Closing();
             if (!shouldClose)
             {
                 e.Cancel = true;
             }
+
         }
+
     }
 }

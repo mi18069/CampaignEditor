@@ -3,13 +3,11 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using CampaignEditor.Controllers;
-using CampaignEditor.Helpers;
 using CampaignEditor.StartupHelpers;
 using Database.Repositories;
 
@@ -78,6 +76,7 @@ namespace CampaignEditor
             IAbstractFactory<ChangePassword> factoryChangePassword)
         {
             InitializeComponent();
+
             this.DataContext = this;
             _factoryAddUser = factoryAddUser;
             _factoryAddClient = factoryAddClient;
@@ -106,6 +105,7 @@ namespace CampaignEditor
             FillFilterByUsersComboBox();
             _factoryAllUsers = factoryAllUsers;
             _factoryChangePassword = factoryChangePassword;
+
         }
 
         #region Filter ComboBox
@@ -118,6 +118,7 @@ namespace CampaignEditor
             {
                 cbUsers.Items.Add(username);
             }
+
         }
 
         #endregion
@@ -130,6 +131,7 @@ namespace CampaignEditor
                 tbSearchClients.Text = "";
                 tbSearchClients.Foreground = Brushes.Black;
             }
+
         }
 
         private void tbSearchClients_LostFocus(object sender, RoutedEventArgs e)
@@ -158,6 +160,7 @@ namespace CampaignEditor
                 }
 
             }
+
         }
 
         private void tbSearchCampaigns_PreviewMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
@@ -167,6 +170,7 @@ namespace CampaignEditor
                 tbSearchCampaigns.Text = "";
                 tbSearchCampaigns.Foreground = Brushes.Black;
             }
+
         }
 
         private void tbSearchCampaigns_LostFocus(object sender, RoutedEventArgs e)
@@ -202,6 +206,7 @@ namespace CampaignEditor
         private void dpStartDate_Initialized(object sender, System.EventArgs e)
         {
             dpStartDate.SelectedDate = DateTime.Now.AddYears(-1);
+
         }
 
         private void cbDatePicker_Checked(object sender, RoutedEventArgs e)
@@ -209,6 +214,7 @@ namespace CampaignEditor
             if (_clientsTree != null)
                 _clientsTree.UpdateTree();
             dpStartDate.IsEnabled = true;
+
         }
 
         private void cbDatePicker_Unchecked(object sender, RoutedEventArgs e)
@@ -240,6 +246,7 @@ namespace CampaignEditor
         private void cbUsers_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             _clientsTree.UpdateTree();
+
         }
 
         #endregion
@@ -261,12 +268,14 @@ namespace CampaignEditor
                     tvClients.ContextMenu = tvClients.Resources["CampaignContext"] as System.Windows.Controls.ContextMenu;
                     break;
             }
+
         }
 
         private async Task UpdateCanBeDeleted()
         {
             string clientname = ((HeaderedItemsControl)tvClients.SelectedItem).Header.ToString()!.Trim();
             CanBeDeleted = await _clientsTree.CheckCanBeDeleted(clientname);
+
         }
 
         // In order to select TreeViewItem on mouse right click
@@ -279,6 +288,7 @@ namespace CampaignEditor
                 treeViewItem.Focus();
                 e.Handled = true;
             }
+
         }
 
         static TreeViewItem VisualUpwardSearch(DependencyObject source)
@@ -321,18 +331,21 @@ namespace CampaignEditor
                 var f = _factoryCampaign.Create();
                 await f.Initialize(campaignName, isReadOnly);
                 openCampaignWindows.Add(f);
-                f.Closed += CampaignWindow_Closed;
+
+                f.Closing += CampaignWindow_Closing;
                 f.Show();
                 f.Activate();
+
             }
 
         }
 
         // remove from list of opened campaigns
-        private void CampaignWindow_Closed(object sender, EventArgs e)
+        private void CampaignWindow_Closing(object sender, EventArgs e)
         {
             Campaign window = (Campaign)sender;
             openCampaignWindows.Remove(window);
+
         }
 
         private async void btnNewCampaign_Click(object sender, RoutedEventArgs e)
@@ -442,6 +455,7 @@ namespace CampaignEditor
 
         private void Window_Closing(object sender, CancelEventArgs e)
         {
+
             if (MessageBox.Show("Application will close\nAre you sure you want to exit?", "Message: ",
                 MessageBoxButton.OKCancel, MessageBoxImage.Warning) == MessageBoxResult.OK)
             {
