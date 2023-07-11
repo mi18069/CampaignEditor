@@ -7,6 +7,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.ComponentModel;
+using System.Collections.ObjectModel;
+using Database.DTOs.BrandDTO;
 
 namespace CampaignEditor
 {
@@ -16,6 +18,14 @@ namespace CampaignEditor
         private ClientDTO _client = null;
 
         private CampaignController _campaignController;
+        private BrandController _brandController;
+
+        private ObservableCollection<BrandDTO> _brands = new ObservableCollection<BrandDTO>();
+        public ObservableCollection<BrandDTO> Brands
+        {
+            get { return _brands; }
+            set {_brands = value; }
+        }
 
         public bool infoModified = false;
         private bool isModified = false;
@@ -24,14 +34,17 @@ namespace CampaignEditor
             get { return _campaign; }
             set { _campaign = value; }
             }
-        public CmpInfo(ICampaignRepository campaignRepository)
+        public CmpInfo(ICampaignRepository campaignRepository,
+                       IBrandRepository brandRepository)
         {
+            this.DataContext = this;
             _campaignController = new CampaignController(campaignRepository);
+            _brandController = new BrandController(brandRepository);
 
             InitializeComponent();
         }
 
-        public void Initialize(ClientDTO client, CampaignDTO campaign = null)
+        public async Task Initialize(ClientDTO client, CampaignDTO campaign = null)
         {
             _campaign = campaign;
             _client = client;
@@ -46,8 +59,14 @@ namespace CampaignEditor
                 dpEndDate.SelectedDate = TimeFormat.YMDStringToDateTime(campaign.cmpedate);
 
                 FillTBTextBoxes();
+                await FillLBBrand();
             }
             isModified = false;
+        }
+
+        private async Task FillLBBrand()
+        {
+            Brands = new ObservableCollection<BrandDTO>(await _brandController.GetAllBrands());
         }
 
         private void FillTBTextBoxes()

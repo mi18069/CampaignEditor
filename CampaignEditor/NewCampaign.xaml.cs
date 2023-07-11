@@ -1,9 +1,13 @@
 ﻿using CampaignEditor.Controllers;
 using CampaignEditor.DTOs.CampaignDTO;
+using Database.DTOs.BrandDTO;
 using Database.DTOs.ClientDTO;
+using Database.Entities;
 using Database.Repositories;
 using System;
+using System.Collections.ObjectModel;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -15,17 +19,31 @@ namespace CampaignEditor
 
         private CampaignController _campaignController;
         private ClientController _clientController;
-        
+        private BrandController _brandController;
+
         private ClientDTO _client;
+        BrandDTO selectedBrand = null;
+
+        private ObservableCollection<BrandDTO> _brands = new ObservableCollection<BrandDTO>();
+        public ObservableCollection<BrandDTO> Brands
+        {
+            get { return _brands; }
+            set { _brands = value; }
+        }
+
+        private bool lbSelected = false;
 
         public bool success = false;
 
         public bool canClientBeDeleted = false;
-        public NewCampaign(ICampaignRepository campaignRepository, IClientRepository clientRepository)
+        public NewCampaign(ICampaignRepository campaignRepository, IClientRepository clientRepository,
+                           IBrandRepository brandRepository)
         {
+            this.DataContext = this;
             InitializeComponent();
             _campaignController = new CampaignController(campaignRepository);
             _clientController = new ClientController(clientRepository);
+            _brandController = new BrandController(brandRepository);
         }
 
         // For binding client to campaign
@@ -34,8 +52,15 @@ namespace CampaignEditor
             _client = await _clientController.GetClientByName(clientname);
             canClientBeDeleted = (await _campaignController.GetCampaignsByClientId(_client.clid)).Count() == 0;
             FillFields();
+            await FillLBBrand();
         }
 
+        private async Task FillLBBrand()
+        {
+            var brands = (await _brandController.GetAllBrands()).OrderBy(b => b.brand);
+            Brands = new ObservableCollection<BrandDTO>(brands);
+
+        }
         private void FillFields()
         {
             tbName.Text = "";
@@ -46,6 +71,33 @@ namespace CampaignEditor
             tbTbStartMinutes.Text = "00";
             tbTbEndHours.Text = "25";
             tbTbEndMinutes.Text = "59";
+        }
+
+        private void tbBrand_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (lbSelected)
+            {
+                lbSelected = false;
+                return;
+            }
+
+            lbBrand.Items.Clear();
+
+            if (tbBrand.Text.Trim() != "")
+            {
+                Regex regex = new Regex(tbBrand.Text.ToString(), RegexOptions.IgnoreCase);
+
+                for (int i=0; i<Brands.Count(); i++)
+                {
+                    string brandname = Brands[i].brand;
+
+                    if (regex.IsMatch(brandname))
+                    {
+                        lbBrand.Items.Add(Brands[i]);
+                    }
+                }
+            }
+
         }
 
         private async void btnSave_Click(object sender, RoutedEventArgs e)
@@ -121,6 +173,19 @@ namespace CampaignEditor
         private void btnCancel_Click(object sender, RoutedEventArgs e)
         {
             this.Close();
+        }
+
+        private void lbBrand_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            selectedBrand = null;
+
+            var brand = lbBrand.SelectedItem as BrandDTO;
+            if (brand != null)
+            {
+                lbSelected = true;
+                tbBrand.Text = brand.brand;
+                selectedBrand = brand;
+            }
         }
     }
 }

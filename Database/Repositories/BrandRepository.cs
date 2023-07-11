@@ -31,7 +31,7 @@ namespace Database.Repositories
                     "VALUES (@Brand, @Active, @Brgrbrand, @Brclass)",
             new
             {
-                Brand = brandDTO.brand,
+                Brand = brandDTO.brand.Trim(),
                 Active = brandDTO.active,
                 Brgrbrand = brandDTO.brgrbrand,
                 Brclass = brandDTO.brclass
@@ -50,7 +50,7 @@ namespace Database.Repositories
             brand = brand.Select(item => new Brand()
             {
                 brbrand = item.brbrand,
-                brand = item.brand,
+                brand = (item.brand).Trim(),
                 active = item.aktivan,
                 brgrbrand = item.brgrbrand,
                 brclass = item.brclass
@@ -69,7 +69,7 @@ namespace Database.Repositories
             brand = brand.Select(item => new Brand()
             {
                 brbrand = item.brbrand,
-                brand = item.brand,
+                brand = (item.brand).Trim(),
                 active = item.aktivan,
                 brgrbrand = item.brgrbrand,
                 brclass = item.brclass
@@ -87,7 +87,7 @@ namespace Database.Repositories
             allBrands = allBrands.Select(item => new Brand()
             {
                 brbrand = item.brbrand,
-                brand = item.brand,
+                brand = (item.brand).Trim(),
                 active = item.aktivan,
                 brgrbrand = item.brgrbrand,
                 brclass = item.brclass
