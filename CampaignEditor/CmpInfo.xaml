@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CampaignEditor"
         mc:Ignorable="d"
-        Title="CmpInfo" Height="550" Width="500" FontSize="22">
+        Title="CmpInfo" Height="700" Width="500" FontSize="22">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="10" />
@@ -89,11 +89,16 @@
                  TextChanged="TextBoxes_TextChanged"/>
         <Label Content="Brand: " Grid.Row="8" Grid.Column="1" 
                VerticalAlignment="Center" Margin="10"/>
-        <!-- <ListBox x:Name="lbBrand" Grid.Row="8" Grid.Column="2" Grid.ColumnSpan="4"
-                 VerticalAlignment="Center"/> -->
-        <ComboBox Grid.Row="8" Grid.Column="2" Grid.ColumnSpan="4" 
-                  ItemsSource="{Binding Brands}" SelectedItem="{Binding Brand}" 
- IsEditable="True" StaysOpenOnEdit="True" Text="{Binding Brand, UpdateSourceTrigger=PropertyChanged}"/>
+
+        <Label Content="Brand: " Grid.Row="8" Grid.Column="1" 
+               VerticalAlignment="Center" Margin="10"/>
+        <TextBox x:Name="tbBrand" Grid.Row="8" Grid.Column="2" Grid.ColumnSpan="4" FontSize="14" FontWeight="Bold"
+                    TextChanged="tbBrand_TextChanged" VerticalAlignment="Center" Margin="10" 
+                 HorizontalScrollBarVisibility="Auto" MinHeight="30" VerticalContentAlignment="Center"/>
+        <ListBox x:Name="lbBrand" Grid.Row="9" Grid.Column="1" Grid.ColumnSpan="5"
+                 VerticalAlignment="Stretch" IsTextSearchEnabled="False"
+                 DisplayMemberPath="brand" Margin="10" FontSize="14"
+                 SelectionChanged="lbBrand_SelectionChanged"/>
 
         <Button x:Name="btnSave" Content="Save" Grid.Row="10" Grid.Column="2" Grid.ColumnSpan="4" 
                 HorizontalAlignment="Right" Width="100" Margin="10, 10, 20, 10"

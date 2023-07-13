@@ -168,22 +168,22 @@ namespace CampaignEditor
         {
             if (tbName.Text.Trim() == "")
             {
-                lblError.Content = "Enter campaign name";
+                MessageBox.Show("Enter campaign name", "Result: ", MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 return false;
             }
             if (await _campaignController.GetCampaignByName(tbName.Text.Trim()) != null)
             {
-                lblError.Content = "Already exists campaign with this name";
+                MessageBox.Show("Already exists campaign with this name", "Result: ", MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 return false;
             }
             else if (dpStartDate.SelectedDate > dpEndDate.SelectedDate)
             {
-                lblError.Content = "Start date must be prior the end date";
+                MessageBox.Show("Start date must be prior the end date", "Result: ", MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 return false;
             }
             else if (lbBrand.SelectedItems.Count != 1)
             {
-                lblError.Content = "Select one brand";
+                MessageBox.Show("Select one brand", "Result: ", MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 return false;
             }
             else

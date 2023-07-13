@@ -1,6 +1,7 @@
 ﻿using CampaignEditor.DTOs.CampaignDTO;
 using CampaignEditor.StartupHelpers;
 using Database.DTOs.ActivityDTO;
+using Database.DTOs.BrandDTO;
 using Database.DTOs.ChannelDTO;
 using Database.DTOs.ClientDTO;
 using Database.DTOs.GoalsDTO;
@@ -45,7 +46,7 @@ namespace CampaignEditor
 
         private bool channelsModified = false;
         private Channels fChannels = null;
-        private List<Tuple<Database.DTOs.ChannelDTO.ChannelDTO, PricelistDTO, ActivityDTO>> _channels = null;
+        private List<Tuple<ChannelDTO, PricelistDTO, ActivityDTO>> _channels = null;
 
         private bool infoModified = false;
         private CmpInfo fInfo = null;
@@ -82,7 +83,7 @@ namespace CampaignEditor
             isReadOnly = _isReadOnly;
 
 
-            InitializeInfo();
+            await InitializeInfo();
             await InitializeTargets();
             await InitializeSpots();
             await InitializeGoals();
@@ -109,15 +110,15 @@ namespace CampaignEditor
             dgSpots.ItemsSource = fSpots.Spotlist;
             _spotlist = fSpots.Spotlist.ToList();
         }
-        private void InitializeInfo()
+        private async Task InitializeInfo()
         {
 
             if (isReadOnly)
                 btnCmpInfo.IsEnabled = false;
             fInfo = _factoryInfo.Create();
-            fInfo.Initialize(_client, _campaign);
+            await fInfo.Initialize(_client, _campaign);
             _campaignInfo = fInfo.Campaign;
-            FillInfo(_campaignInfo);
+            FillInfo(_campaignInfo, fInfo.Brand);
 
         }
 
@@ -154,12 +155,12 @@ namespace CampaignEditor
             {
                 _campaignInfo = fInfo.Campaign;
                 infoModified = true;
-                FillInfo(_campaignInfo);
+                FillInfo(_campaignInfo, fInfo.Brand);
                 fInfo.infoModified = false;
                 btnSave.IsEnabled = true;
             }
         }
-        private void FillInfo(CampaignDTO campaign = null)
+        private void FillInfo(CampaignDTO campaign = null, BrandDTO brand = null)
         {
             if (campaign != null)
             {
@@ -179,6 +180,14 @@ namespace CampaignEditor
                 lblDPStartValue.Content = campaign.cmpstime.ToString().Trim();
                 lblDPEndValue.Content = campaign.cmpetime.ToString().Trim();
                 lblActiveValue.Content = campaign.active;
+                if (brand != null)
+                {
+                    lblBrandValue.Content = brand.brand;
+                }
+                else
+                {
+                    lblBrandValue.Content = "-";
+                }
             }
         }
 
