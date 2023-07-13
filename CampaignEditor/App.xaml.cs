@@ -87,6 +87,7 @@ namespace CampaignEditor
                     Database.Extensions.EmsTypesExtensions.AddEmsTypesExtensions(services);
                     Database.Extensions.DatabaseFunctionsExtensions.AddDatabaseFunctionsExtensions(services);
                     Database.Extensions.BrandExtensions.AddBrandExtensions(services);
+                    Database.Extensions.CmpBrndExtensions.AddCmpBrndExtensions(services);
 
                 }).Build();
 

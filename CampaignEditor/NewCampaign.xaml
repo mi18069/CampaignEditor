@@ -79,7 +79,7 @@
         <Label Content="Brand: " Grid.Row="8" Grid.Column="1" 
                VerticalAlignment="Center" Margin="10"/>
         <TextBox x:Name="tbBrand" Grid.Row="8" Grid.Column="2" Grid.ColumnSpan="4" FontSize="14" FontWeight="Bold"
-                    TextChanged="tbBrand_TextChanged" VerticalAlignment="Center" 
+                    TextChanged="tbBrand_TextChanged" VerticalAlignment="Center" Margin="10" 
                  HorizontalScrollBarVisibility="Auto" MinHeight="30" VerticalContentAlignment="Center"/>
         <ListBox x:Name="lbBrand" Grid.Row="9" Grid.Column="1" Grid.ColumnSpan="5"
                  VerticalAlignment="Stretch" IsTextSearchEnabled="False"
