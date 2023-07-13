@@ -2,7 +2,7 @@
 using CampaignEditor.DTOs.CampaignDTO;
 using Database.DTOs.BrandDTO;
 using Database.DTOs.ClientDTO;
-using Database.Entities;
+using Database.DTOs.CmpBrndDTO;
 using Database.Repositories;
 using System;
 using System.Collections.ObjectModel;
@@ -20,6 +20,7 @@ namespace CampaignEditor
         private CampaignController _campaignController;
         private ClientController _clientController;
         private BrandController _brandController;
+        private CmpBrndController _cmpBrndController;
 
         private ClientDTO _client;
         BrandDTO selectedBrand = null;
@@ -37,13 +38,14 @@ namespace CampaignEditor
 
         public bool canClientBeDeleted = false;
         public NewCampaign(ICampaignRepository campaignRepository, IClientRepository clientRepository,
-                           IBrandRepository brandRepository)
+                           IBrandRepository brandRepository, ICmpBrndRepository cmpBrndRepository)
         {
             this.DataContext = this;
             InitializeComponent();
             _campaignController = new CampaignController(campaignRepository);
             _clientController = new ClientController(clientRepository);
             _brandController = new BrandController(brandRepository);
+            _cmpBrndController = new CmpBrndController(cmpBrndRepository);
         }
 
         // For binding client to campaign
@@ -108,7 +110,8 @@ namespace CampaignEditor
             {
                 try
                 {
-                    await CreateCampaign();
+                    int cmpid = await CreateCampaign();
+                    await CreateCmpBrnd(cmpid);
                     success = true;
                     this.Close();
                 }
@@ -120,7 +123,20 @@ namespace CampaignEditor
             }
         }
 
-        private async Task CreateCampaign()
+        private async Task CreateCmpBrnd(int cmpid)
+        {
+            if (lbBrand.SelectedItems.Count == 1)
+            {
+                BrandDTO brand = lbBrand.SelectedItem as BrandDTO;
+                if (brand != null)
+                {
+                    CmpBrndDTO cmpBrnd = new CmpBrndDTO(cmpid, brand.brbrand);
+                    await _cmpBrndController.CreateCmpBrnd(cmpBrnd);
+                }
+            }
+        }
+
+        private async Task<int> CreateCampaign()
         {
             int cmprev = 0;
             int cmpown = 1; // Don't know what this is
@@ -142,8 +158,10 @@ namespace CampaignEditor
             bool forcec = false;
 
 
-            await _campaignController.CreateCampaign(new CreateCampaignDTO(cmprev, cmpown, cmpname, clid, cmpsdate, cmpedate,
+            var campaign = await _campaignController.CreateCampaign(new CreateCampaignDTO(cmprev, cmpown, cmpname, clid, cmpsdate, cmpedate,
                 cmpstime, cmpetime, cmpstatus, sostring, activity, cmpaddedon, cmpaddedat, active, forcec));
+            
+            return campaign.cmpid;
         }
 
         private async Task<bool> CheckCampaign()
@@ -161,6 +179,11 @@ namespace CampaignEditor
             else if (dpStartDate.SelectedDate > dpEndDate.SelectedDate)
             {
                 lblError.Content = "Start date must be prior the end date";
+                return false;
+            }
+            else if (lbBrand.SelectedItems.Count != 1)
+            {
+                lblError.Content = "Select one brand";
                 return false;
             }
             else
