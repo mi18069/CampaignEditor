@@ -22,6 +22,8 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 
+
+
 namespace CampaignEditor.UserControls
 {
     public partial class CampaignForecast : Page
@@ -804,6 +806,13 @@ namespace CampaignEditor.UserControls
 
 
         #endregion
+
+        private void btnExport_Click(object sender, RoutedEventArgs e)
+        {
+
+            dgMediaPlans.ExportToExcel();
+            
+        }
     }
 }
             

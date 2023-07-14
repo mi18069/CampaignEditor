@@ -262,8 +262,11 @@
 
             <Grid Grid.Row="4" Grid.Column="1" Grid.RowSpan="3">
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="50"/>
                     <RowDefinition Height="auto"/>
                 </Grid.RowDefinitions>
+                <Button x:Name="btnExport" Content="Export to Excel" Grid.Row="0" Margin="10"
+                        Click="btnExport_Click"/>
                 <Border x:Name="pGoals" Grid.Row="1" Visibility="Collapsed"
                 BorderBrush="LightGray" BorderThickness="1" 
                     Margin="0, 10, 10, 0">
@@ -344,6 +347,7 @@
                         </Border>
                     </Grid>
                 </Border>
+
             </Grid>
 
         </Grid>
