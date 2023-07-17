@@ -13,9 +13,6 @@ namespace CampaignEditor
 {
     public partial class Campaign : Window
     {
-        bool isFirstRender = true;
-        bool loaded = false;
-
         public string cmpname = "";
         ClientDTO _client = null;
         CampaignDTO _campaign = null;

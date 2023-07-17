@@ -111,7 +111,10 @@ namespace CampaignEditor
                 try
                 {
                     int cmpid = await CreateCampaign();
-                    await CreateCmpBrnd(cmpid);
+                    if (selectedBrand != null)
+                    {
+                        await CreateCmpBrnd(cmpid);
+                    }
                     success = true;
                     this.Close();
                 }
@@ -125,15 +128,8 @@ namespace CampaignEditor
 
         private async Task CreateCmpBrnd(int cmpid)
         {
-            if (lbBrand.SelectedItems.Count == 1)
-            {
-                BrandDTO brand = lbBrand.SelectedItem as BrandDTO;
-                if (brand != null)
-                {
-                    CmpBrndDTO cmpBrnd = new CmpBrndDTO(cmpid, brand.brbrand);
-                    await _cmpBrndController.CreateCmpBrnd(cmpBrnd);
-                }
-            }
+            CmpBrndDTO cmpBrnd = new CmpBrndDTO(cmpid, selectedBrand.brbrand);
+            await _cmpBrndController.CreateCmpBrnd(cmpBrnd);             
         }
 
         private async Task<int> CreateCampaign()
@@ -181,9 +177,10 @@ namespace CampaignEditor
                 MessageBox.Show("Start date must be prior the end date", "Result: ", MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 return false;
             }
-            else if (lbBrand.SelectedItems.Count != 1)
+            // Check this only if there is selected brand
+            else if (selectedBrand == null && tbBrand.Text.Trim().Length != 0)
             {
-                MessageBox.Show("Select one brand", "Result: ", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                MessageBox.Show("Invalid brand", "Result: ", MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 return false;
             }
             else

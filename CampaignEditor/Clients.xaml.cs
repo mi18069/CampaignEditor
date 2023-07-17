@@ -322,9 +322,12 @@ namespace CampaignEditor
                     window.WindowState = WindowState.Normal;
                 }
 
+                // For setting window in front
+                window.Topmost = true;  
                 window.Topmost = false;
-                window.Activate();
-                window.Topmost = true;
+
+                e.Handled = true;
+
             }
             else
             {

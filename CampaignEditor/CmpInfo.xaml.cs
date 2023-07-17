@@ -193,21 +193,17 @@ namespace CampaignEditor
 
         private async Task UpdateCmpBrnd()
         {
-            if (lbBrand.SelectedItems.Count == 1)
+            if (Brand != null)
             {
-                BrandDTO brand = lbBrand.SelectedItem as BrandDTO;
-                if (brand != null)
+                CmpBrndDTO cmpBrnd = new CmpBrndDTO(_campaign.cmpid, Brand.brbrand);
+                try
                 {
-                    CmpBrndDTO cmpBrnd = new CmpBrndDTO(_campaign.cmpid, brand.brbrand);
-                    try
-                    {
-                        await _cmpBrndController.GetCmpBrndByCmpId(_campaign.cmpid);
-                        await _cmpBrndController.UpdateBrand(cmpBrnd);
-                    }
-                    catch
-                    {
-                        await _cmpBrndController.CreateCmpBrnd(cmpBrnd);
-                    }
+                    await _cmpBrndController.GetCmpBrndByCmpId(_campaign.cmpid);
+                    await _cmpBrndController.UpdateBrand(cmpBrnd);
+                }
+                catch
+                {
+                    await _cmpBrndController.CreateCmpBrnd(cmpBrnd);
                 }
             }
         }
@@ -224,9 +220,10 @@ namespace CampaignEditor
                 MessageBox.Show("Start date must be prior the end date", "Result: ", MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 return false;
             }
-            else if (Brand == null)
+            // Check this only if there is selected brand
+            else if (Brand == null && tbBrand.Text.Trim().Length != 0)
             {
-                MessageBox.Show("Select one brand", "Result: ", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                MessageBox.Show("Invalid brand", "Result: ", MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 return false;
             }
             else
