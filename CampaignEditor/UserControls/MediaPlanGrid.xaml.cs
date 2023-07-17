@@ -25,6 +25,7 @@ using OfficeOpenXml;
 using System.IO;
 using System.Windows.Threading;
 using System.Reflection.Metadata;
+using CampaignEditor.Converters;
 
 namespace CampaignEditor.UserControls
 {
@@ -39,6 +40,7 @@ namespace CampaignEditor.UserControls
         public MediaPlanController _mediaPlanController { get; set; }
         public MediaPlanTermController _mediaPlanTermController { get; set; }
         public SpotController _spotController { get; set; }
+        public Dictionary<int, string> chidChannelDictionary { get; set; }
 
         // for checking if certain character can be written in spot cells
         HashSet<char> spotCodes = new HashSet<char>();
@@ -46,7 +48,7 @@ namespace CampaignEditor.UserControls
         string lastSpotCell = "";
 
         // number of frozen columns
-        int mediaPlanColumns = 25;
+        int mediaPlanColumns = 26;
 
         private int frozenColumnsNum
         {
@@ -90,6 +92,12 @@ namespace CampaignEditor.UserControls
         ICollectionView myDataView;
         public async Task Initialize(CampaignDTO campaign)
         {
+            tcChannel.Binding = new Binding()
+            {
+                Path = new PropertyPath("MediaPlan.chid"),
+                Converter = new ChidToChannelConverter(),
+                ConverterParameter = chidChannelDictionary
+            };
 
             this.frozenColumnsNum = mediaPlanColumns;
             this.Schema.FrozenColumnCount = frozenColumnsNum;

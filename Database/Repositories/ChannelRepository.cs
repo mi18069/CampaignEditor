@@ -49,6 +49,17 @@ namespace Database.Repositories
 
             return _mapper.Map<ChannelDTO>(channel);
         }
+        public async Task<string> GetChannelNameById(int id)
+        {
+            using var connection = _context.GetConnection();
+
+            var channelName = await connection.QueryFirstOrDefaultAsync<string>(
+                "SELECT chname FROM tblchannels WHERE chid = @Id", new { Id = id });
+
+            channelName = channelName.Trim();
+            return channelName;
+        }
+
 
         public async Task<ChannelDTO> GetChannelByName(string channelname)
         {

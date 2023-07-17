@@ -4,6 +4,7 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:CampaignEditor.UserControls"
+             xmlns:converter="clr-namespace:CampaignEditor.Converters"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800" Background="White">
     <Grid>
@@ -30,6 +31,7 @@
                 </Style>
             </DataGrid.CellStyle>
             <DataGrid.Resources>
+                <converter:ChidToChannelConverter x:Key="ChidToChannelConverter"/>
                 <Style TargetType="{x:Type DataGridColumnHeader}">
                     <Setter Property="Background" Value="LightGray"/>
                     <Setter Property="FontWeight" Value="SemiBold"/>
@@ -38,6 +40,8 @@
                 </Style>
             </DataGrid.Resources>
             <DataGrid.Columns>
+                <DataGridTextColumn Header="Channel" x:Name="tcChannel"
+                                        IsReadOnly="True" />
                 <DataGridTextColumn Header="Program" Binding="{Binding MediaPlan.name, Mode=TwoWay}"
                                         IsReadOnly="True" />
                 <DataGridTextColumn Header="Position" Binding="{Binding MediaPlan.position, Mode=TwoWay}" 

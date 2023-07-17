@@ -206,6 +206,13 @@ namespace CampaignEditor.UserControls
             dgMediaPlans.AddMediaPlanClicked += dgMediaPlans_AddMediaPlanClicked;
             dgMediaPlans.DeleteMediaPlanClicked += dgMediaPlans_DeleteMediaPlanClicked;
 
+            Dictionary<int, string> chidChannelDictionary = new Dictionary<int, string>();
+            foreach (ChannelDTO channel in lvChannels.Items)
+            {
+                chidChannelDictionary.Add(channel.chid, channel.chname.Trim());
+            }
+            dgMediaPlans.chidChannelDictionary = chidChannelDictionary;
+
             await dgMediaPlans.Initialize(_campaign);
         }
 
