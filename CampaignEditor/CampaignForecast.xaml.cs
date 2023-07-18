@@ -818,7 +818,10 @@ namespace CampaignEditor.UserControls
 
         private void btnExport_Click(object sender, RoutedEventArgs e)
         {
-
+            // ensuring that grid is loaded
+            var focusedTab = tcGrids.SelectedItem as TabItem;
+            tiChannelGoals.Focus();
+           
             //dgMediaPlans.ExportToExcel();
             Application.Current.Dispatcher.Invoke(DispatcherPriority.ApplicationIdle, new Action(() =>
             {
@@ -830,10 +833,19 @@ namespace CampaignEditor.UserControls
 
                         // ... rest of the code to populate the worksheet ...
                         // Create a new worksheet
-                        var worksheet = excelPackage.Workbook.Worksheets.Add("Sheet1");
+                        var worksheet1 = excelPackage.Workbook.Worksheets.Add("Sheet 1");
+                        dgMediaPlans.PopulateWorksheet(worksheet1, 0, 0);
 
-                        PopulateWorksheet(worksheet, memoryStream, excelPackage);
-                       
+                        var worksheet2 = excelPackage.Workbook.Worksheets.Add("Sheet 2");
+                        sgGrid.PopulateWorksheet(worksheet2, 0, 0);
+
+                        var worksheet3 = excelPackage.Workbook.Worksheets.Add("Sheet 3");
+                        cgGrid.PopulateWorksheet(worksheet3, 0, 0);
+
+                        // Save the Excel package to a memory stream
+                        excelPackage.SaveAs(memoryStream);
+                        // Set the position of the memory stream back to the beginning
+                        memoryStream.Position = 0;
 
                         // Show a dialog to the user for saving or opening the Excel file
                         var saveFileDialog = new Microsoft.Win32.SaveFileDialog
@@ -860,21 +872,8 @@ namespace CampaignEditor.UserControls
                     }
                 }
             }));
-        }
 
-        private void PopulateWorksheet(ExcelWorksheet worksheet, MemoryStream memoryStream, ExcelPackage excelPackage)
-        {
-            /*dgMediaPlans.PopulateWorksheet(worksheet, 0, 0);
-            // Save the Excel package to a memory stream
-            excelPackage.SaveAs(memoryStream);
-            // Set the position of the memory stream back to the beginning
-            memoryStream.Position = 0;*/
-
-            sgGrid.PopulateWorksheet(worksheet, 0, 0);
-            // Save the Excel package to a memory stream
-            excelPackage.SaveAs(memoryStream);
-            // Set the position of the memory stream back to the beginning
-            memoryStream.Position = 0;
+            focusedTab.Focus();
         }
     }
 }

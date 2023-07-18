@@ -19,7 +19,9 @@
                   AutoGenerateColumns="False"
                   HeadersVisibility="Column"
                   CanUserDeleteRows="False"
-                  AlternatingRowBackground="LightGoldenrodYellow" >
+                  AlternatingRowBackground="LightGoldenrodYellow" 
+                  EnableRowVirtualization="False"
+                  EnableColumnVirtualization="False">
             <DataGrid.Columns>
                 <DataGridTextColumn Width="3*" Header="Channel"
                                     IsReadOnly="True" Binding="{Binding Channel.chname, Mode=TwoWay}" />

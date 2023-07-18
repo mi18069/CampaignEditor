@@ -27,6 +27,9 @@ using System.Windows.Threading;
 using System.Reflection.Metadata;
 using CampaignEditor.Converters;
 using System.Diagnostics;
+using OfficeOpenXml.Style;
+using OfficeOpenXml.FormulaParsing;
+using Border = System.Windows.Controls.Border;
 
 namespace CampaignEditor.UserControls
 {
@@ -217,7 +220,7 @@ namespace CampaignEditor.UserControls
                     column.HeaderStyle.Setters.Add(new Setter(Border.BorderBrushProperty, Brushes.OrangeRed));
 
                     trigger.Setters.Add(new Setter(Border.BorderThicknessProperty, new Thickness(1, 1, 3, 1)));
-                    trigger.Setters.Add(new Setter(Border.BorderBrushProperty, Brushes.OrangeRed));
+                    trigger.Setters.Add(new Setter(System.Windows.Controls.Border.BorderBrushProperty, Brushes.OrangeRed));
 
                     column.CellStyle.Setters.Add(new Setter(Border.BorderThicknessProperty, new Thickness(1, 1, 3, 1)));
                     column.CellStyle.Setters.Add(new Setter(Border.BorderBrushProperty, Brushes.OrangeRed));
@@ -944,8 +947,6 @@ namespace CampaignEditor.UserControls
                         worksheet.Cells[rowIndex + 2 + rowOff, columnIndex + 1 + colOff].Value = cellValue;
 
                         // Set the cell color
-                        //var cellColor = (column.GetCellContent(dataItem) as TextBlock)?.Background;
-                        //var cell = (cellContent as TextBlock);
                         var cell = FindParentDataGridCell(cellContent as TextBlock) as DataGridCell;
                         if (cell != null)
                         {
@@ -953,8 +954,19 @@ namespace CampaignEditor.UserControls
                             if (cellColor != null)
                             {
                                 var excelColor = System.Drawing.ColorTranslator.FromHtml(cellColor.ToString());
-                                worksheet.Cells[rowIndex + 2 + rowOff, columnIndex + 1 + colOff].Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
-                                worksheet.Cells[rowIndex + 2 + rowOff, columnIndex + 1 + colOff].Style.Fill.BackgroundColor.SetColor(excelColor);
+                                var excelCell = worksheet.Cells[rowIndex + 2 + rowOff, columnIndex + 1 + colOff];
+                                excelCell.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                                excelCell.Style.Fill.BackgroundColor.SetColor(excelColor);
+
+                                excelCell.Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
+                                excelCell.Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                                excelCell.Style.Border.Left.Color.SetColor(System.Drawing.Color.Black);
+                                excelCell.Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                                excelCell.Style.Border.Right.Color.SetColor(System.Drawing.Color.Black);
+                                excelCell.Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                                excelCell.Style.Border.Top.Color.SetColor(System.Drawing.Color.Black);
+                                excelCell.Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                                excelCell.Style.Border.Bottom.Color.SetColor(System.Drawing.Color.Black);
                             }
                             double cellHeight = cell.ActualHeight;
                             double cellWidth = cell.ActualWidth / 7;

@@ -47,13 +47,14 @@
                                  Grid.Row="1" Grid.Column="2" Grid.RowSpan="5" Grid.ColumnSpan="3" 
                                  SelectionChanged="dgMediaPlans_SelectionChanged"/>
 
-            <TabControl Grid.Row="6" Grid.Column="2" Grid.ColumnSpan="3">
-                <TabItem Header="Spots Goals" >
+            <TabControl x:Name="tcGrids" Grid.Row="6" Grid.Column="2" Grid.ColumnSpan="3">
+                <TabItem Header="Spots Goals" x:Name="tiSpotGoals" >
                     <ScrollViewer HorizontalScrollBarVisibility="Visible">
                         <local:SpotGoalsGrid x:Name="sgGrid" />
                     </ScrollViewer>
                 </TabItem>
-                <TabItem Header="Channels Goals" Height="20" VerticalAlignment="Top" >
+                <TabItem x:Name="tiChannelGoals" Header="Channels Goals" Height="20" VerticalAlignment="Top" 
+                         VirtualizingPanel.IsVirtualizing="False">
                     <local:ChannelsGoalsGrid x:Name="cgGrid"/>
                 </TabItem>
                 <TabItem Header="Data">
