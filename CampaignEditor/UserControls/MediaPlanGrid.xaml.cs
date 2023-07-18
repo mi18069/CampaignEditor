@@ -26,6 +26,7 @@ using System.IO;
 using System.Windows.Threading;
 using System.Reflection.Metadata;
 using CampaignEditor.Converters;
+using System.Diagnostics;
 
 namespace CampaignEditor.UserControls
 {
@@ -900,39 +901,8 @@ namespace CampaignEditor.UserControls
             DeleteMediaPlanClicked?.Invoke(this, EventArgs.Empty);
         }
 
-        public void ExportToExcel()
+        public void PopulateWorksheet(ExcelWorksheet worksheet, int rowOff = 0, int colOff = 0)
         {
-            /*Excel.Application excelApp = new Excel.Application();
-            Excel.Workbook workbook = excelApp.Workbooks.Add();
-            Excel.Worksheet worksheet = workbook.ActiveSheet;
-
-            var dtExcelDataTable = dgMediaPlans;
-
-            for (int Idx = 0; Idx < dtExcelDataTable.Columns.Count; Idx++)
-            {
-                worksheet.Range["A1"].Offset[0, Idx].Value = dtExcelDataTable.Columns[Idx].Header;
-            }
-            // for changing color of cells, not working
-            for (int Idx = 0; Idx < dtExcelDataTable.Columns.Count; Idx++)
-            {
-                var cell = worksheet.Cells[1, Idx];
-                //cell.Interior.Color = System.Drawing.ColorTranslator.ToOle(System.Drawing.Color.LightGoldenrodYellow);
-                cell.Interior.Color = Excel.XlRgbColor.rgbLightGoldenrodYellow;
-            }
-
-
-            for (int Idx = 0; Idx < dtExcelDataTable.Items.Count; Idx++)
-            {
-                worksheet.Range["A2"].Offset[Idx].Resize[1, dtExcelDataTable.Columns.Count].Value = dtExcelDataTable.Items;
-                //worksheet.Range["A2"].Offset[Idx].Resize[1, dtExcelDataTable.Columns.Count].Value = dtExcelDataTable.ItemStringFormat;
-            }
-
-            workbook.Close();
-            excelApp.Quit();
-
-            System.Runtime.InteropServices.Marshal.ReleaseComObject(worksheet);
-            System.Runtime.InteropServices.Marshal.ReleaseComObject(workbook);
-            System.Runtime.InteropServices.Marshal.ReleaseComObject(excelApp);*/
 
             var dataGrid = dgMediaPlans;
 
@@ -946,161 +916,71 @@ namespace CampaignEditor.UserControls
             // Wait for the dispatcher to finish processing pending messages
             Application.Current.Dispatcher.Invoke(DispatcherPriority.ApplicationIdle, new Action(() =>
             {
-                using (var memoryStream = new MemoryStream())
+                // Get the visible columns from the DataGrid
+                var visibleColumns = dataGrid.Columns.Where(c => c.Visibility == Visibility.Visible).ToList();
+
+                // Set the column headers in Excel
+                for (int columnIndex = 0; columnIndex < visibleColumns.Count; columnIndex++)
                 {
-                    ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
-                    using (var excelPackage = new ExcelPackage(memoryStream))
+                    var column = visibleColumns[columnIndex];
+                    worksheet.Cells[1 + rowOff, columnIndex + 1 + colOff].Value = column.Header;
+                    worksheet.Cells[1 + rowOff, columnIndex + 1 + colOff].Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                    worksheet.Cells[1 + rowOff, columnIndex + 1 + colOff].Style.Fill.BackgroundColor.SetColor(System.Drawing.ColorTranslator.FromHtml("#DAA520"));
+                }
+
+                // Set the cell values and colors in Excel
+                for (int rowIndex = 0; rowIndex < dataGrid.Items.Count; rowIndex++)
+                {
+                    var dataItem = (MediaPlanTuple)dataGrid.Items[rowIndex];
+                    for (int columnIndex = 0; columnIndex < visibleColumns.Count; columnIndex++)
                     {
-
-                        // ... rest of the code to populate the worksheet ...
-                        // Create a new worksheet
-                        var worksheet = excelPackage.Workbook.Worksheets.Add("Sheet1");
-
-                        // Get the visible columns from the DataGrid
-                        var visibleColumns = dataGrid.Columns.Where(c => c.Visibility == Visibility.Visible).ToList();
-
-                        // Set the column headers in Excel
-                        for (int columnIndex = 0; columnIndex < visibleColumns.Count; columnIndex++)
+                        var column = visibleColumns[columnIndex];
+                        var cellValue = string.Empty;
+                        var cellContent = column.GetCellContent(dataItem);
+                        if (cellContent is TextBlock textBlock)
                         {
-                            var column = visibleColumns[columnIndex];
-                            worksheet.Cells[1, columnIndex + 1].Value = column.Header;
-                            worksheet.Cells[1, columnIndex + 1].Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
-                            worksheet.Cells[1, columnIndex + 1].Style.Fill.BackgroundColor.SetColor(System.Drawing.ColorTranslator.FromHtml("#DAA520"));
+                            cellValue = textBlock.Text;
                         }
+                        worksheet.Cells[rowIndex + 2 + rowOff, columnIndex + 1 + colOff].Value = cellValue;
 
-                        // Set the cell values and colors in Excel
-                        for (int rowIndex = 0; rowIndex < dataGrid.Items.Count; rowIndex++)
+                        // Set the cell color
+                        //var cellColor = (column.GetCellContent(dataItem) as TextBlock)?.Background;
+                        //var cell = (cellContent as TextBlock);
+                        var cell = FindParentDataGridCell(cellContent as TextBlock) as DataGridCell;
+                        if (cell != null)
                         {
-                            var dataItem = (MediaPlanTuple)dataGrid.Items[rowIndex];
-                            for (int columnIndex = 0; columnIndex < visibleColumns.Count; columnIndex++)
+                            var cellColor = cell.Background;
+                            if (cellColor != null)
                             {
-                                var column = visibleColumns[columnIndex];
-                                var cellValue = string.Empty;
-                                var cellContent = column.GetCellContent(dataItem);
-                                if (cellContent is TextBlock textBlock)
-                                {
-                                    cellValue = textBlock.Text;
-                                }
-                                worksheet.Cells[rowIndex + 2, columnIndex + 1].Value = cellValue;
+                                var excelColor = System.Drawing.ColorTranslator.FromHtml(cellColor.ToString());
+                                worksheet.Cells[rowIndex + 2 + rowOff, columnIndex + 1 + colOff].Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                                worksheet.Cells[rowIndex + 2 + rowOff, columnIndex + 1 + colOff].Style.Fill.BackgroundColor.SetColor(excelColor);
+                            }
+                            double cellHeight = cell.ActualHeight;
+                            double cellWidth = cell.ActualWidth / 7;
 
-                                // Set the cell color
-                                //var cellColor = (column.GetCellContent(dataItem) as TextBlock)?.Background;
-                                //var cell = (cellContent as TextBlock);
-                                var cell = FindParentDataGridCell(cellContent as TextBlock) as DataGridCell;
-                                if (cell != null)
-                                {
-                                    var cellColor = cell.Background;
-                                    if (cellColor != null)
-                                    {
-                                        var excelColor = System.Drawing.ColorTranslator.FromHtml(cellColor.ToString());
-                                        worksheet.Cells[rowIndex + 2, columnIndex + 1].Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
-                                        worksheet.Cells[rowIndex + 2, columnIndex + 1].Style.Fill.BackgroundColor.SetColor(excelColor);
-                                    }
-                                    double cellHeight = cell.ActualHeight;
-                                    double cellWidth = cell.ActualWidth / 7;
+                            // Set the size of the Excel cell
+                            worksheet.Row(rowIndex + 2 + rowOff).Height = cellHeight;
+                            worksheet.Column(columnIndex + 1 + colOff).Width = cellWidth;
+                            worksheet.Row(rowIndex + 2 + rowOff).OutlineLevel = 2;
 
-                                    // Set the size of the Excel cell
-                                    worksheet.Row(rowIndex + 2).Height = cellHeight;
-                                    worksheet.Column(columnIndex + 1).Width = cellWidth;
-                                    worksheet.Row(rowIndex + 2).OutlineLevel = 2;
-
-                                }
-
-                            }                         
-                        }
-                        // Save the Excel package to a memory stream
-                        excelPackage.SaveAs(memoryStream);
-
-                        // Set the position of the memory stream back to the beginning
-                        memoryStream.Position = 0;
-
-                        // Show a dialog to the user for saving or opening the Excel file
-                        var saveFileDialog = new Microsoft.Win32.SaveFileDialog
-                        {
-                            Filter = "Excel Files (*.xlsx)|*.xlsx",
-                            DefaultExt = "xlsx"
-                        };
-
-                        if (saveFileDialog.ShowDialog() == true)
-                        {
-                            // Save the memory stream to a file
-                            File.WriteAllBytes(saveFileDialog.FileName, memoryStream.ToArray());
                         }
 
                     }
                 }
             }));
-                // Export the DataGrid to Excel
-                /*ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
-                using (var excelPackage = new ExcelPackage())
-                {
-                    // Create a new worksheet
-                    var worksheet = excelPackage.Workbook.Worksheets.Add("Sheet1");
 
-                    // Get the visible columns from the DataGrid
-                    var visibleColumns = dataGrid.Columns.Where(c => c.Visibility == Visibility.Visible).ToList();
+            // Disable row virtualization
+            dataGrid.EnableRowVirtualization = true;
+            dataGrid.EnableColumnVirtualization = true;
 
-                    // Set the column headers in Excel
-                    for (int columnIndex = 0; columnIndex < visibleColumns.Count; columnIndex++)
-                    {
-                        var column = visibleColumns[columnIndex];
-                        worksheet.Cells[1, columnIndex + 1].Value = column.Header;
-                        worksheet.Cells[1, columnIndex + 1].Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
-                        worksheet.Cells[1, columnIndex + 1].Style.Fill.BackgroundColor.SetColor(System.Drawing.ColorTranslator.FromHtml("#DAA520"));
-                    }
-
-                    // Set the cell values and colors in Excel
-                    for (int rowIndex = 0; rowIndex < dataGrid.Items.Count; rowIndex++)
-                    {
-                        var dataItem = (MediaPlanTuple)dataGrid.Items[rowIndex];
-                        for (int columnIndex = 0; columnIndex < visibleColumns.Count; columnIndex++)
-                        {
-                            var column = visibleColumns[columnIndex];
-                            var cellValue = string.Empty;
-                            var cellContent = column.GetCellContent(dataItem);
-                            if (cellContent is TextBlock textBlock)
-                            {
-                                cellValue = textBlock.Text;
-                            }
-                            worksheet.Cells[rowIndex + 2, columnIndex + 1].Value = cellValue;
-
-                            // Set the cell color
-                            //var cellColor = (column.GetCellContent(dataItem) as TextBlock)?.Background;
-                            //var cell = (cellContent as TextBlock);
-                            var cell = FindParentDataGridCell(cellContent as TextBlock) as DataGridCell;
-                            if (cell != null)
-                            {
-                                var cellColor = cell.Background;
-                                if (cellColor != null)
-                                {
-                                    var excelColor = System.Drawing.ColorTranslator.FromHtml(cellColor.ToString());
-                                    worksheet.Cells[rowIndex + 2, columnIndex + 1].Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
-                                    worksheet.Cells[rowIndex + 2, columnIndex + 1].Style.Fill.BackgroundColor.SetColor(excelColor);
-                                }
-                                double cellHeight = cell.ActualHeight;
-                                double cellWidth = cell.ActualWidth / 7;
-
-                                // Set the size of the Excel cell
-                                worksheet.Row(rowIndex + 2).Height = cellHeight;
-                                worksheet.Column(columnIndex + 1).Width = cellWidth;
-                                worksheet.Row(rowIndex + 2).OutlineLevel = 2;
-
-                            }
-
-                        }
-                    }
-                    // Save the Excel package to a file or stream
-                    excelPackage.SaveAs(new FileInfo("Grid1.xlsx"));
-
-                    // Re-enable row virtualization
-                    dataGrid.EnableRowVirtualization = true;
-                    dataGrid.EnableColumnVirtualization = false;
-                }
-            }));*/
         }
 
         private DataGridCell FindParentDataGridCell(TextBlock textBlock)
         {
+            if (textBlock == null)
+                return null;
+
             DependencyObject parent = VisualTreeHelper.GetParent(textBlock);
 
             while (parent != null && !(parent is DataGridCell))

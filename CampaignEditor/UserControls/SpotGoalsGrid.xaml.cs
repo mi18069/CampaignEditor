@@ -3,6 +3,9 @@ using CampaignEditor.DTOs.CampaignDTO;
 using Database.DTOs.ChannelDTO;
 using Database.DTOs.SpotDTO;
 using Database.Entities;
+using Microsoft.Office.Interop.Excel;
+using OfficeOpenXml;
+using OfficeOpenXml.Style;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -13,6 +16,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using Border = System.Windows.Controls.Border;
 
 namespace CampaignEditor.UserControls
 {
@@ -117,7 +121,7 @@ namespace CampaignEditor.UserControls
 
                     Border border = new Border();
                     border.BorderBrush = Brushes.Black;
-                    if ( i == _channels.Count || j == ugWeeks.Columns - 1 )
+                    if (i == _channels.Count || j == ugWeeks.Columns - 1)
                     {
                         border.Background = Brushes.Yellow;
                     }
@@ -138,7 +142,7 @@ namespace CampaignEditor.UserControls
 
                     textBlock.HorizontalAlignment = HorizontalAlignment.Center;
                     textBlock.VerticalAlignment = VerticalAlignment.Center;
-                    
+
                     if (i == _channels.Count)
                     {
                         textBlock.Text = "Total";
@@ -147,7 +151,7 @@ namespace CampaignEditor.UserControls
                     {
                         textBlock.Text = _channels[i].chname.Trim();
                     }
-                    
+
                     border.Child = textBlock;
 
                     ugChannels.Children.Add(border);
@@ -158,7 +162,7 @@ namespace CampaignEditor.UserControls
 
             //Goals
             ugGoals.Columns = ugChannels.Columns * 3;
-            for (int j=0; j<ugChannels.Columns; j++)
+            for (int j = 0; j < ugChannels.Columns; j++)
             {
                 for (int i = 0; i < 3; i++)
                 {
@@ -195,17 +199,17 @@ namespace CampaignEditor.UserControls
             }
 
             // Grid Goals
-            for (int i=0; i < ugWeeks.Children.Count; i++)
+            for (int i = 0; i < ugWeeks.Children.Count; i++)
             {
                 int weekNum = firstWeekNum + i;
-                
+
                 if (i == ugWeeks.Children.Count - 1)
                 {
                     AddTotalSubGrids();
                     continue;
                 }
 
-                for (int j=0; j <= _channels.Count; j++)
+                for (int j = 0; j <= _channels.Count; j++)
                 {
                     // Filtering mediaPlans by channels 
                     ObservableCollection<MediaPlanTuple> channelMpTuples;
@@ -213,9 +217,9 @@ namespace CampaignEditor.UserControls
                     {
                         ObservableCollection<ObservableCollection<SpotGoals>> valuesList = new ObservableCollection<ObservableCollection<SpotGoals>>();
                         int n = ugGrid.Children.Count;
-                        for (int k=0; k<_channels.Count; k++)
-                        { 
-                            SpotGoalsSubGrid sg = ugGrid.Children[n-1-k] as SpotGoalsSubGrid;
+                        for (int k = 0; k < _channels.Count; k++)
+                        {
+                            SpotGoalsSubGrid sg = ugGrid.Children[n - 1 - k] as SpotGoalsSubGrid;
                             ObservableCollection<SpotGoals> dg = sg.Values;
                             valuesList.Add(dg);
                         }
@@ -234,7 +238,7 @@ namespace CampaignEditor.UserControls
                     {
                         var allMpTerms = mpTuple.Terms;
                         ObservableCollection<MediaPlanTerm> mpTerms;
-                        
+
                         if (weekNum <= lastWeekNum)
                         {
                             mpTerms = new ObservableCollection<MediaPlanTerm>(mpTuple.Terms.Where(t => t != null &&
@@ -257,7 +261,7 @@ namespace CampaignEditor.UserControls
                 string label = spot.spotcode.Trim() + ": " + spot.spotname.Trim();
                 dgSpots.Items.Add(new SpotLabel { Label = label });
             }
-           
+
 
         }
 
@@ -289,7 +293,7 @@ namespace CampaignEditor.UserControls
                     ObservableCollection<ObservableCollection<SpotGoals>> valuesList = new ObservableCollection<ObservableCollection<SpotGoals>>();
                     int n = ugGrid.Children.Count;
 
-                    for (int k =  n - (_channels.Count + 1); k >= 0; k -= _channels.Count + 1)
+                    for (int k = n - (_channels.Count + 1); k >= 0; k -= _channels.Count + 1)
                     {
                         SpotGoalsSubGrid sg = ugGrid.Children[k] as SpotGoalsSubGrid;
                         ObservableCollection<SpotGoals> values = sg.Values;
@@ -297,7 +301,7 @@ namespace CampaignEditor.UserControls
                     }
                     var totalSubGrid = new SpotGoalsTotalSubGrid(valuesList);
                     ugGrid.Children.Add(totalSubGrid);
-                }             
+                }
             }
         }
 
@@ -343,6 +347,150 @@ namespace CampaignEditor.UserControls
             ugGoals.Width = headerWidth;
             ugGrid.Width = headerWidth;
             ugGrid.Height = dgSpots.Height;
+        }
+
+        public void PopulateWorksheet(ExcelWorksheet worksheet, int rowOff = 0, int colOff = 0)
+        {
+
+            AddHeadersInWorksheet(worksheet, rowOff, colOff);
+
+            var rowOffset = rowOff + 3; // because of headers
+            var colOffset = colOff;
+
+            foreach (var subGrid in ugGrid.Children)
+            {
+
+                var sg = subGrid as SpotGoalsSubGrid;
+                if (sg != null)
+                {
+                    sg.PopulateWorksheet(worksheet, rowOffset, colOffset);
+                }
+                else
+                {
+                    var sg2 = subGrid as SpotGoalsTotalSubGrid;
+                    sg2.PopulateWorksheet(worksheet, rowOffset, colOffset);
+                }
+                colOffset += 3;
+            }
+
+        }
+
+        private void AddHeadersInWorksheet(ExcelWorksheet worksheet, int rowOff = 0, int colOff = 0)
+        {
+            AddWeeksHeaderInWorksheet(worksheet, rowOff, colOff);
+            AddChannelsHeaderInWorksheet(worksheet, rowOff + 1, colOff);
+            AddGoalsHeaderInWorksheet(worksheet, rowOff + 2, colOff);
+        }
+        private void AddWeeksHeaderInWorksheet(ExcelWorksheet worksheet, int rowOff = 0, int colOff = 0)
+        {
+            // Merging cells
+            int offset = (int)(ugGoals.Columns / ugWeeks.Columns);
+            for (int i=0, colOffset = colOff; i<ugWeeks.Columns; i++, colOffset += offset)
+            {
+                var a = colOffset;
+                var b = colOffset + offset;
+                // Get the range of cells to merge
+                var range = worksheet.Cells[1 + rowOff, 1 + colOffset, 1 + rowOff, colOffset + offset];
+                // Merge the cells
+                range.Merge = true;
+            }
+
+            // Set the column headers in Excel
+            for (int columnIndex = 0; columnIndex < ugWeeks.Columns; columnIndex++)
+            {
+                var border = ugWeeks.Children[columnIndex] as Border;
+                var content = string.Empty;
+                if (border != null)
+                {
+                    var textBlock = border.Child as TextBlock;
+                    if (textBlock != null)
+                    {
+                        content = textBlock.Text;
+                    }
+                }
+                var cell = worksheet.Cells[1 + rowOff, columnIndex * offset + 1 + colOff];
+                cell.Value = content;
+
+                cell.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                cell.Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                cell.Style.Border.Left.Color.SetColor(System.Drawing.Color.Black);
+                cell.Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                cell.Style.Border.Right.Color.SetColor(System.Drawing.Color.Black);
+
+                cell.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                cell.Style.Fill.BackgroundColor.SetColor(System.Drawing.ColorTranslator.FromHtml("#DAA520"));
+            }
+        }
+
+        private void AddChannelsHeaderInWorksheet(ExcelWorksheet worksheet, int rowOff = 0, int colOff = 0)
+        {
+            // Merging cells
+            int offset = (int)(ugGoals.Columns / ugChannels.Columns);
+            for (int i = 0, colOffset = colOff; i < ugChannels.Columns; i++, colOffset += offset)
+            {
+                // Get the range of cells to merge
+                var range = worksheet.Cells[1 + rowOff, 1 + colOffset, 1 + rowOff, colOffset + offset];
+                // Merge the cells
+                range.Merge = true;
+            }
+
+            // Set the column headers in Excel
+            for (int columnIndex = 0; columnIndex < ugChannels.Columns; columnIndex++)
+            {
+                var border = ugChannels.Children[columnIndex] as Border;
+                var content = string.Empty;
+                if (border != null)
+                {
+                    var textBlock = border.Child as TextBlock;
+                    if (textBlock != null)
+                    {
+                        content = textBlock.Text;
+                    }
+                }
+
+                var cell = worksheet.Cells[1 + rowOff, columnIndex * offset + 1 + colOff];
+                cell.Value = content;
+
+                cell.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                cell.Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                cell.Style.Border.Left.Color.SetColor(System.Drawing.Color.Black);
+                cell.Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                cell.Style.Border.Right.Color.SetColor(System.Drawing.Color.Black);
+
+                cell.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                cell.Style.Fill.BackgroundColor.SetColor(System.Drawing.ColorTranslator.FromHtml("#DAA520"));
+            }
+        }
+
+        private void AddGoalsHeaderInWorksheet(ExcelWorksheet worksheet, int rowOff = 0, int colOff = 0)
+        {
+
+            // Set the column headers in Excel
+            for (int columnIndex = 0; columnIndex < ugGoals.Columns; columnIndex++)
+            {
+                var border = ugGoals.Children[columnIndex] as Border;
+                var content = string.Empty;
+                if (border != null)
+                {
+                    var textBlock = border.Child as TextBlock;
+                    if (textBlock != null)
+                    {
+                        content = textBlock.Text;
+                    }
+                }
+
+                var cell = worksheet.Cells[1 + rowOff, columnIndex + 1 + colOff];
+                cell.Value = content;
+
+                cell.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                cell.Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                cell.Style.Border.Left.Color.SetColor(System.Drawing.Color.Black);
+                cell.Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                cell.Style.Border.Right.Color.SetColor(System.Drawing.Color.Black);
+
+                cell.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                cell.Style.Fill.BackgroundColor.SetColor(System.Drawing.ColorTranslator.FromHtml("#DAA520"));
+            }
         }
     }
 }

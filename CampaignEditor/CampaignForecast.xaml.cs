@@ -10,10 +10,13 @@ using Database.DTOs.MediaPlanTermDTO;
 using Database.DTOs.SchemaDTO;
 using Database.Entities;
 using Database.Repositories;
+using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
@@ -21,8 +24,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-
-
+using System.Windows.Threading;
 
 namespace CampaignEditor.UserControls
 {
@@ -817,8 +819,62 @@ namespace CampaignEditor.UserControls
         private void btnExport_Click(object sender, RoutedEventArgs e)
         {
 
-            dgMediaPlans.ExportToExcel();
-            
+            //dgMediaPlans.ExportToExcel();
+            Application.Current.Dispatcher.Invoke(DispatcherPriority.ApplicationIdle, new Action(() =>
+            {
+                using (var memoryStream = new MemoryStream())
+                {
+                    ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
+                    using (var excelPackage = new ExcelPackage(memoryStream))
+                    {
+
+                        // ... rest of the code to populate the worksheet ...
+                        // Create a new worksheet
+                        var worksheet = excelPackage.Workbook.Worksheets.Add("Sheet1");
+
+                        PopulateWorksheet(worksheet, memoryStream, excelPackage);
+                       
+
+                        // Show a dialog to the user for saving or opening the Excel file
+                        var saveFileDialog = new Microsoft.Win32.SaveFileDialog
+                        {
+                            Filter = "Excel Files (*.xlsx)|*.xlsx",
+                            DefaultExt = "xlsx"
+                        };
+
+                        if (saveFileDialog.ShowDialog() == true)
+                        {
+                            // Save the memory stream to a file
+                            File.WriteAllBytes(saveFileDialog.FileName, memoryStream.ToArray());
+
+                            try
+                            {
+                                string filePath = saveFileDialog.FileName;
+
+                                // Open the saved Excel file using the default associated program
+                                Process.Start(new ProcessStartInfo(filePath) { UseShellExecute = true });
+                            }
+                            catch { }
+                        }
+
+                    }
+                }
+            }));
+        }
+
+        private void PopulateWorksheet(ExcelWorksheet worksheet, MemoryStream memoryStream, ExcelPackage excelPackage)
+        {
+            /*dgMediaPlans.PopulateWorksheet(worksheet, 0, 0);
+            // Save the Excel package to a memory stream
+            excelPackage.SaveAs(memoryStream);
+            // Set the position of the memory stream back to the beginning
+            memoryStream.Position = 0;*/
+
+            sgGrid.PopulateWorksheet(worksheet, 0, 0);
+            // Save the Excel package to a memory stream
+            excelPackage.SaveAs(memoryStream);
+            // Set the position of the memory stream back to the beginning
+            memoryStream.Position = 0;
         }
     }
 }
