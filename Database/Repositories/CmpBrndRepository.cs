@@ -4,6 +4,7 @@ using Database.Data;
 using Database.DTOs.CmpBrndDTO;
 using Database.Entities;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Database.Repositories
@@ -35,14 +36,14 @@ namespace Database.Repositories
             return affected != 0;
         }
 
-        public async Task<CmpBrndDTO> GetCmpBrndByCmpId(int id)
+        public async Task<IEnumerable<CmpBrndDTO>> GetCmpBrndsByCmpId(int id)
         {
             using var connection = _context.GetConnection();
 
-            var brand = await connection.QueryFirstAsync<CmpBrnd>(
+            var brand = await connection.QueryAsync<CmpBrnd>(
                 "SELECT * FROM tblcmpbrnd WHERE cmpid = @Id", new { Id = id });
 
-            return _mapper.Map<CmpBrndDTO>(brand);
+            return _mapper.Map<IEnumerable<CmpBrndDTO>>(brand);
         }
 
         public async Task<bool> UpdateBrand(CmpBrndDTO cmpbrndDTO)

@@ -52,6 +52,7 @@
                         <RowDefinition Height="auto" />
                         <RowDefinition Height="auto" />
                         <RowDefinition Height="auto" />
+                        <RowDefinition Height="auto" />
                         <RowDefinition Height="*" />
                         <RowDefinition Height="10" />
                     </Grid.RowDefinitions>
@@ -142,15 +143,27 @@
                        HorizontalContentAlignment="Right" FontWeight="DemiBold"/>
                         </Grid>
                     </Border>
-                    <Border x:Name="bBrand" Grid.Row="9" Grid.Column="1" Grid.ColumnSpan="2" 
+                    <Border x:Name="bBrand1" Grid.Row="9" Grid.Column="1" Grid.ColumnSpan="2" 
                         BorderThickness="0, 0, 0, 1" BorderBrush="Black">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
-                            <Label x:Name="lblBrand" Content="Brand: " Grid.Column="0"/>
-                            <Label x:Name="lblBrandValue" Grid.Column="1" 
+                            <Label x:Name="lblBrand1" Content="Brand 1: " Grid.Column="0"/>
+                            <Label x:Name="lblBrand1Value" Grid.Column="1" 
+                       HorizontalContentAlignment="Right" FontWeight="DemiBold"/>
+                        </Grid>
+                    </Border>
+                    <Border x:Name="bBrand2" Grid.Row="10" Grid.Column="1" Grid.ColumnSpan="2" 
+                        BorderThickness="0, 0, 0, 1" BorderBrush="Black">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Label x:Name="lblBrand2" Content="Brand 2: " Grid.Column="0"/>
+                            <Label x:Name="lblBrand2Value" Grid.Column="1" 
                        HorizontalContentAlignment="Right" FontWeight="DemiBold"/>
                         </Grid>
                     </Border>

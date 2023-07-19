@@ -3,8 +3,10 @@ using CampaignEditor.DTOs.CampaignDTO;
 using Database.DTOs.BrandDTO;
 using Database.DTOs.ClientDTO;
 using Database.DTOs.CmpBrndDTO;
+using Database.Entities;
 using Database.Repositories;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -23,7 +25,7 @@ namespace CampaignEditor
         private CmpBrndController _cmpBrndController;
 
         private ClientDTO _client;
-        BrandDTO selectedBrand = null;
+        BrandDTO[] selectedBrands = new BrandDTO[2];
 
         private ObservableCollection<BrandDTO> _brands = new ObservableCollection<BrandDTO>();
         public ObservableCollection<BrandDTO> Brands
@@ -31,8 +33,8 @@ namespace CampaignEditor
             get { return _brands; }
             set { _brands = value; }
         }
-
-        private bool lbSelected = false;
+        // In order to know which textBox to update
+        int tbToEditIndex = 0;
 
         public bool success = false;
 
@@ -75,19 +77,16 @@ namespace CampaignEditor
             tbTbEndMinutes.Text = "59";
         }
 
-        private void tbBrand_TextChanged(object sender, TextChangedEventArgs e)
+        private void tbBrand1_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (lbSelected)
-            {
-                lbSelected = false;
-                return;
-            }
+            tbToEditIndex = 0;
+            selectedBrands[tbToEditIndex] = null;
 
             lbBrand.Items.Clear();
 
-            if (tbBrand.Text.Trim() != "")
+            if (tbBrand1.Text.Trim() != "")
             {
-                Regex regex = new Regex(tbBrand.Text.ToString(), RegexOptions.IgnoreCase);
+                Regex regex = new Regex(tbBrand1.Text.ToString(), RegexOptions.IgnoreCase);
 
                 for (int i=0; i<Brands.Count(); i++)
                 {
@@ -95,7 +94,33 @@ namespace CampaignEditor
 
                     if (regex.IsMatch(brandname))
                     {
-                        lbBrand.Items.Add(Brands[i]);
+                        if (Brands[i] != selectedBrands[1]) // Don't display selected brands
+                            lbBrand.Items.Add(Brands[i]);
+                    }
+                }
+            }
+
+        }
+
+        private void tbBrand2_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            tbToEditIndex = 1;
+            selectedBrands[tbToEditIndex] = null;
+
+            lbBrand.Items.Clear();
+
+            if (tbBrand2.Text.Trim() != "")
+            {
+                Regex regex = new Regex(tbBrand2.Text.ToString(), RegexOptions.IgnoreCase);
+
+                for (int i = 0; i < Brands.Count(); i++)
+                {
+                    string brandname = Brands[i].brand;
+
+                    if (regex.IsMatch(brandname))
+                    {
+                        if (Brands[i] != selectedBrands[0]) // Don't display selected brands
+                            lbBrand.Items.Add(Brands[i]);
                     }
                 }
             }
@@ -104,29 +129,31 @@ namespace CampaignEditor
 
         private async void btnSave_Click(object sender, RoutedEventArgs e)
         {
-            lblError.Content = "";
             string campaignName = tbName.Text.Trim();
             if (await CheckCampaign())
             {
                 try
                 {
                     int cmpid = await CreateCampaign();
-                    if (selectedBrand != null)
+                    foreach (var selectedBrand in selectedBrands)
                     {
-                        await CreateCmpBrnd(cmpid);
+                        if (selectedBrand != null)
+                        {
+                            await CreateCmpBrnd(cmpid, selectedBrand);
+                        }                    
                     }
                     success = true;
                     this.Close();
                 }
                 catch (Exception ex)
                 {
-                    lblError.Content = "Unable to make new campaign";
+                    MessageBox.Show("Unable to create new campaign", "Result: ", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
 
             }
         }
 
-        private async Task CreateCmpBrnd(int cmpid)
+        private async Task CreateCmpBrnd(int cmpid, BrandDTO selectedBrand)
         {
             CmpBrndDTO cmpBrnd = new CmpBrndDTO(cmpid, selectedBrand.brbrand);
             await _cmpBrndController.CreateCmpBrnd(cmpBrnd);             
@@ -178,9 +205,14 @@ namespace CampaignEditor
                 return false;
             }
             // Check this only if there is selected brand
-            else if (selectedBrand == null && tbBrand.Text.Trim().Length != 0)
+            else if (selectedBrands[0] == null && tbBrand1.Text.Trim() != "")
             {
-                MessageBox.Show("Invalid brand", "Result: ", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                MessageBox.Show("Invalid Brand 1", "Result: ", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                return false;
+            }
+            else if (selectedBrands[1] == null && tbBrand2.Text.Trim() != "")
+            {
+                MessageBox.Show("Invalid Brand 2", "Result: ", MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 return false;
             }
             else
@@ -197,15 +229,24 @@ namespace CampaignEditor
 
         private void lbBrand_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            selectedBrand = null;
-
             var brand = lbBrand.SelectedItem as BrandDTO;
             if (brand != null)
             {
-                lbSelected = true;
-                tbBrand.Text = brand.brand;
-                selectedBrand = brand;
+                if (tbToEditIndex == 0)
+                {
+                    tbBrand1.Text = brand.brand;
+                }
+                else if (tbToEditIndex == 1)
+                {
+                    tbBrand2.Text = brand.brand;
+                }
+                selectedBrands[tbToEditIndex] = brand;
+
+                // reset lbBrand
+                lbBrand.Items.Clear();
             }
         }
+
+
     }
 }

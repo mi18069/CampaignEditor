@@ -22,9 +22,9 @@ namespace CampaignEditor.Controllers
             return await _repository.CreateCmpBrnd(cmpbrndDTO);
         }
 
-        public async Task<CmpBrndDTO> GetCmpBrndByCmpId(int id)
+        public async Task<IEnumerable<CmpBrndDTO>> GetCmpBrndsByCmpId(int id)
         {
-            return await _repository.GetCmpBrndByCmpId(id);
+            return await _repository.GetCmpBrndsByCmpId(id);
         }
 
         public async Task<bool> UpdateBrand(CmpBrndDTO cmpbrndDTO)

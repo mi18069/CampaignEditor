@@ -13,13 +13,15 @@ using System.Linq;
 using System;
 using Database.DTOs.CmpBrndDTO;
 using System.Text.RegularExpressions;
+using Database.Entities;
 
 namespace CampaignEditor
 {
     public partial class CmpInfo : Window
     {
         private CampaignDTO _campaign = null;
-        private BrandDTO _brand = null;
+        private BrandDTO[] selectedBrands = new BrandDTO[2];
+        private BrandDTO[] onEntryBrands = new BrandDTO[2];
         private ClientDTO _client = null;
 
         private CampaignController _campaignController;
@@ -41,13 +43,13 @@ namespace CampaignEditor
             set { _campaign = value; }
         }
 
-        public BrandDTO Brand
+        public BrandDTO[] SelectedBrands
         {
-            get { return _brand; }
-            set { _brand = value; }
+            get { return selectedBrands; }
+            set { selectedBrands = value; }
         }
+        int tbToEditIndex = 0;
 
-        private bool lbSelected = false;
 
         public CmpInfo(ICampaignRepository campaignRepository,
                        IBrandRepository brandRepository, ICmpBrndRepository cmpBrndRepository)
@@ -60,7 +62,7 @@ namespace CampaignEditor
             InitializeComponent();
         }
 
-        public async Task Initialize(ClientDTO client, CampaignDTO campaign = null)
+        public async Task Initialize(ClientDTO client, CampaignDTO campaign = null, BrandDTO[] brands = null)
         {
             _campaign = campaign;
             _client = client;
@@ -75,24 +77,56 @@ namespace CampaignEditor
                 dpEndDate.SelectedDate = TimeFormat.YMDStringToDateTime(campaign.cmpedate);
 
                 FillTBTextBoxes();
-                await FillTBBrand();
+                await FillTBBrands(brands);
                 await FillLBBrand();
             }
             isModified = false;
         }
 
-        private async Task FillTBBrand()
+        private async Task FillTBBrands(BrandDTO[] brands = null)
         {
             try
             {
-                var cmpbrnd = await _cmpBrndController.GetCmpBrndByCmpId(_campaign.cmpid);
-                var brand = await _brandController.GetBrandById(cmpbrnd.brbrand);
-                Brand = brand;
-                tbBrand.Text = brand.brand.Trim();
+                // situation when it's clicking on cmpInfo for more than first time
+                // Selected brands already is the same as brands
+
+                
+                if (brands != null)
+                {
+                    if (brands[0] == null)
+                        tbBrand1.Text = "";
+                    else
+                        tbBrand1.Text = brands[0].brand.Trim();
+                    if (brands[1] == null)
+                        tbBrand2.Text = "";
+                    else
+                        tbBrand2.Text = brands[1].brand.Trim();
+                }
+                else
+                {
+                    var cmpbrnds = (await _cmpBrndController.GetCmpBrndsByCmpId(_campaign.cmpid)).ToList();
+                    if (cmpbrnds.Count() >= 1)
+                    {
+                        var brand = await _brandController.GetBrandById(cmpbrnds[0].brbrand);
+                        var tbText = brand.brand.Trim();
+                        tbBrand1.Text = tbText;
+                        selectedBrands[0] = brand;
+                        onEntryBrands[0] = brand;
+                    }
+                    if (cmpbrnds.Count() == 2)
+                    {
+                        var brand = await _brandController.GetBrandById(cmpbrnds[1].brbrand);
+                        var tbText = brand.brand.Trim();
+                        tbBrand2.Text = tbText;
+                        selectedBrands[1] = brand;
+                        onEntryBrands[0] = brand;
+                    }
+
+                }
+                
             }
             catch
             {
-                tbBrand.Text = "";
             }
         }
 
@@ -162,6 +196,16 @@ namespace CampaignEditor
                 }
 
             }
+            // For setting selected brand to first place if needed
+            if (selectedBrands[0] == null && selectedBrands[1] != null)
+            {
+                selectedBrands[0] = selectedBrands[1];
+                selectedBrands[1] = null;
+            }
+            for (int i = 0; i < 2; i++)
+            {
+                onEntryBrands[i] = selectedBrands[i];
+            }
 
             this.Hide();
         }
@@ -193,18 +237,32 @@ namespace CampaignEditor
 
         private async Task UpdateCmpBrnd()
         {
-            if (Brand != null)
+
+            try
             {
-                CmpBrndDTO cmpBrnd = new CmpBrndDTO(_campaign.cmpid, Brand.brbrand);
-                try
+                await _cmpBrndController.DeleteBrandByCmpId(_campaign.cmpid);
+            }
+            catch
+            {
+                MessageBox.Show("Unable to update Brands", "Result: ", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                return;
+            }
+
+            foreach (var selectedBrand in selectedBrands)
+            {
+                if (selectedBrand != null)
                 {
-                    await _cmpBrndController.GetCmpBrndByCmpId(_campaign.cmpid);
-                    await _cmpBrndController.UpdateBrand(cmpBrnd);
+                    CmpBrndDTO cmpBrnd = new CmpBrndDTO(_campaign.cmpid, selectedBrand.brbrand);
+                    try
+                    {
+                        await _cmpBrndController.CreateCmpBrnd(cmpBrnd);
+                    }
+                    catch
+                    {
+                        MessageBox.Show("Unable to set new Brands", "Result: ", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                    }
                 }
-                catch
-                {
-                    await _cmpBrndController.CreateCmpBrnd(cmpBrnd);
-                }
+
             }
         }
 
@@ -221,9 +279,20 @@ namespace CampaignEditor
                 return false;
             }
             // Check this only if there is selected brand
-            else if (Brand == null && tbBrand.Text.Trim().Length != 0)
+            else if (selectedBrands[0] == null && tbBrand1.Text.Trim() != "")
             {
-                MessageBox.Show("Invalid brand", "Result: ", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                MessageBox.Show("Invalid Brand 1", "Result: ", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                return false;
+            }
+            else if (selectedBrands[1] == null && tbBrand2.Text.Trim() != "")
+            {
+                MessageBox.Show("Invalid Brand 2", "Result: ", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                return false;
+            }
+            else if (selectedBrands[0] != null && selectedBrands[1] != null &&
+                selectedBrands[0].brand.Trim() == selectedBrands[1].brand.Trim())
+            {
+                MessageBox.Show("Can't use the same brand", "Result: ", MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 return false;
             }
             else
@@ -234,6 +303,10 @@ namespace CampaignEditor
 
         private void btnCancel_Click(object sender, RoutedEventArgs e)
         {
+            for (int i = 0; i < 2; i++)
+            {
+                selectedBrands[i] = onEntryBrands[i];
+            }
             this.Hide();
         }
         #endregion
@@ -248,19 +321,18 @@ namespace CampaignEditor
             await UpdateCmpBrnd();
         }
 
-        private void tbBrand_TextChanged(object sender, TextChangedEventArgs e)
+        private void tbBrand1_TextChanged(object sender, TextChangedEventArgs e)
         {
-            if (lbSelected)
-            {
-                lbSelected = false;
-                return;
-            }
+
+            tbToEditIndex = 0;
+            selectedBrands[tbToEditIndex] = null;
+            isModified = true;
 
             lbBrand.Items.Clear();
 
-            if (tbBrand.Text.Trim() != "")
+            if (tbBrand1.Text.Trim() != "")
             {
-                Regex regex = new Regex(tbBrand.Text.ToString(), RegexOptions.IgnoreCase);
+                Regex regex = new Regex(tbBrand1.Text.ToString(), RegexOptions.IgnoreCase);
 
                 for (int i = 0; i < Brands.Count(); i++)
                 {
@@ -268,7 +340,35 @@ namespace CampaignEditor
 
                     if (regex.IsMatch(brandname))
                     {
-                        lbBrand.Items.Add(Brands[i]);
+                        if (Brands[i] != selectedBrands[1]) // Don't display selected brands
+                            lbBrand.Items.Add(Brands[i]);
+                    }
+                }
+            }
+
+        }
+
+        private void tbBrand2_TextChanged(object sender, TextChangedEventArgs e)
+        {
+
+            tbToEditIndex = 1;
+            selectedBrands[tbToEditIndex] = null;
+            isModified = true;
+
+            lbBrand.Items.Clear();
+            var a = selectedBrands[0];
+            if (tbBrand2.Text.Trim() != "")
+            {
+                Regex regex = new Regex(tbBrand2.Text.ToString(), RegexOptions.IgnoreCase);
+
+                for (int i = 0; i < Brands.Count(); i++)
+                {
+                    string brandname = Brands[i].brand;
+
+                    if (regex.IsMatch(brandname))
+                    {
+                        if (Brands[i] != selectedBrands[0]) // Don't display selected brands
+                            lbBrand.Items.Add(Brands[i]);
                     }
                 }
             }
@@ -277,14 +377,21 @@ namespace CampaignEditor
 
         private void lbBrand_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            Brand = null;
-
             var brand = lbBrand.SelectedItem as BrandDTO;
             if (brand != null)
             {
-                lbSelected = true;
-                tbBrand.Text = brand.brand;
-                Brand = brand;
+                if (tbToEditIndex == 0)
+                {
+                    tbBrand1.Text = brand.brand;
+                }
+                else if (tbToEditIndex == 1)
+                {
+                    tbBrand2.Text = brand.brand;
+                }
+                selectedBrands[tbToEditIndex] = brand;
+
+                // reset lbBrand
+                lbBrand.Items.Clear();
             }
             isModified = true;
         }
@@ -292,6 +399,10 @@ namespace CampaignEditor
         // Overriding OnClosing because click on x button should only hide window
         protected override void OnClosing(CancelEventArgs e)
         {
+            for (int i=0; i<2; i++)
+            {
+                selectedBrands[i] = onEntryBrands[i];
+            }
             if (!shouldClose)
             {
                 e.Cancel = true;

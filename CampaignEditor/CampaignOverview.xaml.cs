@@ -118,7 +118,7 @@ namespace CampaignEditor
             fInfo = _factoryInfo.Create();
             await fInfo.Initialize(_client, _campaign);
             _campaignInfo = fInfo.Campaign;
-            FillInfo(_campaignInfo, fInfo.Brand);
+            FillInfo(_campaignInfo, fInfo.SelectedBrands);
 
         }
 
@@ -148,19 +148,19 @@ namespace CampaignEditor
 
         private async void btnCmpInfo_Click(object sender, RoutedEventArgs e)
         {
-            fInfo.Initialize(_client, _campaign);
+            await fInfo.Initialize(_client, _campaign, fInfo.SelectedBrands);
             fInfo.ShowDialog();
 
             if (fInfo.infoModified)
             {
                 _campaignInfo = fInfo.Campaign;
                 infoModified = true;
-                FillInfo(_campaignInfo, fInfo.Brand);
+                FillInfo(_campaignInfo, fInfo.SelectedBrands);
                 fInfo.infoModified = false;
                 btnSave.IsEnabled = true;
             }
         }
-        private void FillInfo(CampaignDTO campaign = null, BrandDTO brand = null)
+        private void FillInfo(CampaignDTO campaign = null, BrandDTO[] brands = null)
         {
             if (campaign != null)
             {
@@ -180,13 +180,29 @@ namespace CampaignEditor
                 lblDPStartValue.Content = campaign.cmpstime.ToString().Trim();
                 lblDPEndValue.Content = campaign.cmpetime.ToString().Trim();
                 lblActiveValue.Content = campaign.active;
-                if (brand != null)
+                if (brands[0] != null)
                 {
-                    lblBrandValue.Content = brand.brand;
+                    lblBrand1Value.Content = brands[0].brand;
+                    if (lblBrand1Value.Content.ToString().Length > 15)
+                    {
+                        lblBrand1Value.Content = lblBrand1Value.Content.ToString().Substring(0, 14) + "...";
+                    }
                 }
                 else
                 {
-                    lblBrandValue.Content = "-";
+                    lblBrand1Value.Content = "-";
+                }
+                if (brands[1] != null)
+                {
+                    lblBrand2Value.Content = brands[1].brand;
+                    if (lblBrand2Value.Content.ToString().Length > 15)
+                    {
+                        lblBrand2Value.Content = lblBrand2Value.Content.ToString().Substring(0, 14) + "...";
+                    }
+                }
+                else
+                {
+                    lblBrand2Value.Content = "-";
                 }
             }
         }
