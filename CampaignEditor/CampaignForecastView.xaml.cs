@@ -55,7 +55,7 @@ namespace CampaignEditor
             unavailableDates = (await _databaseFunctionsController.GetAllUnavailableDates()).ToList();
 
             _forecast = _factoryForecast.Create();
-            await _forecast.Initialize(_campaign);
+            _forecast.Initialize(_campaign);
             _forecast.InitializeButtonClicked += Forecast_InitializeButtonClicked;
 
             _forecastDates = _factoryForecastDates.Create();

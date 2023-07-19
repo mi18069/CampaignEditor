@@ -47,16 +47,16 @@
                                  Grid.Row="1" Grid.Column="2" Grid.RowSpan="5" Grid.ColumnSpan="3" 
                                  SelectionChanged="dgMediaPlans_SelectionChanged"/>
 
-            <TabControl x:Name="tcGrids" Grid.Row="6" Grid.Column="2" Grid.ColumnSpan="3">
+            <TabControl x:Name="tcGrids" Grid.Row="6" Grid.Column="2" Grid.ColumnSpan="3"
+                        Loaded="TabControl_Loaded">
                 <TabItem Header="Spots Goals" x:Name="tiSpotGoals" >
                     <ScrollViewer HorizontalScrollBarVisibility="Visible">
                         <local:SpotGoalsGrid x:Name="sgGrid" />
                     </ScrollViewer>
                 </TabItem>
-                <TabItem x:Name="tiChannelGoals" Header="Channels Goals" Height="20" VerticalAlignment="Top" 
-                         VirtualizingPanel.IsVirtualizing="False">
+                <TabItem x:Name="tiChannelGoals" Header="Channels Goals" Height="20" VerticalAlignment="Top">
                     <local:ChannelsGoalsGrid x:Name="cgGrid"/>
-                </TabItem>
+                </TabItem> 
                 <TabItem Header="Data">
                     <DataGrid x:Name="dgHist" 
                       VerticalScrollBarVisibility="Visible"
@@ -266,8 +266,15 @@
                     <RowDefinition Height="50"/>
                     <RowDefinition Height="auto"/>
                 </Grid.RowDefinitions>
-                <Button x:Name="btnExport" Content="Export to Excel" Grid.Row="0" Margin="10"
+                <Button x:Name="btnExport" Content="Export to Excel" Grid.Row="0" Margin="0, 10, 10, 10"
                         Click="btnExport_Click"/>
+                <!-- <Border x:Name="pGoals" Grid.Row="1" HorizontalAlignment="Stretch"
+                BorderBrush="LightGray" BorderThickness="1"
+                    Margin="0, 10, 10, 0">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalContentAlignment="Stretch">
+                        <local:ChannelsGoalsGrid x:Name="cgGrid" HorizontalContentAlignment="Stretch"/>
+                    </ScrollViewer>
+                </Border> -->
                 <Border x:Name="pGoals" Grid.Row="1" Visibility="Collapsed"
                 BorderBrush="LightGray" BorderThickness="1" 
                     Margin="0, 10, 10, 0">
@@ -347,10 +354,10 @@
                             </Grid>
                         </Border>
                     </Grid>
-                </Border>
+                </Border> 
 
-            </Grid>
-
+            </Grid> 
+            
         </Grid>
     </Grid>
 </Page>

@@ -14,11 +14,12 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <DataGrid x:Name="dgGrid" Grid.Row="0" Grid.Column="0" 
+        <DataGrid x:Name="dgGrid" Grid.Row="0" Grid.Column="0"
                   HorizontalAlignment="Stretch" VerticalAlignment="Stretch" 
                   AutoGenerateColumns="False"
                   HeadersVisibility="Column"
                   CanUserDeleteRows="False"
+                  CanUserResizeColumns="True"
                   AlternatingRowBackground="LightGoldenrodYellow" 
                   EnableRowVirtualization="False"
                   EnableColumnVirtualization="False">

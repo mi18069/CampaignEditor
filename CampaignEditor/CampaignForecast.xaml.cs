@@ -10,6 +10,7 @@ using Database.DTOs.MediaPlanTermDTO;
 using Database.DTOs.SchemaDTO;
 using Database.Entities;
 using Database.Repositories;
+using Microsoft.Win32;
 using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
@@ -120,7 +121,7 @@ namespace CampaignEditor.UserControls
 
 
         #region Initialization
-        public async Task Initialize(CampaignDTO campaign)
+        public void Initialize(CampaignDTO campaign)
         {
             _campaign = campaign;
 
@@ -164,11 +165,11 @@ namespace CampaignEditor.UserControls
             // For dgMediaPlans
             await InitializeDataGrid();
             await InitializeSGGrid();
-            InitializeCGGrid();
+            await InitializeCGGrid();
 
         }
 
-        private void InitializeCGGrid()
+        private async Task InitializeCGGrid()
         {
             ObservableCollection<MediaPlan> mediaPlans = new ObservableCollection<MediaPlan>();
             foreach (var mpTuple in _allMediaPlans)
@@ -181,6 +182,7 @@ namespace CampaignEditor.UserControls
                 channels.Add(channel);
             }
             cgGrid.Initialize(mediaPlans, channels);
+            tiChannelGoals.Focus();
         }
 
         private async Task InitializeSGGrid()
@@ -818,9 +820,6 @@ namespace CampaignEditor.UserControls
 
         private void btnExport_Click(object sender, RoutedEventArgs e)
         {
-            // ensuring that grid is loaded
-            var focusedTab = tcGrids.SelectedItem as TabItem;
-            tiChannelGoals.Focus();
            
             //dgMediaPlans.ExportToExcel();
             Application.Current.Dispatcher.Invoke(DispatcherPriority.ApplicationIdle, new Action(() =>
@@ -854,27 +853,93 @@ namespace CampaignEditor.UserControls
                             DefaultExt = "xlsx"
                         };
 
-                        if (saveFileDialog.ShowDialog() == true)
-                        {
-                            // Save the memory stream to a file
-                            File.WriteAllBytes(saveFileDialog.FileName, memoryStream.ToArray());
-
-                            try
-                            {
-                                string filePath = saveFileDialog.FileName;
-
-                                // Open the saved Excel file using the default associated program
-                                Process.Start(new ProcessStartInfo(filePath) { UseShellExecute = true });
-                            }
-                            catch { }
-                        }
-
+                        SaveFile(saveFileDialog, memoryStream);
                     }
+              
                 }
             }));
 
-            focusedTab.Focus();
         }
+
+        private void SaveFile(SaveFileDialog saveFileDialog, MemoryStream memoryStream)
+        {
+
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                try
+                {
+                    // Save the memory stream to a file
+                    File.WriteAllBytes(saveFileDialog.FileName, memoryStream.ToArray());
+
+                    try
+                    {
+                        string filePath = saveFileDialog.FileName;
+
+                        // Open the saved Excel file using the default associated program
+                        Process.Start(new ProcessStartInfo(filePath) { UseShellExecute = true });
+                    }
+                    catch 
+                    {
+                        MessageBox.Show("Unable to open Excel file",
+                        "Result: ", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+
+                }
+                catch (IOException ex)
+                {
+                    MessageBox.Show("Unable to change opened Excel file",
+                        "Result: ", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                catch
+                {
+                    MessageBox.Show("Unable to make Excel file",
+                        "Result: ", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            
+        }
+
+        private void TabControl_Loaded(object sender, RoutedEventArgs e)
+        {
+            // Get the TabControl instance
+            var tabControl = (TabControl)sender;
+
+            // Iterate through all TabItems
+            foreach (var tabItem in tabControl.Items.OfType<TabItem>())
+            {
+                // Get the content of the TabItem
+                var tabItemContent = tabItem.Content as FrameworkElement;
+
+                // Find the UserControl within the TabItem content
+                var userControl = FindVisualChild<UserControl>(tabItemContent);
+
+                // Access the DataGrid within the UserControl
+                var dataGrid = FindVisualChild<DataGrid>(userControl);
+
+                // Retrieve the information from the DataGrid
+                // ...
+            }
+        }
+
+        private T FindVisualChild<T>(DependencyObject parent) where T : DependencyObject
+        {
+            if (parent == null)
+                return null;
+
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+            {
+                var child = VisualTreeHelper.GetChild(parent, i);
+                if (child is T desiredChild)
+                    return desiredChild;
+
+                var foundChild = FindVisualChild<T>(child);
+                if (foundChild != null)
+                    return foundChild;
+            }
+
+            return null;
+        }
+
     }
 }
             
