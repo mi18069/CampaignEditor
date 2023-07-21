@@ -30,6 +30,7 @@ using System.Diagnostics;
 using OfficeOpenXml.Style;
 using OfficeOpenXml.FormulaParsing;
 using Border = System.Windows.Controls.Border;
+using System.Reflection;
 
 namespace CampaignEditor.UserControls
 {
@@ -951,6 +952,18 @@ namespace CampaignEditor.UserControls
                         if (cell != null)
                         {
                             var cellColor = cell.Background;
+                            var cellBorderColor = cell.BorderBrush;
+
+                            var drawingColor = System.Drawing.Color.Black;
+                            var drawingThickness = ExcelBorderStyle.Thin;
+
+                            if (cellBorderColor == Brushes.OrangeRed)
+                            {
+                                drawingColor = System.Drawing.Color.OrangeRed;
+                                drawingThickness = ExcelBorderStyle.Thick;
+                            }
+
+
                             if (cellColor != null)
                             {
                                 var excelColor = System.Drawing.ColorTranslator.FromHtml(cellColor.ToString());
@@ -959,14 +972,14 @@ namespace CampaignEditor.UserControls
                                 excelCell.Style.Fill.BackgroundColor.SetColor(excelColor);
 
                                 excelCell.Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
-                                excelCell.Style.Border.Left.Style = ExcelBorderStyle.Thin;
-                                excelCell.Style.Border.Left.Color.SetColor(System.Drawing.Color.Black);
-                                excelCell.Style.Border.Right.Style = ExcelBorderStyle.Thin;
-                                excelCell.Style.Border.Right.Color.SetColor(System.Drawing.Color.Black);
-                                excelCell.Style.Border.Top.Style = ExcelBorderStyle.Thin;
-                                excelCell.Style.Border.Top.Color.SetColor(System.Drawing.Color.Black);
-                                excelCell.Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
-                                excelCell.Style.Border.Bottom.Color.SetColor(System.Drawing.Color.Black);
+                                excelCell.Style.Border.Left.Style = drawingThickness;
+                                excelCell.Style.Border.Left.Color.SetColor(drawingColor);
+                                excelCell.Style.Border.Right.Style = drawingThickness;
+                                excelCell.Style.Border.Right.Color.SetColor(drawingColor);
+                                excelCell.Style.Border.Top.Style = drawingThickness;
+                                excelCell.Style.Border.Top.Color.SetColor(drawingColor);
+                                excelCell.Style.Border.Bottom.Style = drawingThickness;
+                                excelCell.Style.Border.Bottom.Color.SetColor(drawingColor);
                             }
                             double cellHeight = cell.ActualHeight;
                             double cellWidth = cell.ActualWidth / 7;
@@ -984,9 +997,10 @@ namespace CampaignEditor.UserControls
 
             // Disable row virtualization
             dataGrid.EnableRowVirtualization = true;
-            dataGrid.EnableColumnVirtualization = true;
+            dataGrid.EnableColumnVirtualization = true;          
 
         }
+
 
         private DataGridCell FindParentDataGridCell(TextBlock textBlock)
         {
@@ -1019,5 +1033,7 @@ namespace CampaignEditor.UserControls
             }
             return null;
         }
+
+
     }
 }

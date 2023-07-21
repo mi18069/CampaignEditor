@@ -17,6 +17,8 @@
                     CanUserDeleteRows="False"
                     SelectionMode="Single"
                     HorizontalScrollBarVisibility="Visible"
+                    VirtualizingStackPanel.IsVirtualizing="True"
+                    VirtualizingStackPanel.VirtualizationMode="Recycling"
                   EnableRowVirtualization="True"
                   EnableColumnVirtualization="True" 
                   SelectionChanged="DataGrid_SelectionChanged"

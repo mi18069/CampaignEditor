@@ -826,8 +826,8 @@ namespace CampaignEditor.UserControls
 
         private async void btnExport_Click(object sender, RoutedEventArgs e)
         {
+
            
-            //dgMediaPlans.ExportToExcel();
             Application.Current.Dispatcher.Invoke(DispatcherPriority.ApplicationIdle, new Action(async () =>
             {
                 using (var memoryStream = new MemoryStream())
