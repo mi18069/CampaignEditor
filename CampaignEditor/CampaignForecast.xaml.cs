@@ -46,6 +46,8 @@ namespace CampaignEditor.UserControls
         private readonly IAbstractFactory<AddSchema> _factoryAddSchema;
         private readonly IAbstractFactory<AMRTrim> _factoryAmrTrim;
         private readonly IAbstractFactory<MediaPlanGrid> _factoryMediaPlanGrid;
+        private readonly IAbstractFactory<PrintCampaignInfo> _factoryPrintCmpInfo;
+
 
         private SelectedMPGoals SelectedMediaPlan = new SelectedMPGoals();
 
@@ -74,6 +76,8 @@ namespace CampaignEditor.UserControls
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyname));
         }
+
+
         public CampaignForecast(ISchemaRepository schemaRepository,
             IChannelRepository channelRepository,
             IChannelCmpRepository channelCmpRepository,
@@ -88,7 +92,8 @@ namespace CampaignEditor.UserControls
             IAbstractFactory<AMRTrim> factoryAmrTrim,
             IAbstractFactory<MediaPlanConverter> factoryMpConverter,
             IAbstractFactory<MediaPlanTermConverter> factoryMpTermConverter,
-            IAbstractFactory<MediaPlanGrid> mediaPlanGrid)
+            IAbstractFactory<MediaPlanGrid> mediaPlanGrid,
+            IAbstractFactory<PrintCampaignInfo> factoryPrintCmpInfo)
         {
             this.DataContext = this;
 
@@ -107,6 +112,7 @@ namespace CampaignEditor.UserControls
             _factoryAddSchema = factoryAddSchema;
             _factoryAmrTrim = factoryAmrTrim;
             _factoryMediaPlanGrid = mediaPlanGrid;
+            _factoryPrintCmpInfo = factoryPrintCmpInfo;
 
             _mpConverter = factoryMpConverter.Create();
             _mpTermConverter = factoryMpTermConverter.Create();
@@ -818,11 +824,11 @@ namespace CampaignEditor.UserControls
 
         #endregion
 
-        private void btnExport_Click(object sender, RoutedEventArgs e)
+        private async void btnExport_Click(object sender, RoutedEventArgs e)
         {
            
             //dgMediaPlans.ExportToExcel();
-            Application.Current.Dispatcher.Invoke(DispatcherPriority.ApplicationIdle, new Action(() =>
+            Application.Current.Dispatcher.Invoke(DispatcherPriority.ApplicationIdle, new Action(async () =>
             {
                 using (var memoryStream = new MemoryStream())
                 {
@@ -832,14 +838,19 @@ namespace CampaignEditor.UserControls
 
                         // ... rest of the code to populate the worksheet ...
                         // Create a new worksheet
-                        var worksheet1 = excelPackage.Workbook.Worksheets.Add("Sheet 1");
+                        var worksheet0 = excelPackage.Workbook.Worksheets.Add("Campaign Info");
+                        var f = _factoryPrintCmpInfo.Create();
+                        await f.PrintData(_campaign.cmpid, worksheet0, 0, 0);
+
+                        var worksheet1 = excelPackage.Workbook.Worksheets.Add("Program Schema");
                         dgMediaPlans.PopulateWorksheet(worksheet1, 0, 0);
 
-                        var worksheet2 = excelPackage.Workbook.Worksheets.Add("Sheet 2");
+                        var worksheet2 = excelPackage.Workbook.Worksheets.Add("Spot Goals");
                         sgGrid.PopulateWorksheet(worksheet2, 0, 0);
 
-                        var worksheet3 = excelPackage.Workbook.Worksheets.Add("Sheet 3");
+                        var worksheet3 = excelPackage.Workbook.Worksheets.Add("Channel Goals");
                         cgGrid.PopulateWorksheet(worksheet3, 0, 0);
+
 
                         // Save the Excel package to a memory stream
                         excelPackage.SaveAs(memoryStream);

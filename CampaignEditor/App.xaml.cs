@@ -54,6 +54,7 @@ namespace CampaignEditor
                     services.AddFormFactory<CampaignForecastDates>();
                     services.AddFormFactory<ChangePassword>();
                     services.AddFormFactory<SpotGoalsGrid>();
+                    services.AddFormFactory<PrintCampaignInfo>();
                     services.AddScoped<IDataContext, DataContext>();
                     // Add services
                     Extensions.UserExtensions.AddUserExtensions(services);

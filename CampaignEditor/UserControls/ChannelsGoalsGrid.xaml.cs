@@ -155,23 +155,8 @@ namespace CampaignEditor.UserControls
                 }
 
             }
-
-
         }
 
-        private DataGridCell FindParentDataGridCell(TextBlock textBlock)
-        {
-            if (textBlock == null)
-                return null;
 
-            DependencyObject parent = VisualTreeHelper.GetParent(textBlock);
-
-            while (parent != null && !(parent is DataGridCell))
-            {
-                parent = VisualTreeHelper.GetParent(parent);
-            }
-
-            return parent as DataGridCell;
-        }
     }
 }
