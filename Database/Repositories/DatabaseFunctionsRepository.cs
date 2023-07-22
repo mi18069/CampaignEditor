@@ -39,7 +39,7 @@ namespace Database.Repositories
             var affected = await connection.ExecuteAsync(
             new CommandDefinition(
                       "WITH RECURSIVE all_dates AS( " +
-                      "SELECT COALESCE(MAX(date), CAST('2019-04-19' AS TIMESTAMP)) AS date " +
+                      "SELECT COALESCE(DATEADD(MONTH, -6, MAX(date)), CAST('2019-04-19' AS TIMESTAMP)) AS date " +
                       "FROM emsfiles.norecords " +
                       "UNION ALL " +
                       "SELECT date + INTERVAL '1' DAY " +
