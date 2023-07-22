@@ -1,5 +1,8 @@
 ﻿using Database;
+using Database.Data;
 using System;
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows;
 
@@ -21,12 +24,23 @@ namespace CampaignEditor
 
         private void FillFields()
         {
+            string encryptedString = AppSettings.ConnectionString.Trim();
+            // Decrypt string
+            var connectionString = string.Empty;
+            try
+            {
+                connectionString = EncryptionUtility.DecryptString(encryptedString);
+            }
+            catch
+            {
+                connectionString = "Server=;port=;user id=;password=;database=;";
+            }
+
             Regex regServer = new Regex("Server=[^;]*;");
             Regex regPort = new Regex("port=[^;]*;");
             Regex regUsername = new Regex("user id=[^;]*;");
             Regex regPassword = new Regex("password=[^;]*;");
             Regex regDatabase = new Regex("database=[^;]*;");
-            string connectionString = AppSettings.ConnectionString;
 
             try
             {
@@ -128,13 +142,25 @@ namespace CampaignEditor
 
             string connectionString = string.Format("Server={0};port={1};user id={2};password={3};database={4};",
                 tbServer.Text.Trim(), tbPort.Text.Trim(), tbUsername.Text.Trim(), pbPassword.Password.ToString().Trim(), tbDatabase.Text.Trim());
-            
+
+            // Encrypting connectionString
+            var encryptedString = string.Empty;
+            try
+            {
+                encryptedString = EncryptionUtility.EncryptString(connectionString);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Cannot save settings: " + ex.Message, "Message", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
             // Saving without checkings
             AppSetting setting = new AppSetting();
-            setting.SaveConnectionString("cs", connectionString);
+            setting.SaveConnectionString("cs", encryptedString);
             MessageBox.Show("Connection succesfully saved", "Message", MessageBoxButton.OK, MessageBoxImage.Information);
             this.Close();
 
         }
+
     }
 }

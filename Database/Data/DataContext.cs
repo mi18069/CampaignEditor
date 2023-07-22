@@ -15,11 +15,9 @@ namespace Database.Data
 
         public NpgsqlConnection GetConnection()
         {
-            //string connectionString = "Server=localhost;port=5433;user id=postgres;password=jovan1999;database=mplaner;";
-            //string connectionString = "Server=localhost;port=5432;user id=postgres;password=Peca;database=mplaner;";
-            //var connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["cs"].ConnectionString;
-            var connectionString = AppSettings.ConnectionString;
+            var encryptedString = AppSettings.ConnectionString;
             var connection = new NpgsqlConnection();
+            var connectionString = EncryptionUtility.DecryptString(encryptedString);
             connection.ConnectionString = connectionString;
             return connection;
         }
