@@ -1,4 +1,5 @@
-﻿using CampaignEditor.Controllers;
+﻿using AutoMapper.Configuration.Conventions;
+using CampaignEditor.Controllers;
 using CampaignEditor.DTOs.CampaignDTO;
 using Database.DTOs.ChannelDTO;
 using Database.DTOs.SpotDTO;
@@ -224,6 +225,7 @@ namespace CampaignEditor.UserControls
                             valuesList.Add(dg);
                         }
                         var totalSubGrid = new SpotGoalsTotalSubGrid(valuesList);
+                        totalSubGrid.SelectedRowChanged += SubGrid_SelectedRowChanged;
                         ugGrid.Children.Add(totalSubGrid);
                         continue;
                     }
@@ -251,6 +253,7 @@ namespace CampaignEditor.UserControls
                         mpTuples.Add(new MediaPlanTuple(mpTuple.MediaPlan, mpTerms));
                     }
                     var subGrid = new SpotGoalsSubGrid(_spots, mpTuples);
+                    subGrid.SelectedRowChanged += SubGrid_SelectedRowChanged;
                     ugGrid.Children.Add(subGrid);
                 }
             }
@@ -300,6 +303,7 @@ namespace CampaignEditor.UserControls
                         valuesList.Add(values);
                     }
                     var totalSubGrid = new SpotGoalsTotalSubGrid(valuesList);
+                    totalSubGrid.SelectedRowChanged += SubGrid_SelectedRowChanged;
                     ugGrid.Children.Add(totalSubGrid);
                 }
             }
@@ -349,6 +353,7 @@ namespace CampaignEditor.UserControls
             ugGrid.Height = dgSpots.Height;
         }
 
+        #region Export to Excel
         public void PopulateWorksheet(ExcelWorksheet worksheet, int rowOff = 0, int colOff = 0)
         {
 
@@ -491,6 +496,75 @@ namespace CampaignEditor.UserControls
                 cell.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
                 cell.Style.Fill.BackgroundColor.SetColor(System.Drawing.ColorTranslator.FromHtml("#DAA520"));
             }
+        }
+
+        #endregion
+
+        // Helper method to find a parent of a specific type
+        private T FindParent<T>(DependencyObject child) where T : DependencyObject
+        {
+            DependencyObject parent = VisualTreeHelper.GetParent(child);
+
+            if (parent == null)
+                return null;
+
+            T parentItem = parent as T;
+            return parentItem ?? FindParent<T>(parent);
+        }
+
+        private void TextBlock_MouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            // Get the clicked DataGridCell
+            TextBlock textBlock = sender as TextBlock;
+
+            // Find the parent DataGridCell
+            DataGridCell cell = FindParent<DataGridCell>(textBlock);
+
+            // Find the parent DataGridRow
+            DataGridRow row = FindParent<DataGridRow>(cell);
+            if (row == null)
+                return;
+
+            // Get the column index
+            //int columnIndex = cell.Column.DisplayIndex;
+
+            // Get the row index of the clicked cell
+            int rowIndex = dgSpots.Items.IndexOf(row.Item);
+            SelectAllSubgridRows(rowIndex);
+            
+        }
+
+        private void SelectAllSubgridRows(int rowIndex)
+        {
+            if (rowIndex != null)
+            {
+                foreach (var subGrid in ugGrid.Children)
+                {
+                    SpotGoalsSubGrid sg = subGrid as SpotGoalsSubGrid;
+                    if (sg == null)
+                    {
+                        SpotGoalsTotalSubGrid tsg = subGrid as SpotGoalsTotalSubGrid;
+                        if (tsg != null)
+                        {
+                            tsg.SelectByRowIndex(rowIndex);
+                        }
+                        else
+                        {
+                            continue;
+                        }
+                    }
+                    else
+                    {
+                        sg.SelectByRowIndex(rowIndex);
+                    }
+                }
+            }
+        }
+
+        // Event handler for the custom event in subGrids
+        private void SubGrid_SelectedRowChanged(object sender, int rowIndex)
+        {
+            SelectAllSubgridRows(rowIndex);
         }
     }
 }

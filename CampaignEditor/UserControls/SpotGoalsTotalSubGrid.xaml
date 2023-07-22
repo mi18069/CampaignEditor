@@ -11,9 +11,20 @@
                   HorizontalContentAlignment="Center" AutoGenerateColumns="False"
                   HeadersVisibility="None"
                   CanUserAddRows="False" CanUserDeleteRows="False" CanUserReorderColumns="False"
-                  CanUserSortColumns="False" CanUserResizeRows="False" IsHitTestVisible="False"
+                  CanUserSortColumns="False" CanUserResizeRows="False"
                   AlternatingRowBackground="LightGoldenrodYellow" BorderBrush="Black"
-                  EnableRowVirtualization="False" EnableColumnVirtualization="False">
+                  EnableRowVirtualization="False" EnableColumnVirtualization="False" SelectedCellsChanged="dgGrid_SelectedCellsChanged">
+            <DataGrid.Resources>
+                <!-- Style for selected cells -->
+                <Style TargetType="DataGridCell">
+                    <Style.Triggers>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter Property="Background" Value="LightBlue" />
+                            <Setter Property="Foreground" Value="Black" />
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.Resources>
             <DataGrid.Columns>
                 <DataGridTextColumn Width="*"
                                     IsReadOnly="True" Binding="{Binding Insertations, Mode=TwoWay}"/>

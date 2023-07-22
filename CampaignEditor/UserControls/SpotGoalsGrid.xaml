@@ -29,13 +29,24 @@
         <DataGrid x:Name="dgSpots" Grid.Row="3" Grid.Column="0" 
                   HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                   HeadersVisibility="None" AutoGenerateColumns="False" CanUserSortColumns="False"
-                  CanUserResizeRows="False" IsHitTestVisible="False" BorderBrush="Black">
+                  CanUserResizeRows="False" BorderBrush="Black">
+            <DataGrid.Resources>
+                <Style TargetType="DataGridCell">
+                    <Style.Triggers>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter Property="Background" Value="LightBlue" />
+                            <Setter Property="Foreground" Value="Black" />
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.Resources>
             <DataGrid.Columns>
                 <DataGridTextColumn Width="auto" IsReadOnly="True" Binding="{Binding Label}"
                                     FontWeight="Bold">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="{x:Type TextBlock}">
                             <Setter Property="Background" Value="LightGoldenrodYellow" />
+                            <EventSetter Event="MouseLeftButtonDown" Handler="TextBlock_MouseLeftButtonDown" />
                         </Style>
                     </DataGridTextColumn.ElementStyle>
                 </DataGridTextColumn>

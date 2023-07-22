@@ -111,6 +111,7 @@ namespace CampaignEditor.UserControls
 
         }
 
+        #region Export to Excel
         public void PopulateWorksheet(ExcelWorksheet worksheet, int rowOff = 0, int colOff = 0)
         {
             var dataGrid = dgGrid;
@@ -187,6 +188,27 @@ namespace CampaignEditor.UserControls
             }
 
             return parent as DataGridCell;
+        }
+
+        #endregion
+
+        public void SelectByRowIndex(int rowIndex)
+        {
+            dgGrid.SelectedIndex = rowIndex;
+            
+        }
+
+        public event EventHandler<int> SelectedRowChanged;
+
+
+        // Event handler for DataGrid's SelectedCellsChanged event
+        private void dgGrid_SelectedCellsChanged(object sender, SelectedCellsChangedEventArgs e)
+        {
+            // Get the index of the selected row
+            int rowIndex = dgGrid.SelectedIndex;
+
+            // Raise the custom event with the selected row index as the event argument
+            SelectedRowChanged?.Invoke(this, rowIndex);
         }
     }
 }

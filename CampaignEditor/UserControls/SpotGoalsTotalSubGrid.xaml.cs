@@ -2,6 +2,7 @@
 using Database.Entities;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
@@ -168,5 +169,24 @@ namespace CampaignEditor.UserControls
 
             return parent as DataGridCell;
         }
+
+        public void SelectByRowIndex(int rowIndex)
+        {
+            dgGrid.SelectedIndex = rowIndex;
+        }
+
+        public event EventHandler<int> SelectedRowChanged;
+
+
+        // Event handler for DataGrid's SelectedCellsChanged event
+        private void dgGrid_SelectedCellsChanged(object sender, SelectedCellsChangedEventArgs e)
+        {
+            // Get the index of the selected row
+            int rowIndex = dgGrid.SelectedIndex;
+
+            // Raise the custom event with the selected row index as the event argument
+            SelectedRowChanged?.Invoke(this, rowIndex);
+        }
+   
     }
 }
