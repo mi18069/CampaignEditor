@@ -1,10 +1,8 @@
-﻿using AutoMapper.Configuration.Conventions;
-using CampaignEditor.Controllers;
+﻿using CampaignEditor.Controllers;
 using CampaignEditor.DTOs.CampaignDTO;
 using Database.DTOs.ChannelDTO;
 using Database.DTOs.SpotDTO;
 using Database.Entities;
-using Microsoft.Office.Interop.Excel;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
 using System;
@@ -16,7 +14,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
 using System.Windows.Media;
 using Border = System.Windows.Controls.Border;
 

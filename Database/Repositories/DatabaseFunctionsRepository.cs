@@ -30,16 +30,61 @@ namespace Database.Repositories
             return allRecords;
         }
 
+        private async Task<bool> CheckPastDates()
+        {
+            using var connection = _context.GetConnection();
+
+            var commandTimeout = 20; // Set the timeout value in seconds
+
+            string sqlQuery = @"
+                WITH RECURSIVE all_dates AS (
+                  SELECT 
+                    GREATEST(
+                      CURRENT_DATE - INTERVAL '12' MONTH, 
+                      CAST('2019-04-19' AS TIMESTAMP)
+                    ) AS date
+                  FROM emsfiles.norecords
+                  UNION ALL
+                  SELECT date + INTERVAL '1' DAY
+                  FROM all_dates
+                  WHERE date < CURRENT_DATE
+                )
+                DELETE FROM emsfiles.norecords
+                WHERE date IN (
+                  SELECT date::DATE
+                  FROM all_dates
+                  WHERE (
+                    EXISTS (
+                      SELECT 1 FROM tblemsfileslist WHERE TO_DATE(SUBSTRING(filename, 1, 8), 'yyyyMMdd') = all_dates.date::DATE
+                    ) 
+                    AND EXISTS (
+                      SELECT 1 FROM tblop4fileslist WHERE TO_DATE(SUBSTRING(filename, 1, 8), 'yyyyMMdd') = all_dates.date::DATE
+                    ) 
+                    AND EXISTS (
+                      SELECT 1 FROM tbltv4fileslist WHERE TO_DATE(SUBSTRING(filename, 1, 8), 'yyyyMMdd') = all_dates.date::DATE
+                    ) 
+                  )
+                );
+                ";
+
+            var affected = await connection.ExecuteAsync(
+            new CommandDefinition(sqlQuery, commandTimeout: commandTimeout));
+
+            return affected != 0;
+        }
+
         public async Task<bool> RunUpdateUnavailableDates()
         {
             using var connection = _context.GetConnection();
 
             var commandTimeout = 20; // Set the timeout value in seconds
 
+            await CheckPastDates(); // Deleting dates in the last year if data for that dates are added
+
             var affected = await connection.ExecuteAsync(
             new CommandDefinition(
                       "WITH RECURSIVE all_dates AS( " +
-                      "SELECT COALESCE(DATEADD(MONTH, -6, MAX(date)), CAST('2019-04-19' AS TIMESTAMP)) AS date " +
+                      "SELECT COALESCE( max(date), CAST('2019-04-19' AS TIMESTAMP)) AS date " +
                       "FROM emsfiles.norecords " +
                       "UNION ALL " +
                       "SELECT date + INTERVAL '1' DAY " +
@@ -71,6 +116,7 @@ namespace Database.Repositories
                       "); "
                     ,
                     commandTimeout: commandTimeout));
+
 
             return affected != 0;
         }

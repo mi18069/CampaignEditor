@@ -19,18 +19,11 @@ using CampaignEditor.StartupHelpers;
 using System.ComponentModel;
 using System.Collections.Specialized;
 using Database.DTOs.ChannelDTO;
-
-using Excel = Microsoft.Office.Interop.Excel;
 using OfficeOpenXml;
-using System.IO;
 using System.Windows.Threading;
-using System.Reflection.Metadata;
 using CampaignEditor.Converters;
-using System.Diagnostics;
 using OfficeOpenXml.Style;
-using OfficeOpenXml.FormulaParsing;
 using Border = System.Windows.Controls.Border;
-using System.Reflection;
 
 namespace CampaignEditor.UserControls
 {
