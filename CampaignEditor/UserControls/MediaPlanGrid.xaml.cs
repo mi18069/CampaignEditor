@@ -24,6 +24,7 @@ using System.Windows.Threading;
 using CampaignEditor.Converters;
 using OfficeOpenXml.Style;
 using Border = System.Windows.Controls.Border;
+using CampaignEditor.Helpers;
 
 namespace CampaignEditor.UserControls
 {
@@ -72,6 +73,7 @@ namespace CampaignEditor.UserControls
         float progCoefPreFocus = 0.0f; // for saving progcoef value before changing
         MediaPlan focusedMediaPlan;
 
+        public ObservableBool CanUserEdit { get; set; }
         public DataGrid Grid
         {
             get { return dgMediaPlans; }
@@ -79,7 +81,18 @@ namespace CampaignEditor.UserControls
 
         public MediaPlanGrid()
         {
+
+            CanUserEdit = new ObservableBool(true);
+
+            if (MainWindow.user.usrlevel == 2)
+            {
+                CanUserEdit.Value = false;
+
+            }
+
             InitializeComponent();
+
+
         }
 
 
@@ -164,7 +177,7 @@ namespace CampaignEditor.UserControls
             {
                 // Create a new DataGridTextColumn
                 DataGridTextColumn column = new DataGridTextColumn();
-
+   
                 // Set the column header to the date
                 column.Header = date.ToString("dd.MM.yy");
 
@@ -183,6 +196,7 @@ namespace CampaignEditor.UserControls
                 cellStyle.Setters.Add(textInputEventSetter);
                 cellStyle.Setters.Add(keyDownEventSetter);
                 cellStyle.Setters.Add(mouseLeftButtonDownEventSetter);
+                //cellStyle.Setters.Add(new Setter(DataGridCell.IsHitTestVisibleProperty, CanUserEdit.Value));
                 column.CellStyle = cellStyle;
 
                 var trigger = new DataTrigger();
@@ -378,14 +392,14 @@ namespace CampaignEditor.UserControls
             }
 
 
-            // if cell is not binded to mediaPlanTerm, disable editing
+            // if cell is not binded to mediaPlanTerm, or if user don't have privileges disable editing
             var tuple = (MediaPlanTuple)cell.DataContext;
             var mpTerms = tuple.Terms;
             var index = cell.Column.DisplayIndex - mediaPlanColumns;
             var mpTerm = mpTerms[index];
             DateTime currentDate = DateTime.Now;
 
-            if (mpTerm == null || mpTerm.Date <= DateOnly.FromDateTime(currentDate))
+            if (!CanUserEdit.Value || mpTerm == null || mpTerm.Date <= DateOnly.FromDateTime(currentDate))
             {
                 e.Handled = true;
                 return;
@@ -690,6 +704,22 @@ namespace CampaignEditor.UserControls
 
             }
 
+        }
+
+        private void TextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            if (!CanUserEdit.Value)
+            {
+                e.Handled = true;
+            }
+        }
+
+        private void TextBox_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (!CanUserEdit.Value)
+            {
+                e.Handled = true;
+            }
         }
 
         #endregion

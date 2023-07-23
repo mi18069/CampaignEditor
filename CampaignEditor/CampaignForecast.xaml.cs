@@ -51,6 +51,8 @@ namespace CampaignEditor.UserControls
 
         private SelectedMPGoals SelectedMediaPlan = new SelectedMPGoals();
 
+        private bool canUserEdit = true;
+
         private CampaignDTO _campaign;
 
         // for duration of campaign
@@ -121,7 +123,8 @@ namespace CampaignEditor.UserControls
 
             if (MainWindow.user.usrlevel == 2)
             {
-                this.IsEnabled = false;
+                canUserEdit = false;
+                btnResetDates.IsEnabled = canUserEdit;
             }
         }
 
@@ -799,6 +802,12 @@ namespace CampaignEditor.UserControls
         #region DgHist
         private async void DgHistsChbCell_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
+            if (!canUserEdit)
+            {
+                e.Handled = true;
+                return;
+            }              
+
             if (sender is DataGridCell cell && cell.DataContext is MediaPlanHist mediaPlanHist)
             {
 

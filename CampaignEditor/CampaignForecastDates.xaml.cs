@@ -20,12 +20,19 @@ namespace CampaignEditor
         private List<DateTime> unavailableDates = new List<DateTime>();
 
         private CampaignDTO _campaign;
+        private bool canUserEdit = true;
 
         public CampaignForecastDates(IMediaPlanRefRepository mediaPlanRefRepository)
         {
             _mediaPlanRefController = new MediaPlanRefController(mediaPlanRefRepository);
 
             InitializeComponent();
+
+            if (MainWindow.user.usrid == 2)
+            {
+                canUserEdit = false;
+                Init.IsEnabled = canUserEdit;
+            }
         }
 
         public async Task Initialize(CampaignDTO campaign, List<DateTime> unavailableDates)

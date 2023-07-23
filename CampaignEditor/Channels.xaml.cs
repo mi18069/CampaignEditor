@@ -121,6 +121,12 @@ namespace CampaignEditor
             _factoryGroupChannels = factoryGroupChannels;
 
             InitializeComponent();
+
+            if (MainWindow.user.usrid != 0)
+            {
+                btnNewPricelist.IsEnabled = false;
+                btnEditPricelist.IsEnabled = false;
+            }
         }
 
         public async Task Initialize(ClientDTO client, CampaignDTO campaign,

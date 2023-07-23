@@ -25,6 +25,8 @@
                   MouseRightButtonDown="DataGrid_MouseRightButtonDown">
             <DataGrid.CellStyle>
                 <Style TargetType="DataGridCell">
+                    <!-- <Setter Property="IsHitTestVisible" Value="{Binding CanUserEdit.Value, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:MediaPlanGrid}}}" /> -->
+
                     <Style.Triggers>
                         <Trigger Property="IsFocused" Value="True">
                             <Setter Property="Background" Value="Orange"/>
@@ -65,6 +67,8 @@
                     <DataGridTextColumn.EditingElementStyle>
                         <Style TargetType="{x:Type TextBox}">
                             <EventSetter Event="TextChanged" Handler="TextBoxAMRTrim_TextChanged"/>
+                            <EventSetter Event="PreviewTextInput" Handler="TextBox_PreviewTextInput"/>
+                            <EventSetter Event="PreviewKeyDown" Handler="TextBox_PreviewKeyDown"/>
                         </Style>
                     </DataGridTextColumn.EditingElementStyle>
                 </DataGridTextColumn>
@@ -77,6 +81,8 @@
                     <DataGridTextColumn.EditingElementStyle>
                         <Style TargetType="{x:Type TextBox}">
                             <EventSetter Event="TextChanged" Handler="TextBoxAMRTrim_TextChanged"/>
+                            <EventSetter Event="PreviewTextInput" Handler="TextBox_PreviewTextInput"/>
+                            <EventSetter Event="PreviewKeyDown" Handler="TextBox_PreviewKeyDown"/>
                         </Style>
                     </DataGridTextColumn.EditingElementStyle>
                 </DataGridTextColumn>
@@ -89,6 +95,8 @@
                     <DataGridTextColumn.EditingElementStyle>
                         <Style TargetType="{x:Type TextBox}">
                             <EventSetter Event="TextChanged" Handler="TextBoxAMRTrim_TextChanged"/>
+                            <EventSetter Event="PreviewTextInput" Handler="TextBox_PreviewTextInput"/>
+                            <EventSetter Event="PreviewKeyDown" Handler="TextBox_PreviewKeyDown"/>
                         </Style>
                     </DataGridTextColumn.EditingElementStyle>
                 </DataGridTextColumn>
@@ -101,6 +109,8 @@
                     <DataGridTextColumn.EditingElementStyle>
                         <Style TargetType="{x:Type TextBox}">
                             <EventSetter Event="TextChanged" Handler="TextBoxAMRTrim_TextChanged"/>
+                            <EventSetter Event="PreviewTextInput" Handler="TextBox_PreviewTextInput"/>
+                            <EventSetter Event="PreviewKeyDown" Handler="TextBox_PreviewKeyDown"/>
                         </Style>
                     </DataGridTextColumn.EditingElementStyle>
                 </DataGridTextColumn>
@@ -113,6 +123,8 @@
                             <EventSetter Event="TextChanged" Handler="ProgCoef_TextChanged"/>
                             <EventSetter Event="PreviewGotKeyboardFocus" Handler="ProgCoef_PreviewGotKeyboardFocus"/>
                             <EventSetter Event="PreviewLostKeyboardFocus" Handler="ProgCoef_PreviewLostKeyboardFocus"/>
+                            <EventSetter Event="PreviewTextInput" Handler="TextBox_PreviewTextInput"/>
+                            <EventSetter Event="PreviewKeyDown" Handler="TextBox_PreviewKeyDown"/>
                         </Style>
                     </DataGridTextColumn.EditingElementStyle>
                 </DataGridTextColumn>
