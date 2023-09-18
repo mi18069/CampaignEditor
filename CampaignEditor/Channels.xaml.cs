@@ -7,7 +7,6 @@ using Database.DTOs.ChannelDTO;
 using Database.DTOs.ChannelGroupDTO;
 using Database.DTOs.ClientDTO;
 using Database.DTOs.PricelistDTO;
-using Database.Entities;
 using Database.Repositories;
 using System;
 using System.Collections;
@@ -18,7 +17,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 using System.Windows.Media;
 
 namespace CampaignEditor
@@ -122,10 +120,11 @@ namespace CampaignEditor
 
             InitializeComponent();
 
-            if (MainWindow.user.usrid != 0)
+            if (MainWindow.user.usrlevel != 0)
             {
                 btnNewPricelist.IsEnabled = false;
                 btnEditPricelist.IsEnabled = false;
+                btnEditChannelGroups.IsEnabled = false;
             }
         }
 
@@ -282,6 +281,33 @@ namespace CampaignEditor
         #endregion
 
         #region Selection Changed
+
+        // Select on double-click, not single click
+        private void lvChannels_PreviewMouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (e.ClickCount == 2)
+            {
+                // Double-clicked item
+                if (e.OriginalSource is FrameworkElement element)
+                {
+                    if (element.DataContext is ChannelDTO selectedItem)
+                    {
+                        if (lvChannels.SelectedItems.Contains(selectedItem))
+                        {
+                            // Item is selected, so deselect it
+                            lvChannels.SelectedItems.Remove(selectedItem);
+                        }
+                        else
+                        {
+                            // Item is not selected, so select it
+                            lvChannels.SelectedItems.Add(selectedItem);
+                        }
+                        e.Handled = true; // Prevent default behavior
+                    }
+                }
+            }
+            e.Handled = true; // Prevent default behavior
+        }
 
         private async void lvChannels_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
@@ -605,5 +631,7 @@ namespace CampaignEditor
             }
 
         }
+
+
     }
 }
