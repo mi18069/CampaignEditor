@@ -147,7 +147,7 @@ namespace CampaignEditor
         #endregion
 
         #region Save and Cancel
-        private void btnSave_Click(object sender, RoutedEventArgs e)
+        private async void btnSave_Click(object sender, RoutedEventArgs e)
         {
             bool passCheckTest = false;
             if (goalsModified)
@@ -162,6 +162,8 @@ namespace CampaignEditor
                     int rchTo = (bool)cbRCH.IsChecked ? int.Parse(tbRCHTo.Text) : 0;
                     int rch = (bool)cbRCH.IsChecked ? int.Parse(tbRCH.Text) : 0;
                     Goal = new GoalsDTO(_campaign.cmpid, budget, grp, insertations, rchFrom, rchTo, rch);
+
+                    await UpdateDatabase(Goal);
                 }
             }
             if (!goalsModified || goalsModified && passCheckTest)

@@ -201,6 +201,7 @@ namespace CampaignEditor
                         Spotlist.Add(spot);
                     }
                 }
+                await UpdateDatabase(Spotlist.ToList());
                 this.Hide();
             }
             
@@ -212,7 +213,7 @@ namespace CampaignEditor
             for(int i=0; i<n-1; i++)
             {
                 SpotItem spotItem = wpSpots.Children[i] as SpotItem;
-                // Don't check last item if it's empty
+                // Don't check item if it's empty
                 if (spotItem.tbLength.Text.Trim().Length == 0 && 
                     spotItem.tbName.Text.Trim().Length == 0)
                 {

@@ -188,7 +188,7 @@ namespace CampaignEditor
                     {
                         MessageBox.Show("Unabe to update campaign", "Result: ", MessageBoxButton.OK, MessageBoxImage.Exclamation);
                     }
-
+                    await UpdateDatabase(Campaign);
                 }
                 else
                 {

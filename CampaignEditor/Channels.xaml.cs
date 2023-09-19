@@ -17,6 +17,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Media;
 
 namespace CampaignEditor
@@ -142,17 +143,27 @@ namespace CampaignEditor
         {
             Selected.Clear();
 
+            _channelList = new ObservableCollection<ChannelDTO>((await _channelController.GetAllChannels()).OrderBy(c => c.chname));
+
+            // Create a ListCollectionView and bind it to the ObservableCollection
+            ListCollectionView channelListView = new ListCollectionView(ChannelList);
+            channelListView.SortDescriptions.Add(new SortDescription("chname", ListSortDirection.Ascending));
+
+            // Set the ListCollectionView as the view for your ObservableCollection
+            lvChannels.ItemsSource = channelListView;
+
             if (SelectedChannels == null)
             {
 
                 // Initializing and sorting lists, so it don't have to be sorted later
-                _channelList = new ObservableCollection<ChannelDTO>((await _channelController.GetAllChannels()).OrderBy(c => c.chname));
                 _allPricelistsList = (List<PricelistDTO>)(await _pricelistController.GetAllClientPricelists(_client.clid));
                 _pricelistList = new ObservableCollection<PricelistDTO>((AllPricelistsList).OrderBy(p=>p.clid!=0).ThenByDescending(p => p.valfrom));
                 _activityList = new ObservableCollection<ActivityDTO>((await _activityController.GetAllActivities()).OrderBy(a => a.act));
 
+
+
                 // Binding to ListViews
-                lvChannels.ItemsSource = ChannelList;
+                //lvChannels.ItemsSource = ChannelList;
                 lvPricelists.ItemsSource = PricelistList;
                 lvActivities.ItemsSource = ActivityList;
 
@@ -176,7 +187,7 @@ namespace CampaignEditor
             {   
                 foreach (var selected in SelectedChannels)
                 {
-                    // If we want to move some channel from channelList to Seleccted,
+                    // If we want to move some channel from channelList to Selected,
                     // first we must find that object in ChannelList, if not,
                     // just take from selectedList
                     ChannelDTO selectedChannel = null;
@@ -528,10 +539,13 @@ namespace CampaignEditor
         #endregion
 
 
-        private void btnSave_Click(object sender, RoutedEventArgs e)
+        private async void btnSave_Click(object sender, RoutedEventArgs e)
         {
             if (channelsModified)
+            {
                 SelectedChannels = Selected.ToList();
+                await UpdateDatabase(SelectedChannels);
+            }
             this.Hide();
         }
         private void btnCancel_Click(object sender, RoutedEventArgs e)

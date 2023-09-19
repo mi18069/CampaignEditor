@@ -392,13 +392,8 @@
             </Grid>
         </Border>
 
-        <Button x:Name="btnSave" Content="Save" Grid.Row="5" Grid.Column="8"
-                IsEnabled="False"
-                Width="100" Height="40"
-                HorizontalAlignment="Right" 
-                Click="btnSave_Click"/>
-        <Button x:Name="btnCancel" Content="Cancel" Grid.Row="5" Grid.Column="8"
-                Width="100" Height="40" HorizontalAlignment="Left" 
+        <Button x:Name="btnCancel" Content="Close" Grid.Row="5" Grid.Column="8"
+                Width="100" Height="40" HorizontalAlignment="Right" 
                 Click="btnCancel_Click"/>
         <Label x:Name="lblError" Foreground="Red" HorizontalContentAlignment="Right"
                Width="750"

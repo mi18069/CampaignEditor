@@ -44,7 +44,8 @@
         <TextBox x:Name="tbName" Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="4"
                  TextWrapping="NoWrap"
                  VerticalAlignment="Center" Margin="10" 
-                 TextChanged="tb_TextChanged"/>
+                 TextChanged="tb_TextChanged"
+                 IsReadOnly="True"/>
 
         <Label x:Name="lblClient" Content="Client: " Grid.Row="3" Grid.Column="1"
                HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="10" />

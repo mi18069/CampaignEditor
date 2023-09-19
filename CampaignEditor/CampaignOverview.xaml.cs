@@ -10,7 +10,6 @@ using Database.DTOs.SpotDTO;
 using Database.DTOs.TargetDTO;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -32,27 +31,21 @@ namespace CampaignEditor
 
         public bool isReadOnly = false;
 
-        private bool spotsModified = false;
-        private Spots fSpots = null;
+        private Spots fSpots = null; 
         private List<SpotDTO> _spotlist = new List<SpotDTO>();
 
-        private bool targetsModified = false;
         private AssignTargets fTargets = null;
         private List<TargetDTO> _targetlist = new List<TargetDTO>();
 
-        private bool goalsModified = false;
         private Goals fGoals = null;
         private GoalsDTO _goals = null;
 
-        private bool channelsModified = false;
         private Channels fChannels = null;
         private List<Tuple<ChannelDTO, PricelistDTO, ActivityDTO>> _channels = null;
 
-        private bool infoModified = false;
         private CmpInfo fInfo = null;
         private CampaignDTO _campaignInfo = null;
 
-        bool clickedOnClose = false;
 
         public CampaignOverview(IAbstractFactory<AssignTargets> factoryAssignTargets,
             IAbstractFactory<Channels> factoryChannels, IAbstractFactory<Spots> factorySpots,
@@ -67,11 +60,6 @@ namespace CampaignEditor
             _factoryInfo = factoryInfo;
 
             InitializeComponent();
-
-            if (MainWindow.user.usrid == 2)
-            {
-                btnSave.IsEnabled = false;
-            }
 
         }
 
@@ -154,10 +142,9 @@ namespace CampaignEditor
             if (fInfo.infoModified)
             {
                 _campaignInfo = fInfo.Campaign;
-                infoModified = true;
+                _campaign = fInfo.Campaign;
                 FillInfo(_campaignInfo, fInfo.SelectedBrands);
-                fInfo.infoModified = false;
-                btnSave.IsEnabled = true;
+
             }
         }
         private void FillInfo(CampaignDTO campaign = null, BrandDTO[] brands = null)
@@ -218,9 +205,7 @@ namespace CampaignEditor
             {
                 _targetlist = fTargets.SelectedTargetsList.ToList();
                 FillDGTargets(_targetlist);
-                targetsModified = true;
                 fTargets.targetsModified = false;
-                btnSave.IsEnabled = true;
             }
         }
         private void FillDGTargets(List<TargetDTO> selectedTargetsList)
@@ -253,9 +238,7 @@ namespace CampaignEditor
             {
                 _channels = fChannels.SelectedChannels;
                 dgChannels.ItemsSource = _channels;
-                channelsModified = true;
                 fChannels.channelsModified = false;
-                btnSave.IsEnabled = true;
             }
         }
         #endregion
@@ -268,9 +251,7 @@ namespace CampaignEditor
             if (fSpots.spotsModified)
             {
                 _spotlist = fSpots.Spotlist.ToList();
-                spotsModified = true;
                 fSpots.spotsModified = false;
-                btnSave.IsEnabled = true;
             }
         }
         #endregion
@@ -283,10 +264,8 @@ namespace CampaignEditor
             if (fGoals.goalsModified)
             {
                 _goals = fGoals.Goal;
-                goalsModified = true;
                 FillGoals(_goals);
                 fGoals.goalsModified = false;
-                btnSave.IsEnabled = true;
             }
         }
 
@@ -340,7 +319,6 @@ namespace CampaignEditor
 
         private void btnCancel_Click(object sender, RoutedEventArgs e)
         {
-            clickedOnClose = true;
             // Get the parent of the button (sender)
             DependencyObject button = (DependencyObject)sender;
 
@@ -356,37 +334,6 @@ namespace CampaignEditor
             {
                 window.Close();
             }
-        }
-
-        private async void btnSave_Click(object sender, RoutedEventArgs e)
-        {
-            if (targetsModified)
-            {
-                await fTargets.UpdateDatabase(_targetlist);
-                targetsModified = false;
-            }
-            if (spotsModified)
-            {
-                await fSpots.UpdateDatabase(_spotlist);
-                spotsModified = false;
-            }
-            if (goalsModified)
-            {
-                await fGoals.UpdateDatabase(_goals);
-                goalsModified = false;
-            }
-            if (channelsModified)
-            {
-                await fChannels.UpdateDatabase(_channels);
-                channelsModified = false;
-            }
-            if (infoModified)
-            {
-                await fInfo.UpdateDatabase(_campaignInfo);
-                infoModified = false;
-            }
-            MessageBox.Show("Changes successfully saved", "Message", MessageBoxButton.OK, MessageBoxImage.Asterisk);
-            btnSave.IsEnabled = false;
         }
 
         private void dgSpots_Loaded(object sender, RoutedEventArgs e)
@@ -412,23 +359,6 @@ namespace CampaignEditor
             fChannels.shouldClose = true;
             fChannels.Close();
 
-            if (clickedOnClose)
-            {
-                clickedOnClose = false;
-                return true;
-            }
-            if (btnSave.IsEnabled)
-            {
-                if (MessageBox.Show("You have unsaved changes in overview\nIf you exit changes will be lost", "Message",
-                    MessageBoxButton.OKCancel, MessageBoxImage.Question) == MessageBoxResult.OK)
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
             return true;
         }
 

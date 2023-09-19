@@ -203,7 +203,7 @@ namespace CampaignEditor
         private async void btnSave_Click(object sender, RoutedEventArgs e)
         {
             targetsModified = true;
-            
+            await UpdateDatabase(SelectedTargetsList.ToList());
             this.Hide();
         }
 
