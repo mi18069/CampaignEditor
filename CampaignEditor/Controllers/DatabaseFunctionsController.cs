@@ -29,5 +29,11 @@ namespace CampaignEditor.Controllers
             return await _repository.StartAMRCalculation(cmpid, minusTime, plusTime, xmpid);
         }
 
+        public async Task<bool> CheckForecastPrerequisites(int cmpid)
+        {
+            return await _repository.CheckForecastPrerequisites(cmpid);
+        }
+        
+
     }
 }

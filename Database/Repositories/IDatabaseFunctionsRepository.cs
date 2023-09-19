@@ -10,5 +10,7 @@ namespace Database.Repositories
         Task<IEnumerable<DateTime>> GetAllUnavailableDates();
         Task<bool> StartAMRCalculation(int cmpid, int minusTime, int plusTime, int xmpid);
 
+        Task<bool> CheckForecastPrerequisites(int cmpid);
+
     }
 }

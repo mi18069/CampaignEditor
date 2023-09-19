@@ -92,7 +92,13 @@ namespace CampaignEditor
                 {
                     tabForecast.Content = loadingPage.Content;
                     await _forecast.DeleteData();
-                    await InitializeNewForecast();
+                    if (await InitializeNewForecast())
+                        tabForecast.Content = _forecast.Content;
+                    else
+                    {
+                        tabForecast.Content = _forecastDates.Content;
+                        return;
+                    }
                     tabForecast.Content = _forecast.Content;
                 }
                 else
@@ -103,23 +109,37 @@ namespace CampaignEditor
             else
             {
                 tabForecast.Content = loadingPage.Content;
-                await InitializeNewForecast();
-                tabForecast.Content = _forecast.Content;
+                if (await InitializeNewForecast())
+                    tabForecast.Content = _forecast.Content;
+                else
+                {
+                    tabForecast.Content = _forecastDates.Content;
+                    return;
+                }
+                    
             }
             alreadyExists = true;
         }
 
-        private async Task InitializeNewForecast()
+        private async Task<bool> InitializeNewForecast()
         {
+            if (! await CheckPrerequisites(_campaign))
+            {
+                MessageBox.Show("Cannot start Forecast.\nNot all required parameters are given", "Message:",
+                                MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
+            }
             var success = await _forecastDates.InsertMediaPlanRefs();
             if (!success)
             {
                 MessageBox.Show("An error occured, please try again", "Message: ",
                                 MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
+                return false;
             }
 
             await _forecast.InsertAndLoadData();
+
+            return true;
         }
 
         // Inside CampaignForecast
@@ -129,6 +149,14 @@ namespace CampaignEditor
             tabForecast.Content = _forecastDates.Content;
         }
 
+        // Function which tests if we can make new forecast
+        private async Task<bool> CheckPrerequisites(CampaignDTO campaign)
+        {
+            if (await _databaseFunctionsController.CheckForecastPrerequisites(campaign.cmpid))
+                return true;
+            else
+                return false;
+        }
 
     }
 }

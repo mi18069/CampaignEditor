@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Dapper;
 using Database.Data;
+using Database.DTOs.GoalsDTO;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -140,6 +141,32 @@ namespace Database.Repositories
                     commandTimeout: commandTimeout));
 
             return affected != 0;
+        }
+
+        public async Task<bool> CheckForecastPrerequisites(int cmpid)
+        {
+            using var connection = _context.GetConnection();
+
+            // Check the number of rows with cmpid = cmpid in tables
+            var cmptgtCount = await connection.ExecuteScalarAsync<int>(
+                "SELECT COUNT(*) FROM tblcmptgt WHERE cmpid = @cmpid",
+                new { cmpid });
+
+            var cmpspotsCount = await connection.ExecuteScalarAsync<int>(
+                "SELECT COUNT(*) FROM tblcmpspot WHERE cmpid = @cmpid",
+                new { cmpid });
+
+            var cmpchnCount = await connection.ExecuteScalarAsync<int>(
+                "SELECT COUNT(*) FROM tblcmpchn WHERE cmpid = @cmpid",
+                new { cmpid });
+
+            GoalsDTO cmpGoals = await connection.QueryFirstOrDefaultAsync<GoalsDTO>(
+                "SELECT * FROM tblcmpgoals WHERE cmpid = @cmpid",
+                new { cmpid });
+
+
+            return cmptgtCount > 0 && cmpspotsCount > 0 && cmpchnCount > 0 && 
+                   (cmpGoals.budget > 0 || cmpGoals.ins > 0 || cmpGoals.grp > 0);
         }
     }
 }
