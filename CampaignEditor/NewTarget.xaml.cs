@@ -550,7 +550,7 @@ namespace CampaignEditor
                     return false;
                 }
             }
-            else if (checkname && await _targetController.GetTargetByName(tbName.Text.Trim()) != null)
+            else if (checkname && await _targetController.CheckClientTargetName(tbName.Text, _campaign.clid))
             {
                 lblError.Content = "Target name already exist";
                 return false;
