@@ -205,7 +205,7 @@ namespace CampaignEditor.UserControls
             sgGrid._allMediaPlans = _allMediaPlans;
 
             await sgGrid.Initialize(_campaign);
-
+            tiSpotGoals.IsSelected = true;
             return sgGrid;
         }
 
@@ -844,10 +844,11 @@ namespace CampaignEditor.UserControls
 
         private async void btnExport_Click(object sender, RoutedEventArgs e)
         {
-
-           
+            var selectedTabItem = tcGrids.SelectedItem as TabItem;
+            tiSpotWeekGoals.IsSelected = true;
             Application.Current.Dispatcher.Invoke(DispatcherPriority.ApplicationIdle, new Action(async () =>
             {
+                // opened tabItem
                 using (var memoryStream = new MemoryStream())
                 {
                     ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
@@ -863,12 +864,15 @@ namespace CampaignEditor.UserControls
                         var worksheet1 = excelPackage.Workbook.Worksheets.Add("Program Schema");
                         dgMediaPlans.PopulateWorksheet(worksheet1, 0, 0);
 
-                        var worksheet2 = excelPackage.Workbook.Worksheets.Add("Spot Goals");
+                        tiSpotGoals.IsSelected = true;
+                        var worksheet2 = excelPackage.Workbook.Worksheets.Add("Spot Goals 1");
                         sgGrid.PopulateWorksheet(worksheet2, 0, 0);
 
-                        var worksheet3 = excelPackage.Workbook.Worksheets.Add("Channel Goals");
-                        cgGrid.PopulateWorksheet(worksheet3, 0, 0);
+                        var worksheet3 = excelPackage.Workbook.Worksheets.Add("Spot Goals 2");
+                        swgGrid.PopulateWorksheet(worksheet3, 0, 0);
 
+                        var worksheet4 = excelPackage.Workbook.Worksheets.Add("Channel Goals");
+                        cgGrid.PopulateWorksheet(worksheet4, 0, 0);
 
                         // Save the Excel package to a memory stream
                         excelPackage.SaveAs(memoryStream);
@@ -887,6 +891,7 @@ namespace CampaignEditor.UserControls
               
                 }
             }));
+            tiSpotGoals.IsSelected = true;
 
         }
 

@@ -15,6 +15,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using static Npgsql.Replication.PgOutput.Messages.RelationMessage;
 using Border = System.Windows.Controls.Border;
 
 namespace CampaignEditor.UserControls
@@ -366,7 +367,7 @@ namespace CampaignEditor.UserControls
             AddHeadersInWorksheet(worksheet, rowOff, colOff);
 
             var rowOffset = rowOff + 3; // because of headers
-            var colOffset = colOff;
+            var colOffset = colOff + 1; // because of spots
 
             foreach (var subGrid in ugGrid.Children)
             {
@@ -388,18 +389,46 @@ namespace CampaignEditor.UserControls
 
         private void AddHeadersInWorksheet(ExcelWorksheet worksheet, int rowOff = 0, int colOff = 0)
         {
-            AddWeeksHeaderInWorksheet(worksheet, rowOff, colOff);
-            AddChannelsHeaderInWorksheet(worksheet, rowOff + 1, colOff);
-            AddGoalsHeaderInWorksheet(worksheet, rowOff + 2, colOff);
+            AddSpotsHeaderInWorksheet(worksheet, rowOff + 3, colOff);
+            AddWeeksHeaderInWorksheet(worksheet, rowOff, colOff+1);
+            AddChannelsHeaderInWorksheet(worksheet, rowOff + 1, colOff+1);
+            AddGoalsHeaderInWorksheet(worksheet, rowOff + 2, colOff+1);
         }
+        private void AddSpotsHeaderInWorksheet(ExcelWorksheet worksheet, int rowOff = 0, int colOff = 0)
+        {
+
+            // Set the cell values and colors in Excel
+            for (int rowIndex = 0; rowIndex < dgSpots.Items.Count; rowIndex++)
+            {                
+                var spotLabel = dgSpots.Items[rowIndex] as SpotLabel;
+                string cellValue = spotLabel.Label;
+                worksheet.Cells[rowIndex + 1 + rowOff, colOff + 1].Value = cellValue;
+
+                // Set the cell color
+                var cell = worksheet.Cells[rowIndex + 1 + rowOff, colOff + 1];
+                if (cell != null)
+                {
+                    cell.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                    cell.Style.Fill.BackgroundColor.SetColor(System.Drawing.ColorTranslator.FromHtml("#DAA520"));
+
+                    double cellWidth = 30;
+
+                    // Set the size of the Excel cell
+                    worksheet.Column(colOff + 1).Width = cellWidth;
+                    worksheet.Row(rowIndex + 1 + rowOff).OutlineLevel = 2;
+
+                }
+
+                
+            }
+        }
+
         private void AddWeeksHeaderInWorksheet(ExcelWorksheet worksheet, int rowOff = 0, int colOff = 0)
         {
             // Merging cells
             int offset = (int)(ugGoals.Columns / ugWeeks.Columns);
             for (int i=0, colOffset = colOff; i<ugWeeks.Columns; i++, colOffset += offset)
             {
-                var a = colOffset;
-                var b = colOffset + offset;
                 // Get the range of cells to merge
                 var range = worksheet.Cells[1 + rowOff, 1 + colOffset, 1 + rowOff, colOffset + offset];
                 // Merge the cells

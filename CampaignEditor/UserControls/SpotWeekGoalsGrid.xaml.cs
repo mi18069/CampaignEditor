@@ -6,12 +6,12 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Windows;
 using System.Windows.Controls;
-using static CampaignEditor.UserControls.SpotGoalsGrid;
 using System.Windows.Controls.Primitives;
 using System.Windows.Media;
-using System.Windows.Data;
-using Database.Entities;
-using System.Reflection.Emit;
+using OfficeOpenXml.Style;
+using OfficeOpenXml;
+using Border = System.Windows.Controls.Border;
+
 
 namespace CampaignEditor.UserControls
 {
@@ -115,7 +115,7 @@ namespace CampaignEditor.UserControls
                     }
                     TextBlock textBlock = new TextBlock();
 
-                    textBlock.HorizontalAlignment = HorizontalAlignment.Center;
+                    textBlock.HorizontalAlignment = HorizontalAlignment.Left;
                     textBlock.VerticalAlignment = VerticalAlignment.Center;
                     textBlock.FontWeight = FontWeights.Bold;
 
@@ -128,11 +128,6 @@ namespace CampaignEditor.UserControls
                     ugSpots.Children.Add(border);
                 }
 
-                /*foreach (SpotDTO spot in _spots)
-                {
-                    string label = spot.spotcode.Trim() + ": " + spot.spotname.Trim();
-                    dgSpots.Items.Add(new SpotLabel { Label = label });           
-                }*/
             }
 
            
@@ -290,11 +285,208 @@ namespace CampaignEditor.UserControls
             ugChannels.Width = headerWidth;
             ugGoals.Width = headerWidth;
             ugGrid.Width = headerWidth;
-
-            //double spotRowHeight = ugWeeks.Height / dgSpots.Items.Count;
-            //dgSpots.RowHeight = spotRowHeight + 20;
-            //ugGrid.Height = dgSpots.Height;
-            //ugWeeks.Height = ugGrid.Height;
         }
+
+        #region Export to Excel
+        public void PopulateWorksheet(ExcelWorksheet worksheet, int rowOff = 0, int colOff = 0)
+        {
+
+            AddHeadersInWorksheet(worksheet, rowOff, colOff);
+
+            var rowOffset = rowOff + 2; // because of headers
+            var colOffset = colOff + 2; // because of headers
+
+            int colOffChn = 0;
+            foreach (var subGrid in ugGrid.Children)
+            {
+
+                var sg = subGrid as SpotGoalsSubGrid;
+                if (sg != null)
+                {
+                    sg.PopulateWorksheet(worksheet, rowOffset, colOffset + colOffChn * 3);
+                }
+                else
+                {
+                    var tsg = subGrid as SpotGoalsTotalSubGrid;
+                    tsg.PopulateWorksheet(worksheet, rowOffset, colOffset + colOffChn * 3); // we have 3 spotGoals
+                }
+                colOffChn += 1;
+                if (colOffChn == _channels.Count + 1)
+                {
+                    colOffChn = 0;
+                    rowOffset += _spots.Count;
+                }
+            }
+
+        }
+
+        private void AddHeadersInWorksheet(ExcelWorksheet worksheet, int rowOff = 0, int colOff = 0)
+        {
+            AddWeeksHeaderInWorksheet(worksheet, rowOff + 2, colOff);
+            AddSpotsHeaderInWorksheet(worksheet, rowOff + 2, colOff + 1);
+            AddChannelsHeaderInWorksheet(worksheet, rowOff, colOff + 2);
+            AddGoalsHeaderInWorksheet(worksheet, rowOff + 1, colOff + 2);
+        }
+
+        private void AddWeeksHeaderInWorksheet(ExcelWorksheet worksheet, int rowOff = 0, int colOff = 0)
+        {
+            // Merging cells
+            int offset = _spots.Count;
+            for (int i = 0, rowOffset = rowOff; i < ugWeeks.Rows; i++, rowOffset += offset)
+            {
+                // Get the range of cells to merge
+                var range = worksheet.Cells[1 + rowOffset, 1 + colOff, offset + rowOffset, 1 + colOff];
+                // Merge the cells
+                range.Merge = true;
+            }
+
+            // Set the cell values and colors in Excel
+            for (int rowIndex = 0; rowIndex < ugWeeks.Children.Count; rowIndex++)
+            {
+                string cellValue = string.Empty;
+
+                var weekBorder = ugWeeks.Children[rowIndex] as Border;
+                if (weekBorder != null)
+                {
+                    var weekTextBlock = weekBorder.Child as TextBlock;
+                    if (weekTextBlock != null)
+                    {
+                        cellValue = weekTextBlock.Text;
+                    }
+                }
+
+                worksheet.Cells[rowIndex * offset + 1 + rowOff, colOff + 1].Value = cellValue;
+
+                // Set the cell color
+                var cell = worksheet.Cells[rowIndex * offset + 1 + rowOff , colOff + 1];
+                if (cell != null)
+                {
+                    cell.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                    cell.Style.Fill.BackgroundColor.SetColor(System.Drawing.ColorTranslator.FromHtml("#DAA520"));
+                    cell.Style.VerticalAlignment = ExcelVerticalAlignment.Top;
+
+                    double cellWidth = 10;
+
+                    // Set the size of the Excel cell
+                    worksheet.Column(colOff + 1).Width = cellWidth;
+                    worksheet.Row(rowIndex + 1 + rowOff).OutlineLevel = 2;
+
+                }
+
+
+            }
+        }
+
+        private void AddSpotsHeaderInWorksheet(ExcelWorksheet worksheet, int rowOff = 0, int colOff = 0)
+        {
+
+            // Set the cell values and colors in Excel
+            for (int rowIndex = 0; rowIndex < ugSpots.Children.Count; rowIndex++)
+            {
+                string cellValue = string.Empty;
+
+                var spotBorder = ugSpots.Children[rowIndex] as Border;
+                if (spotBorder != null) 
+                {
+                    var spotTextBlock = spotBorder.Child as TextBlock;
+                    if (spotTextBlock != null)
+                    {
+                        cellValue = spotTextBlock.Text;
+                    }
+                }
+                worksheet.Cells[rowIndex + 1 + rowOff, colOff + 1].Value = cellValue;
+
+                // Set the cell color
+                var cell = worksheet.Cells[rowIndex + 1 + rowOff, colOff + 1];
+                if (cell != null)
+                {
+                    cell.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                    cell.Style.Fill.BackgroundColor.SetColor(System.Drawing.ColorTranslator.FromHtml("#DAA520"));
+
+                    double cellWidth = 30;
+
+                    // Set the size of the Excel cell
+                    worksheet.Column(colOff + 1).Width = cellWidth;
+                    worksheet.Row(rowIndex + 1 + rowOff).OutlineLevel = 2;
+
+                }
+
+
+            }
+        }
+        
+
+        private void AddChannelsHeaderInWorksheet(ExcelWorksheet worksheet, int rowOff = 0, int colOff = 0)
+        {
+            // Merging cells
+            int offset = (int)(ugGoals.Columns / ugChannels.Columns);
+            for (int i = 0, colOffset = colOff; i < ugChannels.Columns; i++, colOffset += offset)
+            {
+                // Get the range of cells to merge
+                var range = worksheet.Cells[1 + rowOff, 1 + colOffset, 1 + rowOff, colOffset + offset];
+                // Merge the cells
+                range.Merge = true;
+            }
+
+            // Set the column headers in Excel
+            for (int columnIndex = 0; columnIndex < ugChannels.Columns; columnIndex++)
+            {
+                var border = ugChannels.Children[columnIndex] as Border;
+                var content = string.Empty;
+                if (border != null)
+                {
+                    var textBlock = border.Child as TextBlock;
+                    if (textBlock != null)
+                    {
+                        content = textBlock.Text;
+                    }
+                }
+
+                var cell = worksheet.Cells[1 + rowOff, columnIndex * offset + 1 + colOff];
+                cell.Value = content;
+
+                cell.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                cell.Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                cell.Style.Border.Left.Color.SetColor(System.Drawing.Color.Black);
+                cell.Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                cell.Style.Border.Right.Color.SetColor(System.Drawing.Color.Black);
+
+                cell.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                cell.Style.Fill.BackgroundColor.SetColor(System.Drawing.ColorTranslator.FromHtml("#DAA520"));
+            }
+        }
+
+        private void AddGoalsHeaderInWorksheet(ExcelWorksheet worksheet, int rowOff = 0, int colOff = 0)
+        {
+
+            // Set the column headers in Excel
+            for (int columnIndex = 0; columnIndex < ugGoals.Columns; columnIndex++)
+            {
+                var border = ugGoals.Children[columnIndex] as Border;
+                var content = string.Empty;
+                if (border != null)
+                {
+                    var textBlock = border.Child as TextBlock;
+                    if (textBlock != null)
+                    {
+                        content = textBlock.Text;
+                    }
+                }
+
+                var cell = worksheet.Cells[1 + rowOff, columnIndex + 1 + colOff];
+                cell.Value = content;
+
+                cell.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                cell.Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                cell.Style.Border.Left.Color.SetColor(System.Drawing.Color.Black);
+                cell.Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                cell.Style.Border.Right.Color.SetColor(System.Drawing.Color.Black);
+
+                cell.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                cell.Style.Fill.BackgroundColor.SetColor(System.Drawing.ColorTranslator.FromHtml("#DAA520"));
+            }
+        }
+
+        #endregion
     }
 }
