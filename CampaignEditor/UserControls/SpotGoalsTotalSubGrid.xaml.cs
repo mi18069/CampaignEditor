@@ -48,6 +48,19 @@ namespace CampaignEditor.UserControls
             SubscribeToDataGrids();
         }
 
+        public SpotGoalsTotalSubGrid(SpotGoalsTotalSubGrid tsg)
+        {
+            InitializeComponent();
+
+            _valuesList = tsg._valuesList;
+            _dictionary = tsg._dictionary;
+            _values = tsg._values;
+
+            _values.ReplaceRange(_dictionary.Values);
+            dgGrid.ItemsSource = _values;
+            SubscribeToDataGrids();
+        }
+
         private void SumValues() 
         {
             ResetDictionaryValues();

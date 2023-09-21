@@ -42,6 +42,14 @@ namespace CampaignEditor.UserControls
         DateTime startDate;
         DateTime endDate;
 
+        // for accessing from SpotWeekGoalsGrid class
+        public CampaignDTO Campaign { get { return _campaign; } }
+        public DateTime StartDate { get { return startDate; } }
+        public DateTime EndDate { get { return endDate; } }
+        public List<SpotDTO> Spots { get { return _spots; } }
+        public List<ChannelDTO> Channels { get { return _channels; } }
+
+
         public SpotGoalsGrid()
         {
             InitializeComponent();

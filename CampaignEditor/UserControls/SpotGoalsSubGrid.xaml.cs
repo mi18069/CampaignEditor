@@ -51,6 +51,19 @@ namespace CampaignEditor.UserControls
             SubscribeToMediaPlanTerms();
             dgGrid.ItemsSource = _dictionary.Values;
         }
+        public SpotGoalsSubGrid(SpotGoalsSubGrid sg)
+        {
+            InitializeComponent();
+
+            this._mpTuples = sg._mpTuples; 
+            _dictionary = sg._dictionary;
+            _values = sg._values;
+            _spotLengths = sg._spotLengths;
+
+            _values.ReplaceRange(_dictionary.Values);
+            dgGrid.ItemsSource = _values;
+            SubscribeToMediaPlanTerms();
+        }
 
         private void CalculateGoals()
         {

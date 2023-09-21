@@ -49,9 +49,14 @@
 
             <TabControl x:Name="tcGrids" Grid.Row="6" Grid.Column="2" Grid.ColumnSpan="3"
                         Loaded="TabControl_Loaded">
-                <TabItem Header="Spots Goals" x:Name="tiSpotGoals" >
+                <TabItem Header="Spots Goals 1" x:Name="tiSpotGoals" >
                     <ScrollViewer HorizontalScrollBarVisibility="Visible">
                         <local:SpotGoalsGrid x:Name="sgGrid" />
+                    </ScrollViewer>
+                </TabItem>
+                <TabItem Header="Spots Goals 2" x:Name="tiSpotWeekGoals" >
+                    <ScrollViewer HorizontalScrollBarVisibility="Visible">
+                        <local:SpotWeekGoalsGrid x:Name="swgGrid" />
                     </ScrollViewer>
                 </TabItem>
                 <TabItem x:Name="tiChannelGoals" Header="Channels Goals" Height="20" VerticalAlignment="Top">

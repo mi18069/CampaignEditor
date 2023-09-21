@@ -115,6 +115,9 @@
     <Compile Update="UserControls\SpotItem.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="UserControls\SpotWeekGoalsGrid.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="UserControls\TargetDPItem.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -241,6 +244,9 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="UserControls\SpotItem.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UserControls\SpotWeekGoalsGrid.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="UserControls\TargetDPItem.xaml">

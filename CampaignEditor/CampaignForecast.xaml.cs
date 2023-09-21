@@ -23,6 +23,7 @@ using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
@@ -173,7 +174,8 @@ namespace CampaignEditor.UserControls
             await FillLoadedDateRanges();
             // For dgMediaPlans
             await InitializeDataGrid();
-            await InitializeSGGrid();
+            var sgGrid = await InitializeSGGrid();
+            InitializeSWGGrid(sgGrid);
             await InitializeCGGrid();
 
         }
@@ -194,7 +196,7 @@ namespace CampaignEditor.UserControls
             tiChannelGoals.Focus();
         }
 
-        private async Task InitializeSGGrid()
+        private async Task<SpotGoalsGrid> InitializeSGGrid()
         {
             sgGrid._mediaPlanController = _mediaPlanController;
             sgGrid._mediaPlanTermController = _mediaPlanTermController;
@@ -203,6 +205,13 @@ namespace CampaignEditor.UserControls
             sgGrid._allMediaPlans = _allMediaPlans;
 
             await sgGrid.Initialize(_campaign);
+
+            return sgGrid;
+        }
+
+        private void InitializeSWGGrid(SpotGoalsGrid sgGrid)
+        {
+            swgGrid.Initialize(sgGrid);
         }
 
         private async Task InitializeDataGrid()
