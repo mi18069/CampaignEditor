@@ -181,6 +181,17 @@ namespace CampaignEditor.UserControls
                 // Set the column header to the date
                 column.Header = date.ToString("dd.MM.yy");
 
+                var disabledCellColor = Brushes.LightGoldenrodYellow;
+                var enabledCellColor = Brushes.LightGreen;
+                if (DateTime.TryParse(column.Header.ToString(), out DateTime columnHeaderDate))
+                {
+                    if (columnHeaderDate < DateTime.Today)
+                    {
+                        // Apply the dimmed column style
+                        disabledCellColor = Brushes.Goldenrod;
+                        enabledCellColor = Brushes.Green;
+                    }
+                }
 
                 var binding = new Binding($"Terms[{dates.IndexOf(date)}].Spotcode");
                 //binding.ValidationRules.Add(new CharLengthValidationRule(1)); // add validation rule to restrict input to a single character
@@ -202,7 +213,7 @@ namespace CampaignEditor.UserControls
                 var trigger = new DataTrigger();
                 trigger.Binding = new Binding($"Terms[{dates.IndexOf(date)}]");
                 trigger.Value = null;
-                trigger.Setters.Add(new Setter(BackgroundProperty, Brushes.LightGoldenrodYellow)); // Set background to yellow if value is null
+                trigger.Setters.Add(new Setter(BackgroundProperty, disabledCellColor)); // Set background to yellow if value is null
 
                 //set background to yellow if column is weekend day
                 if (date.DayOfWeek == DayOfWeek.Saturday)
@@ -236,7 +247,7 @@ namespace CampaignEditor.UserControls
 
                 column.CellStyle.Triggers.Add(trigger);
 
-                column.CellStyle.Setters.Add(new Setter(BackgroundProperty, Brushes.LightGreen)); // Set background to green if value is not null
+                column.CellStyle.Setters.Add(new Setter(BackgroundProperty, enabledCellColor)); // Set background to green if value is not null
                 column.CanUserSort = false;
                 column.CanUserResize = false;
                 column.CanUserReorder = false;
@@ -1056,7 +1067,6 @@ namespace CampaignEditor.UserControls
             }
             return null;
         }
-
 
     }
 }
