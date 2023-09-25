@@ -56,7 +56,6 @@ namespace CampaignEditor
         public bool shouldClose = false;
         public bool canEdit = false;
         private bool onlyActive = false; // For chbActive
-        private bool changePricelist = true;
         
         #region Getters and Setters for lists
 
@@ -207,6 +206,7 @@ namespace CampaignEditor
             }
 
             dgSelected.ItemsSource = Selected;
+            await RefreshPricelists();
         }
 
         #region ToSelected and FromSelected 
@@ -232,21 +232,19 @@ namespace CampaignEditor
         private void btnToSelected_Click(object sender, RoutedEventArgs e)
         {
             // At least one item from every listView needs to be selected to execute
-            if (lvChannels.SelectedItems.Count > 0 &&
+            if (lbSelectedChannels.Items.Count > 0 &&
                 lvPricelists.SelectedItems.Count > 0 &&
                 lvActivities.SelectedItems.Count > 0) 
             {
-                int n = lvChannels.SelectedItems.Count;
-                var channels = lvChannels.SelectedItems;
+                int n = lbSelectedChannels.Items.Count;
+                var channels = lbSelectedChannels.Items;
 
                 PricelistDTO pricelist = lvPricelists.SelectedItem as PricelistDTO;
                 ActivityDTO activity = lvActivities.SelectedItem as ActivityDTO;
                 for (int i=0; i<n; i++)
                 {
                     ChannelDTO channel = channels[0] as ChannelDTO; // 0 because we need n iterations, and in each we remove one item
-                    changePricelist = false;
                     MoveToSelected(channel, pricelist, activity);
-                    changePricelist = true;
                 }
             }
         }
@@ -293,61 +291,32 @@ namespace CampaignEditor
 
         #region Selection Changed
 
-        // Select on double-click, not single click
-        private void lvChannels_PreviewMouseLeftButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private async void lvChannels_PreviewMouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-            if (e.ClickCount == 2)
-            {
-                // Double-clicked item
-                if (e.OriginalSource is FrameworkElement element)
-                {
-                    if (element.DataContext is ChannelDTO selectedItem)
-                    {
-                        if (lvChannels.SelectedItems.Contains(selectedItem))
-                        {
-                            // Item is selected, so deselect it
-                            lvChannels.SelectedItems.Remove(selectedItem);
-                        }
-                        else
-                        {
-                            // Item is not selected, so select it
-                            lvChannels.SelectedItems.Add(selectedItem);
-                        }
-                        e.Handled = true; // Prevent default behavior
-                    }
-                }
-            }
-            e.Handled = true; // Prevent default behavior
+            lvChannels.SelectedItems.Clear();
+
         }
 
-        private async void lvChannels_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        private async void lvChannels_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-            if (lvChannels.SelectedItems.Count == 0)
-            {
-                lbSelectedChannels.Items.Clear();
-            }
-
-            if (!changePricelist && lvChannels.SelectedItems.Count > 0)
-            {
-                return;
-            }
-                
-            PricelistDTO lastSelected = null;
-            if (lvPricelists.SelectedItems.Count > 0)
-            {
-                lastSelected = lvPricelists.SelectedItem as PricelistDTO;
-            }
 
             if (lvChannels.SelectedItems.Count > 0)
             {
-                lbSelectedChannels.Items.Clear();
-                foreach (var channel in lvChannels.SelectedItems)
+                ChannelDTO channel = lvChannels.SelectedItem as ChannelDTO;
+                if (channel != null)
                 {
                     lbSelectedChannels.Items.Add(channel);
+                    ChannelList.Remove(channel);
                 }
-                lastSelected = lvPricelists.SelectedItem as PricelistDTO;
+
             }
 
+            await RefreshPricelists();
+
+        }
+
+        private async Task RefreshPricelists()
+        {
             PricelistList.Clear();
             // Making lists of integers for faster transition of elements
             List<int> plids = new List<int>();
@@ -375,7 +344,7 @@ namespace CampaignEditor
                     plids.Add(pricelist.plid);
                 }
             }
-            foreach (ChannelDTO chid in lvChannels.SelectedItems)
+            foreach (ChannelDTO chid in lbSelectedChannels.Items)
             {
                 chids.Add(chid.chid);
             }
@@ -394,7 +363,7 @@ namespace CampaignEditor
             foreach (int plid in plIds)
             {
                 PricelistDTO pricelist = await _pricelistController.GetPricelistById(plid);
-                pricelists.Add(pricelist);               
+                pricelists.Add(pricelist);
             }
 
             PricelistComparer comparer = new PricelistComparer();
@@ -403,14 +372,7 @@ namespace CampaignEditor
             foreach (var pricelist in pricelists)
             {
                 PricelistList.Add(pricelist);
-                if (lastSelected != null && lastSelected.plid == pricelist.plid)
-                {
-                    lvPricelists.SelectedIndex = selectedIndex;
-                }
-                selectedIndex++;
             }
-            
-
         }
 
         // In order to select ListView on mouse right click
@@ -450,7 +412,8 @@ namespace CampaignEditor
             if (f.pricelistChanged)
             {
                 _allPricelistsList = ((await _pricelistController.GetAllClientPricelists(_client.clid))).ToList<PricelistDTO>();
-                lvChannels_SelectionChanged(lvChannels, null);
+                //lvChannels_SelectionChanged(lvChannels, null);
+                await RefreshPricelists();
             }
         }
         private async void btnNewPricelist_Click(object sender, RoutedEventArgs e)
@@ -460,20 +423,25 @@ namespace CampaignEditor
             f.ShowDialog();
             if (f.pricelistChanged)
             {
-                _allPricelistsList = (List<PricelistDTO>)(await _pricelistController.GetAllClientPricelists(_client.clid)); 
-                lvChannels_SelectionChanged(lvChannels, null);
+                _allPricelistsList = (List<PricelistDTO>)(await _pricelistController.GetAllClientPricelists(_client.clid));
+                //lvChannels_SelectionChanged(lvChannels, null);
+                await RefreshPricelists();
             }
         }
-        private void chbActivePricelists_Checked(object sender, RoutedEventArgs e)
+        private async void chbActivePricelists_Checked(object sender, RoutedEventArgs e)
         {
             onlyActive = true;
-            lvChannels_SelectionChanged(lvChannels, null);
+            //lvChannels_SelectionChanged(lvChannels, null);
+            await RefreshPricelists();
+
         }
 
-        private void chbActivePricelists_Unchecked(object sender, RoutedEventArgs e)
+        private async void chbActivePricelists_Unchecked(object sender, RoutedEventArgs e)
         {
             onlyActive = false;
-            lvChannels_SelectionChanged(lvChannels, null);
+            //lvChannels_SelectionChanged(lvChannels, null);
+            await RefreshPricelists();
+
         }
         #endregion
 
@@ -531,7 +499,36 @@ namespace CampaignEditor
                         continue;
                     }
                 }
-                lvChannels.SelectAll();
+
+
+            }
+            // Remove channels which are in dgSelected and lbSelectedChannels
+            foreach (Tuple<ChannelDTO, PricelistDTO, ActivityDTO> tuple in dgSelected.Items)
+            {
+                ChannelDTO chn = tuple.Item1 as ChannelDTO;
+                for (int i = 0; i < ChannelList.Count; i++)
+                {
+                    ChannelDTO channel = ChannelList[i];
+                    if (chn.chid == channel.chid)
+                    {
+                        ChannelList.RemoveAt(i);
+                        i = ChannelList.Count; // in order to step out of loop
+                    }
+                }
+            }
+
+            foreach (ChannelDTO chn in lbSelectedChannels.Items)
+            {
+                for (int i = 0; i < ChannelList.Count; i++)
+                {
+                    ChannelDTO channel = ChannelList[i];
+                    if (chn.chid == channel.chid)
+                    {
+                        ChannelList.RemoveAt(i);
+                        i = ChannelList.Count; // in order to step out of loop
+                    }
+                }
+
             }
 
         }
@@ -585,21 +582,18 @@ namespace CampaignEditor
 
         #endregion
 
-        private void lbSelectedChannels_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private async void lbSelectedChannels_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             if (lbSelectedChannels.SelectedItems.Count < 1)
                 return;
 
             var channel = lbSelectedChannels.SelectedItems[0] as ChannelDTO;
-            for (int i=0; i<lbSelectedChannels.Items.Count; i++)
+            if (channel != null)
             {
-                ChannelDTO ch = lbSelectedChannels.Items[i] as ChannelDTO;
-                if (ch.chid == channel.chid)
-                {
-                    lbSelectedChannels.Items.Remove(channel);
-                    lvChannels.SelectedItems.Remove(ch);
-                }
+                lbSelectedChannels.Items.Remove(channel);
+                ChannelList.Add(channel);
             }
+            await RefreshPricelists();
         }
 
         public class PricelistComparer : IComparer<PricelistDTO>
@@ -646,6 +640,6 @@ namespace CampaignEditor
 
         }
 
-
+        
     }
 }
