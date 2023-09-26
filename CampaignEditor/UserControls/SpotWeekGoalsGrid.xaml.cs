@@ -11,6 +11,7 @@ using System.Windows.Media;
 using OfficeOpenXml.Style;
 using OfficeOpenXml;
 using Border = System.Windows.Controls.Border;
+using OfficeOpenXml.FormulaParsing;
 
 
 namespace CampaignEditor.UserControls
@@ -337,6 +338,9 @@ namespace CampaignEditor.UserControls
 
         private void AddWeeksHeaderInWorksheet(ExcelWorksheet worksheet, int rowOff = 0, int colOff = 0)
         {
+            var drawingThickness = ExcelBorderStyle.Thick;
+            var drawingColor = System.Drawing.Color.Black;
+
             // Merging cells
             int offset = _spots.Count;
             for (int i = 0, rowOffset = rowOff; i < ugWeeks.Rows; i++, rowOffset += offset)
@@ -345,7 +349,11 @@ namespace CampaignEditor.UserControls
                 var range = worksheet.Cells[1 + rowOffset, 1 + colOff, offset + rowOffset, 1 + colOff];
                 // Merge the cells
                 range.Merge = true;
+
+                range.Style.Border.Bottom.Style = drawingThickness;
+                range.Style.Border.Bottom.Color.SetColor(drawingColor);
             }
+
 
             // Set the cell values and colors in Excel
             for (int rowIndex = 0; rowIndex < ugWeeks.Children.Count; rowIndex++)
@@ -380,7 +388,6 @@ namespace CampaignEditor.UserControls
 
                 }
 
-
             }
         }
 
@@ -403,12 +410,17 @@ namespace CampaignEditor.UserControls
                 }
                 worksheet.Cells[rowIndex + 1 + rowOff, colOff + 1].Value = cellValue;
 
+                var drawingThickness = ExcelBorderStyle.Thin;
+                var drawingColor = System.Drawing.Color.Black;
+
                 // Set the cell color
                 var cell = worksheet.Cells[rowIndex + 1 + rowOff, colOff + 1];
                 if (cell != null)
                 {
                     cell.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
                     cell.Style.Fill.BackgroundColor.SetColor(System.Drawing.ColorTranslator.FromHtml("#DAA520"));
+                    cell.Style.Border.Bottom.Style = drawingThickness;
+                    cell.Style.Border.Bottom.Color.SetColor(drawingColor);
 
                     double cellWidth = 30;
 

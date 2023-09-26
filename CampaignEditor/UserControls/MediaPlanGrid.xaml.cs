@@ -986,6 +986,14 @@ namespace CampaignEditor.UserControls
                         if (cell != null)
                         {
                             var cellColor = cell.Background;
+                            if (cellColor == Brushes.Green)
+                            {
+                                cellColor = Brushes.LightGreen;
+                            }
+                            else if(cellColor == Brushes.Goldenrod)
+                            {
+                                cellColor = Brushes.LightGoldenrodYellow;
+                            }
                             var cellBorderColor = cell.BorderBrush;
 
                             var drawingColor = System.Drawing.Color.Black;

@@ -416,11 +416,15 @@ namespace CampaignEditor.UserControls
 
                 // Set the cell color
                 var cell = worksheet.Cells[rowIndex + 1 + rowOff, colOff + 1];
+                var drawingThickness = ExcelBorderStyle.Thin;
+                var drawingColor = System.Drawing.Color.Black;
+
                 if (cell != null)
                 {
                     cell.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
                     cell.Style.Fill.BackgroundColor.SetColor(System.Drawing.ColorTranslator.FromHtml("#DAA520"));
-
+                    cell.Style.Border.Bottom.Style = drawingThickness;
+                    cell.Style.Border.Bottom.Color.SetColor(drawingColor);
                     double cellWidth = 30;
 
                     // Set the size of the Excel cell
