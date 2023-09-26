@@ -47,11 +47,11 @@
         <Label x:Name="lblStartDate" Content="Start Date: " Grid.Row="3" Grid.Column="1" 
                HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10" />
         <DatePicker x:Name="dpStartDate" Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="3" 
-                    VerticalAlignment="Center" Margin="10"/>
+                    FirstDayOfWeek="Monday" VerticalAlignment="Center" Margin="10"/>
         <Label x:Name="lblEndDate" Content="End Date: " Grid.Row="4" Grid.Column="1"
                HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10" />
         <DatePicker x:Name="dpEndDate" Grid.Row="4" Grid.Column="2" Grid.ColumnSpan="3"
-                    VerticalAlignment="Center" Margin="10"/>
+                    FirstDayOfWeek="Monday" VerticalAlignment="Center" Margin="10"/>
 
         <Label x:Name="lblTbStart" Content="TB Start: " Grid.Row="5" Grid.Column="1" 
                HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10" />

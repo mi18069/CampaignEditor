@@ -185,7 +185,7 @@ namespace CampaignEditor.UserControls
                 var enabledCellColor = Brushes.LightGreen;
                 if (DateTime.TryParse(column.Header.ToString(), out DateTime columnHeaderDate))
                 {
-                    if (columnHeaderDate < DateTime.Today)
+                    if (columnHeaderDate <= DateTime.Today)
                     {
                         // Apply the dimmed column style
                         disabledCellColor = Brushes.Goldenrod;

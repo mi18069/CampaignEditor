@@ -53,10 +53,10 @@
                Text="" FontWeight="DemiBold" HorizontalAlignment="Right"/>
 
         <Label Grid.Row="5" Grid.Column="1" Content="From: " Margin="0, 10"/>
-        <DatePicker Grid.Row="5" Grid.Column="2" x:Name="dpFrom" Margin="0, 10"/>
+        <DatePicker FirstDayOfWeek="Monday" Grid.Row="5" Grid.Column="2" x:Name="dpFrom" Margin="0, 10"/>
 
         <Label Grid.Row="5" Grid.Column="4" Content="To: " Margin="0, 10"/>
-        <DatePicker Grid.Row="5" Grid.Column="5" x:Name="dpTo" Margin="0, 10"/>
+        <DatePicker FirstDayOfWeek="Monday" Grid.Row="5" Grid.Column="5" x:Name="dpTo" Margin="0, 10"/>
         
         <Label Grid.Row="6" Grid.Column="1" Content="Time from: " Margin="0, 10"/>
         <TextBox Grid.Row="6" Grid.Column="2" x:Name="tbTimeFrom" MaxLength="5" Margin="0, 10"

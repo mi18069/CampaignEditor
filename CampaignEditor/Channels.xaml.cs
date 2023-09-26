@@ -218,6 +218,7 @@ namespace CampaignEditor
             Selected.Insert(index, Tuple.Create(channel, pricelist, activity)!);
             ChannelList.Remove(channel);
             AllChannelList.Remove(channel);
+            lbSelectedChannels.Items.Remove(channel);
             channelsModified = true;
         }
         private void MoveFromSelected(Tuple<ChannelDTO, PricelistDTO, ActivityDTO> tuple)
@@ -575,9 +576,9 @@ namespace CampaignEditor
         private async void miDeletePricelist_Click(object sender, RoutedEventArgs e)
         {
             PricelistDTO pricelist = lvPricelists.SelectedItem as PricelistDTO;
-            //PricelistDTO pricelist = sender as PricelistDTO;
             PricelistsToBeDeleted.Add(pricelist);
             PricelistList.Remove(pricelist);
+            channelsModified = true;
         }
 
         #endregion

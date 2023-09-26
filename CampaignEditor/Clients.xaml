@@ -77,7 +77,7 @@
             <Grid>
                 <Label x:Name="lblFilter" Content="  Show  " Background="White"
                        HorizontalAlignment="Center" Margin="0, -20, 0, 0"/>
-                <DatePicker x:Name="dpStartDate" 
+                <DatePicker x:Name="dpStartDate" FirstDayOfWeek="Monday"
                     Width="150" Height="40"
                     VerticalAlignment="Top" HorizontalAlignment="Left" Margin="130, 40, 0, 0"
                     Initialized="dpStartDate_Initialized"
