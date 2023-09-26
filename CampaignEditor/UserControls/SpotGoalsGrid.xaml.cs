@@ -15,7 +15,6 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using static Npgsql.Replication.PgOutput.Messages.RelationMessage;
 using Border = System.Windows.Controls.Border;
 
 namespace CampaignEditor.UserControls
@@ -60,6 +59,13 @@ namespace CampaignEditor.UserControls
         {
 
             _campaign = campaign;
+
+            _spots.Clear();
+            _channels.Clear();
+            ugChannels.Children.Clear();
+            ugGoals.Children.Clear();
+            ugWeeks.Children.Clear();
+            dgSpots.Items.Clear();
 
             startDate = TimeFormat.YMDStringToDateTime(_campaign.cmpsdate);
             endDate = TimeFormat.YMDStringToDateTime(_campaign.cmpedate);
@@ -306,8 +312,12 @@ namespace CampaignEditor.UserControls
                     for (int k = n - (_channels.Count + 1); k >= 0; k -= _channels.Count + 1)
                     {
                         SpotGoalsSubGrid sg = ugGrid.Children[k] as SpotGoalsSubGrid;
-                        ObservableCollection<SpotGoals> values = sg.Values;
-                        valuesList.Add(values);
+                        if (sg != null)
+                        {
+                            ObservableCollection<SpotGoals> values = sg.Values;
+                            valuesList.Add(values);
+                        }
+
                     }
                     var totalSubGrid = new SpotGoalsTotalSubGrid(valuesList);
                     totalSubGrid.SelectedRowChanged += SubGrid_SelectedRowChanged;

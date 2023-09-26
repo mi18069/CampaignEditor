@@ -31,6 +31,7 @@ namespace CampaignEditor.UserControls
         public void Initialize(ObservableCollection<MediaPlan> mediaPlans, List<ChannelDTO> channels)
         {
             _mediaPlans = mediaPlans;
+            _dictionary.Clear();
             foreach (ChannelDTO channel in channels)
             {
                 _dictionary.Add(channel.chid, new ProgramGoals(channel));

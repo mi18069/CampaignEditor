@@ -42,6 +42,13 @@ namespace CampaignEditor.UserControls
             startDate = sgGrid.StartDate;
             endDate = sgGrid.EndDate;
 
+            _spots.Clear();
+            _channels.Clear();
+            ugWeeks.Children.Clear();
+            ugGoals.Children.Clear();
+            ugChannels.Children.Clear();
+            ugSpots.Children.Clear();
+
             var spots = sgGrid.Spots;
             foreach (SpotDTO spot in spots)
             {
