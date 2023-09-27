@@ -60,7 +60,6 @@ namespace CampaignEditor
             _factoryInfo = factoryInfo;
 
             InitializeComponent();
-
         }
 
         #region Initialization

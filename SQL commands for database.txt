@@ -220,4 +220,10 @@ CREATE TABLE IF NOT EXISTS cmpxmpref (
    version int
 );
 
+-- make cmpxmpversion
+CREATE TABLE IF NOT EXISTS cmpxmpversion (
+   cmpid int NOT NULL,
+   version int NOT NULL
+);
+
  
