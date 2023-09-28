@@ -31,6 +31,7 @@
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
                 <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="200"/>
                 <RowDefinition Height="10"/>
@@ -42,12 +43,24 @@
                       SelectionMode="Multiple" Margin="0, 0 ,10,0"
                       SelectionChanged="lvChannels_SelectionChanged"
                       PreviewMouseRightButtonDown="lvChannels_PreviewMouseRightButtonDown"/>
-
+            <Border Grid.Row="2" Grid.Column="1" 
+                    BorderBrush="LightGray" BorderThickness="1" Margin="0, 10, 10, 10">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition Width="auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Label Grid.Column="0" Content="Version: " HorizontalAlignment="Left"/>
+                    <ComboBox Grid.Column="1" x:Name="cbVersions" HorizontalAlignment="Left"
+                             SelectionChanged="CbVersions_SelectionChanged"/>
+                </Grid>
+            </Border>
+            
             <local:MediaPlanGrid x:Name="dgMediaPlans" 
-                                 Grid.Row="1" Grid.Column="2" Grid.RowSpan="5" Grid.ColumnSpan="3" 
+                                 Grid.Row="1" Grid.Column="2" Grid.RowSpan="6" Grid.ColumnSpan="3" 
                                  SelectionChanged="dgMediaPlans_SelectionChanged"/>
 
-            <TabControl x:Name="tcGrids" Grid.Row="6" Grid.Column="2" Grid.ColumnSpan="3"
+            <TabControl x:Name="tcGrids" Grid.Row="7" Grid.Column="2" Grid.ColumnSpan="3"
                         Loaded="TabControl_Loaded">
                 <TabItem Header="Spots Goals 1" x:Name="tiSpotGoals" >
                     <ScrollViewer HorizontalScrollBarVisibility="Visible">
@@ -133,7 +146,7 @@
             </TabControl>
 
 
-            <Border Grid.Row="2" Grid.Column="1" 
+            <Border Grid.Row="3" Grid.Column="1" 
                 BorderBrush="LightGray" BorderThickness="1" Margin="0, 10, 10, 10">
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -162,7 +175,7 @@
                 </Grid>
             </Border>
 
-            <Border Grid.Row="3" Grid.Column="1" 
+            <Border Grid.Row="4" Grid.Column="1" 
                 BorderBrush="LightGray" BorderThickness="1" 
                     VerticalAlignment="Top" Margin="0, 10, 10, 10">
                 <Grid>
@@ -266,7 +279,7 @@
                 </Grid>
             </Border>
 
-            <Grid Grid.Row="4" Grid.Column="1" Grid.RowSpan="3">
+            <Grid Grid.Row="5" Grid.Column="1" Grid.RowSpan="3">
                 <Grid.RowDefinitions>
                     <RowDefinition Height="50"/>
                     <RowDefinition Height="auto"/>

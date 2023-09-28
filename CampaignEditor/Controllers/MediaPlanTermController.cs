@@ -1,5 +1,4 @@
 ﻿using Database.DTOs.MediaPlanTermDTO;
-using Database.Entities;
 using Database.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -49,6 +48,10 @@ namespace CampaignEditor.Controllers
         public async Task<bool> DeleteMediaPlanTermByXmpId(int id)
         {
             return await _repository.DeleteMediaPlanTermByXmpId(id);
+        }
+        public async Task<bool> SetActiveMediaPlanTermByMPId(int id, bool isActive)
+        {
+            return await _repository.SetActiveMediaPlanTermByMPId(id, isActive);
         }
     }
 }

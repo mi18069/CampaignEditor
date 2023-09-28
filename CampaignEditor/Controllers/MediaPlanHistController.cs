@@ -60,6 +60,11 @@ namespace CampaignEditor.Controllers
             return await _repository.DeleteMediaPlanHistByXmpid(xmpid);
         }
 
+        public async Task<bool> SetActiveMediaPlanHistByMPId(int id, bool isActive)
+        {
+            return await _repository.SetActiveMediaPlanHistByMPId(id, isActive);
+        }
+
         public MediaPlanHist ConvertFromDTO(MediaPlanHistDTO mediaPlanHistDTO)
         {
             return _repository.ConvertFromDTO(mediaPlanHistDTO);
@@ -69,5 +74,6 @@ namespace CampaignEditor.Controllers
         {
             return _repository.ConvertToDTO(mediaPlanHist);
         }
+
     }
 }

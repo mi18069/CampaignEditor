@@ -268,5 +268,16 @@ namespace Database.Repositories
         {
             return _mapper.Map<MediaPlanHistDTO>(mediaPlanHist);
         }
+
+        public async Task<bool> SetActiveMediaPlanHistByMPId(int id, bool isActive)
+        {
+            using var connection = _context.GetConnection();
+
+            var affected = await connection.ExecuteAsync(
+                "UPDATE xmphist SET active = @Active " +
+                "WHERE xmpid = @Id", new { Active = isActive, Id = id });
+
+            return affected != 0;
+        }
     }
 }

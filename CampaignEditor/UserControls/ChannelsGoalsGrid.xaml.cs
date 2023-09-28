@@ -3,14 +3,11 @@ using Database.DTOs.ChannelDTO;
 using Database.Entities;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
-using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
-using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
 
 namespace CampaignEditor.UserControls
 {
@@ -32,6 +29,7 @@ namespace CampaignEditor.UserControls
         {
             _mediaPlans = mediaPlans;
             _dictionary.Clear();
+
             foreach (ChannelDTO channel in channels)
             {
                 _dictionary.Add(channel.chid, new ProgramGoals(channel));

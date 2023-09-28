@@ -18,6 +18,7 @@ namespace Database.Repositories
         Task<bool> DeleteMediaPlanHistByXmpid(int xmpid);
         MediaPlanHist ConvertFromDTO(MediaPlanHistDTO mediaPlanHistDTO);
         MediaPlanHistDTO ConvertToDTO(MediaPlanHist mediaPlanHist);
+        Task<bool> SetActiveMediaPlanHistByMPId(int id, bool isActive);
 
     }
 }

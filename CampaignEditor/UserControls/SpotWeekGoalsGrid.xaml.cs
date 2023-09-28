@@ -49,6 +49,7 @@ namespace CampaignEditor.UserControls
             ugGoals.Children.Clear();
             ugChannels.Children.Clear();
             ugSpots.Children.Clear();
+            ugGrid.Children.Clear();
 
             var spots = sgGrid.Spots;
             foreach (SpotDTO spot in spots)

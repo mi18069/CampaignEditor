@@ -2,6 +2,7 @@
 using CampaignEditor.DTOs.CampaignDTO;
 using CampaignEditor.Helpers;
 using CampaignEditor.StartupHelpers;
+using Database.DTOs.ChannelCmpDTO;
 using Database.DTOs.ChannelDTO;
 using Database.DTOs.GoalsDTO;
 using Database.DTOs.MediaPlanDTO;
@@ -20,10 +21,10 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
@@ -41,27 +42,30 @@ namespace CampaignEditor.UserControls
         private MediaPlanRefController _mediaPlanRefController;
         private SpotController _spotController;
         private GoalsController _goalsController;
+        private MediaPlanVersionController _mediaPlanVersionController;
 
         private DatabaseFunctionsController _databaseFunctionsController;
 
         private readonly IAbstractFactory<AddSchema> _factoryAddSchema;
         private readonly IAbstractFactory<AMRTrim> _factoryAmrTrim;
-        private readonly IAbstractFactory<MediaPlanGrid> _factoryMediaPlanGrid;
         private readonly IAbstractFactory<PrintCampaignInfo> _factoryPrintCmpInfo;
 
 
         private SelectedMPGoals SelectedMediaPlan = new SelectedMPGoals();
 
         private bool canUserEdit = true;
+        private bool isEditableVersion = true;
 
         private CampaignDTO _campaign;
+        private int _cmpVersion;
+        private int _maxVersion = 1;
+        private List<int> _versions = new List<int>();
+        private List<ChannelDTO> _channels = new List<ChannelDTO>();
 
         // for duration of campaign
         DateTime startDate;
         DateTime endDate;
         
-        int mediaPlanColumns = 25;
-
         private ObservableCollection<MediaPlanTuple> _allMediaPlans =
             new ObservableCollection<MediaPlanTuple>();
 
@@ -90,12 +94,12 @@ namespace CampaignEditor.UserControls
             IMediaPlanRefRepository mediaPlanRefRepository,
             ISpotRepository spotRepository,
             IGoalsRepository goalsRepository,
+            IMediaPlanVersionRepository mediaPlanVersionRepository,
             IDatabaseFunctionsRepository databaseFunctionsRepository,
             IAbstractFactory<AddSchema> factoryAddSchema,
             IAbstractFactory<AMRTrim> factoryAmrTrim,
             IAbstractFactory<MediaPlanConverter> factoryMpConverter,
             IAbstractFactory<MediaPlanTermConverter> factoryMpTermConverter,
-            IAbstractFactory<MediaPlanGrid> mediaPlanGrid,
             IAbstractFactory<PrintCampaignInfo> factoryPrintCmpInfo)
         {
             this.DataContext = this;
@@ -109,12 +113,12 @@ namespace CampaignEditor.UserControls
             _mediaPlanRefController = new MediaPlanRefController(mediaPlanRefRepository);
             _spotController = new SpotController(spotRepository);
             _goalsController = new GoalsController(goalsRepository);
+            _mediaPlanVersionController = new MediaPlanVersionController(mediaPlanVersionRepository);
 
             _databaseFunctionsController = new DatabaseFunctionsController(databaseFunctionsRepository);
 
             _factoryAddSchema = factoryAddSchema;
             _factoryAmrTrim = factoryAmrTrim;
-            _factoryMediaPlanGrid = mediaPlanGrid;
             _factoryPrintCmpInfo = factoryPrintCmpInfo;
 
             _mpConverter = factoryMpConverter.Create();
@@ -131,44 +135,118 @@ namespace CampaignEditor.UserControls
 
 
         #region Initialization
-        public void Initialize(CampaignDTO campaign)
+        public async Task Initialize(CampaignDTO campaign)
         {
             _campaign = campaign;
-
+            var mpVersion = await _mediaPlanVersionController.GetLatestMediaPlanVersion(_campaign.cmpid);
+            if (mpVersion != null)
+            {
+                _maxVersion = mpVersion.version;
+            }
+            _cmpVersion = _maxVersion;
             startDate = TimeFormat.YMDStringToDateTime(_campaign.cmpsdate);
             endDate = TimeFormat.YMDStringToDateTime(_campaign.cmpedate);
 
             dgHist.ItemsSource = _showMPHist;
 
+            // Initializing important lists
+            InitializeVersions(_maxVersion);
+            await InitializeChannels();
+            FillCbVersions();
+
         }
 
-        public async Task InsertAndLoadData()
+        private void InitializeVersions(int maxVersion)
+        {
+            for (int i = 0; i < maxVersion; i++)
+            {
+                _versions.Add(i + 1);
+            }
+        }
+
+        private async Task InitializeChannels()
+        {
+            var channelCmps = await _channelCmpController.GetChannelCmpsByCmpid(_campaign.cmpid);
+            foreach (ChannelCmpDTO chnCmp in channelCmps)
+            {
+                ChannelDTO channel = await _channelController.GetChannelById(chnCmp.chid);
+                _channels.Add(channel);
+            }
+            _channels = _channels.OrderBy(c => c.chname).ToList();
+        }
+
+        public async Task InsertAndLoadData(int version)
         {
 
-            var channelCmps = await _channelCmpController.GetChannelCmpsByCmpid(_campaign.cmpid);
+            await checkIfMaxVersionChanged(version);
 
-            List<Task> tasks = new List<Task>();
-
-            foreach (var channelCmp in channelCmps)
+            // Inserting new MediaPlans in database
+            List<Task> insertingTasks = new List<Task>();       
+            foreach (var channel in _channels)
             {
-                Task task = Task.Run(() => InsertInDatabase(channelCmp.chid));
-                tasks.Add(task);
+                Task task = Task.Run(() => InsertInDatabase(channel.chid, version));
+                insertingTasks.Add(task);
+            }
+            // waiting for all tasks to finish
+            await Task.WhenAll(insertingTasks);
+
+            // We'll make nChannel threads, and for each thread we'll run startAMRCamculation for each MediaPlan
+            List<Task> amrTasks = new List<Task>();
+            List<List<MediaPlanDTO>> mediaPlansByChannels = new List<List<MediaPlanDTO>>();
+            foreach (ChannelDTO channel in _channels)
+            {
+                List<MediaPlanDTO> mediaPlans = (await _mediaPlanController.GetAllChannelCmpMediaPlans(channel.chid, _campaign.cmpid, version)).ToList();
+                mediaPlansByChannels.Add(mediaPlans);
             }
 
-            // waiting for all tasks to finish
-            await Task.WhenAll(tasks);
-
-            await _databaseFunctionsController.StartAMRCalculation(_campaign.cmpid, 40, 40);
-            await CalculateMPValues();
-
-            await LoadData();
+            foreach (List<MediaPlanDTO> mediaPlanList in mediaPlansByChannels)
+            {
+                Task task = Task.Run(() => StartAMRByMediaPlan(_campaign.cmpid, 40, 40, mediaPlanList));
+                amrTasks.Add(task);
+            }
+            await Task.WhenAll(amrTasks);
+         
+            await CalculateMPValues(_campaign.cmpid, version);
+            
+            await LoadData(version, true);
 
         }
 
-        public async Task LoadData()
+        private async Task StartAMRByMediaPlan(int cmpid, int minusTime, int plusTime, List<MediaPlanDTO> mediaPlans)
         {
+            foreach (MediaPlanDTO mediaPlan in mediaPlans)
+            {
+                await _databaseFunctionsController.StartAMRCalculation(cmpid, minusTime, plusTime, mediaPlan.xmpid);
+            }
+
+        }
+
+        private async Task checkIfMaxVersionChanged(int version)
+        {
+
+            if (_maxVersion < version)
+            {
+                cbVersions.Items.Add(version);
+                _maxVersion = version;
+                cbVersions.SelectedIndex = cbVersions.Items.Count - 1;
+            }
+            _cmpVersion = version;
+            
+        }
+
+        public void EmptyFields()
+        {
+            lvChannels.Items.Clear();
+            cbVersions.Items.Clear();
+        }
+
+        public async Task LoadData(int version, bool isEnabled = false)
+        {
+            _cmpVersion = version;
+            isEditableVersion = _maxVersion == _cmpVersion;
+
             // Filling lvChannels and dictionary
-            await FillLvChannels();
+            FillLvChannels();
             await FillMPList();
             await FillGoals();
             await FillLoadedDateRanges();
@@ -180,6 +258,32 @@ namespace CampaignEditor.UserControls
 
         }
 
+        private async Task InitializeDataGrid()
+        {
+            dgMediaPlans.CanUserEdit = new ObservableBool(canUserEdit && isEditableVersion);
+            dgMediaPlans._selectedChannels = _selectedChannels;
+            dgMediaPlans._allMediaPlans = _allMediaPlans;
+            Dictionary<int, string> chidChannelDictionary = new Dictionary<int, string>();
+            foreach (ChannelDTO channel in _channels)
+            {
+                chidChannelDictionary.Add(channel.chid, channel.chname.Trim());
+            }
+            dgMediaPlans.chidChannelDictionary = chidChannelDictionary;
+
+            dgMediaPlans._converter = _mpConverter;
+            dgMediaPlans._factoryAddSchema = _factoryAddSchema;
+            dgMediaPlans._factoryAmrTrim = _factoryAmrTrim;
+            dgMediaPlans._schemaController = _schemaController;
+            dgMediaPlans._mediaPlanController = _mediaPlanController;
+            dgMediaPlans._mediaPlanTermController = _mediaPlanTermController;
+            dgMediaPlans._spotController = _spotController;
+            dgMediaPlans.AddMediaPlanClicked += dgMediaPlans_AddMediaPlanClicked;
+            dgMediaPlans.DeleteMediaPlanClicked += dgMediaPlans_DeleteMediaPlanClicked;
+
+            await dgMediaPlans.Initialize(_campaign);
+            
+        }
+
         private async Task InitializeCGGrid()
         {
             ObservableCollection<MediaPlan> mediaPlans = new ObservableCollection<MediaPlan>();
@@ -188,7 +292,7 @@ namespace CampaignEditor.UserControls
                 mediaPlans.Add(mpTuple.MediaPlan);
             }
             List<ChannelDTO> channels = new List<ChannelDTO>();
-            foreach (ChannelDTO channel in lvChannels.Items) 
+            foreach (ChannelDTO channel in _channels) 
             {
                 channels.Add(channel);
             }
@@ -214,29 +318,7 @@ namespace CampaignEditor.UserControls
             swgGrid.Initialize(sgGrid);
         }
 
-        private async Task InitializeDataGrid()
-        {
-            dgMediaPlans._converter = _mpConverter;
-            dgMediaPlans._factoryAddSchema = _factoryAddSchema;
-            dgMediaPlans._factoryAmrTrim = _factoryAmrTrim;
-            dgMediaPlans._schemaController = _schemaController;
-            dgMediaPlans._mediaPlanController = _mediaPlanController;
-            dgMediaPlans._mediaPlanTermController = _mediaPlanTermController;
-            dgMediaPlans._spotController = _spotController;
-            dgMediaPlans._selectedChannels = _selectedChannels;
-            dgMediaPlans._allMediaPlans = _allMediaPlans;
-            dgMediaPlans.AddMediaPlanClicked += dgMediaPlans_AddMediaPlanClicked;
-            dgMediaPlans.DeleteMediaPlanClicked += dgMediaPlans_DeleteMediaPlanClicked;
-
-            Dictionary<int, string> chidChannelDictionary = new Dictionary<int, string>();
-            foreach (ChannelDTO channel in lvChannels.Items)
-            {
-                chidChannelDictionary.Add(channel.chid, channel.chname.Trim());
-            }
-            dgMediaPlans.chidChannelDictionary = chidChannelDictionary;
-
-            await dgMediaPlans.Initialize(_campaign);
-        }
+        
 
         #region CampaignForecastView
 
@@ -253,16 +335,25 @@ namespace CampaignEditor.UserControls
             OnInitializeButtonClicked();
         }
 
-        public async Task DeleteData()
+        // Define a custom event to signal the selection change
+        public event EventHandler<SelectionChangedEventArgs> SelectionChanged;
+
+        public async Task DeleteData(int version)
         {
             await _mediaPlanRefController.DeleteMediaPlanRefById(_campaign.cmpid);
-            var mediaPlans = await _mediaPlanController.GetAllMediaPlansByCmpid(_campaign.cmpid);
+            var mediaPlans = await _mediaPlanController.GetAllMediaPlansByCmpid(_campaign.cmpid, version);
 
             foreach (var mediaPlan in mediaPlans)
             {
-                await DeleteMPById(mediaPlan.xmpid);
+                //await DeleteMPById(mediaPlan.xmpid);
+                await SetMPToInactive(mediaPlan.xmpid);
             }
 
+        }
+
+        private async Task SetMPToInactive(int xmpid)
+        {
+            await _mediaPlanController.SetActiveMediaPlanById(xmpid, false);
         }
 
         private async Task DeleteMPById(int xmpid)
@@ -276,9 +367,9 @@ namespace CampaignEditor.UserControls
         #endregion
 
 
-        private async Task CalculateMPValues()
+        private async Task CalculateMPValues(int cmpid, int version)
         {
-            var mediaPlansDTO = await _mediaPlanController.GetAllMediaPlansByCmpid(_campaign.cmpid);
+            var mediaPlansDTO = await _mediaPlanController.GetAllMediaPlansByCmpid(cmpid, version);
 
             foreach (var mediaPlanDTO in mediaPlansDTO)
             {
@@ -289,7 +380,7 @@ namespace CampaignEditor.UserControls
         }
 
         #region Inserting in database
-        private async Task InsertInDatabase(int chid)
+        private async Task InsertInDatabase(int chid, int version)
         {
             var schemas = await _schemaController.GetAllChannelSchemasWithinDateAndTime(
                 chid, DateOnly.FromDateTime(startDate), DateOnly.FromDateTime(endDate),
@@ -297,18 +388,18 @@ namespace CampaignEditor.UserControls
 
             foreach (var schema in schemas)
             {
-                MediaPlanDTO mediaPlan = await SchemaToMP(schema);
+                MediaPlanDTO mediaPlan = await SchemaToMP(schema, version);
                 var mediaPlanTerms = await MediaPlanToMPTerm(mediaPlan);
             }
 
         }
 
         // reaching or creating mediaPlan
-        private async Task<MediaPlanDTO> SchemaToMP(SchemaDTO schema)
+        private async Task<MediaPlanDTO> SchemaToMP(SchemaDTO schema, int version)
         {
             MediaPlanDTO mediaPlan = null;
             // if already exist, fix conflicts
-            if ((mediaPlan = await _mediaPlanController.GetMediaPlanBySchemaAndCmpId(schema.id, _campaign.cmpid)) != null)
+            if ((mediaPlan = await _mediaPlanController.GetMediaPlanBySchemaAndCmpId(schema.id, _campaign.cmpid, version)) != null)
             {
                 // if mediaPlan already exists, return that one
                 if (AreEqualMediaPlanAndSchema(mediaPlan, schema))
@@ -328,7 +419,7 @@ namespace CampaignEditor.UserControls
             }
 
             CreateMediaPlanDTO createMediaPlan = new CreateMediaPlanDTO(schema.id, _campaign.cmpid, schema.chid,
-            schema.name.Trim(), 1, schema.position, schema.stime, schema.etime, schema.blocktime,
+            schema.name.Trim(), version, schema.position, schema.stime, schema.etime, schema.blocktime,
             schema.days, schema.type, schema.special, schema.sdate, schema.edate, schema.progcoef,
             schema.created, schema.modified, 0, 100, 0, 100, 0, 100, 0, 100, 0, 0, 0, 0, 1, 1, 1, 0, true);
 
@@ -348,7 +439,7 @@ namespace CampaignEditor.UserControls
                    plan1.blocktime == schema.blocktime &&
                    plan1.days == schema.days &&
                    plan1.sdate == schema.sdate &&
-                   plan1.edate == schema.edate;
+                   plan1.edate == schema.edate; 
         }
 
         private async Task<List<MediaPlanTerm>> MediaPlanToMPTerm(MediaPlanDTO mediaPlan)
@@ -455,25 +546,37 @@ namespace CampaignEditor.UserControls
         #endregion
 
         #region Filling lists
-        private async Task FillLvChannels()
+        private void FillLvChannels()
         {
             lvChannels.Items.Clear();
 
-            var channelIds = await _mediaPlanController.GetAllChannelsByCmpid(_campaign.cmpid);
-            List<ChannelDTO> channels = new List<ChannelDTO>();
-            foreach (var chid in channelIds)
-            {
-                ChannelDTO channel = await _channelController.GetChannelById(chid);
-                channels.Add(channel);
-            }
-
-            channels = channels.OrderBy(c => c.chname).ToList();
-
-            foreach (ChannelDTO channel in channels)
+            foreach (ChannelDTO channel in _channels)
             {
                 lvChannels.Items.Add(channel);
             }
 
+        }
+
+        public void FillCbVersions()
+        {
+            cbVersions.Items.Clear();
+            for (int i=0; i<_maxVersion; i++)
+            {
+                cbVersions.Items.Add(i + 1);
+            }
+            cbVersions.SelectedIndex = cbVersions.Items.Count-1;
+        }
+
+        public delegate void ChangeVersionEventHandler(object sender, ChangeVersionEventArgs e);
+        public event ChangeVersionEventHandler VersionChanged;
+        private void CbVersions_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            // Check if any items are selected
+            int selectedIndex = cbVersions.SelectedIndex;
+            int version = selectedIndex + 1; // Versions start from 1
+            var eventArgs = new ChangeVersionEventArgs(version);
+            VersionChanged?.Invoke(this, eventArgs);            
+            
         }
 
         private async Task FillMPList()
@@ -482,7 +585,7 @@ namespace CampaignEditor.UserControls
 
             int n = (int)(endDate - startDate).TotalDays;
 
-            var mediaPlans = await _mediaPlanController.GetAllMediaPlansByCmpid(_campaign.cmpid);
+            var mediaPlans = await _mediaPlanController.GetAllMediaPlansByCmpid(_campaign.cmpid, _cmpVersion);
             foreach (MediaPlanDTO mediaPlan in mediaPlans)
             {
                 List<MediaPlanTermDTO> mediaPlanTerms = (List<MediaPlanTermDTO>)await _mediaPlanTermController.GetAllMediaPlanTermsByXmpid(mediaPlan.xmpid);
@@ -615,7 +718,6 @@ namespace CampaignEditor.UserControls
         {
             GoalsDTO goals = await _goalsController.GetGoalsByCmpid(_campaign.cmpid);
             mpGoals.MediaPlans = new ObservableCollection<MediaPlan>(_allMediaPlans.Select(mp => mp.MediaPlan));
-
             if (goals != null)
             {
                 if (goals.budget == 0)
@@ -752,11 +854,10 @@ namespace CampaignEditor.UserControls
                     var schema = await _schemaController.CreateGetSchema(f._schema);
                     if (schema != null)
                     {
-                        MediaPlanDTO mediaPlanDTO = await SchemaToMP(schema);
+                        MediaPlanDTO mediaPlanDTO = await SchemaToMP(schema, _cmpVersion);
 
                         await _databaseFunctionsController.StartAMRCalculation(_campaign.cmpid, 40, 40, mediaPlanDTO.xmpid);
                         var mediaPlan = await _mpConverter.ConvertFirstFromDTO(mediaPlanDTO);
-
                         var mediaPlanTerms = await MediaPlanToMPTerm(mediaPlanDTO);
                         var mpTuple = new MediaPlanTuple(mediaPlan, new ObservableCollection<MediaPlanTerm>(mediaPlanTerms));
                         _allMediaPlans.Add(mpTuple);
@@ -811,7 +912,7 @@ namespace CampaignEditor.UserControls
         #region DgHist
         private async void DgHistsChbCell_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (!canUserEdit)
+            if (!canUserEdit || !isEditableVersion)
             {
                 e.Handled = true;
                 return;

@@ -3,6 +3,7 @@ using CampaignEditor.DTOs.CampaignDTO;
 using CampaignEditor.Helpers;
 using CampaignEditor.StartupHelpers;
 using CampaignEditor.UserControls;
+using Database.DTOs.MediaPlanVersionDTO;
 using Database.Repositories;
 using System;
 using System.Collections.Generic;
@@ -21,6 +22,7 @@ namespace CampaignEditor
 
         private MediaPlanRefController _mediaPlanRefController;
         private DatabaseFunctionsController _databaseFunctionsController;
+        private MediaPlanVersionController _mediaPlanVersionController;
 
         private CampaignForecast _forecast;
         private CampaignForecastDates _forecastDates;
@@ -35,6 +37,7 @@ namespace CampaignEditor
 
         public CampaignForecastView(IMediaPlanRefRepository mediaPlanRefRepository,
             IDatabaseFunctionsRepository databaseFunctionsRepository,
+            IMediaPlanVersionRepository mediaPlanVersionRepository,
             IAbstractFactory<CampaignForecast> factoryForecast,
             IAbstractFactory<CampaignForecastDates> factoryForecastDates)
         {
@@ -43,6 +46,7 @@ namespace CampaignEditor
 
             _mediaPlanRefController = new MediaPlanRefController(mediaPlanRefRepository);
             _databaseFunctionsController = new DatabaseFunctionsController(databaseFunctionsRepository);
+            _mediaPlanVersionController = new MediaPlanVersionController(mediaPlanVersionRepository);
 
             InitializeComponent();
         }
@@ -55,8 +59,9 @@ namespace CampaignEditor
             unavailableDates = (await _databaseFunctionsController.GetAllUnavailableDates()).ToList();
 
             _forecast = _factoryForecast.Create();
-            _forecast.Initialize(_campaign);
+            await _forecast.Initialize(_campaign);
             _forecast.InitializeButtonClicked += Forecast_InitializeButtonClicked;
+            _forecast.VersionChanged += Forecast_ChangeVersionClicked;
 
             _forecastDates = _factoryForecastDates.Create();
             _forecastDates.CancelButtonClicked += ForecastDates_CancelButtonClicked;
@@ -67,7 +72,17 @@ namespace CampaignEditor
             if (exists)
             {
                 alreadyExists = true;
-                await _forecast.LoadData();
+                var mpVersion = await _mediaPlanVersionController.GetLatestMediaPlanVersion(_campaign.cmpid);
+                if (mpVersion == null)
+                {
+                    var mpVerDTO = new MediaPlanVersionDTO(_campaign.cmpid, 1);
+                    await _mediaPlanVersionController.CreateMediaPlanVersion(mpVerDTO);
+                    await _forecast.LoadData(1, true);
+                }
+                else
+                {
+                    await _forecast.LoadData(mpVersion.version, true);
+                }
                 tabForecast.Content = _forecast.Content;
             }
             else
@@ -91,7 +106,12 @@ namespace CampaignEditor
                     MessageBoxButton.OKCancel, MessageBoxImage.Warning) == MessageBoxResult.OK)
                 {
                     tabForecast.Content = loadingPage.Content;
-                    await _forecast.DeleteData();
+                    var mpVer = await _mediaPlanVersionController.GetLatestMediaPlanVersion(_campaign.cmpid);
+                    int version = 1;
+                    if (mpVer != null)
+                        version = mpVer.version;
+
+                    await _forecast.DeleteData(version);
                     if (await InitializeNewForecast())
                         tabForecast.Content = _forecast.Content;
                     else
@@ -136,8 +156,20 @@ namespace CampaignEditor
                                 MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
+            var mpVer = await _mediaPlanVersionController.GetLatestMediaPlanVersion(_campaign.cmpid);
 
-            await _forecast.InsertAndLoadData();
+            if (mpVer == null)
+            {
+                var mpVerDTO = new MediaPlanVersionDTO(_campaign.cmpid, 1);
+                await _mediaPlanVersionController.CreateMediaPlanVersion(mpVerDTO);
+                await _forecast.InsertAndLoadData(1);
+            }
+            else
+            {
+                mpVer = await _mediaPlanVersionController.IncrementMediaPlanVersion(mpVer);
+                await _forecast.InsertAndLoadData(mpVer.version);
+            }
+            
 
             return true;
         }
@@ -147,6 +179,15 @@ namespace CampaignEditor
         {
             await _forecastDates.LoadGridInit();
             tabForecast.Content = _forecastDates.Content;
+        }
+
+        private async void Forecast_ChangeVersionClicked(object sender, ChangeVersionEventArgs e)
+        {
+            tabForecast.Content = loadingPage.Content;
+            //_forecast.EmptyFields();
+            int version = e.Version;
+            await _forecast.LoadData(version, false);
+            tabForecast.Content = _forecast.Content;
         }
 
         // Function which tests if we can make new forecast

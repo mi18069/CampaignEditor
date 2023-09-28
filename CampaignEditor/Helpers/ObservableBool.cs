@@ -19,6 +19,7 @@ namespace CampaignEditor.Helpers
             }
         }
 
+
         public ObservableBool(bool value)
         {
             Value = value;

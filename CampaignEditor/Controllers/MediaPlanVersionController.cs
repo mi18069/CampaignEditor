@@ -29,23 +29,20 @@ namespace CampaignEditor.Controllers
                 }
                 else
                 {
-                    MediaPlanVersionDTO mpVersionDTO = new MediaPlanVersionDTO(cmpid, 1);
-                    await _repository.CreateMediaPlanVersion(mpVersionDTO);
-                    return await _repository.GetLatestMediaPlanVersion(cmpid);
+                    return null;
                 }
             }
             catch
             {
-                MediaPlanVersionDTO mpVersionDTO = new MediaPlanVersionDTO(cmpid, 1);
-                await _repository.CreateMediaPlanVersion(mpVersionDTO);
-                return await _repository.GetLatestMediaPlanVersion(cmpid);
+                return null;
             }
 
         }
 
-        public async Task<bool> IncrementMediaPlanVersion(MediaPlanVersionDTO mediaPlanVersionDTO)
+        public async Task<MediaPlanVersionDTO> IncrementMediaPlanVersion(MediaPlanVersionDTO mediaPlanVersionDTO)
         {
-           return await _repository.IncrementMediaPlanVersion(mediaPlanVersionDTO);
+            await _repository.IncrementMediaPlanVersion(mediaPlanVersionDTO);
+            return await _repository.GetLatestMediaPlanVersion(mediaPlanVersionDTO.cmpid); 
         }
 
         public async Task<bool> DeleteMediaPlanVersionById(int cmpid)

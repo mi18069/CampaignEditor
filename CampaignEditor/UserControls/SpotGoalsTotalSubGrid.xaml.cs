@@ -6,12 +6,9 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
-using System.ComponentModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Input;
 using System.Windows.Media;
 
 namespace CampaignEditor.UserControls
@@ -55,6 +52,8 @@ namespace CampaignEditor.UserControls
             _valuesList = tsg._valuesList;
             _dictionary = tsg._dictionary;
             _values = tsg._values;
+
+            dgGrid.Items.Clear();
 
             _values.ReplaceRange(_dictionary.Values);
             dgGrid.ItemsSource = _values;

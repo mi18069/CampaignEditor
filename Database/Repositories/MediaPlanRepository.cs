@@ -171,13 +171,13 @@ namespace Database.Repositories
             return _mapper.Map<MediaPlanDTO>(mediaPlan.FirstOrDefault());
         }
 
-        public async Task<MediaPlanDTO?> GetMediaPlanBySchemaAndCmpId(int schemaid, int cmpid)
+        public async Task<MediaPlanDTO?> GetMediaPlanBySchemaAndCmpId(int schemaid, int cmpid, int version)
         {
             using var connection = _context.GetConnection();
 
             var mediaPlan = await connection.QueryAsync<dynamic>(
-                "SELECT * FROM xmp WHERE schid = @Schemaid AND cmpid = @Cmpid", 
-                new { Schemaid = schemaid, Cmpid = cmpid });
+                "SELECT * FROM xmp WHERE schid = @Schemaid AND cmpid = @Cmpid AND verzija = @Version", 
+                new { Schemaid = schemaid, Cmpid = cmpid, Version = version });
 
             mediaPlan = mediaPlan.Select(item => new MediaPlan()
             {
@@ -368,24 +368,24 @@ namespace Database.Repositories
             return _mapper.Map<IEnumerable<MediaPlanDTO>>(allMediaPlans);
         }
 
-        public async Task<IEnumerable<int>> GetAllChannelsByCmpid(int cmpid)
+        public async Task<IEnumerable<int>> GetAllChannelsByCmpid(int cmpid, int version)
         {
             using var connection = _context.GetConnection();
 
             var allChannelIds = await connection.QueryAsync<int>
-                ("SELECT chid FROM xmp WHERE cmpid = @Cmpid GROUP BY chid", 
-                new { Cmpid = cmpid });
+                ("SELECT chid FROM xmp WHERE cmpid = @Cmpid AND verzija = @Version GROUP BY chid", 
+                new { Cmpid = cmpid, Version = version });
 
             return _mapper.Map<IEnumerable<int>>(allChannelIds);
         }
 
-        public async Task<IEnumerable<MediaPlanDTO>> GetAllMediaPlansByCmpid(int cmpid)
+        public async Task<IEnumerable<MediaPlanDTO>> GetAllMediaPlansByCmpid(int cmpid, int version)
         {
             using var connection = _context.GetConnection();
 
             var mediaPlans = await connection.QueryAsync<dynamic>(
-                "SELECT * FROM xmp WHERE cmpid = @Cmpid",
-                new { Cmpid = cmpid });
+                "SELECT * FROM xmp WHERE cmpid = @Cmpid AND verzija = @Version",
+                new { Cmpid = cmpid, Version = version });
 
             mediaPlans = mediaPlans.Select(item => new MediaPlan()
             {
@@ -479,13 +479,13 @@ namespace Database.Repositories
             return _mapper.Map<IEnumerable<MediaPlanDTO>>(allMediaPlans);
         }
 
-        public async Task<IEnumerable<MediaPlanDTO>> GetAllChannelCmpMediaPlans(int chid, int cmpid)
+        public async Task<IEnumerable<MediaPlanDTO>> GetAllChannelCmpMediaPlans(int chid, int cmpid, int version)
         {
             using var connection = _context.GetConnection();
 
             var mediaPlans = await connection.QueryAsync<dynamic>(
-                "SELECT * FROM xmp WHERE chid = @Chid AND cmpid = @Cmpid",
-                new { Chid = chid, Cmpid = cmpid });
+                "SELECT * FROM xmp WHERE chid = @Chid AND cmpid = @Cmpid AND verzija = @Version",
+                new { Chid = chid, Cmpid = cmpid, Version = version });
 
             mediaPlans = mediaPlans.Select(item => new MediaPlan()
             {

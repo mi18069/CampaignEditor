@@ -15,5 +15,7 @@ namespace Database.Repositories
         Task<bool> UpdateMediaPlanTerm(UpdateMediaPlanTermDTO mediaPlanTermDTO);
         Task<bool> DeleteMediaPlanTermById(int id);
         Task<bool> DeleteMediaPlanTermByXmpId(int id);
+        Task<bool> SetActiveMediaPlanTermByMPId(int id, bool isActive);
+
     }
 }

@@ -11,7 +11,6 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using System.Windows.Threading;
 
 namespace CampaignEditor.UserControls
 {
@@ -40,6 +39,9 @@ namespace CampaignEditor.UserControls
         {
             InitializeComponent();
             _mpTuples = mpTuples;
+            _dictionary.Clear();
+            _spotLengths.Clear();
+            dgGrid.Items.Clear();
 
             foreach (var spot in spots)
             {

@@ -10,13 +10,13 @@ namespace Database.Repositories
         Task<bool> CreateMediaPlan(CreateMediaPlanDTO mediaPlanDTO);
         Task<MediaPlanDTO> GetMediaPlanById(int id);
         Task<MediaPlanDTO> GetMediaPlanBySchemaId(int id);
-        Task<MediaPlanDTO?> GetMediaPlanBySchemaAndCmpId(int schemaid, int cmpid);
+        Task<MediaPlanDTO?> GetMediaPlanBySchemaAndCmpId(int schemaid, int cmpid, int version);
         Task<MediaPlanDTO> GetMediaPlanByCmpId(int id);
         Task<MediaPlanDTO> GetMediaPlanByName(string name);
-        Task<IEnumerable<MediaPlanDTO>> GetAllMediaPlansByCmpid(int cmpid);
+        Task<IEnumerable<MediaPlanDTO>> GetAllMediaPlansByCmpid(int cmpid, int version);
         Task<IEnumerable<MediaPlanDTO>> GetAllMediaPlans();
-        Task<IEnumerable<int>> GetAllChannelsByCmpid(int cmpid);
-        Task<IEnumerable<MediaPlanDTO>> GetAllChannelCmpMediaPlans(int chid, int cmpid);
+        Task<IEnumerable<int>> GetAllChannelsByCmpid(int cmpid, int version);
+        Task<IEnumerable<MediaPlanDTO>> GetAllChannelCmpMediaPlans(int chid, int cmpid, int version);
         Task<IEnumerable<MediaPlanDTO>> GetAllMediaPlansWithinDate(DateOnly sdate, DateOnly edate);
         Task<bool> UpdateMediaPlan(UpdateMediaPlanDTO mediaPlanDTO);
         Task<bool> DeleteMediaPlanById(int id);

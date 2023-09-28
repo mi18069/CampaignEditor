@@ -132,5 +132,16 @@ namespace Database.Repositories
 
             return affected != 0;
         }
+
+        public async Task<bool> SetActiveMediaPlanTermByMPId(int id, bool isActive)
+        {
+            using var connection = _context.GetConnection();
+
+            var affected = await connection.ExecuteAsync(
+                "UPDATE xmpterm SET active = @Active " +
+                "WHERE xmpid = @Id", new { Active = isActive, Id = id });
+
+            return affected != 0;
+        }
     }
 }

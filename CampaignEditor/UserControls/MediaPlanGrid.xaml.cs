@@ -114,7 +114,6 @@ namespace CampaignEditor.UserControls
             this.Schema.FrozenColumnCount = frozenColumnsNum;
 
             _campaign = campaign;
-            //this._allMediaPlans = _allMediaPlans;
 
             startDate = TimeFormat.YMDStringToDateTime(_campaign.cmpsdate);
             endDate = TimeFormat.YMDStringToDateTime(_campaign.cmpedate);
@@ -136,7 +135,7 @@ namespace CampaignEditor.UserControls
             {
                 var mediaPlan = ((MediaPlanTuple)d).MediaPlan;
            
-                return mediaPlan.active && _selectedChannels.Any(c => c.chid == mediaPlan.chid);
+                return _selectedChannels.Any(c => c.chid == mediaPlan.chid);
             };
 
             _allMediaPlans.CollectionChanged += OnCollectionChanged;
@@ -291,6 +290,8 @@ namespace CampaignEditor.UserControls
 
         private async void OnCellPreviewTextInput(object sender, TextCompositionEventArgs e)
         {
+            if (!CanUserEdit.Value) 
+                return;
 
             DataGridCell cell = sender as DataGridCell;
             TextBlock textBlock = cell.Content as TextBlock;

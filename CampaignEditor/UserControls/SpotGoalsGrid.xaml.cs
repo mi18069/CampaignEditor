@@ -66,6 +66,8 @@ namespace CampaignEditor.UserControls
             ugGoals.Children.Clear();
             ugWeeks.Children.Clear();
             dgSpots.Items.Clear();
+            ugGrid.Children.Clear();
+            
 
             startDate = TimeFormat.YMDStringToDateTime(_campaign.cmpsdate);
             endDate = TimeFormat.YMDStringToDateTime(_campaign.cmpedate);
@@ -351,7 +353,7 @@ namespace CampaignEditor.UserControls
             return calendar.GetWeekOfYear(
                 date,
                 CultureInfo.CurrentCulture.DateTimeFormat.CalendarWeekRule,
-                CultureInfo.CurrentCulture.DateTimeFormat.FirstDayOfWeek
+                DayOfWeek.Monday // Use Monday as the first day of the week
             );
         }
 
