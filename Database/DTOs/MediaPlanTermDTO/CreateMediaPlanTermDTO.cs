@@ -8,5 +8,9 @@ namespace Database.DTOs.MediaPlanTermDTO
             : base(xmpid, date, spotcode)
         {
         }
+        public CreateMediaPlanTermDTO(MediaPlanTermDTO mpTermDTO)
+            : base(mpTermDTO.xmpid, mpTermDTO.date, mpTermDTO.spotcode)
+        {
+        }
     }
 }

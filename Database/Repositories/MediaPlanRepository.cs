@@ -73,6 +73,68 @@ namespace Database.Repositories
             return affected != 0;
         }
 
+        public async Task<MediaPlanDTO> CreateAndReturnMediaPlan(CreateMediaPlanDTO mediaPlanDTO)
+        {
+            using var connection = _context.GetConnection();
+
+            var result = await connection.QuerySingleAsync<MediaPlanDTO>(
+                "INSERT INTO xmp (schid, cmpid, chid, naziv, verzija, pozicija, vremeod, vremedo, vremerbl, " +
+                "dani, tipologija, specijal, datumod, datumdo, progkoef, datumkreiranja, datumizmene, " +
+                "amr1, amr1trim, amr2, amr2trim, amr3, amr3trim, amrsale, amrsaletrim, amrp1, amrp2, amrp3, amrpsale, dpkoef, seaskoef, seckoef, price, active) " +
+                "OUTPUT INSERTED.Id " + // Retrieve the newly inserted Id
+                "VALUES (@Schid, @Cmpid, @Chid, @Name, @Version, @Position, @Stime, @Etime, @Blocktime, " +
+                "@Days, @Type, @Special, CAST (@Sdate AS DATE), CAST(@Edate AS DATE), @Progcoef, CAST(@Created AS DATE), CAST(@Modified AS DATE), " +
+                "@Amr1, @Amr1trim, @Amr2, @Amr2trim, @Amr3, @Amr3trim, @Amrsale, @Amrsaletrim, @Amrp1, @Amrp2, @Amrp3, @Amrpsale, @Dpcoef, @Seascoef, @Seccoef, @Price, @Active) ",
+            new
+            {
+                Schid = mediaPlanDTO.schid,
+                Cmpid = mediaPlanDTO.cmpid,
+                Chid = mediaPlanDTO.chid,
+                Name = mediaPlanDTO.name,
+                Version = mediaPlanDTO.version,
+                Position = mediaPlanDTO.position,
+                Stime = mediaPlanDTO.stime,
+                Etime = mediaPlanDTO.etime,
+                Blocktime = mediaPlanDTO.blocktime,
+                Days = mediaPlanDTO.days,
+                Type = mediaPlanDTO.type,
+                Special = mediaPlanDTO.special,
+                Sdate = mediaPlanDTO.sdate.ToString("yyyy-MM-dd"),
+                Edate = mediaPlanDTO.edate?.ToString("yyyy-MM-dd"),
+                Progcoef = mediaPlanDTO.progcoef,
+                Created = mediaPlanDTO.created.ToString("yyyy-MM-dd"),
+                Modified = mediaPlanDTO.modified?.ToString("yyyy-MM-dd"),
+                Amr1 = mediaPlanDTO.amr1,
+                Amr1trim = mediaPlanDTO.amr1trim,
+                Amr2 = mediaPlanDTO.amr2,
+                Amr2trim = mediaPlanDTO.amr2trim,
+                Amr3 = mediaPlanDTO.amr3,
+                Amr3trim = mediaPlanDTO.amr3trim,
+                Amrsale = mediaPlanDTO.amrsale,
+                Amrsaletrim = mediaPlanDTO.amrsaletrim,
+                Amrp1 = mediaPlanDTO.amrp1,
+                Amrp2 = mediaPlanDTO.amrp2,
+                Amrp3 = mediaPlanDTO.amrp3,
+                Amrpsale = mediaPlanDTO.amrpsale,
+                Dpcoef = mediaPlanDTO.dpcoef,
+                Seascoef = mediaPlanDTO.seascoef,
+                Seccoef = mediaPlanDTO.seccoef,
+                Price = mediaPlanDTO.price,
+                Active = mediaPlanDTO.active
+            });
+
+            if (result != null)
+            {
+                // Successfully inserted, 'result' contains the newly inserted MediaPlan with Id
+                return result;
+            }
+            else
+            {
+                // Insertion failed, handle accordingly (e.g., throw an exception)
+                return null;
+            }
+        }
+
         public async Task<MediaPlanDTO> GetMediaPlanById(int id)
         {
             using var connection = _context.GetConnection();

@@ -118,6 +118,7 @@ namespace CampaignEditor.UserControls
             startDate = TimeFormat.YMDStringToDateTime(_campaign.cmpsdate);
             endDate = TimeFormat.YMDStringToDateTime(_campaign.cmpedate);
 
+            DeleteDateColumns(frozenColumnsNum);
             InitializeDateColumns();
 
 
@@ -141,6 +142,18 @@ namespace CampaignEditor.UserControls
             _allMediaPlans.CollectionChanged += OnCollectionChanged;
             _selectedChannels.CollectionChanged += OnCollectionChanged;
 
+        }
+
+        private void DeleteDateColumns(int frozenColumnsNum)
+        {
+            // Get the columns after the frozenColumnsNum-th column
+            var columnsToRemove = dgMediaPlans.Columns.Cast<DataGridColumn>().Skip(frozenColumnsNum).ToList();
+
+            // Remove the columns from the DataGrid
+            foreach (var column in columnsToRemove)
+            {
+                dgMediaPlans.Columns.Remove(column);
+            }
         }
 
         // Method to handle the CollectionChanged event

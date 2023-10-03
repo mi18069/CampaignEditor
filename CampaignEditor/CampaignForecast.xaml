@@ -49,10 +49,15 @@
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="auto"/>
                         <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <Label Grid.Column="0" Content="Version: " HorizontalAlignment="Left"/>
                     <ComboBox Grid.Column="1" x:Name="cbVersions" HorizontalAlignment="Left"
                              SelectionChanged="CbVersions_SelectionChanged"/>
+                    <Button x:Name="btnNewVersion" Grid.Column="2" HorizontalAlignment="Left"
+                            Click="btnNewVersion_Click" Margin="20, 0, 0 ,0" BorderThickness="0" Background="White">
+                        <Image Source="\images\GreenPlus.png" Width="20" Height="20"></Image>
+                    </Button>
                 </Grid>
             </Border>
             

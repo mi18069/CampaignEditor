@@ -4,9 +4,11 @@ using CampaignEditor.Helpers;
 using CampaignEditor.StartupHelpers;
 using CampaignEditor.UserControls;
 using Database.DTOs.MediaPlanVersionDTO;
+using Database.Entities;
 using Database.Repositories;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -62,6 +64,7 @@ namespace CampaignEditor
             await _forecast.Initialize(_campaign);
             _forecast.InitializeButtonClicked += Forecast_InitializeButtonClicked;
             _forecast.VersionChanged += Forecast_ChangeVersionClicked;
+            _forecast.NewVersionClicked += _forecast_NewVersionClicked;
 
             _forecastDates = _factoryForecastDates.Create();
             _forecastDates.CancelButtonClicked += ForecastDates_CancelButtonClicked;
@@ -188,6 +191,21 @@ namespace CampaignEditor
             int version = e.Version;
             await _forecast.LoadData(version, false);
             tabForecast.Content = _forecast.Content;
+        }
+
+        private async void _forecast_NewVersionClicked(object? sender, ChangeVersionEventArgs e)
+        {
+            int version = _forecast.CmpVersion;
+
+            if (MessageBox.Show("Make new media plan from version: " + version + "?", 
+                "Message: ", MessageBoxButton.OKCancel, MessageBoxImage.Question) == MessageBoxResult.OK)
+            {
+                tabForecast.Content = loadingPage.Content;
+                ObservableCollection<MediaPlanTuple> mpTuplesToCopy = _forecast.dgMediaPlans._allMediaPlans;
+                await _forecast.MakeNewVersion(mpTuplesToCopy);
+                tabForecast.Content = _forecast.Content;
+            }
+
         }
 
         // Function which tests if we can make new forecast

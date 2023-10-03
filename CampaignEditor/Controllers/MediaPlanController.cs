@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System;
 using Database.Repositories;
+using Database.Entities;
 
 namespace CampaignEditor.Controllers
 {
@@ -20,7 +21,13 @@ namespace CampaignEditor.Controllers
             return await _repository.GetMediaPlanBySchemaAndCmpId(mediaPlanDTO.schid, mediaPlanDTO.cmpid, mediaPlanDTO.version);
         }
 
-        public async Task<MediaPlanDTO> GetMediaPlanById(int id)
+        public async Task<MediaPlanDTO> CreateAndReturnMediaPlan(CreateMediaPlanDTO mediaPlanDTO)
+        {
+            var mpDTO = await _repository.CreateAndReturnMediaPlan(mediaPlanDTO);
+            return mpDTO;
+        }
+
+            public async Task<MediaPlanDTO> GetMediaPlanById(int id)
         {
             return await _repository.GetMediaPlanById(id);
         }

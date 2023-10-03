@@ -8,6 +8,7 @@ namespace Database.Repositories
     public interface IMediaPlanRepository
     {
         Task<bool> CreateMediaPlan(CreateMediaPlanDTO mediaPlanDTO);
+        Task<MediaPlanDTO> CreateAndReturnMediaPlan(CreateMediaPlanDTO mediaPlanDTO);
         Task<MediaPlanDTO> GetMediaPlanById(int id);
         Task<MediaPlanDTO> GetMediaPlanBySchemaId(int id);
         Task<MediaPlanDTO?> GetMediaPlanBySchemaAndCmpId(int schemaid, int cmpid, int version);

@@ -42,7 +42,7 @@ namespace CampaignEditor.UserControls
             _dictionary.Clear();
             _spotLengths.Clear();
             dgGrid.Items.Clear();
-
+            
             foreach (var spot in spots)
             {
                 _dictionary.Add(spot.spotcode[0], new SpotGoals());

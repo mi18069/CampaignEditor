@@ -11,6 +11,7 @@ using System.Collections.ObjectModel;
 using System.Data;
 using System.Globalization;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -73,10 +74,7 @@ namespace CampaignEditor.UserControls
             endDate = TimeFormat.YMDStringToDateTime(_campaign.cmpedate);
 
             var spots = await _spotController.GetSpotsByCmpid(_campaign.cmpid);
-            foreach (SpotDTO spot in spots)
-            {
-                _spots.Add(spot);
-            }
+            _spots = spots.ToList();
             _spots = _spots.OrderBy(s => s.spotcode).ToList();
 
             var channelIds = await _mediaPlanController.GetAllChannelsByCmpid(_campaign.cmpid);
