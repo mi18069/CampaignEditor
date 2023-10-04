@@ -45,6 +45,11 @@ namespace CampaignEditor.Controllers
             return await _repository.GetLatestMediaPlanVersion(mediaPlanVersionDTO.cmpid); 
         }
 
+        public async Task<bool> UpdateMediaPlanVersion(int cmpid, int version)
+        {
+            return await _repository.UpdateMediaPlanVersion(cmpid, version);
+        }
+
         public async Task<bool> DeleteMediaPlanVersionById(int cmpid)
         {
             return await _repository.DeleteMediaPlanVersionById(cmpid);

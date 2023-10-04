@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Dapper;
 using Database.Data;
+using Database.DTOs.MediaPlanTermDTO;
 using Database.DTOs.MediaPlanVersionDTO;
 using Database.Entities;
 using System;
@@ -58,6 +59,21 @@ namespace Database.Repositories
                 {
                     Cmpid = mediaPlanVersionDTO.cmpid,
                     Version = mediaPlanVersionDTO.version + 1
+                });
+
+            return affected != 0;
+        }
+
+        public async Task<bool> UpdateMediaPlanVersion(int cmpid, int version)
+        {
+            using var connection = _context.GetConnection();
+
+            var affected = await connection.ExecuteAsync(
+                "UPDATE cmpxmpversion SET version = @Version WHERE cmpid = @Cmpid",
+            new
+            {
+                    Version=version,
+                    Cmpid = cmpid
                 });
 
             return affected != 0;

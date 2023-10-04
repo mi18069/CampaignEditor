@@ -25,7 +25,7 @@ namespace Database.Repositories
             using var connection = _context.GetConnection();
 
             var affected = await connection.ExecuteAsync(
-                "INSERT INTO xmphsit (xmpid, schid, chid, naziv, pozicija, vremeod, vremedo, " +
+                "INSERT INTO xmphist (xmpid, schid, chid, naziv, pozicija, vremeod, vremedo, " +
                 "datum, progkoef, amr1, amr2, amr3, amrsale, amrp1, amrp2, amrp3, amrpsale, active, outlier) " +
                 "VALUES (@Xmpid, @Schid, @Chid, @Name, @Position, @Stime, @Etime, " +
                 "CAST(@Date AS DATE), @Progcoef, @Amr1, @Amr2, @Amr3, @Amrsale, @Amrp1, @Amrp2, @Amrp3, @Amrpsale, @Active, @Outlier) ",

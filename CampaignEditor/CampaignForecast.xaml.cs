@@ -140,6 +140,7 @@ namespace CampaignEditor.UserControls
         public async Task Initialize(CampaignDTO campaign)
         {
             _campaign = campaign;
+            await DeleteVersion(2, 3);
             var mpVersion = await _mediaPlanVersionController.GetLatestMediaPlanVersion(_campaign.cmpid);
             if (mpVersion != null)
             {
@@ -251,7 +252,7 @@ namespace CampaignEditor.UserControls
             int newVersion = mpVer.version + 1;
             await _mediaPlanVersionController.IncrementMediaPlanVersion(mpVer);           
 
-            // Make new MediaPlan and MediaPlanTerms in database
+            // Make new MediaPlan, MediaPlanTerms and MediaPlanHists in database
             foreach (MediaPlanTuple mediaPlanTuple in allMediaPlans) 
             {
                 MediaPlan mp = mediaPlanTuple.MediaPlan;
@@ -263,6 +264,7 @@ namespace CampaignEditor.UserControls
 
                 if (mediaPlan != null)
                 {
+                    // Adding MediaPlanTerms in database
                     foreach (MediaPlanTerm mpTerm in mediaPlanTuple.Terms)
                     {
                         if (mpTerm != null)
@@ -274,13 +276,37 @@ namespace CampaignEditor.UserControls
                         }
 
                     }
+
+                    // Adding MediaPlanHists in database
+                    var hists = await _mediaPlanHistController.GetAllMediaPlanHistsByXmpid(mpDTO.xmpid);
+                    
+                    foreach (var hist in hists) 
+                    { 
+                        CreateMediaPlanHistDTO createMpHistDTO = new CreateMediaPlanHistDTO(hist);
+                        createMpHistDTO.xmpid = mediaPlan.xmpid;
+                        await _mediaPlanHistController.CreateMediaPlanHist(createMpHistDTO);
+                    }
+
                 }
 
             }
 
-            await checkIfMaxVersionChanged(newVersion);
-            await LoadData(newVersion, true);
-            
+            await checkIfMaxVersionChanged(newVersion);            
+        }
+
+        private async Task DeleteVersion(int fromVersion, int toVersion)
+        {
+            for (int i = fromVersion; i <= toVersion; i++)
+            {
+                var mps = await _mediaPlanController.GetAllMediaPlansByCmpid(_campaign.cmpid, i);
+                foreach (var mp in mps)
+                {
+                    await _mediaPlanTermController.DeleteMediaPlanTermByXmpId(mp.xmpid);
+                    await _mediaPlanHistController.DeleteMediaPlanHistByXmpid(mp.xmpid);
+                    await _mediaPlanController.DeleteMediaPlanById(mp.xmpid);
+                }
+            }
+            await _mediaPlanVersionController.UpdateMediaPlanVersion(_campaign.cmpid, fromVersion - 1);
         }
 
         private async Task StartAMRByMediaPlan(int cmpid, int minusTime, int plusTime, List<MediaPlanDTO> mediaPlans)
