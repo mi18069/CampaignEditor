@@ -130,6 +130,14 @@ namespace CampaignEditor
 
         }
 
-
+        public static string MinToRepresentative(int timeInMins)
+        {
+            int hours = timeInMins / 60;
+            int minutes = timeInMins % 60;
+            string hoursStr = hours.ToString().PadLeft(2, '0');
+            string minutesStr = minutes.ToString().PadLeft(2, '0');
+            return hoursStr + ":" + minutesStr;
+            
+        }
     }
 }

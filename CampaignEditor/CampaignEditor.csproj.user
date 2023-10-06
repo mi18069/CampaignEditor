@@ -40,6 +40,9 @@
     <Compile Update="CampaignOverview.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="CampaignValidation.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="ChangePassword.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -85,6 +88,9 @@
     <Compile Update="CampaignForecast.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="UserControls\CanvasTerms.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="UserControls\DateRangeItem.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -92,6 +98,15 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="UserControls\ChannelsGoalsGrid.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="UserControls\Ruler.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="UserControls\RulerLine.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="UserControls\RulerTimeline.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="UserControls\SeasonalitiesItem.xaml.cs">
@@ -119,6 +134,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="UserControls\TargetDPItem.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="UserControls\TermRectangle.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="UserControls\TreeViewCampaignsItem.xaml.cs">
@@ -166,6 +184,9 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="CampaignOverview.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="CampaignValidation.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="ChangePassword.xaml">
@@ -216,6 +237,9 @@
     <Page Update="CampaignForecast.xaml">
       <SubType>Designer</SubType>
     </Page>
+    <Page Update="UserControls\CanvasTerms.xaml">
+      <SubType>Designer</SubType>
+    </Page>
     <Page Update="UserControls\DateRangeItem.xaml">
       <SubType>Designer</SubType>
     </Page>
@@ -223,6 +247,15 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="UserControls\ChannelsGoalsGrid.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UserControls\Ruler.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UserControls\RulerLine.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UserControls\RulerTimeline.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="UserControls\SeasonalitiesItem.xaml">
@@ -250,6 +283,9 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="UserControls\TargetDPItem.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UserControls\TermRectangle.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="UserControls\TreeViewCampaignsItem.xaml">

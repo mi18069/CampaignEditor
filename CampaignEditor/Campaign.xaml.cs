@@ -4,7 +4,6 @@ using CampaignEditor.Helpers;
 using CampaignEditor.StartupHelpers;
 using Database.DTOs.ClientDTO;
 using Database.Repositories;
-using System.ComponentModel;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -20,17 +19,21 @@ namespace CampaignEditor
 
         private readonly IAbstractFactory<CampaignOverview> _factoryOverview;
         private readonly IAbstractFactory<CampaignForecastView> _factoryForecastView;
+        private readonly IAbstractFactory<CampaignValidation> _factoryValidation;
 
         private ClientController _clientController;
         private CampaignController _campaignController;
 
         CampaignOverview factoryCampaignOverview;
         public Campaign(IClientRepository clientRepository, ICampaignRepository campaignRepository, 
-            IAbstractFactory<CampaignOverview> factoryOverview, IAbstractFactory<CampaignForecastView> factoryForecastView)
+            IAbstractFactory<CampaignOverview> factoryOverview, 
+            IAbstractFactory<CampaignForecastView> factoryForecastView,
+            IAbstractFactory<CampaignValidation> factoryValidation)
         {
 
             _factoryOverview = factoryOverview;
             _factoryForecastView = factoryForecastView;
+            _factoryValidation = factoryValidation;
 
             _clientController = new ClientController(clientRepository);
             _campaignController = new CampaignController(campaignRepository);
@@ -66,7 +69,10 @@ namespace CampaignEditor
             TabItem tabForecast = (TabItem)tcTabs.FindName("tiForecast");
             tabForecast.Content = loadingPage.Content;
 
-            factoryCampaignOverview = _factoryOverview.Create();
+            TabItem tabValidation = (TabItem)tcTabs.FindName("tiValidation");
+            tabValidation.Content = loadingPage.Content;
+
+            var factoryCampaignOverview = _factoryOverview.Create();
             await factoryCampaignOverview.Initialization(_client, _campaign, readOnly);
             tabOverview.Content = factoryCampaignOverview.Content;
 
@@ -74,6 +80,9 @@ namespace CampaignEditor
             factoryCampaignForecastView.tabForecast = tabForecast;
             await factoryCampaignForecastView.Initialize(_campaign);
 
+            var factoryCampaignValidation = _factoryValidation.Create();
+            factoryCampaignValidation.Initialize();
+            tabValidation.Content = factoryCampaignValidation.Content;
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)

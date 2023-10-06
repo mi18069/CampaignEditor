@@ -9,13 +9,15 @@
         Height="750" Width="1200" MinWidth="1000" MinHeight="700"
         Closing="Window_Closing">
     <Window.Resources>
-        <local:ToHalfConverterM4 x:Key="toHalfConverter" />
+        <local:ToThirdConverterM4 x:Key="toThirdConverter" />
     </Window.Resources>
     <Grid>
         <TabControl x:Name="tcTabs" >
             <TabItem x:Name="tiOverview" Header="Overview"
-                     Height="50"  Width="{Binding ElementName=tcTabs, Path=ActualWidth, Converter={StaticResource toHalfConverter}}"/>
-            <TabItem x:Name="tiForecast" Header="Forecast" Width="{Binding ElementName=tcTabs, Path=ActualWidth, Converter={StaticResource toHalfConverter}}"
+                     Height="50"  Width="{Binding ElementName=tcTabs, Path=ActualWidth, Converter={StaticResource toThirdConverter}}"/>
+            <TabItem x:Name="tiForecast" Header="Forecast" Width="{Binding ElementName=tcTabs, Path=ActualWidth, Converter={StaticResource toThirdConverter}}"
+                     Height="50"/>
+            <TabItem x:Name="tiValidation" Header="Validation" Width="{Binding ElementName=tcTabs, Path=ActualWidth, Converter={StaticResource toThirdConverter}}"
                      Height="50"/>
         </TabControl>
     </Grid>
