@@ -30,6 +30,11 @@ namespace CampaignEditor.Controllers
             return await _repository.GetAllMediaPlanTermsByXmpid(xmpid);
         }
 
+        public async Task<IEnumerable<MediaPlanTermDTO>> GetAllNotNullMediaPlanTermsByXmpid(int xmpid)
+        {
+            return await _repository.GetAllNotNullMediaPlanTermsByXmpid(xmpid);
+        }
+
         public async Task<IEnumerable<MediaPlanTermDTO>> GetAllMediaPlanTerms()
         {
             return await _repository.GetAllMediaPlanTerms();

@@ -12,6 +12,7 @@ namespace Database.Repositories
         Task<MediaPlanTermDTO> GetMediaPlanTermByXmpidAndDate(int id, DateOnly date);
         Task<IEnumerable<MediaPlanTermDTO>> GetAllMediaPlanTerms();
         Task<IEnumerable<MediaPlanTermDTO>> GetAllMediaPlanTermsByXmpid(int xmpid);
+        Task<IEnumerable<MediaPlanTermDTO>> GetAllNotNullMediaPlanTermsByXmpid(int xmpid);
         Task<bool> UpdateMediaPlanTerm(UpdateMediaPlanTermDTO mediaPlanTermDTO);
         Task<bool> DeleteMediaPlanTermById(int id);
         Task<bool> DeleteMediaPlanTermByXmpId(int id);

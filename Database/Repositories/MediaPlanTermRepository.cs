@@ -85,6 +85,24 @@ namespace Database.Repositories
             return _mapper.Map<IEnumerable<MediaPlanTermDTO>>(allMediaPlanTerms);
         }
 
+        public async Task<IEnumerable<MediaPlanTermDTO>> GetAllNotNullMediaPlanTermsByXmpid(int xmpid)
+        {
+            using var connection = _context.GetConnection();
+
+            var allMediaPlanTerms = await connection.QueryAsync<dynamic>(
+                "SELECT * FROM xmpterm WHERE xmpid = @Xmpid AND spotcode IS NOT NULL ORDER BY datum", new { Xmpid = xmpid });
+
+            allMediaPlanTerms = allMediaPlanTerms.Select(item => new MediaPlanTerm()
+            {
+                Xmptermid = item.xmptermid,
+                Xmpid = item.xmpid,
+                Date = DateOnly.FromDateTime(item.datum),
+                Spotcode = item.spotcode
+            });
+
+            return _mapper.Map<IEnumerable<MediaPlanTermDTO>>(allMediaPlanTerms);
+        }
+
         public async Task<IEnumerable<MediaPlanTermDTO>> GetAllMediaPlanTerms()
         {
             using var connection = _context.GetConnection();

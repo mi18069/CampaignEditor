@@ -139,5 +139,22 @@ namespace CampaignEditor
             return hoursStr + ":" + minutesStr;
             
         }
+
+        public static int CalculateMinutesBetweenRepresentatives(string time1, string time2)
+        {
+            // Parse the hours and minutes from the time strings
+            if (DateTime.TryParseExact(time1, "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime dateTime1) &&
+                DateTime.TryParseExact(time2, "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime dateTime2))
+            {
+                // Calculate the time difference in minutes
+                TimeSpan timeDifference = dateTime2 - dateTime1;
+                return (int)timeDifference.TotalMinutes;
+            }
+            else
+            {
+                // Handle invalid time format
+                throw new ArgumentException("Invalid time format. Use 'hh:mm' format.");
+            }
+        }
     }
 }

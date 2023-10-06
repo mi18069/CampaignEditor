@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:CampaignEditor.UserControls"
              mc:Ignorable="d" 
              d:DesignHeight="500" d:DesignWidth="500" Background="White">
-    <Border x:Name="border" BorderThickness="0">
+    <Border x:Name="border" BorderThickness="2" BorderBrush="Black">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>

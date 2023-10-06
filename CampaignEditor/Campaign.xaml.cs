@@ -71,6 +71,8 @@ namespace CampaignEditor
 
             TabItem tabValidation = (TabItem)tcTabs.FindName("tiValidation");
             tabValidation.Content = loadingPage.Content;
+            
+            // Without await, because we want to run asynchronuously
 
             var factoryCampaignOverview = _factoryOverview.Create();
             await factoryCampaignOverview.Initialization(_client, _campaign, readOnly);
@@ -81,14 +83,18 @@ namespace CampaignEditor
             await factoryCampaignForecastView.Initialize(_campaign);
 
             var factoryCampaignValidation = _factoryValidation.Create();
-            factoryCampaignValidation.Initialize();
+            await factoryCampaignValidation.Initialize(_campaign);
             tabValidation.Content = factoryCampaignValidation.Content;
         }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
 
-            bool shouldClose = factoryCampaignOverview.Window_Closing();
+            bool shouldClose = true;
+            if (factoryCampaignOverview != null)
+            {
+                shouldClose = factoryCampaignOverview.Window_Closing();
+            }
             if (!shouldClose)
             {
                 e.Cancel = true;
