@@ -1,6 +1,5 @@
 ﻿using CampaignEditor.Controllers;
 using Database.Entities;
-using Database.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,7 +18,7 @@ namespace CampaignEditor.UserControls
         public MediaPlanTermController _mediaPlanTermController;
         public SpotController _spotController;
 
-        int lineHeight = 20;
+        int lineHeight = 3;
 
         public RulerTimeline()
         {
@@ -74,7 +73,7 @@ namespace CampaignEditor.UserControls
                     int height = TimeFormat.CalculateMinutesBetweenRepresentatives(
                         termTuple.MediaPlan.stime, termTuple.MediaPlan.etime);
                     int offset = TimeFormat.CalculateMinutesBetweenRepresentatives(
-                        "02:00", termTuple.MediaPlan.stime);
+                        "02:00", termTuple.MediaPlan.stime) + 3; 
 
                     string name = termTuple.Spot.spotname.Trim();
                     canvas.DrawTermRectangle(height, offset, 0, name);
@@ -90,7 +89,7 @@ namespace CampaignEditor.UserControls
                         int height = TimeFormat.CalculateMinutesBetweenRepresentatives(
                             termTupleNext.MediaPlan.stime, termTupleNext.MediaPlan.etime);
                         int offset = TimeFormat.CalculateMinutesBetweenRepresentatives(
-                            "02:00", termTupleNext.MediaPlan.stime);
+                            "02:00", termTupleNext.MediaPlan.stime) + 3;
 
                         string name = termTupleNext.Spot.spotname.Trim();
                         canvas.DrawTermRectangle(height, offset, 1, name);

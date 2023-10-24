@@ -9,9 +9,9 @@
     <Border x:Name="border" BorderThickness="2" BorderBrush="Black">
         <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="*"/>
-                <RowDefinition Height="*"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
             </Grid.RowDefinitions>
             <Label x:Name="lblName" Grid.Row="0" FontWeight="Bold"/>
             <Label x:Name="lblDay" Grid.Row="1" />

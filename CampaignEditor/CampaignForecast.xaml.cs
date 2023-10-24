@@ -140,12 +140,12 @@ namespace CampaignEditor.UserControls
         public async Task Initialize(CampaignDTO campaign)
         {
             _campaign = campaign;
-            await DeleteVersion(2, 3);
             var mpVersion = await _mediaPlanVersionController.GetLatestMediaPlanVersion(_campaign.cmpid);
             if (mpVersion != null)
             {
                 _maxVersion = mpVersion.version;
             }
+
             _cmpVersion = _maxVersion;
             startDate = TimeFormat.YMDStringToDateTime(_campaign.cmpsdate);
             endDate = TimeFormat.YMDStringToDateTime(_campaign.cmpedate);

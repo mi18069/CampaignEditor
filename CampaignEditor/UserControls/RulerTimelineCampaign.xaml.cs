@@ -39,16 +39,20 @@ namespace CampaignEditor.UserControls
         public async Task Initialize(CampaignDTO campaign)
         {
             _campaign = campaign;
-            int version = (await _mediaPlanVersionController.GetLatestMediaPlanVersion(campaign.cmpid)).version;           
-            _campaignVersion = version;
+            var mpVersion = await _mediaPlanVersionController.GetLatestMediaPlanVersion(campaign.cmpid);
+            if (mpVersion != null)
+            {
+                int version = mpVersion.version;
+                _campaignVersion = version;
 
-            await FillChannels(campaign);
-            await FillDays(campaign);
+                await FillChannels(campaign);
+                await FillDays(campaign);
 
-            rulerTimeline._mediaPlanController = _mediaPlanController;
-            rulerTimeline._mediaPlanTermController = _mediaPlanTermController;
-            rulerTimeline._spotController = _spotController;
-            rulerTimeline.Initialize();
+                rulerTimeline._mediaPlanController = _mediaPlanController;
+                rulerTimeline._mediaPlanTermController = _mediaPlanTermController;
+                rulerTimeline._spotController = _spotController;
+                rulerTimeline.Initialize();
+            }        
 
         }
 

@@ -8,11 +8,9 @@
              d:DesignHeight="20" Width="150" d:Background="White">
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition x:Name="colLabel"  Width="*"/>
+            <ColumnDefinition x:Name="colLabel" Width="*"/>
             <ColumnDefinition x:Name="colLine" Width="*"/>
         </Grid.ColumnDefinitions>
-        <Label x:Name="lblLineValue" Grid.Column="0" FontSize="9"
-               VerticalContentAlignment="Stretch" HorizontalContentAlignment="Right"/>
         <Rectangle x:Name="recLine" Grid.Column="1" Fill="Black" Height="1"/>
     </Grid>
 </UserControl>

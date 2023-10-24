@@ -9,5 +9,6 @@
     <Grid>
         <Border x:Name="bRuler" BorderBrush="Black" BorderThickness="2" />
         <StackPanel x:Name="spRuler" Margin="0, 10, 0, 10" HorizontalAlignment="Right"/>
+        <Canvas x:Name="cTimes"/>
     </Grid>
 </UserControl>

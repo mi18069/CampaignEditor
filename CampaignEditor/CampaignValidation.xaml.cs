@@ -40,14 +40,27 @@ namespace CampaignEditor
 
         public async Task Initialize(CampaignDTO campaign)
         {
-            rulerExpected._channelCmpController = _channelCmpController;
-            rulerExpected._channelController = _channelController;
-            rulerExpected._mediaPlanVersionController = _mediaPlanVersionController;
-            rulerExpected._mediaPlanController = _mediaPlanController;
-            rulerExpected._mediaPlanTermController = _mediaPlanTermController;
-            rulerExpected._spotController = _spotController;
 
-            await rulerExpected.Initialize(campaign);
+            var mpVersion = await _mediaPlanVersionController.GetLatestMediaPlanVersion(campaign.cmpid);
+            if (mpVersion != null)
+            {
+                gridNotInitialized.Visibility = System.Windows.Visibility.Collapsed;
+                gridValidation.Visibility = System.Windows.Visibility.Visible;
+
+                rulerExpected._channelCmpController = _channelCmpController;
+                rulerExpected._channelController = _channelController;
+                rulerExpected._mediaPlanVersionController = _mediaPlanVersionController;
+                rulerExpected._mediaPlanController = _mediaPlanController;
+                rulerExpected._mediaPlanTermController = _mediaPlanTermController;
+                rulerExpected._spotController = _spotController;
+
+                await rulerExpected.Initialize(campaign);
+            }
+            else
+            {
+                gridValidation.Visibility = System.Windows.Visibility.Collapsed;
+                gridNotInitialized.Visibility = System.Windows.Visibility.Visible;               
+            }
         }
     }
 }
