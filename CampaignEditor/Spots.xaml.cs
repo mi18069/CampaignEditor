@@ -58,7 +58,7 @@ namespace CampaignEditor
             if (spotlist == null)
             {
                 var spots = await _spotController.GetSpotsByCmpid(Campaign.cmpid);
-                spots.OrderBy(s => s.spotcode);
+                spots = spots.OrderBy(s => s.spotcode);
                 foreach (var spot in spots)
                 {
                     Spotlist.Add(spot);

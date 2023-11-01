@@ -10,12 +10,12 @@
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto"/>
-                <RowDefinition Height="auto"/>
-                <RowDefinition Height="auto"/>
+                <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
-            <Label x:Name="lblName" Grid.Row="0" FontWeight="Bold"/>
-            <Label x:Name="lblDay" Grid.Row="1" />
-            <Label x:Name="lblTime" Grid.Row="2" />
+            <ScrollViewer VerticalScrollBarVisibility="Disabled" HorizontalScrollBarVisibility="Auto">
+                <TextBlock x:Name="tbName" Grid.Row="0" FontWeight="Bold" HorizontalAlignment="Center"/>
+            </ScrollViewer>
+            <Label x:Name="lblTime" Grid.Row="2" HorizontalAlignment="Center"/>
         </Grid>
     </Border>
 </UserControl>

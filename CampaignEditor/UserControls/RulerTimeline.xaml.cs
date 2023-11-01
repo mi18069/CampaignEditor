@@ -69,14 +69,8 @@ namespace CampaignEditor.UserControls
                 TermTuple termTuple = termTuples[i];
 
                 if (termTuple.MediaPlan.etime != null)
-                {
-                    int height = TimeFormat.CalculateMinutesBetweenRepresentatives(
-                        termTuple.MediaPlan.stime, termTuple.MediaPlan.etime);
-                    int offset = TimeFormat.CalculateMinutesBetweenRepresentatives(
-                        "02:00", termTuple.MediaPlan.stime) + 3; 
-
-                    string name = termTuple.Spot.spotname.Trim();
-                    canvas.DrawTermRectangle(height, offset, 0, name);
+                {                   
+                    canvas.DrawTermRectangle(termTuple, 0);
                 }
 
                 if (i + 1 < termTuples.Count())
@@ -86,13 +80,7 @@ namespace CampaignEditor.UserControls
                     if (termTupleNext.MediaPlan.etime != null &&
                         termTupleNext.MediaPlanTerm.xmptermid == termTuple.MediaPlanTerm.xmptermid)
                     {
-                        int height = TimeFormat.CalculateMinutesBetweenRepresentatives(
-                            termTupleNext.MediaPlan.stime, termTupleNext.MediaPlan.etime);
-                        int offset = TimeFormat.CalculateMinutesBetweenRepresentatives(
-                            "02:00", termTupleNext.MediaPlan.stime) + 3;
-
-                        string name = termTupleNext.Spot.spotname.Trim();
-                        canvas.DrawTermRectangle(height, offset, 1, name);
+                        canvas.DrawTermRectangle(termTuple, 1);
                         i++;
                     }
                 }

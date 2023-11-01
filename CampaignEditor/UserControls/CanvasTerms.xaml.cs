@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Database.Entities;
+using System.Collections.Generic;
 using System.Windows.Controls;
 using System.Windows.Media;
 
@@ -24,20 +25,28 @@ namespace CampaignEditor.UserControls
             _lineHeight = lineHeight;
         }
 
-        public void DrawTermRectangle(int length, int offset, int canvasNum, string name)
+        public void DrawTermRectangle(TermTuple termTuple, int canvasNum)
         {
-            TermRectangle tr = new TermRectangle(_lineHeight * length, Brushes.Beige);
+            int length = TimeFormat.CalculateMinutesBetweenRepresentatives(
+                        termTuple.MediaPlan.stime, termTuple.MediaPlan.etime);
+            int offset = TimeFormat.CalculateMinutesBetweenRepresentatives(
+                "02:00", termTuple.MediaPlan.stime) + 3;
+            string name = termTuple.Spot.spotname.Trim();
 
+            TermRectangle tr = new TermRectangle(_lineHeight * length, Brushes.Beige);
             Canvas cnv = canvasNumDict[canvasNum];
 
             tr.Width = (double)cnv.ActualWidth;
 
-            tr.lblName.Content = name;
+            tr.tbName.Text = name;
+            //tr.lblDay.Content = termTuple.MediaPlanTerm.date.ToString();
+            tr.lblTime.Content = termTuple.MediaPlan.stime.ToString() + " - " + termTuple.MediaPlan.etime.ToString();
+
             Canvas.SetLeft(tr, 0);
             Canvas.SetTop(tr, _lineHeight * (offset + 1)); // Set Y-coordinate (vertical offset)
-          
+
             cnv.Children.Add(tr);
-        }
+        }      
 
         public void ClearCanvas()
         {
