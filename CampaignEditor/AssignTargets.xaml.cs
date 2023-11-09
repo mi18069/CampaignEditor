@@ -8,7 +8,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -283,7 +282,8 @@ namespace CampaignEditor
         {
             var target = lbTargets.SelectedItem as TargetDTO;
             if (target != null)
-                FillTargetTextBlock(target.targdefi);
+                //FillTargetTextBlock(target.targdefi);
+                tbDescription.Text = target.targdesc.Trim();
             CheckEdit();
         }
 
@@ -291,21 +291,18 @@ namespace CampaignEditor
         {
             var target = lbSelectedTargets.SelectedItem as TargetDTO;
             if (target != null)
-                FillTargetTextBlock(target.targdefi);
+                //FillTargetTextBlock(target.targdefi);
+                tbDescription.Text = target.targdesc.Trim();
             CheckEdit();
         }
 
-        private async void FillTargetTextBlock(string targetdefi)
+        /*private async void FillTargetTextBlock(string targetdefi)
         {
             var instance = _factoryNewTarget.Create();
             string text = await instance.ParseTargetdefi(targetdefi);
             tbTargetFilters.Text = text;
-        }
+        }*/
 
-        private void ListViewItem_LostFocus(object sender, RoutedEventArgs e)
-        {
-            tbTargetFilters.Text = "";
-        }
 
         #endregion
 

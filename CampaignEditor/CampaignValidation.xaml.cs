@@ -1,6 +1,12 @@
 ﻿using CampaignEditor.Controllers;
 using CampaignEditor.DTOs.CampaignDTO;
+using CampaignEditor.Entities;
+using CampaignEditor.UserControls;
+using Database.DTOs.ChannelDTO;
 using Database.Repositories;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Controls;
 
@@ -18,6 +24,10 @@ namespace CampaignEditor
         private MediaPlanController _mediaPlanController;
         private MediaPlanTermController _mediaPlanTermController;
         private SpotController _spotController;
+
+        private List<ChannelDTO> _channels = new List<ChannelDTO>();
+        private List<DateOnly> _dates = new List<DateOnly>();
+
 
         public CampaignValidation(
             IChannelCmpRepository channelCmpRepository,
@@ -47,19 +57,83 @@ namespace CampaignEditor
                 gridNotInitialized.Visibility = System.Windows.Visibility.Collapsed;
                 gridValidation.Visibility = System.Windows.Visibility.Visible;
 
-                rulerExpected._channelCmpController = _channelCmpController;
-                rulerExpected._channelController = _channelController;
-                rulerExpected._mediaPlanVersionController = _mediaPlanVersionController;
-                rulerExpected._mediaPlanController = _mediaPlanController;
-                rulerExpected._mediaPlanTermController = _mediaPlanTermController;
-                rulerExpected._spotController = _spotController;
+                await FillChannels(campaign);
+                await FillDates(campaign);
 
-                await rulerExpected.Initialize(campaign);
+                validationStack._channelCmpController = _channelCmpController;
+                validationStack._channelController = _channelController;
+                validationStack._mediaPlanVersionController = _mediaPlanVersionController;
+                validationStack._mediaPlanController = _mediaPlanController;
+                validationStack._mediaPlanTermController = _mediaPlanTermController;
+                validationStack._spotController = _spotController;
+                validationStack._channels = _channels;
+                validationStack._dates = _dates;
+
+                await validationStack.Initialize(campaign);
             }
             else
             {
                 gridValidation.Visibility = System.Windows.Visibility.Collapsed;
                 gridNotInitialized.Visibility = System.Windows.Visibility.Visible;               
+            }
+        }
+
+        private async Task FillChannels(CampaignDTO campaign)
+        {
+            var channelCmps = await _channelCmpController.GetChannelCmpsByCmpid(campaign.cmpid);
+            List<ChannelDTO> channels = new List<ChannelDTO>();
+
+            foreach (var channelCmp in channelCmps)
+            {
+                var channel = await _channelController.GetChannelById(channelCmp.chid);
+                channels.Add(channel);
+            }
+
+            channels = channels.OrderBy(c => c.chname).ToList();
+
+            _channels = channels;
+            FillChannelsComboBox(channels);
+        }
+
+        private void FillChannelsComboBox(IEnumerable<ChannelDTO> channels)
+        {
+            foreach (ChannelDTO channel in channels)
+            {
+                ComboBoxItem cbiChannel = new ComboBoxItem();
+                cbiChannel.DataContext = channel;
+                cbiChannel.Content = channel.chname;
+
+                cbChannels.Items.Add(cbiChannel);
+            }
+        }
+
+        private async Task FillDates(CampaignDTO campaign)
+        {
+            var startDate = TimeFormat.YMDStringToDateTime(campaign.cmpsdate);
+            var endDate = TimeFormat.YMDStringToDateTime(campaign.cmpedate);
+
+            if (startDate > endDate)
+            {
+                return;
+            }
+
+            DateTime date = startDate;
+            while (date <= endDate)
+            {
+                _dates.Add(DateOnly.FromDateTime(date));
+                date = date.AddDays(1);
+            }
+        }
+
+        private async void cbChannels_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (cbChannels.SelectedItem is ComboBoxItem selectedChannelItem)
+            {
+                if (selectedChannelItem.DataContext is ChannelDTO selectedChannel)
+                {
+                    await validationStack.LoadData(selectedChannel.chid);
+
+                }
             }
         }
     }

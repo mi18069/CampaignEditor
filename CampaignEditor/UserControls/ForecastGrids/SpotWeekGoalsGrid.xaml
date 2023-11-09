@@ -56,7 +56,7 @@
         </DataGrid> -->
 
         <UniformGrid x:Name="ugGrid" Grid.Row="2" Grid.Column="2"
-                     HorizontalAlignment="Left" VerticalAlignment="Stretch"/>
+                     HorizontalAlignment="Left" VerticalAlignment="Stretch" Focusable="False"/>
 
     </Grid>
 </UserControl>

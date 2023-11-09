@@ -144,13 +144,26 @@ namespace CampaignEditor.UserControls
                 for (int columnIndex = 0; columnIndex < columns.Count; columnIndex++)
                 {
                     var column = columns[columnIndex];
-                    var cellValue = string.Empty;
                     var cellContent = column.GetCellContent(dataItem);
                     if (cellContent is TextBlock textBlock)
                     {
-                        cellValue = textBlock.Text;
+                        // Try to parse the text to a double
+                        if (double.TryParse(textBlock.Text, out double numericValue))
+                        {
+                            // If successful, write the numeric value to the Excel cell
+                            worksheet.Cells[rowIndex + 1 + rowOff, columnIndex + 1 + colOff].Value = numericValue;
+                        }
+                        else
+                        {
+                            // If not a valid number, write the text as it is
+                            worksheet.Cells[rowIndex + 1 + rowOff, columnIndex + 1 + colOff].Value = textBlock.Text;
+                        }
+
                     }
-                    worksheet.Cells[rowIndex + 1 + rowOff, columnIndex + 1 + colOff].Value = cellValue;
+                    else
+                    {
+                        worksheet.Cells[rowIndex + 1 + rowOff, columnIndex + 1 + colOff].Value = "";
+                    }
 
                     // Set the cell color
                     var cell = FindParentDataGridCell(cellContent as TextBlock) as DataGridCell;
@@ -180,7 +193,7 @@ namespace CampaignEditor.UserControls
                         // Set the size of the Excel cell
                         worksheet.Row(rowIndex + 1 + rowOff).Height = cellHeight;
                         worksheet.Column(columnIndex + 1 + colOff).Width = cellWidth;
-                        worksheet.Row(rowIndex + 1 + rowOff).OutlineLevel = 2;
+                        //worksheet.Row(rowIndex + 1 + rowOff).OutlineLevel = 2;
 
                     }
 

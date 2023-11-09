@@ -3,6 +3,7 @@ using CampaignEditor.DTOs.UserDTO;
 using CampaignEditor.Repositories;
 using CampaignEditor.StartupHelpers;
 using Database;
+using Database.Repositories;
 using System;
 using System.Configuration;
 using System.IO;
@@ -19,6 +20,7 @@ namespace CampaignEditor
         private readonly IAbstractFactory<Clients> _factoryClients;
         private readonly IAbstractFactory<Config> _factoryConfig;
         private UserController _userController;
+        private OnStartupContoller _onStartupController;
 
         private string appPath = Directory.GetCurrentDirectory();
         private string imgPeekPath = "\\images\\PassPeekImg.png";
@@ -27,7 +29,7 @@ namespace CampaignEditor
         public static UserDTO user = null;
         private bool onlyOne = false; // To ensure that only one window is shown
         public MainWindow(IUserRepository userRepository, IAbstractFactory<Clients> factoryClients,
-            IAbstractFactory<Config> factoryConfig)
+            IAbstractFactory<Config> factoryConfig, IDatabaseFunctionsRepository dfRepository)
         {
             
             InitializeComponent();
@@ -37,13 +39,19 @@ namespace CampaignEditor
             _factoryConfig = factoryConfig;
 
             _userController = new UserController(_userRepository);
-
+            _onStartupController = new OnStartupContoller(dfRepository);
+            RunStartup();
             PassShowHide.Source = new BitmapImage(new Uri(appPath + imgPeekPath));
-
+          
             Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
             string connectionString = config.ConnectionStrings.ConnectionStrings["cs"].ConnectionString;
             AppSettings.ConnectionString = connectionString;
 
+        }
+
+        private void RunStartup()
+        {
+            _onStartupController.RunUpdateUnavailableDates();
         }
 
         // Checks if the username and password are typed correctly

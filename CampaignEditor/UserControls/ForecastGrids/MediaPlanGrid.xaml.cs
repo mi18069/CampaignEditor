@@ -47,7 +47,7 @@ namespace CampaignEditor.UserControls
         string lastSpotCell = "";
 
         // number of frozen columns
-        int mediaPlanColumns = 26;
+        int mediaPlanColumns = 27;
 
         private int frozenColumnsNum
         {
@@ -747,6 +747,20 @@ namespace CampaignEditor.UserControls
             }
         }
 
+        private async void SpecialCheckBox_CheckedChanged(object sender, RoutedEventArgs e)
+        {
+            var tuple = dgMediaPlans.SelectedItems[0] as MediaPlanTuple;
+            var checkBox = sender as CheckBox;
+
+            if (checkBox != null)
+            {
+                var mediaPlan = tuple.MediaPlan;
+                mediaPlan.special = checkBox.IsChecked ?? false;
+                await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(_converter.ConvertToDTO(mediaPlan)));
+            }
+
+        }
+
         #endregion
 
         #endregion
@@ -987,16 +1001,34 @@ namespace CampaignEditor.UserControls
                     for (int columnIndex = 0; columnIndex < visibleColumns.Count; columnIndex++)
                     {
                         var column = visibleColumns[columnIndex];
-                        var cellValue = string.Empty;
                         var cellContent = column.GetCellContent(dataItem);
                         if (cellContent is TextBlock textBlock)
                         {
-                            cellValue = textBlock.Text;
+                            // Try to parse the text to a double
+                            if (double.TryParse(textBlock.Text, out double numericValue))
+                            {
+                                // If successful, write the numeric value to the Excel cell
+                                worksheet.Cells[rowIndex + 2 + rowOff, columnIndex + 1 + colOff].Value = numericValue;
+                            }
+                            else
+                            {
+                                // If not a valid number, write the text as it is
+                                worksheet.Cells[rowIndex + 2 + rowOff, columnIndex + 1 + colOff].Value = textBlock.Text;
+                            }
                         }
-                        worksheet.Cells[rowIndex + 2 + rowOff, columnIndex + 1 + colOff].Value = cellValue;
+                        else if (cellContent is CheckBox checkbox)
+                        {
+                            var cellValue = checkbox.IsChecked == true ? "yes" : "no" ;
+                            worksheet.Cells[rowIndex + 2 + rowOff, columnIndex + 1 + colOff].Value = cellValue;
+
+                        }
+                        else
+                        {
+                            worksheet.Cells[rowIndex + 2 + rowOff, columnIndex + 1 + colOff].Value = "";
+                        }
 
                         // Set the cell color
-                        var cell = FindParentDataGridCell(cellContent as TextBlock) as DataGridCell;
+                        var cell = FindParentDataGridCell(cellContent) as DataGridCell;
                         if (cell != null)
                         {
                             var cellColor = cell.Background;
@@ -1043,7 +1075,7 @@ namespace CampaignEditor.UserControls
                             // Set the size of the Excel cell
                             worksheet.Row(rowIndex + 2 + rowOff).Height = cellHeight;
                             worksheet.Column(columnIndex + 1 + colOff).Width = cellWidth;
-                            worksheet.Row(rowIndex + 2 + rowOff).OutlineLevel = 2;
+                            //worksheet.Row(rowIndex + 2 + rowOff).OutlineLevel = 2;
 
                         }
 
@@ -1057,6 +1089,17 @@ namespace CampaignEditor.UserControls
 
         }
 
+        private DataGridCell FindParentDataGridCell(FrameworkElement element)
+        {
+            // Traverse up the visual tree to find the DataGridCell
+            FrameworkElement parent = element;
+            while (parent != null && !(parent is DataGridCell))
+            {
+                parent = VisualTreeHelper.GetParent(parent) as FrameworkElement;
+            }
+
+            return parent as DataGridCell;
+        }
 
         private DataGridCell FindParentDataGridCell(TextBlock textBlock)
         {

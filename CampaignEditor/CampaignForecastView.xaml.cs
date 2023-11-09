@@ -26,8 +26,8 @@ namespace CampaignEditor
         private DatabaseFunctionsController _databaseFunctionsController;
         private MediaPlanVersionController _mediaPlanVersionController;
 
-        private CampaignForecast _forecast;
-        private CampaignForecastDates _forecastDates;
+        private CampaignForecast _forecast = null;
+        private CampaignForecastDates _forecastDates = null;
 
         LoadingPage loadingPage = new LoadingPage();
         private bool alreadyExists = false;
@@ -57,24 +57,14 @@ namespace CampaignEditor
         {
             _campaign = campaign;
 
-            await _databaseFunctionsController.RunUpdateUnavailableDates();
-            unavailableDates = (await _databaseFunctionsController.GetAllUnavailableDates()).ToList();
-
-            _forecast = _factoryForecast.Create();
-            await _forecast.Initialize(_campaign);
-            _forecast.InitializeButtonClicked += Forecast_InitializeButtonClicked;
-            _forecast.VersionChanged += Forecast_ChangeVersionClicked;
-            _forecast.NewVersionClicked += _forecast_NewVersionClicked;
-
-            _forecastDates = _factoryForecastDates.Create();
-            _forecastDates.CancelButtonClicked += ForecastDates_CancelButtonClicked;
-            _forecastDates.InitializeButtonClicked += ForecastDates_InitializeButtonClicked;
-            await _forecastDates.Initialize(_campaign, unavailableDates);
-
             var exists = (await _mediaPlanRefController.GetMediaPlanRef(_campaign.cmpid) != null);
             if (exists)
             {
                 alreadyExists = true;
+                if (_forecast == null)
+                {
+                    await LoadForecast();
+                }
                 var mpVersion = await _mediaPlanVersionController.GetLatestMediaPlanVersion(_campaign.cmpid);
                 if (mpVersion == null)
                 {
@@ -91,8 +81,33 @@ namespace CampaignEditor
             else
             {
                 alreadyExists = false;
+                if (_forecastDates == null)
+                {
+                    await LoadForecastDates();
+                }
                 tabForecast.Content = _forecastDates.Content;
             }
+        }
+
+        private async Task LoadForecastDates()
+        {
+            // Changed to execute in startup
+            //await _databaseFunctionsController.RunUpdateUnavailableDates();
+            unavailableDates = (await _databaseFunctionsController.GetAllUnavailableDates()).ToList();
+
+            _forecastDates = _factoryForecastDates.Create();
+            _forecastDates.CancelButtonClicked += ForecastDates_CancelButtonClicked;
+            _forecastDates.InitializeButtonClicked += ForecastDates_InitializeButtonClicked;
+            await _forecastDates.Initialize(_campaign, unavailableDates);
+        }
+
+        private async Task LoadForecast()
+        {
+            _forecast = _factoryForecast.Create();
+            await _forecast.Initialize(_campaign);
+            _forecast.InitializeButtonClicked += Forecast_InitializeButtonClicked;
+            _forecast.VersionChanged += Forecast_ChangeVersionClicked;
+            _forecast.NewVersionClicked += _forecast_NewVersionClicked;
         }
 
         private void ForecastDates_CancelButtonClicked(object sender, EventArgs e)
@@ -146,6 +161,11 @@ namespace CampaignEditor
 
         private async Task<bool> InitializeNewForecast()
         {
+            if (_forecastDates == null)
+            {
+                await LoadForecastDates();
+            }
+
             if (! await CheckPrerequisites(_campaign))
             {
                 MessageBox.Show("Cannot start Forecast.\nNot all required parameters are given", "Message:",
@@ -160,6 +180,11 @@ namespace CampaignEditor
                 return false;
             }
             var mpVer = await _mediaPlanVersionController.GetLatestMediaPlanVersion(_campaign.cmpid);
+
+            if (_forecast == null)
+            {
+                await LoadForecast();
+            }
 
             if (mpVer == null)
             {

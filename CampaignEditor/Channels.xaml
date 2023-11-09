@@ -73,7 +73,8 @@
                 MinWidth="250" 
                 DisplayMemberPath="plname"
                 SelectionMode="Single"
-                PreviewMouseRightButtonDown="lvPricelists_PreviewMouseRightButtonDown">
+                PreviewMouseRightButtonDown="lvPricelists_PreviewMouseRightButtonDown"
+                  MouseDoubleClick="lvPricelists_MouseDoubleClick">
             <ListView.ItemContainerStyle>
                 <Style TargetType="{x:Type ListViewItem}">
                     <Style.Triggers>

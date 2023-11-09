@@ -9,6 +9,7 @@ using Database.DTOs.MediaPlanDTO;
 using Database.DTOs.MediaPlanHistDTO;
 using Database.DTOs.MediaPlanTermDTO;
 using Database.DTOs.SchemaDTO;
+using Database.DTOs.TargetDTO;
 using Database.Entities;
 using Database.Repositories;
 using Microsoft.Win32;
@@ -62,7 +63,7 @@ namespace CampaignEditor.UserControls
         public int CmpVersion { get { return _cmpVersion; } }
         private int _maxVersion = 1;
         private List<int> _versions = new List<int>();
-        private List<ChannelDTO> _channels = new List<ChannelDTO>();
+        private ObservableCollection<ChannelDTO> _channels = new ObservableCollection<ChannelDTO>();
 
         // for duration of campaign
         DateTime startDate;
@@ -200,12 +201,17 @@ namespace CampaignEditor.UserControls
         private async Task InitializeChannels()
         {
             var channelCmps = await _channelCmpController.GetChannelCmpsByCmpid(_campaign.cmpid);
+            List<ChannelDTO> channels = new List<ChannelDTO>();
             foreach (ChannelCmpDTO chnCmp in channelCmps)
             {
                 ChannelDTO channel = await _channelController.GetChannelById(chnCmp.chid);
+                channels.Add(channel);
+            }
+
+            foreach (var channel in channels)
+            {
                 _channels.Add(channel);
             }
-            _channels = _channels.OrderBy(c => c.chname).ToList();
         }
 
         // Inserting new Data into database
@@ -393,7 +399,45 @@ namespace CampaignEditor.UserControls
             swgGrid.Initialize(sgGrid);
         }
 
-        
+        #region Drag and Drop selected Targets
+        private void ListViewItem_PreviewMouseMove(object sender, MouseEventArgs e)
+        {
+            if (e.LeftButton == MouseButtonState.Pressed)
+            {
+                if (sender is ListViewItem)
+                {
+                    ListViewItem draggedItem = sender as ListViewItem;
+                    DragDrop.DoDragDrop(draggedItem, draggedItem.DataContext, DragDropEffects.Move);
+                }
+            }
+        }
+
+        private void ListViewItem_Drop(object sender, DragEventArgs e)
+        {
+            ChannelDTO droppedData = e.Data.GetData(typeof(ChannelDTO)) as ChannelDTO;
+            ChannelDTO target = ((ListBoxItem)(sender)).DataContext as ChannelDTO;
+
+            int removedIdx = lvChannels.Items.IndexOf(droppedData);
+            int targetIdx = lvChannels.Items.IndexOf(target);
+
+            if (removedIdx < targetIdx)
+            {
+                _channels.Insert(targetIdx + 1, droppedData);
+                _channels.RemoveAt(removedIdx);
+            }
+            else
+            {
+                int remIdx = removedIdx + 1;
+                if (_channels.Count + 1 > remIdx)
+                {
+                    _channels.Insert(targetIdx, droppedData);
+                    _channels.RemoveAt(remIdx);
+                }
+            }
+
+        }
+
+        #endregion
 
         #region CampaignForecastView
 
@@ -443,6 +487,49 @@ namespace CampaignEditor.UserControls
             var eventArgs = new ChangeVersionEventArgs(newVersion);
             NewVersionClicked?.Invoke(this, eventArgs);
 
+        }
+
+        private async void btnClear_Click(object sender, RoutedEventArgs e)
+        {
+            if (MessageBox.Show("Are you sure you want to clear all spots?", "Result", MessageBoxButton.OKCancel,
+                MessageBoxImage.Question) == MessageBoxResult.OK)
+            {
+                await ClearAllMPTerms();
+                lvChannels.SelectedItems.Clear();
+                /*cgGrid.ResetDictionaryValues();
+                await FillGoals();*/
+                
+            }
+        }
+
+        private async Task ClearAllMPTerms()
+        {
+            DateOnly today = DateOnly.FromDateTime(DateTime.Today);
+            foreach (var mediaPlanTuple in _allMediaPlans)
+            {
+                foreach (var mediaPlanTerm in mediaPlanTuple.Terms)
+                {
+                    if (mediaPlanTerm == null ||
+                        mediaPlanTerm.Spotcode == null)
+                    {
+                        continue;
+                    }
+                    else if (mediaPlanTerm.Date > today &&
+                        mediaPlanTerm.Spotcode.Trim() != "")
+                    {
+                        mediaPlanTerm.Spotcode = null;
+                        await _mediaPlanTermController.UpdateMediaPlanTerm(
+                            new UpdateMediaPlanTermDTO(_mpTermConverter.ConvertToDTO(mediaPlanTerm)));
+                    }
+                }
+                await RecalculateMPValues(mediaPlanTuple.MediaPlan);
+            }
+        }
+
+        private async Task RecalculateMPValues(MediaPlan mediaPlan)
+        {
+            await _mpConverter.ComputeExtraProperties(mediaPlan);
+            await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(_mpConverter.ConvertToDTO(mediaPlan)));
         }
 
         private async Task SetMPToInactive(int xmpid)
@@ -642,12 +729,7 @@ namespace CampaignEditor.UserControls
         #region Filling lists
         private void FillLvChannels()
         {
-            lvChannels.Items.Clear();
-
-            foreach (ChannelDTO channel in _channels)
-            {
-                lvChannels.Items.Add(channel);
-            }
+            lvChannels.ItemsSource = _channels;
 
         }
 
@@ -1157,7 +1239,6 @@ namespace CampaignEditor.UserControls
 
             return null;
         }
-
     }
 }
             

@@ -385,7 +385,7 @@ namespace CampaignEditor.UserControls
 
                     // Set the size of the Excel cell
                     worksheet.Column(colOff + 1).Width = cellWidth;
-                    worksheet.Row(rowIndex + 1 + rowOff).OutlineLevel = 2;
+                    //worksheet.Row(rowIndex + 1 + rowOff).OutlineLevel = 2;
 
                 }
 
@@ -427,7 +427,7 @@ namespace CampaignEditor.UserControls
 
                     // Set the size of the Excel cell
                     worksheet.Column(colOff + 1).Width = cellWidth;
-                    worksheet.Row(rowIndex + 1 + rowOff).OutlineLevel = 2;
+                    //worksheet.Row(rowIndex + 1 + rowOff).OutlineLevel = 2;
 
                 }
 

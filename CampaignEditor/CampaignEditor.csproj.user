@@ -88,28 +88,28 @@
     <Compile Update="CampaignForecast.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="UserControls\CanvasTerms.xaml.cs">
+    <Compile Update="UserControls\RulerControls\CanvasTerms.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="UserControls\DateRangeItem.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="UserControls\MediaPlanGrid.xaml.cs">
+    <Compile Update="UserControls\ForecastGrids\MediaPlanGrid.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="UserControls\ChannelsGoalsGrid.xaml.cs">
+    <Compile Update="UserControls\ForecastGrids\ChannelsGoalsGrid.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="UserControls\Ruler.xaml.cs">
+    <Compile Update="UserControls\RulerControls\Ruler.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="UserControls\RulerLine.xaml.cs">
+    <Compile Update="UserControls\RulerControls\RulerLine.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="UserControls\RulerTimeline.xaml.cs">
+    <Compile Update="UserControls\RulerControls\RulerTimeline.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="UserControls\RulerTimelineCampaign.xaml.cs">
+    <Compile Update="UserControls\RulerControls\RulerTimelineCampaign.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="UserControls\SeasonalitiesItem.xaml.cs">
@@ -121,25 +121,25 @@
     <Compile Update="Sectable.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="UserControls\SpotGoalsGrid.xaml.cs">
+    <Compile Update="UserControls\ForecastGrids\SpotGoalsGrid.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="UserControls\SpotGoalsSubGrid.xaml.cs">
+    <Compile Update="UserControls\ForecastGrids\SpotGoalsSubGrid.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="UserControls\SpotGoalsTotalSubGrid.xaml.cs">
+    <Compile Update="UserControls\ForecastGrids\SpotGoalsTotalSubGrid.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="UserControls\SpotItem.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="UserControls\SpotWeekGoalsGrid.xaml.cs">
+    <Compile Update="UserControls\ForecastGrids\SpotWeekGoalsGrid.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="UserControls\TargetDPItem.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="UserControls\TermRectangle.xaml.cs">
+    <Compile Update="UserControls\RulerControls\TermRectangle.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="UserControls\TreeViewCampaignsItem.xaml.cs">
@@ -149,6 +149,18 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="UserControls\UsersListItem.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="UserControls\ValidationItems\DateLabelItem.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="UserControls\ValidationItems\ValidationStack.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="UserControls\ValidationItems\VTermEmptyItem.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="UserControls\ValidationItems\VTermItem.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="UsersOfClient.xaml.cs">
@@ -240,28 +252,28 @@
     <Page Update="CampaignForecast.xaml">
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="UserControls\CanvasTerms.xaml">
+    <Page Update="UserControls\RulerControls\CanvasTerms.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="UserControls\DateRangeItem.xaml">
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="UserControls\MediaPlanGrid.xaml">
+    <Page Update="UserControls\ForecastGrids\MediaPlanGrid.xaml">
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="UserControls\ChannelsGoalsGrid.xaml">
+    <Page Update="UserControls\ForecastGrids\ChannelsGoalsGrid.xaml">
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="UserControls\Ruler.xaml">
+    <Page Update="UserControls\RulerControls\Ruler.xaml">
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="UserControls\RulerLine.xaml">
+    <Page Update="UserControls\RulerControls\RulerLine.xaml">
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="UserControls\RulerTimeline.xaml">
+    <Page Update="UserControls\RulerControls\RulerTimeline.xaml">
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="UserControls\RulerTimelineCampaign.xaml">
+    <Page Update="UserControls\RulerControls\RulerTimelineCampaign.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="UserControls\SeasonalitiesItem.xaml">
@@ -273,25 +285,25 @@
     <Page Update="Sectable.xaml">
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="UserControls\SpotGoalsGrid.xaml">
+    <Page Update="UserControls\ForecastGrids\SpotGoalsGrid.xaml">
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="UserControls\SpotGoalsSubGrid.xaml">
+    <Page Update="UserControls\ForecastGrids\SpotGoalsSubGrid.xaml">
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="UserControls\SpotGoalsTotalSubGrid.xaml">
+    <Page Update="UserControls\ForecastGrids\SpotGoalsTotalSubGrid.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="UserControls\SpotItem.xaml">
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="UserControls\SpotWeekGoalsGrid.xaml">
+    <Page Update="UserControls\ForecastGrids\SpotWeekGoalsGrid.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="UserControls\TargetDPItem.xaml">
       <SubType>Designer</SubType>
     </Page>
-    <Page Update="UserControls\TermRectangle.xaml">
+    <Page Update="UserControls\RulerControls\TermRectangle.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="UserControls\TreeViewCampaignsItem.xaml">
@@ -301,6 +313,18 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="UserControls\UsersListItem.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UserControls\ValidationItems\DateLabelItem.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UserControls\ValidationItems\ValidationStack.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UserControls\ValidationItems\VTermEmptyItem.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UserControls\ValidationItems\VTermItem.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="UsersOfClient.xaml">

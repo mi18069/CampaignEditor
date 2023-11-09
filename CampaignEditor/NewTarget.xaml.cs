@@ -108,11 +108,10 @@ namespace CampaignEditor
             targetToEdit = target;
             await InitializeTree(campaign);
             tbName.Text = target.targname.Trim();
-            tbDescription.Text = target.targdesc.Trim();
             btnSaveAs.Visibility = Visibility.Visible;         
             
             var res = await CheckTreeUsingTargetdefi(target.targdefi);
-            PrintInTbSelected();
+            PrintInTbDescription();
 
             if (res == false)
                 return false;
@@ -137,13 +136,14 @@ namespace CampaignEditor
         // For writing in textBox element
         private List<string> GetSelectedStrings()
         {
-            
+
             List<string> selectedStrings = new List<string>();
             foreach (TreeViewModel parent in treeViewList)
             {
                 StringBuilder row = new StringBuilder("");
-                if (parent.IsChecked != false){
-                    row.Append(parent.Name.Trim() + ":\n");
+                if (parent.IsChecked != false)
+                {
+                    row.Append(parent.Name.Trim() + "(");
                 }
                 int i = 0;
                 foreach (TreeViewModel child in parent.Children)
@@ -152,42 +152,49 @@ namespace CampaignEditor
                     {
                         if (i != 0)
                         {
-                            row.Append(",\n");
+                            row.Append(",");
                         }
-                        row.Append(' ', 5);
                         row.Append(child.Name.Trim());
                         i++;
                     }
                 }
+                row.Append(')');
+
                 if (parent.IsChecked != false)
                     selectedStrings.Add(row.ToString());
             }
 
             return selectedStrings;
         }
-        private void PrintInTbSelected()
+        public void PrintInTbDescription()
         {
-            tbSelected.Text = "";
+            tbDescription.Text = "";
             List<string> selectedStrings = GetSelectedStrings();
+            StringBuilder sb = new StringBuilder("");
+
             if (cbAgeRange.IsChecked == true)
             {
                 string from = tbFrom.Text;
                 string to = tbTo.Text;
-                string ageString = "Age Range:\n     " + from + " - " + to;
+                string ageString = "Age Range(" + from + "-" + to + ")";
                 selectedStrings.Add(ageString);
             }
             foreach (string str in selectedStrings)
             {
-                tbSelected.Text += str + "\n";
+                sb.Append(str + "&");
             }
+            if (sb.Length > 0)
+                sb.Remove(sb.Length - 1, 1); // removes last "&"
+
+            tbDescription.Text = sb.ToString();
         }
         private void tb_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
         {
-            PrintInTbSelected();
+            PrintInTbDescription();
         }
         private void CheckBox_Click(object sender, RoutedEventArgs e)
         {
-            PrintInTbSelected();
+            PrintInTbDescription();
         }
 
         #endregion
@@ -525,11 +532,6 @@ namespace CampaignEditor
             if (tbName.Text == "")
             {
                 lblError.Content = "Enter name";
-                return false;
-            }
-            else if (tbDescription.Text == "")
-            {
-                lblError.Content = "Enter description";
                 return false;
             }
             else if((bool)cbAgeRange.IsChecked == true)

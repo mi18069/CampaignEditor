@@ -214,8 +214,9 @@ namespace CampaignEditor
         private void MoveToSelected(ChannelDTO channel, PricelistDTO pricelist, ActivityDTO activity)
         {
             var list = Selected.Select(t => t.Item1).ToList(); // making a list to pass to function FindIndex
-            int index = FindIndex(list, channel); // Finding the right index, to keep the list sorted
-            Selected.Insert(index, Tuple.Create(channel, pricelist, activity)!);
+            // We don't want to insert alphabetically, but in adding order
+            //int index = FindIndex(list, channel); // Finding the right index, to keep the list sorted
+            Selected.Add(Tuple.Create(channel, pricelist, activity)!);
             ChannelList.Remove(channel);
             AllChannelList.Remove(channel);
             lbSelectedChannels.Items.Remove(channel);
@@ -389,7 +390,6 @@ namespace CampaignEditor
                 e.Handled = true;
             }
         }
-
         static ListViewItem VisualUpwardSearch(DependencyObject source)
         {
             while (source != null && !(source is ListViewItem))
@@ -398,6 +398,22 @@ namespace CampaignEditor
             return source as ListViewItem;
         }
 
+
+        private async void lvPricelists_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            var f = _factoryPriceList.Create();
+            if (lvPricelists.SelectedItems.Count > 0)
+                await f.Initialize(_campaign, lvPricelists.SelectedItem as PricelistDTO);
+            else
+                await f.Initialize(_campaign);
+            f.ShowDialog();
+            if (f.pricelistChanged)
+            {
+                _allPricelistsList = ((await _pricelistController.GetAllClientPricelists(_client.clid))).ToList<PricelistDTO>();
+                //lvChannels_SelectionChanged(lvChannels, null);
+                await RefreshPricelists();
+            }
+        }
 
         #endregion
 
@@ -640,7 +656,5 @@ namespace CampaignEditor
             }
 
         }
-
-        
     }
 }

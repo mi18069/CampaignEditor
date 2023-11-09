@@ -68,7 +68,7 @@ namespace CampaignEditor.UserControls
             dgGrid.ItemsSource = _values;
         }
 
-        private void ResetDictionaryValues(int chid = -1)
+        public void ResetDictionaryValues(int chid = -1)
         {
             if (chid == -1)
             {
