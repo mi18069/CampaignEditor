@@ -4,7 +4,7 @@ namespace Database.DTOs.MediaPlanDTO
 {
     public class BaseMediaPlanDTO
     {
-        public BaseMediaPlanDTO(int schid, int cmpid, int chid, string name, int version, string position, string stime, string? etime, string? blocktime, string days, string type, bool special, DateOnly sdate, DateOnly? edate, float progcoef, DateOnly created, DateOnly? modified, double amr1, int amr1trim, double amr2, int amr2trim, double amr3, int amr3trim, double amrsale, int amrsaletrim, double amrp1, double amrp2, double amrp3, double amrpsale, double dpcoef, double seascoef, double seccoef, double price, bool active)
+        public BaseMediaPlanDTO(int schid, int cmpid, int chid, string name, int version, string position, string stime, string? etime, string? blocktime, string days, string type, bool special, DateOnly sdate, DateOnly? edate, float progcoef, DateOnly created, DateOnly? modified, double amr1, int amr1trim, double amr2, int amr2trim, double amr3, int amr3trim, double amrsale, int amrsaletrim, double amrp1, double amrp2, double amrp3, double amrpsale, double dpcoef, double seascoef, double seccoef, double price, bool active, double pps)
         {
             this.schid = schid;
             this.cmpid = cmpid;
@@ -40,6 +40,7 @@ namespace Database.DTOs.MediaPlanDTO
             this.seccoef = seccoef;
             this.price = price;
             this.active = active;
+            this.pps = pps;
         }
 
         public int schid { get; set; }
@@ -76,5 +77,7 @@ namespace Database.DTOs.MediaPlanDTO
         public double seccoef { get; set; }
         public double price { get; set; }
         public bool active { get; set; }
+
+        public double pps { get; set; }
     }
 }

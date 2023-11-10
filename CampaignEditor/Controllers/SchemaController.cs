@@ -53,7 +53,7 @@ namespace CampaignEditor.Controllers
             foreach (var schema in withinDates)
             {
                 if (TimeFormat.Time5CharCompare(schema.stime.Substring(0, 5), stime.Substring(0, 5)) >= 0 
-                    && (etime == null || TimeFormat.Time5CharCompare(schema.etime!.Substring(0, 5), etime.Substring(0, 5)) <= 0))
+                    && (etime == null || schema.etime == null || TimeFormat.Time5CharCompare(schema.etime!.Substring(0, 5), etime.Substring(0, 5)) <= 0))
                 {
                     withinDateAndTime.Add(schema);
                 }

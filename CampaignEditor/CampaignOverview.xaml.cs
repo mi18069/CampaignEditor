@@ -136,7 +136,14 @@ namespace CampaignEditor
         private async void btnCmpInfo_Click(object sender, RoutedEventArgs e)
         {
             await fInfo.Initialize(_client, _campaign, fInfo.SelectedBrands);
-            fInfo.ShowDialog();
+            try
+            {
+                fInfo.ShowDialog();
+            }
+            catch
+            {
+                return;
+            }
 
             if (fInfo.infoModified)
             {
@@ -199,7 +206,15 @@ namespace CampaignEditor
         private async void btnAssignTargets_Click(object sender, RoutedEventArgs e)
         {
             await fTargets.Initialize(_campaign, _targetlist);
-            fTargets.ShowDialog();
+            try
+            {
+                fTargets.ShowDialog();
+            }
+            catch
+            {
+                return;
+            }
+
             if (fTargets.targetsModified)
             {
                 _targetlist = fTargets.SelectedTargetsList.ToList();
@@ -232,7 +247,14 @@ namespace CampaignEditor
         {
 
             await fChannels.Initialize(_client, _campaign, _channels);
-            fChannels.ShowDialog();
+            try
+            {
+                fChannels.ShowDialog();
+            }
+            catch
+            {
+                return;
+            }
             if (fChannels.channelsModified)
             {
                 _channels = fChannels.SelectedChannels;
@@ -246,7 +268,15 @@ namespace CampaignEditor
         private async void btnSpots_Click(object sender, RoutedEventArgs e)
         {
             await fSpots.Initialize(_campaign, _spotlist);
-            fSpots.ShowDialog();
+            try
+            {
+                fSpots.ShowDialog();
+            }
+            catch
+            {
+                return;
+            }
+            
             if (fSpots.spotsModified)
             {
                 _spotlist = fSpots.Spotlist.ToList();
@@ -259,7 +289,15 @@ namespace CampaignEditor
         private async void btnGoals_Click(object sender, RoutedEventArgs e)
         {
             await fGoals.Initialize(_campaign, _goals);
-            fGoals.ShowDialog();
+            try
+            {
+                fGoals.ShowDialog();
+            }
+            catch
+            {
+                return;
+            }
+
             if (fGoals.goalsModified)
             {
                 _goals = fGoals.Goal;

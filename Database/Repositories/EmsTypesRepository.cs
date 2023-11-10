@@ -1,5 +1,4 @@
-﻿
-using AutoMapper;
+﻿using AutoMapper;
 using Dapper;
 using Database.Data;
 using Database.DTOs.ChannelCmpDTO;

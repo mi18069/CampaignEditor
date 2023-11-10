@@ -47,6 +47,8 @@ namespace Database.Entities
         public double price { get; set; }
         public bool active { get; set; }
 
+        public double pps { get; set; }
+
         private double cpp;
 
         private int _length;
@@ -251,6 +253,7 @@ namespace Database.Entities
                 _length = value;
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(Price));
+                OnPropertyChanged(nameof(PricePerSecond));
                 OnPropertyChanged(nameof(AvgLength));
             }
         }
@@ -266,17 +269,29 @@ namespace Database.Entities
             set 
             { 
                 cpp = value;
+                OnPropertyChanged();
                 OnPropertyChanged(nameof(Price));
             } 
         }
 
         public double Price
         {
-            get { return (Cpp/30) * Length * amrpsale * progcoef * dpcoef * seascoef * seccoef ;}
+            //get { return (Cpp/30) * Length * amrpsale * progcoef * dpcoef * seascoef * seccoef ;}
+            get { return price; }
             set 
             { 
-                OnPropertyChanged();
                 price = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public double PricePerSecond
+        {
+            get { return pps; }
+            set
+            {
+                pps = value;
+                OnPropertyChanged();
             }
         }
 

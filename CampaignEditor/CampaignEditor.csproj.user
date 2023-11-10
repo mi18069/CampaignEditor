@@ -151,6 +151,9 @@
     <Compile Update="UserControls\UsersListItem.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="UserControls\ValidationItems\CampaignDPItem.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="UserControls\ValidationItems\DateLabelItem.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -313,6 +316,9 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="UserControls\UsersListItem.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UserControls\ValidationItems\CampaignDPItem.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="UserControls\ValidationItems\DateLabelItem.xaml">

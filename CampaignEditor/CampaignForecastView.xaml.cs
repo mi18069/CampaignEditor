@@ -9,6 +9,7 @@ using Database.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -120,7 +121,7 @@ namespace CampaignEditor
         {
             if (alreadyExists)
             {
-                if (MessageBox.Show("All data will be lost\nAre you sure you want to initialize?", "Message: ",
+                if (MessageBox.Show("Current data will be lost\nAre you sure you want to initialize?", "Message: ",
                     MessageBoxButton.OKCancel, MessageBoxImage.Warning) == MessageBoxResult.OK)
                 {
                     tabForecast.Content = loadingPage.Content;
@@ -130,14 +131,16 @@ namespace CampaignEditor
                         version = mpVer.version;
 
                     await _forecast.DeleteData(version);
-                    if (await InitializeNewForecast())
+                    var success = await InitializeNewForecast();
+                    if (success)
+                    {
                         tabForecast.Content = _forecast.Content;
+                    }
                     else
                     {
                         tabForecast.Content = _forecastDates.Content;
                         return;
                     }
-                    tabForecast.Content = _forecast.Content;
                 }
                 else
                 {
@@ -147,7 +150,8 @@ namespace CampaignEditor
             else
             {
                 tabForecast.Content = loadingPage.Content;
-                if (await InitializeNewForecast())
+                var success = await InitializeNewForecast();
+                if (success)
                     tabForecast.Content = _forecast.Content;
                 else
                 {
@@ -185,7 +189,6 @@ namespace CampaignEditor
             {
                 await LoadForecast();
             }
-
             if (mpVer == null)
             {
                 var mpVerDTO = new MediaPlanVersionDTO(_campaign.cmpid, 1);
@@ -195,6 +198,8 @@ namespace CampaignEditor
             else
             {
                 mpVer = await _mediaPlanVersionController.IncrementMediaPlanVersion(mpVer);
+                await LoadForecast();
+
                 await _forecast.InsertAndLoadData(mpVer.version);
             }
             
@@ -205,6 +210,10 @@ namespace CampaignEditor
         // Inside CampaignForecast
         private async void Forecast_InitializeButtonClicked(object sender, EventArgs e)
         {
+            if (_forecastDates == null)
+            {
+                await LoadForecastDates();
+            }
             await _forecastDates.LoadGridInit();
             tabForecast.Content = _forecastDates.Content;
         }

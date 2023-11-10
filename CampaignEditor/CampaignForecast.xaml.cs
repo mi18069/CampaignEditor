@@ -230,24 +230,27 @@ namespace CampaignEditor.UserControls
             // waiting for all tasks to finish
             await Task.WhenAll(insertingTasks);
 
-            // We'll make nChannel threads, and for each thread we'll run startAMRCalculation for each MediaPlan
-            List<Task> amrTasks = new List<Task>();
             List<List<MediaPlanDTO>> mediaPlansByChannels = new List<List<MediaPlanDTO>>();
             foreach (ChannelDTO channel in _channels)
             {
                 List<MediaPlanDTO> mediaPlans = (await _mediaPlanController.GetAllChannelCmpMediaPlans(channel.chid, _campaign.cmpid, version)).ToList();
                 mediaPlansByChannels.Add(mediaPlans);
             }
-
+            
+            // We'll make nChannel threads, and for each thread we'll run startAMRCalculation for each MediaPlan
+            List<Task> amrTasks = new List<Task>();
             foreach (List<MediaPlanDTO> mediaPlanList in mediaPlansByChannels)
             {
                 Task task = Task.Run(() => StartAMRByMediaPlan(_campaign.cmpid, 40, 40, mediaPlanList));
                 amrTasks.Add(task);
             }
             await Task.WhenAll(amrTasks);
-         
-            await CalculateMPValues(_campaign.cmpid, version);
             
+
+            //await _databaseFunctionsController.StartAMRCalculation(_campaign.cmpid, 40, 40);
+
+            await CalculateMPValues(_campaign.cmpid, version);
+
             await LoadData(version, true);
 
         }
@@ -389,7 +392,7 @@ namespace CampaignEditor.UserControls
 
         private async Task<SpotGoalsGrid> InitializeSGGrid()
         {
-            await sgGrid.Initialize(_campaign);
+            await sgGrid.Initialize(_campaign, _cmpVersion);
             tiSpotGoals.IsSelected = true;
             return sgGrid;
         }
@@ -496,8 +499,6 @@ namespace CampaignEditor.UserControls
             {
                 await ClearAllMPTerms();
                 lvChannels.SelectedItems.Clear();
-                /*cgGrid.ResetDictionaryValues();
-                await FillGoals();*/
                 
             }
         }
@@ -602,7 +603,7 @@ namespace CampaignEditor.UserControls
             CreateMediaPlanDTO createMediaPlan = new CreateMediaPlanDTO(schema.id, _campaign.cmpid, schema.chid,
             schema.name.Trim(), version, schema.position, schema.stime, schema.etime, schema.blocktime,
             schema.days, schema.type, schema.special, schema.sdate, schema.edate, schema.progcoef,
-            schema.created, schema.modified, 0, 100, 0, 100, 0, 100, 0, 100, 0, 0, 0, 0, 1, 1, 1, 0, true);
+            schema.created, schema.modified, 0, 100, 0, 100, 0, 100, 0, 100, 0, 0, 0, 0, 1, 1, 1, 0, true, 0);
 
             return await _mediaPlanController.CreateMediaPlan(createMediaPlan);
 

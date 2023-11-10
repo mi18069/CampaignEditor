@@ -24,7 +24,7 @@
         <UniformGrid x:Name="ugChannels" Grid.Row="1" Grid.Column="1" 
                      HorizontalAlignment="Left" VerticalAlignment="Stretch" Rows="1"/>
         <UniformGrid x:Name="ugGoals" Grid.Row="2" Grid.Column="1"
-                     HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+                     HorizontalAlignment="Left" VerticalAlignment="Stretch"/>
 
         <DataGrid x:Name="dgSpots" Grid.Row="3" Grid.Column="0" 
                   HorizontalAlignment="Stretch" VerticalAlignment="Stretch"

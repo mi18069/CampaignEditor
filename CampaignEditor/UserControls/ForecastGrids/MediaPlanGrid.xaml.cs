@@ -47,7 +47,7 @@ namespace CampaignEditor.UserControls
         string lastSpotCell = "";
 
         // number of frozen columns
-        int mediaPlanColumns = 27;
+        int mediaPlanColumns = 28;
 
         private int frozenColumnsNum
         {
@@ -421,7 +421,15 @@ namespace CampaignEditor.UserControls
             var tuple = (MediaPlanTuple)cell.DataContext;
             var mpTerms = tuple.Terms;
             var index = cell.Column.DisplayIndex - mediaPlanColumns;
-            var mpTerm = mpTerms[index];
+            MediaPlanTerm mpTerm;
+            try
+            {
+                mpTerm = mpTerms[index];
+            }
+            catch
+            {
+                return;
+            }
             DateTime currentDate = DateTime.Now;
 
             if (!CanUserEdit.Value || mpTerm == null || mpTerm.Date <= DateOnly.FromDateTime(currentDate))

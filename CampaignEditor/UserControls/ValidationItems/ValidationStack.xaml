@@ -8,14 +8,20 @@
              d:DesignHeight="800" d:DesignWidth="800" Background="White">
     <Grid>
         <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-            <StackPanel Orientation="Horizontal">
-                <StackPanel x:Name="spExpected">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <!-- Set to take available space -->
+                    <ColumnDefinition Width="*" />
+                    <!-- Set to take available space -->
+                </Grid.ColumnDefinitions>
+                <StackPanel x:Name="spExpected" Grid.Column="0">
                     <!-- Content for the first StackPanel -->
                 </StackPanel>
-                <StackPanel x:Name="spRealized">
+                <StackPanel x:Name="spRealized" Grid.Column="1">
                     <!-- Content for the second StackPanel -->
                 </StackPanel>
-            </StackPanel>
+            </Grid>
         </ScrollViewer>
     </Grid>
 </UserControl>

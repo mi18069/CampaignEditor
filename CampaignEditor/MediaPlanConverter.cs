@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 
 namespace CampaignEditor
 {
@@ -195,12 +196,34 @@ namespace CampaignEditor
             await CalculateLengthAndInsertations(mediaPlan, terms);
             await CalculateSeccoef(mediaPlan, pricelist);
             await CalculateSeascoef(mediaPlan, pricelist, terms);
+            CalculatePrices(mediaPlan, pricelist);
 
-            mediaPlan.Cpp = pricelist.price;
+        }
 
-            mediaPlan.price = (mediaPlan.Cpp/30) * mediaPlan.Length * mediaPlan.Amrpsale * mediaPlan.Progcoef *
-                mediaPlan.Dpcoef * mediaPlan.Seascoef * mediaPlan.Seccoef;
-
+        private void CalculatePrices(MediaPlan mediaPlan, PricelistDTO pricelist)
+        {
+            // For seconds type pricelists
+            if (pricelist.pltype == 1)
+            {
+                mediaPlan.PricePerSecond = pricelist.price;
+                mediaPlan.Price = mediaPlan.PricePerSecond * mediaPlan.Length;
+                double divider = mediaPlan.Amrpsale * mediaPlan.Progcoef * mediaPlan.Dpcoef * mediaPlan.Seascoef * mediaPlan.Seccoef;
+                if (divider == 0)
+                    mediaPlan.Cpp = 0;
+                else
+                    mediaPlan.Cpp = mediaPlan.Price / divider;
+            }
+            // For cpp pricelists
+            else if (pricelist.pltype == 0)
+            {
+                mediaPlan.Cpp = pricelist.price;
+                mediaPlan.Price = (mediaPlan.Cpp / 30) * mediaPlan.Length * mediaPlan.Amrpsale * mediaPlan.Progcoef *
+                    mediaPlan.Dpcoef * mediaPlan.Seascoef * mediaPlan.Seccoef;
+                if (mediaPlan.Length > 0)
+                    mediaPlan.PricePerSecond = mediaPlan.Price / mediaPlan.Length;
+                else
+                    mediaPlan.PricePerSecond = 0;
+            }
         }
 
         public MediaPlanDTO ConvertToDTO(MediaPlan mediaPlan)
@@ -212,7 +235,7 @@ namespace CampaignEditor
                 mediaPlan.Amr1, mediaPlan.Amr1trim, mediaPlan.Amr2, mediaPlan.Amr2trim, mediaPlan.Amr3, 
                 mediaPlan.Amr3trim, mediaPlan.Amrsale, mediaPlan.Amrsaletrim, mediaPlan.Amrp1, mediaPlan.Amrp2,
                 mediaPlan.Amrp3, mediaPlan.Amrpsale, mediaPlan.Dpcoef, mediaPlan.Seascoef, mediaPlan.Seccoef,
-                mediaPlan.Price, mediaPlan.active);
+                mediaPlan.Price, mediaPlan.active, mediaPlan.PricePerSecond);
 
             return mediaPlanDTO;
         }

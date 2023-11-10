@@ -62,10 +62,9 @@ namespace CampaignEditor.UserControls
             {
                 _dictionary[chid].Insertations += mediaPlan.Insertations;
                 _dictionary[chid].Grp += mediaPlan.Insertations * (mediaPlan.Amrp1 + mediaPlan.Amrp2 + mediaPlan.Amrp3);
-                _dictionary[chid].Budget += mediaPlan.price;           
+                _dictionary[chid].Budget += mediaPlan.Price;           
             }
             _values.ReplaceRange(_dictionary.Values);
-            dgGrid.ItemsSource = _values;
         }
 
         public void ResetDictionaryValues(int chid = -1)

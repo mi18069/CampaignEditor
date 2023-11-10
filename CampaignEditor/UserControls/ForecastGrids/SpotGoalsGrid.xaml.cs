@@ -38,6 +38,7 @@ namespace CampaignEditor.UserControls
         public ObservableCollection<MediaPlanTuple> _allMediaPlans;
 
         CampaignDTO _campaign;
+        int _version = 1;
 
         // for duration of campaign
         DateTime startDate;
@@ -56,10 +57,11 @@ namespace CampaignEditor.UserControls
             InitializeComponent();
         }
 
-        public async Task Initialize(CampaignDTO campaign)
+        public async Task Initialize(CampaignDTO campaign, int version)
         {
 
             _campaign = campaign;
+            _version = version;
 
             _spots.Clear();
             _channels.Clear();
@@ -77,7 +79,7 @@ namespace CampaignEditor.UserControls
             _spots = spots.ToList();
             _spots = _spots.OrderBy(s => s.spotcode).ToList();
 
-            var channelIds = await _mediaPlanController.GetAllChannelsByCmpid(_campaign.cmpid);
+            var channelIds = await _mediaPlanController.GetAllChannelsByCmpid(_campaign.cmpid, _version);
             List<ChannelDTO> channels = new List<ChannelDTO>();
             foreach (var chid in channelIds)
             {
