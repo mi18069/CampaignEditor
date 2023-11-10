@@ -130,8 +130,7 @@
                 </DataGridTextColumn>
                 <DataGridTextColumn Header="Affinity" Binding="{Binding MediaPlan.Affinity, StringFormat=N2}"
                                             IsReadOnly="True"/>
-                <DataGridTextColumn Header="Prog Coef" Binding="{Binding MediaPlan.progcoef, Mode=TwoWay, StringFormat=N2}" 
-                                    >
+                <DataGridTextColumn Header="Prog Coef" Binding="{Binding MediaPlan.progcoef, Mode=TwoWay, StringFormat=N2}" >
                     <DataGridTextColumn.EditingElementStyle>
                         <Style TargetType="{x:Type TextBox}">
                             <EventSetter Event="TextChanged" Handler="ProgCoef_TextChanged"/>
@@ -142,13 +141,15 @@
                         </Style>
                     </DataGridTextColumn.EditingElementStyle>
                 </DataGridTextColumn>
+                <DataGridTextColumn Header="DP Coef" Binding="{Binding MediaPlan.Dpcoef, StringFormat=N2}"
+                                        IsReadOnly="True"/>
                 <DataGridTextColumn Header="Seas Coef" Binding="{Binding MediaPlan.Seascoef, StringFormat=N2}"
                                         IsReadOnly="True"/>
                 <DataGridTextColumn Header="Sec Coef" Binding="{Binding MediaPlan.Seccoef, StringFormat=N2}"
                                         IsReadOnly="True"/>
                 <DataGridTextColumn Header="CPP" Binding="{Binding MediaPlan.Cpp, StringFormat=N2}"
                                         IsReadOnly="True"/>
-                <DataGridTextColumn Header="Insertations" Binding="{Binding MediaPlan.Insertations}"
+                <DataGridTextColumn Header="Ins" Binding="{Binding MediaPlan.Insertations}"
                                         IsReadOnly="True"/>
                 <DataGridTextColumn Header="PPS" Binding="{Binding MediaPlan.PricePerSecond, StringFormat=N2}"
                                         IsReadOnly="True"/>

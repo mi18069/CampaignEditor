@@ -210,6 +210,7 @@ namespace Database.Entities
             set
             {
                 dpcoef = value;
+                OnPropertyChanged();
                 OnPropertyChanged(nameof(Price));
             }
         }

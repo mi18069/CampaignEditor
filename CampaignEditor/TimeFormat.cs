@@ -97,8 +97,8 @@ namespace CampaignEditor
             int h1, h2, m1, m2; 
             if (Int32.TryParse(time1.Substring(0, 2), out h1) &&
                 Int32.TryParse(time1.Substring(3, 2), out m1) &&
-                Int32.TryParse(time1.Substring(0, 2), out h2) &&
-                Int32.TryParse(time1.Substring(3, 2), out m2))
+                Int32.TryParse(time2.Substring(0, 2), out h2) &&
+                Int32.TryParse(time2.Substring(3, 2), out m2))
             {
                 return h1 < h2 ? -1 : (h1 > h2 ? 1 : (m1 < m2 ? -1 : (m1 > m2 ? 1 : 0)));
             }
@@ -156,5 +156,6 @@ namespace CampaignEditor
                 throw new ArgumentException("Invalid time format. Use 'hh:mm' format.");
             }
         }
+
     }
 }

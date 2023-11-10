@@ -22,7 +22,7 @@
                 <ColumnDefinition Width="auto"/>
                 <ColumnDefinition Width="auto"/>
                 <ColumnDefinition Width="auto"/>
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="1.2*"/>
                 <ColumnDefinition Width="10"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
@@ -39,7 +39,7 @@
 
             <ListView x:Name="lvChannels" Grid.Row="1" Grid.Column="1" 
                       MaxHeight="200"
-                      DisplayMemberPath="chname" MinWidth="250" MinHeight="150"
+                      DisplayMemberPath="chname" MinWidth="220" MinHeight="100"
                       SelectionMode="Multiple" Margin="0, 0 ,10,0"
                       SelectionChanged="lvChannels_SelectionChanged"
                       PreviewMouseRightButtonDown="lvChannels_PreviewMouseRightButtonDown"

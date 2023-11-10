@@ -9,5 +9,6 @@ namespace Database.Entities
         public string dpe { get; set; }
         public float price { get; set; }
         public bool ispt { get; set; }
+        public string days { get; set; }
     }
 }

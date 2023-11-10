@@ -289,8 +289,9 @@ namespace CampaignEditor
                 item.tbToM.Text = toList[1];
 
                 item.tbCoef.Text = dp.price.ToString();
-
                 item.cbIsPT.IsChecked = dp.ispt;
+                item.tbDays.Text = dp.days.ToString();
+
                 item.modified = false;
 
                 wpDayParts.Children.Add(item);
@@ -395,7 +396,8 @@ namespace CampaignEditor
                 if (item.tbFromH.Text.Trim() == "" ||
                     item.tbFromM.Text.Trim() == "" ||
                     item.tbToH.Text.Trim() == "" ||
-                    item.tbToM.Text.Trim() == "")
+                    item.tbToM.Text.Trim() == "" ||
+                    item.tbDays.Text.Trim() == "")
                 {
                     continue;
                 }
@@ -405,13 +407,15 @@ namespace CampaignEditor
                     string dpe = (item.tbToH.Text.Trim() + ":" + item.tbToM.Text.Trim()).PadLeft(2, '0');
                     float price = float.Parse(item.tbCoef.Text.Trim());
                     bool ispt = (bool)item.cbIsPT.IsChecked;
-                    await _pricesController.CreatePrices(new CreatePricesDTO(pricelist.plid, dps, dpe, price, ispt));
+                    string days = item.tbDays.Text.Trim();
+
+                    await _pricesController.CreatePrices(new CreatePricesDTO(pricelist.plid, dps, dpe, price, ispt, days));
                     created += 1; 
                 }
             }
             if (created == 0)
             {
-                await _pricesController.CreatePrices(new CreatePricesDTO(pricelist.plid, "02:00", "25:59", 1.0f, false));
+                await _pricesController.CreatePrices(new CreatePricesDTO(pricelist.plid, "02:00", "25:59", 1.0f, false, "1234567"));
             }
         }
         #endregion
@@ -560,7 +564,7 @@ namespace CampaignEditor
             }
 
             // If there are no values entered in dpItems, clear and add one, and fill it with default values
-            if (!atLeastOne)
+            /*if (!atLeastOne)
             {
                 wpDayParts.Children.Clear();
                 wpDayParts.Children.Add(MakeDPItem());
@@ -572,7 +576,7 @@ namespace CampaignEditor
                 item.tbToH.Text = "25";
                 item.tbToM.Text = "59";
                 item.tbCoef.Text = "1.00";
-            }
+            }*/
 
             return success;
         }
