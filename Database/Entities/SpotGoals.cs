@@ -24,13 +24,13 @@ namespace Database.Entities
 
         public double Grp
         {
-            get { return Math.Round(grp, 2); }
+            get { return grp; }
             set { grp = value; }
         }
 
         public double Budget
         {
-            get { return Math.Round(budget, 2); }
+            get { return budget; }
             set { budget = value; }
         }
         public SpotGoals()

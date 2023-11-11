@@ -79,7 +79,7 @@ namespace CampaignEditor
         }
 
         // Selecting whole text
-        private void tb_GotMouseCapture(object sender, MouseEventArgs e)
+        private void tb_GotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
             var tb = sender as TextBox;
 
@@ -124,5 +124,6 @@ namespace CampaignEditor
             }
 
         }
+
     }
 }

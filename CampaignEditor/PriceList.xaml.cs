@@ -277,6 +277,8 @@ namespace CampaignEditor
             wpDayParts.Children.Clear();
 
             var dpValues = await _pricesController.GetAllPricesByPlId(_pricelist.plid);
+            dpValues = dpValues.OrderBy(dp => dp.dps).ThenBy(dp => dp.days);
+
             foreach (var dp in dpValues)
             {
                 TargetDPItem item = MakeDPItem();

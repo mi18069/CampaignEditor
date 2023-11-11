@@ -46,7 +46,7 @@ namespace CampaignEditor.UserControls
             {
                 int chid = mediaPlan.chid;
                 _dictionary[chid].Insertations += mediaPlan.Insertations;
-                _dictionary[chid].Grp += mediaPlan.Insertations * (mediaPlan.Amrp1 + mediaPlan.Amrp2 + mediaPlan.Amrp3);
+                _dictionary[chid].Grp += mediaPlan.Insertations * mediaPlan.Amrp1;
                 _dictionary[chid].Budget += mediaPlan.price;
             }
 
@@ -61,7 +61,7 @@ namespace CampaignEditor.UserControls
             foreach (MediaPlan mediaPlan in mediaPlans)
             {
                 _dictionary[chid].Insertations += mediaPlan.Insertations;
-                _dictionary[chid].Grp += mediaPlan.Insertations * (mediaPlan.Amrp1 + mediaPlan.Amrp2 + mediaPlan.Amrp3);
+                _dictionary[chid].Grp += mediaPlan.Insertations * mediaPlan.Amrp1;
                 _dictionary[chid].Budget += mediaPlan.Price;           
             }
             _values.ReplaceRange(_dictionary.Values);

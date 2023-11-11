@@ -85,7 +85,7 @@ namespace CampaignEditor.UserControls
                             {
                                 _dictionary[spotcode].Insertations += 1;
                                 _dictionary[spotcode].Budget += (mediaPlan.Price / mediaPlan.Length) * _spotLengths[spotcode];
-                                _dictionary[spotcode].Grp += mediaPlan.Amrp1 + mediaPlan.Amrp2 + mediaPlan.Amrp3;
+                                _dictionary[spotcode].Grp += mediaPlan.Amrp1;
                             }
 
                         }

@@ -160,86 +160,24 @@ namespace CampaignEditor
         private async Task CalculateDPCoef(MediaPlan mediaPlan, PricelistDTO pricelist, IEnumerable<MediaPlanTermDTO> terms = null)
         {
 
-            // for every term, we'll add it's pricelist daypart and length of it's spots
-            // in the end, dpCoef will be calculated proportionally to spot lengths
-            Dictionary<PricesDTO, int> dpSecRatio = new Dictionary<PricesDTO, int>();
-            // When neither priceworks is good, we use this price
-            PricesDTO defaultPrice = new PricesDTO(-1, -1, "", "", 1.0f, false, "1234567");
-            dpSecRatio.Add(defaultPrice, 0);
-
             var prices = await _pricesController.GetAllPricesByPlId(pricelist.plid);
-            int cmpid = mediaPlan.cmpid;
 
             string blocktime = mediaPlan.blocktime ?? mediaPlan.stime;
 
-            foreach (var term in terms)
+            foreach (var price in prices)
             {
-                if (term != null && term.spotcode != null)
+                // No need to check for day because mediaPlan will be adjusted correctly
+                if ((TimeFormat.CompareReporesentative(price.dps, blocktime) != 1) &&
+                    (TimeFormat.CompareReporesentative(price.dpe, blocktime) != -1))
                 {
-                    int spotLength = await GetLengthOfSpotsInsideTerm(term, cmpid);
-                    bool foundPrices = false;
-                    foreach (var price in prices)
-                    {
-                        var a = (TimeFormat.CompareReporesentative(price.dps, blocktime) != 1);
-                        var b = (TimeFormat.CompareReporesentative(price.dpe, blocktime) != -1);
-                        var c = ContainsDayInDaysString(term.date, price.days);
-
-                        if ((TimeFormat.CompareReporesentative(price.dps, blocktime) != 1) &&
-                            (TimeFormat.CompareReporesentative(price.dpe, blocktime) != -1) &&
-                            ContainsDayInDaysString(term.date, price.days))
-                        {
-                            foundPrices = true;
-                            if (dpSecRatio.ContainsKey(price))
-                            {
-                                dpSecRatio[price] += spotLength;
-                            }
-                            else
-                            {
-                                dpSecRatio.Add(price, spotLength);
-                            }
-                        }
-                    }
-                    if (!foundPrices)
-                    {
-                        dpSecRatio[defaultPrice] += spotLength;
-                    }
+                    mediaPlan.Dpcoef = price.price;
+                    return;
                 }
             }
+            
+            mediaPlan.Dpcoef = 1.0;
+            return;
 
-            mediaPlan.Dpcoef = CalculateWeightedAverage(dpSecRatio); 
-
-        }
-
-        static double CalculateWeightedAverage(Dictionary<PricesDTO, int> dpSecRatio)
-        {
-
-            double numerator = 0;
-            double denominator = 0;
-
-            foreach (var price in dpSecRatio.Keys)
-            {
-                numerator += price.price * dpSecRatio[price];
-                denominator += dpSecRatio[price];
-            }
-
-            if (denominator == 0)
-            {
-                return 1.0;
-            }
-
-            return numerator / denominator;
-        }
-
-        private async Task<int> GetLengthOfSpotsInsideTerm(MediaPlanTermDTO mediaPlanTerm, int cmpid)
-        {
-            var length = 0;
-            foreach (char spotcode in mediaPlanTerm.spotcode.Trim())
-            {
-                var spot = await _spotController.GetSpotsByCmpidAndCode(cmpid, spotcode.ToString());
-                length += spot.spotlength;
-            }
-
-            return length;
         }
 
         public static bool ContainsDayInDaysString(DateOnly date, string dayString)
@@ -264,8 +202,10 @@ namespace CampaignEditor
         private async Task CalculateFirst(MediaPlan mediaPlan)
         {
             var channelCmp = await _channelCmpController.GetChannelCmpByIds(mediaPlan.cmpid, mediaPlan.chid);
+            var pricelist = await _pricelistController.GetPricelistById(channelCmp.plid);
 
-            await CalculateAMRs(mediaPlan);           
+            await CalculateAMRs(mediaPlan);
+            await CalculateDPCoef(mediaPlan, pricelist);
             await ComputeExtraProperties(mediaPlan);
             
         }
@@ -280,7 +220,6 @@ namespace CampaignEditor
             }
 
             await CalculateLengthAndInsertations(mediaPlan, terms);
-            await CalculateDPCoef(mediaPlan, pricelist, terms);
             await CalculateSeccoef(mediaPlan, pricelist);
             await CalculateSeascoef(mediaPlan, pricelist, terms);
             CalculatePrices(mediaPlan, pricelist);
@@ -292,19 +231,18 @@ namespace CampaignEditor
             // For seconds type pricelists
             if (pricelist.pltype == 1)
             {
-                mediaPlan.PricePerSecond = pricelist.price;
-                mediaPlan.Price = mediaPlan.PricePerSecond * mediaPlan.Length;
-                double divider = mediaPlan.Amrpsale * mediaPlan.Progcoef * mediaPlan.Dpcoef * mediaPlan.Seascoef * mediaPlan.Seccoef;
-                if (divider == 0)
-                    mediaPlan.Cpp = 0;
-                else
-                    mediaPlan.Cpp = mediaPlan.Price / divider;
+
+                mediaPlan.PricePerSecond = mediaPlan.Dpcoef / mediaPlan.Amrp1;
+                double coefs = mediaPlan.Progcoef * mediaPlan.Dpcoef * mediaPlan.Seascoef * mediaPlan.Seccoef;
+                mediaPlan.Price = coefs * mediaPlan.Length;
+                mediaPlan.Cpp = mediaPlan.Price / (mediaPlan.Amrp1);
+
             }
             // For cpp pricelists
             else if (pricelist.pltype == 0)
             {
                 mediaPlan.Cpp = pricelist.price;
-                mediaPlan.Price = (mediaPlan.Cpp / 30) * mediaPlan.Length * mediaPlan.Amrpsale * mediaPlan.Progcoef *
+                mediaPlan.Price = (pricelist.price / 30) * mediaPlan.Length * mediaPlan.Amrpsale * mediaPlan.Progcoef *
                     mediaPlan.Dpcoef * mediaPlan.Seascoef * mediaPlan.Seccoef;
                 if (mediaPlan.Length > 0)
                     mediaPlan.PricePerSecond = mediaPlan.Price / mediaPlan.Length;

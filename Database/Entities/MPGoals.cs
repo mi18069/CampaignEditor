@@ -14,13 +14,25 @@ namespace Database.Entities
 
         public double Grp
         {
-            get { return Math.Round(grp, 2); }
+            get { return grp; }
             set
             {
                 grp = value;
                 OnPropertyChanged(nameof(Grp));
+                OnPropertyChanged(nameof(GrpRounded));
             }
         }
+
+        public double GrpRounded
+        {
+            get { return Math.Round(grp, 2); }
+            set
+            {
+                grp = value;
+                OnPropertyChanged(nameof(GrpRounded));
+            }
+        }
+
         public int Insertations
         {
             get { return insertations; }
@@ -32,11 +44,22 @@ namespace Database.Entities
         }
         public double Budget
         {
-            get { return Math.Round(budget, 2); }
+            get { return budget; }
             set
             {
                 budget = value;
                 OnPropertyChanged(nameof(Budget));
+                OnPropertyChanged(nameof(BudgetRounded));
+            }
+        }
+
+        public double BudgetRounded
+        {
+            get { return Math.Round(budget, 2); }
+            set
+            {
+                budget = value;
+                OnPropertyChanged(nameof(BudgetRounded));
             }
         }
 
@@ -101,7 +124,7 @@ namespace Database.Entities
             {
                 budget += mediaPlan.Price;
                 insertations += mediaPlan.Insertations;
-                grp += mediaPlan.Insertations * (mediaPlan.Amrp1 + mediaPlan.Amrp2 + mediaPlan.Amrp3);
+                grp += mediaPlan.Insertations * mediaPlan.Amrp1;
             }
 
             Budget = budget;

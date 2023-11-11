@@ -62,7 +62,7 @@ namespace CampaignEditor.UserControls
             new ObservableCollection<MediaPlanTuple>();
 
         public ObservableCollection<ChannelDTO> _selectedChannels = new ObservableCollection<ChannelDTO>();
-
+        public List<DayOfWeek> _filteredDays = new List<DayOfWeek>();
         public MediaPlanConverter _converter { get; set; }
         CampaignDTO _campaign;
 
@@ -135,8 +135,10 @@ namespace CampaignEditor.UserControls
             myDataView.Filter = d =>
             {
                 var mediaPlan = ((MediaPlanTuple)d).MediaPlan;
-           
-                return _selectedChannels.Any(c => c.chid == mediaPlan.chid);
+                var mpTerms = ((MediaPlanTuple)d).Terms;
+
+                return _selectedChannels.Any(c => c.chid == mediaPlan.chid) && 
+                       mpTerms.Any(t => t != null && _filteredDays.Contains(t.Date.DayOfWeek));
             };
 
             _allMediaPlans.CollectionChanged += OnCollectionChanged;

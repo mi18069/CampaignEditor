@@ -222,7 +222,7 @@
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
                             <Label x:Name="lblBudget" Content="Budget: " Grid.Column="0" />
-                            <Label x:Name="lblBudgetValue" Grid.Column="1" Content="{Binding Budget}"
+                            <Label x:Name="lblBudgetValue" Grid.Column="1" Content="{Binding BudgetRounded}"
                                     HorizontalContentAlignment="Right" FontWeight="DemiBold">
                                 <Label.Foreground>
                                     <MultiBinding Converter="{StaticResource ValueComparisonConverter}">
@@ -244,7 +244,7 @@
                                 <ColumnDefinition Width="*" />
                             </Grid.ColumnDefinitions>
                             <Label x:Name="lblGRP" Content="GRP: " Grid.Column="0"/>
-                            <Label x:Name="lblGRPValue" Grid.Column="1" Content="{Binding Grp}"
+                            <Label x:Name="lblGRPValue" Grid.Column="1" Content="{Binding GrpRounded}"
                        HorizontalContentAlignment="Right" FontWeight="DemiBold">
                                 <Label.Foreground>
                                     <MultiBinding Converter="{StaticResource ValueComparisonConverter}">
@@ -297,103 +297,101 @@
                 </Grid>
             </Border>
 
-            <Grid Grid.Row="5" Grid.Column="1" Grid.RowSpan="3">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="50"/>
-                    <RowDefinition Height="auto"/>
-                </Grid.RowDefinitions>
-                <Button x:Name="btnExport" Content="Export to Excel" Grid.Row="0" Margin="0, 10, 10, 10"
-                        Click="btnExport_Click"/>
-                <!-- <Border x:Name="pGoals" Grid.Row="1" HorizontalAlignment="Stretch"
-                BorderBrush="LightGray" BorderThickness="1"
-                    Margin="0, 10, 10, 0">
-                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalContentAlignment="Stretch">
-                        <local:ChannelsGoalsGrid x:Name="cgGrid" HorizontalContentAlignment="Stretch"/>
-                    </ScrollViewer>
-                </Border> -->
-                <Border x:Name="pGoals" Grid.Row="1" Visibility="Collapsed"
-                BorderBrush="LightGray" BorderThickness="1" 
-                    Margin="0, 10, 10, 0">
-                    <Grid Name="progGoals">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="10" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="10" />
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="10" />
-                            <RowDefinition Height="auto" />
-                            <RowDefinition Height="auto" />
-                            <RowDefinition Height="auto" />
-                            <RowDefinition Height="auto" />
-                            <RowDefinition Height="*" />
-                            <RowDefinition Height="10" />
-                        </Grid.RowDefinitions>
-                        <Border x:Name="bpBudget" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" 
-                        BorderThickness="0, 0, 0, 1" BorderBrush="Black">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <Label x:Name="lblpBudget" Content="Budget: " Grid.Column="0" />
-                                <Label x:Name="lblpBudgetValue" Grid.Column="1" Content="{Binding Budget}"
+            <ScrollViewer Grid.Row="5" Grid.Column="1" Grid.RowSpan="3">
+                <Grid >
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="50"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                    </Grid.RowDefinitions>
+                    <Button x:Name="btnExport" Content="Export to Excel" Grid.Row="0" Margin="0, 10, 10, 10"
+                            Click="btnExport_Click"/>
+                    
+                    <ListView x:Name="lvFilterDays" Grid.Row="1" Margin="0, 10, 10, 10"
+                              SelectionMode="Multiple"
+                              SelectionChanged="lvFilterDays_SelectionChanged"/>
+                    <Border x:Name="pGoals" Grid.Row="2" Visibility="Collapsed"
+                    BorderBrush="LightGray" BorderThickness="1" 
+                        Margin="0, 10, 10, 0">
+                        <Grid Name="progGoals">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="10" />
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="10" />
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="10" />
+                                <RowDefinition Height="auto" />
+                                <RowDefinition Height="auto" />
+                                <RowDefinition Height="auto" />
+                                <RowDefinition Height="auto" />
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="10" />
+                            </Grid.RowDefinitions>
+                            <Border x:Name="bpBudget" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="3" 
+                            BorderThickness="0, 0, 0, 1" BorderBrush="Black">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Label x:Name="lblpBudget" Content="Budget: " Grid.Column="0" />
+                                    <Label x:Name="lblpBudgetValue" Grid.Column="1" Content="{Binding Budget}"
+                               HorizontalContentAlignment="Right" FontWeight="DemiBold"/>
+                                    <Label x:Name="lblpBudgetTarget" Grid.Column="2" 
+                               HorizontalContentAlignment="Right" FontWeight="Light"/>
+                                </Grid>
+                            </Border>
+                            <Border x:Name="bpGRP" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3" 
+                            BorderThickness="0, 0, 0, 1" BorderBrush="Black">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Label x:Name="lblpGRP" Content="GRP: " Grid.Column="0"/>
+                                    <Label x:Name="lblpGRPValue" Grid.Column="1" Content="{Binding Grp}"
                            HorizontalContentAlignment="Right" FontWeight="DemiBold"/>
-                                <Label x:Name="lblpBudgetTarget" Grid.Column="2" 
+                                    <Label x:Name="lblpGRPTarget" Grid.Column="2" 
                            HorizontalContentAlignment="Right" FontWeight="Light"/>
-                            </Grid>
-                        </Border>
-                        <Border x:Name="bpGRP" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="3" 
-                        BorderThickness="0, 0, 0, 1" BorderBrush="Black">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <Label x:Name="lblpGRP" Content="GRP: " Grid.Column="0"/>
-                                <Label x:Name="lblpGRPValue" Grid.Column="1" Content="{Binding Grp}"
-                       HorizontalContentAlignment="Right" FontWeight="DemiBold"/>
-                                <Label x:Name="lblpGRPTarget" Grid.Column="2" 
-                       HorizontalContentAlignment="Right" FontWeight="Light"/>
-                            </Grid>
-                        </Border>
-                        <Border x:Name="bpInsertations" Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="3" 
-                        BorderThickness="0, 0, 0, 1" BorderBrush="Black">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <Label x:Name="lblpInsertations" Content="Insertations: " Grid.Column="0"/>
-                                <Label x:Name="lblpInsertationsValue" Grid.Column="1" Content="{Binding Insertations}"
-                       HorizontalContentAlignment="Right" FontWeight="DemiBold"/>
-                                <Label x:Name="lblpInsertationsTarget" Grid.Column="2" 
-                       HorizontalContentAlignment="Right" FontWeight="Light"/>
-                            </Grid>
-                        </Border>
-                        <Border x:Name="bpReach" Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="3" 
-                        BorderThickness="0, 0, 0, 1" BorderBrush="Black">
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="*" />
-                                </Grid.ColumnDefinitions>
-                                <Label x:Name="lblpReach" Content="Reach: " Grid.Column="0"/>
-                                <Label x:Name="lblpReachValue" Grid.Column="1" 
-                       HorizontalContentAlignment="Right" FontWeight="DemiBold"/>
-                                <Label x:Name="lblpReachTarget" Grid.Column="2" 
-                       HorizontalContentAlignment="Right" FontWeight="Light"/>
-                            </Grid>
-                        </Border>
-                    </Grid>
-                </Border> 
-
-            </Grid> 
-            
+                                </Grid>
+                            </Border>
+                            <Border x:Name="bpInsertations" Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="3" 
+                            BorderThickness="0, 0, 0, 1" BorderBrush="Black">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Label x:Name="lblpInsertations" Content="Insertations: " Grid.Column="0"/>
+                                    <Label x:Name="lblpInsertationsValue" Grid.Column="1" Content="{Binding Insertations}"
+                           HorizontalContentAlignment="Right" FontWeight="DemiBold"/>
+                                    <Label x:Name="lblpInsertationsTarget" Grid.Column="2" 
+                           HorizontalContentAlignment="Right" FontWeight="Light"/>
+                                </Grid>
+                            </Border>
+                            <Border x:Name="bpReach" Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="3" 
+                            BorderThickness="0, 0, 0, 1" BorderBrush="Black">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Label x:Name="lblpReach" Content="Reach: " Grid.Column="0"/>
+                                    <Label x:Name="lblpReachValue" Grid.Column="1" 
+                           HorizontalContentAlignment="Right" FontWeight="DemiBold"/>
+                                    <Label x:Name="lblpReachTarget" Grid.Column="2" 
+                           HorizontalContentAlignment="Right" FontWeight="Light"/>
+                                </Grid>
+                            </Border>
+                        </Grid>
+                    </Border>
+                </Grid>
+            </ScrollViewer>
         </Grid>
     </Grid>
 </Page>

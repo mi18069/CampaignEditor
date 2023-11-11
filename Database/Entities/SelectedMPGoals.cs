@@ -69,7 +69,7 @@ namespace Database.Entities
         {
             Budget = mediaPlan.Price;
             Insertations = mediaPlan.Insertations;
-            Grp = mediaPlan.Insertations * (mediaPlan.Amrp1 + mediaPlan.Amrp2 + mediaPlan.Amrp3);
+            Grp = mediaPlan.Insertations * mediaPlan.Amrp1;
         }
 
         protected virtual void OnPropertyChanged(string propertyName)

@@ -57,7 +57,7 @@ namespace Database.Entities
 
         public double Affinity
         {
-            get { return amrpsale != 0 ? (amrp1/amrpsale) * 100 : 0; }
+            get { return Amrpsale != 0 ? (Amrp1 / Amrpsale) * 100 : 0; }
         }
 
         public double Amr1
@@ -67,6 +67,7 @@ namespace Database.Entities
             {
                 amr1 = (value*100)/(double)amr1trim;
                 OnPropertyChanged();
+                //OnPropertyChanged(nameof(Amrp1));
             }
         }
 
@@ -77,6 +78,8 @@ namespace Database.Entities
             {
                 amr2 = value;
                 OnPropertyChanged();
+                //OnPropertyChanged(nameof(Amrp2));
+
             }
         }
 
@@ -87,6 +90,7 @@ namespace Database.Entities
             {
                 amr3 = value;
                 OnPropertyChanged();
+                //OnPropertyChanged(nameof(Amrp3));
             }
         }
 
@@ -97,6 +101,7 @@ namespace Database.Entities
             {
                 amrsale = value;
                 OnPropertyChanged();
+                //OnPropertyChanged(nameof(Amrpsale));
             }
         }
 
@@ -108,6 +113,7 @@ namespace Database.Entities
                 amrp1 = (value * 100) / (double)amr1trim;
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(Affinity));
+                OnPropertyChanged(nameof(PricePerSecond));
                 OnPropertyChanged(nameof(Price));
             }
         }
@@ -119,6 +125,8 @@ namespace Database.Entities
             {
                 amrp2 = value;
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(Affinity));
+                OnPropertyChanged(nameof(PricePerSecond));
                 OnPropertyChanged(nameof(Price));
             }
         }
@@ -130,6 +138,8 @@ namespace Database.Entities
             {
                 amrp3 = value;
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(Affinity));
+                OnPropertyChanged(nameof(PricePerSecond));
                 OnPropertyChanged(nameof(Price));
             }
         }
@@ -142,6 +152,7 @@ namespace Database.Entities
                 amrpsale = value;
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(Affinity));
+                OnPropertyChanged(nameof(PricePerSecond));
                 OnPropertyChanged(nameof(Price));
             }
         }
@@ -167,6 +178,7 @@ namespace Database.Entities
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(Amr2));
                 OnPropertyChanged(nameof(Amrp2));
+
             }
         }
 
@@ -211,7 +223,7 @@ namespace Database.Entities
             {
                 dpcoef = value;
                 OnPropertyChanged();
-                OnPropertyChanged(nameof(Price));
+                OnPropertyChanged(nameof(PricePerSecond));
             }
         }
 
@@ -221,6 +233,7 @@ namespace Database.Entities
             set
             {
                 progcoef = value;
+                OnPropertyChanged();
                 OnPropertyChanged(nameof(Price));
             }
         }
@@ -231,6 +244,7 @@ namespace Database.Entities
             set
             {
                 seascoef = value;
+                OnPropertyChanged();
                 OnPropertyChanged(nameof(Price));
             }
         }
@@ -271,7 +285,6 @@ namespace Database.Entities
             { 
                 cpp = value;
                 OnPropertyChanged();
-                OnPropertyChanged(nameof(Price));
             } 
         }
 
@@ -283,6 +296,7 @@ namespace Database.Entities
             { 
                 price = value;
                 OnPropertyChanged();
+                OnPropertyChanged(nameof(Cpp));
             }
         }
 

@@ -41,15 +41,15 @@
                  Width="30"
                  MaxLength="2"
                  Margin="0,15" 
-                 GotMouseCapture="tb_GotMouseCapture"
+                 GotKeyboardFocus="tb_GotKeyboardFocus"
                  TextChanged="tb_TextChanged" PreviewTextInput="tbNum_PreviewTextInput"/>
         <Label Content=":"  FontSize="16" FontWeight="Bold" Grid.Row="1" Grid.Column="3"
                VerticalAlignment="Center" VerticalContentAlignment="Center"/>
-        <TextBox x:Name="tbFromM" Grid.Row="1" Grid.Column="4" 
+        <TextBox x:Name="tbFromM" Grid.Row="1" Grid.Column="4" Text="00"
                  Width="30"
                  MaxLength="2"
                  Margin="0,15"
-                 GotMouseCapture="tb_GotMouseCapture"
+                 GotKeyboardFocus="tb_GotKeyboardFocus"
                  TextChanged="tb_TextChanged" PreviewTextInput="tbNum_PreviewTextInput"/>
 
         <Label Content="To:" Grid.Row="1" Grid.Column="5"
@@ -58,15 +58,15 @@
                  Width="30"
                  MaxLength="2"
                  Margin="0,15"
-                 GotMouseCapture="tb_GotMouseCapture"
+                 GotKeyboardFocus="tb_GotKeyboardFocus"
                  TextChanged="tb_TextChanged" PreviewTextInput="tbNum_PreviewTextInput"/>
         <Label Content=":" FontSize="16" FontWeight="Bold" Grid.Row="1" Grid.Column="7"
                VerticalAlignment="Center"/>
-        <TextBox x:Name="tbToM" Grid.Row="1" Grid.Column="8" 
+        <TextBox x:Name="tbToM" Grid.Row="1" Grid.Column="8" Text="59"
                  Width="30"
                  MaxLength="2"
                  Margin="0,15"
-                 GotMouseCapture="tb_GotMouseCapture"
+                 GotKeyboardFocus="tb_GotKeyboardFocus"
                  TextChanged="tb_TextChanged" PreviewTextInput="tbNum_PreviewTextInput"/>
 
         <Label Content="DP Coef:" Grid.Row="1" Grid.Column="9"
@@ -74,7 +74,7 @@
         <TextBox x:Name="tbCoef" Grid.Row="1" Grid.Column="10" 
                  Width="50"
                  Margin="0,15"
-                 GotMouseCapture="tb_GotMouseCapture"
+                 GotKeyboardFocus="tb_GotKeyboardFocus"
                  TextChanged="tb_TextChanged"/>
 
         <Label Content="Days(1-7): " Grid.Row="1" Grid.Column="11"
@@ -82,12 +82,12 @@
                Margin="15, 0, 0, 0"/>
         <TextBox x:Name="tbDays" Grid.Row="1" Grid.Column="12" Text="1234567"
                  VerticalAlignment="Center" HorizontalAlignment="Center"
-                 MaxLength="7" MinWidth="50" GotMouseCapture="tb_GotMouseCapture"
+                 MaxLength="7" MinWidth="50" GotKeyboardFocus="tb_GotKeyboardFocus"
                  TextChanged="tb_TextChanged" PreviewTextInput="tbNum1To7_PreviewTextInput"/>
 
         <CheckBox x:Name="cbIsPT" Content="" Grid.Row="1" Grid.Column="13" 
                   VerticalAlignment="Center" HorizontalAlignment="Center" Margin="15, 0, 0, 0"
-                  Checked="cb_Checked" Unchecked="cb_Unchecked">
+                  Checked="cb_Checked" Unchecked="cb_Unchecked" IsTabStop="False">
             <CheckBox.LayoutTransform>
                 <ScaleTransform ScaleX="1.5" ScaleY="1.5" />
             </CheckBox.LayoutTransform>
@@ -97,7 +97,7 @@
 
         <Button x:Name="btnDelete" Grid.Row="1" Grid.Column="15" 
                 Background="White" BorderThickness="0"
-                Click="btnDelete_Click">
+                Click="btnDelete_Click" IsTabStop="False">
             <Image Source="\images\Red_X.png" Width="20" Height="20"></Image>
         </Button>
     </Grid>

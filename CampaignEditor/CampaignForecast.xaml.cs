@@ -9,7 +9,6 @@ using Database.DTOs.MediaPlanDTO;
 using Database.DTOs.MediaPlanHistDTO;
 using Database.DTOs.MediaPlanTermDTO;
 using Database.DTOs.SchemaDTO;
-using Database.DTOs.TargetDTO;
 using Database.Entities;
 using Database.Repositories;
 using Microsoft.Win32;
@@ -19,11 +18,9 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Diagnostics.Tracing;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Threading.Channels;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -65,6 +62,10 @@ namespace CampaignEditor.UserControls
         private List<int> _versions = new List<int>();
         private ObservableCollection<ChannelDTO> _channels = new ObservableCollection<ChannelDTO>();
 
+        List<DayOfWeek> filteredDays = new List<DayOfWeek> 
+        { DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday,
+          DayOfWeek.Friday, DayOfWeek.Saturday, DayOfWeek.Sunday};
+
         // for duration of campaign
         DateTime startDate;
         DateTime endDate;
@@ -80,6 +81,7 @@ namespace CampaignEditor.UserControls
 
         MediaPlanConverter _mpConverter;
         MediaPlanTermConverter _mpTermConverter;
+        
 
         public event PropertyChangedEventHandler? PropertyChanged;
         public void OnPropertyChanged([CallerMemberName] string propertyname = null)
@@ -158,6 +160,41 @@ namespace CampaignEditor.UserControls
             InitializeVersions(_maxVersion);
             await InitializeChannels();
             FillCbVersions();
+            FillLvFilterDays();
+        }
+
+        private void FillLvFilterDays()
+        {
+            lvFilterDays.Items.Add(DayOfWeek.Monday);
+            lvFilterDays.Items.Add(DayOfWeek.Tuesday);
+            lvFilterDays.Items.Add(DayOfWeek.Wednesday);
+            lvFilterDays.Items.Add(DayOfWeek.Thursday);
+            lvFilterDays.Items.Add(DayOfWeek.Friday);
+            lvFilterDays.Items.Add(DayOfWeek.Saturday);
+            lvFilterDays.Items.Add(DayOfWeek.Sunday);
+
+            //lvFilterDays.SelectAll();
+        }
+
+        private void lvFilterDays_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            filteredDays.Clear();
+            if (lvFilterDays.SelectedItems.Count == 0)
+            {
+                foreach (DayOfWeek day in lvFilterDays.Items)
+                    filteredDays.Add(day);
+            }
+            else
+            {
+                foreach (DayOfWeek day in lvFilterDays.SelectedItems)
+                    filteredDays.Add(day);
+            }
+
+
+            dgMediaPlans._filteredDays = filteredDays;
+
+            var selectedChannels = lvChannels.SelectedItems.Cast<ChannelDTO>();
+            _selectedChannels.ReplaceRange(selectedChannels);
 
         }
 
@@ -245,11 +282,10 @@ namespace CampaignEditor.UserControls
                 amrTasks.Add(task);
             }
             await Task.WhenAll(amrTasks);
-            
+
 
             //await _databaseFunctionsController.StartAMRCalculation(_campaign.cmpid, 40, 40);
 
-            await CalculateMPValues(_campaign.cmpid, version);
 
             await LoadData(version, true);
 
@@ -345,6 +381,9 @@ namespace CampaignEditor.UserControls
             _cmpVersion = version;
             isEditableVersion = (_maxVersion == _cmpVersion) || isEnabled;
 
+            await CalculateMPValues(_campaign.cmpid, version);
+
+
             // Filling lvChannels and dictionary
             FillLvChannels();
             await FillMPList();
@@ -363,6 +402,8 @@ namespace CampaignEditor.UserControls
             dgMediaPlans.CanUserEdit = new ObservableBool(canUserEdit && isEditableVersion);
             dgMediaPlans._selectedChannels = _selectedChannels;
             dgMediaPlans._allMediaPlans = _allMediaPlans;
+            dgMediaPlans._filteredDays = filteredDays;
+
             Dictionary<int, string> chidChannelDictionary = new Dictionary<int, string>();
             foreach (ChannelDTO channel in _channels)
             {
@@ -1240,6 +1281,8 @@ namespace CampaignEditor.UserControls
 
             return null;
         }
+
+
     }
 }
             

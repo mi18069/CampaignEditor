@@ -151,7 +151,7 @@
                                         IsReadOnly="True"/>
                 <DataGridTextColumn Header="Ins" Binding="{Binding MediaPlan.Insertations}"
                                         IsReadOnly="True"/>
-                <DataGridTextColumn Header="PPS" Binding="{Binding MediaPlan.PricePerSecond, StringFormat=N2}"
+                <DataGridTextColumn Header="CPSP" Binding="{Binding MediaPlan.PricePerSecond, StringFormat=N2}"
                                         IsReadOnly="True"/>
                 <DataGridTextColumn Header="Cost" Binding="{Binding MediaPlan.Price, StringFormat=N2}"
                                         IsReadOnly="True"/>

@@ -29,9 +29,9 @@
                 <DataGridTextColumn Width="*"
                                     IsReadOnly="True" Binding="{Binding Insertations, Mode=TwoWay}"/>
                 <DataGridTextColumn Width="*"
-                                    IsReadOnly="True" Binding="{Binding Grp, Mode=TwoWay}"/>
+                                    IsReadOnly="True" Binding="{Binding Grp, Mode=TwoWay, StringFormat=N2}"/>
                 <DataGridTextColumn Width="*"
-                                    IsReadOnly="True" Binding="{Binding Budget, Mode=TwoWay}"/>
+                                    IsReadOnly="True" Binding="{Binding Budget, Mode=TwoWay, StringFormat=N2}"/>
             </DataGrid.Columns>
             <DataGrid.RowStyle>
                 <Style TargetType="DataGridRow">
