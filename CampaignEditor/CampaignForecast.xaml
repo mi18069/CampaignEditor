@@ -37,10 +37,13 @@
                 <RowDefinition Height="10"/>
             </Grid.RowDefinitions>
 
-            <ListView x:Name="lvChannels" Grid.Row="1" Grid.Column="1" 
+            <Button x:Name="btnSelectChannels" Grid.Row="1" Grid.Column="1"
+                    Content="Select all channels" Height="20" Margin="0, 0, 10, 0"
+                    Background="White" Click="btnSelectChannels_Click"/>
+            <ListView x:Name="lvChannels" Grid.Row="2" Grid.Column="1" 
                       MaxHeight="200"
                       DisplayMemberPath="chname" MinWidth="220" MinHeight="100"
-                      SelectionMode="Multiple" Margin="0, 0 ,10,0"
+                      SelectionMode="Multiple" Margin="0, 10 ,10,0"
                       SelectionChanged="lvChannels_SelectionChanged"
                       PreviewMouseRightButtonDown="lvChannels_PreviewMouseRightButtonDown"
                       AllowDrop="True">
@@ -51,10 +54,12 @@
                     </Style>
                     </ListView.ItemContainerStyle>
                 </ListView>
-                <Border Grid.Row="2" Grid.Column="1" 
+            
+                <Border Grid.Row="3" Grid.Column="1" 
                     BorderBrush="LightGray" BorderThickness="1" Margin="0, 10, 10, 10">
                 <Grid>
                     <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="auto"/>
                         <ColumnDefinition Width="auto"/>
                         <ColumnDefinition Width="auto"/>
                         <ColumnDefinition Width="auto"/>
@@ -64,12 +69,16 @@
                     <ComboBox Grid.Column="1" x:Name="cbVersions" HorizontalAlignment="Left"
                              SelectionChanged="CbVersions_SelectionChanged"/>
                     <Button x:Name="btnNewVersion" Grid.Column="2" HorizontalAlignment="Left"
-                            Click="btnNewVersion_Click" Margin="20, 0, 0 ,0" BorderThickness="0" Background="White">
+                            Click="btnNewVersion_Click" Margin="15, 0, 0 ,0" BorderThickness="0" Background="White">
                         <Image Source="\images\GreenPlus.png" Width="20" Height="20"></Image>
                     </Button>
                     <Button x:Name="btnClear" Grid.Column="3" HorizontalAlignment="Left"
-                            Click="btnClear_Click"  Margin="20, 0, 0 ,0" BorderThickness="0" Background="White">
+                            Click="btnClear_Click"  Margin="15, 0, 0 ,0" BorderThickness="0" Background="White">
                         <Image Source="\images\Red_X.png" Width="20" Height="20"></Image>
+                    </Button>
+                    <Button x:Name="btnRefresh" Grid.Column="   4" HorizontalAlignment="Left"
+                            Click="btnRefresh_Click" Margin="15, 0, 0, 0" BorderThickness="0" Background="White">
+                        <Image Source="\images\refresh_icon3.png" Width="20" Height="20"></Image>
                     </Button>
                 </Grid>
             </Border>
@@ -164,7 +173,7 @@
             </TabControl>
 
 
-            <Border Grid.Row="3" Grid.Column="1" 
+            <Border Grid.Row="4" Grid.Column="1" 
                 BorderBrush="LightGray" BorderThickness="1" Margin="0, 10, 10, 10">
                 <Grid>
                     <Grid.ColumnDefinitions>
@@ -183,7 +192,7 @@
 
                     <Label Grid.Row="1" Grid.Column="1" Content="Referenced dates" 
                            FontWeight="Light" HorizontalAlignment="Center"/>
-                    <ScrollViewer Grid.Row="2" Grid.Column="1" Height="70" VerticalScrollBarVisibility="Auto">
+                    <ScrollViewer Grid.Row="2" Grid.Column="1" Height="50" VerticalScrollBarVisibility="Auto">
                         <StackPanel  x:Name="spLoadedDateRanges"
                                     HorizontalAlignment="Center"/>
                     </ScrollViewer>
@@ -193,7 +202,7 @@
                 </Grid>
             </Border>
 
-            <Border Grid.Row="4" Grid.Column="1" 
+            <Border Grid.Row="5" Grid.Column="1" 
                 BorderBrush="LightGray" BorderThickness="1" 
                     VerticalAlignment="Top" Margin="0, 10, 10, 10">
                 <Grid>
@@ -297,7 +306,7 @@
                 </Grid>
             </Border>
 
-            <ScrollViewer Grid.Row="5" Grid.Column="1" Grid.RowSpan="3">
+            <ScrollViewer Grid.Row="6" Grid.Column="1" Grid.RowSpan="3">
                 <Grid >
                     <Grid.RowDefinitions>
                         <RowDefinition Height="50"/>

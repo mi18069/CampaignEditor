@@ -1,16 +1,12 @@
-﻿using Database.DTOs.MediaPlanTermDTO;
-using Database.DTOs.SpotDTO;
-using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System;
 using System.ComponentModel;
-using System.Linq;
 using System.Runtime.CompilerServices;
 
 namespace Database.Entities
 {
     public class MediaPlan : INotifyPropertyChanged
     {
+
         public int xmpid { get; set; }
         public int schid { get; set; }
         public int cmpid { get; set; }
@@ -60,12 +56,82 @@ namespace Database.Entities
             get { return Amrpsale != 0 ? (Amrp1 / Amrpsale) * 100 : 0; }
         }
 
+        public string Name
+        {
+            get { return name; }
+            set
+            {
+                name = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public string Position
+        {
+            get { return position; }
+            set
+            {
+                position = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public string Stime
+        {
+            get { return stime; }
+            set
+            {
+                stime = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public string? Etime
+        {
+            get { return etime; }
+            set
+            {
+                etime = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public string? Blocktime
+        {
+            get { return blocktime; }
+            set
+            {
+                blocktime = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public string Type
+        {
+            get { return type; }
+            set
+            {
+                type = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public bool Special
+        {
+            get { return special; }
+            set
+            {
+                special = value;
+                OnPropertyChanged();
+            }
+        }
+
         public double Amr1
         {
             get { return amr1 * ((double)amr1trim / 100); }
             set
             {
-                amr1 = (value*100)/(double)amr1trim;
+                amr1 = value * (100 / (double)amr1trim);
                 OnPropertyChanged();
                 //OnPropertyChanged(nameof(Amrp1));
             }
@@ -76,7 +142,7 @@ namespace Database.Entities
             get { return amr2 * ((double)amr2trim / 100); }
             set
             {
-                amr2 = value;
+                amr2 = value * (100 / (double)amr2trim);
                 OnPropertyChanged();
                 //OnPropertyChanged(nameof(Amrp2));
 
@@ -88,7 +154,7 @@ namespace Database.Entities
             get { return amr3 * ((double)amr3trim / 100); }
             set
             {
-                amr3 = value;
+                amr3 = value * (100 / (double)amr3trim);
                 OnPropertyChanged();
                 //OnPropertyChanged(nameof(Amrp3));
             }
@@ -99,7 +165,7 @@ namespace Database.Entities
             get { return amrsale * ((double)amrsaletrim / 100); }
             set
             {
-                amrsale = value;
+                amrsale = value * (100 / (double)amrsaletrim);
                 OnPropertyChanged();
                 //OnPropertyChanged(nameof(Amrpsale));
             }
@@ -110,7 +176,7 @@ namespace Database.Entities
             get { return amrp1 * ((double)amr1trim / 100); }
             set
             {
-                amrp1 = (value * 100) / (double)amr1trim;
+                amrp1 = value * (100 / (double)amr1trim);
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(Affinity));
                 OnPropertyChanged(nameof(PricePerSecond));
@@ -123,7 +189,7 @@ namespace Database.Entities
             get { return amrp2 * ((double)amr2trim / 100); }
             set
             {
-                amrp2 = value;
+                amrp2 = value * (100 / (double)amr2trim);
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(Affinity));
                 OnPropertyChanged(nameof(PricePerSecond));
@@ -136,7 +202,7 @@ namespace Database.Entities
             get { return amrp3 * ((double)amr3trim / 100); }
             set
             {
-                amrp3 = value;
+                amrp3 = value * (100 / (double)amr3trim);
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(Affinity));
                 OnPropertyChanged(nameof(PricePerSecond));
@@ -149,7 +215,7 @@ namespace Database.Entities
             get { return amrpsale * ((double)amrsaletrim /100); }
             set
             {
-                amrpsale = value;
+                amrpsale = value * (100 / (double)amrsaletrim);
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(Affinity));
                 OnPropertyChanged(nameof(PricePerSecond));
@@ -290,7 +356,6 @@ namespace Database.Entities
 
         public double Price
         {
-            //get { return (Cpp/30) * Length * amrpsale * progcoef * dpcoef * seascoef * seccoef ;}
             get { return price; }
             set 
             { 

@@ -205,6 +205,7 @@ namespace CampaignEditor
             cbSectable2.Items.Clear();
 
             List<SectableDTO> sectables = (List<SectableDTO>)await _sectableController.GetAllSectablesByOwnerId(_campaign.clid);
+            
             foreach (var sectable in sectables)
             {
                 cbSectable.Items.Add(sectable);
@@ -247,6 +248,8 @@ namespace CampaignEditor
             await AssignPricelistValues();
             await AssignDayPartsValues();
             await AssignChannelsValues();
+            AssignSectableValues();
+            AssignSeasonalityValues();
         }
         private async Task AssignPricelistValues()
         {
@@ -323,6 +326,38 @@ namespace CampaignEditor
                 }
             }
         }
+
+        private void AssignSectableValues()
+        {
+
+            for (int index = 0; index < cbSectable.Items.Count; index++)
+            {
+                SectableDTO sectable = cbSectable.Items[index] as SectableDTO;
+                if (sectable.sctid == _pricelist.sectbid)
+                {
+                    cbSectable.SelectedIndex = index;
+                }
+                if (sectable.sctid == _pricelist.sectbid2)
+                {
+                    cbSectable2.SelectedIndex = index;
+                }
+            }
+
+        }
+        private void AssignSeasonalityValues()
+        {
+
+            for (int index = 0; index < cbSeasonality.Items.Count; index++)
+            {
+                SeasonalityDTO seasonality = cbSeasonality.Items[index] as SeasonalityDTO;
+                if (seasonality.seasid == _pricelist.seastbid)
+                {
+                    cbSeasonality.SelectedIndex = index;
+                }
+            }
+
+        }
+        
         #endregion
 
         #region Writing into base
@@ -428,8 +463,9 @@ namespace CampaignEditor
             if (_pricelist == null)
                 if (await CheckName() == false)
                     return false; 
-            if (CheckCP() && CheckMinGRP() &&
-                CheckValidity() && CheckComboBoxes() && CheckDPs())
+            if (CheckCP() && CheckMinGRP() && 
+                CheckValidity() && CheckComboBoxes() && CheckDPs() &&
+                CheckNonEmptyChannelsSelected())
             {
                 if ((bool)chbSectable2.IsChecked)
                 {
@@ -440,6 +476,25 @@ namespace CampaignEditor
             }
             else
                 return false;
+        }
+
+        private bool CheckNonEmptyChannelsSelected()
+        {
+            bool checkedChannel = false;
+            foreach (CheckBox channelBox in wpChannels.Children)
+            {
+                if ((bool)channelBox.IsChecked)
+                {
+                    checkedChannel = true;
+                    break;
+                }
+            }
+            if (!checkedChannel)
+            {
+                MessageBox.Show("Select at least one channel", "Result", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+
+            return checkedChannel;
         }
 
         // Values in tbSectable2 needs to be 4 chars long integers

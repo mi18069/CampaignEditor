@@ -18,6 +18,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Diagnostics.Tracing;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -155,12 +156,53 @@ namespace CampaignEditor.UserControls
 
             dgHist.ItemsSource = _showMPHist;
 
+
             SubscribeControllers();
             // Initializing important lists
             InitializeVersions(_maxVersion);
             await InitializeChannels();
+
+            /*var xmpChannels = await _mediaPlanController.GetAllChannelsByCmpid(_campaign.cmpid, _maxVersion);
+            var a = _channels;
+            List<int> uChannels = new List<int>();
+            foreach (var channel in _channels)
+            {
+                bool found = false;
+                foreach (int chid in xmpChannels)
+                {
+                    if (channel.chid == chid)
+                    {
+                        found = true;
+                    }
+                }
+                if (!found)
+                    uChannels.Add(channel.chid);
+            }
+
+            foreach (int chid in uChannels)
+            {
+                await InsertDataForChannel(_maxVersion, chid);
+            }*/
+
             FillCbVersions();
             FillLvFilterDays();
+
+        }
+
+        public async Task InsertDataForChannel(int version, int chid)
+        {
+
+            // Inserting new MediaPlans in database
+
+            await InsertInDatabase(chid, version);
+
+
+            List<MediaPlanDTO> mediaPlans = (await _mediaPlanController.GetAllChannelCmpMediaPlans(chid, _campaign.cmpid, version)).ToList();            
+
+            // We'll make nChannel threads, and for each thread we'll run startAMRCalculation for each MediaPlan
+
+            Task task = Task.Run(() => StartAMRByMediaPlan(_campaign.cmpid, 40, 40, mediaPlans));
+            
         }
 
         private void FillLvFilterDays()
@@ -266,6 +308,7 @@ namespace CampaignEditor.UserControls
             }
             // waiting for all tasks to finish
             await Task.WhenAll(insertingTasks);
+            
 
             List<List<MediaPlanDTO>> mediaPlansByChannels = new List<List<MediaPlanDTO>>();
             foreach (ChannelDTO channel in _channels)
@@ -286,6 +329,7 @@ namespace CampaignEditor.UserControls
 
             //await _databaseFunctionsController.StartAMRCalculation(_campaign.cmpid, 40, 40);
 
+            await CalculateMPValues(_campaign.cmpid, version);
 
             await LoadData(version, true);
 
@@ -380,9 +424,6 @@ namespace CampaignEditor.UserControls
         {
             _cmpVersion = version;
             isEditableVersion = (_maxVersion == _cmpVersion) || isEnabled;
-
-            await CalculateMPValues(_campaign.cmpid, version);
-
 
             // Filling lvChannels and dictionary
             FillLvChannels();
@@ -533,6 +574,9 @@ namespace CampaignEditor.UserControls
 
         }
 
+        public event EventHandler<ChangeVersionEventArgs> SetLoadingPage;
+        public event EventHandler<ChangeVersionEventArgs> SetContentPage;
+
         private async void btnClear_Click(object sender, RoutedEventArgs e)
         {
             if (MessageBox.Show("Are you sure you want to clear all spots?", "Result", MessageBoxButton.OKCancel,
@@ -542,6 +586,24 @@ namespace CampaignEditor.UserControls
                 lvChannels.SelectedItems.Clear();
                 
             }
+        }
+
+        public async void btnRefresh_Click(object sender, RoutedEventArgs e)
+        {
+            if (MessageBox.Show("Synchronize data?", "Result", MessageBoxButton.OKCancel,
+                MessageBoxImage.Question) == MessageBoxResult.OK)
+            {
+                SetLoadingPage?.Invoke(this, null);
+
+                // When pricelists or calculating inside MediaPlans are changed 
+                await CalculateMPValues(_campaign.cmpid, _maxVersion);
+
+                await LoadData(_maxVersion);
+
+                SetContentPage?.Invoke(this, null);
+
+            }
+
         }
 
         private async Task ClearAllMPTerms()
@@ -1152,6 +1214,7 @@ namespace CampaignEditor.UserControls
 
         private async void btnExport_Click(object sender, RoutedEventArgs e)
         {
+
             var selectedTabItem = tcGrids.SelectedItem as TabItem;
             tiSpotWeekGoals.IsSelected = true;
             Application.Current.Dispatcher.Invoke(DispatcherPriority.ApplicationIdle, new Action(async () =>
@@ -1196,11 +1259,12 @@ namespace CampaignEditor.UserControls
 
                         SaveFile(saveFileDialog, memoryStream);
                     }
-              
+
                 }
             }));
             tiSpotGoals.IsSelected = true;
 
+            
         }
 
         private void SaveFile(SaveFileDialog saveFileDialog, MemoryStream memoryStream)
@@ -1282,7 +1346,18 @@ namespace CampaignEditor.UserControls
             return null;
         }
 
-
+        private void btnSelectChannels_Click(object sender, RoutedEventArgs e)
+        {
+            // If all channels are selected
+            if (lvChannels.SelectedItems.Count == lvChannels.Items.Count)
+            {
+                lvChannels.UnselectAll();
+            }
+            else
+            {
+                lvChannels.SelectAll();
+            }
+        }
     }
 }
             

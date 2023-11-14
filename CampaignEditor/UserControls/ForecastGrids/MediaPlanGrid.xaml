@@ -27,11 +27,12 @@
                   EnableRowVirtualization="True"
                   EnableColumnVirtualization="True" 
                   SelectionChanged="DataGrid_SelectionChanged"
-                  MouseRightButtonDown="DataGrid_MouseRightButtonDown">
+                  MouseRightButtonDown="DataGrid_MouseRightButtonDown"
+                  PreparingCellForEdit="dgMediaPlans_PreparingCellForEdit"
+                  CellEditEnding="dgMediaPlans_CellEditEnding"
+                  CurrentCellChanged="dgMediaPlans_CurrentCellChanged">
             <DataGrid.CellStyle>
                 <Style TargetType="DataGridCell">
-                    <!-- <Setter Property="IsHitTestVisible" Value="{Binding CanUserEdit.Value, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type local:MediaPlanGrid}}}" /> -->
-
                     <Style.Triggers>
                         <Trigger Property="IsFocused" Value="True">
                             <Setter Property="Background" Value="Orange"/>
@@ -51,110 +52,82 @@
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Channel" x:Name="tcChannel"
                                         IsReadOnly="True" />
-                <DataGridTextColumn Header="Program" Binding="{Binding MediaPlan.name, Mode=TwoWay}"
-                                        IsReadOnly="True" />
-                <DataGridTextColumn Header="Position" Binding="{Binding MediaPlan.position, Mode=TwoWay}" 
-                                        IsReadOnly="True"/>
-                <DataGridTextColumn Header="Start time" Binding="{Binding MediaPlan.stime, Mode=TwoWay}" 
-                                        IsReadOnly="True"/>
-                <DataGridTextColumn Header="End time" Binding="{Binding MediaPlan.etime, Mode=TwoWay}" 
-                                        IsReadOnly="True"/>
-                <DataGridTextColumn Header="Block time" Binding="{Binding MediaPlan.blocktime , Mode=TwoWay}" 
-                                        IsReadOnly="True"/>
-                <DataGridTextColumn Header="Type" Binding="{Binding MediaPlan.type, Mode=TwoWay}" 
-                                        IsReadOnly="True" Visibility="Collapsed"/>
-                <DataGridCheckBoxColumn Header="Special" Binding="{Binding MediaPlan.special, Mode=TwoWay}" 
-                                        Visibility="Collapsed">
-                    <DataGridCheckBoxColumn.EditingElementStyle>
-                        <Style TargetType="{x:Type CheckBox}">
-                            <EventSetter Event="Checked" Handler="SpecialCheckBox_CheckedChanged"/>
-                            <EventSetter Event="Unchecked" Handler="SpecialCheckBox_CheckedChanged"/>
+                <DataGridTextColumn Header="Program" Binding="{Binding MediaPlan.Name, Mode=TwoWay}"/>
+                <DataGridComboBoxColumn Header="Position" SelectedItemBinding="{Binding MediaPlan.Position, Mode=TwoWay}">
+                    <DataGridComboBoxColumn.ElementStyle>
+                        <Style TargetType="ComboBox"/>
+                    </DataGridComboBoxColumn.ElementStyle>
+                    <DataGridComboBoxColumn.EditingElementStyle>
+                        <Style TargetType="ComboBox"/>
+                    </DataGridComboBoxColumn.EditingElementStyle>
+                </DataGridComboBoxColumn>
+
+
+
+                <DataGridTextColumn Header="Start time" Binding="{Binding MediaPlan.Stime, Mode=TwoWay}">
+                    <DataGridTextColumn.EditingElementStyle>
+                        <Style TargetType="{x:Type TextBox}">
+                            <Setter Property="MaxLength" Value="5"/>
                         </Style>
-                    </DataGridCheckBoxColumn.EditingElementStyle>
-                </DataGridCheckBoxColumn>
+                    </DataGridTextColumn.EditingElementStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn Header="End time" Binding="{Binding MediaPlan.Etime, Mode=TwoWay}">
+                    <DataGridTextColumn.EditingElementStyle>
+                        <Style TargetType="{x:Type TextBox}">
+                            <Setter Property="MaxLength" Value="5"/>
+                        </Style>
+                    </DataGridTextColumn.EditingElementStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn Header="Block time" Binding="{Binding MediaPlan.Blocktime , Mode=TwoWay}">
+                    <DataGridTextColumn.EditingElementStyle>
+                        <Style TargetType="{x:Type TextBox}">
+                            <Setter Property="MaxLength" Value="5"/>
+                        </Style>
+                    </DataGridTextColumn.EditingElementStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn Header="Type" Binding="{Binding MediaPlan.Type, Mode=TwoWay}" Visibility="Collapsed"/>
+                <DataGridCheckBoxColumn Header="Special" Binding="{Binding MediaPlan.Special, Mode=TwoWay}" 
+                                        Visibility="Collapsed"/>
+
                 <DataGridTextColumn Header="AMR 1" Binding="{Binding MediaPlan.Amr1, Mode=TwoWay, StringFormat=N2}" 
                                              IsReadOnly="True" Visibility="Collapsed" />
                 <DataGridTextColumn Header="AMR% 1" Binding="{Binding MediaPlan.Amrp1, Mode=TwoWay, StringFormat=N2}" 
                                             IsReadOnly="True"/>
                 <DataGridTextColumn Header="AMR 1 Trim" Binding="{Binding MediaPlan.Amr1trim, Mode=TwoWay}" 
-                                             Visibility="Collapsed">
-                    <DataGridTextColumn.EditingElementStyle>
-                        <Style TargetType="{x:Type TextBox}">
-                            <EventSetter Event="TextChanged" Handler="TextBoxAMRTrim_TextChanged"/>
-                            <EventSetter Event="PreviewTextInput" Handler="TextBox_PreviewTextInput"/>
-                            <EventSetter Event="PreviewKeyDown" Handler="TextBox_PreviewKeyDown"/>
-                        </Style>
-                    </DataGridTextColumn.EditingElementStyle>
-                </DataGridTextColumn>
+                                             Visibility="Collapsed"/>
+
                 <DataGridTextColumn Header="AMR 2" Binding="{Binding MediaPlan.Amr2, Mode=TwoWay, StringFormat=N2}" 
                                             IsReadOnly="True" Visibility="Collapsed"/>
                 <DataGridTextColumn Header="AMR% 2" Binding="{Binding MediaPlan.Amrp2, Mode=TwoWay, StringFormat=N2}" 
                                             IsReadOnly="True" Visibility="Collapsed"/>
                 <DataGridTextColumn Header="AMR 2 Trim" Binding="{Binding MediaPlan.Amr2trim, Mode=TwoWay}" 
-                                             Visibility="Collapsed">
-                    <DataGridTextColumn.EditingElementStyle>
-                        <Style TargetType="{x:Type TextBox}">
-                            <EventSetter Event="TextChanged" Handler="TextBoxAMRTrim_TextChanged"/>
-                            <EventSetter Event="PreviewTextInput" Handler="TextBox_PreviewTextInput"/>
-                            <EventSetter Event="PreviewKeyDown" Handler="TextBox_PreviewKeyDown"/>
-                        </Style>
-                    </DataGridTextColumn.EditingElementStyle>
-                </DataGridTextColumn>
+                                             Visibility="Collapsed"/>
+
                 <DataGridTextColumn Header="AMR 3" Binding="{Binding MediaPlan.Amr3, Mode=TwoWay, StringFormat=N2}" 
                                             IsReadOnly="True" Visibility="Collapsed"/>
                 <DataGridTextColumn Header="AMR% 3" Binding="{Binding MediaPlan.Amrp3, Mode=TwoWay, StringFormat=N2}" 
                                             IsReadOnly="True" Visibility="Collapsed"/>
                 <DataGridTextColumn Header="AMR 3 Trim" Binding="{Binding MediaPlan.Amr3trim, Mode=TwoWay}" 
-                                             Visibility="Collapsed">
-                    <DataGridTextColumn.EditingElementStyle>
-                        <Style TargetType="{x:Type TextBox}">
-                            <EventSetter Event="TextChanged" Handler="TextBoxAMRTrim_TextChanged"/>
-                            <EventSetter Event="PreviewTextInput" Handler="TextBox_PreviewTextInput"/>
-                            <EventSetter Event="PreviewKeyDown" Handler="TextBox_PreviewKeyDown"/>
-                        </Style>
-                    </DataGridTextColumn.EditingElementStyle>
-                </DataGridTextColumn>
+                                             Visibility="Collapsed"/>
+
                 <DataGridTextColumn Header="AMR Sale" Binding="{Binding MediaPlan.Amrsale, Mode=TwoWay, StringFormat=N2}"
                                         IsReadOnly="True" Visibility="Collapsed"/>
                 <DataGridTextColumn Header="AMR% Sale" Binding="{Binding MediaPlan.Amrpsale, Mode=TwoWay, StringFormat=N2}" 
                                             IsReadOnly="True"/>
                 <DataGridTextColumn Header="AMR Sale Trim" Binding="{Binding MediaPlan.Amrsaletrim, Mode=TwoWay}" 
-                                             Visibility="Collapsed">
-                    <DataGridTextColumn.EditingElementStyle>
-                        <Style TargetType="{x:Type TextBox}">
-                            <EventSetter Event="TextChanged" Handler="TextBoxAMRTrim_TextChanged"/>
-                            <EventSetter Event="PreviewTextInput" Handler="TextBox_PreviewTextInput"/>
-                            <EventSetter Event="PreviewKeyDown" Handler="TextBox_PreviewKeyDown"/>
-                        </Style>
-                    </DataGridTextColumn.EditingElementStyle>
-                </DataGridTextColumn>
+                                             Visibility="Collapsed"/>
+
                 <DataGridTextColumn Header="Affinity" Binding="{Binding MediaPlan.Affinity, StringFormat=N2}"
                                             IsReadOnly="True"/>
-                <DataGridTextColumn Header="Prog Coef" Binding="{Binding MediaPlan.progcoef, Mode=TwoWay, StringFormat=N2}" >
-                    <DataGridTextColumn.EditingElementStyle>
-                        <Style TargetType="{x:Type TextBox}">
-                            <EventSetter Event="TextChanged" Handler="ProgCoef_TextChanged"/>
-                            <EventSetter Event="PreviewGotKeyboardFocus" Handler="ProgCoef_PreviewGotKeyboardFocus"/>
-                            <EventSetter Event="PreviewLostKeyboardFocus" Handler="ProgCoef_PreviewLostKeyboardFocus"/>
-                            <EventSetter Event="PreviewTextInput" Handler="TextBox_PreviewTextInput"/>
-                            <EventSetter Event="PreviewKeyDown" Handler="TextBox_PreviewKeyDown"/>
-                        </Style>
-                    </DataGridTextColumn.EditingElementStyle>
-                </DataGridTextColumn>
-                <DataGridTextColumn Header="DP Coef" Binding="{Binding MediaPlan.Dpcoef, StringFormat=N2}"
-                                        IsReadOnly="True"/>
-                <DataGridTextColumn Header="Seas Coef" Binding="{Binding MediaPlan.Seascoef, StringFormat=N2}"
-                                        IsReadOnly="True"/>
-                <DataGridTextColumn Header="Sec Coef" Binding="{Binding MediaPlan.Seccoef, StringFormat=N2}"
-                                        IsReadOnly="True"/>
-                <DataGridTextColumn Header="CPP" Binding="{Binding MediaPlan.Cpp, StringFormat=N2}"
-                                        IsReadOnly="True"/>
+                <DataGridTextColumn Header="Prog Coef" Binding="{Binding MediaPlan.Progcoef, Mode=TwoWay, StringFormat=N2}" />
+                <DataGridTextColumn Header="DP Coef" Binding="{Binding MediaPlan.Dpcoef, StringFormat=N2}"/>
+                <DataGridTextColumn Header="Seas Coef" Binding="{Binding MediaPlan.Seascoef, StringFormat=N2}"/>
+                <DataGridTextColumn Header="Sec Coef" Binding="{Binding MediaPlan.Seccoef, StringFormat=N2}"/>
+                <DataGridTextColumn Header="CPP" Binding="{Binding MediaPlan.Cpp, StringFormat=N2}"/>
                 <DataGridTextColumn Header="Ins" Binding="{Binding MediaPlan.Insertations}"
                                         IsReadOnly="True"/>
-                <DataGridTextColumn Header="CPSP" Binding="{Binding MediaPlan.PricePerSecond, StringFormat=N2}"
-                                        IsReadOnly="True"/>
-                <DataGridTextColumn Header="Cost" Binding="{Binding MediaPlan.Price, StringFormat=N2}"
-                                        IsReadOnly="True"/>
+                <DataGridTextColumn Header="CPSP" Binding="{Binding MediaPlan.PricePerSecond, StringFormat=N2}"/>
+                <DataGridTextColumn Header="Cost" Binding="{Binding MediaPlan.Price, StringFormat=N2}"/>
             </DataGrid.Columns>
         </DataGrid>
     </Grid>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Globalization;
+using System.Linq;
 using System.Windows.Controls;
 
 namespace CampaignEditor
@@ -157,5 +158,49 @@ namespace CampaignEditor
             }
         }
 
+        // Transforms hhmm format to hh:mm
+        public static string ReturnGoodTimeFormat(string timeString)
+        {
+            if (timeString == null)
+            {
+                return null;
+            }
+            else if (timeString.Length == 4)
+            {
+                int mins;
+                if (timeString.Any(c => !Char.IsDigit(c)))
+                {
+                    throw new ArgumentException("Invalid timeString format");
+                }
+
+                if (Int32.TryParse(timeString.Substring(2, 2), out mins))
+                {
+                    if (mins > 59)
+                    {
+                        throw new ArgumentException("Invalid timeString format");
+                    }
+                }
+
+                return timeString.Substring(0,2) + ":" + timeString.Substring(2,2);
+            }
+            else if (timeString.Length == 5)
+            {
+                int hours, mins;
+                if (Int32.TryParse(timeString.Substring(0, 2), out hours) &&
+                    Int32.TryParse(timeString.Substring(3, 2), out mins))
+                {
+                    if (mins > 59)
+                    {
+                        throw new ArgumentException("Invalid timeString format");
+                    }
+                    return timeString.Substring(0, 2) + ":" + timeString.Substring(3, 2);
+                }
+            }
+            else
+            {
+                throw new ArgumentException("Invalid timeString format");
+            }
+            return null;
+        }
     }
 }

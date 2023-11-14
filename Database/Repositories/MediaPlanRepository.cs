@@ -2,11 +2,9 @@
 using Dapper;
 using Database.Data;
 using Database.DTOs.MediaPlanDTO;
-using Database.DTOs.TargetValueDTO;
 using Database.Entities;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -38,7 +36,7 @@ namespace Database.Repositories
                 Schid = mediaPlanDTO.schid,
                 Cmpid = mediaPlanDTO.cmpid,
                 Chid = mediaPlanDTO.chid,
-                Name = mediaPlanDTO.name,
+                Name = mediaPlanDTO.name.Trim(),
                 Version = mediaPlanDTO.version,
                 Position = mediaPlanDTO.position,
                 Stime = mediaPlanDTO.stime,
@@ -608,6 +606,9 @@ namespace Database.Repositories
         {
             using var connection = _context.GetConnection();
 
+            var a =mediaPlanDTO.pps;
+            var b = Math.Round(mediaPlanDTO.pps, 2);
+       
             var affected = await connection.ExecuteAsync(
                  "UPDATE xmp SET xmpid = @Xmpid, schid = @Schid, cmpid = @Cmpid, chid = @Chid, naziv = @Name, " +
                  "verzija = @Version, pozicija = @Position, " +
@@ -616,7 +617,7 @@ namespace Database.Repositories
                  "datumkreiranja = CAST(@Created AS DATE), datumizmene = CAST(@Modified AS DATE), " +
                  "amr1 = @Amr1, amr1trim = @Amr1trim, amr2 = @Amr2, amr2trim = @Amr2trim, amr3 = @Amr3, amr3trim = @Amr3trim, amrsale = @Amrsale, amrsaletrim = @Amrsaletrim, " +
                  "amrp1 = @Amrp1, amrp2 = @Amrp2, amrp3 = @Amrp3, amrpsale = @Amrpsale, " +
-                 "dpkoef = @Dpcoef, progkoef = @Progcoef, seaskoef = @Seascoef, seckoef = @Seccoef, price = @Price, active = @Active " +
+                 "dpkoef = @Dpcoef, progkoef = @Progcoef, seaskoef = @Seascoef, seckoef = @Seccoef, price = @Price, active = @Active, pricepersec = @PricePerSec " +
                  "WHERE xmpid = @Xmpid",
                  new
                  {
@@ -624,7 +625,7 @@ namespace Database.Repositories
                      Schid = mediaPlanDTO.schid,
                      Cmpid = mediaPlanDTO.cmpid,
                      Chid = mediaPlanDTO.chid,
-                     Name = mediaPlanDTO.name,
+                     Name = mediaPlanDTO.name.Trim(),
                      Version = mediaPlanDTO.version,
                      Position = mediaPlanDTO.position,
                      Stime = mediaPlanDTO.stime,

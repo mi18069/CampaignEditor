@@ -20,7 +20,6 @@ namespace CampaignEditor
         private readonly IAbstractFactory<Clients> _factoryClients;
         private readonly IAbstractFactory<Config> _factoryConfig;
         private UserController _userController;
-        private OnStartupContoller _onStartupController;
 
         private string appPath = Directory.GetCurrentDirectory();
         private string imgPeekPath = "\\images\\PassPeekImg.png";
@@ -29,7 +28,7 @@ namespace CampaignEditor
         public static UserDTO user = null;
         private bool onlyOne = false; // To ensure that only one window is shown
         public MainWindow(IUserRepository userRepository, IAbstractFactory<Clients> factoryClients,
-            IAbstractFactory<Config> factoryConfig, IDatabaseFunctionsRepository dfRepository)
+            IAbstractFactory<Config> factoryConfig)
         {
             
             InitializeComponent();
@@ -39,8 +38,6 @@ namespace CampaignEditor
             _factoryConfig = factoryConfig;
 
             _userController = new UserController(_userRepository);
-            _onStartupController = new OnStartupContoller(dfRepository);
-            RunStartup();
             PassShowHide.Source = new BitmapImage(new Uri(appPath + imgPeekPath));
           
             Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
@@ -49,10 +46,6 @@ namespace CampaignEditor
 
         }
 
-        private void RunStartup()
-        {
-            _onStartupController.RunUpdateUnavailableDates();
-        }
 
         // Checks if the username and password are typed correctly
         private async void btnCheckCredentials_Click(object sender, RoutedEventArgs e)

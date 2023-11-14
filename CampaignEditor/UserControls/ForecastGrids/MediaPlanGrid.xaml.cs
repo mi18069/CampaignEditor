@@ -49,6 +49,11 @@ namespace CampaignEditor.UserControls
         // number of frozen columns
         int mediaPlanColumns = 29;
 
+        // for saving old values of MediaPlan when I want to change it
+        private MediaPlan _mediaPlanOldValues;
+        private MediaPlan _mediaPlanToUpdate;
+        bool isEditingEnded = false;
+
         private int frozenColumnsNum
         {
             get { return (int)GetValue(frozenColumnsNumProperty); }
@@ -70,9 +75,6 @@ namespace CampaignEditor.UserControls
         DateTime startDate;
         DateTime endDate;
 
-        float progCoefPreFocus = 0.0f; // for saving progcoef value before changing
-        MediaPlan focusedMediaPlan;
-
         public ObservableBool CanUserEdit { get; set; }
         public DataGrid Grid
         {
@@ -87,11 +89,19 @@ namespace CampaignEditor.UserControls
             if (MainWindow.user.usrlevel == 2)
             {
                 CanUserEdit.Value = false;
-
             }
 
             InitializeComponent();
 
+            dgMediaPlans.IsManipulationEnabled = CanUserEdit.Value;
+
+            // For combobox in Position column
+            var positionColumn = dgMediaPlans.Columns.FirstOrDefault(c => c.Header.ToString() == "Position") as DataGridComboBoxColumn;
+            if (positionColumn != null)
+            {
+                // Add the possible values
+                positionColumn.ItemsSource = new[] { "INS", "BET" };
+            }
 
         }
 
@@ -515,18 +525,6 @@ namespace CampaignEditor.UserControls
             return child;
         }
 
-        public static DataGridRow GetRow(DataGrid dataGrid, int index)
-        {
-            DataGridRow row = (DataGridRow)dataGrid.ItemContainerGenerator.ContainerFromIndex(index);
-            if (row == null)
-            {
-                dataGrid.UpdateLayout();
-                dataGrid.ScrollIntoView(dataGrid.Items[index]);
-                row = (DataGridRow)dataGrid.ItemContainerGenerator.ContainerFromIndex(index);
-            }
-            return row;
-        }
-
         private MediaPlanTerm GetSelectedMediaPlanTerm(DataGridCell cell)
         {
             // Traverse the visual tree to find the DataGridRow and DataGridCell that contain the selected cell
@@ -573,200 +571,79 @@ namespace CampaignEditor.UserControls
 
         #endregion
 
-        #region MediaPlan columns  
+        #region Editing MediaPlan
 
-        private async void TextBoxAMRTrim_TextChanged(object sender, TextChangedEventArgs e)
+        private void dgMediaPlans_PreparingCellForEdit(object sender, DataGridPreparingCellForEditEventArgs e)
         {
-            var tuple = dgMediaPlans.SelectedItems[0] as MediaPlanTuple;
-            var textBox = sender as TextBox;
+            isEditingEnded = false;
 
-            BindingExpression bindingExpr = textBox.GetBindingExpression(TextBox.TextProperty);
-            string propertyName = bindingExpr?.ResolvedSourcePropertyName;
-            if (tuple != null)
+            // Access the DataContext (your MediaPlan object)
+            var mediaPlanTuple = e.Row.DataContext as MediaPlanTuple;
+
+            // Get values before editing
+            if (mediaPlanTuple != null)
             {
-                var mediaPlan = tuple.MediaPlan;
-                int value = 0;
-
-                if (propertyName == "Amr1trim")
-                {
-                    if (textBox != null && (textBox.Text.Trim() == "" || Int32.TryParse(textBox.Text.Trim(), out value)))
-                    {
-                        if (value > 999)
-                        {
-                            textBox.Text = mediaPlan.amr1trim.ToString();
-                        }
-                        else
-                        {
-                            value = textBox.Text.Trim() == "" ? 0 : value;
-                            mediaPlan.amr1trim = value;
-                            await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(_converter.ConvertToDTO(mediaPlan)));
-                        }
-                    }
-            
-                    else
-                    {
-                        textBox.Text = mediaPlan.amr1trim.ToString();
-                    }
-                }
-                else if (propertyName == "Amr2trim")
-                {
-                    if (textBox != null && (textBox.Text.Trim() == "" || Int32.TryParse(textBox.Text.Trim(), out value)))
-                    {
-                        if (value > 999)
-                        {
-                            textBox.Text = mediaPlan.amr2trim.ToString();
-                        }
-                        else
-                        {
-                            value = textBox.Text.Trim() == "" ? 0 : value;
-                            mediaPlan.amr2trim = value;
-                            await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(_converter.ConvertToDTO(mediaPlan)));
-                        }
-                        
-                    }
-                    else
-                    {
-                        textBox.Text = mediaPlan.amr2trim.ToString();
-                    }
-                }
-                else if (propertyName == "Amr3trim")
-                {
-                    if (textBox != null && (textBox.Text.Trim() == "" || Int32.TryParse(textBox.Text.Trim(), out value)))
-                    {
-                        if (value > 999)
-                        {
-                            textBox.Text = mediaPlan.amr3trim.ToString();
-                        }
-                        else
-                        {
-                            value = textBox.Text.Trim() == "" ? 0 : value;
-                            mediaPlan.amr3trim = value;
-                            await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(_converter.ConvertToDTO(mediaPlan)));
-                        }
-                       
-                    }
-                    else
-                    {
-                        textBox.Text = mediaPlan.amr3trim.ToString();
-                    }
-                }
-                else if (propertyName == "Amrsaletrim")
-                {
-                    if (textBox != null && (textBox.Text.Trim() == "" || Int32.TryParse(textBox.Text.Trim(), out value)))
-                    {
-                        if (value > 999)
-                        {
-                            textBox.Text = mediaPlan.amrsaletrim.ToString();
-                        }
-                        else
-                        {
-                            value = textBox.Text.Trim() == "" ? 0 : value;
-                            mediaPlan.amrsaletrim = value;
-                            await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(_converter.ConvertToDTO(mediaPlan)));
-                        }
-
-                       
-                    }
-                    else
-                    {
-                        textBox.Text = mediaPlan.amrsaletrim.ToString();
-                    }
-                }
-            }
-        }
-
-        private void ProgCoef_PreviewGotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
-        {
-            var tuple = dgMediaPlans.SelectedItems[0] as MediaPlanTuple;
-            var mediaPlan = tuple.MediaPlan;
-            progCoefPreFocus = mediaPlan.progcoef;
-            focusedMediaPlan = mediaPlan;
-        }
-
-        private async void ProgCoef_TextChanged(object sender, TextChangedEventArgs e)
-        {
-
-            var textBox = sender as TextBox;
-            if (textBox != null && focusedMediaPlan != null)
-            {
-                float value = 0.0f;
-                if (float.TryParse(textBox.Text, out value))
-                {
-                    if (value < 0 || value >= 10.0f)
-                    {
-                        textBox.Text = focusedMediaPlan.Progcoef.ToString();
-                        e.Handled = true;
-                        return;
-                    }
-                    else
-                    {
-                        focusedMediaPlan.Progcoef = value;
-                    }
-                }
-            }
-        }
-
-        private async void ProgCoef_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
-        {
-            var textBox = sender as TextBox;
-            var profCoefPreFocusText = progCoefPreFocus.ToString();
-            if (textBox != null && focusedMediaPlan != null && focusedMediaPlan.Progcoef != progCoefPreFocus)
-            {
-                var response = MessageBox.Show("Do you want to change progCoef globally for this program?", "Message",
-    MessageBoxButton.YesNoCancel, MessageBoxImage.Question);
-
-                switch (response)
-                {
-                    case MessageBoxResult.Cancel:
-                        textBox.Text = profCoefPreFocusText;
-                        break;
-
-                    case MessageBoxResult.No:
-                        await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(_converter.ConvertToDTO(focusedMediaPlan)));
-                        break;
-
-                    case MessageBoxResult.Yes:
-                        await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(_converter.ConvertToDTO(focusedMediaPlan)));
-                        var schema = await _schemaController.GetSchemaById(focusedMediaPlan.schid);
-                        schema.progcoef = focusedMediaPlan.progcoef;
-                        await _schemaController.UpdateSchema(new UpdateSchemaDTO(schema));
-                        break;
-
-                    default:
-                        break;
-                }
-
+                _mediaPlanToUpdate = mediaPlanTuple.MediaPlan;
+                _mediaPlanOldValues = _converter.CopyMP(_mediaPlanToUpdate);
 
             }
 
         }
 
-        private void TextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        private void dgMediaPlans_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
         {
-            if (!CanUserEdit.Value)
-            {
-                e.Handled = true;
-            }
+            isEditingEnded = true;
         }
 
-        private void TextBox_PreviewKeyDown(object sender, KeyEventArgs e)
+        private async void dgMediaPlans_CurrentCellChanged(object sender, EventArgs e)
         {
-            if (!CanUserEdit.Value)
+            if (isEditingEnded)
             {
-                e.Handled = true;
-            }
-        }
-
-        private async void SpecialCheckBox_CheckedChanged(object sender, RoutedEventArgs e)
-        {
-            var tuple = dgMediaPlans.SelectedItems[0] as MediaPlanTuple;
-            var checkBox = sender as CheckBox;
-
-            if (checkBox != null)
-            {
-                var mediaPlan = tuple.MediaPlan;
-                mediaPlan.special = checkBox.IsChecked ?? false;
-                await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(_converter.ConvertToDTO(mediaPlan)));
+                // Compare with the original value and revert if needed
+                if (_mediaPlanToUpdate != null && !_converter.SameMPValues(_mediaPlanToUpdate, _mediaPlanOldValues))
+                {
+                    // If coefs are changed, we need to recalculate price
+                    double eps = 0.0001;
+                    if (Math.Abs(_mediaPlanToUpdate.Progcoef - _mediaPlanOldValues.Progcoef) > eps ||
+                        Math.Abs(_mediaPlanToUpdate.Dpcoef - _mediaPlanOldValues.Dpcoef) > eps ||
+                        Math.Abs(_mediaPlanToUpdate.Seccoef - _mediaPlanOldValues.Seccoef) > eps ||
+                        Math.Abs(_mediaPlanToUpdate.Seascoef - _mediaPlanOldValues.Seascoef) > eps)
+                    {
+                        await _converter.CalculatePrices(_mediaPlanToUpdate);
+                    }
+                    else if(_mediaPlanToUpdate.Stime != _mediaPlanOldValues.Stime ||
+                            _mediaPlanToUpdate.Etime != _mediaPlanOldValues.Etime ||
+                            _mediaPlanToUpdate.Blocktime != _mediaPlanOldValues.Blocktime)
+                    {
+                        try
+                        {
+                            _mediaPlanToUpdate.Stime = TimeFormat.ReturnGoodTimeFormat(_mediaPlanToUpdate.Stime.Trim());
+                            _mediaPlanToUpdate.Etime = TimeFormat.ReturnGoodTimeFormat(_mediaPlanToUpdate.Etime.Trim());
+                            if (_mediaPlanToUpdate.Blocktime != null)
+                                _mediaPlanToUpdate.Blocktime = TimeFormat.ReturnGoodTimeFormat(_mediaPlanToUpdate.Blocktime.Trim());
+                        }
+                        catch
+                        {
+                            MessageBox.Show("Wrong Time Format", "Result", MessageBoxButton.OK, MessageBoxImage.Error);
+                            isEditingEnded = false;
+                            _mediaPlanToUpdate.Stime = _mediaPlanOldValues.Stime;
+                            _mediaPlanToUpdate.Etime = _mediaPlanOldValues.Etime;
+                            _mediaPlanToUpdate.Blocktime = _mediaPlanOldValues.Blocktime;
+                            return;
+                        }
+                    }
+                    try
+                    {
+                        var mpDTO = _converter.ConvertToDTO(_mediaPlanToUpdate);
+                        await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(mpDTO));
+                        _converter.CopyValues(_mediaPlanToUpdate, await _converter.ConvertFirstFromDTO(mpDTO));
+                    }
+                    catch
+                    {
+                        _converter.CopyValues(_mediaPlanToUpdate, _mediaPlanOldValues);
+                    }
+                }
+                isEditingEnded = false;
             }
 
         }
@@ -835,48 +712,48 @@ namespace CampaignEditor.UserControls
                     dependencyObject = VisualTreeHelper.GetParent(dependencyObject);
                 }
 
-                if (dependencyObject == null)
+                if (dependencyObject != null)
                 {
-                    return;
+                    DataGridCell cell = dependencyObject as DataGridCell;
+
+                    var mediaPlanTuple = Schema.SelectedItem as MediaPlanTuple;
+                    if (mediaPlanTuple != null)
+                    {
+                        var mediaPlan = mediaPlanTuple.MediaPlan;
+
+                        MenuItem trimAmr = new MenuItem();
+                        // Check if the clicked cell is in the "AMR" columns
+                        if (cell.Column.Header.ToString() == "AMR 1" || cell.Column.Header.ToString() == "AMR% 1")
+                        {
+                            trimAmr.Header = "Trim Amr1";
+                            trimAmr.Click += await TrimAmrAsync(mediaPlan, "Trim AMR 1", "amr1trim", mediaPlan.amr1trim);
+                        }
+                        else if (cell.Column.Header.ToString() == "AMR 2" || cell.Column.Header.ToString() == "AMR% 2")
+                        {
+                            trimAmr.Header = "Trim Amr2";
+                            trimAmr.Click += await TrimAmrAsync(mediaPlan, "Trim AMR 2", "amr2trim", mediaPlan.amr2trim);
+                        }
+                        else if (cell.Column.Header.ToString() == "AMR 3" || cell.Column.Header.ToString() == "AMR% 3")
+                        {
+                            trimAmr.Header = "Trim Amr3";
+                            trimAmr.Click += await TrimAmrAsync(mediaPlan, "Trim AMR 3", "amr3trim", mediaPlan.amr3trim);
+                        }
+                        else if (cell.Column.Header.ToString() == "AMR Sale" || cell.Column.Header.ToString() == "AMR% Sale")
+                        {
+                            trimAmr.Header = "Trim Amr Sale";
+                            trimAmr.Click += await TrimAmrAsync(mediaPlan, "Trim AMR Sale", "amrsaletrim", mediaPlan.amrsaletrim);
+                        }
+                        else
+                        {
+                            trimAmr.Header = "Trim All Amrs";
+                            trimAmr.Click += await TrimAmrAsync(mediaPlan, "Trim AMRs", "amrtrimall", null);
+                        }
+                        menu.Items.Add(trimAmr);
+                    }
+                    
                 }
 
-                DataGridCell cell = dependencyObject as DataGridCell;
-
-                var mediaPlanTuple = Schema.SelectedItem as MediaPlanTuple;
-                if (mediaPlanTuple == null)
-                {
-                    return;
-                }
-                var mediaPlan = mediaPlanTuple.MediaPlan;
-
-                MenuItem trimAmr = new MenuItem();
-                // Check if the clicked cell is in the "AMR" columns
-                if (cell.Column.Header.ToString() == "AMR 1" || cell.Column.Header.ToString() == "AMR% 1")
-                {
-                    trimAmr.Header = "Trim Amr1";
-                    trimAmr.Click += await TrimAmrAsync(mediaPlan, "Trim AMR 1", "amr1trim", mediaPlan.amr1trim);
-                }
-                else if (cell.Column.Header.ToString() == "AMR 2" || cell.Column.Header.ToString() == "AMR% 2")
-                {
-                    trimAmr.Header = "Trim Amr2";
-                    trimAmr.Click += await TrimAmrAsync(mediaPlan, "Trim AMR 2", "amr2trim", mediaPlan.amr2trim);
-                }
-                else if (cell.Column.Header.ToString() == "AMR 3" || cell.Column.Header.ToString() == "AMR% 3")
-                {
-                    trimAmr.Header = "Trim Amr3";
-                    trimAmr.Click += await TrimAmrAsync(mediaPlan, "Trim AMR 3", "amr3trim", mediaPlan.amr3trim);
-                }
-                else if (cell.Column.Header.ToString() == "AMR Sale" || cell.Column.Header.ToString() == "AMR% Sale")
-                {
-                    trimAmr.Header = "Trim Amr Sale";
-                    trimAmr.Click += await TrimAmrAsync(mediaPlan, "Trim AMR Sale", "amrsaletrim", mediaPlan.amrsaletrim);
-                }
-                else
-                {
-                    trimAmr.Header = "Trim All Amrs";
-                    trimAmr.Click += await TrimAmrAsync(mediaPlan, "Trim AMRs", "amrtrimall", null);
-                }
-                menu.Items.Add(trimAmr);
+               
                 Schema.ContextMenu = menu;
             }
         }
@@ -891,21 +768,6 @@ namespace CampaignEditor.UserControls
                 return parent as T;
             else
                 return FindParent<T>(parent);
-        }
-        public bool AreMediaPlansEqual(MediaPlanDTO plan1, MediaPlanDTO plan2)
-        {
-            return plan1.xmpid == plan2.xmpid &&
-                   plan1.schid == plan2.schid &&
-                   plan1.cmpid == plan2.cmpid &&
-                   plan1.chid == plan2.chid &&
-                   plan1.name == plan2.name &&
-                   plan1.position == plan2.position &&
-                   plan1.stime == plan2.stime &&
-                   plan1.etime == plan2.etime &&
-                   plan1.blocktime == plan2.blocktime &&
-                   plan1.days == plan2.days &&
-                   plan1.sdate == plan2.sdate &&
-                   plan1.edate == plan2.edate;
         }
 
         private async Task<RoutedEventHandler> TrimAmrAsync(MediaPlan mediaPlan, string message, string attr, int? trimValue)
@@ -1111,37 +973,6 @@ namespace CampaignEditor.UserControls
             return parent as DataGridCell;
         }
 
-        private DataGridCell FindParentDataGridCell(TextBlock textBlock)
-        {
-            if (textBlock == null)
-                return null;
-
-            DependencyObject parent = VisualTreeHelper.GetParent(textBlock);
-
-            while (parent != null && !(parent is DataGridCell))
-            {
-                parent = VisualTreeHelper.GetParent(parent);
-            }
-
-            return parent as DataGridCell;
-        }
-
-        public static DataGridCell GetCell(DataGrid dataGrid, int row, int column)
-        {
-            DataGridRow rowContainer = GetRow(dataGrid, row);
-            if (rowContainer != null)
-            {
-                DataGridCellsPresenter presenter = GetVisualChild<DataGridCellsPresenter>(rowContainer);
-                if (presenter == null)
-                {
-                    dataGrid.ScrollIntoView(rowContainer, dataGrid.Columns[column]);
-                    presenter = GetVisualChild<DataGridCellsPresenter>(rowContainer);
-                }
-                DataGridCell cell = (DataGridCell)presenter.ItemContainerGenerator.ContainerFromIndex(column);
-                return cell;
-            }
-            return null;
-        }
-
+      
     }
 }

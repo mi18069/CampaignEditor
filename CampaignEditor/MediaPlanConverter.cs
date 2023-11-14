@@ -1,12 +1,9 @@
 ﻿using AutoMapper;
 using CampaignEditor.Controllers;
-using CampaignEditor.DTOs.CampaignDTO;
 using Database.DTOs.MediaPlanDTO;
 using Database.DTOs.MediaPlanHistDTO;
 using Database.DTOs.MediaPlanTermDTO;
 using Database.DTOs.PricelistDTO;
-using Database.DTOs.PricesDTO;
-using Database.DTOs.SpotDTO;
 using Database.Entities;
 using Database.Repositories;
 using System;
@@ -91,6 +88,7 @@ namespace CampaignEditor
             await SetOutliers(hists);
 
             var filteredHists = hists.Where(h => h.active);
+
             mediaPlan.Amr1 = MathFunctions.ArithmeticMean(filteredHists.Select(h => h.amr1)) * mediaPlan.amr1trim/100;
             mediaPlan.Amr2 = MathFunctions.ArithmeticMean(filteredHists.Select(h => h.amr2)) * mediaPlan.amr2trim/100;
             mediaPlan.Amr3 = MathFunctions.ArithmeticMean(filteredHists.Select(h => h.amr3)) * mediaPlan.amr3trim/100;
@@ -101,13 +99,36 @@ namespace CampaignEditor
             mediaPlan.Amrpsale = MathFunctions.ArithmeticMean(filteredHists.Select(h => h.amrpsale)) * mediaPlan.amrsaletrim/100;
         }
 
-        private async Task CalculateSeccoef(MediaPlan mediaPlan, PricelistDTO pricelist)
+        private async Task CalculateSeccoef(MediaPlan mediaPlan, PricelistDTO pricelist, IEnumerable<MediaPlanTermDTO> terms)
         {
 
             var sectable = await _sectableController.GetSectableById(pricelist.sectbid);
             var sectables = await _sectablesController.GetSectablesByIdAndSec(sectable.sctid, (int)Math.Ceiling(mediaPlan.AvgLength));
             var seccoef = sectables == null ? 1 : sectables.coef;
-            mediaPlan.seccoef = seccoef;
+            mediaPlan.Seccoef = seccoef;
+
+            /*int secCount = 0;
+            double seccoef = 0.0;
+
+            foreach (var term in terms)
+            {
+                if (term != null && term.spotcode != null && term.spotcode.Trim() != "")
+                {
+                    foreach (char c in term.spotcode.Trim())
+                    {
+                        SpotDTO spot = await _spotController.GetSpotsByCmpidAndCode(mediaPlan.cmpid, c.ToString());
+                        var sec = await _sectablesController.GetSectablesByIdAndSec(sectable.sctid, spot.spotlength);
+                        if (sec != null)
+                            seccoef += sec.coef * (30 / spot.spotlength);
+                        else
+                            seccoef += 1.0;
+                        secCount += 1;
+                    }
+
+                }                 
+                
+            }
+            mediaPlan.Seccoef = secCount == 0 ? 1.0 : seccoef / secCount;*/
         }
 
         private async Task CalculateSeascoef(MediaPlan mediaPlan, PricelistDTO pricelist, IEnumerable<MediaPlanTermDTO> terms)
@@ -119,17 +140,21 @@ namespace CampaignEditor
             int seasCount = 0;
             foreach (var term in terms)
             {
-                foreach (var seas in seasonalities)
+                if (term != null && term.spotcode != null && term.spotcode.Trim() != "")
                 {
-                    if (term.date >= DateOnly.FromDateTime(TimeFormat.YMDStringToDateTime(seas.stdt).Date) &&
-                        term.date <= DateOnly.FromDateTime(TimeFormat.YMDStringToDateTime(seas.endt).Date))
+                    foreach (var seas in seasonalities)
                     {
-                        seasCount += 1;
-                        seasCoef += seas.coef;
+                        if (term.date >= DateOnly.FromDateTime(TimeFormat.YMDStringToDateTime(seas.stdt).Date) &&
+                            term.date <= DateOnly.FromDateTime(TimeFormat.YMDStringToDateTime(seas.endt).Date))
+                        {
+                            seasCount += 1;
+                            seasCoef += seas.coef;
+                        }
                     }
                 }
+
             }
-            mediaPlan.seascoef = seasCount == 0 ? 1 : seasCoef / seasCount;
+            mediaPlan.Seascoef = seasCount == 0 ? 1 : seasCoef / seasCount;
         }
 
         public async Task CalculateLengthAndInsertations(MediaPlan mediaPlan, IEnumerable<MediaPlanTermDTO> terms)
@@ -220,20 +245,28 @@ namespace CampaignEditor
             }
 
             await CalculateLengthAndInsertations(mediaPlan, terms);
-            await CalculateSeccoef(mediaPlan, pricelist);
+            await CalculateSeccoef(mediaPlan, pricelist, terms);
             await CalculateSeascoef(mediaPlan, pricelist, terms);
-            CalculatePrices(mediaPlan, pricelist);
+            await CalculatePrices(mediaPlan, pricelist);
 
         }
 
-        private void CalculatePrices(MediaPlan mediaPlan, PricelistDTO pricelist)
+        public async Task CalculatePrices(MediaPlan mediaPlan, PricelistDTO pricelist = null)
         {
+
+            if (pricelist == null)
+            {
+                var channelCmp = await _channelCmpController.GetChannelCmpByIds(mediaPlan.cmpid, mediaPlan.chid);
+                pricelist = await _pricelistController.GetPricelistById(channelCmp.plid);
+            }
+
+            double coefs = mediaPlan.Progcoef * mediaPlan.Dpcoef * mediaPlan.Seascoef * mediaPlan.Seccoef;
+
             // For seconds type pricelists
             if (pricelist.pltype == 1)
             {
 
-                mediaPlan.PricePerSecond = mediaPlan.Dpcoef / mediaPlan.Amrp1;
-                double coefs = mediaPlan.Progcoef * mediaPlan.Dpcoef * mediaPlan.Seascoef * mediaPlan.Seccoef;
+                mediaPlan.PricePerSecond = coefs / mediaPlan.Amrp1;
                 mediaPlan.Price = coefs * mediaPlan.Length;
                 mediaPlan.Cpp = mediaPlan.Price / (mediaPlan.Amrp1);
 
@@ -242,8 +275,7 @@ namespace CampaignEditor
             else if (pricelist.pltype == 0)
             {
                 mediaPlan.Cpp = pricelist.price;
-                mediaPlan.Price = (pricelist.price / 30) * mediaPlan.Length * mediaPlan.Amrpsale * mediaPlan.Progcoef *
-                    mediaPlan.Dpcoef * mediaPlan.Seascoef * mediaPlan.Seccoef;
+                mediaPlan.Price = (pricelist.price / 30) * mediaPlan.Length * mediaPlan.Amrpsale * coefs;
                 if (mediaPlan.Length > 0)
                     mediaPlan.PricePerSecond = mediaPlan.Price / mediaPlan.Length;
                 else
@@ -305,6 +337,105 @@ namespace CampaignEditor
             double mad = CalculateMedian(absoluteDeviations);
 
             return mad;
+        }
+
+        public void CopyValues(MediaPlan originalMP, MediaPlan copyMP)
+        {
+            originalMP.xmpid = copyMP.xmpid;
+            originalMP.schid = copyMP.schid;
+            originalMP.cmpid = copyMP.cmpid;
+            originalMP.chid = copyMP.chid;
+            originalMP.Name = copyMP.Name;
+            originalMP.version = copyMP.version;
+            originalMP.Position = copyMP.Position;
+            originalMP.Stime = copyMP.Stime;
+            originalMP.Etime = copyMP.Etime;
+            originalMP.Blocktime = copyMP.Blocktime;
+            originalMP.days = copyMP.days;
+            originalMP.Type = copyMP.Type;
+            originalMP.Special = copyMP.Special;
+            originalMP.sdate = copyMP.sdate;
+            originalMP.edate = copyMP.edate;
+            originalMP.Progcoef = copyMP.Progcoef;
+            originalMP.created = copyMP.created;
+            originalMP.modified = copyMP.modified;
+            originalMP.Amr1 = copyMP.Amr1;
+            originalMP.Amr1trim = copyMP.Amr1trim;
+            originalMP.Amr2 = copyMP.Amr2;
+            originalMP.Amr2trim = copyMP.Amr2trim;
+            originalMP.Amr3 = copyMP.Amr3;
+            originalMP.Amr3trim = copyMP.Amr3trim;
+            originalMP.Amrsale = copyMP.Amrsale;
+            originalMP.Amrsaletrim = copyMP.Amrsaletrim;
+            originalMP.Amrp1 = copyMP.Amrp1;
+            originalMP.Amrp2 = copyMP.Amrp2;
+            originalMP.Amrp3 = copyMP.Amrp3;
+            originalMP.Amrpsale = copyMP.Amrpsale;
+            originalMP.Dpcoef = copyMP.Dpcoef;
+            originalMP.Seascoef = copyMP.Seascoef;
+            originalMP.Seccoef = copyMP.Seccoef;
+            originalMP.Price = copyMP.Price;
+            originalMP.active = copyMP.active;
+            originalMP.PricePerSecond = copyMP.PricePerSecond;
+            originalMP.Cpp = copyMP.Cpp;
+            originalMP.Length = copyMP.Length;
+            originalMP.Insertations = copyMP.Insertations;
+        }
+
+        public MediaPlan CopyMP(MediaPlan mediaPlan)
+        {
+            MediaPlan mediaPlanCopy = new MediaPlan();
+
+            CopyValues(mediaPlanCopy, mediaPlan);
+
+            return mediaPlanCopy;
+        }
+
+        public bool SameMPValues(MediaPlan mediaPlan1, MediaPlan mediaPlan2)
+        {
+
+            double eps = 0.0001;
+
+            return
+            mediaPlan1.xmpid == mediaPlan2.xmpid &&
+            mediaPlan1.schid == mediaPlan2.schid &&
+            mediaPlan1.cmpid == mediaPlan2.cmpid &&
+            mediaPlan1.chid == mediaPlan2.chid &&
+            mediaPlan1.name.Trim() == mediaPlan2.name.Trim() &&
+            mediaPlan1.version == mediaPlan2.version &&
+            mediaPlan1.position == mediaPlan2.position &&
+            mediaPlan1.stime == mediaPlan2.stime &&
+            mediaPlan1.etime == mediaPlan2.etime &&
+            mediaPlan1.blocktime == mediaPlan2.blocktime &&
+            mediaPlan1.days == mediaPlan2.days &&
+            mediaPlan1.type == mediaPlan2.type &&
+            mediaPlan1.special == mediaPlan2.special &&
+            mediaPlan1.sdate == mediaPlan2.sdate &&
+            mediaPlan1.edate == mediaPlan2.edate &&
+            mediaPlan1.progcoef == mediaPlan2.progcoef &&
+            mediaPlan1.created == mediaPlan2.created &&
+            mediaPlan1.modified == mediaPlan2.modified &&
+            (mediaPlan1.amr1 - mediaPlan2.amr1 < eps) &&
+            mediaPlan1.amr1trim == mediaPlan2.amr1trim &&
+            (mediaPlan1.amr2 - mediaPlan2.amr2 < eps) &&
+            mediaPlan1.amr2trim == mediaPlan2.amr2trim &&
+            (mediaPlan1.amr3 - mediaPlan2.amr3 < eps) &&
+            mediaPlan1.amr3trim == mediaPlan2.amr3trim &&
+            (mediaPlan1.amrsale - mediaPlan2.amrsale < eps) &&
+            mediaPlan1.amrsaletrim == mediaPlan2.amrsaletrim &&
+            (mediaPlan1.amrp1 - mediaPlan2.amrp1 < eps) &&
+            (mediaPlan1.amrp2 - mediaPlan2.amrp2 < eps) &&
+            (mediaPlan1.amrp3 - mediaPlan2.amrp3 < eps) &&
+            (mediaPlan1.amrpsale - mediaPlan2.amrpsale < eps) &&
+            mediaPlan1.dpcoef == mediaPlan2.dpcoef &&
+            mediaPlan1.seascoef == mediaPlan2.seascoef &&
+            mediaPlan1.seccoef == mediaPlan2.seccoef &&
+            mediaPlan1.price == mediaPlan2.price &&
+            mediaPlan1.active == mediaPlan2.active &&
+            mediaPlan1.pps == mediaPlan2.pps &&
+            mediaPlan1.Cpp == mediaPlan2.Cpp &&
+            mediaPlan1.Length == mediaPlan2.Length &&
+            mediaPlan1.Insertations == mediaPlan2.Insertations;
         }
     }
 }

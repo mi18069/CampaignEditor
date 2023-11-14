@@ -21,18 +21,21 @@ namespace CampaignEditor
         private ChannelController _channelController;
         private MediaPlanController _mediaPlanController;
         private EmsTypesController _emsTypesController;
+        private ChannelCmpController _channelCmpController;
 
         public CreateSchemaDTO _schema = null;
 
         public AddSchema(IChannelRepository channelRepository,
             IMediaPlanRepository mediaPlanRepository,
-            IEmsTypesRepository emsTypesRepository)
+            IEmsTypesRepository emsTypesRepository,
+            IChannelCmpRepository channelCmpRepository)
         {
             InitializeComponent();
 
             _channelController = new ChannelController(channelRepository);
             _mediaPlanController = new MediaPlanController(mediaPlanRepository);
             _emsTypesController = new EmsTypesController(emsTypesRepository);
+            _channelCmpController = new ChannelCmpController(channelCmpRepository);
         }
 
         public async Task Initialize(CampaignDTO campaign)
@@ -83,10 +86,11 @@ namespace CampaignEditor
         {
             cbChannels.Items.Clear();
 
-            var channelIds = await _mediaPlanController.GetAllChannelsByCmpid(_campaign.cmpid);
+            var channelCmpIds = await _channelCmpController.GetChannelCmpsByCmpid(_campaign.cmpid);
             List<ChannelDTO> channels = new List<ChannelDTO>();
-            foreach (var chid in channelIds)
+            foreach (var chCmpid in channelCmpIds)
             {
+                var chid = chCmpid.chid;
                 ChannelDTO channel = await _channelController.GetChannelById(chid);
                 channels.Add(channel);
             }

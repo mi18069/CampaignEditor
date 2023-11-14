@@ -36,13 +36,17 @@ namespace CampaignEditor
         private CampaignDTO _campaign;
         public TabItem tabForecast;
 
+        private OnStartupContoller _onStartupController;
+
+
         List<DateTime> unavailableDates = new List<DateTime>();
 
         public CampaignForecastView(IMediaPlanRefRepository mediaPlanRefRepository,
             IDatabaseFunctionsRepository databaseFunctionsRepository,
             IMediaPlanVersionRepository mediaPlanVersionRepository,
             IAbstractFactory<CampaignForecast> factoryForecast,
-            IAbstractFactory<CampaignForecastDates> factoryForecastDates)
+            IAbstractFactory<CampaignForecastDates> factoryForecastDates,
+            IDatabaseFunctionsRepository dfRepository)
         {
             _factoryForecast = factoryForecast;
             _factoryForecastDates = factoryForecastDates;
@@ -50,6 +54,7 @@ namespace CampaignEditor
             _mediaPlanRefController = new MediaPlanRefController(mediaPlanRefRepository);
             _databaseFunctionsController = new DatabaseFunctionsController(databaseFunctionsRepository);
             _mediaPlanVersionController = new MediaPlanVersionController(mediaPlanVersionRepository);
+            _onStartupController = new OnStartupContoller(dfRepository);
 
             InitializeComponent();
         }
@@ -57,6 +62,7 @@ namespace CampaignEditor
         public async Task Initialize(CampaignDTO campaign)
         {
             _campaign = campaign;
+            await _onStartupController.RunUpdateUnavailableDates();
 
             var exists = (await _mediaPlanRefController.GetMediaPlanRef(_campaign.cmpid) != null);
             if (exists)
@@ -109,6 +115,8 @@ namespace CampaignEditor
             _forecast.InitializeButtonClicked += Forecast_InitializeButtonClicked;
             _forecast.VersionChanged += Forecast_ChangeVersionClicked;
             _forecast.NewVersionClicked += _forecast_NewVersionClicked;
+            _forecast.SetLoadingPage += _forecast_SetLoadingPage;
+            _forecast.SetContentPage += _forecast_SetContentPage;
         }
 
         private void ForecastDates_CancelButtonClicked(object sender, EventArgs e)
@@ -240,6 +248,16 @@ namespace CampaignEditor
                 tabForecast.Content = _forecast.Content;
             }
 
+        }
+
+        private void _forecast_SetLoadingPage(object? sender, ChangeVersionEventArgs e)
+        {
+            tabForecast.Content = loadingPage.Content;
+        }
+
+        private void _forecast_SetContentPage(object? sender, ChangeVersionEventArgs e)
+        {
+            tabForecast.Content = _forecast.Content;
         }
 
         // Function which tests if we can make new forecast
