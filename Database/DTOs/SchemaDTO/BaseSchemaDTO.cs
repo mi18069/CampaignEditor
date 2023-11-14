@@ -7,12 +7,12 @@ namespace Database.DTOs.SchemaDTO
         public BaseSchemaDTO(int chid, string name, string position, string stime, string? etime, string? blocktime, string days, string type, bool special, DateOnly sdate, DateOnly? edate, float progcoef, DateOnly created, DateOnly? modified)
         {
             this.chid = chid;
-            this.name = name ?? throw new ArgumentNullException(nameof(name));
-            this.position = position ?? throw new ArgumentNullException(nameof(position));
+            this.name = name;
+            this.position = position;
             this.stime = stime;
             this.etime = etime;
             this.blocktime = blocktime;
-            this.days = days ?? throw new ArgumentNullException(nameof(days));
+            this.days = days;
             this.type = type;
             this.special = special;
             this.sdate = sdate;

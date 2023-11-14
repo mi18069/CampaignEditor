@@ -41,5 +41,14 @@ namespace Database.Repositories
 
             return _mapper.Map<IEnumerable<EmsTypesDTO>>(allEmsTypes);
         }
+
+        public async Task<IEnumerable<EmsTypes>> GetAllEmsTypesEntities()
+        {
+            using var connection = _context.GetConnection();
+
+            var allEmsTypes = await connection.QueryAsync<EmsTypes>("SELECT * FROM tbltypo ");
+
+            return allEmsTypes;
+        }
     }
 }

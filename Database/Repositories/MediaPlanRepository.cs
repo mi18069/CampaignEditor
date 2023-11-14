@@ -91,7 +91,7 @@ namespace Database.Repositories
                 Schid = mediaPlanDTO.schid,
                 Cmpid = mediaPlanDTO.cmpid,
                 Chid = mediaPlanDTO.chid,
-                Name = mediaPlanDTO.name,
+                Name = mediaPlanDTO.name.Trim(),
                 Version = mediaPlanDTO.version,
                 Position = mediaPlanDTO.position,
                 Stime = mediaPlanDTO.stime,
@@ -150,7 +150,7 @@ namespace Database.Repositories
                 schid = item.schid,
                 cmpid = item.cmpid,
                 chid = item.chid,
-                name = item.naziv,
+                name = (string)item.naziv.Trim(),
                 version = item.verzija,
                 position = item.pozicija,
                 stime = item.vremeod,
@@ -200,7 +200,7 @@ namespace Database.Repositories
                 schid = item.schid,
                 cmpid = item.cmpid,
                 chid = item.chid,
-                name = item.naziv,
+                name = (string)item.naziv.Trim(),
                 version = item.verzija,
                 position = item.pozicija,
                 stime = item.vremeod,
@@ -251,7 +251,7 @@ namespace Database.Repositories
                 schid = item.schid,
                 cmpid = item.cmpid,
                 chid = item.chid,
-                name = item.naziv,
+                name = (string)item.naziv.Trim(),
                 version = item.verzija,
                 position = item.pozicija,
                 stime = item.vremeod,
@@ -301,7 +301,7 @@ namespace Database.Repositories
                 schid = item.schid,
                 cmpid = item.cmpid,
                 chid = item.chid,
-                name = item.naziv,
+                name = (string)item.naziv.Trim(),
                 version = item.verzija,
                 position = item.pozicija,
                 stime = item.vremeod,
@@ -351,7 +351,7 @@ namespace Database.Repositories
                 schid = item.schid,
                 cmpid = item.cmpid,
                 chid = item.chid,
-                name = item.naziv,
+                name = (string)item.naziv.Trim(),
                 version = item.verzija,
                 position = item.pozicija,
                 stime = item.vremeod,
@@ -401,7 +401,7 @@ namespace Database.Repositories
                 schid = item.schid,
                 cmpid = item.cmpid,
                 chid = item.chid,
-                name = item.naziv,
+                name = (string)item.naziv.Trim(),
                 version = item.verzija,
                 position = item.pozicija,
                 stime = item.vremeod,
@@ -463,7 +463,7 @@ namespace Database.Repositories
                 schid = item.schid,
                 cmpid = item.cmpid,
                 chid = item.chid,
-                name = item.naziv,
+                name = (string)item.naziv.Trim(),
                 version = item.verzija,
                 position = item.pozicija,
                 stime = item.vremeod,
@@ -514,7 +514,7 @@ namespace Database.Repositories
                 schid = item.schid,
                 cmpid = item.cmpid,
                 chid = item.chid,
-                name = item.naziv,
+                name = (string)item.naziv.Trim(),
                 version = item.verzija,
                 position = item.pozicija,
                 stime = item.vremeod,
@@ -565,7 +565,7 @@ namespace Database.Repositories
                 schid = item.schid,
                 cmpid = item.cmpid,
                 chid = item.chid,
-                name = item.naziv,
+                name = (string)item.naziv.Trim(),
                 version = item.verzija,
                 position = item.pozicija,
                 stime = item.vremeod,
@@ -605,9 +605,6 @@ namespace Database.Repositories
         public async Task<bool> UpdateMediaPlan(UpdateMediaPlanDTO mediaPlanDTO)
         {
             using var connection = _context.GetConnection();
-
-            var a =mediaPlanDTO.pps;
-            var b = Math.Round(mediaPlanDTO.pps, 2);
        
             var affected = await connection.ExecuteAsync(
                  "UPDATE xmp SET xmpid = @Xmpid, schid = @Schid, cmpid = @Cmpid, chid = @Chid, naziv = @Name, " +

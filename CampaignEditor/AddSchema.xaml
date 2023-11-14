@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:CampaignEditor"
+        xmlns:local="clr-namespace:CampaignEditor.UserControls"
         mc:Ignorable="d"
         Title="Add MediaPlan" Height="570" Width="400" ResizeMode="NoResize">
     <Grid>
@@ -25,6 +25,7 @@
             <RowDefinition Height="auto" />
             <RowDefinition Height="auto" />
             <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="50" />
             <RowDefinition Height="10" />
@@ -39,15 +40,25 @@
                  VerticalContentAlignment="Center"/>
 
         <Label Grid.Row="3" Grid.Column="1" Content="Position: " Margin="0, 10"/>
-        <ComboBox Grid.Row="3" Grid.Column="2" x:Name="cbPosition" Margin="0, 10">
-            <ComboBoxItem>Inside</ComboBoxItem>
-            <ComboBoxItem>Between</ComboBoxItem>
-        </ComboBox>
+        <ComboBox Grid.Row="3" Grid.Column="2" x:Name="cbPosition" Margin="0, 10"/>
+
 
         <Label Grid.Row="3" Grid.Column="4" Content="Type: " Margin="0, 10"/>
-        <TextBox Grid.Row="3" Grid.Column="5" x:Name="tbType" Margin="0, 10"
-                 Width="70" VerticalContentAlignment="Center" MaxLength="3"
-                 TextChanged="tbType_TextChanged"/>
+
+        <ComboBox  Grid.Row="3" Grid.Column="5" x:Name="cbType" Margin="0, 10"
+                   SelectedValuePath="typocode" IsEditable="True"
+                   TextSearch.TextPath="typocode"
+                   IsTextSearchEnabled="True"
+                   SelectionChanged="cbType_SelectionChanged">
+            <ComboBox.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel>
+                        <TextBlock Text="{Binding typocode}" />
+                        <TextBlock Text="{Binding typoname}" />
+                    </StackPanel>
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
 
         <TextBlock Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="5" x:Name="tbTypeDesc"
                Text="" FontWeight="DemiBold" HorizontalAlignment="Right"/>
@@ -60,29 +71,33 @@
         
         <Label Grid.Row="6" Grid.Column="1" Content="Time from: " Margin="0, 10"/>
         <TextBox Grid.Row="6" Grid.Column="2" x:Name="tbTimeFrom" MaxLength="5" Margin="0, 10"
-                 Width="70" VerticalContentAlignment="Center"/>
+                 Width="70" VerticalContentAlignment="Center" LostKeyboardFocus="tbTime_LostKeyboardFocus"/>
 
         <Label Grid.Row="6" Grid.Column="4" Content="Time to: " Margin="0, 10"/>
         <TextBox Grid.Row="6" Grid.Column="5" x:Name="tbTimeTo" MaxLength="5" Margin="0, 10"
-                 Width="70" VerticalContentAlignment="Center"/>
+                 Width="70" VerticalContentAlignment="Center" LostKeyboardFocus="tbTime_LostKeyboardFocus"/>
 
         <Label Grid.Row="7" Grid.Column="1" Content="Block time: " Margin="0, 10"/>
         <TextBox Grid.Row="7" Grid.Column="2" x:Name="tbBlockTime" MaxLength="5" Margin="0, 10"
-                 Width="70" VerticalContentAlignment="Center"/>
+                 Width="70" VerticalContentAlignment="Center" LostKeyboardFocus="tbTime_LostKeyboardFocus"/>
 
-        <CheckBox Grid.Row="7" Grid.Column="5" x:Name="chbSpecial" Content="IsSpecial: "
+        <Label Content="Prog coef: " Grid.Row="7" Grid.Column="4" Margin="0, 10"/>
+        <TextBox Grid.Row="7" Grid.Column="5" x:Name="tbProgCoef" Margin="0, 10"
+                 Width="70" VerticalContentAlignment="Center" LostKeyboardFocus="tbProgCoef_LostKeyboardFocus"/>
+
+        <CheckBox Grid.Row="8" Grid.Column="5" x:Name="chbSpecial" Content="IsSpecial: "
                   HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0, 10" IsChecked="False"/>
-        
-        <Label Grid.Row="8" Grid.Column="1" Content="Days: " Margin="0, 10"/>
-        <ListBox Grid.Row="8" Grid.Column="2" x:Name="lbDays" Margin="0, 10"
+
+        <Label Grid.Row="8" Grid.RowSpan="2" Grid.Column="1" Content="Days: " Margin="0, 10"/>
+        <ListBox Grid.Row="8" Grid.RowSpan="2" Grid.Column="2" x:Name="lbDays" Margin="0, 10"
                  Grid.ColumnSpan="3" SelectionMode="Multiple">
 
         </ListBox>
 
-        <Button Grid.Row="9" Grid.Column="1" Grid.ColumnSpan="6" Margin="10" 
+        <Button Grid.Row="10" Grid.Column="1" Grid.ColumnSpan="6" Margin="10" 
                 Width="100" HorizontalAlignment="Right" x:Name="btnSave" Content="Save" 
                 Click="btnSave_Click"/>
-        <Button Grid.Row="9" Grid.Column="1" Grid.ColumnSpan="6" Margin="10, 10, 120, 10" 
+        <Button Grid.Row="10" Grid.Column="1" Grid.ColumnSpan="6" Margin="10, 10, 120, 10" 
                 Width="100" HorizontalAlignment="Right" x:Name="btnCancel" Content="Cancel" 
                 Click="btnCancel_Click"/>
     </Grid>

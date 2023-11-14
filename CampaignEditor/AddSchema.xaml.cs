@@ -3,13 +3,18 @@ using CampaignEditor.DTOs.CampaignDTO;
 using Database.DTOs.ChannelDTO;
 using Database.DTOs.EmsTypesDTO;
 using Database.DTOs.SchemaDTO;
+using Database.Entities;
 using Database.Repositories;
+using OfficeOpenXml.Style;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace CampaignEditor
 {
@@ -24,12 +29,14 @@ namespace CampaignEditor
         private ChannelCmpController _channelCmpController;
 
         public CreateSchemaDTO _schema = null;
-
+        private ChannelDTO _selectedChannel = null;
+        private List<EmsTypes> _emsTypes = new List<EmsTypes>();
         public AddSchema(IChannelRepository channelRepository,
             IMediaPlanRepository mediaPlanRepository,
             IEmsTypesRepository emsTypesRepository,
             IChannelCmpRepository channelCmpRepository)
         {
+            this.DataContext = this;
             InitializeComponent();
 
             _channelController = new ChannelController(channelRepository);
@@ -38,10 +45,11 @@ namespace CampaignEditor
             _channelCmpController = new ChannelCmpController(channelCmpRepository);
         }
 
-        public async Task Initialize(CampaignDTO campaign)
+        public async Task Initialize(CampaignDTO campaign, ChannelDTO selectedChannel = null)
         {
             _campaign = campaign;
 
+            _selectedChannel = selectedChannel;
             await FillComboboxes();
         }
 
@@ -49,8 +57,16 @@ namespace CampaignEditor
         {
             await FillCbChannels();
             FillCbPosition();
+            await FillLbType();
             FillDate();
             FillDays();
+        }
+
+        private async Task FillLbType()
+        {
+            var types = await _emsTypesController.GetAllEmsTypesEntities();
+            _emsTypes = types.ToList();
+            cbType.ItemsSource = _emsTypes;
         }
 
         private void FillCbPosition()
@@ -58,6 +74,7 @@ namespace CampaignEditor
             cbPosition.Items.Clear();
             cbPosition.Items.Add("INS");
             cbPosition.Items.Add("BET");
+            cbPosition.SelectedIndex = 0;
         }
         private void FillDays()
         {
@@ -79,7 +96,6 @@ namespace CampaignEditor
         private void FillDate()
         {
             dpFrom.SelectedDate = DateTime.Now;
-            dpTo.SelectedDate = DateTime.Now;
         }
 
         private async Task FillCbChannels()
@@ -100,6 +116,10 @@ namespace CampaignEditor
             foreach (ChannelDTO channel in channels)
             {
                 cbChannels.Items.Add(channel);
+                if (_selectedChannel != null && channel.chid == _selectedChannel.chid)
+                {
+                    cbChannels.SelectedItem = channel;
+                }
             }
 
         }
@@ -145,11 +165,15 @@ namespace CampaignEditor
             {
                 days += day.Item2.ToString();
             }
-            string? type = tbType.Text.Trim().Length > 0 ? tbType.Text.ToUpper() : null;
+            string type = cbType.Text.Trim().Length > 0 ? cbType.Text.ToUpper() : "000";
             bool special = (bool)chbSpecial.IsChecked;
             DateOnly dateFrom = DateOnly.FromDateTime(dpFrom.SelectedDate.Value);
             DateOnly? dateTo = dpTo.SelectedDate.HasValue ? DateOnly.FromDateTime(dpTo.SelectedDate.Value) : null;
             float progcoef = 1.0f;
+            if (tbProgCoef.Text.Trim().Length > 0 && float.TryParse(tbProgCoef.Text.Trim(), out float progCoef))
+            {
+                progcoef = progCoef;
+            }
             DateOnly created = DateOnly.FromDateTime(DateTime.Now);
 
             return new CreateSchemaDTO(chid, name, position, timeFrom, timeTo, blockTime, days, type,
@@ -160,7 +184,6 @@ namespace CampaignEditor
         {
             var timeRegex1 = new Regex(@"^[0-9]{2}:[0-9]{2}$");
             var timeRegex2 = new Regex(@"^[0-9]{4}$");
-
             if (cbChannels.SelectedIndex == -1)
             {
                 MessageBox.Show("Assign channel");
@@ -176,19 +199,14 @@ namespace CampaignEditor
                 MessageBox.Show("Assign position");
                 return false;
             }
-            else if (await _emsTypesController.GetEmsTypesByCode(tbType.Text.Trim()) == null)
+            else if (cbType.Text.Trim().Length > 0 && await _emsTypesController.GetEmsTypesByCode(cbType.Text.Trim()) == null)
             {
                 MessageBox.Show("Invalid type value");
                 return false;
             }
-            else if (!dpFrom.SelectedDate.HasValue)
+            else if (dpTo.SelectedDate.HasValue && dpFrom.SelectedDate > dpTo.SelectedDate)
             {
-                MessageBox.Show("Enter start date");
-                return false;
-            }
-            else if (dpFrom.SelectedDate > dpTo.SelectedDate)
-            {
-                MessageBox.Show("Invalid date values");
+                MessageBox.Show("Start date is after end date");
                 return false;
             }
             else if (tbTimeFrom.Text.Trim().Length == 0)
@@ -201,16 +219,21 @@ namespace CampaignEditor
                 MessageBox.Show("Invalid time from value\nPossible formats: HH:mm or HHmm");
                 return false;
             }
-            else if ( tbTimeTo.Text.Trim().Length > 0 && 
+            else if (tbTimeTo.Text.Trim().Length > 0 &&
                 !timeRegex1.IsMatch(tbTimeTo.Text.Trim()) && !timeRegex2.IsMatch(tbTimeFrom.Text.Trim()))
             {
                 MessageBox.Show("Invalid time from value\nPossible formats: HH:mm or HHmm");
                 return false;
             }
-            else if (tbBlockTime.Text.Trim().Length > 0 && 
+            else if (tbBlockTime.Text.Trim().Length > 0 &&
                 !timeRegex1.IsMatch(tbBlockTime.Text) && !timeRegex2.IsMatch(tbTimeFrom.Text.Trim()))
             {
                 MessageBox.Show("Invalid time from value\nPossible formats: HH:mm or HHmm");
+                return false;
+            }
+            else if (tbProgCoef.Text.Trim().Length > 0 && !float.TryParse(tbProgCoef.Text.Trim(), out _))
+            {
+                MessageBox.Show("Invalid Prog coef value", "Result", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
             else if (lbDays.SelectedItems.Count == 0)
@@ -224,19 +247,50 @@ namespace CampaignEditor
             }
         }
 
-        private async void tbType_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
+        private void tbTime_LostKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
         {
-            if (tbType.Text.Length == 3)
+            TextBox textBox = sender as TextBox;
+
+            if (textBox != null)
             {
-                EmsTypesDTO emsType = null;
-                if ((emsType = await _emsTypesController.GetEmsTypesByCode(tbType.Text.ToUpper())) != null)
+                try
                 {
-                    tbTypeDesc.Text = emsType.typoname.ToString().Trim();
+                    string timeString = textBox.Text.Trim();
+                    textBox.Text = TimeFormat.ReturnGoodTimeFormat(timeString);
                 }
-                else
+                catch
                 {
-                    tbTypeDesc.Text = "";
+                    MessageBox.Show("Invalid time format", "Result", MessageBoxButton.OK, MessageBoxImage.Error);
+                    textBox.Text = "";
                 }
+            }
+        }
+
+        private void tbProgCoef_LostKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
+        {
+            if (!float.TryParse(tbProgCoef.Text.Trim(), out _))
+            {
+                MessageBox.Show("Invalid Prog coef value", "Result", MessageBoxButton.OK, MessageBoxImage.Error);
+                tbProgCoef.Text = "";
+            }
+        }
+
+        private async void cbType_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (cbType.Text.Length == 3)
+            {
+                if (cbType.SelectedItem != null)
+                {
+                    EmsTypes emsTypes = cbType.SelectedItem as EmsTypes;
+                    if (emsTypes != null)
+                    {
+                        tbTypeDesc.Text = emsTypes.typoname.ToString().Trim();                        
+                    }
+                    else
+                    {
+                        tbTypeDesc.Text = "";
+                    }
+                }             
             }
             else
             {

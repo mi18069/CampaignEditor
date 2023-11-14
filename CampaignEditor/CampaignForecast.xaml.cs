@@ -1114,13 +1114,19 @@ namespace CampaignEditor.UserControls
         private async void dgMediaPlans_AddMediaPlanClicked(object? sender, EventArgs e)
         {
             var f = _factoryAddSchema.Create();
-            await f.Initialize(_campaign);
+            ChannelDTO selectedChannel = null;
+            if (lvChannels.SelectedItems.Count == 1)
+            {
+                selectedChannel = lvChannels.SelectedItem as ChannelDTO;
+            }
+            await f.Initialize(_campaign, selectedChannel);
             f.ShowDialog();
             if (f._schema != null)
             {
                 try
                 {
                     var schema = await _schemaController.CreateGetSchema(f._schema);
+                    var a = f._schema.type;
                     if (schema != null)
                     {
                         MediaPlanDTO mediaPlanDTO = await SchemaToMP(schema, _cmpVersion);

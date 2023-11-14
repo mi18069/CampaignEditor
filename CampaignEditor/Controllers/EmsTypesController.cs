@@ -1,4 +1,5 @@
 ﻿using Database.DTOs.EmsTypesDTO;
+using Database.Entities;
 using Database.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -23,6 +24,11 @@ namespace CampaignEditor.Controllers
         public async Task<IEnumerable<EmsTypesDTO>> GetAllEmsTypes()
         {
             return await _repository.GetAllEmsTypes();
+        }
+
+        public async Task<IEnumerable<EmsTypes>> GetAllEmsTypesEntities()
+        {
+            return await _repository.GetAllEmsTypesEntities();
         }
 
     }

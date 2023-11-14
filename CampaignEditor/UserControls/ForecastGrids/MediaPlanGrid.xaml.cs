@@ -1,7 +1,6 @@
 ﻿using CampaignEditor.Controllers;
 using Database.DTOs.MediaPlanDTO;
 using Database.DTOs.MediaPlanTermDTO;
-using Database.DTOs.SchemaDTO;
 using Database.Entities;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;

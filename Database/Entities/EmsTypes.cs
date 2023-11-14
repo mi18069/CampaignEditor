@@ -5,5 +5,10 @@ namespace Database.Entities
     {
         public string typocode { get; set; }
         public string typoname { get; set; }
+
+        public string Concatenated
+        {
+            get { return typocode + " " + typoname.Trim(); }
+        }
     }
 }

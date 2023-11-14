@@ -165,6 +165,10 @@ namespace CampaignEditor
             {
                 return null;
             }
+            else if (timeString.Trim() == "")
+            {
+                return "";
+            }
             else if (timeString.Length == 4)
             {
                 int mins;
