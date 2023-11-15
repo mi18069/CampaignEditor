@@ -4,6 +4,7 @@ using Database.DTOs.MediaPlanDTO;
 using Database.DTOs.MediaPlanHistDTO;
 using Database.DTOs.MediaPlanTermDTO;
 using Database.DTOs.PricelistDTO;
+using Database.DTOs.SpotDTO;
 using Database.Entities;
 using Database.Repositories;
 using System;
@@ -99,64 +100,6 @@ namespace CampaignEditor
             mediaPlan.Amrpsale = MathFunctions.ArithmeticMean(filteredHists.Select(h => h.amrpsale)) * mediaPlan.amrsaletrim/100;
         }
 
-        private async Task CalculateSeccoef(MediaPlan mediaPlan, PricelistDTO pricelist, IEnumerable<MediaPlanTermDTO> terms)
-        {
-
-            var sectable = await _sectableController.GetSectableById(pricelist.sectbid);
-            var sectables = await _sectablesController.GetSectablesByIdAndSec(sectable.sctid, (int)Math.Ceiling(mediaPlan.AvgLength));
-            var seccoef = sectables == null ? 1 : sectables.coef;
-            mediaPlan.Seccoef = seccoef;
-
-            /*int secCount = 0;
-            double seccoef = 0.0;
-
-            foreach (var term in terms)
-            {
-                if (term != null && term.spotcode != null && term.spotcode.Trim() != "")
-                {
-                    foreach (char c in term.spotcode.Trim())
-                    {
-                        SpotDTO spot = await _spotController.GetSpotsByCmpidAndCode(mediaPlan.cmpid, c.ToString());
-                        var sec = await _sectablesController.GetSectablesByIdAndSec(sectable.sctid, spot.spotlength);
-                        if (sec != null)
-                            seccoef += sec.coef * (30 / spot.spotlength);
-                        else
-                            seccoef += 1.0;
-                        secCount += 1;
-                    }
-
-                }                 
-                
-            }
-            mediaPlan.Seccoef = secCount == 0 ? 1.0 : seccoef / secCount;*/
-        }
-
-        private async Task CalculateSeascoef(MediaPlan mediaPlan, PricelistDTO pricelist, IEnumerable<MediaPlanTermDTO> terms)
-        {
-            var seasonality = await _seasonalityController.GetSeasonalityById(pricelist.seastbid);
-
-            var seasonalities = await _seasonalitiesController.GetSeasonalitiesById(seasonality.seasid);
-            double seasCoef = 0;
-            int seasCount = 0;
-            foreach (var term in terms)
-            {
-                if (term != null && term.spotcode != null && term.spotcode.Trim() != "")
-                {
-                    foreach (var seas in seasonalities)
-                    {
-                        if (term.date >= DateOnly.FromDateTime(TimeFormat.YMDStringToDateTime(seas.stdt).Date) &&
-                            term.date <= DateOnly.FromDateTime(TimeFormat.YMDStringToDateTime(seas.endt).Date))
-                        {
-                            seasCount += 1;
-                            seasCoef += seas.coef;
-                        }
-                    }
-                }
-
-            }
-            mediaPlan.Seascoef = seasCount == 0 ? 1 : seasCoef / seasCount;
-        }
-
         public async Task CalculateLengthAndInsertations(MediaPlan mediaPlan, IEnumerable<MediaPlanTermDTO> terms)
         {
             var insertations = 0;
@@ -245,14 +188,19 @@ namespace CampaignEditor
             }
 
             await CalculateLengthAndInsertations(mediaPlan, terms);
-            await CalculateSeccoef(mediaPlan, pricelist, terms);
-            await CalculateSeascoef(mediaPlan, pricelist, terms);
-            await CalculatePrices(mediaPlan, pricelist);
+
+            await CalculatePrices(mediaPlan, pricelist, terms);
 
         }
 
-        public async Task CalculatePrices(MediaPlan mediaPlan, PricelistDTO pricelist = null)
+
+
+        public async Task CalculatePrices(MediaPlan mediaPlan, PricelistDTO pricelist = null, IEnumerable<MediaPlanTermDTO> terms = null)
         {
+            if (terms == null)
+            {
+                terms = await _mediaPlanTermController.GetAllMediaPlanTermsByXmpid(mediaPlan.xmpid);
+            }
 
             if (pricelist == null)
             {
@@ -260,27 +208,153 @@ namespace CampaignEditor
                 pricelist = await _pricelistController.GetPricelistById(channelCmp.plid);
             }
 
+            terms = terms.Where(term => term != null && term.spotcode != null).ToList();
+
+            await CalculateAvgSeccoef(mediaPlan, pricelist, terms);
+            await CalculateAvgSeascoef(mediaPlan, pricelist, terms);
+
             double coefs = mediaPlan.Progcoef * mediaPlan.Dpcoef * mediaPlan.Seascoef * mediaPlan.Seccoef;
 
             // For seconds type pricelists
             if (pricelist.pltype == 1)
             {
-
+                await CalculatePriceSecondsPricelist(mediaPlan, pricelist, terms);
                 mediaPlan.PricePerSecond = coefs / mediaPlan.Amrp1;
-                mediaPlan.Price = coefs * mediaPlan.Length;
                 mediaPlan.Cpp = mediaPlan.Price / (mediaPlan.Amrp1);
-
             }
             // For cpp pricelists
-            else if (pricelist.pltype == 0)
+            else
             {
+                await CalculatePriceCPPPricelist(mediaPlan, pricelist, terms);
                 mediaPlan.Cpp = pricelist.price;
-                mediaPlan.Price = (pricelist.price / 30) * mediaPlan.Length * mediaPlan.Amrpsale * coefs;
                 if (mediaPlan.Length > 0)
                     mediaPlan.PricePerSecond = mediaPlan.Price / mediaPlan.Length;
                 else
                     mediaPlan.PricePerSecond = 0;
             }
+        }
+
+        private async Task CalculatePriceSecondsPricelist(MediaPlan mediaPlan, PricelistDTO pricelist, IEnumerable<MediaPlanTermDTO> terms)
+        {
+            double price = 0;
+            foreach (MediaPlanTermDTO mpTerm in terms)
+            {
+                foreach (char spotcode in mpTerm.spotcode.Trim())
+                {
+                    SpotDTO spotDTO = await _spotController.GetSpotsByCmpidAndCode(mediaPlan.cmpid, spotcode.ToString());
+
+                    double seccoef = await CalculateTermSeccoef(mediaPlan, pricelist, spotDTO);
+                    double seascoef = await CalculateTermSeascoef(mediaPlan, pricelist, mpTerm);
+                    double coefs = seascoef * seccoef * mediaPlan.Progcoef * mediaPlan.Dpcoef;
+
+                    price += coefs * spotDTO.spotlength;
+                }
+
+            }
+
+            mediaPlan.Price = price;
+        }
+
+        private async Task CalculatePriceCPPPricelist(MediaPlan mediaPlan, PricelistDTO pricelist, IEnumerable<MediaPlanTermDTO> terms)
+        {
+            double price = 0;
+            foreach (MediaPlanTermDTO mpTerm in terms)
+            {
+                foreach (char spotcode in mpTerm.spotcode.Trim())
+                {
+                    SpotDTO spotDTO = await _spotController.GetSpotsByCmpidAndCode(mediaPlan.cmpid, spotcode.ToString());
+
+                    double seccoef = await CalculateTermSeccoef(mediaPlan, pricelist, spotDTO);
+                    double seascoef = await CalculateTermSeascoef(mediaPlan, pricelist, mpTerm);
+                    double coefs = seascoef * seccoef * mediaPlan.Progcoef * mediaPlan.Dpcoef;
+
+                    price += (pricelist.price / 30) * spotDTO.spotlength * mediaPlan.Amrpsale * coefs;
+                }
+
+            }
+            mediaPlan.Price = price;
+
+        }
+
+        private async Task<double> CalculateTermSeccoef(MediaPlan mediaPlan, PricelistDTO pricelist, SpotDTO spotDTO)
+        {
+
+            var sectable = await _sectableController.GetSectableById(pricelist.sectbid);
+            var sectables = await _sectablesController.GetSectablesByIdAndSec(sectable.sctid, spotDTO.spotlength);
+            var seccoef = sectables == null ? 1 : sectables.coef * (30 / spotDTO.spotlength);
+            return seccoef;
+        }
+
+        private async Task<double> CalculateTermSeascoef(MediaPlan mediaPlan, PricelistDTO pricelist, MediaPlanTermDTO mpTerm)
+        {
+            var seasonality = await _seasonalityController.GetSeasonalityById(pricelist.seastbid);
+
+            var seasonalities = await _seasonalitiesController.GetSeasonalitiesById(seasonality.seasid);
+            double seasCoef = 1.0;
+
+            foreach (var seas in seasonalities)
+            {
+                if (mpTerm.date >= DateOnly.FromDateTime(TimeFormat.YMDStringToDateTime(seas.stdt).Date) &&
+                    mpTerm.date <= DateOnly.FromDateTime(TimeFormat.YMDStringToDateTime(seas.endt).Date))
+                {
+                    seasCoef = seas.coef;
+                    break;
+                }
+            }
+
+            return seasCoef;
+        }
+
+        private async Task CalculateAvgSeccoef(MediaPlan mediaPlan, PricelistDTO pricelist, IEnumerable<MediaPlanTermDTO> terms)
+        {
+
+            var sectable = await _sectableController.GetSectableById(pricelist.sectbid);
+            /*var sectables = await _sectablesController.GetSectablesByIdAndSec(sectable.sctid, (int)Math.Ceiling(mediaPlan.AvgLength));
+            var seccoef = sectables == null ? 1 : sectables.coef;
+            mediaPlan.Seccoef = seccoef;*/
+
+            int secCount = 0;
+            double seccoef = 0.0;
+
+            foreach (var term in terms)
+            {
+                foreach (char c in term.spotcode.Trim())
+                {
+                    SpotDTO spot = await _spotController.GetSpotsByCmpidAndCode(mediaPlan.cmpid, c.ToString());
+                    var sec = await _sectablesController.GetSectablesByIdAndSec(sectable.sctid, spot.spotlength);
+                    if (sec != null)
+                        seccoef += sec.coef * (30 / spot.spotlength);
+                    else
+                        seccoef += 1.0;
+                    secCount += 1;
+                }
+               
+            }
+            mediaPlan.Seccoef = secCount == 0 ? 1.0 : seccoef / secCount;
+        }
+
+        private async Task CalculateAvgSeascoef(MediaPlan mediaPlan, PricelistDTO pricelist, IEnumerable<MediaPlanTermDTO> terms)
+        {
+            var seasonality = await _seasonalityController.GetSeasonalityById(pricelist.seastbid);
+
+            var seasonalities = await _seasonalitiesController.GetSeasonalitiesById(seasonality.seasid);
+            double seasCoef = 0;
+            int seasCount = 0;
+            foreach (var term in terms)
+            {
+                foreach (var seas in seasonalities)
+                {
+                    if (term.date >= DateOnly.FromDateTime(TimeFormat.YMDStringToDateTime(seas.stdt).Date) &&
+                        term.date <= DateOnly.FromDateTime(TimeFormat.YMDStringToDateTime(seas.endt).Date))
+                    {
+                        seasCount += 1;
+                        seasCoef += seas.coef;
+                    }
+                }
+                
+
+            }
+            mediaPlan.Seascoef = seasCount == 0 ? 1 : seasCoef / seasCount;
         }
 
         public MediaPlanDTO ConvertToDTO(MediaPlan mediaPlan)

@@ -148,9 +148,6 @@
     <Compile Update="UserControls\TreeViewClientsItem.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Update="UserControls\TypeListBox.xaml.cs">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Update="UserControls\UsersListItem.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -316,9 +313,6 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="UserControls\TreeViewClientsItem.xaml">
-      <SubType>Designer</SubType>
-    </Page>
-    <Page Update="UserControls\TypeListBox.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="UserControls\UsersListItem.xaml">

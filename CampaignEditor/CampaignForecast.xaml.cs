@@ -1220,11 +1220,11 @@ namespace CampaignEditor.UserControls
 
         private async void btnExport_Click(object sender, RoutedEventArgs e)
         {
-
-            var selectedTabItem = tcGrids.SelectedItem as TabItem;
-            tiSpotWeekGoals.IsSelected = true;
             Application.Current.Dispatcher.Invoke(DispatcherPriority.ApplicationIdle, new Action(async () =>
             {
+                var selectedTabItem = tcGrids.SelectedItem as TabItem;
+                tiSpotWeekGoals.IsSelected = true;
+
                 // opened tabItem
                 using (var memoryStream = new MemoryStream())
                 {
@@ -1267,10 +1267,10 @@ namespace CampaignEditor.UserControls
                     }
 
                 }
-            }));
-            tiSpotGoals.IsSelected = true;
+                tiSpotGoals.IsSelected = true;
 
-            
+            }));
+
         }
 
         private void SaveFile(SaveFileDialog saveFileDialog, MemoryStream memoryStream)
@@ -1365,5 +1365,6 @@ namespace CampaignEditor.UserControls
             }
         }
     }
+   
 }
             

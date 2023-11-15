@@ -147,6 +147,8 @@
                                         IsReadOnly="True" />
                             <DataGridTextColumn Header="Datum" Binding="{Binding date, Mode=TwoWay, StringFormat=d, ConverterCulture=en-GB}" 
                                         IsReadOnly="True"/>
+                            <DataGridTextColumn Header="Position" Binding="{Binding position, Mode=TwoWay}" 
+                                        IsReadOnly="True"/>
                             <DataGridTextColumn Header="Start time" Binding="{Binding stime, Mode=TwoWay, Converter={StaticResource SecIntConverter}}" 
                                         IsReadOnly="True"/>
                             <DataGridTextColumn Header="End time" Binding="{Binding etime, Mode=TwoWay, Converter={StaticResource SecIntConverter}}" 
