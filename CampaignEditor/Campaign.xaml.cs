@@ -4,6 +4,7 @@ using CampaignEditor.Helpers;
 using CampaignEditor.StartupHelpers;
 using Database.DTOs.ClientDTO;
 using Database.Repositories;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -59,7 +60,6 @@ namespace CampaignEditor
 
         private async Task AssignPagesToTabs()
         {
-
             //Placing loading page
             var loadingPage = new LoadingPage();
 
@@ -71,7 +71,7 @@ namespace CampaignEditor
 
             TabItem tabValidation = (TabItem)tcTabs.FindName("tiValidation");
             tabValidation.Content = loadingPage.Content;
-            
+
             // Without await, because we want to run asynchronuously
 
             var factoryCampaignOverview = _factoryOverview.Create();
@@ -85,7 +85,9 @@ namespace CampaignEditor
             var factoryCampaignValidation = _factoryValidation.Create();
             await factoryCampaignValidation.Initialize(_campaign);
             tabValidation.Content = factoryCampaignValidation.Content;
-        }
+
+
+        }     
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {

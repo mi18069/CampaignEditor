@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using CampaignEditor.Controllers;
+using CampaignEditor.DTOs.CampaignDTO;
 using Database.DTOs.MediaPlanDTO;
 using Database.DTOs.MediaPlanHistDTO;
 using Database.DTOs.MediaPlanTermDTO;
@@ -16,6 +17,9 @@ namespace CampaignEditor
 {
     public class MediaPlanConverter
     {
+        private Dictionary<char, SpotDTO> spotcodeSpotDict = new Dictionary<char, SpotDTO>();
+        CampaignDTO _campaign;
+
         private readonly IMapper _mapperFromDTO;
 
         private MediaPlanHistController _mediaPlanHistController;
@@ -61,15 +65,14 @@ namespace CampaignEditor
             _pricesController = new PricesController(pricesRepository);
         }
 
-        public async Task<MediaPlan> ConvertFromDTO(MediaPlanDTO mediaPlanDTO, IEnumerable<MediaPlanTermDTO> terms = null)
+        public async Task Initialize(CampaignDTO campaign)
         {
-
-            var mediaPlan = _mapperFromDTO.Map<MediaPlanDTO, MediaPlan>(mediaPlanDTO);
-
-            // Perform additional computations and set extra properties
-            await ComputeExtraProperties(mediaPlan, terms);
-
-            return mediaPlan;
+            _campaign = campaign;
+            var spots = await _spotController.GetSpotsByCmpid(campaign.cmpid);
+            foreach (var spot in spots)
+            {
+                spotcodeSpotDict.Add(spot.spotcode.Trim()[0], spot);
+            }
         }
 
         public async Task<MediaPlan> ConvertFirstFromDTO(MediaPlanDTO mediaPlanDTO)
@@ -78,6 +81,17 @@ namespace CampaignEditor
 
             // Perform additional computations and set extra properties
             await CalculateFirst(mediaPlan);
+
+            return mediaPlan;
+        }
+
+        public async Task<MediaPlan> ConvertFromDTO(MediaPlanDTO mediaPlanDTO, bool calculatePrice = false, IEnumerable<MediaPlanTermDTO> terms = null)
+        {
+
+            var mediaPlan = _mapperFromDTO.Map<MediaPlanDTO, MediaPlan>(mediaPlanDTO);
+
+            // Perform additional computations and set extra properties
+            await ComputeExtraProperties(mediaPlan, calculatePrice, terms);
 
             return mediaPlan;
         }
@@ -100,7 +114,7 @@ namespace CampaignEditor
             mediaPlan.Amrpsale = MathFunctions.ArithmeticMean(filteredHists.Select(h => h.amrpsale)) * mediaPlan.amrsaletrim/100;
         }
 
-        public async Task CalculateLengthAndInsertations(MediaPlan mediaPlan, IEnumerable<MediaPlanTermDTO> terms)
+        public void CalculateLengthAndInsertations(MediaPlan mediaPlan, IEnumerable<MediaPlanTermDTO> terms)
         {
             var insertations = 0;
             var length = 0;
@@ -108,9 +122,9 @@ namespace CampaignEditor
             {
                 if (term != null && term.spotcode != null && term.spotcode.Length > 0)
                 {
-                    foreach (var spotcode in term.spotcode)
+                    foreach (var spotcode in term.spotcode.Trim())
                     {
-                        var spot = await _spotController.GetSpotsByCmpidAndCode(mediaPlan.cmpid, spotcode.ToString());
+                        var spot = spotcodeSpotDict[spotcode];
                         if (spot != null)
                         {
                             length += spot.spotlength;
@@ -174,11 +188,11 @@ namespace CampaignEditor
 
             await CalculateAMRs(mediaPlan);
             await CalculateDPCoef(mediaPlan, pricelist);
-            await ComputeExtraProperties(mediaPlan);
-            
+            await ComputeExtraProperties(mediaPlan, true);
+
         }
 
-        public async Task ComputeExtraProperties(MediaPlan mediaPlan, IEnumerable<MediaPlanTermDTO> terms = null)
+        public async Task ComputeExtraProperties(MediaPlan mediaPlan, bool calculatePrice = false, IEnumerable<MediaPlanTermDTO> terms = null)
         {
             var channelCmp = await _channelCmpController.GetChannelCmpByIds(mediaPlan.cmpid, mediaPlan.chid);
             var pricelist = await _pricelistController.GetPricelistById(channelCmp.plid);
@@ -187,13 +201,28 @@ namespace CampaignEditor
                 terms = await _mediaPlanTermController.GetAllMediaPlanTermsByXmpid(mediaPlan.xmpid);
             }
 
-            await CalculateLengthAndInsertations(mediaPlan, terms);
+            CalculateLengthAndInsertations(mediaPlan, terms);
 
-            await CalculatePrices(mediaPlan, pricelist, terms);
+            if (calculatePrice)
+                await CalculatePrices(mediaPlan, pricelist, terms);
+
+            CalculateCPP(mediaPlan, pricelist);
 
         }
 
-
+        private void CalculateCPP(MediaPlan mediaPlan, PricelistDTO pricelist)
+        {
+            // For seconds pricelists
+            if (pricelist.pltype == 1)
+            {
+                mediaPlan.Cpp = mediaPlan.Price / (mediaPlan.Amrp1);
+            }
+            // For cpp pricelists
+            else
+            {
+                mediaPlan.Cpp = pricelist.price;
+            }
+        }
 
         public async Task CalculatePrices(MediaPlan mediaPlan, PricelistDTO pricelist = null, IEnumerable<MediaPlanTermDTO> terms = null)
         {
@@ -220,13 +249,13 @@ namespace CampaignEditor
             {
                 await CalculatePriceSecondsPricelist(mediaPlan, pricelist, terms);
                 mediaPlan.PricePerSecond = coefs / mediaPlan.Amrp1;
-                mediaPlan.Cpp = mediaPlan.Price / (mediaPlan.Amrp1);
+                //mediaPlan.Cpp = mediaPlan.Price / (mediaPlan.Amrp1);
             }
             // For cpp pricelists
             else
             {
                 await CalculatePriceCPPPricelist(mediaPlan, pricelist, terms);
-                mediaPlan.Cpp = pricelist.price;
+                //mediaPlan.Cpp = pricelist.price;
                 if (mediaPlan.Length > 0)
                     mediaPlan.PricePerSecond = mediaPlan.Price / mediaPlan.Length;
                 else
@@ -241,7 +270,7 @@ namespace CampaignEditor
             {
                 foreach (char spotcode in mpTerm.spotcode.Trim())
                 {
-                    SpotDTO spotDTO = await _spotController.GetSpotsByCmpidAndCode(mediaPlan.cmpid, spotcode.ToString());
+                    SpotDTO spotDTO = spotcodeSpotDict[spotcode];
 
                     double seccoef = await CalculateTermSeccoef(mediaPlan, pricelist, spotDTO);
                     double seascoef = await CalculateTermSeascoef(mediaPlan, pricelist, mpTerm);
@@ -262,7 +291,7 @@ namespace CampaignEditor
             {
                 foreach (char spotcode in mpTerm.spotcode.Trim())
                 {
-                    SpotDTO spotDTO = await _spotController.GetSpotsByCmpidAndCode(mediaPlan.cmpid, spotcode.ToString());
+                    SpotDTO spotDTO = spotcodeSpotDict[spotcode];
 
                     double seccoef = await CalculateTermSeccoef(mediaPlan, pricelist, spotDTO);
                     double seascoef = await CalculateTermSeascoef(mediaPlan, pricelist, mpTerm);
@@ -320,7 +349,7 @@ namespace CampaignEditor
             {
                 foreach (char c in term.spotcode.Trim())
                 {
-                    SpotDTO spot = await _spotController.GetSpotsByCmpidAndCode(mediaPlan.cmpid, c.ToString());
+                    SpotDTO spot = spotcodeSpotDict[c];
                     var sec = await _sectablesController.GetSectablesByIdAndSec(sectable.sctid, spot.spotlength);
                     if (sec != null)
                         seccoef += sec.coef * (30 / spot.spotlength);

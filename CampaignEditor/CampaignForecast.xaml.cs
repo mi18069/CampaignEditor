@@ -14,6 +14,7 @@ using Database.Repositories;
 using Microsoft.Win32;
 using OfficeOpenXml;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -70,9 +71,11 @@ namespace CampaignEditor.UserControls
         // for duration of campaign
         DateTime startDate;
         DateTime endDate;
-        
-        private ObservableCollection<MediaPlanTuple> _allMediaPlans =
-            new ObservableCollection<MediaPlanTuple>();
+
+        private ConcurrentBag<MediaPlanTuple> _concurrentAllMediaPlans = new ConcurrentBag<MediaPlanTuple>();
+
+        private ObservableRangeCollection<MediaPlanTuple> _allMediaPlans =
+            new ObservableRangeCollection<MediaPlanTuple>();
 
         private ObservableRangeCollection<ChannelDTO> _selectedChannels = new ObservableRangeCollection<ChannelDTO>();
 
@@ -144,6 +147,8 @@ namespace CampaignEditor.UserControls
         public async Task Initialize(CampaignDTO campaign)
         {
             _campaign = campaign;
+            await _mpConverter.Initialize(campaign);
+
             var mpVersion = await _mediaPlanVersionController.GetLatestMediaPlanVersion(_campaign.cmpid);
             if (mpVersion != null)
             {
@@ -215,7 +220,6 @@ namespace CampaignEditor.UserControls
             lvFilterDays.Items.Add(DayOfWeek.Saturday);
             lvFilterDays.Items.Add(DayOfWeek.Sunday);
 
-            //lvFilterDays.SelectAll();
         }
 
         private void lvFilterDays_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -432,9 +436,9 @@ namespace CampaignEditor.UserControls
             await FillLoadedDateRanges();
             // For dgMediaPlans
             await InitializeDataGrid();
+            await InitializeCGGrid();
             var sgGrid = await InitializeSGGrid();
             InitializeSWGGrid(sgGrid);
-            await InitializeCGGrid();
 
         }
 
@@ -458,7 +462,7 @@ namespace CampaignEditor.UserControls
 
         private async Task InitializeCGGrid()
         {
-            ObservableCollection<MediaPlan> mediaPlans = new ObservableCollection<MediaPlan>();
+            /*ObservableCollection<MediaPlan> mediaPlans = new ObservableCollection<MediaPlan>();
             foreach (var mpTuple in _allMediaPlans)
             {
                 mediaPlans.Add(mpTuple.MediaPlan);
@@ -467,8 +471,9 @@ namespace CampaignEditor.UserControls
             foreach (ChannelDTO channel in _channels) 
             {
                 channels.Add(channel);
-            }
-            cgGrid.Initialize(mediaPlans, channels);
+            }*/
+            ObservableCollection<MediaPlan> mediaPlans = new ObservableCollection<MediaPlan>(_allMediaPlans.Select(mp => mp.MediaPlan));    
+            cgGrid.Initialize(mediaPlans, _channels.ToList());
             tiChannelGoals.Focus();
         }
 
@@ -632,7 +637,7 @@ namespace CampaignEditor.UserControls
 
         private async Task RecalculateMPValues(MediaPlan mediaPlan)
         {
-            await _mpConverter.ComputeExtraProperties(mediaPlan);
+            await _mpConverter.ComputeExtraProperties(mediaPlan, true);
             await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(_mpConverter.ConvertToDTO(mediaPlan)));
         }
 
@@ -847,19 +852,15 @@ namespace CampaignEditor.UserControls
             cbVersions.SelectedIndex = cbVersions.Items.Count-1;
         }
 
-
-        private async Task FillMPList()
+        private async Task FillMPListByChannel(int daysNum, int chid)
         {
-            _allMediaPlans.Clear();
-
-            int n = (int)(endDate - startDate).TotalDays;
-
-            var mediaPlans = await _mediaPlanController.GetAllMediaPlansByCmpid(_campaign.cmpid, _cmpVersion);
-            foreach (MediaPlanDTO mediaPlan in mediaPlans)
+            var mediaPlansByChannel = await _mediaPlanController.GetAllMediaPlansByCmpidAndChannel(_campaign.cmpid, chid, _cmpVersion);
+            //var mediaPlans = await _mediaPlanController.GetAllMediaPlansByCmpid(_campaign.cmpid, _cmpVersion);
+            foreach (MediaPlanDTO mediaPlan in mediaPlansByChannel)
             {
                 List<MediaPlanTermDTO> mediaPlanTerms = (List<MediaPlanTermDTO>)await _mediaPlanTermController.GetAllMediaPlanTermsByXmpid(mediaPlan.xmpid);
                 var mediaPlanDates = new ObservableCollection<MediaPlanTerm>();
-                for (int i = 0, j = 0; i <= n && j < mediaPlanTerms.Count(); i++)
+                for (int i = 0, j = 0; i <= daysNum && j < mediaPlanTerms.Count(); i++)
                 {
                     if (DateOnly.FromDateTime(startDate.AddDays(i)) == mediaPlanTerms[j].date)
                     {
@@ -873,8 +874,27 @@ namespace CampaignEditor.UserControls
                 }
 
                 MediaPlanTuple mpTuple = new MediaPlanTuple(await _mpConverter.ConvertFromDTO(mediaPlan), mediaPlanDates);
-                _allMediaPlans.Add(mpTuple);
+                _concurrentAllMediaPlans.Add(mpTuple);
             }
+        } 
+        private async Task FillMPList()
+        {
+            _allMediaPlans.Clear();
+            _concurrentAllMediaPlans.Clear();
+
+            int daysNum = (int)(endDate - startDate).TotalDays;
+
+
+            List<Task> insertingTasks = new List<Task>();
+            foreach (var channel in _channels)
+            {
+                Task task = Task.Run(() => FillMPListByChannel(daysNum, channel.chid));
+                insertingTasks.Add(task);
+            }
+            // waiting for all tasks to finish
+            await Task.WhenAll(insertingTasks);
+
+            _allMediaPlans.ReplaceRange(_concurrentAllMediaPlans);
 
         }
         #endregion

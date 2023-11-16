@@ -1,5 +1,6 @@
 ﻿using CampaignEditor.Controllers;
 using CampaignEditor.DTOs.CampaignDTO;
+using CampaignEditor.Helpers;
 using Database.DTOs.ChannelDTO;
 using Database.DTOs.SpotDTO;
 using Database.Entities;
@@ -35,7 +36,7 @@ namespace CampaignEditor.UserControls
         List<SpotDTO> _spots = new List<SpotDTO>();
         List<ChannelDTO> _channels = new List<ChannelDTO>();
 
-        public ObservableCollection<MediaPlanTuple> _allMediaPlans;
+        public ObservableRangeCollection<MediaPlanTuple> _allMediaPlans;
 
         CampaignDTO _campaign;
         int _version = 1;

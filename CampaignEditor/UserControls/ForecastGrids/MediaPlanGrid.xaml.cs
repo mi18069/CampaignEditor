@@ -62,8 +62,8 @@ namespace CampaignEditor.UserControls
         public static readonly DependencyProperty frozenColumnsNumProperty =
             DependencyProperty.Register(nameof(frozenColumnsNum), typeof(int), typeof(MainWindow), new PropertyMetadata(0));
 
-        public ObservableCollection<MediaPlanTuple> _allMediaPlans =
-            new ObservableCollection<MediaPlanTuple>();
+        public ObservableRangeCollection<MediaPlanTuple> _allMediaPlans =
+            new ObservableRangeCollection<MediaPlanTuple>();
 
         public ObservableCollection<ChannelDTO> _selectedChannels = new ObservableCollection<ChannelDTO>();
         public List<DayOfWeek> _filteredDays = new List<DayOfWeek>();
@@ -356,7 +356,7 @@ namespace CampaignEditor.UserControls
                     if (mediaPlanTuple != null)
                     {
                         var mediaPlan = mediaPlanTuple.MediaPlan;
-                        await _converter.ComputeExtraProperties(mediaPlan);
+                        await _converter.ComputeExtraProperties(mediaPlan, true);
                         await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(_converter.ConvertToDTO(mediaPlan)));
                     }
 
@@ -393,7 +393,7 @@ namespace CampaignEditor.UserControls
                         if (mediaPlanTuple != null)
                         {
                             var mediaPlan = mediaPlanTuple.MediaPlan;
-                            await _converter.ComputeExtraProperties(mediaPlan);
+                            await _converter.ComputeExtraProperties(mediaPlan, true);
                             await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(_converter.ConvertToDTO(mediaPlan)));
                         }
 
@@ -496,7 +496,7 @@ namespace CampaignEditor.UserControls
                 if (mediaPlanTuple != null)
                 {
                     var mediaPlan = mediaPlanTuple.MediaPlan;
-                    await _converter.ComputeExtraProperties(mediaPlan);
+                    await _converter.ComputeExtraProperties(mediaPlan, true);
                     await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(_converter.ConvertToDTO(mediaPlan)));
                 }
 
