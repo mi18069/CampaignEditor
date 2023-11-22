@@ -4,6 +4,7 @@ using CampaignEditor.Helpers;
 using CampaignEditor.StartupHelpers;
 using Database.DTOs.ClientDTO;
 using Database.Repositories;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows;
@@ -26,6 +27,10 @@ namespace CampaignEditor
         private CampaignController _campaignController;
 
         CampaignOverview factoryCampaignOverview;
+
+        public delegate void AddChannelEventHandler(object sender, EventArgs e);
+        private Channels channelsInstance; 
+
         public Campaign(IClientRepository clientRepository, ICampaignRepository campaignRepository, 
             IAbstractFactory<CampaignOverview> factoryOverview, 
             IAbstractFactory<CampaignForecastView> factoryForecastView,
@@ -80,7 +85,7 @@ namespace CampaignEditor
 
             var factoryCampaignForecastView = _factoryForecastView.Create();
             factoryCampaignForecastView.tabForecast = tabForecast;
-            await factoryCampaignForecastView.Initialize(_campaign);
+            await factoryCampaignForecastView.Initialize(_campaign  );
 
             var factoryCampaignValidation = _factoryValidation.Create();
             await factoryCampaignValidation.Initialize(_campaign);

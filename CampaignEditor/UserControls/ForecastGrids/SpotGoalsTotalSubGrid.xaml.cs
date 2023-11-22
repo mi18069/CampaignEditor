@@ -23,6 +23,7 @@ namespace CampaignEditor.UserControls
         Dictionary<int, SpotGoals> _dictionary = new Dictionary<int, SpotGoals>();
         ObservableRangeCollection<SpotGoals> _values = new ObservableRangeCollection<SpotGoals>();
 
+        public int row = -1;
         public ObservableCollection<SpotGoals> Values
         {
             get { return _values; }
@@ -198,6 +199,11 @@ namespace CampaignEditor.UserControls
         public void SelectByRowIndex(int rowIndex)
         {
             dgGrid.SelectedIndex = rowIndex;
+        }
+
+        public void Unselect()
+        {
+            dgGrid.UnselectAll();
         }
 
         public event EventHandler<int> SelectedRowChanged;

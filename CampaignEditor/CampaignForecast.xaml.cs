@@ -2,6 +2,7 @@
 using CampaignEditor.DTOs.CampaignDTO;
 using CampaignEditor.Helpers;
 using CampaignEditor.StartupHelpers;
+using CampaignEditor.UserControls.ForecastGrids;
 using Database.DTOs.ChannelCmpDTO;
 using Database.DTOs.ChannelDTO;
 using Database.DTOs.GoalsDTO;
@@ -29,6 +30,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
+using static CampaignEditor.Campaign;
 
 namespace CampaignEditor.UserControls
 {
@@ -93,6 +95,8 @@ namespace CampaignEditor.UserControls
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyname));
         }
 
+        // Event to be raised when changes need to be delegated
+        public event AddChannelEventHandler AddChannelDelegated;
 
         public CampaignForecast(ISchemaRepository schemaRepository,
             IChannelRepository channelRepository,
@@ -140,8 +144,31 @@ namespace CampaignEditor.UserControls
                 canUserEdit = false;
                 btnResetDates.IsEnabled = canUserEdit;
             }
+            svsg1.PreviewMouseWheel += ScrollViewer_PreviewMouseWheel;
+            svsg2.PreviewMouseWheel += ScrollViewer_PreviewMouseWheel;
+            svsg3.PreviewMouseWheel += ScrollViewer_PreviewMouseWheel;
         }
 
+        // Event handler to forward the mouse wheel event to the ScrollViewer
+        private void ScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            var scrollViewer = (ScrollViewer)sender;
+            scrollViewer.ScrollToVerticalOffset(scrollViewer.VerticalOffset - e.Delta);
+            e.Handled = true;
+        }
+
+        #region Triggers
+        public async void OnAddChannelDelegated(object sender, EventArgs e)
+        {
+            var mpVersion = await _mediaPlanVersionController.GetLatestMediaPlanVersion(_campaign.cmpid);
+            if (mpVersion != null)
+            {
+                await InitializeChannels();
+                await LoadData(_maxVersion);
+            }
+        }
+
+        #endregion
 
         #region Initialization
         public async Task Initialize(CampaignDTO campaign)
@@ -167,47 +194,9 @@ namespace CampaignEditor.UserControls
             InitializeVersions(_maxVersion);
             await InitializeChannels();
 
-            /*var xmpChannels = await _mediaPlanController.GetAllChannelsByCmpid(_campaign.cmpid, _maxVersion);
-            var a = _channels;
-            List<int> uChannels = new List<int>();
-            foreach (var channel in _channels)
-            {
-                bool found = false;
-                foreach (int chid in xmpChannels)
-                {
-                    if (channel.chid == chid)
-                    {
-                        found = true;
-                    }
-                }
-                if (!found)
-                    uChannels.Add(channel.chid);
-            }
-
-            foreach (int chid in uChannels)
-            {
-                await InsertDataForChannel(_maxVersion, chid);
-            }*/
-
             FillCbVersions();
             FillLvFilterDays();
 
-        }
-
-        public async Task InsertDataForChannel(int version, int chid)
-        {
-
-            // Inserting new MediaPlans in database
-
-            await InsertInDatabase(chid, version);
-
-
-            List<MediaPlanDTO> mediaPlans = (await _mediaPlanController.GetAllChannelCmpMediaPlans(chid, _campaign.cmpid, version)).ToList();            
-
-            // We'll make nChannel threads, and for each thread we'll run startAMRCalculation for each MediaPlan
-
-            Task task = Task.Run(() => StartAMRByMediaPlan(_campaign.cmpid, 40, 40, mediaPlans));
-            
         }
 
         private void FillLvFilterDays()
@@ -248,6 +237,7 @@ namespace CampaignEditor.UserControls
         {
             SubscribeDataGridControllers();
             SubscribeSGGridControllers(); 
+            SubscribeSDGGridControllers();
         }
 
 
@@ -273,6 +263,15 @@ namespace CampaignEditor.UserControls
             sgGrid._allMediaPlans = _allMediaPlans;
         }
 
+        private void SubscribeSDGGridControllers()
+        {
+            sdgGrid._mediaPlanController = _mediaPlanController;
+            sdgGrid._mediaPlanTermController = _mediaPlanTermController;
+            sdgGrid._spotController = _spotController;
+            sdgGrid._channelController = _channelController;
+            sdgGrid._allMediaPlans = _allMediaPlans;
+        }
+
         private void InitializeVersions(int maxVersion)
         {
             for (int i = 0; i < maxVersion; i++)
@@ -281,8 +280,33 @@ namespace CampaignEditor.UserControls
             }
         }
 
+        public async Task AddChannels(List<ChannelDTO> channels)
+        {
+            List<Task> addChannelTask = new List<Task>();
+            foreach (var channel in channels)
+            {
+                Task task = Task.Run(() => InsertDataForChannel(_maxVersion, channel.chid));
+                addChannelTask.Add(task);
+            }
+
+            await Task.WhenAll(addChannelTask);
+            await LoadData(_maxVersion);
+
+        }
+
+        public async Task InsertDataForChannel(int version, int chid)
+        {
+
+            // Inserting new MediaPlans in database
+            await InsertInDatabase(chid, version);
+            List<MediaPlanDTO> mediaPlans = (await _mediaPlanController.GetAllChannelCmpMediaPlans(chid, _campaign.cmpid, version)).ToList();
+            await StartAMRByMediaPlan(_campaign.cmpid, 40, 40, mediaPlans);
+
+        }
+
         private async Task InitializeChannels()
         {
+            _channels.Clear();
             var channelCmps = await _channelCmpController.GetChannelCmpsByCmpid(_campaign.cmpid);
             List<ChannelDTO> channels = new List<ChannelDTO>();
             foreach (ChannelCmpDTO chnCmp in channelCmps)
@@ -437,9 +461,9 @@ namespace CampaignEditor.UserControls
             // For dgMediaPlans
             await InitializeDataGrid();
             await InitializeCGGrid();
-            var sgGrid = await InitializeSGGrid();
-            InitializeSWGGrid(sgGrid);
-
+            /*await InitializeSGGrid();
+            await InitializeSDGGrid();
+            InitializeSWGGrid();*/
         }
 
         private async Task InitializeDataGrid()
@@ -462,30 +486,27 @@ namespace CampaignEditor.UserControls
 
         private async Task InitializeCGGrid()
         {
-            /*ObservableCollection<MediaPlan> mediaPlans = new ObservableCollection<MediaPlan>();
-            foreach (var mpTuple in _allMediaPlans)
-            {
-                mediaPlans.Add(mpTuple.MediaPlan);
-            }
-            List<ChannelDTO> channels = new List<ChannelDTO>();
-            foreach (ChannelDTO channel in _channels) 
-            {
-                channels.Add(channel);
-            }*/
+
             ObservableCollection<MediaPlan> mediaPlans = new ObservableCollection<MediaPlan>(_allMediaPlans.Select(mp => mp.MediaPlan));    
             cgGrid.Initialize(mediaPlans, _channels.ToList());
             tiChannelGoals.Focus();
         }
 
-        private async Task<SpotGoalsGrid> InitializeSGGrid()
+        private async Task InitializeSGGrid()
         {
-            await sgGrid.Initialize(_campaign, _cmpVersion);
             tiSpotGoals.IsSelected = true;
-            return sgGrid;
+            await sgGrid.Initialize(_campaign, _cmpVersion);
         }
 
-        private void InitializeSWGGrid(SpotGoalsGrid sgGrid)
+        private async Task InitializeSDGGrid()
         {
+            tiSpotDaysGoals.IsSelected = true;
+            await sdgGrid.Initialize(_campaign, _cmpVersion);
+        }
+
+        private void InitializeSWGGrid()
+        {
+            tiSpotWeekGoals.IsSelected = true;
             swgGrid.Initialize(sgGrid);
         }
 
@@ -656,7 +677,7 @@ namespace CampaignEditor.UserControls
 
         #endregion
 
-
+        // ADD THREADING HERE
         private async Task CalculateMPValues(int cmpid, int version)
         {
             var mediaPlansDTO = await _mediaPlanController.GetAllMediaPlansByCmpid(cmpid, version);
@@ -855,7 +876,11 @@ namespace CampaignEditor.UserControls
         private async Task FillMPListByChannel(int daysNum, int chid)
         {
             var mediaPlansByChannel = await _mediaPlanController.GetAllMediaPlansByCmpidAndChannel(_campaign.cmpid, chid, _cmpVersion);
-            //var mediaPlans = await _mediaPlanController.GetAllMediaPlansByCmpid(_campaign.cmpid, _cmpVersion);
+            if (mediaPlansByChannel.Count() == 0)
+            {
+                await InsertDataForChannel(_maxVersion, chid);
+                mediaPlansByChannel = await _mediaPlanController.GetAllMediaPlansByCmpidAndChannel(_campaign.cmpid, chid, _cmpVersion);
+            }
             foreach (MediaPlanDTO mediaPlan in mediaPlansByChannel)
             {
                 List<MediaPlanTermDTO> mediaPlanTerms = (List<MediaPlanTermDTO>)await _mediaPlanTermController.GetAllMediaPlanTermsByXmpid(mediaPlan.xmpid);
@@ -1240,10 +1265,11 @@ namespace CampaignEditor.UserControls
 
         private async void btnExport_Click(object sender, RoutedEventArgs e)
         {
+            var selectedTabItem = tcGrids.SelectedItem as TabItem;
+            tiSpotWeekGoals.IsSelected = true;
+
             Application.Current.Dispatcher.Invoke(DispatcherPriority.ApplicationIdle, new Action(async () =>
             {
-                var selectedTabItem = tcGrids.SelectedItem as TabItem;
-                tiSpotWeekGoals.IsSelected = true;
 
                 // opened tabItem
                 using (var memoryStream = new MemoryStream())
@@ -1261,15 +1287,17 @@ namespace CampaignEditor.UserControls
                         var worksheet1 = excelPackage.Workbook.Worksheets.Add("Program Schema");
                         dgMediaPlans.PopulateWorksheet(worksheet1, 0, 0);
 
-                        tiSpotGoals.IsSelected = true;
                         var worksheet2 = excelPackage.Workbook.Worksheets.Add("Spot Goals 1");
                         sgGrid.PopulateWorksheet(worksheet2, 0, 0);
 
                         var worksheet3 = excelPackage.Workbook.Worksheets.Add("Spot Goals 2");
                         swgGrid.PopulateWorksheet(worksheet3, 0, 0);
 
-                        var worksheet4 = excelPackage.Workbook.Worksheets.Add("Channel Goals");
-                        cgGrid.PopulateWorksheet(worksheet4, 0, 0);
+                        var worksheet4 = excelPackage.Workbook.Worksheets.Add("Spot Goals 3");
+                        sdgGrid.PopulateWorksheet(worksheet4, 0, 0);
+
+                        var worksheet5 = excelPackage.Workbook.Worksheets.Add("Channel Goals");
+                        cgGrid.PopulateWorksheet(worksheet5, 0, 0);
 
                         // Save the Excel package to a memory stream
                         excelPackage.SaveAs(memoryStream);
@@ -1287,7 +1315,6 @@ namespace CampaignEditor.UserControls
                     }
 
                 }
-                tiSpotGoals.IsSelected = true;
 
             }));
 
@@ -1331,45 +1358,12 @@ namespace CampaignEditor.UserControls
             
         }
 
-        private void TabControl_Loaded(object sender, RoutedEventArgs e)
+        private async void TabControl_Loaded(object sender, RoutedEventArgs e)
         {
-            // Get the TabControl instance
-            var tabControl = (TabControl)sender;
-
-            // Iterate through all TabItems
-            foreach (var tabItem in tabControl.Items.OfType<TabItem>())
-            {
-                // Get the content of the TabItem
-                var tabItemContent = tabItem.Content as FrameworkElement;
-
-                // Find the UserControl within the TabItem content
-                var userControl = FindVisualChild<UserControl>(tabItemContent);
-
-                // Access the DataGrid within the UserControl
-                var dataGrid = FindVisualChild<DataGrid>(userControl);
-
-                // Retrieve the information from the DataGrid
-                // ...
-            }
-        }
-
-        private T FindVisualChild<T>(DependencyObject parent) where T : DependencyObject
-        {
-            if (parent == null)
-                return null;
-
-            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
-            {
-                var child = VisualTreeHelper.GetChild(parent, i);
-                if (child is T desiredChild)
-                    return desiredChild;
-
-                var foundChild = FindVisualChild<T>(child);
-                if (foundChild != null)
-                    return foundChild;
-            }
-
-            return null;
+            await InitializeSDGGrid();
+            await InitializeSGGrid();
+            InitializeSWGGrid();
+            tiSpotGoals.IsSelected = true;
         }
 
         private void btnSelectChannels_Click(object sender, RoutedEventArgs e)
@@ -1384,6 +1378,7 @@ namespace CampaignEditor.UserControls
                 lvChannels.SelectAll();
             }
         }
+
     }
    
 }

@@ -215,7 +215,14 @@ namespace CampaignEditor
             // For seconds pricelists
             if (pricelist.pltype == 1)
             {
-                mediaPlan.Cpp = mediaPlan.Price / (mediaPlan.Amrp1);
+                if (mediaPlan.Amrp1 > 0)
+                {
+                    mediaPlan.Cpp = mediaPlan.Price / (mediaPlan.Amrp1);
+                }
+                else
+                {
+                    mediaPlan.Cpp = 0;
+                }
             }
             // For cpp pricelists
             else
@@ -237,7 +244,7 @@ namespace CampaignEditor
                 pricelist = await _pricelistController.GetPricelistById(channelCmp.plid);
             }
 
-            terms = terms.Where(term => term != null && term.spotcode != null).ToList();
+            //terms = terms.Where(term => term != null && term.spotcode != null && term.spotcode.Trim().Count() > 0).ToList();
 
             await CalculateAvgSeccoef(mediaPlan, pricelist, terms);
             await CalculateAvgSeascoef(mediaPlan, pricelist, terms);
@@ -248,7 +255,14 @@ namespace CampaignEditor
             if (pricelist.pltype == 1)
             {
                 await CalculatePriceSecondsPricelist(mediaPlan, pricelist, terms);
-                mediaPlan.PricePerSecond = coefs / mediaPlan.Amrp1;
+                if (mediaPlan.Amrp1 > 0)
+                {
+                    mediaPlan.PricePerSecond = coefs / mediaPlan.Amrp1;
+                }
+                else
+                {
+                    mediaPlan.PricePerSecond = 0;
+                }
                 //mediaPlan.Cpp = mediaPlan.Price / (mediaPlan.Amrp1);
             }
             // For cpp pricelists
@@ -268,16 +282,20 @@ namespace CampaignEditor
             double price = 0;
             foreach (MediaPlanTermDTO mpTerm in terms)
             {
-                foreach (char spotcode in mpTerm.spotcode.Trim())
+                if (mpTerm != null && mpTerm.spotcode != null)
                 {
-                    SpotDTO spotDTO = spotcodeSpotDict[spotcode];
+                    foreach (char spotcode in mpTerm.spotcode.Trim())
+                    {
+                        SpotDTO spotDTO = spotcodeSpotDict[spotcode];
 
-                    double seccoef = await CalculateTermSeccoef(mediaPlan, pricelist, spotDTO);
-                    double seascoef = await CalculateTermSeascoef(mediaPlan, pricelist, mpTerm);
-                    double coefs = seascoef * seccoef * mediaPlan.Progcoef * mediaPlan.Dpcoef;
+                        double seccoef = await CalculateTermSeccoef(mediaPlan, pricelist, spotDTO);
+                        double seascoef = await CalculateTermSeascoef(mediaPlan, pricelist, mpTerm);
+                        double coefs = seascoef * seccoef * mediaPlan.Progcoef * mediaPlan.Dpcoef;
 
-                    price += coefs * spotDTO.spotlength;
+                        price += coefs * spotDTO.spotlength;
+                    }
                 }
+               
 
             }
 
@@ -289,16 +307,20 @@ namespace CampaignEditor
             double price = 0;
             foreach (MediaPlanTermDTO mpTerm in terms)
             {
-                foreach (char spotcode in mpTerm.spotcode.Trim())
+                if (mpTerm != null && mpTerm.spotcode != null)
                 {
-                    SpotDTO spotDTO = spotcodeSpotDict[spotcode];
+                    foreach (char spotcode in mpTerm.spotcode.Trim())
+                    {
+                        SpotDTO spotDTO = spotcodeSpotDict[spotcode];
 
-                    double seccoef = await CalculateTermSeccoef(mediaPlan, pricelist, spotDTO);
-                    double seascoef = await CalculateTermSeascoef(mediaPlan, pricelist, mpTerm);
-                    double coefs = seascoef * seccoef * mediaPlan.Progcoef * mediaPlan.Dpcoef;
+                        double seccoef = await CalculateTermSeccoef(mediaPlan, pricelist, spotDTO);
+                        double seascoef = await CalculateTermSeascoef(mediaPlan, pricelist, mpTerm);
+                        double coefs = seascoef * seccoef * mediaPlan.Progcoef * mediaPlan.Dpcoef;
 
-                    price += (pricelist.price / 30) * spotDTO.spotlength * mediaPlan.Amrpsale * coefs;
+                        price += (pricelist.price / 30) * spotDTO.spotlength * mediaPlan.Amrpsale * coefs;
+                    }
                 }
+                
 
             }
             mediaPlan.Price = price;
@@ -310,7 +332,12 @@ namespace CampaignEditor
 
             var sectable = await _sectableController.GetSectableById(pricelist.sectbid);
             var sectables = await _sectablesController.GetSectablesByIdAndSec(sectable.sctid, spotDTO.spotlength);
-            var seccoef = sectables == null ? 1 : sectables.coef * (30 / spotDTO.spotlength);
+            var seccoef = 1.0;
+            if (sectable.sctid != 1)
+            {
+                seccoef = sectables == null ? 1 : sectables.coef * ((double)30 / spotDTO.spotlength);
+            }
+            
             return seccoef;
         }
 
@@ -341,25 +368,40 @@ namespace CampaignEditor
             /*var sectables = await _sectablesController.GetSectablesByIdAndSec(sectable.sctid, (int)Math.Ceiling(mediaPlan.AvgLength));
             var seccoef = sectables == null ? 1 : sectables.coef;
             mediaPlan.Seccoef = seccoef;*/
+            if (sectable.sctid == 1)
+            {
+                mediaPlan.Seccoef = 1.0;
+                return;
+            }
 
             int secCount = 0;
             double seccoef = 0.0;
 
             foreach (var term in terms)
             {
-                foreach (char c in term.spotcode.Trim())
+                if (term != null && term.spotcode != null)
                 {
-                    SpotDTO spot = spotcodeSpotDict[c];
-                    var sec = await _sectablesController.GetSectablesByIdAndSec(sectable.sctid, spot.spotlength);
-                    if (sec != null)
-                        seccoef += sec.coef * (30 / spot.spotlength);
-                    else
-                        seccoef += 1.0;
-                    secCount += 1;
-                }
-               
+                    foreach (char c in term.spotcode.Trim())
+                    {
+                        SpotDTO spot = spotcodeSpotDict[c];
+                        var sec = await _sectablesController.GetSectablesByIdAndSec(sectable.sctid, spot.spotlength);
+                        if (sec != null)
+                            seccoef += sec.coef * ((double)30 / spot.spotlength);
+                        else
+                            seccoef += 1.0;
+                        secCount += 1;
+                    }
+                }            
             }
-            mediaPlan.Seccoef = secCount == 0 ? 1.0 : seccoef / secCount;
+
+            if (secCount == 0)
+            {
+                mediaPlan.Seccoef = 1.0;
+            }
+            else
+            {
+                mediaPlan.Seccoef = seccoef / secCount;
+            }
         }
 
         private async Task CalculateAvgSeascoef(MediaPlan mediaPlan, PricelistDTO pricelist, IEnumerable<MediaPlanTermDTO> terms)
@@ -371,19 +413,31 @@ namespace CampaignEditor
             int seasCount = 0;
             foreach (var term in terms)
             {
-                foreach (var seas in seasonalities)
+                if (term != null && term.spotcode != null)
                 {
-                    if (term.date >= DateOnly.FromDateTime(TimeFormat.YMDStringToDateTime(seas.stdt).Date) &&
-                        term.date <= DateOnly.FromDateTime(TimeFormat.YMDStringToDateTime(seas.endt).Date))
+                    foreach (var seas in seasonalities)
                     {
-                        seasCount += 1;
-                        seasCoef += seas.coef;
+                        if (term.date >= DateOnly.FromDateTime(TimeFormat.YMDStringToDateTime(seas.stdt).Date) &&
+                            term.date <= DateOnly.FromDateTime(TimeFormat.YMDStringToDateTime(seas.endt).Date))
+                        {
+                            seasCount += 1;
+                            seasCoef += seas.coef;
+                        }
                     }
                 }
+                    
                 
 
             }
-            mediaPlan.Seascoef = seasCount == 0 ? 1 : seasCoef / seasCount;
+
+            if (seasCount == 0)
+            {
+                mediaPlan.Seascoef = 1.0;
+            }
+            else
+            {
+                mediaPlan.Seascoef = seasCoef / seasCount;
+            }
         }
 
         public MediaPlanDTO ConvertToDTO(MediaPlan mediaPlan)

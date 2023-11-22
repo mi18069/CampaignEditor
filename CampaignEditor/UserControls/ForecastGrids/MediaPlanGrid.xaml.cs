@@ -893,6 +893,12 @@ namespace CampaignEditor.UserControls
                             worksheet.Cells[rowIndex + 2 + rowOff, columnIndex + 1 + colOff].Value = cellValue;
 
                         }
+                        else if (cellContent is ComboBox combobox)
+                        {
+                            var cellValue = combobox.Text.Trim();
+                            worksheet.Cells[rowIndex + 2 + rowOff, columnIndex + 1 + colOff].Value = cellValue;
+
+                        }
                         else
                         {
                             worksheet.Cells[rowIndex + 2 + rowOff, columnIndex + 1 + colOff].Value = "";

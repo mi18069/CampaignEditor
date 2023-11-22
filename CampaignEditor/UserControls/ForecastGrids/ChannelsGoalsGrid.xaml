@@ -28,10 +28,14 @@
                                     IsReadOnly="True" Binding="{Binding Channel.chname, Mode=TwoWay}" />
                 <DataGridTextColumn Width="*" Header="INS"
                                     IsReadOnly="True" Binding="{Binding Insertations, Mode=TwoWay}" />
-                <DataGridTextColumn Width="*" Header="GRP"
-                                    IsReadOnly="True" Binding="{Binding Grp, Mode=TwoWay}"/>
+                <DataGridTextColumn Width="*" Header="GRP 1"
+                                    IsReadOnly="True" Binding="{Binding Grp1, Mode=TwoWay, StringFormat=N2}"/>
+                <DataGridTextColumn Width="*" Header="GRP 2"
+                                    IsReadOnly="True" Binding="{Binding Grp2, Mode=TwoWay, StringFormat=N2}"/>
+                <DataGridTextColumn Width="*" Header="GRP 3"
+                                    IsReadOnly="True" Binding="{Binding Grp3, Mode=TwoWay, StringFormat=N2}"/>
                 <DataGridTextColumn Width="*" Header="BUD"
-                                    IsReadOnly="True" Binding="{Binding Budget, Mode=TwoWay}"/>
+                                    IsReadOnly="True" Binding="{Binding Budget, Mode=TwoWay, StringFormat=N2}"/>
             </DataGrid.Columns>
             <DataGrid.Resources>
                 <Style TargetType="{x:Type DataGridColumnHeader}">

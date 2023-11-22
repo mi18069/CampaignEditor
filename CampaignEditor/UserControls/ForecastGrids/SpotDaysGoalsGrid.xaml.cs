@@ -1,91 +1,110 @@
-﻿using CampaignEditor.DTOs.CampaignDTO;
+﻿using CampaignEditor.Controllers;
+using CampaignEditor.DTOs.CampaignDTO;
+using CampaignEditor.Helpers;
 using Database.DTOs.ChannelDTO;
 using Database.DTOs.SpotDTO;
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Controls.Primitives;
-using System.Windows.Media;
+using Database.Entities;
 using OfficeOpenXml.Style;
 using OfficeOpenXml;
-using Border = System.Windows.Controls.Border;
-using OfficeOpenXml.FormulaParsing;
-using System.Windows.Interop;
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
+using System.Diagnostics;
+using System.Globalization;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Media;
 
-
-namespace CampaignEditor.UserControls
+namespace CampaignEditor.UserControls.ForecastGrids
 {
     /// <summary>
-    /// This grid is very similar to SpotGoalsGrid, so I'll pass it some SpotGoalsGrid, and make
-    /// this grid based on that, on that way, there's no need to calculate same things more than once
+    /// This grid is very similar to SpotWeekGoalsGrid, it just have days on the side, not weeks
     /// </summary>
-    public partial class SpotWeekGoalsGrid : UserControl
+    public partial class SpotDaysGoalsGrid : UserControl
     {
 
         CampaignDTO _campaign;
+        int _version = 1;
+
+
         // for duration of campaign
         DateTime startDate;
         DateTime endDate;
 
         List<SpotDTO> _spots = new List<SpotDTO>();
         List<ChannelDTO> _channels = new List<ChannelDTO>();
+        public MediaPlanController _mediaPlanController { get; set; }
+        public MediaPlanTermController _mediaPlanTermController { get; set; }
+        public SpotController _spotController { get; set; }
+        public ChannelController _channelController { get; set; }
 
-        public SpotWeekGoalsGrid()
+        public ObservableRangeCollection<MediaPlanTuple> _allMediaPlans;
+        private Dictionary<Char, int> _spotLengths = new Dictionary<char, int>();
+
+
+        public SpotDaysGoalsGrid()
         {
             InitializeComponent();
         }
 
-        public void Initialize(SpotGoalsGrid sgGrid)
+        public async Task Initialize(CampaignDTO campaign, int version)
         {
-            _campaign = sgGrid.Campaign;
-
-            startDate = sgGrid.StartDate;
-            endDate = sgGrid.EndDate;
+            _campaign = campaign;
+            _version = version;
 
             _spots.Clear();
+            _spotLengths.Clear();
             _channels.Clear();
-            ugWeeks.Children.Clear();
-            ugGoals.Children.Clear();
             ugChannels.Children.Clear();
+            ugGoals.Children.Clear();
+            ugDays.Children.Clear();
             ugSpots.Children.Clear();
             ugGrid.Children.Clear();
 
-            var spots = sgGrid.Spots;
-            foreach (SpotDTO spot in spots)
+
+            startDate = TimeFormat.YMDStringToDateTime(_campaign.cmpsdate);
+            endDate = TimeFormat.YMDStringToDateTime(_campaign.cmpedate);
+
+            var spots = await _spotController.GetSpotsByCmpid(_campaign.cmpid);
+            _spots = spots.ToList();
+            _spots = _spots.OrderBy(s => s.spotcode).ToList();
+            foreach (var spot in spots)
             {
-                _spots.Add(spot);
+                _spotLengths.Add(spot.spotcode[0], spot.spotlength);
             }
 
-            var channels = sgGrid.Channels;
-            foreach (ChannelDTO channel in channels)
+            var channelIds = await _mediaPlanController.GetAllChannelsByCmpid(_campaign.cmpid, _version);
+            List<ChannelDTO> channels = new List<ChannelDTO>();
+            foreach (var chid in channelIds)
             {
-                _channels.Add(channel);
-
+                ChannelDTO channel = await _channelController.GetChannelById(chid);
+                channels.Add(channel);
             }
+            _channels = channels.OrderBy(c => c.chname).ToList();
 
             CreateOutboundHeaders();
-            AddGrid(sgGrid.ugGrid);
             SetWidth();
 
         }
 
         private void CreateOutboundHeaders()
         {
-            int firstWeekNum = GetWeekOfYear(startDate);
-            int lastWeekNum = GetWeekOfYear(endDate);
+            int firstDayNum = GetDayOfYear(startDate);
+            int lastDayNum = GetDayOfYear(endDate);
 
             // Add headers
-            // Weeks
-            ugWeeks.Rows = lastWeekNum - firstWeekNum + 1 + 1; // last + 1 is for Header Total
-            for (int i = firstWeekNum; i <= lastWeekNum; i++)
+            // Days
+            ugDays.Rows = lastDayNum - firstDayNum + 1 + 1; // last + 1 is for Header Total // add +1 to this +1
+            for (int i = firstDayNum; i <= lastDayNum; i++)
             {
 
-                Border border = new Border();
+                System.Windows.Controls.Border border = new System.Windows.Controls.Border();
                 border.BorderBrush = Brushes.Black;
                 border.Background = Brushes.LightGoldenrodYellow;
-                if (i == firstWeekNum)
+                if (i == firstDayNum)
                 {
                     border.BorderThickness = new Thickness(1, 3, 1, 1);
                 }
@@ -98,21 +117,21 @@ namespace CampaignEditor.UserControls
                 textBlock.HorizontalAlignment = HorizontalAlignment.Center;
                 textBlock.VerticalAlignment = VerticalAlignment.Center;
                 textBlock.FontWeight = FontWeights.Bold;
-                textBlock.Text = "Week " + i.ToString();
+                textBlock.Text = startDate.AddDays(i - firstDayNum).ToShortDateString();
 
                 border.Child = textBlock;
 
-                ugWeeks.Children.Add(border);
+                ugDays.Children.Add(border);
             }
 
-            AddWeeksHeaderTotal();
+            AddDaysHeaderTotal();
 
             // Spots
-            for (int i = firstWeekNum; i < lastWeekNum + 1 + 1; i++) // +1 because of Total row 
+            for (int i = firstDayNum; i < lastDayNum + 1 + 1; i++) // +1 because of Total row // add +1
             {
-                for (int j=0; j<_spots.Count; j++)
+                for (int j = 0; j < _spots.Count; j++)
                 {
-                    Border border = new Border();
+                    System.Windows.Controls.Border border = new System.Windows.Controls.Border();
                     border.BorderBrush = Brushes.Black;
                     border.Background = Brushes.LightGoldenrodYellow;
                     if (j == _spots.Count - 1)
@@ -140,15 +159,15 @@ namespace CampaignEditor.UserControls
 
             }
 
-           
+
 
             //Channels
             ugChannels.Columns = (_channels.Count + 1);
 
-            for (int i = 0; i < _channels.Count + 1; i++)
+            for (int i = 0; i < ugChannels.Columns; i++)
             {
 
-                Border border = new Border();
+                System.Windows.Controls.Border border = new System.Windows.Controls.Border();
                 border.BorderBrush = Brushes.Black;
                 if (i == _channels.Count)
                 {
@@ -195,7 +214,7 @@ namespace CampaignEditor.UserControls
             {
                 for (int i = 0; i < 3; i++)
                 {
-                    Border border = new Border();
+                    System.Windows.Controls.Border border = new System.Windows.Controls.Border();
                     border.BorderBrush = Brushes.Black;
                     border.Background = Brushes.LightGoldenrodYellow;
                     if (i == 0 && j == 0)
@@ -227,45 +246,117 @@ namespace CampaignEditor.UserControls
                 }
             }
 
-        }
-        
-
-        private void AddGrid(UniformGrid grid)
-        {
-            // Set num of Columns
-            int nCol = ugChannels.Children.Count;
-            ugGrid.Columns = nCol;
-
-            // Iterate through the child elements in the UniformGrid
-            int i = 0;
-            foreach (var child in grid.Children)
+            // Grid Goals
+            ugGrid.Columns = _channels.Count + 1; // 1 for total
+            for (int i = 0; i < ugDays.Children.Count; i++)
             {
-                if (child is SpotGoalsSubGrid sg)
+                DateTime date = startDate.AddDays(i);
+
+                if (i == ugDays.Children.Count - 1)
                 {
-                    var nsg = new SpotGoalsSubGrid(sg);
-                    nsg.row = i / nCol;
-                    nsg.SelectedRowChanged += SubGrid_SelectedRowChanged;
-                    ugGrid.Children.Add(nsg);
-                }
-                else if (child is SpotGoalsTotalSubGrid tsg)
-                {
-                    var ntsg = new SpotGoalsTotalSubGrid(tsg);
-                    ntsg.row = i / nCol;
-                    ntsg.SelectedRowChanged += SubGrid_SelectedRowChanged;
-                    ugGrid.Children.Add(ntsg);
-                }
-                else
-                {
+                    AddTotalSubGrids();
                     continue;
                 }
 
-                i++;
+                for (int j = 0; j < ugChannels.Columns; j++)
+                {
+
+                    // Filtering mediaPlans by channels 
+                    ObservableCollection<MediaPlanTuple> channelMpTuples;
+
+                    if (j == _channels.Count)
+                    {
+                        ObservableCollection<ObservableCollection<SpotGoals>> valuesList = new ObservableCollection<ObservableCollection<SpotGoals>>();
+                        int n = ugGrid.Children.Count;
+                        for (int k = 0; k < _channels.Count; k++)
+                        {
+                            SpotGoalsSubGrid sg = ugGrid.Children[n - 1 - k] as SpotGoalsSubGrid;
+                            ObservableCollection<SpotGoals> dg = sg.Values;
+                            valuesList.Add(dg);
+                        }
+                        var totalSubGrid = new SpotGoalsTotalSubGrid(valuesList);
+                        totalSubGrid.row = i;
+                        totalSubGrid.SelectedRowChanged += SubGrid_SelectedRowChanged;
+                        ugGrid.Children.Add(totalSubGrid);
+                        continue;
+                    }
+                    else
+                    {
+                        int channelId = _channels[j].chid;
+                        channelMpTuples = new ObservableCollection<MediaPlanTuple>(_allMediaPlans.Where(tuple => tuple.MediaPlan.chid == channelId));
+                    }
+
+                    
+                    
+
+                    var mpTuples = new ObservableCollection<MediaPlanTuple>();
+                    foreach (var mpTuple in channelMpTuples)
+                    {
+                        var allMpTerms = mpTuple.Terms;
+                        ObservableCollection<MediaPlanTerm> mpTerms;
+
+                        mpTerms = new ObservableCollection<MediaPlanTerm>(mpTuple.Terms.Where(t => t != null &&
+                                  t.Date != null && t.Date == DateOnly.FromDateTime(date)));
+
+                        
+                        mpTuples.Add(new MediaPlanTuple(mpTuple.MediaPlan, mpTerms));
+                    }
+                    var subGrid = new SpotGoalsSubGrid(_spots, mpTuples);
+                    subGrid.row = i;
+                    subGrid.SelectedRowChanged += SubGrid_SelectedRowChanged;
+                    ugGrid.Children.Add(subGrid);
+                }
+            }
+
+
+        }
+
+        private void AddTotalSubGrids()
+        {
+            for (int j = 0; j < ugChannels.Columns; j++)
+            {
+
+                if (j == _channels.Count)
+                {
+                    ObservableCollection<ObservableCollection<SpotGoals>> totalValuesList = new ObservableCollection<ObservableCollection<SpotGoals>>();
+                    int m = ugGrid.Children.Count;
+                    for (int k = 0; k < _channels.Count; k++)
+                    {
+                        SpotGoalsTotalSubGrid tsg = ugGrid.Children[m - 1 - k] as SpotGoalsTotalSubGrid;
+                        ObservableCollection<SpotGoals> totalValues = tsg.Values;
+                        totalValuesList.Add(totalValues);
+                    }
+                    var totalsSubGrid = new SpotGoalsTotalSubGrid(totalValuesList);
+                    totalsSubGrid.row = ugDays.Children.Count - 1;
+                    ugGrid.Children.Add(totalsSubGrid);
+                }
+                else
+                {
+                    ObservableCollection<ObservableCollection<SpotGoals>> valuesList = new ObservableCollection<ObservableCollection<SpotGoals>>();
+                    int n = ugGrid.Children.Count;
+
+                    for (int k = n - (_channels.Count + 1); k >= 0; k -= _channels.Count + 1)
+                    {
+                        SpotGoalsSubGrid sg = ugGrid.Children[k] as SpotGoalsSubGrid;
+                        if (sg != null)
+                        {
+                            ObservableCollection<SpotGoals> values = sg.Values;
+                            valuesList.Add(values);
+                        }
+
+                    }
+                    var totalSubGrid = new SpotGoalsTotalSubGrid(valuesList);
+                    totalSubGrid.row = ugDays.Children.Count - 1;
+                    totalSubGrid.SelectedRowChanged += SubGrid_SelectedRowChanged;
+                    ugGrid.Children.Add(totalSubGrid);
+                }
             }
         }
 
-        private void AddWeeksHeaderTotal()
+
+        private void AddDaysHeaderTotal()
         {
-            Border border = new Border();
+            System.Windows.Controls.Border border = new System.Windows.Controls.Border();
             border.BorderBrush = Brushes.Black;
             border.Background = Brushes.Yellow;
 
@@ -280,17 +371,13 @@ namespace CampaignEditor.UserControls
 
             border.Child = textBlock;
 
-            ugWeeks.Children.Add(border);
+            ugDays.Children.Add(border);
         }
 
-        private int GetWeekOfYear(DateTime date)
+        private int GetDayOfYear(DateTime date)
         {
             System.Globalization.Calendar calendar = CultureInfo.CurrentCulture.Calendar;
-            return calendar.GetWeekOfYear(
-                date,
-                CultureInfo.CurrentCulture.DateTimeFormat.CalendarWeekRule,
-                CultureInfo.CurrentCulture.DateTimeFormat.FirstDayOfWeek
-            );
+            return calendar.GetDayOfYear(date);
         }
 
         private void SetWidth()
@@ -412,7 +499,7 @@ namespace CampaignEditor.UserControls
 
             // Merging cells
             int offset = _spots.Count;
-            for (int i = 0, rowOffset = rowOff; i < ugWeeks.Rows; i++, rowOffset += offset)
+            for (int i = 0, rowOffset = rowOff; i < ugDays.Rows; i++, rowOffset += offset)
             {
                 // Get the range of cells to merge
                 var range = worksheet.Cells[1 + rowOffset, 1 + colOff, offset + rowOffset, 1 + colOff];
@@ -425,11 +512,11 @@ namespace CampaignEditor.UserControls
 
 
             // Set the cell values and colors in Excel
-            for (int rowIndex = 0; rowIndex < ugWeeks.Children.Count; rowIndex++)
+            for (int rowIndex = 0; rowIndex < ugDays.Children.Count; rowIndex++)
             {
                 string cellValue = string.Empty;
 
-                var weekBorder = ugWeeks.Children[rowIndex] as Border;
+                var weekBorder = ugDays.Children[rowIndex] as System.Windows.Controls.Border;
                 if (weekBorder != null)
                 {
                     var weekTextBlock = weekBorder.Child as TextBlock;
@@ -442,7 +529,7 @@ namespace CampaignEditor.UserControls
                 worksheet.Cells[rowIndex * offset + 1 + rowOff, colOff + 1].Value = cellValue;
 
                 // Set the cell color
-                var cell = worksheet.Cells[rowIndex * offset + 1 + rowOff , colOff + 1];
+                var cell = worksheet.Cells[rowIndex * offset + 1 + rowOff, colOff + 1];
                 if (cell != null)
                 {
                     cell.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
@@ -468,8 +555,8 @@ namespace CampaignEditor.UserControls
             {
                 string cellValue = string.Empty;
 
-                var spotBorder = ugSpots.Children[rowIndex] as Border;
-                if (spotBorder != null) 
+                var spotBorder = ugSpots.Children[rowIndex] as System.Windows.Controls.Border;
+                if (spotBorder != null)
                 {
                     var spotTextBlock = spotBorder.Child as TextBlock;
                     if (spotTextBlock != null)
@@ -502,7 +589,7 @@ namespace CampaignEditor.UserControls
 
             }
         }
-        
+
 
         private void AddChannelsHeaderInWorksheet(ExcelWorksheet worksheet, int rowOff = 0, int colOff = 0)
         {
@@ -519,7 +606,7 @@ namespace CampaignEditor.UserControls
             // Set the column headers in Excel
             for (int columnIndex = 0; columnIndex < ugChannels.Columns; columnIndex++)
             {
-                var border = ugChannels.Children[columnIndex] as Border;
+                var border = ugChannels.Children[columnIndex] as System.Windows.Controls.Border;
                 var content = string.Empty;
                 if (border != null)
                 {
@@ -550,7 +637,7 @@ namespace CampaignEditor.UserControls
             // Set the column headers in Excel
             for (int columnIndex = 0; columnIndex < ugGoals.Columns; columnIndex++)
             {
-                var border = ugGoals.Children[columnIndex] as Border;
+                var border = ugGoals.Children[columnIndex] as System.Windows.Controls.Border;
                 var content = string.Empty;
                 if (border != null)
                 {
@@ -576,5 +663,8 @@ namespace CampaignEditor.UserControls
         }
 
         #endregion
+
+        
+
     }
 }

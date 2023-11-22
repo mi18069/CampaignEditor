@@ -88,6 +88,9 @@
     <Compile Update="CampaignForecast.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="UserControls\ForecastGrids\SpotDaysGoalsGrid.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="UserControls\RulerControls\CanvasTerms.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -253,6 +256,9 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="CampaignForecast.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UserControls\ForecastGrids\SpotDaysGoalsGrid.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="UserControls\RulerControls\CanvasTerms.xaml">

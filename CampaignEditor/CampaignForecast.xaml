@@ -4,6 +4,7 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:CampaignEditor.UserControls" 
+      xmlns:local1="clr-namespace:CampaignEditor.UserControls.ForecastGrids" 
       xmlns:converters="clr-namespace:CampaignEditor.Converters"
       mc:Ignorable="d" 
       d:DesignHeight="700" d:DesignWidth="1200"
@@ -90,13 +91,18 @@
             <TabControl x:Name="tcGrids" Grid.Row="7" Grid.Column="2" Grid.ColumnSpan="3"
                         Loaded="TabControl_Loaded">
                 <TabItem Header="Spots Goals 1" x:Name="tiSpotGoals" >
-                    <ScrollViewer HorizontalScrollBarVisibility="Visible">
+                    <ScrollViewer x:Name="svsg1" HorizontalScrollBarVisibility="Visible">
                         <local:SpotGoalsGrid x:Name="sgGrid" />
                     </ScrollViewer>
                 </TabItem>
                 <TabItem Header="Spots Goals 2" x:Name="tiSpotWeekGoals" >
-                    <ScrollViewer HorizontalScrollBarVisibility="Visible">
+                    <ScrollViewer x:Name="svsg2" HorizontalScrollBarVisibility="Visible">
                         <local:SpotWeekGoalsGrid x:Name="swgGrid" />
+                    </ScrollViewer>
+                </TabItem>
+                <TabItem Header="Spots Goals 3" x:Name="tiSpotDaysGoals" >
+                    <ScrollViewer x:Name="svsg3" HorizontalScrollBarVisibility="Visible">
+                        <local1:SpotDaysGoalsGrid x:Name="sdgGrid" />
                     </ScrollViewer>
                 </TabItem>
                 <TabItem x:Name="tiChannelGoals" Header="Channels Goals" Height="20" VerticalAlignment="Top">

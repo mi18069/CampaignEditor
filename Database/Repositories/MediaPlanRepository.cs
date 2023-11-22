@@ -5,6 +5,7 @@ using Database.DTOs.MediaPlanDTO;
 using Database.Entities;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -556,7 +557,7 @@ namespace Database.Repositories
             using var connection = _context.GetConnection();
 
             var allMediaPlans = await connection.QueryAsync<dynamic>
-                ("SELECT * FROM xmp WHERE datumod <= @Edate AND datumdo >= @Sdate "
+                ("SELECT * FROM xmp WHERE datumod <= @Edate AND datumdo >= @Sdate"
                 , new { Sdate=sdate, Edate=edate});
 
             allMediaPlans = allMediaPlans.Select(item => new MediaPlan()
@@ -656,57 +657,59 @@ namespace Database.Repositories
         public async Task<bool> UpdateMediaPlan(UpdateMediaPlanDTO mediaPlanDTO)
         {
             using var connection = _context.GetConnection();
-       
+            
+            
             var affected = await connection.ExecuteAsync(
-                 "UPDATE xmp SET xmpid = @Xmpid, schid = @Schid, cmpid = @Cmpid, chid = @Chid, naziv = @Name, " +
-                 "verzija = @Version, pozicija = @Position, " +
-                 "vremeod = @Stime, vremedo = @Etime, vremerbl = @Blocktime, dani = @Days, " +
-                 "tipologija = @Type, specijal = @Special, datumod = CAST(@Sdate AS DATE), datumdo = CAST(@Edate AS DATE), " +
-                 "datumkreiranja = CAST(@Created AS DATE), datumizmene = CAST(@Modified AS DATE), " +
-                 "amr1 = @Amr1, amr1trim = @Amr1trim, amr2 = @Amr2, amr2trim = @Amr2trim, amr3 = @Amr3, amr3trim = @Amr3trim, amrsale = @Amrsale, amrsaletrim = @Amrsaletrim, " +
-                 "amrp1 = @Amrp1, amrp2 = @Amrp2, amrp3 = @Amrp3, amrpsale = @Amrpsale, " +
-                 "dpkoef = @Dpcoef, progkoef = @Progcoef, seaskoef = @Seascoef, seckoef = @Seccoef, price = @Price, active = @Active, pricepersec = @PricePerSec " +
-                 "WHERE xmpid = @Xmpid",
-                 new
-                 {
-                     Xmpid = mediaPlanDTO.xmpid,
-                     Schid = mediaPlanDTO.schid,
-                     Cmpid = mediaPlanDTO.cmpid,
-                     Chid = mediaPlanDTO.chid,
-                     Name = mediaPlanDTO.name.Trim(),
-                     Version = mediaPlanDTO.version,
-                     Position = mediaPlanDTO.position,
-                     Stime = mediaPlanDTO.stime,
-                     Etime = mediaPlanDTO.etime,
-                     Blocktime = mediaPlanDTO.blocktime,
-                     Days = mediaPlanDTO.days,
-                     Type = mediaPlanDTO.type,
-                     Special = mediaPlanDTO.special,
-                     Sdate = mediaPlanDTO.sdate.ToString("yyyy-MM-dd"),
-                     Edate = mediaPlanDTO.edate == null ? null : mediaPlanDTO.edate.Value.ToString("yyyy-MM-dd"),
-                     Progcoef = mediaPlanDTO.progcoef,
-                     Created = mediaPlanDTO.created.ToString("yyyy-MM-dd"),
-                     Modified = mediaPlanDTO.modified == null ? null : mediaPlanDTO.modified.Value.ToString("yyyy-MM-dd"),
-                     Amr1 = mediaPlanDTO.amr1,
-                     Amr1trim = mediaPlanDTO.amr1trim,
-                     Amr2 = mediaPlanDTO.amr2,
-                     Amr2trim = mediaPlanDTO.amr2trim,
-                     Amr3 = mediaPlanDTO.amr3,
-                     Amr3trim = mediaPlanDTO.amr3trim,
-                     Amrsale = mediaPlanDTO.amrsale,
-                     Amrsaletrim = mediaPlanDTO.amrsaletrim,
-                     Amrp1 = mediaPlanDTO.amrp1,
-                     Amrp2 = mediaPlanDTO.amrp2,
-                     Amrp3 = mediaPlanDTO.amrp3,
-                     Amrpsale = mediaPlanDTO.amrpsale,
-                     Dpcoef = mediaPlanDTO.dpcoef,
-                     Seascoef = mediaPlanDTO.seascoef,
-                     Seccoef = mediaPlanDTO.seccoef,
-                     Price = mediaPlanDTO.price,
-                     Active = mediaPlanDTO.active,
-                     PricePerSec = Math.Round(mediaPlanDTO.pps, 2)
-                 });
+                "UPDATE xmp SET xmpid = @Xmpid, schid = @Schid, cmpid = @Cmpid, chid = @Chid, naziv = @Name, " +
+                "verzija = @Version, pozicija = @Position, " +
+                "vremeod = @Stime, vremedo = @Etime, vremerbl = @Blocktime, dani = @Days, " +
+                "tipologija = @Type, specijal = @Special, datumod = CAST(@Sdate AS DATE), datumdo = CAST(@Edate AS DATE), " +
+                "datumkreiranja = CAST(@Created AS DATE), datumizmene = CAST(@Modified AS DATE), " +
+                "amr1 = @Amr1, amr1trim = @Amr1trim, amr2 = @Amr2, amr2trim = @Amr2trim, amr3 = @Amr3, amr3trim = @Amr3trim, amrsale = @Amrsale, amrsaletrim = @Amrsaletrim, " +
+                "amrp1 = @Amrp1, amrp2 = @Amrp2, amrp3 = @Amrp3, amrpsale = @Amrpsale, " +
+                "dpkoef = @Dpcoef, progkoef = @Progcoef, seaskoef = @Seascoef, seckoef = @Seccoef, price = @Price, active = @Active, pricepersec = @PricePerSec " +
+                "WHERE xmpid = @Xmpid",
+                new
+                {
+                    Xmpid = mediaPlanDTO.xmpid,
+                    Schid = mediaPlanDTO.schid,
+                    Cmpid = mediaPlanDTO.cmpid,
+                    Chid = mediaPlanDTO.chid,
+                    Name = mediaPlanDTO.name.Trim(),
+                    Version = mediaPlanDTO.version,
+                    Position = mediaPlanDTO.position,
+                    Stime = mediaPlanDTO.stime,
+                    Etime = mediaPlanDTO.etime,
+                    Blocktime = mediaPlanDTO.blocktime,
+                    Days = mediaPlanDTO.days,
+                    Type = mediaPlanDTO.type,
+                    Special = mediaPlanDTO.special,
+                    Sdate = mediaPlanDTO.sdate.ToString("yyyy-MM-dd"),
+                    Edate = mediaPlanDTO.edate == null ? null : mediaPlanDTO.edate.Value.ToString("yyyy-MM-dd"),
+                    Progcoef = mediaPlanDTO.progcoef,
+                    Created = mediaPlanDTO.created.ToString("yyyy-MM-dd"),
+                    Modified = mediaPlanDTO.modified == null ? null : mediaPlanDTO.modified.Value.ToString("yyyy-MM-dd"),
+                    Amr1 = mediaPlanDTO.amr1,
+                    Amr1trim = mediaPlanDTO.amr1trim,
+                    Amr2 = mediaPlanDTO.amr2,
+                    Amr2trim = mediaPlanDTO.amr2trim,
+                    Amr3 = mediaPlanDTO.amr3,
+                    Amr3trim = mediaPlanDTO.amr3trim,
+                    Amrsale = mediaPlanDTO.amrsale,
+                    Amrsaletrim = mediaPlanDTO.amrsaletrim,
+                    Amrp1 = mediaPlanDTO.amrp1,
+                    Amrp2 = mediaPlanDTO.amrp2,
+                    Amrp3 = mediaPlanDTO.amrp3,
+                    Amrpsale = mediaPlanDTO.amrpsale,
+                    Dpcoef = mediaPlanDTO.dpcoef,
+                    Seascoef = mediaPlanDTO.seascoef,
+                    Seccoef = mediaPlanDTO.seccoef,
+                    Price = mediaPlanDTO.price,
+                    Active = mediaPlanDTO.active,
+                    PricePerSec = Math.Round(mediaPlanDTO.pps, 2)
+                });
 
+           
 
             return affected != 0;
         }

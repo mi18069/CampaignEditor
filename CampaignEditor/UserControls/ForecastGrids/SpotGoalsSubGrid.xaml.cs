@@ -25,6 +25,7 @@ namespace CampaignEditor.UserControls
         private ObservableCollection<MediaPlanTuple> _mpTuples;
         private Dictionary<Char, int> _spotLengths = new Dictionary<char, int>();
 
+        public int row = -1;
         public Dictionary<Char, SpotGoals> Dict
         {
             get { return _dictionary; }
@@ -224,6 +225,11 @@ namespace CampaignEditor.UserControls
         {
             dgGrid.SelectedIndex = rowIndex;
             
+        }
+
+        public void Unselect()
+        {
+            dgGrid.UnselectAll();
         }
 
         public event EventHandler<int> SelectedRowChanged;

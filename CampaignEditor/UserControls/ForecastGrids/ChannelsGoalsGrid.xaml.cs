@@ -3,6 +3,7 @@ using Database.DTOs.ChannelDTO;
 using Database.Entities;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -46,7 +47,9 @@ namespace CampaignEditor.UserControls
             {
                 int chid = mediaPlan.chid;
                 _dictionary[chid].Insertations += mediaPlan.Insertations;
-                _dictionary[chid].Grp += mediaPlan.Insertations * mediaPlan.Amrp1;
+                _dictionary[chid].Grp1 += mediaPlan.Insertations * mediaPlan.Amrp1;
+                _dictionary[chid].Grp2 += mediaPlan.Insertations * mediaPlan.Amrp2;
+                _dictionary[chid].Grp3 += mediaPlan.Insertations * mediaPlan.Amrp3;
                 _dictionary[chid].Budget += mediaPlan.price;
             }
 
@@ -61,7 +64,9 @@ namespace CampaignEditor.UserControls
             foreach (MediaPlan mediaPlan in mediaPlans)
             {
                 _dictionary[chid].Insertations += mediaPlan.Insertations;
-                _dictionary[chid].Grp += mediaPlan.Insertations * mediaPlan.Amrp1;
+                _dictionary[chid].Grp1 += mediaPlan.Insertations * mediaPlan.Amrp1;
+                _dictionary[chid].Grp2 += mediaPlan.Insertations * mediaPlan.Amrp2;
+                _dictionary[chid].Grp3 += mediaPlan.Insertations * mediaPlan.Amrp3;
                 _dictionary[chid].Budget += mediaPlan.Price;           
             }
             _values.ReplaceRange(_dictionary.Values);
@@ -73,7 +78,9 @@ namespace CampaignEditor.UserControls
             {
                 foreach (ProgramGoals programGoal in _dictionary.Values)
                 {
-                    programGoal.Grp = 0;
+                    programGoal.Grp1 = 0;
+                    programGoal.Grp2 = 0;
+                    programGoal.Grp3 = 0;
                     programGoal.Insertations = 0;
                     programGoal.Budget = 0;
                 }
@@ -81,7 +88,9 @@ namespace CampaignEditor.UserControls
             else
             {
                 _dictionary[chid].Budget = 0;
-                _dictionary[chid].Grp = 0;
+                _dictionary[chid].Grp1 = 0;
+                _dictionary[chid].Grp2 = 0;
+                _dictionary[chid].Grp3 = 0;
                 _dictionary[chid].Insertations = 0;
             }
         }
@@ -134,8 +143,10 @@ namespace CampaignEditor.UserControls
 
                 worksheet.Cells[rowIndex + 2 + rowOff, 0 + 1 + colOff].Value = dataItem.Channel.chname.Trim();
                 worksheet.Cells[rowIndex + 2 + rowOff, 1 + 1 + colOff].Value = dataItem.Insertations;
-                worksheet.Cells[rowIndex + 2 + rowOff, 2 + 1 + colOff].Value = dataItem.Grp;
-                worksheet.Cells[rowIndex + 2 + rowOff, 3 + 1 + colOff].Value = dataItem.Budget;
+                worksheet.Cells[rowIndex + 2 + rowOff, 2 + 1 + colOff].Value = Math.Round(dataItem.Grp1, 2);
+                worksheet.Cells[rowIndex + 2 + rowOff, 3 + 1 + colOff].Value = Math.Round(dataItem.Grp2, 2);
+                worksheet.Cells[rowIndex + 2 + rowOff, 4 + 1 + colOff].Value = Math.Round(dataItem.Grp3, 2);
+                worksheet.Cells[rowIndex + 2 + rowOff, 5 + 1 + colOff].Value = dataItem.Budget;
 
                 for (int columnIndex = 0; columnIndex < columns.Count; columnIndex++)
                 {

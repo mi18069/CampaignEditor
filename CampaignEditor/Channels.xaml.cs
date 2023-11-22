@@ -19,6 +19,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Media;
+using static CampaignEditor.Campaign;
 
 namespace CampaignEditor
 {
@@ -49,6 +50,8 @@ namespace CampaignEditor
 
         private List<Tuple<ChannelDTO, PricelistDTO, ActivityDTO>> _selectedChannels =
                                 new List<Tuple<ChannelDTO, PricelistDTO, ActivityDTO>>();
+        private List<ChannelDTO> _originalSelectedChannels = new List<ChannelDTO>();
+
 
         private List<PricelistDTO> _pricelistsToBeDeleted = new List<PricelistDTO>();
 
@@ -102,6 +105,8 @@ namespace CampaignEditor
             set { _selectedChannels = value; }
         }
         #endregion
+
+        public event AddChannelEventHandler AddChannelChangesOccurred;
 
         public Channels(IChannelRepository channelRepository, IPricelistRepository pricelistRepository,
             IPricelistChannelsRepository pricelistChannelsRepository, IActivityRepository activityRepository,
@@ -178,12 +183,14 @@ namespace CampaignEditor
                         ActivityDTO activity = await _activityController.GetActivityById(selected.actid);
 
                         MoveToSelected(channel, pricelist, activity);
+                        _originalSelectedChannels.Add(channel);
                     }
                     SelectedChannels = Selected.ToList();
                 }
             }
             else
-            {   
+            {
+                _originalSelectedChannels = (List<ChannelDTO>)SelectedChannels.Select(c => c.Item1).ToList();
                 foreach (var selected in SelectedChannels)
                 {
                     // If we want to move some channel from channelList to Selected,
@@ -559,8 +566,27 @@ namespace CampaignEditor
             {
                 SelectedChannels = Selected.ToList();
                 await UpdateDatabase(SelectedChannels);
+                var addedChannels = CheckAddedChannels();
+                if (addedChannels.Count > 0)
+                {
+                    OnAddChannelChangesOccurred();
+                }
             }
             this.Hide();
+        }
+
+        private List<ChannelDTO> CheckAddedChannels()
+        {
+            List<ChannelDTO> addedChannels = new List<ChannelDTO>();
+            foreach (var channel in SelectedChannels.Select(c => c.Item1).ToList())
+            {
+                if (!_originalSelectedChannels.Contains(channel))
+                {
+                    addedChannels.Add(channel);
+                }
+            }
+
+            return addedChannels;
         }
         private void btnCancel_Click(object sender, RoutedEventArgs e)
         {
@@ -656,5 +682,13 @@ namespace CampaignEditor
             }
 
         }
+
+        #region Triggers for CampaignForecast
+        protected virtual void OnAddChannelChangesOccurred()
+        {
+            AddChannelChangesOccurred?.Invoke(this, EventArgs.Empty);
+        }
+
+        #endregion
     }
 }

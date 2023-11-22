@@ -38,7 +38,6 @@ namespace CampaignEditor
 
         private OnStartupContoller _onStartupController;
 
-
         List<DateTime> unavailableDates = new List<DateTime>();
 
         public CampaignForecastView(IMediaPlanRefRepository mediaPlanRefRepository,
