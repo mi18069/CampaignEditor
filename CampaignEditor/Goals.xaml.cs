@@ -2,6 +2,7 @@
 using CampaignEditor.DTOs.CampaignDTO;
 using Database.DTOs.GoalsDTO;
 using Database.Repositories;
+using System;
 using System.ComponentModel;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -36,10 +37,20 @@ namespace CampaignEditor
             InitializeComponent();
         }
 
+        // Define an event to inform when changes occurs
+        public event EventHandler GoalsChanged;
+
+        // Invoke the event
+        protected virtual void OnGoalsChanged()
+        {
+            GoalsChanged?.Invoke(this, EventArgs.Empty);
+        }
+
         #region Initialization
         public async Task Initialize(CampaignDTO campaign, GoalsDTO goals = null)
         {
             _campaign = campaign;
+            CampaignEventLinker.AddGoals(_campaign.cmpid, this);
 
             if (goals == null)
             {
@@ -164,6 +175,7 @@ namespace CampaignEditor
                     Goal = new GoalsDTO(_campaign.cmpid, budget, grp, insertations, rchFrom, rchTo, rch);
 
                     await UpdateDatabase(Goal);
+                    OnGoalsChanged();
                 }
             }
             if (!goalsModified || goalsModified && passCheckTest)

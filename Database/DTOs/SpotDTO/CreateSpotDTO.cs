@@ -7,5 +7,10 @@ namespace Database.DTOs.SpotDTO
             : base(cmpid, spotcode, spotname, spotlength, ignore)
         {
         }
+
+        public CreateSpotDTO(SpotDTO spot)
+            : base(spot.cmpid, spot.spotcode, spot.spotname, spot.spotlength, spot.ignore)
+        {
+        }
     }
 }

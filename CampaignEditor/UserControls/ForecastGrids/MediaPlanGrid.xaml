@@ -30,7 +30,8 @@
                   MouseRightButtonDown="DataGrid_MouseRightButtonDown"
                   PreparingCellForEdit="dgMediaPlans_PreparingCellForEdit"
                   CellEditEnding="dgMediaPlans_CellEditEnding"
-                  CurrentCellChanged="dgMediaPlans_CurrentCellChanged">
+                  CurrentCellChanged="dgMediaPlans_CurrentCellChanged"
+                  Sorting="dgMediaPlans_Sorting">
             <DataGrid.CellStyle>
                 <Style TargetType="DataGridCell">
                     <Style.Triggers>

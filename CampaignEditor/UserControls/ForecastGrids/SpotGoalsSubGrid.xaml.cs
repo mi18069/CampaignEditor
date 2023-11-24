@@ -84,9 +84,16 @@ namespace CampaignEditor.UserControls
                         {
                             if (spotcode != ' ')
                             {
-                                _dictionary[spotcode].Insertations += 1;
-                                _dictionary[spotcode].Budget += (mediaPlan.Price / mediaPlan.Length) * _spotLengths[spotcode];
-                                _dictionary[spotcode].Grp += mediaPlan.Amrp1;
+                                try
+                                {
+                                    _dictionary[spotcode].Insertations += 1;
+                                    _dictionary[spotcode].Budget += (mediaPlan.Price / mediaPlan.Length) * _spotLengths[spotcode];
+                                    _dictionary[spotcode].Grp += mediaPlan.Amrp1;
+                                }
+                                catch
+                                {
+
+                                }
                             }
 
                         }

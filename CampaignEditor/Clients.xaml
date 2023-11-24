@@ -44,7 +44,8 @@
                     <ContextMenu x:Key="CampaignContext"  StaysOpen="true">
                         <MenuItem Header="Edit campaign" Click="btnAddCampaign_Click"/>
                         <MenuItem Header="Rename campaign" Click="btnRenameCampaign_Click" IsEnabled="{Binding Path=isReadWrite}"/>
-                        <MenuItem Header="Delete campaign" Click="btnDeleteCampaign_Click"  IsEnabled="{Binding Path=isAdministrator}"/>
+                        <!-- <MenuItem Header="Duplicate campaign" Click="btnDuplicateCampaign_Click"  IsEnabled="{Binding Path=isReadWrite}"/> -->
+                        <!-- <MenuItem Header="Delete campaign" Click="btnDeleteCampaign_Click"  IsEnabled="{Binding Path=isAdministrator}"/> -->
                     </ContextMenu>
                 </TreeView.Resources>
             </TreeView>

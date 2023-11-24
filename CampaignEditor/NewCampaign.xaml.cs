@@ -162,7 +162,7 @@ namespace CampaignEditor
         private async Task<int> CreateCampaign()
         {
             int cmprev = 0;
-            int cmpown = 1; // Don't know what this is
+            int cmpown = MainWindow.user.usrid;
             string cmpname = tbName.Text.Trim();
             int clid = _client.clid;
             string cmpsdate = TimeFormat.DPToYMDString(dpStartDate);

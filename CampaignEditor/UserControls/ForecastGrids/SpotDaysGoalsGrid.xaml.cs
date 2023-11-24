@@ -73,7 +73,14 @@ namespace CampaignEditor.UserControls.ForecastGrids
             _spots = _spots.OrderBy(s => s.spotcode).ToList();
             foreach (var spot in spots)
             {
-                _spotLengths.Add(spot.spotcode[0], spot.spotlength);
+                try
+                {
+                    _spotLengths.Add(spot.spotcode[0], spot.spotlength);
+                }
+                catch
+                {
+
+                }
             }
 
             var channelIds = await _mediaPlanController.GetAllChannelsByCmpid(_campaign.cmpid, _version);

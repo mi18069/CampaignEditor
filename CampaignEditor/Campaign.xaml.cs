@@ -28,8 +28,6 @@ namespace CampaignEditor
 
         CampaignOverview factoryCampaignOverview;
 
-        public delegate void AddChannelEventHandler(object sender, EventArgs e);
-        private Channels channelsInstance; 
 
         public Campaign(IClientRepository clientRepository, ICampaignRepository campaignRepository, 
             IAbstractFactory<CampaignOverview> factoryOverview, 
@@ -58,7 +56,7 @@ namespace CampaignEditor
             readOnly = isReadOnly;
             this.Title = "Client: " + _client.clname.Trim() + "  Campaign: " + _campaign.cmpname.Trim();
 
-
+            CampaignEventLinker.AddCampaign(_campaign.cmpid);
             AssignPagesToTabs();
 
         }
@@ -77,7 +75,6 @@ namespace CampaignEditor
             TabItem tabValidation = (TabItem)tcTabs.FindName("tiValidation");
             tabValidation.Content = loadingPage.Content;
 
-            // Without await, because we want to run asynchronuously
 
             var factoryCampaignOverview = _factoryOverview.Create();
             await factoryCampaignOverview.Initialization(_client, _campaign, readOnly);
@@ -101,6 +98,7 @@ namespace CampaignEditor
             if (factoryCampaignOverview != null)
             {
                 shouldClose = factoryCampaignOverview.Window_Closing();
+                CampaignEventLinker.RemoveCampaign(_campaign.cmpid);
             }
             if (!shouldClose)
             {

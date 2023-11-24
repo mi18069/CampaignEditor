@@ -68,6 +68,7 @@ namespace CampaignEditor
         public async Task Initialize(CampaignDTO campaign)
         {
             _campaign = campaign;
+            spotcodeSpotDict.Clear();
             var spots = await _spotController.GetSpotsByCmpid(campaign.cmpid);
             foreach (var spot in spots)
             {
@@ -327,7 +328,7 @@ namespace CampaignEditor
 
         }
 
-        private async Task<double> CalculateTermSeccoef(MediaPlan mediaPlan, PricelistDTO pricelist, SpotDTO spotDTO)
+        public async Task<double> CalculateTermSeccoef(MediaPlan mediaPlan, PricelistDTO pricelist, SpotDTO spotDTO)
         {
 
             var sectable = await _sectableController.GetSectableById(pricelist.sectbid);
@@ -341,7 +342,7 @@ namespace CampaignEditor
             return seccoef;
         }
 
-        private async Task<double> CalculateTermSeascoef(MediaPlan mediaPlan, PricelistDTO pricelist, MediaPlanTermDTO mpTerm)
+        public async Task<double> CalculateTermSeascoef(MediaPlan mediaPlan, PricelistDTO pricelist, MediaPlanTermDTO mpTerm)
         {
             var seasonality = await _seasonalityController.GetSeasonalityById(pricelist.seastbid);
 

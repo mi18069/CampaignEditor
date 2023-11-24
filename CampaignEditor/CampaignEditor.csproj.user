@@ -58,6 +58,9 @@
     <Compile Update="Config.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="DuplicateCampaign.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Goals.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -223,6 +226,9 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Config.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="DuplicateCampaign.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Goals.xaml">

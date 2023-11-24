@@ -28,6 +28,7 @@ namespace CampaignEditor
         private readonly IAbstractFactory<Campaign> _factoryCampaign;
         private readonly IAbstractFactory<AllUsers> _factoryAllUsers;
         private readonly IAbstractFactory<ChangePassword> _factoryChangePassword;
+        private readonly IAbstractFactory<DuplicateCampaign> _factoryDuplicateCampaign;
 
         private CampaignController _campaignController;
 
@@ -73,7 +74,7 @@ namespace CampaignEditor
         public Clients(IAbstractFactory<ClientsTreeView> factoryClientsTreeView, IAbstractFactory<AddUser> factoryAddUser,
             IAbstractFactory<AddClient> factoryAddClient, IAbstractFactory<UsersOfClient> factoryUsersOfClient, IAbstractFactory<NewCampaign> factoryNewCampaign,
             IAbstractFactory<Rename> factoryRename, IAbstractFactory<Campaign> factoryCampaign, ICampaignRepository campaignRepository, IAbstractFactory<AllUsers> factoryAllUsers,
-            IAbstractFactory<ChangePassword> factoryChangePassword)
+            IAbstractFactory<ChangePassword> factoryChangePassword, IAbstractFactory<DuplicateCampaign> factoryDuplicateCampaign)
         {
             InitializeComponent();
 
@@ -105,7 +106,7 @@ namespace CampaignEditor
             FillFilterByUsersComboBox();
             _factoryAllUsers = factoryAllUsers;
             _factoryChangePassword = factoryChangePassword;
-
+            _factoryDuplicateCampaign = factoryDuplicateCampaign;
         }
 
         #region Filter ComboBox
@@ -425,6 +426,19 @@ namespace CampaignEditor
             }
         }
 
+        private void btnDuplicateCampaign_Click(object sender, RoutedEventArgs e)
+        {
+            var item = tvClients.SelectedItem as TreeViewItem;
+            if (item != null)
+            {
+                var name = item.Header.ToString().Trim();
+                var f = _factoryDuplicateCampaign.Create();
+                f.Initialize(name);
+                f.ShowDialog();
+            }
+
+        }
+
         private async void btnDeleteCampaign_Click(object sender, RoutedEventArgs e)
         {
             if (tvClients.SelectedItem != null)
@@ -477,5 +491,7 @@ namespace CampaignEditor
             f.Initialize(MainWindow.user);
             f.ShowDialog();
         }
+
+
     }
 }

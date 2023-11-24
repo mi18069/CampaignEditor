@@ -31,7 +31,6 @@ namespace CampaignEditor.UserControls
 
         List<SpotDTO> _spots = new List<SpotDTO>();
         List<ChannelDTO> _channels = new List<ChannelDTO>();
-
         public SpotWeekGoalsGrid()
         {
             InitializeComponent();
@@ -68,7 +67,6 @@ namespace CampaignEditor.UserControls
             CreateOutboundHeaders();
             AddGrid(sgGrid.ugGrid);
             SetWidth();
-
         }
 
         private void CreateOutboundHeaders()
@@ -285,12 +283,13 @@ namespace CampaignEditor.UserControls
 
         private int GetWeekOfYear(DateTime date)
         {
-            System.Globalization.Calendar calendar = CultureInfo.CurrentCulture.Calendar;
-            return calendar.GetWeekOfYear(
-                date,
-                CultureInfo.CurrentCulture.DateTimeFormat.CalendarWeekRule,
-                CultureInfo.CurrentCulture.DateTimeFormat.FirstDayOfWeek
-            );
+            System.Globalization.CultureInfo cultureInfo = System.Globalization.CultureInfo.CurrentCulture;
+            System.Globalization.Calendar calendar = cultureInfo.Calendar;
+
+            System.Globalization.DateTimeFormatInfo dtfi = cultureInfo.DateTimeFormat;
+            dtfi.FirstDayOfWeek = DayOfWeek.Monday;
+
+            return calendar.GetWeekOfYear(date, dtfi.CalendarWeekRule, dtfi.FirstDayOfWeek) - 1;
         }
 
         private void SetWidth()

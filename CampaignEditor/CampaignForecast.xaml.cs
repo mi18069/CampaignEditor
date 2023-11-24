@@ -23,6 +23,7 @@ using System.Diagnostics;
 using System.Diagnostics.Tracing;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
@@ -52,6 +53,7 @@ namespace CampaignEditor.UserControls
         private readonly IAbstractFactory<AddSchema> _factoryAddSchema;
         private readonly IAbstractFactory<AMRTrim> _factoryAmrTrim;
         private readonly IAbstractFactory<PrintCampaignInfo> _factoryPrintCmpInfo;
+        private readonly Listing _factoryListing;
 
 
         private SelectedMPGoals SelectedMediaPlan = new SelectedMPGoals();
@@ -95,9 +97,6 @@ namespace CampaignEditor.UserControls
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyname));
         }
 
-        // Event to be raised when changes need to be delegated
-        public event AddChannelEventHandler AddChannelDelegated;
-
         public CampaignForecast(ISchemaRepository schemaRepository,
             IChannelRepository channelRepository,
             IChannelCmpRepository channelCmpRepository,
@@ -113,7 +112,8 @@ namespace CampaignEditor.UserControls
             IAbstractFactory<AMRTrim> factoryAmrTrim,
             IAbstractFactory<MediaPlanConverter> factoryMpConverter,
             IAbstractFactory<MediaPlanTermConverter> factoryMpTermConverter,
-            IAbstractFactory<PrintCampaignInfo> factoryPrintCmpInfo)
+            IAbstractFactory<PrintCampaignInfo> factoryPrintCmpInfo,
+            IAbstractFactory<Listing> factoryListing)
         {
             this.DataContext = this;
 
@@ -133,6 +133,7 @@ namespace CampaignEditor.UserControls
             _factoryAddSchema = factoryAddSchema;
             _factoryAmrTrim = factoryAmrTrim;
             _factoryPrintCmpInfo = factoryPrintCmpInfo;
+            _factoryListing = factoryListing.Create();
 
             _mpConverter = factoryMpConverter.Create();
             _mpTermConverter = factoryMpTermConverter.Create();
@@ -147,6 +148,7 @@ namespace CampaignEditor.UserControls
             svsg1.PreviewMouseWheel += ScrollViewer_PreviewMouseWheel;
             svsg2.PreviewMouseWheel += ScrollViewer_PreviewMouseWheel;
             svsg3.PreviewMouseWheel += ScrollViewer_PreviewMouseWheel;
+
         }
 
         // Event handler to forward the mouse wheel event to the ScrollViewer
@@ -168,12 +170,32 @@ namespace CampaignEditor.UserControls
             }
         }
 
+        public async void GoalsChanged(object sender, EventArgs e)
+        {
+            SetLoadingPage?.Invoke(this, null);
+            await FillGoals();
+            SetContentPage?.Invoke(this, null);
+
+        }
+
+        public async void SpotsChanged(object sender, EventArgs e)
+        {
+            SetLoadingPage?.Invoke(this, null);
+            await dgMediaPlans.InitializeSpots(_campaign.cmpid);
+            await InitializeGrids();
+            await _mpConverter.Initialize(_campaign);
+            SetContentPage?.Invoke(this, null);
+
+        }
+
         #endregion
 
         #region Initialization
         public async Task Initialize(CampaignDTO campaign)
         {
             _campaign = campaign;
+            CampaignEventLinker.AddForecast(_campaign.cmpid, this);
+
             await _mpConverter.Initialize(campaign);
 
             var mpVersion = await _mediaPlanVersionController.GetLatestMediaPlanVersion(_campaign.cmpid);
@@ -196,7 +218,6 @@ namespace CampaignEditor.UserControls
 
             FillCbVersions();
             FillLvFilterDays();
-
         }
 
         private void FillLvFilterDays()
@@ -230,14 +251,14 @@ namespace CampaignEditor.UserControls
 
             var selectedChannels = lvChannels.SelectedItems.Cast<ChannelDTO>();
             _selectedChannels.ReplaceRange(selectedChannels);
-
+            //_factoryListing.selectedChannels = _selectedChannels.ToList();
         }
 
         private void SubscribeControllers()
         {
             SubscribeDataGridControllers();
             SubscribeSGGridControllers(); 
-            SubscribeSDGGridControllers();
+            SubscribeSDGGridControllers();         
         }
 
 
@@ -461,9 +482,16 @@ namespace CampaignEditor.UserControls
             // For dgMediaPlans
             await InitializeDataGrid();
             await InitializeCGGrid();
-            /*await InitializeSGGrid();
-            await InitializeSDGGrid();
-            InitializeSWGGrid();*/
+            await InitializeGrids();
+        }
+
+        public async Task InitializeGrids()
+        {
+            await sgGrid.Initialize(_campaign, _cmpVersion);
+            swgGrid.Initialize(sgGrid);
+            await sdgGrid.Initialize(_campaign, _cmpVersion);
+            await _factoryListing.Initialize(_campaign);
+            tiSpotGoals.IsSelected = true;
         }
 
         private async Task InitializeDataGrid()
@@ -490,24 +518,6 @@ namespace CampaignEditor.UserControls
             ObservableCollection<MediaPlan> mediaPlans = new ObservableCollection<MediaPlan>(_allMediaPlans.Select(mp => mp.MediaPlan));    
             cgGrid.Initialize(mediaPlans, _channels.ToList());
             tiChannelGoals.Focus();
-        }
-
-        private async Task InitializeSGGrid()
-        {
-            tiSpotGoals.IsSelected = true;
-            await sgGrid.Initialize(_campaign, _cmpVersion);
-        }
-
-        private async Task InitializeSDGGrid()
-        {
-            tiSpotDaysGoals.IsSelected = true;
-            await sdgGrid.Initialize(_campaign, _cmpVersion);
-        }
-
-        private void InitializeSWGGrid()
-        {
-            tiSpotWeekGoals.IsSelected = true;
-            swgGrid.Initialize(sgGrid);
         }
 
         #region Drag and Drop selected Targets
@@ -1265,11 +1275,16 @@ namespace CampaignEditor.UserControls
 
         private async void btnExport_Click(object sender, RoutedEventArgs e)
         {
+            
+
             var selectedTabItem = tcGrids.SelectedItem as TabItem;
             tiSpotWeekGoals.IsSelected = true;
 
             Application.Current.Dispatcher.Invoke(DispatcherPriority.ApplicationIdle, new Action(async () =>
             {
+
+
+                tiSpotDaysGoals.IsSelected = true;
 
                 // opened tabItem
                 using (var memoryStream = new MemoryStream())
@@ -1298,6 +1313,10 @@ namespace CampaignEditor.UserControls
 
                         var worksheet5 = excelPackage.Workbook.Worksheets.Add("Channel Goals");
                         cgGrid.PopulateWorksheet(worksheet5, 0, 0);
+
+                        var worksheet6 = excelPackage.Workbook.Worksheets.Add("Spot listing");
+                        var list = _allMediaPlans.Where(mpTuple => mpTuple.MediaPlan.Insertations > 0 && _selectedChannels.Any(ch => ch.chid == mpTuple.MediaPlan.chid)).ToList();
+                        await _factoryListing.PopulateWorksheet(list, worksheet6, 0, 0);
 
                         // Save the Excel package to a memory stream
                         excelPackage.SaveAs(memoryStream);
@@ -1337,7 +1356,7 @@ namespace CampaignEditor.UserControls
                         // Open the saved Excel file using the default associated program
                         Process.Start(new ProcessStartInfo(filePath) { UseShellExecute = true });
                     }
-                    catch 
+                    catch
                     {
                         MessageBox.Show("Unable to open Excel file",
                         "Result: ", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -1355,15 +1374,7 @@ namespace CampaignEditor.UserControls
                         "Result: ", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
-            
-        }
 
-        private async void TabControl_Loaded(object sender, RoutedEventArgs e)
-        {
-            await InitializeSDGGrid();
-            await InitializeSGGrid();
-            InitializeSWGGrid();
-            tiSpotGoals.IsSelected = true;
         }
 
         private void btnSelectChannels_Click(object sender, RoutedEventArgs e)

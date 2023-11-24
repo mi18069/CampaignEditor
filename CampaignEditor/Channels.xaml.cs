@@ -106,8 +106,6 @@ namespace CampaignEditor
         }
         #endregion
 
-        public event AddChannelEventHandler AddChannelChangesOccurred;
-
         public Channels(IChannelRepository channelRepository, IPricelistRepository pricelistRepository,
             IPricelistChannelsRepository pricelistChannelsRepository, IActivityRepository activityRepository,
             IAbstractFactory<PriceList> factoryPriceList, IChannelCmpRepository channelCmpRepository,
@@ -138,6 +136,7 @@ namespace CampaignEditor
         {
             this._client = client;
             this._campaign = campaign;
+            CampaignEventLinker.AddChannels(_campaign.cmpid, this);
             SelectedChannels = channelList;
             await FillLists();
             await FillChannelGroups();
@@ -569,7 +568,7 @@ namespace CampaignEditor
                 var addedChannels = CheckAddedChannels();
                 if (addedChannels.Count > 0)
                 {
-                    OnAddChannelChangesOccurred();
+                    //OnAddChannelChangesOccurred();
                 }
             }
             this.Hide();
@@ -683,12 +682,5 @@ namespace CampaignEditor
 
         }
 
-        #region Triggers for CampaignForecast
-        protected virtual void OnAddChannelChangesOccurred()
-        {
-            AddChannelChangesOccurred?.Invoke(this, EventArgs.Empty);
-        }
-
-        #endregion
     }
 }

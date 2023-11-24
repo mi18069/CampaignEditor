@@ -24,6 +24,7 @@ using CampaignEditor.Converters;
 using OfficeOpenXml.Style;
 using Border = System.Windows.Controls.Border;
 using CampaignEditor.Helpers;
+using System.Collections;
 
 namespace CampaignEditor.UserControls
 {
@@ -130,16 +131,13 @@ namespace CampaignEditor.UserControls
             DeleteDateColumns(frozenColumnsNum);
             InitializeDateColumns();
 
+            await InitializeSpots(_campaign.cmpid);
 
-            var spots = await _spotController.GetSpotsByCmpid(_campaign.cmpid);
-            for (int i = 0; i < spots.Count(); i++)
-            {
-                spotCodes.Add((char)('A' + i));
-            }
 
             myDataView = CollectionViewSource.GetDefaultView(_allMediaPlans);
             dgMediaPlans.ItemsSource = myDataView;
 
+            myDataView.SortDescriptions.Add(new SortDescription("MediaPlan.chid", ListSortDirection.Ascending));
             myDataView.SortDescriptions.Add(new SortDescription("MediaPlan.stime", ListSortDirection.Ascending));
             myDataView.Filter = d =>
             {
@@ -153,6 +151,16 @@ namespace CampaignEditor.UserControls
             _allMediaPlans.CollectionChanged += OnCollectionChanged;
             _selectedChannels.CollectionChanged += OnCollectionChanged;
 
+        }
+
+        public async Task InitializeSpots(int cmpid)
+        {
+            spotCodes.Clear();
+            var spots = await _spotController.GetSpotsByCmpid(cmpid);
+            for (int i = 0; i < spots.Count(); i++)
+            {
+                spotCodes.Add((char)('A' + i));
+            }
         }
 
         private void DeleteDateColumns(int frozenColumnsNum)
@@ -866,9 +874,14 @@ namespace CampaignEditor.UserControls
                 }
 
                 // Set the cell values and colors in Excel
-                for (int rowIndex = 0; rowIndex < dataGrid.Items.Count; rowIndex++)
+                for (int i=0, rowIndex = 0; i < dataGrid.Items.Count; rowIndex++, i++)
                 {
-                    var dataItem = (MediaPlanTuple)dataGrid.Items[rowIndex];
+                    var dataItem = (MediaPlanTuple)dataGrid.Items[i];
+                    if (dataItem.MediaPlan.Insertations == 0)
+                    {
+                        rowIndex --;
+                        continue;
+                    }
                     for (int columnIndex = 0; columnIndex < visibleColumns.Count; columnIndex++)
                     {
                         var column = visibleColumns[columnIndex];
@@ -978,6 +991,34 @@ namespace CampaignEditor.UserControls
             return parent as DataGridCell;
         }
 
-      
+        private void dgMediaPlans_Sorting(object sender, DataGridSortingEventArgs e)
+        {
+            e.Handled = true; // Handle sorting manually
+
+            var dataGrid = (DataGrid)sender;
+            var collectionView = (ListCollectionView)CollectionViewSource.GetDefaultView(dataGrid.ItemsSource);
+
+            if (collectionView != null)
+            {
+                // Clear existing sort descriptions
+                collectionView.SortDescriptions.Clear();
+
+                // Add "Channels" as the primary sort
+                collectionView.SortDescriptions.Add(new SortDescription("MediaPlan.chid", ListSortDirection.Ascending));
+
+                // Add the clicked column as a secondary sort
+                var direction = (e.Column.SortDirection != ListSortDirection.Ascending)
+                    ? ListSortDirection.Ascending
+                    : ListSortDirection.Descending;
+
+                e.Column.SortDirection = direction;
+
+                collectionView.SortDescriptions.Add(new SortDescription(e.Column.SortMemberPath, direction));
+
+                // Apply the updated sorting
+                collectionView.Refresh();
+            }
+        }
+       
     }
 }

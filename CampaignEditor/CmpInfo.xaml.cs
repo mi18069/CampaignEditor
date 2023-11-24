@@ -66,7 +66,7 @@ namespace CampaignEditor
         {
             _campaign = campaign;
             _client = client;
-
+            CampaignEventLinker.AddInfo(_campaign.cmpid, this);
             if (campaign != null)
             {
                 cbActive.IsChecked = campaign.active;

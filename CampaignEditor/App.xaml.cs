@@ -60,6 +60,8 @@ namespace CampaignEditor
                     services.AddFormFactory<CampaignValidation>();
                     services.AddFormFactory<RulerTimelineCampaign>();
                     services.AddFormFactory<RulerTimeline>();
+                    services.AddFormFactory<DuplicateCampaign>();
+                    services.AddFormFactory<Listing>();
                     services.AddScoped<IDataContext, DataContext>();
                     // Add services
                     Extensions.UserExtensions.AddUserExtensions(services);

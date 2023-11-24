@@ -16,5 +16,12 @@ namespace CampaignEditor.DTOs.CampaignDTO
             cmpaddedat, active, forcec)
         {
         }
+
+        public CreateCampaignDTO(CampaignDTO campaignDTO)
+            : base(campaignDTO.cmprev, campaignDTO.cmpown, campaignDTO.cmpname, campaignDTO.clid, campaignDTO.cmpsdate, campaignDTO.cmpedate,
+            campaignDTO.cmpstime, campaignDTO.cmpetime, campaignDTO.cmpstatus, campaignDTO.sostring, campaignDTO.activity, campaignDTO.cmpaddedon,
+            campaignDTO.cmpaddedat, campaignDTO.active, campaignDTO.forcec)
+        {
+        }
     }
 }

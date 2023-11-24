@@ -52,7 +52,6 @@ namespace CampaignEditor.UserControls
         public List<SpotDTO> Spots { get { return _spots; } }
         public List<ChannelDTO> Channels { get { return _channels; } }
 
-
         public SpotGoalsGrid()
         {
             InitializeComponent();
@@ -350,12 +349,14 @@ namespace CampaignEditor.UserControls
 
         private int GetWeekOfYear(DateTime date)
         {
-            System.Globalization.Calendar calendar = CultureInfo.CurrentCulture.Calendar;
-            return calendar.GetWeekOfYear(
-                date,
-                CultureInfo.CurrentCulture.DateTimeFormat.CalendarWeekRule,
-                DayOfWeek.Monday // Use Monday as the first day of the week
-            );
+            System.Globalization.CultureInfo cultureInfo = System.Globalization.CultureInfo.CurrentCulture;
+            System.Globalization.Calendar calendar = cultureInfo.Calendar;
+
+            System.Globalization.DateTimeFormatInfo dtfi = cultureInfo.DateTimeFormat;
+            dtfi.FirstDayOfWeek = DayOfWeek.Monday;
+
+            return calendar.GetWeekOfYear(date, dtfi.CalendarWeekRule, dtfi.FirstDayOfWeek) - 1;
+
         }
 
         private void SetWidth()

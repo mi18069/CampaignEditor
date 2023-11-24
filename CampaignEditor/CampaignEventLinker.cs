@@ -1,61 +1,152 @@
 ﻿using CampaignEditor.UserControls;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CampaignEditor
 {
     public static class CampaignEventLinker
     {
-        public static List<Tuple<int, Channels?, CampaignForecast?>> list = new List<Tuple<int, Channels?, CampaignForecast?>>();
 
+        // This class is used to connect classes, so when something is changed within overview,
+        // it is delegated to forecast
+
+        public static List<CampaignLinker> _linkers = new List<CampaignLinker>();
         public static void AddCampaign(int cmpid)
         {
-            list.Add(Tuple.Create<int, Channels?, CampaignForecast?>(cmpid, null, null));
+            var linker = new CampaignLinker();
+            linker.cmpid = cmpid;
+            _linkers.Add(linker);
         }
         public static void RemoveCampaign(int cmpid)
         {
-            for (int i=0; i<list.Count; i++)
+            for (int i=0; i< _linkers.Count; i++)
             {
-                int listCmpid = list[i].Item1;
-                if (listCmpid == cmpid)
+                var linker = _linkers[i];
+                if (linker.cmpid == cmpid)
                 {
-                    list.RemoveAt(i);
+                    _linkers.RemoveAt(i);
+                    return;
                 }
             }
         }
 
         public static void AddChannels(int cmpid, Channels channels)
         {
-            for (int i = 0; i < list.Count; i++)
+            for (int i = 0; i < _linkers.Count; i++)
             {
-                int listCmpid = list[i].Item1;
-                if (listCmpid == cmpid)
+                int linkerCmpid = _linkers[i].cmpid;
+                if (linkerCmpid == cmpid)
                 {
-                    list[i] = Tuple.Create<int, Channels? ,CampaignForecast?>(cmpid, channels, list[i].Item3);
-                    if (list[i].Item3 != null)
+                    _linkers[i].channels = channels;
+                    if (_linkers[i].forecast != null)
                     {
-                        // Add events
+                        // Add trigger
                     }
+
+                }
+            }
+        }
+
+        public static void AddInfo(int cmpid, CmpInfo cmpInfo)
+        {
+            for (int i = 0; i < _linkers.Count; i++)
+            {
+                int linkerCmpid = _linkers[i].cmpid;
+                if (linkerCmpid == cmpid)
+                {
+                    _linkers[i].cmpInfo = cmpInfo;
+                    if (_linkers[i].forecast != null)
+                    {
+                        // Add trigger
+                    }
+
+                }
+            }
+        }
+
+        public static void AddGoals(int cmpid, Goals goals)
+        {
+            for (int i = 0; i < _linkers.Count; i++)
+            {
+                int linkerCmpid = _linkers[i].cmpid;
+                if (linkerCmpid == cmpid)
+                {
+                    _linkers[i].goals = goals;
+                    if (_linkers[i].forecast != null)
+                    {
+                        _linkers[i].goals.GoalsChanged += _linkers[i].forecast.GoalsChanged;
+                    }
+
+                }
+            }
+        }
+
+        public static void AddSpots(int cmpid, Spots spots)
+        {
+            for (int i = 0; i < _linkers.Count; i++)
+            {
+                int linkerCmpid = _linkers[i].cmpid;
+                if (linkerCmpid == cmpid)
+                {
+                    _linkers[i].spots = spots;
+                    if (_linkers[i].forecast != null)
+                    {
+                        //_linkers[i].spots.SpotsChanged += _linkers[i].forecast.SpotsChanged;
+                    }
+
                 }
             }
         }
 
         public static void AddForecast(int cmpid, CampaignForecast forecast)
         {
-            for (int i = 0; i < list.Count; i++)
+            for (int i = 0; i < _linkers.Count; i++)
             {
-                int listCmpid = list[i].Item1;
-                if (listCmpid == cmpid)
+                int linkerCmpid = _linkers[i].cmpid;
+                if (linkerCmpid == cmpid)
                 {
-                    list[i] = Tuple.Create<int, Channels?, CampaignForecast?>(cmpid, list[i].Item2, forecast);
-                    if (list[i].Item2 != null)
+                    _linkers[i].forecast = forecast;
+                    if (_linkers[i].cmpInfo != null)
                     {
-                        // Add events
+                        // Add trigger
+                        var a = 5;
+
                     }
+                    if (_linkers[i].channels != null)
+                    {
+                        // Add trigger
+                        var a = 5;
+                    }
+                    if (_linkers[i].goals != null)
+                    {
+                        _linkers[i].goals.GoalsChanged += _linkers[i].forecast.GoalsChanged;
+                    }
+                    if (_linkers[i].spots != null)
+                    {
+                        _linkers[i].spots.SpotsChanged += _linkers[i].forecast.SpotsChanged;
+                    }
+
                 }
+            }
+        }
+
+        public class CampaignLinker
+        {
+            public int cmpid;
+            public CmpInfo? cmpInfo;
+            public Goals? goals;
+            public Spots? spots;
+            public Channels? channels;
+            public CampaignForecast? forecast;
+
+            public CampaignLinker()
+            {
+                cmpid = -1;
+                cmpInfo = null;
+                goals = null;
+                spots = null;
+                channels = null;
+                forecast = null;
             }
         }
     }

@@ -52,6 +52,7 @@ namespace CampaignEditor
         {
             wpSpots.Children.Clear();
             Campaign = campaign;
+            CampaignEventLinker.AddSpots(Campaign.cmpid, this);
             wpSpots.Children.Add(MakeAddButton());
 
             // If spots are called for the first time
@@ -75,6 +76,15 @@ namespace CampaignEditor
             }
             AddSpotItem();
             ResizeSpotItems();
+        }
+
+        // Define an event to inform when changes occurs
+        public event EventHandler SpotsChanged;
+
+        // Invoke the event
+        protected virtual void OnSpotsChanged()
+        {
+            SpotsChanged?.Invoke(this, EventArgs.Empty);
         }
 
         #region SpotItems
@@ -202,6 +212,7 @@ namespace CampaignEditor
                     }
                 }
                 await UpdateDatabase(Spotlist.ToList());
+                OnSpotsChanged();
                 this.Hide();
             }
             
