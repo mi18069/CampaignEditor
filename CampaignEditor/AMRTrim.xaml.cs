@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -12,6 +14,7 @@ namespace CampaignEditor
         public bool changed = false;
         private bool changedText = false;
         public int newValue = 100;
+        public bool[] attributesToTrim = new bool[4] { false, false, false, false};
         public AMRTrim()
         {
             InitializeComponent();
@@ -41,6 +44,22 @@ namespace CampaignEditor
                 var newValueTb = Int32.TryParse(tbAmr.Text.ToString(), out tryValue);
                 if (newValueTb)
                 {
+                    if (chbAmr1.IsChecked == true)
+                    {
+                        attributesToTrim[0] = true;
+                    }
+                    if (chbAmr2.IsChecked == true)
+                    {
+                        attributesToTrim[1] = true;
+                    }
+                    if (chbAmr3.IsChecked == true)
+                    {
+                        attributesToTrim[2] = true;
+                    }
+                    if (chbAmrSale.IsChecked == true)
+                    {
+                        attributesToTrim[3] = true;
+                    }
                     newValue = tryValue;
                     changed = true;
                 }
@@ -66,6 +85,11 @@ namespace CampaignEditor
                 btnCancel_Click(sender, e);
                 e.Handled = true;
             }
+        }
+
+        private void tbAmr_GotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            tbAmr.SelectAll();
         }
     }
 }

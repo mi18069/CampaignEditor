@@ -25,6 +25,7 @@ using OfficeOpenXml.Style;
 using Border = System.Windows.Controls.Border;
 using CampaignEditor.Helpers;
 using System.Collections;
+using System.Diagnostics;
 
 namespace CampaignEditor.UserControls
 {
@@ -53,6 +54,16 @@ namespace CampaignEditor.UserControls
         private MediaPlan _mediaPlanOldValues;
         private MediaPlan _mediaPlanToUpdate;
         bool isEditingEnded = false;
+
+        public bool filterByIns = false;
+
+        public void FilterByInsChanged()
+        {
+            if (myDataView != null)
+            {
+                myDataView.Refresh();
+            }
+        }
 
         private int frozenColumnsNum
         {
@@ -144,8 +155,15 @@ namespace CampaignEditor.UserControls
                 var mediaPlan = ((MediaPlanTuple)d).MediaPlan;
                 var mpTerms = ((MediaPlanTuple)d).Terms;
 
-                return _selectedChannels.Any(c => c.chid == mediaPlan.chid) && 
-                       mpTerms.Any(t => t != null && _filteredDays.Contains(t.Date.DayOfWeek));
+                if (filterByIns == true)
+                {
+                    return _selectedChannels.Any(c => c.chid == mediaPlan.chid) &&
+                                           mediaPlan.Insertations > 0 &&
+                                           mpTerms.Any(t => t != null && _filteredDays.Contains(t.Date.DayOfWeek));
+                }
+                
+                return _selectedChannels.Any(c => c.chid == mediaPlan.chid) &&
+                                           mpTerms.Any(t => t != null && _filteredDays.Contains(t.Date.DayOfWeek));
             };
 
             _allMediaPlans.CollectionChanged += OnCollectionChanged;
@@ -616,7 +634,7 @@ namespace CampaignEditor.UserControls
                         Math.Abs(_mediaPlanToUpdate.Seccoef - _mediaPlanOldValues.Seccoef) > eps ||
                         Math.Abs(_mediaPlanToUpdate.Seascoef - _mediaPlanOldValues.Seascoef) > eps)
                     {
-                        await _converter.CalculatePrices(_mediaPlanToUpdate);
+                        await _converter.CoefsChanged(_mediaPlanToUpdate);
                     }
                     else if(_mediaPlanToUpdate.Stime != _mediaPlanOldValues.Stime ||
                             _mediaPlanToUpdate.Etime != _mediaPlanOldValues.Etime ||
@@ -643,7 +661,7 @@ namespace CampaignEditor.UserControls
                     {
                         var mpDTO = _converter.ConvertToDTO(_mediaPlanToUpdate);
                         await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(mpDTO));
-                        _converter.CopyValues(_mediaPlanToUpdate, await _converter.ConvertFirstFromDTO(mpDTO));
+                        _converter.CopyValues(_mediaPlanToUpdate, _mediaPlanToUpdate);
                     }
                     catch
                     {
@@ -728,9 +746,20 @@ namespace CampaignEditor.UserControls
                     {
                         var mediaPlan = mediaPlanTuple.MediaPlan;
 
+                        MenuItem updateMediaPlanItem = new MenuItem();
+                        updateMediaPlanItem.Header = "Update Program";
+                        updateMediaPlanItem.Click += async (obj, ea) =>
+                        {
+                            OnUpdateMediaPlanClicked(mediaPlanTuple);
+                        };
+                        menu.Items.Add(updateMediaPlanItem);
+
+
                         MenuItem trimAmr = new MenuItem();
+                        trimAmr.Header = "Trim Program Amrs";
+                        trimAmr.Click += await TrimAmrs(mediaPlan);
                         // Check if the clicked cell is in the "AMR" columns
-                        if (cell.Column.Header.ToString() == "AMR 1" || cell.Column.Header.ToString() == "AMR% 1")
+                        /*if (cell.Column.Header.ToString() == "AMR 1" || cell.Column.Header.ToString() == "AMR% 1")
                         {
                             trimAmr.Header = "Trim Amr1";
                             trimAmr.Click += await TrimAmrAsync(mediaPlan, "Trim AMR 1", "amr1trim", mediaPlan.amr1trim);
@@ -754,7 +783,7 @@ namespace CampaignEditor.UserControls
                         {
                             trimAmr.Header = "Trim All Amrs";
                             trimAmr.Click += await TrimAmrAsync(mediaPlan, "Trim AMRs", "amrtrimall", null);
-                        }
+                        }*/
                         menu.Items.Add(trimAmr);
                     }
                     
@@ -777,38 +806,33 @@ namespace CampaignEditor.UserControls
                 return FindParent<T>(parent);
         }
 
-        private async Task<RoutedEventHandler> TrimAmrAsync(MediaPlan mediaPlan, string message, string attr, int? trimValue)
+        private async Task<RoutedEventHandler> UpdateMediaPlan(MediaPlanTuple mediaPlanTuple)
+        {
+            async void handler(object sender, RoutedEventArgs e)
+            {
+                var f = _factoryAddSchema.Create();
+                
+            }
+
+            return handler;
+        }
+        private async Task<RoutedEventHandler> TrimAmrs(MediaPlan mediaPlan)
         {
             async void handler(object sender, RoutedEventArgs e)
             {
                 var f = _factoryAmrTrim.Create();
-                f.Initialize(message, trimValue);
+                f.Initialize("Trim Amrs for:\n" + mediaPlan.name, mediaPlan.Amr1trim);
                 f.ShowDialog();
                 if (f.changed)
                 {
-                    switch (attr)
-                    {
-                        case "amr1trim":
-                            mediaPlan.Amr1trim = f.newValue;
-                            break;
-                        case "amr2trim":
-                            mediaPlan.Amr2trim = f.newValue;
-                            break;
-                        case "amr3trim":
-                            mediaPlan.Amr3trim = f.newValue;
-                            break;
-                        case "amrsaletrim":
-                            mediaPlan.Amrsaletrim = f.newValue;
-                            break;
-                        case "amrtrimall":
-                            mediaPlan.Amr1trim = f.newValue;
-                            mediaPlan.Amr2trim = f.newValue;
-                            mediaPlan.Amr3trim = f.newValue;
-                            mediaPlan.Amrsaletrim = f.newValue;
-                            break;
-                        default:
-                            break;
-                    }
+                    if (f.attributesToTrim[0])
+                        mediaPlan.Amr1trim = f.newValue;
+                    if (f.attributesToTrim[1])
+                        mediaPlan.Amr2trim = f.newValue;
+                    if (f.attributesToTrim[2])
+                        mediaPlan.Amr3trim = f.newValue;
+                    if (f.attributesToTrim[3])
+                        mediaPlan.Amrsaletrim = f.newValue;
 
                     var mpDTO = _converter.ConvertToDTO(mediaPlan);
 
@@ -817,7 +841,7 @@ namespace CampaignEditor.UserControls
             }
 
             return handler;
-        }
+        }     
 
         private bool IsCellInDataGridHeader(DependencyObject obj)
         {
@@ -837,6 +861,13 @@ namespace CampaignEditor.UserControls
         private void OnAddMediaPlanClicked()
         {
             AddMediaPlanClicked?.Invoke(this, EventArgs.Empty);
+        }
+
+        public event EventHandler<UpdateMediaPlanEventArgs> UpdateMediaPlanClicked;
+
+        private void OnUpdateMediaPlanClicked(MediaPlanTuple mediaPlanTuple)
+        {
+            UpdateMediaPlanClicked?.Invoke(this, new UpdateMediaPlanEventArgs(mediaPlanTuple));
         }
 
         public event EventHandler DeleteMediaPlanClicked;
@@ -877,11 +908,11 @@ namespace CampaignEditor.UserControls
                 for (int i=0, rowIndex = 0; i < dataGrid.Items.Count; rowIndex++, i++)
                 {
                     var dataItem = (MediaPlanTuple)dataGrid.Items[i];
-                    if (dataItem.MediaPlan.Insertations == 0)
+                    /*if (dataItem.MediaPlan.Insertations == 0)
                     {
                         rowIndex --;
                         continue;
-                    }
+                    }*/
                     for (int columnIndex = 0; columnIndex < visibleColumns.Count; columnIndex++)
                     {
                         var column = visibleColumns[columnIndex];

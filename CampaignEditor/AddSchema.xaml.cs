@@ -31,6 +31,9 @@ namespace CampaignEditor
         public CreateSchemaDTO _schema = null;
         private ChannelDTO _selectedChannel = null;
         private List<EmsTypes> _emsTypes = new List<EmsTypes>();
+
+        private MediaPlan _mediaPlan;
+        public bool updateMediaPlan = false;
         public AddSchema(IChannelRepository channelRepository,
             IMediaPlanRepository mediaPlanRepository,
             IEmsTypesRepository emsTypesRepository,
@@ -45,9 +48,11 @@ namespace CampaignEditor
             _channelCmpController = new ChannelCmpController(channelCmpRepository);
         }
 
-        public async Task Initialize(CampaignDTO campaign, ChannelDTO selectedChannel = null)
+        public async Task Initialize(CampaignDTO campaign, ChannelDTO selectedChannel = null, MediaPlan mediaPlan = null)
         {
             _campaign = campaign;
+            if (mediaPlan != null)
+                _mediaPlan = mediaPlan;
 
             _selectedChannel = selectedChannel;
             await FillComboboxes();
@@ -60,6 +65,20 @@ namespace CampaignEditor
             await FillLbType();
             FillDate();
             FillDays();
+
+            if (_mediaPlan != null)
+            {
+                FillByMP(_mediaPlan);
+            }
+        }
+
+        private void FillByMP(MediaPlan mediaPlan) 
+        {
+            tbProgram.Text = mediaPlan.Name.Trim();
+            tbTimeFrom.Text = mediaPlan.stime.ToString();
+            tbTimeTo.Text = mediaPlan.etime?.ToString();
+            tbBlockTime.Text = mediaPlan.blocktime?.ToString();
+            tbProgCoef.Text = mediaPlan.progcoef.ToString();
         }
 
         private async Task FillLbType()
@@ -67,6 +86,10 @@ namespace CampaignEditor
             var types = await _emsTypesController.GetAllEmsTypesEntities();
             _emsTypes = types.ToList();
             cbType.ItemsSource = _emsTypes;
+            if (_mediaPlan != null)
+            {
+                cbType.SelectedValue = _mediaPlan.type;
+            }
         }
 
         private void FillCbPosition()
@@ -74,10 +97,16 @@ namespace CampaignEditor
             cbPosition.Items.Clear();
             cbPosition.Items.Add("INS");
             cbPosition.Items.Add("BET");
-            cbPosition.SelectedIndex = 0;
+
+            if (_mediaPlan == null || _mediaPlan.position == "INS")
+                cbPosition.SelectedIndex = 0;
+            else
+                cbPosition.SelectedIndex = 1;
         }
         private void FillDays()
         {
+            lbDays.Items.Clear();
+
             List<Tuple<string, int>> daysTuple = new List<Tuple<string, int>>
             {
                 Tuple.Create("Monday", 1),
@@ -91,11 +120,25 @@ namespace CampaignEditor
 
             lbDays.ItemsSource = daysTuple;
             lbDays.DisplayMemberPath = "Item1";
+
+            if (_mediaPlan != null)
+            {
+                foreach (char day in _mediaPlan.days.Trim())
+                {
+                    int dayNum = int.Parse(day.ToString());
+                    lbDays.SelectedItems.Add(daysTuple[dayNum - 1]);
+                }
+            }
         }
 
         private void FillDate()
         {
             dpFrom.SelectedDate = DateTime.Now;
+            if (_mediaPlan != null)
+                dpFrom.SelectedDate = new DateTime(_mediaPlan.sdate.Year, _mediaPlan.sdate.Month, _mediaPlan.sdate.Day);
+            if (_mediaPlan != null && _mediaPlan.edate.HasValue)
+                dpFrom.SelectedDate = new DateTime(_mediaPlan.edate.Value.Year, _mediaPlan.edate.Value.Month, _mediaPlan.edate.Value.Day);
+
         }
 
         private async Task FillCbChannels()
@@ -116,7 +159,12 @@ namespace CampaignEditor
             foreach (ChannelDTO channel in channels)
             {
                 cbChannels.Items.Add(channel);
-                if (_selectedChannel != null && channel.chid == _selectedChannel.chid)
+                if (_mediaPlan != null)
+                {
+                    if (_mediaPlan.chid == channel.chid)
+                        cbChannels.SelectedItem = channel;
+                }
+                else if (_selectedChannel != null && channel.chid == _selectedChannel.chid)
                 {
                     cbChannels.SelectedItem = channel;
                 }
@@ -133,10 +181,76 @@ namespace CampaignEditor
         {
             if (await CheckFields())
             {
-                _schema = MakeSchemaDTO();
-
+                if (_mediaPlan == null)
+                    _schema = MakeSchemaDTO();
+                else
+                {
+                    UpdateMediaPlan();
+                    updateMediaPlan = true;
+                }
                 this.Close();
             }
+        }
+
+        private void UpdateMediaPlan()
+        {
+            var channelItem = cbChannels.SelectedItem as ChannelDTO;
+            int chid = channelItem.chid;
+            _mediaPlan.chid = chid;
+
+            string name = tbProgram.Text.Trim();
+            _mediaPlan.Name = name;
+
+            string position = cbPosition.Text.Trim();
+            _mediaPlan.Position = position;
+
+            string timeFrom = tbTimeFrom.Text.Trim();
+            if (!timeFrom.Contains(':'))
+            {
+                timeFrom = timeFrom.Insert(2, ":");
+            }
+            _mediaPlan.Stime = timeFrom;
+
+            string? timeTo = tbTimeTo.Text.Trim().Length > 0 ? tbTimeTo.Text.Trim() : null;
+            if (timeTo != null && !timeTo.Contains(':'))
+            {
+                timeTo = timeTo.Insert(2, ":");
+            }
+            _mediaPlan.Etime = timeTo;
+
+            string? blockTime = tbBlockTime.Text.Trim().Length > 0 ? tbBlockTime.Text.Trim() : null;
+            if (blockTime != null && !blockTime.Contains(':'))
+            {
+                blockTime = blockTime.Insert(2, ":");
+            }
+            _mediaPlan.Blocktime = blockTime;
+
+            string days = "";
+            foreach (Tuple<string, int> day in lbDays.SelectedItems)
+            {
+                days += day.Item2.ToString();
+            }
+            _mediaPlan.days = days;
+
+            string type = cbType.Text.Trim().Length > 0 ? cbType.Text.ToUpper() : "000";
+            _mediaPlan.Type = type;
+
+            bool special = (bool)chbSpecial.IsChecked;
+            _mediaPlan.Special = special;
+
+            DateOnly dateFrom = DateOnly.FromDateTime(dpFrom.SelectedDate.Value);
+            _mediaPlan.sdate = dateFrom;
+
+            DateOnly? dateTo = dpTo.SelectedDate.HasValue ? DateOnly.FromDateTime(dpTo.SelectedDate.Value) : null;
+            _mediaPlan.edate = dateTo;
+
+            float progcoef = 1.0f;
+            if (tbProgCoef.Text.Trim().Length > 0 && float.TryParse(tbProgCoef.Text.Trim(), out float progCoef))
+            {
+                progcoef = progCoef;
+            }
+            _mediaPlan.Progcoef = progcoef;
+
         }
 
         private CreateSchemaDTO MakeSchemaDTO()

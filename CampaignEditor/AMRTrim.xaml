@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CampaignEditor"
         mc:Ignorable="d"
-        Title="AMRTrim" Height="250" Width="300" ResizeMode="NoResize"
+        Title="AMRTrim" Height="250" Width="350" ResizeMode="NoResize"
         PreviewKeyDown="Window_PreviewKeyDown">
     <Grid>
         <Grid.ColumnDefinitions>
@@ -16,6 +16,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="10"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="50"/>
             <RowDefinition Height="10"/>
@@ -24,14 +25,21 @@
         <Label Grid.Row="1" Grid.Column="1" 
             x:Name="lblMessage" FontWeight="Bold" Content="Trim "
                HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="15"/>
-        <TextBox Grid.Row="2" Grid.Column="1" x:Name="tbAmr" FontSize="20"
-                 Width="200" Height="50" TextChanged="tbAmr_TextChanged"
-                 MaxLength="3"/>
-        <Button Grid.Row="3" Grid.Column="1" 
+        <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal">
+            <CheckBox x:Name="chbAmr1" Content="Amr 1" Margin="10, 0" IsChecked="True"/>
+            <CheckBox x:Name="chbAmr2" Content="Amr 2" Margin="10, 0"/>
+            <CheckBox x:Name="chbAmr3" Content="Amr 3" Margin="10, 0"/>
+            <CheckBox x:Name="chbAmrSale" Content="Amr Sale" Margin="10, 0"/>
+        </StackPanel>
+        
+        <TextBox Grid.Row="3" Grid.Column="1" x:Name="tbAmr" FontSize="20" VerticalAlignment="Center"
+                 Width="200" Height="40" TextChanged="tbAmr_TextChanged" HorizontalContentAlignment="Center"
+                 MaxLength="3" GotKeyboardFocus="tbAmr_GotKeyboardFocus"/>
+        <Button Grid.Row="4" Grid.Column="1" 
                 x:Name="btnSave" Content="Save" 
                 Width="100" HorizontalAlignment="Center" Margin="120, 10, 0, 10"
                 Click="btnSave_Click"/>
-        <Button Grid.Row="3" Grid.Column="1" 
+        <Button Grid.Row="4" Grid.Column="1" 
                 x:Name="btnCancel" Content="Cancel" 
                 Width="100" HorizontalAlignment="Center" Margin="-120, 10, 0, 10"
                 Click="btnCancel_Click"/>

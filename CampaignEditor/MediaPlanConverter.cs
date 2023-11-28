@@ -10,6 +10,7 @@ using Database.Entities;
 using Database.Repositories;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -205,10 +206,88 @@ namespace CampaignEditor
             CalculateLengthAndInsertations(mediaPlan, terms);
 
             if (calculatePrice)
-                await CalculatePrices(mediaPlan, pricelist, terms);
-
+            {
+                await CalculateAvgSeasSecCoefs(mediaPlan, pricelist, terms);
+                await CalculatePrice(mediaPlan, pricelist, terms);
+            }
+            await CalculatePricePerSeconds(mediaPlan, pricelist, terms);
             CalculateCPP(mediaPlan, pricelist);
 
+        }
+
+        public async Task CoefsChanged(MediaPlan mediaPlan)
+        {
+            var channelCmp = await _channelCmpController.GetChannelCmpByIds(mediaPlan.cmpid, mediaPlan.chid);
+            var pricelist = await _pricelistController.GetPricelistById(channelCmp.plid);
+
+            double coefs = mediaPlan.Progcoef * mediaPlan.Dpcoef * mediaPlan.Seascoef * mediaPlan.Seccoef;
+
+
+            // For seconds type pricelists
+            if (pricelist.pltype == 1)
+            {
+
+                mediaPlan.Price = coefs * mediaPlan.Length;
+                if (mediaPlan.Amrp1 > 0)
+                {
+                    mediaPlan.PricePerSecond = coefs / mediaPlan.Amrp1;
+                }
+                else
+                {
+                    mediaPlan.PricePerSecond = 0;
+                }
+            }
+            // For cpp pricelists
+            else
+            {
+                mediaPlan.Price = (pricelist.price / 30) * mediaPlan.Length * mediaPlan.Amrpsale * coefs;
+                if (mediaPlan.Length > 0)
+                    mediaPlan.PricePerSecond = mediaPlan.Price / mediaPlan.Length;
+                else
+                    mediaPlan.PricePerSecond = 0;
+            }
+        }
+
+        private async Task CalculatePrice(MediaPlan mediaPlan, PricelistDTO pricelist, IEnumerable<MediaPlanTermDTO> terms)
+        {
+
+            // For seconds type pricelists
+            if (pricelist.pltype == 1)
+            {
+                await CalculatePriceSecondsPricelist(mediaPlan, pricelist, terms);                
+            }
+            // For cpp pricelists
+            else
+            {
+                await CalculatePriceCPPPricelist(mediaPlan, pricelist, terms);               
+            }
+        }
+
+        private async Task CalculatePricePerSeconds(MediaPlan mediaPlan, PricelistDTO pricelist, IEnumerable<MediaPlanTermDTO> terms)
+        {
+
+            // For seconds type pricelists
+            if (pricelist.pltype == 1)
+            {
+                double coefs = mediaPlan.Progcoef * mediaPlan.Dpcoef * mediaPlan.Seascoef * mediaPlan.Seccoef;
+
+                if (mediaPlan.Amrp1 > 0)
+                {
+                    mediaPlan.PricePerSecond = coefs / mediaPlan.Amrp1;
+                }
+                else
+                {
+                    mediaPlan.PricePerSecond = 0;
+                }
+            }
+            // For cpp pricelists
+            else
+            {
+                if (mediaPlan.Length > 0)
+                    mediaPlan.PricePerSecond = mediaPlan.Price / mediaPlan.Length;
+                else
+                    mediaPlan.PricePerSecond = 0;
+            }
         }
 
         private void CalculateCPP(MediaPlan mediaPlan, PricelistDTO pricelist)
@@ -232,50 +311,12 @@ namespace CampaignEditor
             }
         }
 
-        public async Task CalculatePrices(MediaPlan mediaPlan, PricelistDTO pricelist = null, IEnumerable<MediaPlanTermDTO> terms = null)
+        public async Task CalculateAvgSeasSecCoefs(MediaPlan mediaPlan, PricelistDTO pricelist, IEnumerable<MediaPlanTermDTO> terms)
         {
-            if (terms == null)
-            {
-                terms = await _mediaPlanTermController.GetAllMediaPlanTermsByXmpid(mediaPlan.xmpid);
-            }
-
-            if (pricelist == null)
-            {
-                var channelCmp = await _channelCmpController.GetChannelCmpByIds(mediaPlan.cmpid, mediaPlan.chid);
-                pricelist = await _pricelistController.GetPricelistById(channelCmp.plid);
-            }
-
-            //terms = terms.Where(term => term != null && term.spotcode != null && term.spotcode.Trim().Count() > 0).ToList();
 
             await CalculateAvgSeccoef(mediaPlan, pricelist, terms);
             await CalculateAvgSeascoef(mediaPlan, pricelist, terms);
-
-            double coefs = mediaPlan.Progcoef * mediaPlan.Dpcoef * mediaPlan.Seascoef * mediaPlan.Seccoef;
-
-            // For seconds type pricelists
-            if (pricelist.pltype == 1)
-            {
-                await CalculatePriceSecondsPricelist(mediaPlan, pricelist, terms);
-                if (mediaPlan.Amrp1 > 0)
-                {
-                    mediaPlan.PricePerSecond = coefs / mediaPlan.Amrp1;
-                }
-                else
-                {
-                    mediaPlan.PricePerSecond = 0;
-                }
-                //mediaPlan.Cpp = mediaPlan.Price / (mediaPlan.Amrp1);
-            }
-            // For cpp pricelists
-            else
-            {
-                await CalculatePriceCPPPricelist(mediaPlan, pricelist, terms);
-                //mediaPlan.Cpp = pricelist.price;
-                if (mediaPlan.Length > 0)
-                    mediaPlan.PricePerSecond = mediaPlan.Price / mediaPlan.Length;
-                else
-                    mediaPlan.PricePerSecond = 0;
-            }
+            
         }
 
         private async Task CalculatePriceSecondsPricelist(MediaPlan mediaPlan, PricelistDTO pricelist, IEnumerable<MediaPlanTermDTO> terms)

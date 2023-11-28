@@ -273,6 +273,7 @@ namespace CampaignEditor.UserControls
             dgMediaPlans._spotController = _spotController;
             dgMediaPlans.AddMediaPlanClicked += dgMediaPlans_AddMediaPlanClicked;
             dgMediaPlans.DeleteMediaPlanClicked += dgMediaPlans_DeleteMediaPlanClicked;
+            dgMediaPlans.UpdateMediaPlanClicked += dgMediaPlans_UpdateMediaPlanClicked;
         }
 
         private void SubscribeSGGridControllers()
@@ -987,23 +988,27 @@ namespace CampaignEditor.UserControls
 
                 ContextMenu menu = new ContextMenu();
                 MenuItem trimAmrs = new MenuItem();
-                trimAmrs.Header = "Trim All Channel Amrs";
+                trimAmrs.Header = "Trim Channel Amrs";
                 trimAmrs.Click += async (obj, ea) =>
                 {
                     var chname = channel.chname;
 
                     var f = _factoryAmrTrim.Create();
-                    f.Initialize("Trim all Amrs for Channel " + chname, 100);
+                    f.Initialize("Trim Channel " + chname, 100);
                     f.ShowDialog();
                     if (f.changed)
                     {
                         var mediaPlans = _allMediaPlans.Where(mpTuple => mpTuple.MediaPlan.chid == channel.chid).Select(mpTuple => mpTuple.MediaPlan);
                         foreach (MediaPlan mediaPlan in mediaPlans)
                         {
-                            mediaPlan.Amr1trim = f.newValue;
-                            mediaPlan.Amr2trim = f.newValue;
-                            mediaPlan.Amr3trim = f.newValue;
-                            mediaPlan.Amrsaletrim = f.newValue;
+                            if (f.attributesToTrim[0])
+                                mediaPlan.Amr1trim = f.newValue;
+                            if (f.attributesToTrim[1])
+                                mediaPlan.Amr2trim = f.newValue;
+                            if (f.attributesToTrim[2])
+                                mediaPlan.Amr3trim = f.newValue;
+                            if (f.attributesToTrim[3])
+                                mediaPlan.Amrsaletrim = f.newValue;
                             var mpDTO = _mpConverter.ConvertToDTO(mediaPlan);
                             await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(mpDTO));
                         }
@@ -1166,6 +1171,47 @@ namespace CampaignEditor.UserControls
             }
         }
 
+        private async void dgMediaPlans_UpdateMediaPlanClicked(object? sender, UpdateMediaPlanEventArgs e)
+        {
+            MediaPlanTuple mediaPlanTuple = e.MediaPlanTuple;
+            MediaPlan mediaPlan = mediaPlanTuple.MediaPlan;
+
+            var f = _factoryAddSchema.Create();
+            ChannelDTO selectedChannel = await _channelController.GetChannelById(mediaPlan.chid);
+            
+            await f.Initialize(_campaign, selectedChannel, mediaPlan);
+            f.ShowDialog();
+            if (f.updateMediaPlan == true)
+            {
+                try
+                {
+                    MediaPlanDTO mediaPlanDTO = _mpConverter.ConvertToDTO(mediaPlan);
+
+                    await _mediaPlanTermController.DeleteMediaPlanTermByXmpId(mediaPlanDTO.xmpid);
+                    mediaPlanTuple.Terms.Clear();
+                    await _databaseFunctionsController.StartAMRCalculation(_campaign.cmpid, 40, 40, mediaPlanDTO.xmpid);
+                    var mediaPlanTerms = await MediaPlanToMPTerm(mediaPlanDTO);
+                    foreach(var mpTerm in mediaPlanTerms)
+                    {
+                        mediaPlanTuple.Terms.Add(mpTerm);
+                    }
+                    var mpTupleNew = new MediaPlanTuple(mediaPlan, new ObservableCollection<MediaPlanTerm>(mediaPlanTerms));
+
+                    await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(mediaPlanDTO));
+                    mediaPlan = await _mpConverter.ConvertFirstFromDTO(mediaPlanDTO);
+                    mediaPlanTuple.MediaPlan = mediaPlan;
+
+                    _allMediaPlans.Remove(mediaPlanTuple);
+                    _allMediaPlans.Add(mpTupleNew);
+                }
+                catch
+                {
+                    MessageBox.Show("Unable to update Program", "Message", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+
+            }
+        }
+
         private async void dgMediaPlans_AddMediaPlanClicked(object? sender, EventArgs e)
         {
             var f = _factoryAddSchema.Create();
@@ -1181,7 +1227,6 @@ namespace CampaignEditor.UserControls
                 try
                 {
                     var schema = await _schemaController.CreateGetSchema(f._schema);
-                    var a = f._schema.type;
                     if (schema != null)
                     {
                         MediaPlanDTO mediaPlanDTO = await SchemaToMP(schema, _cmpVersion);
@@ -1195,7 +1240,7 @@ namespace CampaignEditor.UserControls
                 }
                 catch
                 {
-                    MessageBox.Show("Unable to create Media Plan", "Message", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show("Unable to create Program", "Message", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
 
             }
@@ -1390,6 +1435,23 @@ namespace CampaignEditor.UserControls
             }
         }
 
+        private void chbOnlyIns_Checked(object sender, RoutedEventArgs e)
+        {
+            if (dgMediaPlans.filterByIns == false)
+            {
+                dgMediaPlans.filterByIns = true;
+                dgMediaPlans.FilterByInsChanged();
+            }
+        }
+
+        private void chbOnlyIns_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (dgMediaPlans.filterByIns == true)
+            {
+                dgMediaPlans.filterByIns = false;
+                dgMediaPlans.FilterByInsChanged();
+            }
+        }
     }
    
 }

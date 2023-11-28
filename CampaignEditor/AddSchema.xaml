@@ -82,7 +82,7 @@
                  Width="70" VerticalContentAlignment="Center" LostKeyboardFocus="tbTime_LostKeyboardFocus"/>
 
         <Label Content="Prog coef: " Grid.Row="7" Grid.Column="4" Margin="0, 10"/>
-        <TextBox Grid.Row="7" Grid.Column="5" x:Name="tbProgCoef" Margin="0, 10"
+        <TextBox Grid.Row="7" Grid.Column="5" x:Name="tbProgCoef" Text ="1.0" Margin="0, 10"
                  Width="70" VerticalContentAlignment="Center" LostKeyboardFocus="tbProgCoef_LostKeyboardFocus"/>
 
         <CheckBox Grid.Row="8" Grid.Column="5" x:Name="chbSpecial" Content="IsSpecial: "
