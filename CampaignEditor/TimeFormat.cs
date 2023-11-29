@@ -93,7 +93,7 @@ namespace CampaignEditor
             return hours.ToString().PadLeft(2, '0') + " : " + minutes.ToString().PadLeft(2, '0');
         }
 
-        public static int CompareReporesentative(string time1, string time2)
+        public static int CompareRepresentative(string time1, string time2)
         {
             int h1, h2, m1, m2; 
             if (Int32.TryParse(time1.Substring(0, 2), out h1) &&

@@ -60,10 +60,14 @@ namespace CampaignEditor
             _chidPricelistDictionary.Clear();
             foreach (var channelCmp in channelCmps)
             {
-                var channel = await _channelController.GetChannelById(channelCmp.chid);
-                _chidChannelDictionary.Add(channel.chid, channel.chname.Trim());
-                var pricelist = await _pricelistController.GetPricelistById(channelCmp.plid);
-                _chidPricelistDictionary.Add(channel.chid, pricelist);
+                try
+                {
+                    var channel = await _channelController.GetChannelById(channelCmp.chid);
+                    _chidChannelDictionary.Add(channel.chid, channel.chname.Trim());
+                    var pricelist = await _pricelistController.GetPricelistById(channelCmp.plid);
+                    _chidPricelistDictionary.Add(channel.chid, pricelist);
+                }
+                catch { }
             }
 
 

@@ -151,11 +151,14 @@ namespace CampaignEditor
             foreach (var price in prices)
             {
                 // No need to check for day because mediaPlan will be adjusted correctly
-                if ((TimeFormat.CompareReporesentative(price.dps, blocktime) != 1) &&
-                    (TimeFormat.CompareReporesentative(price.dpe, blocktime) != -1))
+                if ((TimeFormat.CompareRepresentative(price.dps, blocktime) != 1) &&
+                    (TimeFormat.CompareRepresentative(price.dpe, blocktime) != -1))
                 {
-                    mediaPlan.Dpcoef = price.price;
-                    return;
+                    if (price.days.Trim().Contains(mediaPlan.days.Trim()))
+                    {
+                        mediaPlan.Dpcoef = price.price;
+                        return;
+                    }
                 }
             }
             
