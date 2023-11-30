@@ -12,7 +12,7 @@ using Database.DTOs.ChannelDTO;
 using Database.DTOs.ChannelCmpDTO;
 using Database.Entities;
 using System.Linq;
-using CampaignEditor.DTOs.CampaignDTO;
+using Database.DTOs.CampaignDTO;
 
 namespace CampaignEditor
 {

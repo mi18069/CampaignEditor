@@ -10,7 +10,7 @@ using Database.DTOs.ChannelDTO;
 using System.Threading.Channels;
 using CampaignEditor.Controllers;
 using Database.Repositories;
-using CampaignEditor.DTOs.CampaignDTO;
+using Database.DTOs.CampaignDTO;
 using Database.DTOs.SpotDTO;
 using Database.DTOs.PricelistDTO;
 using CampaignEditor.Helpers;

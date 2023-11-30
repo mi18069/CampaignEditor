@@ -1,4 +1,4 @@
-﻿using CampaignEditor.DTOs.CampaignDTO;
+﻿using Database.DTOs.CampaignDTO;
 using CampaignEditor.Entities;
 using Database.Repositories;
 using Microsoft.Extensions.DependencyInjection;

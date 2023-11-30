@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace CampaignEditor.DTOs.CampaignDTO
+namespace Database.DTOs.CampaignDTO
 {
 
     public class BaseCampaignDTO

@@ -5,7 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.ComponentModel;
 using CampaignEditor.Controllers;
-using CampaignEditor.DTOs.CampaignDTO;
+using Database.DTOs.CampaignDTO;
 using Database.DTOs.ClientDTO;
 using System.Collections.ObjectModel;
 using Database.Repositories;

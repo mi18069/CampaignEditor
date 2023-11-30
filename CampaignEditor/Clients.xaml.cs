@@ -8,6 +8,8 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 using CampaignEditor.Controllers;
+using CampaignEditor.DTOs.UserDTO;
+using CampaignEditor.Repositories;
 using CampaignEditor.StartupHelpers;
 using Database.Repositories;
 
@@ -29,7 +31,9 @@ namespace CampaignEditor
         private readonly IAbstractFactory<AllUsers> _factoryAllUsers;
         private readonly IAbstractFactory<ChangePassword> _factoryChangePassword;
         private readonly IAbstractFactory<DuplicateCampaign> _factoryDuplicateCampaign;
+        private readonly IAbstractFactory<ClientCmpsTreeView> _factoryClientCmpsTreeView;
 
+        private UserController _userController;
         private CampaignController _campaignController;
 
 
@@ -41,6 +45,8 @@ namespace CampaignEditor
 
         private bool clientsUpdated = false;
         private bool campaignsUpdated = false;
+
+        bool loadedAllCheckBoxes = false;
 
         #region Can Be Deleted
         
@@ -74,8 +80,12 @@ namespace CampaignEditor
         public Clients(IAbstractFactory<ClientsTreeView> factoryClientsTreeView, IAbstractFactory<AddUser> factoryAddUser,
             IAbstractFactory<AddClient> factoryAddClient, IAbstractFactory<UsersOfClient> factoryUsersOfClient, IAbstractFactory<NewCampaign> factoryNewCampaign,
             IAbstractFactory<Rename> factoryRename, IAbstractFactory<Campaign> factoryCampaign, ICampaignRepository campaignRepository, IAbstractFactory<AllUsers> factoryAllUsers,
-            IAbstractFactory<ChangePassword> factoryChangePassword, IAbstractFactory<DuplicateCampaign> factoryDuplicateCampaign)
+            IAbstractFactory<ChangePassword> factoryChangePassword, IAbstractFactory<DuplicateCampaign> factoryDuplicateCampaign, IAbstractFactory<ClientCmpsTreeView> factoryClientCmpsTreeView,
+            IUserRepository userRepository, IClientRepository clientRepository,
+            IUserClientsRepository userClientsRepository)
         {
+            instance = this;
+
             InitializeComponent();
 
             this.DataContext = this;
@@ -87,11 +97,11 @@ namespace CampaignEditor
             _factoryRename = factoryRename;
             _factoryCampaign = factoryCampaign;
             _campaignController = new CampaignController(campaignRepository);
-            instance = this;
 
             _clientsTree = factoryClientsTreeView.Create();
             _clientsTree.Initialization(MainWindow.user);
             _ = _clientsTree.InitializeTree();
+
 
 
             isAdministrator = MainWindow.user.usrlevel == 0;
@@ -99,6 +109,7 @@ namespace CampaignEditor
             isReadOnly = MainWindow.user.usrlevel == 2;
 
             tbUsername.Text = MainWindow.user.usrname.Trim();
+            //tvClients.InitializeComponent();
 
             tbSearchCampaigns.Text = searchCampaignsString;
             tbSearchClients.Text = searchClientsString;
@@ -107,7 +118,15 @@ namespace CampaignEditor
             _factoryAllUsers = factoryAllUsers;
             _factoryChangePassword = factoryChangePassword;
             _factoryDuplicateCampaign = factoryDuplicateCampaign;
+            _factoryClientCmpsTreeView = factoryClientCmpsTreeView;
+
+            _userController = new UserController(userRepository);
+            tvClients1._userController = _userController;
+            tvClients1._clientController = new ClientController(clientRepository);
+            tvClients1._userClientsController = new UserClientsController(userClientsRepository);
+            tvClients1._campaignController = new CampaignController(campaignRepository);
         }
+
 
         #region Filter ComboBox
         private async void FillFilterByUsersComboBox()
@@ -147,6 +166,7 @@ namespace CampaignEditor
 
         private async void tbSearchClients_TextChanged(object sender, TextChangedEventArgs e)
         {
+            tvClients1.FilterClientAndCampaign  ();
             if (tbSearchClients.Text.Length >= 3 && tbSearchClients.Text != searchClientsString)
             {
                 await _clientsTree.UpdateTree();
@@ -185,6 +205,8 @@ namespace CampaignEditor
 
         private void tbSearchCampaigns_TextChanged(object sender, TextChangedEventArgs e)
         {
+            tvClients1.FilterClientAndCampaign();
+
             if (tbSearchCampaigns.Text.Length >= 3 && tbSearchCampaigns.Text != searchCampaignsString)
             {
                 _clientsTree.UpdateTree();
@@ -215,6 +237,8 @@ namespace CampaignEditor
             if (_clientsTree != null)
                 _clientsTree.UpdateTree();
             dpStartDate.IsEnabled = true;
+            if (loadedAllCheckBoxes)
+                tvClients1.FilterData();
 
         }
 
@@ -223,30 +247,49 @@ namespace CampaignEditor
             if (_clientsTree != null)
                 _clientsTree.UpdateTree();
             dpStartDate.IsEnabled = false;
+            if (loadedAllCheckBoxes)
+                tvClients1.FilterData();
         }
 
         private void dpStartDate_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
         {
             if (_clientsTree != null)
                 _clientsTree.UpdateTree();
+            if (loadedAllCheckBoxes)
+                tvClients1.FilterData();
+
         }
 
         private void cbFilter_Checked(object sender, RoutedEventArgs e)
         {
             if (_clientsTree != null)
                 _clientsTree.UpdateTree();
+            if (loadedAllCheckBoxes)
+                tvClients1.FilterData();
+
         }
 
         private void cbFilter_Unchecked(object sender, RoutedEventArgs e)
         {
             if (_clientsTree != null)
                 _clientsTree.UpdateTree();
+            if (loadedAllCheckBoxes)
+                tvClients1.FilterData();
+
         }
 
 
-        private void cbUsers_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private async void cbUsers_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             _clientsTree.UpdateTree();
+            string username = ((string)cbUsers.SelectedValue).Trim();
+            if (username == null || username == "All")
+                await tvClients1.Initialize();
+            else
+            {
+                UserDTO user = await _userController.GetUserByUsername(username);
+                await tvClients1.Initialize(user);
+            }
 
         }
 
@@ -492,6 +535,16 @@ namespace CampaignEditor
             f.ShowDialog();
         }
 
-
+        int checkboxesToLoad = 5;
+        int loadedForNow = 0;
+        private async void cb_Loaded(object sender, RoutedEventArgs e)
+        {
+            loadedForNow += 1;
+            if (checkboxesToLoad == loadedForNow)
+            {
+                loadedAllCheckBoxes = true;
+                await tvClients1.Initialize(MainWindow.user);
+            }
+        }
     }
 }

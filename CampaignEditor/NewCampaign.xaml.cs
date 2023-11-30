@@ -1,5 +1,5 @@
 ﻿using CampaignEditor.Controllers;
-using CampaignEditor.DTOs.CampaignDTO;
+using Database.DTOs.CampaignDTO;
 using Database.DTOs.BrandDTO;
 using Database.DTOs.ClientDTO;
 using Database.DTOs.CmpBrndDTO;

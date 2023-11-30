@@ -49,6 +49,9 @@
     <Compile Update="Channels.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="ClientCmpsTreeView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Clients.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -217,6 +220,9 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Channels.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="ClientCmpsTreeView.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Clients.xaml">

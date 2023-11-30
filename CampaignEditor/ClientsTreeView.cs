@@ -1,5 +1,5 @@
 ﻿using CampaignEditor.Controllers;
-using CampaignEditor.DTOs.CampaignDTO;
+using Database.DTOs.CampaignDTO;
 using CampaignEditor.DTOs.UserDTO;
 using CampaignEditor.Repositories;
 using Database.DTOs.ClientDTO;
