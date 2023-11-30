@@ -400,9 +400,9 @@ namespace CampaignEditor
         {
             if ((bool)cbAgeRange.IsChecked == true)
             {
-                string from = tbFrom.Text;
-                string to = tbTo.Text;
-                return "R;11,3;BET,0" + from + ",0" + to + ";100;";
+                string from = tbFrom.Text.PadLeft(3, '0');
+                string to = tbTo.Text.PadLeft(3, '0');
+                return "R;11,3;BET," + from + "," + to + ";100;";
             }
             else
                 return "";

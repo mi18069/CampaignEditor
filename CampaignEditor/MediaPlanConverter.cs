@@ -10,7 +10,6 @@ using Database.Entities;
 using Database.Repositories;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -73,8 +72,13 @@ namespace CampaignEditor
             var spots = await _spotController.GetSpotsByCmpid(campaign.cmpid);
             foreach (var spot in spots)
             {
-                spotcodeSpotDict.Add(spot.spotcode.Trim()[0], spot);
+                try
+                {
+                    spotcodeSpotDict.Add(spot.spotcode.Trim()[0], spot);
+                }
+                catch { }
             }
+
         }
 
         public async Task<MediaPlan> ConvertFirstFromDTO(MediaPlanDTO mediaPlanDTO)
@@ -213,7 +217,8 @@ namespace CampaignEditor
                 await CalculateAvgSeasSecCoefs(mediaPlan, pricelist, terms);
                 await CalculatePrice(mediaPlan, pricelist, terms);
             }
-            await CalculatePricePerSeconds(mediaPlan, pricelist, terms);
+
+            CalculatePricePerSeconds(mediaPlan, pricelist);
             CalculateCPP(mediaPlan, pricelist);
 
         }
@@ -266,13 +271,13 @@ namespace CampaignEditor
             }
         }
 
-        private async Task CalculatePricePerSeconds(MediaPlan mediaPlan, PricelistDTO pricelist, IEnumerable<MediaPlanTermDTO> terms)
+        private void CalculatePricePerSeconds(MediaPlan mediaPlan, PricelistDTO pricelist)
         {
 
             // For seconds type pricelists
             if (pricelist.pltype == 1)
             {
-                double coefs = mediaPlan.Progcoef * mediaPlan.Dpcoef * mediaPlan.Seascoef * mediaPlan.Seccoef;
+                double coefs = mediaPlan.Progcoef * mediaPlan.Dpcoef * mediaPlan.Seascoef;
 
                 if (mediaPlan.Amrp1 > 0)
                 {
@@ -370,7 +375,7 @@ namespace CampaignEditor
             }
             mediaPlan.Price = price;
 
-        }
+        }    
 
         public async Task<double> CalculateTermSeccoef(MediaPlan mediaPlan, PricelistDTO pricelist, SpotDTO spotDTO)
         {
@@ -458,7 +463,7 @@ namespace CampaignEditor
             int seasCount = 0;
             foreach (var term in terms)
             {
-                if (term != null && term.spotcode != null)
+                if (term != null)
                 {
                     foreach (var seas in seasonalities)
                     {

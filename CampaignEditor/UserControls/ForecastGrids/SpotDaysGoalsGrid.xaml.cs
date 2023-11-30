@@ -156,7 +156,7 @@ namespace CampaignEditor.UserControls.ForecastGrids
                     textBlock.FontWeight = FontWeights.Bold;
 
                     SpotDTO spot = _spots[j];
-                    string label = spot.spotcode.Trim() + ": " + spot.spotname.Trim();
+                    string label = spot.spotcode.Trim() + ": " + spot.spotname.Trim() + $" ({spot.spotlength})";
                     textBlock.Text = label;
 
                     border.Child = textBlock;

@@ -276,7 +276,7 @@ namespace CampaignEditor.UserControls
             // Spots
             foreach (SpotDTO spot in _spots)
             {
-                string label = spot.spotcode.Trim() + ": " + spot.spotname.Trim();
+                string label = spot.spotcode.Trim() + ": " + spot.spotname.Trim() + $" ({spot.spotlength})";
                 dgSpots.Items.Add(new SpotLabel { Label = label });
             }
 

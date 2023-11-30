@@ -76,15 +76,16 @@ namespace Database.Repositories
             using var connection = _context.GetConnection();
 
             var affected = await connection.ExecuteAsync(
-                "UPDATE tblseasonality SET seasid = @Seasid, seasname = @Seasname, " +
+                "UPDATE tblseasonality SET seasid = @Seasid, seasactive = @Seasactive, seasname = @Seasname, " +
                 "ownedby = @Ownedby " +
                 "WHERE seasid = @Seasid",
             new
             {
-                    Seasid = seasonalityDTO.seasid,
-                    Seasname = seasonalityDTO.seasname,
-                    Ownedby = seasonalityDTO.ownedby
-                });
+                Seasid = seasonalityDTO.seasid,
+                Seasname = seasonalityDTO.seasname,
+                Seasactive = seasonalityDTO.seasactive,
+                Ownedby = seasonalityDTO.ownedby
+            });
 
             return affected != 0;
         }

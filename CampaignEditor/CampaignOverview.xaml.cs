@@ -265,6 +265,13 @@ namespace CampaignEditor
         #endregion
 
         #region Spots
+        private void dgSpots_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (dgTargets.IsLoaded)
+            {
+                svSpots.MaxHeight = dgTargets.ActualHeight;
+            }
+        }
         private async void btnSpots_Click(object sender, RoutedEventArgs e)
         {
             await fSpots.Initialize(_campaign, _spotlist);
@@ -371,11 +378,6 @@ namespace CampaignEditor
             {
                 window.Close();
             }
-        }
-
-        private void dgSpots_Loaded(object sender, RoutedEventArgs e)
-        {
-            svSpots.MaxHeight = dgSpots.ActualHeight;
         }
 
         public bool Window_Closing()

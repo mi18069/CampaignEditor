@@ -223,7 +223,7 @@ namespace CampaignEditor
             {
                 cbSeasonality.Items.Add(seasonality);
             }
-
+            
             cbSeasonality.SelectedIndex = index;
         }
         private async Task FillCBTarget(int index = 0)

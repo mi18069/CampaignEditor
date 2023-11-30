@@ -24,36 +24,9 @@
                      HorizontalAlignment="Left" VerticalAlignment="Stretch" Rows="1"/>
         <UniformGrid x:Name="ugGoals" Grid.Row="1" Grid.Column="3"
                      HorizontalAlignment="Left" VerticalAlignment="Stretch"/>
-        
+
         <UniformGrid x:Name="ugSpots" Grid.Row="2" Grid.Column="1" Columns="1"
                      HorizontalAlignment="Left" VerticalAlignment="Stretch"/>
-
-        <!-- <DataGrid x:Name="dgSpots" Grid.Row="2" Grid.Column="1" 
-                  HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
-                  HeadersVisibility="None" AutoGenerateColumns="False" CanUserSortColumns="False"
-                  CanUserResizeRows="False" BorderBrush="Black"
-                  RowHeight="15">
-            <DataGrid.Resources>
-                <Style TargetType="DataGridCell">
-                    <Style.Triggers>
-                        <Trigger Property="IsSelected" Value="True">
-                            <Setter Property="Background" Value="LightBlue" />
-                            <Setter Property="Foreground" Value="Black" />
-                        </Trigger>
-                    </Style.Triggers>
-                </Style>
-            </DataGrid.Resources>
-            <DataGrid.Columns>
-                <DataGridTextColumn Width="auto" IsReadOnly="True" Binding="{Binding Label}"
-                                    FontWeight="Bold">
-                    <DataGridTextColumn.ElementStyle>
-                        <Style TargetType="{x:Type TextBlock}">
-                            <Setter Property="Background" Value="LightGoldenrodYellow" />
-                        </Style>
-                    </DataGridTextColumn.ElementStyle>
-                </DataGridTextColumn>
-            </DataGrid.Columns>
-        </DataGrid> -->
 
         <UniformGrid x:Name="ugGrid" Grid.Row="2" Grid.Column="2"
                      HorizontalAlignment="Left" VerticalAlignment="Stretch" Focusable="False"/>

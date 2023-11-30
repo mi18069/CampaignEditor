@@ -76,6 +76,8 @@ namespace CampaignEditor
             }
             var addBtn = MakeAddButton();
             wpSeasonalities.Children.Add(addBtn);
+            modifiedSeasonalities = false;
+
         }
         #endregion
 
@@ -156,6 +158,7 @@ namespace CampaignEditor
             {
                 if (_seasonality == null)
                 {
+                    var a = (bool)cbActive.IsChecked;
                     _seasonality = await _seasonalityController.CreateSeasonality(new CreateSeasonalityDTO
                         (tbName.Text.Trim(), (bool)cbActive.IsChecked, _campaign.clid));
                 }
