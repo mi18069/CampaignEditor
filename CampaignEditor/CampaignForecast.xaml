@@ -90,17 +90,17 @@
 
             <TabControl x:Name="tcGrids" Grid.Row="7" Grid.Column="2" Grid.ColumnSpan="3">
                 <TabItem Header="Spots Goals 1" x:Name="tiSpotGoals" >
-                    <ScrollViewer x:Name="svsg1" HorizontalScrollBarVisibility="Visible">
+                    <ScrollViewer x:Name="svsg1" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Disabled">
                         <local:SpotGoalsGrid x:Name="sgGrid" />
                     </ScrollViewer>
                 </TabItem>
                 <TabItem Header="Spots Goals 2" x:Name="tiSpotWeekGoals" >
-                    <ScrollViewer x:Name="svsg2" HorizontalScrollBarVisibility="Visible">
+                    <ScrollViewer x:Name="svsg2" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Disabled">
                         <local:SpotWeekGoalsGrid x:Name="swgGrid" />
-                    </ScrollViewer>
+                    </ScrollViewer> 
                 </TabItem>
                 <TabItem Header="Spots Goals 3" x:Name="tiSpotDaysGoals" >
-                    <ScrollViewer x:Name="svsg3" HorizontalScrollBarVisibility="Visible">
+                    <ScrollViewer x:Name="svsg3" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Disabled">
                         <local1:SpotDaysGoalsGrid x:Name="sdgGrid" />
                     </ScrollViewer>
                 </TabItem>

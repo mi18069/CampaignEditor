@@ -7,10 +7,10 @@
              xmlns:converters="clr-namespace:CampaignEditor.Converters"
              mc:Ignorable="d" 
              d:DesignHeight="250" d:DesignWidth="800" Background="White">
-    <Grid>
+    <Grid Grid.IsSharedSizeScope="True">
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="0.2*"/>
-            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="auto" SharedSizeGroup="SharedSecondColumn"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="0.2*"/>
@@ -18,7 +18,7 @@
             <RowDefinition Height="0.2*"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <Rectangle Grid.Row="0" Grid.Column="0" Grid.RowSpan="3" Fill="LightGray"/>
+        <Rectangle Grid.Row="0" Grid.Column="0" Grid.RowSpan="3" Fill="LightGray" />
         <UniformGrid x:Name="ugWeeks" Grid.Row="0" Grid.Column="1" 
                      HorizontalAlignment="Left" VerticalAlignment="Stretch" Rows="1"/>
         <UniformGrid x:Name="ugChannels" Grid.Row="1" Grid.Column="1" 
@@ -26,7 +26,49 @@
         <UniformGrid x:Name="ugGoals" Grid.Row="2" Grid.Column="1"
                      HorizontalAlignment="Left" VerticalAlignment="Stretch"/>
 
-        <DataGrid x:Name="dgSpots" Grid.Row="3" Grid.Column="0" 
+        <ScrollViewer  Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" 
+                       VerticalScrollBarVisibility="Hidden">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto" />
+                    <ColumnDefinition Width="*" SharedSizeGroup="SharedSecondColumn"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <DataGrid x:Name="dgSpots" Grid.Row="0" Grid.Column="0"
+                  HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                  HeadersVisibility="None" AutoGenerateColumns="False" CanUserSortColumns="False"
+                  CanUserResizeRows="False" BorderBrush="Black">
+                    <DataGrid.Resources>
+                        <Style TargetType="DataGridCell">
+                            <Style.Triggers>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter Property="Background" Value="LightBlue" />
+                                    <Setter Property="Foreground" Value="Black" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGrid.Resources>
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Width="auto" IsReadOnly="True" Binding="{Binding Label}"
+                                    FontWeight="Bold">
+                            <DataGridTextColumn.ElementStyle>
+                                <Style TargetType="{x:Type TextBlock}">
+                                    <Setter Property="Background" Value="LightGoldenrodYellow" />
+                                    <EventSetter Event="MouseLeftButtonDown" Handler="TextBlock_MouseLeftButtonDown" />
+                                </Style>
+                            </DataGridTextColumn.ElementStyle>
+                        </DataGridTextColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <UniformGrid x:Name="ugGrid" Grid.Row="0" Grid.Column="1" Rows="1"
+                     HorizontalAlignment="Left" VerticalAlignment="Stretch" PreviewMouseWheel="ugGrid_PreviewMouseWheel"/>
+            </Grid>
+        </ScrollViewer>
+        
+        <!-- <DataGrid x:Name="dgSpots" Grid.Row="3" Grid.Column="0"
                   HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                   HeadersVisibility="None" AutoGenerateColumns="False" CanUserSortColumns="False"
                   CanUserResizeRows="False" BorderBrush="Black">
@@ -51,10 +93,10 @@
                     </DataGridTextColumn.ElementStyle>
                 </DataGridTextColumn>
             </DataGrid.Columns>
-        </DataGrid>
+        </DataGrid> -->
 
-        <UniformGrid x:Name="ugGrid" Grid.Row="3" Grid.Column="1" Rows="1"
-                     HorizontalAlignment="Left" VerticalAlignment="Stretch"/>
+        <!-- <UniformGrid x:Name="ugGrid" Grid.Row="3" Grid.Column="1" Rows="1"
+                     HorizontalAlignment="Left" VerticalAlignment="Stretch"/> -->
 
     </Grid>
 </UserControl>

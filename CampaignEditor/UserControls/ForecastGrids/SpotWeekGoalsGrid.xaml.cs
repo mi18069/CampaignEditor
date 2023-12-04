@@ -13,7 +13,7 @@ using OfficeOpenXml;
 using Border = System.Windows.Controls.Border;
 using OfficeOpenXml.FormulaParsing;
 using System.Windows.Interop;
-
+using System.Windows.Input;
 
 namespace CampaignEditor.UserControls
 {
@@ -575,5 +575,29 @@ namespace CampaignEditor.UserControls
         }
 
         #endregion
+
+        private void ugGrid_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            var scrollViewer = FindScrollViewer((DependencyObject)sender);
+
+            if (scrollViewer != null)
+            {
+                scrollViewer.ScrollToVerticalOffset(scrollViewer.VerticalOffset - e.Delta);
+                e.Handled = true;
+            }
+        }
+
+        private ScrollViewer FindScrollViewer(DependencyObject depObj)
+        {
+            DependencyObject current = depObj;
+
+            while (current != null && !(current is ScrollViewer))
+            {
+                current = VisualTreeHelper.GetParent(current);
+            }
+
+            return current as ScrollViewer;
+        }
+
     }
 }

@@ -145,9 +145,9 @@ namespace CampaignEditor.UserControls
                 canUserEdit = false;
                 btnResetDates.IsEnabled = canUserEdit;
             }
-            svsg1.PreviewMouseWheel += ScrollViewer_PreviewMouseWheel;
-            svsg2.PreviewMouseWheel += ScrollViewer_PreviewMouseWheel;
-            svsg3.PreviewMouseWheel += ScrollViewer_PreviewMouseWheel;
+            //svsg1.PreviewMouseWheel += ScrollViewer_PreviewMouseWheel;
+            //svsg2.PreviewMouseWheel += ScrollViewer_PreviewMouseWheel;
+            //svsg3.PreviewMouseWheel += ScrollViewer_PreviewMouseWheel;
 
         }
 

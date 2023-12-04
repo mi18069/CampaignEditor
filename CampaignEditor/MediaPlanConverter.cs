@@ -8,6 +8,7 @@ using Database.DTOs.PricelistDTO;
 using Database.DTOs.SpotDTO;
 using Database.Entities;
 using Database.Repositories;
+using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -158,7 +159,8 @@ namespace CampaignEditor
                 if ((TimeFormat.CompareRepresentative(price.dps, blocktime) != 1) &&
                     (TimeFormat.CompareRepresentative(price.dpe, blocktime) != -1))
                 {
-                    if (price.days.Trim().Contains(mediaPlan.days.Trim()))
+                    // Checks if all days from mediaPlan is in pricelist    
+                    if (mediaPlan.days.Trim().All(c => price.days.Trim().Contains(c)))
                     {
                         mediaPlan.Dpcoef = price.price;
                         return;

@@ -16,6 +16,7 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 using System.Windows.Media;
 using Border = System.Windows.Controls.Border;
 
@@ -618,6 +619,29 @@ namespace CampaignEditor.UserControls
         private void SubGrid_SelectedRowChanged(object sender, int rowIndex)
         {
             SelectAllSubgridRows(rowIndex);
+        }
+
+        private void ugGrid_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            var scrollViewer = FindScrollViewer((DependencyObject)sender);
+
+            if (scrollViewer != null)
+            {
+                scrollViewer.ScrollToVerticalOffset(scrollViewer.VerticalOffset - e.Delta);
+                e.Handled = true;
+            }
+        }
+
+        private ScrollViewer FindScrollViewer(DependencyObject depObj)
+        {
+            DependencyObject current = depObj;
+
+            while (current != null && !(current is ScrollViewer))
+            {
+                current = VisualTreeHelper.GetParent(current);
+            }
+
+            return current as ScrollViewer;
         }
     }
 }
