@@ -24,7 +24,7 @@
         <UniformGrid x:Name="ugGoals" Grid.Row="1" Grid.Column="2"
                      HorizontalAlignment="Left" VerticalAlignment="Stretch"/>
 
-        <ScrollViewer Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" VerticalScrollBarVisibility="Hidden">
+        <ScrollViewer x:Name="svGrid" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" VerticalScrollBarVisibility="Hidden">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="auto"/>
@@ -45,13 +45,6 @@
                              PreviewMouseWheel="ugGrid_PreviewMouseWheel"/>
             </Grid>
         </ScrollViewer>
-        <!-- <UniformGrid x:Name="ugDays" Grid.Row="2" Grid.Column="0" 
-                     HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Rows="1"/>
-
-        <UniformGrid x:Name="ugSpots" Grid.Row="2" Grid.Column="1" Columns="1"
-                     HorizontalAlignment="Left" VerticalAlignment="Stretch"/>
-
-        <UniformGrid x:Name="ugGrid" Grid.Row="2" Grid.Column="2"
-                     HorizontalAlignment="Left" VerticalAlignment="Stretch" Focusable="False"/> -->
+        
     </Grid>
 </UserControl>

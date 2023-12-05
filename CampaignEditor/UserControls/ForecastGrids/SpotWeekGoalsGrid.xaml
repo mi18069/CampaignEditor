@@ -24,7 +24,7 @@
         <UniformGrid x:Name="ugGoals" Grid.Row="1" Grid.Column="2"
                      HorizontalAlignment="Left" VerticalAlignment="Stretch"/>
 
-        <ScrollViewer x:Name="svWeeks" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" 
+        <ScrollViewer x:Name="svGrid" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" 
                       VerticalScrollBarVisibility="Hidden" >
             <Grid>
                 <Grid.ColumnDefinitions>

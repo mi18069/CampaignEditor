@@ -578,25 +578,13 @@ namespace CampaignEditor.UserControls
 
         private void ugGrid_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
-            var scrollViewer = FindScrollViewer((DependencyObject)sender);
+            var scrollViewer = svGrid;
 
             if (scrollViewer != null)
             {
                 scrollViewer.ScrollToVerticalOffset(scrollViewer.VerticalOffset - e.Delta);
                 e.Handled = true;
             }
-        }
-
-        private ScrollViewer FindScrollViewer(DependencyObject depObj)
-        {
-            DependencyObject current = depObj;
-
-            while (current != null && !(current is ScrollViewer))
-            {
-                current = VisualTreeHelper.GetParent(current);
-            }
-
-            return current as ScrollViewer;
         }
 
     }
