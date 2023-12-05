@@ -716,7 +716,7 @@ namespace CampaignEditor.UserControls
             {
                 ContextMenu menu = new ContextMenu();
                 MenuItem deleteItem = new MenuItem();
-                deleteItem.Header = "Delete MediaPlan";
+                deleteItem.Header = "Delete Program";
                 deleteItem.Click += async (obj, ea) =>
                 {
                     OnDeleteMediaPlanClicked();
@@ -724,7 +724,7 @@ namespace CampaignEditor.UserControls
                 menu.Items.Add(deleteItem);
 
                 MenuItem addMediaPlanItem = new MenuItem();
-                addMediaPlanItem.Header = "Add MediaPlan";
+                addMediaPlanItem.Header = "Add Program";
                 addMediaPlanItem.Click += async (obj, ea) =>
                 {
                     OnAddMediaPlanClicked();

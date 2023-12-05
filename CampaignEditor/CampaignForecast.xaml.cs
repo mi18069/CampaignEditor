@@ -728,7 +728,12 @@ namespace CampaignEditor.UserControls
                     return mediaPlan;
                 else
                 {
-
+                    if (MessageBox.Show($"New program conflicts with existing:\n{mediaPlan.name}\n" +
+                        $"This action will replace existing program with new one", "Result", MessageBoxButton.OKCancel, MessageBoxImage.Warning) 
+                        == MessageBoxResult.Cancel)
+                    {
+                        return mediaPlan;
+                    }
                     await _mediaPlanTermController.DeleteMediaPlanTermByXmpId(mediaPlan.xmpid);
                     await _mediaPlanHistController.DeleteMediaPlanHistByXmpid(mediaPlan.xmpid);
                     await _mediaPlanController.DeleteMediaPlanById(mediaPlan.xmpid);
@@ -754,7 +759,7 @@ namespace CampaignEditor.UserControls
         {
             return plan1.schid == schema.id &&
                    plan1.chid == schema.chid &&
-                   plan1.name == schema.name &&
+                   plan1.name.Trim() == schema.name.Trim() &&
                    plan1.position == schema.position &&
                    plan1.stime == schema.stime &&
                    plan1.etime == schema.etime &&
@@ -1231,6 +1236,10 @@ namespace CampaignEditor.UserControls
                     {
                         MediaPlanDTO mediaPlanDTO = await SchemaToMP(schema, _cmpVersion);
 
+                        if (_allMediaPlans.Any(mp => mp.MediaPlan.xmpid == mediaPlanDTO.xmpid))
+                        {
+                            return;
+                        }
                         await _databaseFunctionsController.StartAMRCalculation(_campaign.cmpid, 40, 40, mediaPlanDTO.xmpid);
                         var mediaPlan = await _mpConverter.ConvertFirstFromDTO(mediaPlanDTO);
                         var mediaPlanTerms = await MediaPlanToMPTerm(mediaPlanDTO);
