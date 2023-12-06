@@ -614,6 +614,7 @@ namespace CampaignEditor.UserControls
         public event EventHandler<ChangeVersionEventArgs> SetLoadingPage;
         public event EventHandler<ChangeVersionEventArgs> SetContentPage;
 
+        #region Helper buttons
         private async void btnClear_Click(object sender, RoutedEventArgs e)
         {
             if (MessageBox.Show("Are you sure you want to clear all spots?", "Result", MessageBoxButton.OKCancel,
@@ -621,26 +622,8 @@ namespace CampaignEditor.UserControls
             {
                 await ClearAllMPTerms();
                 lvChannels.SelectedItems.Clear();
-                
-            }
-        }
-
-        public async void btnRefresh_Click(object sender, RoutedEventArgs e)
-        {
-            if (MessageBox.Show("Synchronize data?", "Result", MessageBoxButton.OKCancel,
-                MessageBoxImage.Question) == MessageBoxResult.OK)
-            {
-                SetLoadingPage?.Invoke(this, null);
-
-                // When pricelists or calculating inside MediaPlans are changed 
-                await CalculateMPValues(_campaign.cmpid, _maxVersion);
-
-                await LoadData(_maxVersion);
-
-                SetContentPage?.Invoke(this, null);
 
             }
-
         }
 
         private async Task ClearAllMPTerms()
@@ -667,11 +650,46 @@ namespace CampaignEditor.UserControls
             }
         }
 
+
         private async Task RecalculateMPValues(MediaPlan mediaPlan)
         {
             await _mpConverter.ComputeExtraProperties(mediaPlan, true);
             await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(_mpConverter.ConvertToDTO(mediaPlan)));
         }
+
+        private async void btnFetchData_Click(object sender, RoutedEventArgs e)
+        {
+            if (MessageBox.Show("Load data from database?", "Result", MessageBoxButton.OKCancel,
+                MessageBoxImage.Question) == MessageBoxResult.OK)
+            {
+                SetLoadingPage?.Invoke(this, null);
+
+                await LoadData(_maxVersion);
+
+                SetContentPage?.Invoke(this, null);
+
+            }
+        }
+
+        private async void btnRecalculateData_Click(object sender, RoutedEventArgs e)
+        {
+            if (MessageBox.Show("Recalculate all data values?", "Result", MessageBoxButton.OKCancel,
+     MessageBoxImage.Question) == MessageBoxResult.OK)
+            {
+                SetLoadingPage?.Invoke(this, null);
+
+                // When pricelists or calculating inside MediaPlans are changed 
+                await CalculateMPValues(_campaign.cmpid, _maxVersion);
+
+                await LoadData(_maxVersion);
+
+                SetContentPage?.Invoke(this, null);
+
+            }
+        }
+
+        #endregion
+        
 
         private async Task SetMPToInactive(int xmpid)
         {

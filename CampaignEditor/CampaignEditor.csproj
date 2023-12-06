@@ -14,9 +14,14 @@
     <None Remove="images\EditIcon.png" />
     <None Remove="images\Edit_Icon.png" />
     <None Remove="images\Edit_Icon2.png" />
+    <None Remove="images\fetch_data_icon.png" />
     <None Remove="images\GreenPlus.png" />
     <None Remove="images\Green_+.jpg" />
     <None Remove="images\LeftArrow.png" />
+    <None Remove="images\load_data_icon.png" />
+    <None Remove="images\recalculate_data_icon.jpg" />
+    <None Remove="images\recalculate_data_icon.png" />
+    <None Remove="images\recalculate_icon.png" />
     <None Remove="images\Red_X.png" />
     <None Remove="images\Refresh_icon.png" />
     <None Remove="images\refresh_icon2.png" />
@@ -53,8 +58,11 @@
     <Resource Include="images\ChangePassIcon.png" />
     <Resource Include="images\config_icon.png" />
     <Resource Include="images\Edit_Icon2.png" />
+    <Resource Include="images\fetch_data_icon.png" />
     <Resource Include="images\GreenPlus.png" />
     <Resource Include="images\LeftArrow.png" />
+    <Resource Include="images\recalculate_data_icon.jpg" />
+    <Resource Include="images\recalculate_data_icon.png" />
     <Resource Include="images\Red_X.png" />
     <Resource Include="images\refresh_icon2.png" />
     <Resource Include="images\refresh_icon3.png" />

@@ -64,23 +64,29 @@
                         <ColumnDefinition Width="auto"/>
                         <ColumnDefinition Width="auto"/>
                         <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition Width="auto"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
-                    <Label Grid.Column="0" Content="Version: " HorizontalAlignment="Left"/>
-                    <ComboBox Grid.Column="1" x:Name="cbVersions" HorizontalAlignment="Left"
+                    <Label Grid.Column="0" Content="Version: " HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                    <ComboBox Grid.Column="1" x:Name="cbVersions" HorizontalAlignment="Left" VerticalAlignment="Center"
                              SelectionChanged="CbVersions_SelectionChanged"/>
                     <Button x:Name="btnNewVersion" Grid.Column="2" HorizontalAlignment="Left"
-                            Click="btnNewVersion_Click" Margin="15, 0, 0 ,0" BorderThickness="0" Background="White">
+                            Click="btnNewVersion_Click" Margin="10, 0, 0 ,0" BorderThickness="0" Background="White">
                         <Image Source="\images\GreenPlus.png" Width="20" Height="20"></Image>
                     </Button>
                     <Button x:Name="btnClear" Grid.Column="3" HorizontalAlignment="Left"
-                            Click="btnClear_Click"  Margin="15, 0, 0 ,0" BorderThickness="0" Background="White">
+                            Click="btnClear_Click"  Margin="10, 0, 0 ,0" BorderThickness="0" Background="White">
                         <Image Source="\images\Red_X.png" Width="20" Height="20"></Image>
                     </Button>
-                    <Button x:Name="btnRefresh" Grid.Column="   4" HorizontalAlignment="Left"
-                            Click="btnRefresh_Click" Margin="15, 0, 0, 0" BorderThickness="0" Background="White">
-                        <Image Source="\images\refresh_icon3.png" Width="20" Height="20"></Image>
+                    <Button x:Name="btnRecalculateData" Grid.Column="4" HorizontalAlignment="Left"
+                            Click="btnRecalculateData_Click"  BorderThickness="0" Background="White">
+                        <Image Source="\images\recalculate_data_icon.png" Width="30" Height="30"></Image>
                     </Button>
+                    <Button x:Name="btnFetchData" Grid.Column="5" HorizontalAlignment="Left"
+                            Click="btnFetchData_Click"  Margin="5, 0, 0, 0" BorderThickness="0" Background="White">
+                        <Image Source="\images\fetch_data_icon.png" Width="30" Height="30"></Image>
+                    </Button>
+
                 </Grid>
             </Border>
             
