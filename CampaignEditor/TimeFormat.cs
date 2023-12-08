@@ -171,18 +171,23 @@ namespace CampaignEditor
             }
             else if (timeString.Length == 4)
             {
-                int mins;
+                int mins, hours;
                 if (timeString.Any(c => !Char.IsDigit(c)))
                 {
                     throw new ArgumentException("Invalid timeString format");
                 }
 
-                if (Int32.TryParse(timeString.Substring(2, 2), out mins))
+                if (Int32.TryParse(timeString.Substring(2, 2), out mins) && 
+                    Int32.TryParse(timeString.Substring(0, 2), out hours))
                 {
                     if (mins > 59)
                     {
                         throw new ArgumentException("Invalid timeString format");
                     }
+                }
+                else
+                {
+                    throw new ArgumentException("Invalid timeString format");
                 }
 
                 return timeString.Substring(0,2) + ":" + timeString.Substring(2,2);
@@ -198,6 +203,10 @@ namespace CampaignEditor
                         throw new ArgumentException("Invalid timeString format");
                     }
                     return timeString.Substring(0, 2) + ":" + timeString.Substring(3, 2);
+                }
+                else
+                {
+                    throw new ArgumentException("Invalid timeString format");
                 }
             }
             else

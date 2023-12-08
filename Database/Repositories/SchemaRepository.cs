@@ -92,7 +92,7 @@ namespace Database.Repositories
                     etime = item.vremedo,
                     blocktime = item.vremerbl,
                     days = item.dani,
-                    type = item.tiopologija,
+                    type = item.tipologija,
                     special = item.specijal,
                     sdate = DateOnly.FromDateTime(item.datumod),
                     edate = item.datumdo == null ? null : DateOnly.FromDateTime(item.datumdo),

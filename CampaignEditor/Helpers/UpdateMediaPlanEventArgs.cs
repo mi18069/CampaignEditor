@@ -5,11 +5,11 @@ namespace CampaignEditor.Helpers
 {
     public class UpdateMediaPlanEventArgs : EventArgs
     {
-        public MediaPlanTuple MediaPlanTuple { get; }
+        public MediaPlan MediaPlan { get; }
 
-        public UpdateMediaPlanEventArgs(MediaPlanTuple mediaPlanTuple)
+        public UpdateMediaPlanEventArgs(MediaPlan mediaPlan)
         {
-            MediaPlanTuple = mediaPlanTuple;
+            MediaPlan = mediaPlan;
         }
     }
 }

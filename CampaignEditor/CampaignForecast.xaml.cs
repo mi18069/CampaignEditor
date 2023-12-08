@@ -270,10 +270,15 @@ namespace CampaignEditor.UserControls
             dgMediaPlans._schemaController = _schemaController;
             dgMediaPlans._mediaPlanController = _mediaPlanController;
             dgMediaPlans._mediaPlanTermController = _mediaPlanTermController;
+            dgMediaPlans._databaseFunctionsController = _databaseFunctionsController;
+            dgMediaPlans._mpConverter = _mpConverter;
             dgMediaPlans._spotController = _spotController;
             dgMediaPlans.AddMediaPlanClicked += dgMediaPlans_AddMediaPlanClicked;
             dgMediaPlans.DeleteMediaPlanClicked += dgMediaPlans_DeleteMediaPlanClicked;
+            // to open Update dialog
             dgMediaPlans.UpdateMediaPlanClicked += dgMediaPlans_UpdateMediaPlanClicked;
+            // when mediaPlan is changed
+            dgMediaPlans.UpdatedMediaPlan += dgMediaPlans_UpdatedMediaPlan;
         }
 
         private void SubscribeSGGridControllers()
@@ -497,7 +502,7 @@ namespace CampaignEditor.UserControls
 
         private async Task InitializeDataGrid()
         {
-            dgMediaPlans.CanUserEdit = new ObservableBool(canUserEdit && isEditableVersion);
+            dgMediaPlans.CanUserEdit = canUserEdit && isEditableVersion;
             dgMediaPlans._selectedChannels = _selectedChannels;
             dgMediaPlans._allMediaPlans = _allMediaPlans;
             dgMediaPlans._filteredDays = filteredDays;
@@ -1194,7 +1199,7 @@ namespace CampaignEditor.UserControls
             }
         }
 
-        private async void dgMediaPlans_UpdateMediaPlanClicked(object? sender, UpdateMediaPlanEventArgs e)
+        private async void dgMediaPlans_UpdateMediaPlanClicked(object? sender, UpdateMediaPlanTupleEventArgs e)
         {
             MediaPlanTuple mediaPlanTuple = e.MediaPlanTuple;
             MediaPlan mediaPlan = mediaPlanTuple.MediaPlan;
@@ -1208,24 +1213,7 @@ namespace CampaignEditor.UserControls
             {
                 try
                 {
-                    MediaPlanDTO mediaPlanDTO = _mpConverter.ConvertToDTO(mediaPlan);
-
-                    await _mediaPlanTermController.DeleteMediaPlanTermByXmpId(mediaPlanDTO.xmpid);
-                    mediaPlanTuple.Terms.Clear();
-                    await _databaseFunctionsController.StartAMRCalculation(_campaign.cmpid, 40, 40, mediaPlanDTO.xmpid);
-                    var mediaPlanTerms = await MediaPlanToMPTerm(mediaPlanDTO);
-                    foreach(var mpTerm in mediaPlanTerms)
-                    {
-                        mediaPlanTuple.Terms.Add(mpTerm);
-                    }
-                    var mpTupleNew = new MediaPlanTuple(mediaPlan, new ObservableCollection<MediaPlanTerm>(mediaPlanTerms));
-
-                    await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(mediaPlanDTO));
-                    mediaPlan = await _mpConverter.ConvertFirstFromDTO(mediaPlanDTO);
-                    mediaPlanTuple.MediaPlan = mediaPlan;
-
-                    _allMediaPlans.Remove(mediaPlanTuple);
-                    _allMediaPlans.Add(mpTupleNew);
+                    await UpdateMediaPlanTuple(mediaPlanTuple, true, true);
                 }
                 catch
                 {
@@ -1234,6 +1222,67 @@ namespace CampaignEditor.UserControls
 
             }
         }
+
+        private async void dgMediaPlans_UpdatedMediaPlan(object? sender, UpdateMediaPlanEventArgs e)
+        {
+            MediaPlan mediaPlan = e.MediaPlan;
+            
+            await UpdatedMediaPlan(mediaPlan, true);
+        }
+        private async Task UpdatedMediaPlan(MediaPlan mediaPlan, bool updateSchema = false)
+        {
+            if (updateSchema)
+            {
+                var schema = await _schemaController.GetSchemaById(mediaPlan.schid);
+                schema.stime = mediaPlan.stime;
+                schema.etime = mediaPlan.etime;
+                schema.blocktime = mediaPlan.blocktime;
+                await _schemaController.UpdateSchema(new UpdateSchemaDTO(schema));
+            }
+
+            await _databaseFunctionsController.StartAMRCalculation(mediaPlan.cmpid, 40, 40, mediaPlan.xmpid);
+            var mediaPlanToUpdateDTO = _mpConverter.ConvertToDTO(mediaPlan);
+            mediaPlan = await _mpConverter.ConvertFirstFromDTO(mediaPlanToUpdateDTO);
+            await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(_mpConverter.ConvertToDTO(mediaPlan)));
+        }
+
+        private async Task UpdateMediaPlanTuple(MediaPlanTuple mediaPlanTuple, bool updateSchema = false, bool initNewTerms = false)
+        {
+            MediaPlan mediaPlan = mediaPlanTuple.MediaPlan;
+            MediaPlanDTO mediaPlanDTO = _mpConverter.ConvertToDTO(mediaPlan);
+            var mediaPlanTerms = mediaPlanTuple.Terms;
+
+            if (initNewTerms)
+            {
+                await _mediaPlanTermController.DeleteMediaPlanTermByXmpId(mediaPlanDTO.xmpid);
+                mediaPlanTuple.Terms.Clear();
+                var newMediaPlanTerms = await MediaPlanToMPTerm(mediaPlanDTO);
+                foreach (var mpTerm in newMediaPlanTerms)
+                {
+                    mediaPlanTuple.Terms.Add(mpTerm);
+                }
+            }
+
+            if (updateSchema)
+            {
+                var schema = await _schemaController.GetSchemaById(mediaPlan.schid);
+                schema.stime = mediaPlan.stime;
+                schema.etime = mediaPlan.etime;
+                schema.blocktime = mediaPlan.blocktime;
+                await _schemaController.UpdateSchema(new UpdateSchemaDTO(schema));
+            }
+
+            await _databaseFunctionsController.StartAMRCalculation(_campaign.cmpid, 40, 40, mediaPlanDTO.xmpid);
+
+            var mpTupleNew = new MediaPlanTuple(mediaPlan, new ObservableCollection<MediaPlanTerm>(mediaPlanTerms));
+            await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(mediaPlanDTO));
+            var newMediaPlan = await _mpConverter.ConvertFirstFromDTO(mediaPlanDTO);
+            mediaPlanTuple.MediaPlan = newMediaPlan;
+
+            _allMediaPlans.Remove(mediaPlanTuple);
+            _allMediaPlans.Add(mpTupleNew);
+        }      
+
 
         private async void dgMediaPlans_AddMediaPlanClicked(object? sender, EventArgs e)
         {
@@ -1281,6 +1330,7 @@ namespace CampaignEditor.UserControls
                 _allMediaPlans.Remove(mediaPlanTuple);
                 var mediaPlan = mediaPlanTuple.MediaPlan;
                 await DeleteMPById(mediaPlan.xmpid);
+
             }
         }
 

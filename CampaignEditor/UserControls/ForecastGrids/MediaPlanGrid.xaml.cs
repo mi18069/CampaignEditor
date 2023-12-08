@@ -24,8 +24,6 @@ using CampaignEditor.Converters;
 using OfficeOpenXml.Style;
 using Border = System.Windows.Controls.Border;
 using CampaignEditor.Helpers;
-using System.Collections;
-using System.Diagnostics;
 
 namespace CampaignEditor.UserControls
 {
@@ -39,8 +37,12 @@ namespace CampaignEditor.UserControls
         public SchemaController _schemaController { get; set; }
         public MediaPlanController _mediaPlanController { get; set; }
         public MediaPlanTermController _mediaPlanTermController { get; set; }
+        public MediaPlanConverter _mpConverter { get; set; }
         public SpotController _spotController { get; set; }
+        public DatabaseFunctionsController _databaseFunctionsController { get; set; }
         public Dictionary<int, string> chidChannelDictionary { get; set; }
+
+        private ObservableCollection<TotalItem> totals = new ObservableCollection<TotalItem>();
 
         // for checking if certain character can be written in spot cells
         HashSet<char> spotCodes = new HashSet<char>();
@@ -49,6 +51,9 @@ namespace CampaignEditor.UserControls
 
         // number of frozen columns
         int mediaPlanColumns = 29;
+
+        double dataColumnWidth = 51;
+
 
         // for saving old values of MediaPlan when I want to change it
         private MediaPlan _mediaPlanOldValues;
@@ -86,7 +91,16 @@ namespace CampaignEditor.UserControls
         DateTime startDate;
         DateTime endDate;
 
-        public ObservableBool CanUserEdit { get; set; }
+        private bool _canUserEdit = false;
+        public bool CanUserEdit 
+        {
+            get { return _canUserEdit; } 
+            set 
+            {
+                _canUserEdit = value;
+                dgMediaPlans.IsManipulationEnabled = CanUserEdit;
+            }
+        }
         public DataGrid Grid
         {
             get { return dgMediaPlans; }
@@ -95,16 +109,16 @@ namespace CampaignEditor.UserControls
         public MediaPlanGrid()
         {
 
-            CanUserEdit = new ObservableBool(true);
+            _canUserEdit = false;
 
             if (MainWindow.user.usrlevel == 2)
             {
-                CanUserEdit.Value = false;
+                _canUserEdit = false;
             }
 
             InitializeComponent();
 
-            dgMediaPlans.IsManipulationEnabled = CanUserEdit.Value;
+            dgMediaPlans.IsManipulationEnabled = _canUserEdit;
 
             // For combobox in Position column
             var positionColumn = dgMediaPlans.Columns.FirstOrDefault(c => c.Header.ToString() == "Position") as DataGridComboBoxColumn;
@@ -169,6 +183,122 @@ namespace CampaignEditor.UserControls
             _allMediaPlans.CollectionChanged += OnCollectionChanged;
             _selectedChannels.CollectionChanged += OnCollectionChanged;
 
+            InitializeTotalGrid();
+
+
+        }
+
+        private IEnumerable<DateTime> GetCampaignDates(CampaignDTO campaign)
+        {
+            DateTime startDate = TimeFormat.YMDStringToDateTime(campaign.cmpsdate);
+            DateTime endDate = TimeFormat.YMDStringToDateTime(campaign.cmpedate);
+
+            // Get a list of all dates between start and end date, inclusive
+            var dates = Enumerable.Range(0, 1 + endDate.Subtract(startDate).Days)
+            .Select(offset => startDate.AddDays(offset));
+
+            return dates;
+        }
+
+        private void InitializeTotalGrid()
+        {
+            TimeSpan duration = endDate - startDate;
+            int numberOfDays = duration.Days + 1 ;
+
+            totals.Clear();
+
+            for (int i=0; i<numberOfDays; i++)
+            {
+                var ti = new TotalItem();
+                ti.Total = 0;
+                totals.Add(ti);              
+            }
+
+            icTotals.ItemsSource = totals;
+
+            RefreshTotalGridValues();
+        }
+
+        private void SetTotalsWidth()
+        {
+            double width = 0;
+
+            TimeSpan duration = endDate - startDate;
+            int numberOfDays = duration.Days + 1;
+            int numOfColumns = dgMediaPlans.Columns.Count() - numberOfDays;
+            for (int i=0; i< frozenColumnsNum; i++)
+            {
+                var column = dgMediaPlans.Columns[i] as DataGridColumn;
+
+                if (column.Visibility == Visibility.Visible)
+                {
+                    width += column.ActualWidth;
+                }
+              
+            }
+
+            lblTotal.Width = width;
+
+            double svWidth = dgMediaPlans.ActualWidth - lblTotal.Width;
+            svTotals.Width = svWidth < 0 ? 0 : svWidth;
+        }
+
+        private void dgMediaPlans_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            Dispatcher.BeginInvoke(new Action(() => SetTotalsWidth()), DispatcherPriority.ContextIdle);                  
+        }
+
+        private void RefreshTotalGridValues()
+        {
+            if (dgMediaPlans.Items.Count == 0)
+            {
+                bTotal.Visibility = Visibility.Hidden;
+            }
+            else
+            {
+                bTotal.Visibility = Visibility.Visible;
+                SetTotalsWidth();
+            }
+
+            TimeSpan duration = endDate - startDate;
+            int numberOfDays = duration.Days;
+
+            for (int dateIndex = 0; dateIndex < numberOfDays; dateIndex++)
+            {
+                var count = CountInsByDateIndex(dateIndex);
+                totals[dateIndex].Total = count;
+            }
+        }
+
+        private void RefreshTotalGridValues(int dateIndex)
+        {
+            var count = CountInsByDateIndex(dateIndex);
+            totals[dateIndex].Total = count;
+        }
+
+        private int CountInsByDateIndex(int dateIndex)
+        {
+            int count = 0;
+     
+            foreach (MediaPlanTuple mpTuple in dgMediaPlans.Items)
+            {
+                try
+                {
+                    if (mpTuple.Terms.Count > dateIndex && 
+                        mpTuple.Terms[dateIndex] != null &&                      
+                        mpTuple.Terms[dateIndex].Spotcode != null)
+                    {
+                        count += mpTuple.Terms[dateIndex].Spotcode.Trim().Count();
+
+                    }
+                }
+                catch
+                {
+
+                }
+            }
+
+            return count;
         }
 
         public async Task InitializeSpots(int cmpid)
@@ -197,6 +327,8 @@ namespace CampaignEditor.UserControls
         private void OnCollectionChanged(object sender, NotifyCollectionChangedEventArgs e)
         {
             myDataView.Refresh();
+            // Use Dispatcher to run RefreshTotalGridValues after layout update
+            Dispatcher.BeginInvoke(new Action(() => RefreshTotalGridValues()), DispatcherPriority.ContextIdle);
         }
 
         public event EventHandler<SelectionChangedEventArgs> SelectionChanged;
@@ -213,13 +345,7 @@ namespace CampaignEditor.UserControls
         #region Date Columns
         private void InitializeDateColumns()
         {
-            DateTime startDate = TimeFormat.YMDStringToDateTime(_campaign.cmpsdate);
-            DateTime endDate = TimeFormat.YMDStringToDateTime(_campaign.cmpedate);
-
-            // Get a list of all dates between start and end date, inclusive
-            List<DateTime> dates = Enumerable.Range(0, 1 + endDate.Subtract(startDate).Days)
-            .Select(offset => startDate.AddDays(offset))
-                                  .ToList();
+            var dates = GetCampaignDates(_campaign).ToList();
 
             // Create a column for each date
             foreach (DateTime date in dates)
@@ -245,6 +371,7 @@ namespace CampaignEditor.UserControls
                 var binding = new Binding($"Terms[{dates.IndexOf(date)}].Spotcode");
                 //binding.ValidationRules.Add(new CharLengthValidationRule(1)); // add validation rule to restrict input to a single character
                 column.Binding = binding;
+                column.Width = dataColumnWidth;
 
                 var cellStyle = new Style(typeof(DataGridCell));
 
@@ -340,7 +467,7 @@ namespace CampaignEditor.UserControls
 
         private async void OnCellPreviewTextInput(object sender, TextCompositionEventArgs e)
         {
-            if (!CanUserEdit.Value) 
+            if (!_canUserEdit) 
                 return;
 
             DataGridCell cell = sender as DataGridCell;
@@ -352,6 +479,8 @@ namespace CampaignEditor.UserControls
             {
                 return;
             }
+
+            int numberOfDays = mpTerm.Date.DayNumber - DateOnly.FromDateTime(startDate).DayNumber;
 
             char? spotcodeNull = e.Text.Trim()[0];
             if (spotcodeNull.HasValue)
@@ -365,18 +494,23 @@ namespace CampaignEditor.UserControls
                         (textBlock != null && textBlock.Text.Trim().Length == 2))
                     {
                         cell.Content = spotcode;
+                        totals[numberOfDays].Total -= 1;
                     }
                     else if (textBlock != null)
                     {
                         cell.Content = textBlock.Text.Trim() + spotcode.ToString();
+                        totals[numberOfDays].Total += 1;
+
                     }
                     else if (textBlock == null)
                     {
                         cell.Content += spotcode.ToString();
+                        totals[numberOfDays].Total += 1;
                     }
 
                     await _mediaPlanTermController.UpdateMediaPlanTerm(
                     new UpdateMediaPlanTermDTO(mpTerm.Xmptermid, mpTerm.Xmpid, mpTerm.Date, cell.Content.ToString()));
+
 
                     var mediaPlanTuple = dgMediaPlans.SelectedItem as MediaPlanTuple;
                     if (mediaPlanTuple != null)
@@ -402,14 +536,17 @@ namespace CampaignEditor.UserControls
                             (textBlock != null && textBlock.Text.Trim().Length == 2))
                         {
                             cell.Content = spCode;
+                            totals[numberOfDays].Total -= 1;
                         }
                         else if (textBlock != null)
                         {
                             cell.Content = textBlock.Text.Trim() + spCode.ToString();
+                            totals[numberOfDays].Total += 1;
                         }
                         else if (textBlock == null)
                         {
                             cell.Content += spCode.ToString();
+                            totals[numberOfDays].Total += 1;
                         }
 
                         await _mediaPlanTermController.UpdateMediaPlanTerm(
@@ -469,7 +606,7 @@ namespace CampaignEditor.UserControls
             }
             DateTime currentDate = DateTime.Now;
 
-            if (!CanUserEdit.Value || mpTerm == null || mpTerm.Date <= DateOnly.FromDateTime(currentDate))
+            if (!_canUserEdit || mpTerm == null || mpTerm.Date <= DateOnly.FromDateTime(currentDate))
             {
                 e.Handled = true;
                 return;
@@ -509,6 +646,10 @@ namespace CampaignEditor.UserControls
 
                     mpTerm.Spotcode = null;
                     cell.Content = "";
+
+                    int numberOfDays = mpTerm.Date.DayNumber - DateOnly.FromDateTime(startDate).DayNumber;
+                    if (totals[numberOfDays].Total > 0) 
+                        totals[numberOfDays].Total -= 1;
                 }
                 else if (spotcode.Length == 2)
                 {
@@ -516,6 +657,10 @@ namespace CampaignEditor.UserControls
                     new UpdateMediaPlanTermDTO(mpTerm.Xmptermid, mpTerm.Xmpid, mpTerm.Date, spotcode[0].ToString().Trim()));
                     mpTerm.Spotcode = spotcode[0].ToString();
                     cell.Content = spotcode[0];
+
+                    int numberOfDays = mpTerm.Date.DayNumber - DateOnly.FromDateTime(startDate).DayNumber;
+                    totals[numberOfDays].Total -= 1;
+
                 }
 
                 var mediaPlanTuple = dgMediaPlans.SelectedItem as MediaPlanTuple;
@@ -528,6 +673,15 @@ namespace CampaignEditor.UserControls
 
             }
 
+        }
+
+        private void dgMediaPlans_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            if (!_canUserEdit)
+            {
+                e.Handled = true;
+                return;
+            }
         }
 
         public static T GetVisualChild<T>(Visual parent) where T : Visual
@@ -645,7 +799,17 @@ namespace CampaignEditor.UserControls
                             _mediaPlanToUpdate.Stime = TimeFormat.ReturnGoodTimeFormat(_mediaPlanToUpdate.Stime.Trim());
                             _mediaPlanToUpdate.Etime = TimeFormat.ReturnGoodTimeFormat(_mediaPlanToUpdate.Etime.Trim());
                             if (_mediaPlanToUpdate.Blocktime != null)
-                                _mediaPlanToUpdate.Blocktime = TimeFormat.ReturnGoodTimeFormat(_mediaPlanToUpdate.Blocktime.Trim());
+                            {
+                                if (_mediaPlanToUpdate.Blocktime != _mediaPlanOldValues.Blocktime)
+                                {
+                                    var timeFormat = TimeFormat.ReturnGoodTimeFormat(_mediaPlanToUpdate.Blocktime.Trim());
+                                    _mediaPlanToUpdate.Blocktime = timeFormat == "" ? null : timeFormat;
+                                    await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(_mpConverter.ConvertToDTO(_mediaPlanToUpdate)));
+                                    
+                                    OnUpdatedMediaPlan(_mediaPlanToUpdate);
+                                }
+
+                            }
                         }
                         catch
                         {
@@ -863,11 +1027,18 @@ namespace CampaignEditor.UserControls
             AddMediaPlanClicked?.Invoke(this, EventArgs.Empty);
         }
 
-        public event EventHandler<UpdateMediaPlanEventArgs> UpdateMediaPlanClicked;
+        public event EventHandler<UpdateMediaPlanTupleEventArgs> UpdateMediaPlanClicked;
 
         private void OnUpdateMediaPlanClicked(MediaPlanTuple mediaPlanTuple)
         {
-            UpdateMediaPlanClicked?.Invoke(this, new UpdateMediaPlanEventArgs(mediaPlanTuple));
+            UpdateMediaPlanClicked?.Invoke(this, new UpdateMediaPlanTupleEventArgs(mediaPlanTuple));
+        }
+
+        public event EventHandler<UpdateMediaPlanEventArgs> UpdatedMediaPlan;
+
+        private void OnUpdatedMediaPlan(MediaPlan mediaPlan)
+        {
+            UpdatedMediaPlan?.Invoke(this, new UpdateMediaPlanEventArgs(mediaPlan));
         }
 
         public event EventHandler DeleteMediaPlanClicked;
@@ -1002,6 +1173,24 @@ namespace CampaignEditor.UserControls
 
                     }
                 }
+
+                // Add totals row
+                var totalsRow = dataGrid.Items.Count + 1;
+                int visibleMpColumns = 0;
+                for (int i=0; i<frozenColumnsNum; i++)
+                {
+                    var column = dgMediaPlans.Columns[i];
+                    if (column.Visibility == Visibility.Visible)
+                        visibleMpColumns += 1;
+                }
+
+                for (int i = 0; i<totals.Count; i++)
+                {
+                    var columnIndex = visibleMpColumns + i;
+                    worksheet.Cells[1 + rowOff + totalsRow, columnIndex + 1 + colOff].Value = totals[i].Total.ToString();
+                    worksheet.Cells[1 + rowOff + totalsRow, columnIndex + 1 + colOff].Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                    worksheet.Cells[1 + rowOff + totalsRow, columnIndex + 1 + colOff].Style.Fill.BackgroundColor.SetColor(System.Drawing.ColorTranslator.FromHtml("#DAA520"));
+                }
             }));
 
             // Disable row virtualization
@@ -1050,6 +1239,58 @@ namespace CampaignEditor.UserControls
                 collectionView.Refresh();
             }
         }
-       
+
+        #region Synchronize scrolling between total and dgMediaPlan
+
+        private void dgMediaPlans_Loaded(object sender, RoutedEventArgs e)
+        {
+            DataGrid dataGrid = (DataGrid)sender;
+
+            // Find the ScrollViewer inside the DataGrid's template
+            ScrollViewer scrollViewer = FindVisualChild<ScrollViewer>(dataGrid);
+
+            // Subscribe to the ScrollChanged event
+            if (scrollViewer != null)
+            {
+                scrollViewer.ScrollChanged += ScrollViewer_ScrollChanged;
+            }
+
+            SetTotalsWidth();
+        }
+
+        private static T FindVisualChild<T>(DependencyObject parent) where T : DependencyObject
+        {
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
+            {
+                DependencyObject child = VisualTreeHelper.GetChild(parent, i);
+
+                if (child is T result)
+                {
+                    return result;
+                }
+
+                T childOfChild = FindVisualChild<T>(child);
+
+                if (childOfChild != null)
+                {
+                    return childOfChild;
+                }
+            }
+
+            return null;
+        }
+
+        private void ScrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
+        {
+            var scrollViewer = sender as ScrollViewer;
+            var secondScrollViewer = svTotals;
+
+            if (scrollViewer != null && secondScrollViewer != null)
+            {
+                secondScrollViewer.ScrollToHorizontalOffset(e.HorizontalOffset);
+            }
+        }
+
+        #endregion
     }
 }

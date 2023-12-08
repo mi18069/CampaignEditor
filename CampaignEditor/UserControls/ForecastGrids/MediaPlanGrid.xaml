@@ -13,7 +13,11 @@
         </Style>
     </UserControl.Resources>
     <Grid>
-        <DataGrid x:Name="dgMediaPlans" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+        <DataGrid x:Name="dgMediaPlans" Grid.Row="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                     VerticalScrollBarVisibility="Visible"
                     FontSize="13" AlternatingRowBackground="LightGoldenrodYellow"
                     HeadersVisibility="Column"
@@ -31,7 +35,10 @@
                   PreparingCellForEdit="dgMediaPlans_PreparingCellForEdit"
                   CellEditEnding="dgMediaPlans_CellEditEnding"
                   CurrentCellChanged="dgMediaPlans_CurrentCellChanged"
-                  Sorting="dgMediaPlans_Sorting">
+                  Sorting="dgMediaPlans_Sorting"
+                  PreviewKeyDown="dgMediaPlans_PreviewKeyDown"
+                  SizeChanged="dgMediaPlans_SizeChanged"
+                  Loaded="dgMediaPlans_Loaded">
             <DataGrid.CellStyle>
                 <Style TargetType="DataGridCell">
                     <Style.Triggers>
@@ -131,5 +138,37 @@
                 <DataGridTextColumn Header="Cost" Binding="{Binding MediaPlan.Price, StringFormat=N2}"/>
             </DataGrid.Columns>
         </DataGrid>
+        <Border Grid.Row="1" BorderThickness="2" BorderBrush="Black" x:Name="bTotal">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Label x:Name="lblTotal" Grid.Column="0" HorizontalContentAlignment="Right"
+                       Content="TOTAL:" FontWeight="Bold" />
+                <ScrollViewer x:Name="svTotals" Grid.Column="1" CanContentScroll="True" HorizontalAlignment="Left"
+                      VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Hidden">
+                    <ItemsControl x:Name="icTotals" HorizontalContentAlignment="Stretch">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <DockPanel />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border BorderThickness="1" BorderBrush="Black" Width="51">
+                                    <TextBlock x:Name="tbTotal" Text="{Binding Total}"
+                                               FontWeight="Bold" FontSize="12" HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"/>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+            </Grid>
+        </Border> 
+
+        
+        
     </Grid>
 </UserControl>
