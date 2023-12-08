@@ -489,12 +489,14 @@ namespace CampaignEditor.UserControls
                 lastSpotCell = spotcode.ToString();
                 if (spotCodes.Contains(spotcode))
                 {
-                    // if cell already have 2 spots, delete them and write only one, else add spotcode
-                    if (cell.Content.ToString().Length == 2 ||
-                        (textBlock != null && textBlock.Text.Trim().Length == 2))
+                    // if cell already have 3 spots, return
+                    if (cell.Content.ToString().Length == 3 ||
+                        (textBlock != null && textBlock.Text.Trim().Length == 3))
                     {
-                        cell.Content = spotcode;
-                        totals[numberOfDays].Total -= 1;
+                        return;
+
+                        /*cell.Content = spotcode;
+                        totals[numberOfDays].Total -= 2;*/
                     }
                     else if (textBlock != null)
                     {
@@ -531,12 +533,14 @@ namespace CampaignEditor.UserControls
                     if (scNum > 0 && scNum <= spotCodes.Count())
                     {
                         char spCode = (char)('A' + scNum - 1);
-                        // if cell already have 2 spots, delete them and write only one, else add spotcode
+                        // if cell already have 3 spots, return
                         if (cell.Content.ToString().Length == 2 ||
                             (textBlock != null && textBlock.Text.Trim().Length == 2))
                         {
-                            cell.Content = spCode;
-                            totals[numberOfDays].Total -= 1;
+                            return;
+
+                            /*cell.Content = spCode;
+                            totals[numberOfDays].Total -= 1;*/
                         }
                         else if (textBlock != null)
                         {
@@ -639,7 +643,11 @@ namespace CampaignEditor.UserControls
                 string? spotcode = mpTerm.Spotcode;
                 if (spotcode != null)
                     spotcode = spotcode.Trim();
-                if (spotcode == null || spotcode.Length == 1)
+                if (spotcode == null)
+                {
+                    return;
+                }
+                else if (spotcode.Length == 1)
                 {
                     await _mediaPlanTermController.UpdateMediaPlanTerm(
                     new UpdateMediaPlanTermDTO(mpTerm.Xmptermid, mpTerm.Xmpid, mpTerm.Date, null));
@@ -648,15 +656,15 @@ namespace CampaignEditor.UserControls
                     cell.Content = "";
 
                     int numberOfDays = mpTerm.Date.DayNumber - DateOnly.FromDateTime(startDate).DayNumber;
-                    if (totals[numberOfDays].Total > 0) 
-                        totals[numberOfDays].Total -= 1;
+                    totals[numberOfDays].Total -= 1;
                 }
-                else if (spotcode.Length == 2)
+                else
                 {
+                    var newSpotcode = spotcode.Substring(0, spotcode.Length - 1);
                     await _mediaPlanTermController.UpdateMediaPlanTerm(
-                    new UpdateMediaPlanTermDTO(mpTerm.Xmptermid, mpTerm.Xmpid, mpTerm.Date, spotcode[0].ToString().Trim()));
-                    mpTerm.Spotcode = spotcode[0].ToString();
-                    cell.Content = spotcode[0];
+                    new UpdateMediaPlanTermDTO(mpTerm.Xmptermid, mpTerm.Xmpid, mpTerm.Date, newSpotcode));
+                    mpTerm.Spotcode = newSpotcode;
+                    cell.Content = newSpotcode;
 
                     int numberOfDays = mpTerm.Date.DayNumber - DateOnly.FromDateTime(startDate).DayNumber;
                     totals[numberOfDays].Total -= 1;
