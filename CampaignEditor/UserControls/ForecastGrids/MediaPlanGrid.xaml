@@ -55,6 +55,7 @@
                     <Setter Property="FontWeight" Value="SemiBold"/>
                     <Setter Property="BorderThickness" Value="1,1,1,2"/>
                     <Setter Property="BorderBrush" Value="black"/>
+                    <EventSetter Event="SizeChanged" Handler="DataGridColumnHeader_SizeChanged" />
                 </Style>
             </DataGrid.Resources>
             <DataGrid.Columns>
@@ -69,9 +70,7 @@
                         <Style TargetType="ComboBox"/>
                     </DataGridComboBoxColumn.EditingElementStyle>
                 </DataGridComboBoxColumn>
-
-
-
+                
                 <DataGridTextColumn Header="Start time" Binding="{Binding MediaPlan.Stime, Mode=TwoWay}">
                     <DataGridTextColumn.EditingElementStyle>
                         <Style TargetType="{x:Type TextBox}">
@@ -142,7 +141,7 @@
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="auto"/>
-                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="auto"/>
                 </Grid.ColumnDefinitions>
                 <Label x:Name="lblTotal" Grid.Column="0" HorizontalContentAlignment="Right"
                        Content="TOTAL:" FontWeight="Bold" />
@@ -151,7 +150,7 @@
                     <ItemsControl x:Name="icTotals" HorizontalContentAlignment="Stretch">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
-                                <DockPanel />
+                                <DockPanel HorizontalAlignment="Left" LastChildFill="False"/>
                             </ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
                         <ItemsControl.ItemTemplate>

@@ -53,7 +53,7 @@ namespace CampaignEditor
             cmpname = campaignName;
             _campaign = await _campaignController.GetCampaignByName(campaignName);
             _client = await _clientController.GetClientById(_campaign.clid);
-            readOnly = isReadOnly;
+            readOnly = isReadOnly || (TimeFormat.YMDStringToDateTime(_campaign.cmpedate) < DateTime.Now);
             this.Title = "Client: " + _client.clname.Trim() + "  Campaign: " + _campaign.cmpname.Trim();
 
             CampaignEventLinker.AddCampaign(_campaign.cmpid);
@@ -82,7 +82,7 @@ namespace CampaignEditor
 
             var factoryCampaignForecastView = _factoryForecastView.Create();
             factoryCampaignForecastView.tabForecast = tabForecast;
-            await factoryCampaignForecastView.Initialize(_campaign  );
+            await factoryCampaignForecastView.Initialize(_campaign, readOnly);
 
             var factoryCampaignValidation = _factoryValidation.Create();
             await factoryCampaignValidation.Initialize(_campaign);

@@ -248,6 +248,12 @@ namespace CampaignEditor.UserControls
             Dispatcher.BeginInvoke(new Action(() => SetTotalsWidth()), DispatcherPriority.ContextIdle);                  
         }
 
+        private void DataGridColumnHeader_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            Dispatcher.BeginInvoke(new Action(() => SetTotalsWidth()), DispatcherPriority.ContextIdle);
+
+        }
+
         private void RefreshTotalGridValues()
         {
             if (dgMediaPlans.Items.Count == 0)
@@ -863,6 +869,7 @@ namespace CampaignEditor.UserControls
 
             }
 
+            // For setting visibility of columns
             if (IsCellInDataGridHeader(dependencyObject))
             {
                 ContextMenu menu = new ContextMenu();
@@ -877,6 +884,8 @@ namespace CampaignEditor.UserControls
                     {
                         column.Visibility = item.IsChecked ? Visibility.Hidden : Visibility.Visible;
                         item.IsChecked = column.Visibility == Visibility.Visible ? true : false;
+                        Dispatcher.BeginInvoke(new Action(() => SetTotalsWidth()), DispatcherPriority.ContextIdle);
+
                     };
 
                     menu.Items.Add(item);
@@ -1266,6 +1275,7 @@ namespace CampaignEditor.UserControls
             SetTotalsWidth();
         }
 
+
         private static T FindVisualChild<T>(DependencyObject parent) where T : DependencyObject
         {
             for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
@@ -1300,5 +1310,7 @@ namespace CampaignEditor.UserControls
         }
 
         #endregion
+
+ 
     }
 }

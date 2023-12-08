@@ -140,15 +140,6 @@ namespace CampaignEditor.UserControls
 
             InitializeComponent();
 
-            if (MainWindow.user.usrlevel == 2)
-            {
-                canUserEdit = false;
-                btnResetDates.IsEnabled = canUserEdit;
-            }
-            //svsg1.PreviewMouseWheel += ScrollViewer_PreviewMouseWheel;
-            //svsg2.PreviewMouseWheel += ScrollViewer_PreviewMouseWheel;
-            //svsg3.PreviewMouseWheel += ScrollViewer_PreviewMouseWheel;
-
         }
 
         // Event handler to forward the mouse wheel event to the ScrollViewer
@@ -191,9 +182,21 @@ namespace CampaignEditor.UserControls
         #endregion
 
         #region Initialization
-        public async Task Initialize(CampaignDTO campaign)
+        public async Task Initialize(CampaignDTO campaign, bool isReadOnly)
         {
             _campaign = campaign;
+
+            canUserEdit = !isReadOnly;
+
+            if (!canUserEdit)
+            {
+                btnClear.IsEnabled = false;
+                btnNewVersion.IsEnabled = false;
+                btnFetchData.IsEnabled = false;
+                btnRecalculateData.IsEnabled = false;
+                btnResetDates.IsEnabled = false;
+            }
+
             CampaignEventLinker.AddForecast(_campaign.cmpid, this);
 
             await _mpConverter.Initialize(campaign);

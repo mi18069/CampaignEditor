@@ -39,7 +39,7 @@ namespace CampaignEditor
         private OnStartupContoller _onStartupController;
 
         List<DateTime> unavailableDates = new List<DateTime>();
-
+        private bool isReadOnly = true;
         public CampaignForecastView(IMediaPlanRefRepository mediaPlanRefRepository,
             IDatabaseFunctionsRepository databaseFunctionsRepository,
             IMediaPlanVersionRepository mediaPlanVersionRepository,
@@ -58,9 +58,11 @@ namespace CampaignEditor
             InitializeComponent();
         }
 
-        public async Task Initialize(CampaignDTO campaign)
+        public async Task Initialize(CampaignDTO campaign, bool isReadOnly)
         {
             _campaign = campaign;
+            this.isReadOnly = isReadOnly;
+
             await _onStartupController.RunUpdateUnavailableDates();
 
             var exists = (await _mediaPlanRefController.GetMediaPlanRef(_campaign.cmpid) != null);
@@ -76,11 +78,11 @@ namespace CampaignEditor
                 {
                     var mpVerDTO = new MediaPlanVersionDTO(_campaign.cmpid, 1);
                     await _mediaPlanVersionController.CreateMediaPlanVersion(mpVerDTO);
-                    await _forecast.LoadData(1, true);
+                    await _forecast.LoadData(1, isReadOnly);
                 }
                 else
                 {
-                    await _forecast.LoadData(mpVersion.version, true);
+                    await _forecast.LoadData(mpVersion.version, isReadOnly);
                 }
                 tabForecast.Content = _forecast.Content;
             }
@@ -104,13 +106,13 @@ namespace CampaignEditor
             _forecastDates = _factoryForecastDates.Create();
             _forecastDates.CancelButtonClicked += ForecastDates_CancelButtonClicked;
             _forecastDates.InitializeButtonClicked += ForecastDates_InitializeButtonClicked;
-            await _forecastDates.Initialize(_campaign, unavailableDates);
+            await _forecastDates.Initialize(_campaign, unavailableDates, isReadOnly);
         }
 
         private async Task LoadForecast()
         {
             _forecast = _factoryForecast.Create();
-            await _forecast.Initialize(_campaign);
+            await _forecast.Initialize(_campaign, isReadOnly);
             _forecast.InitializeButtonClicked += Forecast_InitializeButtonClicked;
             _forecast.VersionChanged += Forecast_ChangeVersionClicked;
             _forecast.NewVersionClicked += _forecast_NewVersionClicked;

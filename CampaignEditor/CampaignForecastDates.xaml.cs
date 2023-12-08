@@ -28,16 +28,13 @@ namespace CampaignEditor
 
             InitializeComponent();
 
-            if (MainWindow.user.usrid == 2)
-            {
-                canUserEdit = false;
-                Init.IsEnabled = canUserEdit;
-            }
         }
 
-        public async Task Initialize(CampaignDTO campaign, List<DateTime> unavailableDates)
+        public async Task Initialize(CampaignDTO campaign, List<DateTime> unavailableDates, bool isReadOnly)
         {
             this._campaign = campaign;
+            canUserEdit = !isReadOnly;
+
             this.unavailableDates = unavailableDates;
 
             await LoadGridInit();
@@ -45,6 +42,7 @@ namespace CampaignEditor
 
         public async Task LoadGridInit()
         {
+            Init.IsEnabled = canUserEdit;
             lbDateRanges.Items.Clear();
             var dateRanges = await _mediaPlanRefController.GetAllMediaPlanRefsByCmpid(_campaign.cmpid);
 
