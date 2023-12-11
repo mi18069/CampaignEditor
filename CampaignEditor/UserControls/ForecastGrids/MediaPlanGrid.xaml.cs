@@ -939,32 +939,15 @@ namespace CampaignEditor.UserControls
                         MenuItem trimAmr = new MenuItem();
                         trimAmr.Header = "Trim Program Amrs";
                         trimAmr.Click += await TrimAmrs(mediaPlan);
-                        // Check if the clicked cell is in the "AMR" columns
-                        /*if (cell.Column.Header.ToString() == "AMR 1" || cell.Column.Header.ToString() == "AMR% 1")
+
+                        MenuItem recalculateMediaPlan = new MenuItem();
+                        recalculateMediaPlan.Header = "Recalculate program values";
+                        recalculateMediaPlan.Click += async (obj, ea) =>
                         {
-                            trimAmr.Header = "Trim Amr1";
-                            trimAmr.Click += await TrimAmrAsync(mediaPlan, "Trim AMR 1", "amr1trim", mediaPlan.amr1trim);
-                        }
-                        else if (cell.Column.Header.ToString() == "AMR 2" || cell.Column.Header.ToString() == "AMR% 2")
-                        {
-                            trimAmr.Header = "Trim Amr2";
-                            trimAmr.Click += await TrimAmrAsync(mediaPlan, "Trim AMR 2", "amr2trim", mediaPlan.amr2trim);
-                        }
-                        else if (cell.Column.Header.ToString() == "AMR 3" || cell.Column.Header.ToString() == "AMR% 3")
-                        {
-                            trimAmr.Header = "Trim Amr3";
-                            trimAmr.Click += await TrimAmrAsync(mediaPlan, "Trim AMR 3", "amr3trim", mediaPlan.amr3trim);
-                        }
-                        else if (cell.Column.Header.ToString() == "AMR Sale" || cell.Column.Header.ToString() == "AMR% Sale")
-                        {
-                            trimAmr.Header = "Trim Amr Sale";
-                            trimAmr.Click += await TrimAmrAsync(mediaPlan, "Trim AMR Sale", "amrsaletrim", mediaPlan.amrsaletrim);
-                        }
-                        else
-                        {
-                            trimAmr.Header = "Trim All Amrs";
-                            trimAmr.Click += await TrimAmrAsync(mediaPlan, "Trim AMRs", "amrtrimall", null);
-                        }*/
+                            OnRecalculateMediaPlan();
+                        };
+                        menu.Items.Add(recalculateMediaPlan);
+
                         menu.Items.Add(trimAmr);
                     }
                     
@@ -1063,6 +1046,13 @@ namespace CampaignEditor.UserControls
         private void OnDeleteMediaPlanClicked()
         {
             DeleteMediaPlanClicked?.Invoke(this, EventArgs.Empty);
+        }
+
+        public event EventHandler RecalculateMediaPlan;
+
+        private void OnRecalculateMediaPlan()
+        {
+            RecalculateMediaPlan?.Invoke(this, EventArgs.Empty);
         }
 
         public void PopulateWorksheet(ExcelWorksheet worksheet, int rowOff = 0, int colOff = 0)

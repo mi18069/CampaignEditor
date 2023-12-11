@@ -143,7 +143,7 @@ namespace Database.Repositories
             using var connection = _context.GetConnection();
 
             var mediaPlan = await connection.QueryAsync<dynamic>(
-                "SELECT * FROM xmp WHERE id = @Id", new { Id = id });
+                "SELECT * FROM xmp WHERE xmpid = @Id", new { Id = id });
 
             mediaPlan = mediaPlan.Select(item => new MediaPlan()
             {

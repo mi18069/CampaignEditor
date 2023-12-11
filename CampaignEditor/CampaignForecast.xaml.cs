@@ -25,10 +25,13 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
+using System.Threading;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Markup;
 using System.Windows.Media;
 using System.Windows.Threading;
 using static CampaignEditor.Campaign;
@@ -282,6 +285,7 @@ namespace CampaignEditor.UserControls
             dgMediaPlans.UpdateMediaPlanClicked += dgMediaPlans_UpdateMediaPlanClicked;
             // when mediaPlan is changed
             dgMediaPlans.UpdatedMediaPlan += dgMediaPlans_UpdatedMediaPlan;
+            dgMediaPlans.RecalculateMediaPlan += dgMediaPlans_RecalculateMediaPlan;
         }
 
         private void SubscribeSGGridControllers()
@@ -387,7 +391,7 @@ namespace CampaignEditor.UserControls
 
             //await _databaseFunctionsController.StartAMRCalculation(_campaign.cmpid, 40, 40);
 
-            await CalculateMPValues(_campaign.cmpid, version);
+            await CalculateMPValuesForCampaign(_campaign.cmpid, version);
 
             await LoadData(version, true);
 
@@ -686,8 +690,9 @@ namespace CampaignEditor.UserControls
             {
                 SetLoadingPage?.Invoke(this, null);
 
+
                 // When pricelists or calculating inside MediaPlans are changed 
-                await CalculateMPValues(_campaign.cmpid, _maxVersion);
+                await CalculateMPValuesForCampaign(_campaign.cmpid, _maxVersion);
 
                 await LoadData(_maxVersion);
 
@@ -714,17 +719,32 @@ namespace CampaignEditor.UserControls
 
         #endregion
 
-        // ADD THREADING HERE
-        private async Task CalculateMPValues(int cmpid, int version)
+        private async Task CalculateMPValuesForCampaign(int cmpid, int version)
         {
-            var mediaPlansDTO = await _mediaPlanController.GetAllMediaPlansByCmpid(cmpid, version);
+            // Start all tasks and gather them in a list
+            List<Task> calculatingChannelMPTasks = _channels.Select(channel =>
+                Task.Run(() => CalculateMPValuesForChannel(cmpid, channel.chid, version)))
+                .ToList();
+
+            // Wait for all tasks to complete
+            await Task.WhenAll(calculatingChannelMPTasks);
+        }
+
+        private async Task CalculateMPValuesForChannel(int cmpid, int chid, int version)
+        {
+
+            var mediaPlansDTO = await _mediaPlanController.GetAllMediaPlansByCmpidAndChannel(cmpid, chid, version);
 
             foreach (var mediaPlanDTO in mediaPlansDTO)
             {
-                var mediaPlan = await _mpConverter.ConvertFirstFromDTO(mediaPlanDTO);
-                await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(_mpConverter.ConvertToDTO(mediaPlan)));
+                await CalculateMPValues(mediaPlanDTO);
             }
+        }
 
+        private async Task CalculateMPValues(MediaPlanDTO mediaPlanDTO)
+        {
+            var mediaPlan = await _mpConverter.ConvertFirstFromDTO(mediaPlanDTO);
+            await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(_mpConverter.ConvertToDTO(mediaPlan)));
         }
 
         #region Inserting in database
@@ -1018,6 +1038,7 @@ namespace CampaignEditor.UserControls
                 // Call your function for the item
 
                 ContextMenu menu = new ContextMenu();
+
                 MenuItem trimAmrs = new MenuItem();
                 trimAmrs.Header = "Trim Channel Amrs";
                 trimAmrs.Click += async (obj, ea) =>
@@ -1047,6 +1068,24 @@ namespace CampaignEditor.UserControls
                     }
                 };
                 menu.Items.Add(trimAmrs);
+
+                MenuItem recalculateChannel = new MenuItem();
+                recalculateChannel.Header = "Recalculate channel values";
+                recalculateChannel.Click += async (obj, ea) =>
+                {
+                    if (MessageBox.Show($"Recalculate channel values for channel:\n{channel.chname.Trim()}?",
+                        "Result:", MessageBoxButton.OKCancel, MessageBoxImage.Question) == MessageBoxResult.OK)
+                    {
+                        SetLoadingPage?.Invoke(this, null);
+                        // When pricelists or calculating inside MediaPlans are changed 
+                        await CalculateMPValuesForChannel(_campaign.cmpid, channel.chid, _maxVersion);
+
+                        await LoadData(_maxVersion);
+                        SetContentPage?.Invoke(this, null);
+                    }
+                    
+                };
+                menu.Items.Add(recalculateChannel);
 
                 lvChannels.ContextMenu = menu;
             }
@@ -1330,10 +1369,33 @@ namespace CampaignEditor.UserControls
             var mediaPlanTuple = dgMediaPlans.Schema.SelectedItem as MediaPlanTuple;
             if (mediaPlanTuple != null)
             {
-                _allMediaPlans.Remove(mediaPlanTuple);
-                var mediaPlan = mediaPlanTuple.MediaPlan;
-                await DeleteMPById(mediaPlan.xmpid);
+                if (MessageBox.Show($"Delete program\n{mediaPlanTuple.MediaPlan.Name.Trim()}?", "Result",
+    MessageBoxButton.OKCancel, MessageBoxImage.Question) == MessageBoxResult.OK)
+                {
+                    _allMediaPlans.Remove(mediaPlanTuple);
+                    var mediaPlan = mediaPlanTuple.MediaPlan;
+                    await DeleteMPById(mediaPlan.xmpid);
+                }
+            }
+        }
 
+        private async void dgMediaPlans_RecalculateMediaPlan(object? sender, EventArgs e)
+        {
+            var mediaPlanTuple = dgMediaPlans.Schema.SelectedItem as MediaPlanTuple;
+            if (mediaPlanTuple != null)
+            {
+                if (MessageBox.Show($"Recalculate values for program\n{mediaPlanTuple.MediaPlan.Name.Trim()}?", "Result", 
+                    MessageBoxButton.OKCancel, MessageBoxImage.Question) == MessageBoxResult.OK)
+                {
+                    var mpDTO = await _mediaPlanController.GetMediaPlanById(mediaPlanTuple.MediaPlan.xmpid);
+                    var mediaPlan = await _mpConverter.ConvertFirstFromDTO(mpDTO);
+                    await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(_mpConverter.ConvertToDTO(mediaPlan)));
+                    mediaPlanTuple.MediaPlan = mediaPlan;
+
+                    _allMediaPlans.Remove(mediaPlanTuple);
+                    _allMediaPlans.Add(mediaPlanTuple);
+                }
+                    
             }
         }
 
