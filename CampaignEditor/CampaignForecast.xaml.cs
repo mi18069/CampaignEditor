@@ -815,28 +815,33 @@ namespace CampaignEditor.UserControls
                    plan1.edate == schema.edate; 
         }
 
-        private async Task<List<MediaPlanTerm>> MediaPlanToMPTerm(MediaPlanDTO mediaPlan)
+        private async Task<ObservableArray<MediaPlanTerm?>> MediaPlanToMPTerm(MediaPlanDTO mediaPlan)
         {
 
             List<DateTime> availableDates = GetAvailableDates(mediaPlan);
             DateTime started = startDate;
 
             int n = (int)(endDate - startDate).TotalDays;
-            var mediaPlanDates = new List<MediaPlanTerm>();
+            var mediaPlanDates = new ObservableArray<MediaPlanTerm?>(n+1);
 
             List<DateTime> sorted = availableDates.OrderBy(d => d).ToList();
 
-            for (int i = 0, j = 0; i <= n && j < sorted.Count(); i++)
+            for (int i = 0, j = 0; i <= n; i++)
             {
+                if (j >= sorted.Count())
+                {
+                    mediaPlanDates[i] = null;
+                    continue;
+                }
                 if (started.AddDays(i).Date == sorted[j].Date)
                 {
                     CreateMediaPlanTermDTO mpTerm = new CreateMediaPlanTermDTO(mediaPlan.xmpid, DateOnly.FromDateTime(sorted[j]), null);
-                    mediaPlanDates.Add(_mpTermConverter.ConvertFromDTO(await _mediaPlanTermController.CreateMediaPlanTerm(mpTerm)));
+                    mediaPlanDates[i] = _mpTermConverter.ConvertFromDTO(await _mediaPlanTermController.CreateMediaPlanTerm(mpTerm));
                     j++;
                 }
                 else
                 {
-                    mediaPlanDates.Add(null);
+                    mediaPlanDates[i] = null;
                 }
             }
 
@@ -946,17 +951,23 @@ namespace CampaignEditor.UserControls
             foreach (MediaPlanDTO mediaPlan in mediaPlansByChannel)
             {
                 List<MediaPlanTermDTO> mediaPlanTerms = (List<MediaPlanTermDTO>)await _mediaPlanTermController.GetAllMediaPlanTermsByXmpid(mediaPlan.xmpid);
-                var mediaPlanDates = new ObservableCollection<MediaPlanTerm>();
-                for (int i = 0, j = 0; i <= daysNum && j < mediaPlanTerms.Count(); i++)
+                var mediaPlanDates = new ObservableArray<MediaPlanTerm?>(daysNum+1);
+                for (int i = 0, j = 0; i <= daysNum; i++)
                 {
+                    if (j >= mediaPlanTerms.Count())
+                    {
+                        mediaPlanDates[i] = null;
+                        continue;
+                    }
+
                     if (DateOnly.FromDateTime(startDate.AddDays(i)) == mediaPlanTerms[j].date)
                     {
-                        mediaPlanDates.Add(_mpTermConverter.ConvertFromDTO(mediaPlanTerms[j]));
+                        mediaPlanDates[i] = _mpTermConverter.ConvertFromDTO(mediaPlanTerms[j]);
                         j++;
                     }
                     else
                     {
-                        mediaPlanDates.Add(null);
+                        mediaPlanDates[i] = null;
                     }
                 }
 
@@ -1297,12 +1308,14 @@ namespace CampaignEditor.UserControls
             if (initNewTerms)
             {
                 await _mediaPlanTermController.DeleteMediaPlanTermByXmpId(mediaPlanDTO.xmpid);
-                mediaPlanTuple.Terms.Clear();
                 var newMediaPlanTerms = await MediaPlanToMPTerm(mediaPlanDTO);
+                /*mediaPlanTuple.Terms.Clear();
+
                 foreach (var mpTerm in newMediaPlanTerms)
                 {
                     mediaPlanTuple.Terms.Add(mpTerm);
-                }
+                }*/
+                mediaPlanTuple.Terms = newMediaPlanTerms;
             }
 
             if (updateSchema)
@@ -1316,7 +1329,7 @@ namespace CampaignEditor.UserControls
 
             await _databaseFunctionsController.StartAMRCalculation(_campaign.cmpid, 40, 40, mediaPlanDTO.xmpid);
 
-            var mpTupleNew = new MediaPlanTuple(mediaPlan, new ObservableCollection<MediaPlanTerm>(mediaPlanTerms));
+            var mpTupleNew = new MediaPlanTuple(mediaPlan, mediaPlanTerms);
             await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(mediaPlanDTO));
             var newMediaPlan = await _mpConverter.ConvertFirstFromDTO(mediaPlanDTO);
             mediaPlanTuple.MediaPlan = newMediaPlan;
@@ -1352,7 +1365,7 @@ namespace CampaignEditor.UserControls
                         await _databaseFunctionsController.StartAMRCalculation(_campaign.cmpid, 40, 40, mediaPlanDTO.xmpid);
                         var mediaPlan = await _mpConverter.ConvertFirstFromDTO(mediaPlanDTO);
                         var mediaPlanTerms = await MediaPlanToMPTerm(mediaPlanDTO);
-                        var mpTuple = new MediaPlanTuple(mediaPlan, new ObservableCollection<MediaPlanTerm>(mediaPlanTerms));
+                        var mpTuple = new MediaPlanTuple(mediaPlan, mediaPlanTerms);
                         _allMediaPlans.Add(mpTuple);
                     }
                 }

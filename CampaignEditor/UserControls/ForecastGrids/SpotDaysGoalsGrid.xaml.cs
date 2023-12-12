@@ -301,9 +301,9 @@ namespace CampaignEditor.UserControls.ForecastGrids
                     foreach (var mpTuple in channelMpTuples)
                     {
                         var allMpTerms = mpTuple.Terms;
-                        ObservableCollection<MediaPlanTerm> mpTerms;
+                        ObservableArray<MediaPlanTerm?> mpTerms;
 
-                        mpTerms = new ObservableCollection<MediaPlanTerm>(mpTuple.Terms.Where(t => t != null &&
+                        mpTerms = new ObservableArray<MediaPlanTerm?>(mpTuple.Terms.Where(t => t != null &&
                                   t.Date != null && t.Date == DateOnly.FromDateTime(date)));
 
                         

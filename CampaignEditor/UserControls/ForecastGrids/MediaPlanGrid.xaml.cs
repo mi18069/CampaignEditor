@@ -290,7 +290,7 @@ namespace CampaignEditor.UserControls
             {
                 try
                 {
-                    if (mpTuple.Terms.Count > dateIndex && 
+                    if (mpTuple.Terms.Count() > dateIndex && 
                         mpTuple.Terms[dateIndex] != null &&                      
                         mpTuple.Terms[dateIndex].Spotcode != null)
                     {
@@ -744,7 +744,7 @@ namespace CampaignEditor.UserControls
             {
                 return null; // row is not bound to a tuple
             }
-            ObservableCollection<MediaPlanTerm> mpTerms = tuple.Terms;
+            ObservableArray<MediaPlanTerm?> mpTerms = tuple.Terms;
 
             // Get the MediaPlanTerm for the selected cell
             int rowIndex = row.GetIndex();

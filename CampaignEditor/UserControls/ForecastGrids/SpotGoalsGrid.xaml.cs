@@ -255,16 +255,16 @@ namespace CampaignEditor.UserControls
                     foreach (var mpTuple in channelMpTuples)
                     {
                         var allMpTerms = mpTuple.Terms;
-                        ObservableCollection<MediaPlanTerm> mpTerms;
+                        ObservableArray<MediaPlanTerm?> mpTerms;
 
                         if (weekNum <= lastWeekNum)
                         {
-                            mpTerms = new ObservableCollection<MediaPlanTerm>(mpTuple.Terms.Where(t => t != null &&
+                            mpTerms = new ObservableArray<MediaPlanTerm?>(mpTuple.Terms.Where(t => t != null &&
                                         GetWeekOfYear(t.Date.ToDateTime(TimeOnly.Parse("00:00 AM"))) == weekNum));
                         }
                         else
                         {
-                            mpTerms = new ObservableCollection<MediaPlanTerm>(mpTuple.Terms.Where(t => t != null));
+                            mpTerms = new ObservableArray<MediaPlanTerm?>(mpTuple.Terms.Where(t => t != null));
                         }
                         mpTuples.Add(new MediaPlanTuple(mpTuple.MediaPlan, mpTerms));
                     }
