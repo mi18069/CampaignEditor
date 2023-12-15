@@ -43,6 +43,7 @@
                 <UniformGrid x:Name="ugGrid" Grid.Row="0" Grid.Column="2"
                      HorizontalAlignment="Left" VerticalAlignment="Stretch" 
                              PreviewMouseWheel="ugGrid_PreviewMouseWheel"/>
+
             </Grid>
         </ScrollViewer>
         

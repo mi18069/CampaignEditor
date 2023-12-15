@@ -10,5 +10,27 @@ namespace Database.DTOs.ChannelDTO
         }
 
         public int chid { get; set; }
+
+        public override bool Equals(object obj)
+        {
+            if (obj == null || GetType() != obj.GetType())
+            {
+                return false;
+            }
+
+            BaseIdentityChannelDTO other = (BaseIdentityChannelDTO)obj;
+
+            return chid == other.chid;
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 17;
+                hash = hash * 23 + chid.GetHashCode();
+                return hash;
+            }
+        }
     }
 }

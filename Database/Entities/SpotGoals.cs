@@ -19,21 +19,40 @@ namespace Database.Entities
         public int Insertations
         {
             get { return insertations; }
-            set { insertations = value; }
+            set 
+            { 
+                insertations = value; 
+                OnPropertyChanged();
+            }
         }
 
         public double Grp
         {
             get { return grp; }
-            set { grp = value; }
+            set 
+            { 
+                grp = value; 
+                OnPropertyChanged();
+            }
         }
 
         public double Budget
         {
             get { return budget; }
-            set { budget = value; }
+            set 
+            { 
+                budget = value; 
+                OnPropertyChanged();
+            }
         }
         public SpotGoals()
+        {
+            Insertations = 0;
+            Grp = 0;
+            Budget = 0;
+        }
+
+        public void ResetValues()
         {
             Insertations = 0;
             Grp = 0;

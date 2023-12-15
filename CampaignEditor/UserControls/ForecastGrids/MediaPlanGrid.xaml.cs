@@ -267,7 +267,7 @@ namespace CampaignEditor.UserControls
             }
 
             TimeSpan duration = endDate - startDate;
-            int numberOfDays = duration.Days;
+            int numberOfDays = duration.Days + 1;
 
             for (int dateIndex = 0; dateIndex < numberOfDays; dateIndex++)
             {
@@ -471,6 +471,8 @@ namespace CampaignEditor.UserControls
             SimulateTextInput(lastSpotCell);
         }
 
+        
+
         private async void OnCellPreviewTextInput(object sender, TextCompositionEventArgs e)
         {
             if (!_canUserEdit) 
@@ -501,14 +503,11 @@ namespace CampaignEditor.UserControls
                     {
                         return;
 
-                        /*cell.Content = spotcode;
-                        totals[numberOfDays].Total -= 2;*/
                     }
                     else if (textBlock != null)
                     {
                         cell.Content = textBlock.Text.Trim() + spotcode.ToString();
                         totals[numberOfDays].Total += 1;
-
                     }
                     else if (textBlock == null)
                     {
@@ -530,6 +529,7 @@ namespace CampaignEditor.UserControls
 
 
                     mpTerm.Spotcode = cell.Content.ToString().Trim();
+                    TermUpdated(mpTerm, spotcode);
 
                 }
                 // For entering numbers
@@ -540,13 +540,11 @@ namespace CampaignEditor.UserControls
                     {
                         char spCode = (char)('A' + scNum - 1);
                         // if cell already have 3 spots, return
-                        if (cell.Content.ToString().Length == 2 ||
-                            (textBlock != null && textBlock.Text.Trim().Length == 2))
+                        if (cell.Content.ToString().Length == 3 ||
+                            (textBlock != null && textBlock.Text.Trim().Length == 3))
                         {
                             return;
 
-                            /*cell.Content = spCode;
-                            totals[numberOfDays].Total -= 1;*/
                         }
                         else if (textBlock != null)
                         {
@@ -572,6 +570,8 @@ namespace CampaignEditor.UserControls
 
                         mpTerm.Spotcode = cell.Content.ToString().Trim();
                         lastSpotCell = mpTerm.Spotcode;
+                        TermUpdated(mpTerm, spCode);
+
 
                         //cell.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
 
@@ -660,6 +660,7 @@ namespace CampaignEditor.UserControls
 
                     mpTerm.Spotcode = null;
                     cell.Content = "";
+                    TermUpdated(mpTerm, spotcode[0]);
 
                     int numberOfDays = mpTerm.Date.DayNumber - DateOnly.FromDateTime(startDate).DayNumber;
                     totals[numberOfDays].Total -= 1;
@@ -671,10 +672,10 @@ namespace CampaignEditor.UserControls
                     new UpdateMediaPlanTermDTO(mpTerm.Xmptermid, mpTerm.Xmpid, mpTerm.Date, newSpotcode));
                     mpTerm.Spotcode = newSpotcode;
                     cell.Content = newSpotcode;
+                    TermUpdated(mpTerm, spotcode[spotcode.Length - 1]);
 
                     int numberOfDays = mpTerm.Date.DayNumber - DateOnly.FromDateTime(startDate).DayNumber;
                     totals[numberOfDays].Total -= 1;
-
                 }
 
                 var mediaPlanTuple = dgMediaPlans.SelectedItem as MediaPlanTuple;
@@ -687,6 +688,14 @@ namespace CampaignEditor.UserControls
 
             }
 
+        }
+
+        public delegate void UpdatedTermEventHandler(object sender, UpdatedTermEventArgs e);
+        public event UpdatedTermEventHandler UpdatedTerm;
+        private void TermUpdated(MediaPlanTerm term, char spotcode)
+        {
+            var updatedTerm = new UpdatedTermEventArgs(term, spotcode);
+            UpdatedTerm?.Invoke(this, updatedTerm);
         }
 
         private void dgMediaPlans_PreviewKeyDown(object sender, KeyEventArgs e)

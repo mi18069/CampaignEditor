@@ -10,6 +10,7 @@ using Database.DTOs.MediaPlanDTO;
 using Database.DTOs.MediaPlanHistDTO;
 using Database.DTOs.MediaPlanTermDTO;
 using Database.DTOs.SchemaDTO;
+using Database.DTOs.SpotDTO;
 using Database.Entities;
 using Database.Repositories;
 using Microsoft.Win32;
@@ -286,6 +287,8 @@ namespace CampaignEditor.UserControls
             // when mediaPlan is changed
             dgMediaPlans.UpdatedMediaPlan += dgMediaPlans_UpdatedMediaPlan;
             dgMediaPlans.RecalculateMediaPlan += dgMediaPlans_RecalculateMediaPlan;
+            // When updating Terms
+            dgMediaPlans.UpdatedTerm += dgMediaPlans_UpdatedTerm;
         }
 
         private void SubscribeSGGridControllers()
@@ -1035,6 +1038,8 @@ namespace CampaignEditor.UserControls
                 channels.Add(channel);
             }
             _selectedChannels.ReplaceRange(channels);
+
+            sdgGrid.SelectedChannelsChanged(_selectedChannels);
         }
 
         #region ContextMenu
@@ -1412,6 +1417,26 @@ namespace CampaignEditor.UserControls
             }
         }
 
+        private async void dgMediaPlans_UpdatedTerm(object? sender, UpdatedTermEventArgs e)
+        {
+            MediaPlanTerm term = e.Term;
+            char? spotcode = e.Spotcode;
+
+            await UpdatedTerm(term, spotcode);
+        }
+
+        private async Task UpdatedTerm(MediaPlanTerm term, char? spotcode)
+        {
+            MediaPlanDTO mediaPlan = await _mediaPlanController.GetMediaPlanById(term.Xmpid);
+            ChannelDTO channel = await _channelController.GetChannelById(mediaPlan.chid);
+            DateOnly date = term.Date;
+            SpotDTO? spot = null;
+            if (spotcode.HasValue)
+                spot = await _spotController.GetSpotsByCmpidAndCode(_campaign.cmpid, spotcode.ToString());
+
+            sdgGrid.RecalculateGoals(channel, date, spot, true);
+        }
+
         #endregion
 
         #region Page
@@ -1484,7 +1509,7 @@ namespace CampaignEditor.UserControls
             {
 
 
-                tiSpotDaysGoals.IsSelected = true;
+                //tiSpotDaysGoals.IsSelected = true;
 
                 // opened tabItem
                 using (var memoryStream = new MemoryStream())
@@ -1509,7 +1534,7 @@ namespace CampaignEditor.UserControls
                         swgGrid.PopulateWorksheet(worksheet3, 0, 0);
 
                         var worksheet4 = excelPackage.Workbook.Worksheets.Add("Spot Goals 3");
-                        sdgGrid.PopulateWorksheet(worksheet4, 0, 0);
+                        sdgGrid.PopulateWorksheet(worksheet4, 1, 1);
 
                         var worksheet5 = excelPackage.Workbook.Worksheets.Add("Channel Goals");
                         cgGrid.PopulateWorksheet(worksheet5, 0, 0);
