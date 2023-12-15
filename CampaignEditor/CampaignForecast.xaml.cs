@@ -264,7 +264,8 @@ namespace CampaignEditor.UserControls
         private void SubscribeControllers()
         {
             SubscribeDataGridControllers();
-            SubscribeSGGridControllers(); 
+            SubscribeSGGridControllers();
+            SubscribeSWGGridControllers();
             SubscribeSDGGridControllers();         
         }
 
@@ -298,6 +299,15 @@ namespace CampaignEditor.UserControls
             sgGrid._spotController = _spotController;
             sgGrid._channelController = _channelController;
             sgGrid._allMediaPlans = _allMediaPlans;
+        }
+
+        private void SubscribeSWGGridControllers()
+        {
+            swgGrid._mediaPlanController = _mediaPlanController;
+            swgGrid._mediaPlanTermController = _mediaPlanTermController;
+            swgGrid._spotController = _spotController;
+            swgGrid._channelController = _channelController;
+            swgGrid._allMediaPlans = _allMediaPlans;
         }
 
         private void SubscribeSDGGridControllers()
@@ -504,7 +514,7 @@ namespace CampaignEditor.UserControls
         public async Task InitializeGrids()
         {
             await sgGrid.Initialize(_campaign, _cmpVersion);
-            swgGrid.Initialize(sgGrid);
+            await swgGrid.Initialize(_campaign, _cmpVersion);
             await sdgGrid.Initialize(_campaign, _cmpVersion);
             await _factoryListing.Initialize(_campaign);
             tiSpotGoals.IsSelected = true;
@@ -1040,6 +1050,7 @@ namespace CampaignEditor.UserControls
             _selectedChannels.ReplaceRange(channels);
 
             sdgGrid.SelectedChannelsChanged(_selectedChannels);
+            swgGrid.SelectedChannelsChanged(_selectedChannels);
         }
 
         #region ContextMenu
@@ -1435,6 +1446,7 @@ namespace CampaignEditor.UserControls
                 spot = await _spotController.GetSpotsByCmpidAndCode(_campaign.cmpid, spotcode.ToString());
 
             sdgGrid.RecalculateGoals(channel, date, spot, true);
+            swgGrid.RecalculateGoals(channel, date, spot, true);
         }
 
         #endregion
@@ -1499,19 +1511,11 @@ namespace CampaignEditor.UserControls
         #endregion
 
         private async void btnExport_Click(object sender, RoutedEventArgs e)
-        {
-            
-
+        {         
             var selectedTabItem = tcGrids.SelectedItem as TabItem;
-            tiSpotWeekGoals.IsSelected = true;
 
             Application.Current.Dispatcher.Invoke(DispatcherPriority.ApplicationIdle, new Action(async () =>
             {
-
-
-                //tiSpotDaysGoals.IsSelected = true;
-
-                // opened tabItem
                 using (var memoryStream = new MemoryStream())
                 {
                     ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
@@ -1531,7 +1535,7 @@ namespace CampaignEditor.UserControls
                         sgGrid.PopulateWorksheet(worksheet2, 0, 0);
 
                         var worksheet3 = excelPackage.Workbook.Worksheets.Add("Spot Goals 2");
-                        swgGrid.PopulateWorksheet(worksheet3, 0, 0);
+                        swgGrid.PopulateWorksheet(worksheet3, 1, 1);
 
                         var worksheet4 = excelPackage.Workbook.Worksheets.Add("Spot Goals 3");
                         sdgGrid.PopulateWorksheet(worksheet4, 1, 1);

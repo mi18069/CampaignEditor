@@ -8,21 +8,14 @@ using OfficeOpenXml.Style;
 using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
 using System.Windows.Input;
 using System.Windows.Data;
-using System.Threading.Channels;
-using System.Net;
 using System.Windows.Controls.Primitives;
-using Microsoft.Office.Interop.Excel;
-using System.Drawing;
-using System.Runtime.InteropServices;
 
 namespace CampaignEditor.UserControls.ForecastGrids
 {
@@ -47,6 +40,7 @@ namespace CampaignEditor.UserControls.ForecastGrids
         public SpotController _spotController { get; set; }
         public ChannelController _channelController { get; set; }
         private List<ChannelDTO> _selectedChannels = new List<ChannelDTO>();
+        private List<ChannelDTO> _visibleChannels = new List<ChannelDTO>();
 
         public ObservableRangeCollection<MediaPlanTuple> _allMediaPlans;
         private Dictionary<Char, int> _spotLengths = new Dictionary<char, int>();
@@ -145,6 +139,8 @@ namespace CampaignEditor.UserControls.ForecastGrids
                 _data.Add(channel, dateGoalsDict);
             }
         }
+
+        #region Recalculation
         public void RecalculateGoals()
         {
             foreach (var channel in _data.Keys)
@@ -178,6 +174,48 @@ namespace CampaignEditor.UserControls.ForecastGrids
             }
 
         }
+
+        public void RecalculateGoals(ChannelDTO channel, DateOnly date, SpotDTO spot, bool updateTotal = false)
+        {
+            var spotGoals = _data[channel][date][spot];
+
+            var dateTime = date.ToDateTime(TimeOnly.Parse("00:01 AM"));
+            int dateIndex = (int)(dateTime - startDate).Days;
+
+            var channelMpTuples = _allMediaPlans.Where(mpt => mpt.MediaPlan.chid == channel.chid);
+
+            int ins = 0;
+            double grp = 0;
+            double budget = 0;
+            foreach (var mpTuple in channelMpTuples)
+            {
+                var term = mpTuple.Terms[dateIndex];
+                if (term == null || term.Spotcode == null)
+                    continue;
+                foreach (char spotcode in term.Spotcode.Trim())
+                {
+                    if (spotcode == spot.spotcode[0])
+                    {
+                        var mediaPlan = mpTuple.MediaPlan;
+                        ins += 1;
+                        grp += mediaPlan.Amrp1;
+                        // Need to fix this
+                        budget += (mediaPlan.Price / mediaPlan.Length) * spot.spotlength;
+                    }
+                }
+            }
+            spotGoals.Insertations = ins;
+            spotGoals.Grp = grp;
+            spotGoals.Budget = budget;
+
+            if (updateTotal)
+            {
+                RecalculateTotalColumnSpotGoals(date, spot);
+                RecalculateTotalFooterSpotGoals(channel, spot);
+                RecalculateTotalFooterSpotGoals(dummyChannel, spot);
+            }
+        }
+
         private void RecalculateTotalFooterSpotGoals(ChannelDTO channel)
         {
 
@@ -253,132 +291,7 @@ namespace CampaignEditor.UserControls.ForecastGrids
             totalSpotGoals.Budget = budget;
         }
 
-        public void RecalculateGoals(ChannelDTO channel, DateOnly date, SpotDTO spot, bool updateTotal = false)
-        {
-            var spotGoals = _data[channel][date][spot];
-           
-            var dateTime = date.ToDateTime(TimeOnly.Parse("00:01 AM"));
-            int dateIndex = (int)(dateTime - startDate).Days;
-
-            var channelMpTuples = _allMediaPlans.Where(mpt => mpt.MediaPlan.chid == channel.chid);
-
-            int ins = 0;
-            double grp = 0;
-            double budget = 0;
-            foreach (var mpTuple in channelMpTuples)
-            {
-                var term = mpTuple.Terms[dateIndex];
-                if (term == null || term.Spotcode == null)
-                    continue;
-                foreach (char spotcode in term.Spotcode.Trim())
-                {
-                    if (spotcode == spot.spotcode[0])
-                    {
-                        var mediaPlan = mpTuple.MediaPlan;
-                        ins += 1;
-                        grp += mediaPlan.Amrp1;
-                        // Need to fix this
-                        budget += (mediaPlan.Price / mediaPlan.Length) * spot.spotlength;
-                    }
-                }
-            }
-            spotGoals.Insertations = ins;
-            spotGoals.Grp = grp;
-            spotGoals.Budget = budget;
-
-            if (updateTotal)
-            {
-                RecalculateTotalColumnSpotGoals(date, spot);
-                RecalculateTotalFooterSpotGoals(channel, spot);
-                RecalculateTotalFooterSpotGoals(dummyChannel, spot);
-            }
-        }
-
-        public void SelectedChannelsChanged(IEnumerable<ChannelDTO> selectedChannels)
-        {
-            // Channel is unselected
-            if (selectedChannels.Count() < _selectedChannels.Count())
-            {
-
-                for (int i=0; i<_selectedChannels.Count();i++)
-                {
-                    var channel = _selectedChannels[i];
-                    if (!selectedChannels.Contains(channel))
-                    {
-                        HideChannel(channel);
-                        _selectedChannels.Remove(channel);
-                        i--;
-                    }
-                }
-
-            }
-            // Channel is selected
-            else if (selectedChannels.Count() > _selectedChannels.Count())
-            {
-                foreach (var channel in selectedChannels)
-                {
-                    if (!_selectedChannels.Contains(channel))
-                    {
-                        ShowChannel(channel);
-                        _selectedChannels.Add(channel);
-
-                    }
-                }
-
-            }
-            
-            if (_selectedChannels.Count >= 2)
-            {
-                RecalculateTotalColumnSpotGoals();
-                ShowChannel(dummyChannel);
-            }
-            else
-            {
-                RecalculateTotalColumnSpotGoals();
-                HideChannel(dummyChannel);
-            }
-        }
-
-        private void ShowChannel(ChannelDTO channel)
-        {
-            // Showing Channel and Goals headers
-            for (int i = 0; i < _channels.Count; i++)
-            {
-                if (_channels[i].chid == channel.chid)
-                {
-                    ugChannels.Children[i].Visibility = Visibility.Visible;
-                    for (int j = 0; j < 3; j++)
-                    {
-                        ugGoals.Children[i*3 + j].Visibility = Visibility.Visible;
-                    }
-                }
-            }
-
-            //Showing channelGrid
-            var dataGrid = _channelGrids[channel];
-            dataGrid.Visibility = Visibility.Visible;
-        }
-
-        private void HideChannel(ChannelDTO channel)
-        {
-            // Hiding Channel and Goals headers
-            for (int i=0; i<_channels.Count; i++)
-            {
-                if (_channels[i].chid == channel.chid)
-                {
-                    ugChannels.Children[i].Visibility = Visibility.Collapsed;
-                    for (int j=0; j<3; j++)
-                    {
-                        ugGoals.Children[i*3 + j].Visibility = Visibility.Collapsed;
-                    }
-                }
-            }
-
-            //Hiding channelGrid
-            var dataGrid = _channelGrids[channel];
-            dataGrid.Visibility = Visibility.Collapsed;
-        }
-
+        #endregion
         private void CreateOutboundHeaders()
         {
             int firstDayNum = GetDayOfYear(startDate);
@@ -474,6 +387,19 @@ namespace CampaignEditor.UserControls.ForecastGrids
             return label;
         }
 
+        private int GetDayOfYear(DateTime date)
+        {
+            System.Globalization.Calendar calendar = CultureInfo.CurrentCulture.Calendar;
+            return calendar.GetDayOfYear(date);
+        }
+
+        #region ChannelDataColumn
+        private void AddChannelDataColumn(ChannelDTO channel)
+        {
+            AddChannelHeader(channel);
+            AddChannelDataGridColumn(channel);
+        }
+
         private void AddChannelHeader(ChannelDTO channel)
         {
             System.Windows.Controls.Border border = new System.Windows.Controls.Border();
@@ -530,6 +456,7 @@ namespace CampaignEditor.UserControls.ForecastGrids
             dataGrid.IsManipulationEnabled = false;
             dataGrid.IsReadOnly = true;
             dataGrid.SelectionChanged += DataGrid_SelectionChanged;
+            dataGrid.PreviewKeyDown += DataGrid_PreviewKeyDown;
             dataGrid.AlternatingRowBackground = System.Windows.Media.Brushes.LightGoldenrodYellow;
 
             ApplyCellStyle(dataGrid);
@@ -569,19 +496,107 @@ namespace CampaignEditor.UserControls.ForecastGrids
             _channelGrids.Add(channel, dataGrid);
         }
 
+        #endregion
 
+        #region Selection changed
+        public void SelectedChannelsChanged(IEnumerable<ChannelDTO> selectedChannels)
+        {
+            // Channel is unselected
+            if (selectedChannels.Count() < _selectedChannels.Count())
+            {
 
-        private void AddChannelDataColumn(ChannelDTO channel)
-        {
-            AddChannelHeader(channel);
-            AddChannelDataGridColumn(channel);
-        }      
-      
-        private int GetDayOfYear(DateTime date)
-        {
-            System.Globalization.Calendar calendar = CultureInfo.CurrentCulture.Calendar;
-            return calendar.GetDayOfYear(date);
+                for (int i = 0; i < _selectedChannels.Count(); i++)
+                {
+                    var channel = _selectedChannels[i];
+                    if (!selectedChannels.Contains(channel))
+                    {
+                        HideChannel(channel);
+                        _selectedChannels.Remove(channel);
+                        _visibleChannels.Remove(channel);
+
+                        if (_selectedChannels.Count < 2 && _visibleChannels.Contains(dummyChannel))
+                            _visibleChannels.Remove(dummyChannel);
+
+                        i--;
+                    }
+                }
+
+            }
+            // Channel is selected
+            else if (selectedChannels.Count() > _selectedChannels.Count())
+            {
+                foreach (var channel in selectedChannels)
+                {
+                    if (!_selectedChannels.Contains(channel))
+                    {
+                        ShowChannel(channel);
+                        _selectedChannels.Add(channel);
+                        _visibleChannels.Add(channel);
+
+                        if (_selectedChannels.Count >= 2 && !_visibleChannels.Contains(dummyChannel)) 
+                            _visibleChannels.Add(dummyChannel);
+                    }
+                }
+
+            }
+
+            if (_selectedChannels.Count >= 2)
+            {
+                RecalculateTotalColumnSpotGoals();
+                ShowChannel(dummyChannel);
+            }
+            else
+            {
+                RecalculateTotalColumnSpotGoals();
+                HideChannel(dummyChannel);
+            }
         }
+
+        private void ShowChannel(ChannelDTO channel)
+        {
+            // Showing Channel and Goals headers
+            for (int i = 0; i < _channels.Count; i++)
+            {
+                if (_channels[i].chid == channel.chid)
+                {
+                    ugChannels.Children[i].Visibility = Visibility.Visible;
+                    for (int j = 0; j < 3; j++)
+                    {
+                        ugGoals.Children[i * 3 + j].Visibility = Visibility.Visible;
+                    }
+                }
+            }
+
+            //Showing channelGrid
+            var dataGrid = _channelGrids[channel];
+            dataGrid.Visibility = Visibility.Visible;
+        }
+
+        private void HideChannel(ChannelDTO channel)
+        {
+            // Hiding Channel and Goals headers
+            for (int i = 0; i < _channels.Count; i++)
+            {
+                if (_channels[i].chid == channel.chid)
+                {
+                    ugChannels.Children[i].Visibility = Visibility.Collapsed;
+                    for (int j = 0; j < 3; j++)
+                    {
+                        ugGoals.Children[i * 3 + j].Visibility = Visibility.Collapsed;
+                    }
+                }
+            }
+
+            //Hiding channelGrid
+            var dataGrid = _channelGrids[channel];
+            dataGrid.Visibility = Visibility.Collapsed;
+        }
+
+        #endregion
+
+
+
+        #region Datagrid Functionality
 
         private void SetWidth()
         {
@@ -674,25 +689,137 @@ namespace CampaignEditor.UserControls.ForecastGrids
             dataGrid.Resources.Add(typeof(DataGridCell), cellStyle);
         }
 
+        private void ugGrid_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            var scrollViewer = svGrid;
+
+            if (scrollViewer != null)
+            {
+                scrollViewer.ScrollToVerticalOffset(scrollViewer.VerticalOffset - e.Delta);
+                e.Handled = true;
+            }
+        }
+
+            #region Change dataGrid focus
+
+        private void DataGrid_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            var dataGrid = sender as DataGrid;
+            if (e.Key == Key.Right && GetFocusedColumnIndex(dataGrid) == 2)
+            {
+                // Focus the next DataGrid to the right
+                FocusNextDataGrid(dataGrid, true);
+                e.Handled = true;
+            }
+            else if (e.Key == Key.Left && GetFocusedColumnIndex(dataGrid) == 0)
+            {
+                // Focus the previous DataGrid to the left
+                FocusNextDataGrid(dataGrid, false);
+                e.Handled = true;
+            }
+        }
+
+        private int GetFocusedColumnIndex(DataGrid dataGrid)
+        {
+            if (dataGrid.CurrentCell != null)
+            {
+                DataGridColumn focusedColumn = dataGrid.CurrentCell.Column;
+
+                if (focusedColumn != null)
+                {
+                    // Get the index of the focused column
+                    int columnIndex = dataGrid.Columns.IndexOf(focusedColumn);
+                    return columnIndex;
+                }
+            }
+
+            return -1; // No focused cell or column found
+        }
+
+        private void FocusNextDataGrid(DataGrid currentDataGrid, bool focusRight)
+        {
+            DataGrid previousDataGrid = null;
+            bool foundCurrent = false;
+
+            foreach (var channelGrid in _channelGrids)
+            {
+                var channel = channelGrid.Key;
+                if (_visibleChannels.Contains(channel))
+                {
+                    var dataGrid = channelGrid.Value;
+                    if (foundCurrent)
+                    {
+                        // Focus the next or previous cell based on the arrow key direction
+                        if (focusRight)
+                        {
+                            dataGrid.Focus();
+                            MoveFocusToFirstCell(dataGrid);
+                        }
+                        else
+                        {
+                            dataGrid.Focus();
+                            MoveFocusToLastCell(dataGrid);
+                        }
+                        return;
+                    }
+
+                    if (dataGrid == currentDataGrid)
+                    {
+                        if (focusRight)
+                        {
+                            foundCurrent = true;
+                            continue;
+                        }
+                        else
+                        {
+                            previousDataGrid.Focus();
+                            MoveFocusToLastCell(previousDataGrid);
+                        }
+                    }
+
+                    previousDataGrid = dataGrid;
+                }
+            }
+        }
+
+        private void MoveFocusToFirstCell(DataGrid dataGrid)
+        {
+            if (dataGrid != null && dataGrid.SelectedItem != null)
+            {
+                // Move to the most left cell in the same row
+                dataGrid.CurrentCell = new DataGridCellInfo(dataGrid.SelectedItem, dataGrid.Columns[0]);
+                dataGrid.ScrollIntoView(dataGrid.SelectedItem, dataGrid.Columns[0]);
+            }
+        }
+
+        private void MoveFocusToLastCell(DataGrid dataGrid)
+        {
+            if (dataGrid != null && dataGrid.SelectedItem != null)
+            {
+                // Move to the most right cell in the same row
+                dataGrid.CurrentCell = new DataGridCellInfo(dataGrid.SelectedItem, dataGrid.Columns[dataGrid.Columns.Count - 1]);
+                dataGrid.ScrollIntoView(dataGrid.SelectedItem, dataGrid.Columns[dataGrid.Columns.Count - 1]);
+            }
+        }
+
+            #endregion
+
+        #endregion
+
         #region Export to Excel
         public void PopulateWorksheet(ExcelWorksheet worksheet, int rowOff = 1, int colOff = 1)
         {
-            var selectedChannels = _selectedChannels;
+            var visibleChannels = _visibleChannels;
 
-            if (selectedChannels.Count == 0)
+            if (visibleChannels.Count == 0)
                 return;
 
             AddLeftHeadersInWorksheet(worksheet, rowOff + 2, colOff);
 
             int colOffset = 2;
-            foreach (var channel in selectedChannels)
+            foreach (var channel in visibleChannels)
             {
                 AddChannelInWorksheet(channel, worksheet, rowOff, colOff + colOffset);
-                colOffset += 3;
-            }
-            if (selectedChannels.Count >= 2)
-            {
-                AddChannelInWorksheet(dummyChannel, worksheet, rowOff, colOff + colOffset);
                 colOffset += 3;
             }
 
@@ -855,16 +982,7 @@ namespace CampaignEditor.UserControls.ForecastGrids
 
         #endregion
 
-        private void ugGrid_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
-        {
-            var scrollViewer = svGrid;
 
-            if (scrollViewer != null)
-            {
-                scrollViewer.ScrollToVerticalOffset(scrollViewer.VerticalOffset - e.Delta);
-                e.Handled = true;
-            }
-        }
 
     }
 }
