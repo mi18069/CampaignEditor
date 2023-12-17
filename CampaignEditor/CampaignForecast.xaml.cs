@@ -264,7 +264,7 @@ namespace CampaignEditor.UserControls
         private void SubscribeControllers()
         {
             SubscribeDataGridControllers();
-            SubscribeSGGridControllers();
+            //SubscribeSGGridControllers();
             SubscribeSWGGridControllers();
             SubscribeSDGGridControllers();         
         }
@@ -292,14 +292,14 @@ namespace CampaignEditor.UserControls
             dgMediaPlans.UpdatedTerm += dgMediaPlans_UpdatedTerm;
         }
 
-        private void SubscribeSGGridControllers()
+        /*private void SubscribeSGGridControllers()
         {
             sgGrid._mediaPlanController = _mediaPlanController;
             sgGrid._mediaPlanTermController = _mediaPlanTermController;
             sgGrid._spotController = _spotController;
             sgGrid._channelController = _channelController;
             sgGrid._allMediaPlans = _allMediaPlans;
-        }
+        }*/
 
         private void SubscribeSWGGridControllers()
         {
@@ -308,6 +308,8 @@ namespace CampaignEditor.UserControls
             swgGrid._spotController = _spotController;
             swgGrid._channelController = _channelController;
             swgGrid._allMediaPlans = _allMediaPlans;
+
+            swgGrid.spotGoalsGrid = sgGrid;
         }
 
         private void SubscribeSDGGridControllers()
@@ -513,7 +515,7 @@ namespace CampaignEditor.UserControls
 
         public async Task InitializeGrids()
         {
-            await sgGrid.Initialize(_campaign, _cmpVersion);
+            //await sgGrid.Initialize(_campaign, _cmpVersion);
             await swgGrid.Initialize(_campaign, _cmpVersion);
             await sdgGrid.Initialize(_campaign, _cmpVersion);
             await _factoryListing.Initialize(_campaign);
@@ -1532,7 +1534,7 @@ namespace CampaignEditor.UserControls
                         dgMediaPlans.PopulateWorksheet(worksheet1, 0, 0);
 
                         var worksheet2 = excelPackage.Workbook.Worksheets.Add("Spot Goals 1");
-                        sgGrid.PopulateWorksheet(worksheet2, 0, 0);
+                        sgGrid.PopulateWorksheet(worksheet2, 1, 1);
 
                         var worksheet3 = excelPackage.Workbook.Worksheets.Add("Spot Goals 2");
                         swgGrid.PopulateWorksheet(worksheet3, 1, 1);

@@ -531,7 +531,13 @@ namespace CampaignEditor.UserControls.ForecastGrids
                     {
                         ShowChannel(channel);
                         _selectedChannels.Add(channel);
-                        _visibleChannels.Add(channel);
+
+                        int index = _visibleChannels.Count;
+                        if (_visibleChannels.Contains(dummyChannel))
+                        {
+                            index -= 1;
+                        }
+                        _visibleChannels.Insert(index, channel);
 
                         if (_selectedChannels.Count >= 2 && !_visibleChannels.Contains(dummyChannel)) 
                             _visibleChannels.Add(dummyChannel);
