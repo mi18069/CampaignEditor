@@ -778,8 +778,11 @@ namespace CampaignEditor.UserControls.ForecastGrids
                         }
                         else
                         {
-                            previousDataGrid.Focus();
-                            MoveFocusToLastCell(previousDataGrid);
+                            if (previousDataGrid != null)
+                            {
+                                previousDataGrid.Focus();
+                                MoveFocusToLastCell(previousDataGrid);
+                            }
                         }
                     }
 

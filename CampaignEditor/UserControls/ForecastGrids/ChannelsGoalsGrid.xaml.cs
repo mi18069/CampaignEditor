@@ -1,6 +1,7 @@
 ﻿using CampaignEditor.Helpers;
 using Database.DTOs.ChannelDTO;
 using Database.Entities;
+using Microsoft.Office.Interop.Excel;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
 using System;
@@ -114,56 +115,86 @@ namespace CampaignEditor.UserControls
 
         }
 
-        public void PopulateWorksheet(ExcelWorksheet worksheet, int rowOff = 0, int colOff = 0)
+        private void AddHeader(ExcelWorksheet worksheet, int rowOff = 1, int colOff = 1)
+        {
+            // Set the column headers in Excel 
+            List<ExcelRange> cells = new List<ExcelRange>();
+
+            var cellChannel = worksheet.Cells[rowOff, colOff];
+            cellChannel.Value = "Channel";
+            cells.Add(cellChannel);
+
+            var cellIns = worksheet.Cells[rowOff, colOff + 1];
+            cellIns.Value = "INS";
+            cells.Add(cellIns);
+
+            var cellGrp1 = worksheet.Cells[rowOff, colOff + 2];
+            cellGrp1.Value = "GRP 1";
+            cells.Add(cellGrp1);
+
+            var cellGrp2 = worksheet.Cells[rowOff, colOff + 3];
+            cellGrp2.Value = "GRP 2";
+            cells.Add(cellGrp2);
+
+            var cellGrp3 = worksheet.Cells[rowOff, colOff + 4];
+            cellGrp3.Value = "GRP 3";
+            cells.Add(cellGrp3);
+
+            var cellBud = worksheet.Cells[rowOff, colOff + 5];
+            cellBud.Value = "BUD";
+            cells.Add(cellBud);
+
+            foreach (var cell in cells)
+            {
+                cell.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                cell.Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                cell.Style.Border.Left.Color.SetColor(System.Drawing.Color.Black);
+                cell.Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                cell.Style.Border.Right.Color.SetColor(System.Drawing.Color.Black);
+
+                cell.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                cell.Style.Fill.BackgroundColor.SetColor(System.Drawing.ColorTranslator.FromHtml("#DAA520"));
+            }
+        }
+
+        private void AddChannel(ChannelDTO channel, ExcelWorksheet worksheet, int rowOff = 1, int colOff = 1)
+        {
+            var programGoals = _dictionary[channel.chid];
+
+            var cellChannel = worksheet.Cells[rowOff, colOff];
+            cellChannel.Value = channel.chname.Trim();
+
+            var cellIns = worksheet.Cells[rowOff, colOff + 1];
+            cellIns.Value = programGoals.Insertations;
+
+            var cellGrp1 = worksheet.Cells[rowOff, colOff + 2];
+            cellGrp1.Value = programGoals.Grp1;
+
+            var cellGrp2 = worksheet.Cells[rowOff, colOff + 3];
+            cellGrp2.Value = programGoals.Grp2;
+
+            var cellGrp3 = worksheet.Cells[rowOff, colOff + 4];
+            cellGrp3.Value = programGoals.Grp3;
+
+            var cellBud = worksheet.Cells[rowOff, colOff + 5];
+            cellBud.Value = programGoals.Budget;
+        }
+        public void PopulateWorksheet(IEnumerable<ChannelDTO> selectedChannels, ExcelWorksheet worksheet, int rowOff = 1, int colOff = 1)
         {
 
-            var dataGrid = dgGrid;
+            if (selectedChannels.Count() == 0)
+                return;
 
-            //Unselect all rows
-            dataGrid.SelectedItem = null;
+            AddHeader(worksheet, rowOff, colOff);
 
-            // Get the visible columns from the DataGrid
-            var columns = dataGrid.Columns;
-
-            // Set the column headers in Excel
-            for (int columnIndex = 0; columnIndex < columns.Count; columnIndex++)
+            int i = 1;
+            foreach (var channel in selectedChannels)
             {
-                var column = columns[columnIndex];
-                worksheet.Cells[1 + rowOff, columnIndex + 1 + colOff].Value = column.Header;
-                worksheet.Cells[1 + rowOff, columnIndex + 1 + colOff].Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
-                worksheet.Cells[1 + rowOff, columnIndex + 1 + colOff].Style.Fill.BackgroundColor.SetColor(System.Drawing.ColorTranslator.FromHtml("#DAA520"));
+                AddChannel(channel, worksheet, rowOff + i, colOff);
+                i++;
             }
-            //Set width of first column
-            worksheet.Column(0 + 1 + colOff).Width = 30;
 
-            // Set the cell values and colors in Excel
-            for (int rowIndex = 0; rowIndex < dataGrid.Items.Count; rowIndex++)
-            {
-                var dataItem = (ProgramGoals)dataGrid.Items[rowIndex];
-
-                worksheet.Cells[rowIndex + 2 + rowOff, 0 + 1 + colOff].Value = dataItem.Channel.chname.Trim();
-                worksheet.Cells[rowIndex + 2 + rowOff, 1 + 1 + colOff].Value = dataItem.Insertations;
-                worksheet.Cells[rowIndex + 2 + rowOff, 2 + 1 + colOff].Value = Math.Round(dataItem.Grp1, 2);
-                worksheet.Cells[rowIndex + 2 + rowOff, 3 + 1 + colOff].Value = Math.Round(dataItem.Grp2, 2);
-                worksheet.Cells[rowIndex + 2 + rowOff, 4 + 1 + colOff].Value = Math.Round(dataItem.Grp3, 2);
-                worksheet.Cells[rowIndex + 2 + rowOff, 5 + 1 + colOff].Value = dataItem.Budget;
-
-                for (int columnIndex = 0; columnIndex < columns.Count; columnIndex++)
-                {
-                    var excelCell = worksheet.Cells[rowIndex + 2 + rowOff, columnIndex + 1 + colOff];
-
-                    excelCell.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-                    excelCell.Style.Border.Left.Style = ExcelBorderStyle.Thin;
-                    excelCell.Style.Border.Left.Color.SetColor(System.Drawing.Color.Black);
-                    excelCell.Style.Border.Right.Style = ExcelBorderStyle.Thin;
-                    excelCell.Style.Border.Right.Color.SetColor(System.Drawing.Color.Black);
-                    excelCell.Style.Border.Top.Style = ExcelBorderStyle.Thin;
-                    excelCell.Style.Border.Top.Color.SetColor(System.Drawing.Color.Black);
-                    excelCell.Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
-                    excelCell.Style.Border.Bottom.Color.SetColor(System.Drawing.Color.Black);
-                }
-
-            }
+            
         }
 
 

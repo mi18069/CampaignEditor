@@ -1514,8 +1514,6 @@ namespace CampaignEditor.UserControls
 
         private async void btnExport_Click(object sender, RoutedEventArgs e)
         {         
-            var selectedTabItem = tcGrids.SelectedItem as TabItem;
-
             Application.Current.Dispatcher.Invoke(DispatcherPriority.ApplicationIdle, new Action(async () =>
             {
                 using (var memoryStream = new MemoryStream())
@@ -1528,22 +1526,22 @@ namespace CampaignEditor.UserControls
                         // Create a new worksheet
                         var worksheet0 = excelPackage.Workbook.Worksheets.Add("Campaign Info");
                         var f = _factoryPrintCmpInfo.Create();
-                        await f.PrintData(_campaign.cmpid, worksheet0, 0, 0);
+                        await f.PrintData(_campaign.cmpid, _selectedChannels, worksheet0, 0, 0);
 
                         var worksheet1 = excelPackage.Workbook.Worksheets.Add("Program Schema");
                         dgMediaPlans.PopulateWorksheet(worksheet1, 0, 0);
 
-                        var worksheet2 = excelPackage.Workbook.Worksheets.Add("Spot Goals 1");
+                        var worksheet2 = excelPackage.Workbook.Worksheets.Add("By Weeks 1");
                         sgGrid.PopulateWorksheet(worksheet2, 1, 1);
 
-                        var worksheet3 = excelPackage.Workbook.Worksheets.Add("Spot Goals 2");
+                        var worksheet3 = excelPackage.Workbook.Worksheets.Add("By Weeks 2");
                         swgGrid.PopulateWorksheet(worksheet3, 1, 1);
 
-                        var worksheet4 = excelPackage.Workbook.Worksheets.Add("Spot Goals 3");
+                        var worksheet4 = excelPackage.Workbook.Worksheets.Add("By Days");
                         sdgGrid.PopulateWorksheet(worksheet4, 1, 1);
 
                         var worksheet5 = excelPackage.Workbook.Worksheets.Add("Channel Goals");
-                        cgGrid.PopulateWorksheet(worksheet5, 0, 0);
+                        cgGrid.PopulateWorksheet(_selectedChannels, worksheet5, 1, 1);
 
                         var worksheet6 = excelPackage.Workbook.Worksheets.Add("Spot listing");
                         var list = _allMediaPlans.Where(mpTuple => mpTuple.MediaPlan.Insertations > 0 && _selectedChannels.Any(ch => ch.chid == mpTuple.MediaPlan.chid)).ToList();

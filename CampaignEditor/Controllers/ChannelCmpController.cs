@@ -23,9 +23,9 @@ namespace CampaignEditor.Controllers
             return await _repository.GetChannelCmpByIds(channelCmpDTO.cmpid, channelCmpDTO.plid);
         }
 
-        public async Task<ChannelCmpDTO> GetChannelCmpByIds(int cmpid, int plid)
+        public async Task<ChannelCmpDTO> GetChannelCmpByIds(int cmpid, int chid)
         {
-            return await _repository.GetChannelCmpByIds(cmpid, plid);
+            return await _repository.GetChannelCmpByIds(cmpid, chid);
         }
 
         public async Task<IEnumerable<ChannelCmpDTO>> GetChannelCmpsByCmpid(int id)

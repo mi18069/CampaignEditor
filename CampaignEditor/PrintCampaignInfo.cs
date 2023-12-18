@@ -59,7 +59,7 @@ namespace CampaignEditor
 
         }
 
-        public async Task PrintData(int cmpid, ExcelWorksheet worksheet, int rowOff = 0, int colOff = 0)
+        public async Task PrintData(int cmpid, IEnumerable<ChannelDTO> selectedChannels, ExcelWorksheet worksheet, int rowOff = 0, int colOff = 0)
         {
             int[] moved = new int[] { 0, 0 }; // How much each grid takes space
             int[] offset = new int[] { rowOff, colOff }; // How much each grid takes space
@@ -90,8 +90,17 @@ namespace CampaignEditor
             moved = PopulateSpotsWorksheet(worksheet, spots.ToList(), rowOff + offset[0], colOff + offset[1]);
             offset[1] += moved[1] + colSpace;
 
-            var channelCmps = await _channelCmpController.GetChannelCmpsByCmpid(cmpid);
+            /*var channelCmps = await _channelCmpController.GetChannelCmpsByCmpid(cmpid);
             moved = await(PopulateChannelsWorksheet(worksheet, channelCmps.ToList(), rowOff + offset[0], colOff + offset[1]));
+            offset[1] += moved[1] + colSpace;*/
+
+            var channelCmps = new List<ChannelCmpDTO>();
+            foreach (var channel in selectedChannels)
+            {
+                var channelCmp = await _channelCmpController.GetChannelCmpByIds(campaign.cmpid, channel.chid);
+                channelCmps.Add(channelCmp);
+            }
+            moved = await (PopulateChannelsWorksheet(worksheet, channelCmps, rowOff + offset[0], colOff + offset[1]));
             offset[1] += moved[1] + colSpace;
 
         }
