@@ -85,7 +85,8 @@ namespace CampaignEditor
             DateTime endDate = TimeFormat.YMDStringToDateTime(_campaign.cmpedate);
 
             List<string> columnHeaders = new List<string> { "Date", "Channel", "Program", "Position", "Start time",
-            "End time", "Block time", "Type", "Amr1", "Amr% 1", "Amr1 Trim", "Amr2", "Amr% 2", "Amr2 Trim", "Amr3","Amr% 3","Amr3 Trim","Affinity","CPSP","Prog coef", "Dp coef", "Seas coef", "Sec coef", "Length", "Spot"};
+            "End time", "Block time", "Type", "Amr1", "Amr% 1", "Amr1 Trim", "Amr2", "Amr% 2", "Amr2 Trim", "Amr3",
+            "Amr% 3","Amr3 Trim","Affinity","CPSP","Prog coef", "Dp coef", "Seas coef", "Sec coef", "Length", "Spot"};
 
             int numOfColumns = columnHeaders.Count;
 

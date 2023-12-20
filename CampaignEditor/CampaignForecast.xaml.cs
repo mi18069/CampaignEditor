@@ -56,8 +56,9 @@ namespace CampaignEditor.UserControls
 
         private readonly IAbstractFactory<AddSchema> _factoryAddSchema;
         private readonly IAbstractFactory<AMRTrim> _factoryAmrTrim;
-        private readonly IAbstractFactory<PrintCampaignInfo> _factoryPrintCmpInfo;
+        private readonly PrintCampaignInfo _factoryPrintCmpInfo;
         private readonly Listing _factoryListing;
+        private readonly PrintForecast _factoryPrintForecast;
 
 
         private SelectedMPGoals SelectedMediaPlan = new SelectedMPGoals();
@@ -117,7 +118,8 @@ namespace CampaignEditor.UserControls
             IAbstractFactory<MediaPlanConverter> factoryMpConverter,
             IAbstractFactory<MediaPlanTermConverter> factoryMpTermConverter,
             IAbstractFactory<PrintCampaignInfo> factoryPrintCmpInfo,
-            IAbstractFactory<Listing> factoryListing)
+            IAbstractFactory<Listing> factoryListing,
+            IAbstractFactory<PrintForecast> factoryPrintForecast)
         {
             this.DataContext = this;
 
@@ -136,8 +138,9 @@ namespace CampaignEditor.UserControls
 
             _factoryAddSchema = factoryAddSchema;
             _factoryAmrTrim = factoryAmrTrim;
-            _factoryPrintCmpInfo = factoryPrintCmpInfo;
+            _factoryPrintCmpInfo = factoryPrintCmpInfo.Create();
             _factoryListing = factoryListing.Create();
+            _factoryPrintForecast = factoryPrintForecast.Create();
 
             _mpConverter = factoryMpConverter.Create();
             _mpTermConverter = factoryMpTermConverter.Create();
@@ -264,11 +267,25 @@ namespace CampaignEditor.UserControls
         private void SubscribeControllers()
         {
             SubscribeDataGridControllers();
-            //SubscribeSGGridControllers();
             SubscribeSWGGridControllers();
-            SubscribeSDGGridControllers();         
+            SubscribeSDGGridControllers();
+            SubscribePrintForecastControllers();
         }
 
+        private void SubscribePrintForecastControllers()
+        {
+            _factoryPrintForecast.lvChannels = lvChannels;
+            _factoryPrintForecast.cgGrid = cgGrid;
+            _factoryPrintForecast.mpGrid = dgMediaPlans;
+            _factoryPrintForecast.sdgGrid = sdgGrid;
+            _factoryPrintForecast.sgGrid = sgGrid;
+            _factoryPrintForecast.swgGrid = swgGrid;
+            _factoryPrintForecast.factoryListing = _factoryListing;
+            _factoryPrintForecast.factoryPrintCmpInfo = _factoryPrintCmpInfo;
+            _factoryPrintForecast._allMediaPlans = _allMediaPlans;
+            _factoryPrintForecast._campaign = _campaign;
+
+        }
 
         private void SubscribeDataGridControllers()
         {
@@ -511,6 +528,7 @@ namespace CampaignEditor.UserControls
             await InitializeDataGrid();
             await InitializeCGGrid();
             await InitializeGrids();
+            _factoryPrintForecast.Initialize();
         }
 
         public async Task InitializeGrids()
@@ -942,7 +960,6 @@ namespace CampaignEditor.UserControls
         private void FillLvChannels()
         {
             lvChannels.ItemsSource = _channels;
-
         }
 
         public void FillCbVersions()
@@ -1513,98 +1530,11 @@ namespace CampaignEditor.UserControls
         #endregion
 
         private async void btnExport_Click(object sender, RoutedEventArgs e)
-        {         
-            Application.Current.Dispatcher.Invoke(DispatcherPriority.ApplicationIdle, new Action(async () =>
-            {
-                using (var memoryStream = new MemoryStream())
-                {
-                    ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
-                    using (var excelPackage = new ExcelPackage(memoryStream))
-                    {
-
-                        // ... rest of the code to populate the worksheet ...
-                        // Create a new worksheet
-                        var worksheet0 = excelPackage.Workbook.Worksheets.Add("Campaign Info");
-                        var f = _factoryPrintCmpInfo.Create();
-                        await f.PrintData(_campaign.cmpid, _selectedChannels, worksheet0, 0, 0);
-
-                        var worksheet1 = excelPackage.Workbook.Worksheets.Add("Program Schema");
-                        dgMediaPlans.PopulateWorksheet(worksheet1, 0, 0);
-
-                        var worksheet2 = excelPackage.Workbook.Worksheets.Add("By Weeks 1");
-                        sgGrid.PopulateWorksheet(worksheet2, 1, 1);
-
-                        var worksheet3 = excelPackage.Workbook.Worksheets.Add("By Weeks 2");
-                        swgGrid.PopulateWorksheet(worksheet3, 1, 1);
-
-                        var worksheet4 = excelPackage.Workbook.Worksheets.Add("By Days");
-                        sdgGrid.PopulateWorksheet(worksheet4, 1, 1);
-
-                        var worksheet5 = excelPackage.Workbook.Worksheets.Add("Channel Goals");
-                        cgGrid.PopulateWorksheet(_selectedChannels, worksheet5, 1, 1);
-
-                        var worksheet6 = excelPackage.Workbook.Worksheets.Add("Spot listing");
-                        var list = _allMediaPlans.Where(mpTuple => mpTuple.MediaPlan.Insertations > 0 && _selectedChannels.Any(ch => ch.chid == mpTuple.MediaPlan.chid)).ToList();
-                        await _factoryListing.PopulateWorksheet(list, worksheet6, 0, 0);
-
-                        // Save the Excel package to a memory stream
-                        excelPackage.SaveAs(memoryStream);
-                        // Set the position of the memory stream back to the beginning
-                        memoryStream.Position = 0;
-
-                        // Show a dialog to the user for saving or opening the Excel file
-                        var saveFileDialog = new Microsoft.Win32.SaveFileDialog
-                        {
-                            Filter = "Excel Files (*.xlsx)|*.xlsx",
-                            DefaultExt = "xlsx"
-                        };
-
-                        SaveFile(saveFileDialog, memoryStream);
-                    }
-
-                }
-
-            }));
-
-        }
-
-        private void SaveFile(SaveFileDialog saveFileDialog, MemoryStream memoryStream)
         {
-
-            if (saveFileDialog.ShowDialog() == true)
-            {
-                try
-                {
-                    // Save the memory stream to a file
-                    File.WriteAllBytes(saveFileDialog.FileName, memoryStream.ToArray());
-
-                    try
-                    {
-                        string filePath = saveFileDialog.FileName;
-
-                        // Open the saved Excel file using the default associated program
-                        Process.Start(new ProcessStartInfo(filePath) { UseShellExecute = true });
-                    }
-                    catch
-                    {
-                        MessageBox.Show("Unable to open Excel file",
-                        "Result: ", MessageBoxButton.OK, MessageBoxImage.Error);
-                    }
-
-                }
-                catch (IOException ex)
-                {
-                    MessageBox.Show("Unable to change opened Excel file",
-                        "Result: ", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-                catch
-                {
-                    MessageBox.Show("Unable to make Excel file",
-                        "Result: ", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-            }
-
+            _factoryPrintForecast.CheckFields();
+            _factoryPrintForecast.ShowDialog();
         }
+
 
         private void btnSelectChannels_Click(object sender, RoutedEventArgs e)
         {
@@ -1635,6 +1565,14 @@ namespace CampaignEditor.UserControls
                 dgMediaPlans.filterByIns = false;
                 dgMediaPlans.FilterByInsChanged();
             }
+        }
+
+        public bool Window_Closing()
+        {          
+            _factoryPrintForecast.shouldClose = true;
+            _factoryPrintForecast.Close();
+
+            return true;
         }
     }
    

@@ -50,7 +50,7 @@ namespace CampaignEditor.UserControls
         string lastSpotCell = "";
 
         // number of frozen columns
-        int mediaPlanColumns = 29;
+        public int mediaPlanColumns = 29;
 
         double dataColumnWidth = 51;
 

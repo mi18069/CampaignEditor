@@ -7,5 +7,6 @@ namespace Database.DTOs.ChannelDTO
             : base(chid, chname, chactive, chrdsid, chsname, shid, chrfid)
         {
         }
+
     }
 }

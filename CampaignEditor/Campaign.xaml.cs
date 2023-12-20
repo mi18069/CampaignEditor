@@ -94,13 +94,15 @@ namespace CampaignEditor
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
 
-            bool shouldClose = true;
+            bool shouldCloseOverview = true;
+            bool shouldCloseForecast = true;
             if (factoryCampaignOverview != null)
             {
-                shouldClose = factoryCampaignOverview.Window_Closing();
+                shouldCloseOverview = factoryCampaignOverview.Window_Closing();
+                shouldCloseForecast = factoryCampaignOverview.Window_Closing();
                 CampaignEventLinker.RemoveCampaign(_campaign.cmpid);
             }
-            if (!shouldClose)
+            if (!shouldCloseOverview && !shouldCloseForecast)
             {
                 e.Cancel = true;
             }

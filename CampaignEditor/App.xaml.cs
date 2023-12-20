@@ -62,6 +62,7 @@ namespace CampaignEditor
                     services.AddFormFactory<RulerTimeline>();
                     services.AddFormFactory<DuplicateCampaign>();
                     services.AddFormFactory<Listing>();
+                    services.AddFormFactory<PrintForecast>();
                     services.AddScoped<IDataContext, DataContext>();
                     // Add services
                     Extensions.UserExtensions.AddUserExtensions(services);
