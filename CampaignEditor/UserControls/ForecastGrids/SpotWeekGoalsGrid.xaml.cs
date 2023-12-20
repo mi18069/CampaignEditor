@@ -68,6 +68,7 @@ namespace CampaignEditor.UserControls
             _spots.Clear();
             _spotLengths.Clear();
             _channels.Clear();
+            _channelGrids.Clear();
             ugChannels.Children.Clear();
             ugGoals.Children.Clear();
             ugWeeks.Children.Clear();
@@ -342,7 +343,10 @@ namespace CampaignEditor.UserControls
         #endregion
         private void CreateOutboundHeaders()
         {
-
+            ugWeeks.Children.Clear();
+            ugChannels.Children.Clear();
+            ugGoals.Children.Clear();
+            ugSpots.Children.Clear();
             // Add headers
             // Weeks
             ugWeeks.Rows = lastWeekNum - firstWeekNum + 1 + 1; // last + 1 is for Total footer 
@@ -411,7 +415,6 @@ namespace CampaignEditor.UserControls
                 }
 
             }
-
 
             ugChannels.Columns = (_channels.Count); 
             ugGoals.Columns = ugChannels.Columns * 3;

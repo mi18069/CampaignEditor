@@ -1,20 +1,17 @@
 ﻿using Database.DTOs.ChannelDTO;
 using Database.DTOs.SpotDTO;
 using Database.Entities;
-using Microsoft.AspNetCore.Mvc;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Threading.Channels;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
-using System.Windows.Markup;
 
 namespace CampaignEditor.UserControls
 {
@@ -45,14 +42,19 @@ namespace CampaignEditor.UserControls
         }
 
         public void Initialize()
-        {           
+        {
+            _channelWeekGrids.Clear();
+
             CreateOutboundHeaders();
             SetWidth();
         }
       
         private void CreateOutboundHeaders()
         {
-
+            ugWeeks.Children.Clear();
+            ugChannels.Children.Clear();
+            ugGoals.Children.Clear();
+            ugSpots.Children.Clear();
             // Add headers
             // Weeks
             ugWeeks.Columns = lastWeekNum - firstWeekNum + 1 + 1; // last + 1 is for Total footer 

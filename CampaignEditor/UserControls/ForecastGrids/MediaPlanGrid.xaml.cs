@@ -21,9 +21,16 @@ using Database.DTOs.ChannelDTO;
 using OfficeOpenXml;
 using System.Windows.Threading;
 using CampaignEditor.Converters;
-using OfficeOpenXml.Style;
+using Brushes = System.Windows.Media.Brushes;
 using Border = System.Windows.Controls.Border;
+using Style = System.Windows.Style;
+using MenuItem = System.Windows.Controls.MenuItem;
+using Action = System.Action;
 using CampaignEditor.Helpers;
+using System.Drawing;
+using OfficeOpenXml.FormulaParsing;
+using OfficeOpenXml.Style;
+using Microsoft.Office.Interop.Excel;
 
 namespace CampaignEditor.UserControls
 {
@@ -92,10 +99,10 @@ namespace CampaignEditor.UserControls
         DateTime endDate;
 
         private bool _canUserEdit = false;
-        public bool CanUserEdit 
+        public bool CanUserEdit
         {
-            get { return _canUserEdit; } 
-            set 
+            get { return _canUserEdit; }
+            set
             {
                 _canUserEdit = value;
                 dgMediaPlans.IsManipulationEnabled = CanUserEdit;
@@ -175,7 +182,7 @@ namespace CampaignEditor.UserControls
                                            mediaPlan.Insertations > 0 &&
                                            mpTerms.Any(t => t != null && _filteredDays.Contains(t.Date.DayOfWeek));
                 }
-                
+
                 return _selectedChannels.Any(c => c.chid == mediaPlan.chid) &&
                                            mpTerms.Any(t => t != null && _filteredDays.Contains(t.Date.DayOfWeek));
             };
@@ -203,15 +210,15 @@ namespace CampaignEditor.UserControls
         private void InitializeTotalGrid()
         {
             TimeSpan duration = endDate - startDate;
-            int numberOfDays = duration.Days + 1 ;
+            int numberOfDays = duration.Days + 1;
 
             totals.Clear();
 
-            for (int i=0; i<numberOfDays; i++)
+            for (int i = 0; i < numberOfDays; i++)
             {
                 var ti = new TotalItem();
                 ti.Total = 0;
-                totals.Add(ti);              
+                totals.Add(ti);
             }
 
             icTotals.ItemsSource = totals;
@@ -226,7 +233,7 @@ namespace CampaignEditor.UserControls
             TimeSpan duration = endDate - startDate;
             int numberOfDays = duration.Days + 1;
             int numOfColumns = dgMediaPlans.Columns.Count() - numberOfDays;
-            for (int i=0; i< frozenColumnsNum; i++)
+            for (int i = 0; i < frozenColumnsNum; i++)
             {
                 var column = dgMediaPlans.Columns[i] as DataGridColumn;
 
@@ -234,7 +241,7 @@ namespace CampaignEditor.UserControls
                 {
                     width += column.ActualWidth;
                 }
-              
+
             }
 
             lblTotal.Width = width;
@@ -245,7 +252,7 @@ namespace CampaignEditor.UserControls
 
         private void dgMediaPlans_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            Dispatcher.BeginInvoke(new Action(() => SetTotalsWidth()), DispatcherPriority.ContextIdle);                  
+            Dispatcher.BeginInvoke(new Action(() => SetTotalsWidth()), DispatcherPriority.ContextIdle);
         }
 
         private void DataGridColumnHeader_SizeChanged(object sender, SizeChangedEventArgs e)
@@ -285,13 +292,13 @@ namespace CampaignEditor.UserControls
         private int CountInsByDateIndex(int dateIndex)
         {
             int count = 0;
-     
+
             foreach (MediaPlanTuple mpTuple in dgMediaPlans.Items)
             {
                 try
                 {
-                    if (mpTuple.Terms.Count() > dateIndex && 
-                        mpTuple.Terms[dateIndex] != null &&                      
+                    if (mpTuple.Terms.Count() > dateIndex &&
+                        mpTuple.Terms[dateIndex] != null &&
                         mpTuple.Terms[dateIndex].Spotcode != null)
                     {
                         count += mpTuple.Terms[dateIndex].Spotcode.Trim().Count();
@@ -358,7 +365,7 @@ namespace CampaignEditor.UserControls
             {
                 // Create a new DataGridTextColumn
                 DataGridTextColumn column = new DataGridTextColumn();
-   
+
                 // Set the column header to the date
                 column.Header = date.ToString("dd.MM.yy");
 
@@ -471,11 +478,11 @@ namespace CampaignEditor.UserControls
             SimulateTextInput(lastSpotCell);
         }
 
-        
+
 
         private async void OnCellPreviewTextInput(object sender, TextCompositionEventArgs e)
         {
-            if (!_canUserEdit) 
+            if (!_canUserEdit)
                 return;
 
             DataGridCell cell = sender as DataGridCell;
@@ -761,7 +768,7 @@ namespace CampaignEditor.UserControls
             try
             {
                 mpTerm = mpTerms[columnIndex - frozenColumnsNum];
-            
+
             }
             catch
             {
@@ -813,7 +820,7 @@ namespace CampaignEditor.UserControls
                     {
                         await _converter.CoefsChanged(_mediaPlanToUpdate);
                     }
-                    else if(_mediaPlanToUpdate.Stime != _mediaPlanOldValues.Stime ||
+                    else if (_mediaPlanToUpdate.Stime != _mediaPlanOldValues.Stime ||
                             _mediaPlanToUpdate.Etime != _mediaPlanOldValues.Etime ||
                             _mediaPlanToUpdate.Blocktime != _mediaPlanOldValues.Blocktime)
                     {
@@ -828,7 +835,7 @@ namespace CampaignEditor.UserControls
                                     var timeFormat = TimeFormat.ReturnGoodTimeFormat(_mediaPlanToUpdate.Blocktime.Trim());
                                     _mediaPlanToUpdate.Blocktime = timeFormat == "" ? null : timeFormat;
                                     await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(_mpConverter.ConvertToDTO(_mediaPlanToUpdate)));
-                                    
+
                                     OnUpdatedMediaPlan(_mediaPlanToUpdate);
                                 }
 
@@ -959,10 +966,10 @@ namespace CampaignEditor.UserControls
 
                         menu.Items.Add(trimAmr);
                     }
-                    
+
                 }
 
-               
+
                 Schema.ContextMenu = menu;
             }
         }
@@ -984,7 +991,7 @@ namespace CampaignEditor.UserControls
             async void handler(object sender, RoutedEventArgs e)
             {
                 var f = _factoryAddSchema.Create();
-                
+
             }
 
             return handler;
@@ -1014,7 +1021,7 @@ namespace CampaignEditor.UserControls
             }
 
             return handler;
-        }     
+        }
 
         private bool IsCellInDataGridHeader(DependencyObject obj)
         {
@@ -1064,155 +1071,307 @@ namespace CampaignEditor.UserControls
             RecalculateMediaPlan?.Invoke(this, EventArgs.Empty);
         }
 
-        public void PopulateWorksheet(ExcelWorksheet worksheet, int rowOff = 0, int colOff = 0)
+        Dictionary<string, System.Drawing.Color> colors = new Dictionary<string, System.Drawing.Color>();
+        private void FillColorsDictionary()
+        {
+            var headerColor = System.Drawing.ColorTranslator.FromHtml("#DAA520");
+            colors.Add("header", headerColor);
+
+            var term = System.Drawing.ColorTranslator.FromHtml(Brushes.LightGreen.ToString());
+            colors.Add("term", term);
+
+            var nullTerm = System.Drawing.ColorTranslator.FromHtml(Brushes.LightGoldenrodYellow.ToString());
+            colors.Add("null", nullTerm);
+
+            var weekday = System.Drawing.Color.OrangeRed;
+            colors.Add("weekday", weekday);
+
+            var day = System.Drawing.Color.Black;
+            colors.Add("day", day);
+        }
+
+        public void PopulateWorksheet(bool[] visibleColumns, ExcelWorksheet worksheet, int rowOff = 1, int colOff = 1)
+        {
+            var selectedChannels = _selectedChannels;
+            var selectedChannelsChids = selectedChannels.Select(ch => ch.chid);
+            var mpTuples = _allMediaPlans.Where(mpTuple => selectedChannelsChids.Contains(mpTuple.MediaPlan.chid));
+
+            if (colors.Count == 0)
+            {
+                FillColorsDictionary();
+            }
+
+            AddColumnHeaders(visibleColumns, worksheet, rowOff, colOff);
+            int visibleColumnsNum = visibleColumns.Count(v => v);
+            AddDateHeaders(worksheet, rowOff, colOff + visibleColumnsNum);
+
+            int rowOffset = 1;
+            foreach (var mpTuple in mpTuples)
+            {
+                AddMpTuple(mpTuple, visibleColumns, worksheet, rowOff + rowOffset, colOff);
+                rowOffset += 1;
+            }
+
+            AddTotals(worksheet, rowOff + rowOffset, colOff + visibleColumnsNum);
+
+        }
+
+        private void AddTotals(ExcelWorksheet worksheet, int rowOff, int colOff)
         {
 
-            var dataGrid = dgMediaPlans;
-
-            // Disable row virtualization
-            dataGrid.EnableRowVirtualization = false;
-            dataGrid.EnableColumnVirtualization = false;
-
-            //Unselect all rows
-            dataGrid.SelectedItem = null;
-
-            // Wait for the dispatcher to finish processing pending messages
-            Application.Current.Dispatcher.Invoke(DispatcherPriority.ApplicationIdle, new Action(() =>
+            int colOffset = 0;
+            for (int i = 0; i < totals.Count; i++)
             {
-                // Get the visible columns from the DataGrid
-                var visibleColumns = dataGrid.Columns.Where(c => c.Visibility == Visibility.Visible).ToList();
+                var excelCell = worksheet.Cells[rowOff, colOff + colOffset];
+                excelCell.Value = totals[i].Total.ToString();
+                SetBackgroundColor(excelCell, colors["header"]);
+                colOffset += 1;
+            }
+        }       
 
-                // Set the column headers in Excel
-                for (int columnIndex = 0; columnIndex < visibleColumns.Count; columnIndex++)
+        private void AddColumnHeaders(bool[] visibleColumns, ExcelWorksheet worksheet, int rowOff, int colOff)
+        {
+            string[] columnHeaders = new string[]{"Channel", "Program", "Position", "Start time",
+            "End time", "Block time", "Type", "Special", "Amr1", "Amr% 1", "Amr1 Trim", "Amr2", "Amr% 2", "Amr2 Trim",
+            "Amr3", "Amr% 3","Amr3 Trim", "Amr sale", "Amr% sale", "Amr sale Trim",
+            "Affinity","Prog coef", "Dp coef", "Seas coef", "Sec coef", "CPP", "Ins", "CPSP", "Price"};
+
+            int colOffset = 0;
+
+            for (int i = 0; i < visibleColumns.Count(); i++)
+            {
+                if (visibleColumns[i])
                 {
-                    var column = visibleColumns[columnIndex];
-                    worksheet.Cells[1 + rowOff, columnIndex + 1 + colOff].Value = column.Header;
-                    worksheet.Cells[1 + rowOff, columnIndex + 1 + colOff].Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
-                    worksheet.Cells[1 + rowOff, columnIndex + 1 + colOff].Style.Fill.BackgroundColor.SetColor(System.Drawing.ColorTranslator.FromHtml("#DAA520"));
+                    worksheet.Cells[rowOff, colOff + colOffset].Value = columnHeaders[i];
+                    worksheet.Cells[rowOff, colOff + colOffset].Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                    worksheet.Cells[rowOff, colOff + colOffset].Style.Fill.BackgroundColor.SetColor(colors["header"]);
+                    colOffset += 1;
+                }
+            }
+        }
+        private void AddDateHeaders(ExcelWorksheet worksheet, int rowOff, int colOff)
+        {
+            DateOnly startDate = DateOnly.FromDateTime(TimeFormat.YMDStringToDateTime(_campaign.cmpsdate));
+            DateOnly endDate = DateOnly.FromDateTime(TimeFormat.YMDStringToDateTime(_campaign.cmpedate));
+
+            int colOffset = 0;
+
+            for (var date = startDate; date <= endDate; date = date.AddDays(1))
+            {
+                var excelCell = worksheet.Cells[rowOff, colOff + colOffset];
+                excelCell.Value = date.ToShortDateString();
+                SetBackgroundColor(excelCell, colors["header"]);               
+                colOffset += 1;
+            }
+        }
+
+        private void AddMpTuple(MediaPlanTuple mpTuple, bool[] visibleColumns, ExcelWorksheet worksheet, int rowOff, int colOff)
+        {
+            int colOffset = 0;
+            MediaPlan mediaPlan = mpTuple.MediaPlan;
+            if (visibleColumns[0])
+            {
+                worksheet.Cells[rowOff, colOff + colOffset].Value = chidChannelDictionary[mediaPlan.chid];
+                colOffset += 1;
+            }
+            if (visibleColumns[1])
+            {
+                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Name;
+                colOffset += 1;
+            }
+            if (visibleColumns[2])
+            {
+                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Position;
+                colOffset += 1;
+            }
+            if (visibleColumns[3])
+            {
+                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Stime;
+                colOffset += 1;
+            }
+            if (visibleColumns[4])
+            {
+                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Etime;
+                colOffset += 1;
+            }
+            if (visibleColumns[5])
+            {
+                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Blocktime;
+                colOffset += 1;
+            }
+            if (visibleColumns[6])
+            {
+                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Type;
+                colOffset += 1;
+            }
+            if (visibleColumns[7])
+            {
+                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Special;
+                colOffset += 1;
+            }
+            if (visibleColumns[8])
+            {
+                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Amr1;
+                colOffset += 1;
+            }
+            if (visibleColumns[9])
+            {
+                worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.Amrp1, 2);
+                colOffset += 1;
+            }
+            if (visibleColumns[10])
+            {
+                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Amr1trim;
+                colOffset += 1;
+            }
+            if (visibleColumns[11])
+            {
+                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Amr2;
+                colOffset += 1;
+            }
+            if (visibleColumns[12])
+            {
+                worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.Amrp2, 2);
+                colOffset += 1;
+            }
+            if (visibleColumns[13])
+            {
+                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Amr2trim;
+                colOffset += 1;
+            }
+            if (visibleColumns[14])
+            {
+                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Amr3;
+                colOffset += 1;
+            }
+            if (visibleColumns[15])
+            {
+                worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.Amrp3, 2);
+                colOffset += 1;
+            }
+            if (visibleColumns[16])
+            {
+                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Amr3trim;
+                colOffset += 1;
+            }
+            if (visibleColumns[17])
+            {
+                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Amrsale;
+                colOffset += 1;
+            }
+            if (visibleColumns[18])
+            {
+                worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.Amrpsale, 2);
+                colOffset += 1;
+            }
+            if (visibleColumns[19])
+            {
+                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Amrsaletrim;
+                colOffset += 1;
+            }
+            if (visibleColumns[20])
+            {
+                worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.Affinity, 2);
+                colOffset += 1;
+            }
+            if (visibleColumns[21])
+            {
+                worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.Progcoef, 2);
+                colOffset += 1;
+            }
+            if (visibleColumns[22])
+            {
+                worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.Dpcoef, 2);
+                colOffset += 1;
+            }
+            if (visibleColumns[23])
+            {
+                worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.Seascoef, 2);
+                colOffset += 1;
+            }
+            if (visibleColumns[24])
+            {
+                worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.Seccoef, 2);
+                colOffset += 1;
+            }
+            if (visibleColumns[25])
+            {
+                worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.Cpp, 2);
+                colOffset += 1;
+            }
+            if (visibleColumns[26])
+            {
+                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Insertations;
+                colOffset += 1;
+            }
+            if (visibleColumns[27])
+            {
+                worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.PricePerSecond, 2);
+                colOffset += 1;
+            }
+            if (visibleColumns[28])
+            {
+                worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.Price, 2);
+                colOffset += 1;
+            }
+
+            AddMpTerms(mpTuple.Terms, worksheet, rowOff, colOff + colOffset);
+        }
+
+        private void AddMpTerms(IEnumerable<MediaPlanTerm> mpTerms, ExcelWorksheet worksheet, int rowOff, int colOff)
+        {
+            int colOffset = 0;
+
+            DateOnly date = DateOnly.FromDateTime(TimeFormat.YMDStringToDateTime(_campaign.cmpsdate));
+
+            foreach (var term in mpTerms)
+            {
+                var excelCell = worksheet.Cells[rowOff, colOff + colOffset];
+
+                if (term == null)
+                {
+                    excelCell.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                    SetBackgroundColor(excelCell, colors["null"]);
+                }
+                else
+                {
+                    excelCell.Value = term.Spotcode;
+                    SetBackgroundColor(excelCell, colors["term"]);
                 }
 
-                // Set the cell values and colors in Excel
-                for (int i=0, rowIndex = 0; i < dataGrid.Items.Count; rowIndex++, i++)
+                if (date.DayOfWeek == DayOfWeek.Saturday || date.DayOfWeek == DayOfWeek.Sunday)
                 {
-                    var dataItem = (MediaPlanTuple)dataGrid.Items[i];
-                    /*if (dataItem.MediaPlan.Insertations == 0)
-                    {
-                        rowIndex --;
-                        continue;
-                    }*/
-                    for (int columnIndex = 0; columnIndex < visibleColumns.Count; columnIndex++)
-                    {
-                        var column = visibleColumns[columnIndex];
-                        var cellContent = column.GetCellContent(dataItem);
-                        if (cellContent is TextBlock textBlock)
-                        {
-                            // Try to parse the text to a double
-                            if (double.TryParse(textBlock.Text, out double numericValue))
-                            {
-                                // If successful, write the numeric value to the Excel cell
-                                worksheet.Cells[rowIndex + 2 + rowOff, columnIndex + 1 + colOff].Value = numericValue;
-                            }
-                            else
-                            {
-                                // If not a valid number, write the text as it is
-                                worksheet.Cells[rowIndex + 2 + rowOff, columnIndex + 1 + colOff].Value = textBlock.Text;
-                            }
-                        }
-                        else if (cellContent is CheckBox checkbox)
-                        {
-                            var cellValue = checkbox.IsChecked == true ? "yes" : "no" ;
-                            worksheet.Cells[rowIndex + 2 + rowOff, columnIndex + 1 + colOff].Value = cellValue;
-
-                        }
-                        else if (cellContent is ComboBox combobox)
-                        {
-                            var cellValue = combobox.Text.Trim();
-                            worksheet.Cells[rowIndex + 2 + rowOff, columnIndex + 1 + colOff].Value = cellValue;
-
-                        }
-                        else
-                        {
-                            worksheet.Cells[rowIndex + 2 + rowOff, columnIndex + 1 + colOff].Value = "";
-                        }
-
-                        // Set the cell color
-                        var cell = FindParentDataGridCell(cellContent) as DataGridCell;
-                        if (cell != null)
-                        {
-                            var cellColor = cell.Background;
-                            if (cellColor == Brushes.Green)
-                            {
-                                cellColor = Brushes.LightGreen;
-                            }
-                            else if(cellColor == Brushes.Goldenrod)
-                            {
-                                cellColor = Brushes.LightGoldenrodYellow;
-                            }
-                            var cellBorderColor = cell.BorderBrush;
-
-                            var drawingColor = System.Drawing.Color.Black;
-                            var drawingThickness = ExcelBorderStyle.Thin;
-
-                            if (cellBorderColor == Brushes.OrangeRed)
-                            {
-                                drawingColor = System.Drawing.Color.OrangeRed;
-                                drawingThickness = ExcelBorderStyle.Thick;
-                            }
-
-
-                            if (cellColor != null)
-                            {
-                                var excelColor = System.Drawing.ColorTranslator.FromHtml(cellColor.ToString());
-                                var excelCell = worksheet.Cells[rowIndex + 2 + rowOff, columnIndex + 1 + colOff];
-                                excelCell.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
-                                excelCell.Style.Fill.BackgroundColor.SetColor(excelColor);
-
-                                excelCell.Style.HorizontalAlignment = ExcelHorizontalAlignment.Left;
-                                excelCell.Style.Border.Left.Style = drawingThickness;
-                                excelCell.Style.Border.Left.Color.SetColor(drawingColor);
-                                excelCell.Style.Border.Right.Style = drawingThickness;
-                                excelCell.Style.Border.Right.Color.SetColor(drawingColor);
-                                excelCell.Style.Border.Top.Style = drawingThickness;
-                                excelCell.Style.Border.Top.Color.SetColor(drawingColor);
-                                excelCell.Style.Border.Bottom.Style = drawingThickness;
-                                excelCell.Style.Border.Bottom.Color.SetColor(drawingColor);
-                            }
-                            double cellHeight = cell.ActualHeight;
-                            double cellWidth = cell.ActualWidth / 7;
-
-                            // Set the size of the Excel cell
-                            worksheet.Row(rowIndex + 2 + rowOff).Height = cellHeight;
-                            worksheet.Column(columnIndex + 1 + colOff).Width = cellWidth;
-                            //worksheet.Row(rowIndex + 2 + rowOff).OutlineLevel = 2;
-
-                        }
-
-                    }
+                    SetBorderColor(excelCell, ExcelBorderStyle.Thick, colors["weekday"]);
+                }
+                else
+                {
+                    SetBorderColor(excelCell, ExcelBorderStyle.Thin, colors["day"]);
                 }
 
-                // Add totals row
-                var totalsRow = dataGrid.Items.Count + 1;
-                int visibleMpColumns = 0;
-                for (int i=0; i<frozenColumnsNum; i++)
-                {
-                    var column = dgMediaPlans.Columns[i];
-                    if (column.Visibility == Visibility.Visible)
-                        visibleMpColumns += 1;
-                }
+                date = date.AddDays(1);
+                colOffset += 1;
+            }
+        }
 
-                for (int i = 0; i<totals.Count; i++)
-                {
-                    var columnIndex = visibleMpColumns + i;
-                    worksheet.Cells[1 + rowOff + totalsRow, columnIndex + 1 + colOff].Value = totals[i].Total.ToString();
-                    worksheet.Cells[1 + rowOff + totalsRow, columnIndex + 1 + colOff].Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
-                    worksheet.Cells[1 + rowOff + totalsRow, columnIndex + 1 + colOff].Style.Fill.BackgroundColor.SetColor(System.Drawing.ColorTranslator.FromHtml("#DAA520"));
-                }
-            }));
+        private void SetBackgroundColor(ExcelRange excelCell, System.Drawing.Color color)
+        {
+            excelCell.Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+            excelCell.Style.Fill.BackgroundColor.SetColor(color);
+        }
 
-            // Disable row virtualization
-            dataGrid.EnableRowVirtualization = true;
-            dataGrid.EnableColumnVirtualization = true;          
+        private void SetBorderColor(ExcelRange excelCell, ExcelBorderStyle thickness, System.Drawing.Color color)
+        {
+            excelCell.Style.Border.Left.Style = thickness;
+            excelCell.Style.Border.Left.Color.SetColor(color);
 
+            excelCell.Style.Border.Right.Style = thickness;
+            excelCell.Style.Border.Right.Color.SetColor(color);
+
+            excelCell.Style.Border.Top.Style = thickness;
+            excelCell.Style.Border.Top.Color.SetColor(color);
+
+            excelCell.Style.Border.Bottom.Style = thickness;
+            excelCell.Style.Border.Bottom.Color.SetColor(color);
         }
 
         private DataGridCell FindParentDataGridCell(FrameworkElement element)

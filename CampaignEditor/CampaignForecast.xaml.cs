@@ -528,7 +528,6 @@ namespace CampaignEditor.UserControls
             await InitializeDataGrid();
             await InitializeCGGrid();
             await InitializeGrids();
-            _factoryPrintForecast.Initialize();
         }
 
         public async Task InitializeGrids()
@@ -1070,6 +1069,8 @@ namespace CampaignEditor.UserControls
 
             sdgGrid.SelectedChannelsChanged(_selectedChannels);
             swgGrid.SelectedChannelsChanged(_selectedChannels);
+            cgGrid.SelectedChannelsChanged(_selectedChannels);
+
         }
 
         #region ContextMenu
@@ -1344,13 +1345,7 @@ namespace CampaignEditor.UserControls
             {
                 await _mediaPlanTermController.DeleteMediaPlanTermByXmpId(mediaPlanDTO.xmpid);
                 var newMediaPlanTerms = await MediaPlanToMPTerm(mediaPlanDTO);
-                /*mediaPlanTuple.Terms.Clear();
-
-                foreach (var mpTerm in newMediaPlanTerms)
-                {
-                    mediaPlanTuple.Terms.Add(mpTerm);
-                }*/
-                mediaPlanTuple.Terms = newMediaPlanTerms;
+                mediaPlanTerms = newMediaPlanTerms;
             }
 
             if (updateSchema)
@@ -1364,10 +1359,9 @@ namespace CampaignEditor.UserControls
 
             await _databaseFunctionsController.StartAMRCalculation(_campaign.cmpid, 40, 40, mediaPlanDTO.xmpid);
 
-            var mpTupleNew = new MediaPlanTuple(mediaPlan, mediaPlanTerms);
             await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(mediaPlanDTO));
             var newMediaPlan = await _mpConverter.ConvertFirstFromDTO(mediaPlanDTO);
-            mediaPlanTuple.MediaPlan = newMediaPlan;
+            var mpTupleNew = new MediaPlanTuple(newMediaPlan, mediaPlanTerms);
 
             _allMediaPlans.Remove(mediaPlanTuple);
             _allMediaPlans.Add(mpTupleNew);
@@ -1412,6 +1406,16 @@ namespace CampaignEditor.UserControls
             }
         }
 
+        private async Task DeleteTermValues(IEnumerable<MediaPlanTerm> terms)
+        {
+            foreach (var term in terms.Where(term => term != null && term.Spotcode != null 
+            && term.Spotcode.Trim().Count() > 0))
+            {
+                foreach (char spotcode in term.Spotcode.Trim())
+                    await UpdatedTerm(term, spotcode);
+            }
+        }
+
         private async void dgMediaPlans_DeleteMediaPlanClicked(object? sender, EventArgs e)
         {
             var mediaPlanTuple = dgMediaPlans.Schema.SelectedItem as MediaPlanTuple;
@@ -1420,6 +1424,7 @@ namespace CampaignEditor.UserControls
                 if (MessageBox.Show($"Delete program\n{mediaPlanTuple.MediaPlan.Name.Trim()}?", "Result",
     MessageBoxButton.OKCancel, MessageBoxImage.Question) == MessageBoxResult.OK)
                 {
+                    await DeleteTermValues(mediaPlanTuple.Terms);
                     _allMediaPlans.Remove(mediaPlanTuple);
                     var mediaPlan = mediaPlanTuple.MediaPlan;
                     await DeleteMPById(mediaPlan.xmpid);
@@ -1531,7 +1536,6 @@ namespace CampaignEditor.UserControls
 
         private async void btnExport_Click(object sender, RoutedEventArgs e)
         {
-            _factoryPrintForecast.CheckFields();
             _factoryPrintForecast.ShowDialog();
         }
 

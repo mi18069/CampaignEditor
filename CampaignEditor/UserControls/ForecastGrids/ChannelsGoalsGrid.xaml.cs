@@ -21,7 +21,7 @@ namespace CampaignEditor.UserControls
         Dictionary<int, ProgramGoals> _dictionary = new Dictionary<int, ProgramGoals>();
         ObservableRangeCollection<ProgramGoals> _values = new ObservableRangeCollection<ProgramGoals>();
         ObservableCollection<MediaPlan> _mediaPlans;
-
+        List<ChannelDTO> _selectedChannels = new List<ChannelDTO>();
         public ChannelsGoalsGrid()
         {
             InitializeComponent();         
@@ -41,6 +41,15 @@ namespace CampaignEditor.UserControls
             SubscribeToMediaPlans();
         }
 
+        public void SelectedChannelsChanged(IEnumerable<ChannelDTO> selectedChannels)
+        {
+            foreach (var channel in selectedChannels)
+            {
+                _selectedChannels.Insert(0, channel);
+            }
+            dgGrid.ItemsSource = _values.Where(pg => _selectedChannels.Select(ch => ch.chid).Contains(pg.Channel.chid));
+        }
+
         private void CalculateGoals()
         {
             ResetDictionaryValues();
@@ -55,7 +64,7 @@ namespace CampaignEditor.UserControls
             }
 
             _values.ReplaceRange(_dictionary.Values);
-            dgGrid.ItemsSource = _values;
+            dgGrid.ItemsSource = _values.Where(pg => _selectedChannels.Select(ch => ch.chid).Contains(pg.Channel.chid));
         }
 
         private void RecalculateGoals(int chid)

@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CampaignEditor"
         mc:Ignorable="d"
-        Title="PrintForecast" Height="500" Width="900" FontSize="20" MaxHeight="600" MaxWidth="1000">
+        Title="PrintForecast" Height="200" Width="600" FontSize="20" MaxHeight="300" MaxWidth="600">
     <Window.Resources>
         <Style x:Key="HiddenHeaderStyle" TargetType="GridViewColumnHeader">
             <Setter Property="Visibility" Value="Collapsed"/>
@@ -27,80 +27,28 @@
             <RowDefinition Height="10" />
         </Grid.RowDefinitions>
 
-        <Grid Grid.Row="1" Grid.Column="1" Margin="20, 0">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="auto"/>
-                <RowDefinition Height="auto"/>
-                <RowDefinition Height="auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-            <Label Grid.Row="0" Content="Channels" />
-            <RadioButton Grid.Row="1" x:Name="rbSelectedChannels" 
-                     Content="Selected Channels" GroupName="Channels" 
-                     VerticalContentAlignment="Center" IsChecked="True"/>
-            <RadioButton Grid.Row="2" x:Name="rbCustomChannels" 
-                     Content="Custom channels" VerticalContentAlignment="Center" GroupName="Channels" IsEnabled="False"/>
-            <ListView Grid.Row="3" x:Name="lvCustomChannels" FontSize="12"
-                      IsEnabled="{Binding IsChecked, ElementName=rbCustomChannels}">
-                <ListView.View>
-                    <GridView ColumnHeaderContainerStyle="{StaticResource HiddenHeaderStyle}">
-                        <GridViewColumn Width="40">
-                            <GridViewColumn.CellTemplate>
-                                <DataTemplate>
-                                    <CheckBox IsChecked="{Binding IsSelected, Mode=TwoWay}"/>
-                                </DataTemplate>
-                            </GridViewColumn.CellTemplate>
-                        </GridViewColumn>
-                        <GridViewColumn DisplayMemberBinding="{Binding chname}"/>
-                    </GridView>
-                </ListView.View>
-            </ListView>
-        </Grid>
-
-
-        <Grid Grid.Row="1" Grid.Column="2">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="auto"/>
-                <RowDefinition Height="auto"/>
-                <RowDefinition Height="auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
-
-            <Label Grid.Row="0" Content="Columns" />
-            <RadioButton Grid.Row="1" x:Name="rbSelectedColumns" 
-                     VerticalContentAlignment="Center" Content="Selected Columns" GroupName="Columns" IsChecked="True"/>
-            <RadioButton Grid.Row="2" x:Name="rbCustomColumns" 
-                     VerticalContentAlignment="Center" Content="Custom Columns" GroupName="Columns"  IsEnabled="False"/>
-            <ScrollViewer Grid.Row="3" IsEnabled="{Binding IsChecked, ElementName=rbCustomColumns}"
-                          HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled"
-                          MaxHeight="250">
-                <WrapPanel x:Name="wpColumns" Orientation="Vertical" ItemWidth="150"/>
-            </ScrollViewer>
-            
-        </Grid>
-
         <Grid Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Margin="0, 20">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="auto"/>
                 <ColumnDefinition Width="auto"/>
                 <ColumnDefinition Width="auto"/>
-                <ColumnDefinition Width="auto"/>
-                <ColumnDefinition Width="auto"/>
-                <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-
-            <CheckBox Grid.Column="0" x:Name="chbMpGrid" Margin="5, 0"
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <CheckBox Grid.Row="0" Grid.Column="0" x:Name="chbMpGrid"  Margin="10, 0"
                   Content="Program Schema" VerticalContentAlignment="Center" IsChecked="True"/>
-            <CheckBox Grid.Column="1" x:Name="chbWeeks1" Margin="10, 0"
-                  Content="Weeks Horizontal" VerticalContentAlignment="Center" IsChecked="True"/>
-            <CheckBox Grid.Column="2" x:Name="chbWeeks2" Margin="10, 0"
-                  Content="Weeks Vertical" VerticalContentAlignment="Center" IsChecked="True"/>
-            <CheckBox Grid.Column="3" x:Name="chbDays" Margin="10, 0"
-                  Content="Days" VerticalContentAlignment="Center" IsChecked="True"/>
-            <CheckBox Grid.Column="4" x:Name="chbChannels" Margin="10, 0"
-                  Content="Channels" VerticalContentAlignment="Center" IsChecked="True"/>
-            <CheckBox Grid.Column="5" x:Name="chbListing" Margin="5, 0"
-                  Content="Listing" VerticalContentAlignment="Center" IsChecked="True"/>
+            <CheckBox Grid.Row="0" Grid.Column="1" x:Name="chbWeeks1" Margin="10, 0"
+                  Content="Weeks Horizontal" VerticalContentAlignment="Center" IsChecked="False"/>
+            <CheckBox Grid.Row="0" Grid.Column="2" x:Name="chbWeeks2" Margin="10, 0"
+                  Content="Weeks Vertical" VerticalContentAlignment="Center" IsChecked="False"/>
+            <CheckBox Grid.Row="1" Grid.Column="0" x:Name="chbDays" Margin="10, 0"
+                  Content="Days" VerticalContentAlignment="Center" IsChecked="False"/>
+            <CheckBox Grid.Row="1" Grid.Column="1" x:Name="chbChannels" Margin="10, 0"
+                  Content="Channels" VerticalContentAlignment="Center" IsChecked="False"/>
+            <CheckBox Grid.Row="1" Grid.Column="2" x:Name="chbListing" Margin="10, 0"
+                  Content="Listing" VerticalContentAlignment="Center" IsChecked="False"/>
         </Grid>
 
         <Button Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" x:Name="btnPrint"

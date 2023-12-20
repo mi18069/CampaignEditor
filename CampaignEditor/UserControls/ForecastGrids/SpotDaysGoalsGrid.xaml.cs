@@ -64,6 +64,7 @@ namespace CampaignEditor.UserControls.ForecastGrids
             _spots.Clear();
             _spotLengths.Clear();
             _channels.Clear();
+            _channelGrids.Clear();
             ugChannels.Children.Clear();
             ugGoals.Children.Clear();
             ugDays.Children.Clear();

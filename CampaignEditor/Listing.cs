@@ -14,6 +14,7 @@ using CampaignEditor.DTOs.CampaignDTO;
 using Database.DTOs.SpotDTO;
 using Database.DTOs.PricelistDTO;
 using CampaignEditor.Helpers;
+using System.Drawing.Text;
 
 namespace CampaignEditor
 {
@@ -78,97 +79,230 @@ namespace CampaignEditor
                 _spotcodeSpotDictionary.Add(spot.spotcode.Trim()[0], spot);
             }
         }
-        public async Task PopulateWorksheet(List<MediaPlanTuple> mpTuples, ExcelWorksheet worksheet, int rowOff = 0, int colOff = 0)
+
+        private bool[] TransformVisibleColumns(bool[] visibleGridColumns)
+        {
+            bool[] visibleColumns = new bool[26];
+            visibleColumns[0] = true;
+            for (int i = 0; i < 17; i++)
+            {
+                visibleColumns[i + 1] = visibleGridColumns[i];
+            }
+            // Skipping Amr sale columns
+            for (int i = 20; i < 25; i++)
+            {
+                visibleColumns[i] = visibleGridColumns[i];
+            }
+            // Skipping CPP and Ins
+            visibleColumns[25] = visibleGridColumns[27]; // CPSP
+
+            return visibleColumns;
+        }
+
+        public async Task PopulateWorksheet(List<MediaPlanTuple> mpTuples, bool[] visibleGridColumns, ExcelWorksheet worksheet, int rowOff = 1, int colOff = 1)
         {
             mpTuples = mpTuples.OrderBy(mpt => mpt.MediaPlan.chid).ThenBy(mpt => mpt.MediaPlan.stime).ToList();
             DateTime startDate = TimeFormat.YMDStringToDateTime(_campaign.cmpsdate);
             DateTime endDate = TimeFormat.YMDStringToDateTime(_campaign.cmpedate);
 
-            List<string> columnHeaders = new List<string> { "Date", "Channel", "Program", "Position", "Start time",
-            "End time", "Block time", "Type", "Amr1", "Amr% 1", "Amr1 Trim", "Amr2", "Amr% 2", "Amr2 Trim", "Amr3",
-            "Amr% 3","Amr3 Trim","Affinity","CPSP","Prog coef", "Dp coef", "Seas coef", "Sec coef", "Length", "Spot"};
+            bool[] visibleColumns = TransformVisibleColumns(visibleGridColumns);
+            int visibleColumnsNum = visibleColumns.Count(v => v);
 
-            int numOfColumns = columnHeaders.Count;
+            AddHeaders(worksheet, visibleColumns, rowOff, colOff);
 
-            // Set the column headers in Excel
-            for (int columnIndex = 0; columnIndex < numOfColumns; columnIndex++)
-            {
-                worksheet.Cells[1 + rowOff, columnIndex + 1 + colOff].Value = columnHeaders[columnIndex];
-                worksheet.Cells[1 + rowOff, columnIndex + 1 + colOff].Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
-                worksheet.Cells[1 + rowOff, columnIndex + 1 + colOff].Style.Fill.BackgroundColor.SetColor(System.Drawing.ColorTranslator.FromHtml("#DAA520"));
-            }
-
-            // Set the cell values and colors in Excel
-
-            int rowIndex = 0;
+            int rowOffset = 1;
+            int dateIndex = 0;
             for (DateTime date = startDate; date < endDate; date = date.AddDays(1))
             {
                 bool first = true;
                 foreach (var mpTuple in mpTuples)
                 {
                     var mediaPlan = mpTuple.MediaPlan;
-                    var terms = mpTuple.Terms.Where(term => term != null && term.Date == DateOnly.FromDateTime(date) && term.Spotcode != null && term.Spotcode.Trim().Count() > 0);
-                    if (first && terms.Count()>0)
+                    var term = mpTuple.Terms[dateIndex];
+                    if (term == null || term.Spotcode == null || term.Spotcode.Trim().Count() == 0)
                     {
-                        worksheet.Cells[rowIndex + 2 + rowOff, 0 + 1 + colOff].Value = DateOnly.FromDateTime(date);
-                        var excelCell = worksheet.Cells[rowIndex + 2 + rowOff, 0 + 1 + colOff];
+                        continue;
+                    }
+                    if (first)
+                    {
+                        var excelCell = worksheet.Cells[rowOff + rowOffset, colOff];
+                        excelCell.Value = DateOnly.FromDateTime(date);
                         excelCell.Style.Border.Bottom.Style = ExcelBorderStyle.Thick;
                         excelCell.Style.Border.Bottom.Color.SetColor(System.Drawing.Color.Black);
-                        
+
                         first = false;
-                        rowIndex++;
+                        rowOffset++;
                     }
-                    foreach (var term in terms)
+
+                    foreach (char spotcode in term.Spotcode.Trim())
                     {
-                        foreach (char spotcode in term.Spotcode.Trim())
-                        {
-                            worksheet.Cells[rowIndex + 2 + rowOff, 0 + 1 + colOff].Value = term.Date;
-                            worksheet.Cells[rowIndex + 2 + rowOff, 1 + 1 + colOff].Value = _chidChannelDictionary[mediaPlan.chid];
-                            worksheet.Cells[rowIndex + 2 + rowOff, 2 + 1 + colOff].Value = mediaPlan.Name;
-                            worksheet.Cells[rowIndex + 2 + rowOff, 3 + 1 + colOff].Value = mediaPlan.Position;
-                            worksheet.Cells[rowIndex + 2 + rowOff, 4 + 1 + colOff].Value = mediaPlan.Stime;
-                            worksheet.Cells[rowIndex + 2 + rowOff, 5 + 1 + colOff].Value = mediaPlan.Etime;
-                            worksheet.Cells[rowIndex + 2 + rowOff, 6 + 1 + colOff].Value = mediaPlan.Blocktime ?? "";
-                            worksheet.Cells[rowIndex + 2 + rowOff, 7 + 1 + colOff].Value = mediaPlan.Type;
-                            worksheet.Cells[rowIndex + 2 + rowOff, 8 + 1 + colOff].Value = mediaPlan.Amr1;
-                            worksheet.Cells[rowIndex + 2 + rowOff, 9 + 1 + colOff].Value = Math.Round(mediaPlan.Amrp1, 2);
-                            worksheet.Cells[rowIndex + 2 + rowOff, 10 + 1 + colOff].Value = mediaPlan.Amr1trim;
-                            worksheet.Cells[rowIndex + 2 + rowOff, 11 + 1 + colOff].Value = mediaPlan.Amr2;
-                            worksheet.Cells[rowIndex + 2 + rowOff, 12 + 1 + colOff].Value = Math.Round(mediaPlan.Amrp2, 2);
-                            worksheet.Cells[rowIndex + 2 + rowOff, 13 + 1 + colOff].Value = mediaPlan.Amr2trim;
-                            worksheet.Cells[rowIndex + 2 + rowOff, 14 + 1 + colOff].Value = mediaPlan.Amr3;
-                            worksheet.Cells[rowIndex + 2 + rowOff, 15 + 1 + colOff].Value = Math.Round(mediaPlan.Amrp3, 2);
-                            worksheet.Cells[rowIndex + 2 + rowOff, 16 + 1 + colOff].Value = mediaPlan.Amr3trim;
-                            worksheet.Cells[rowIndex + 2 + rowOff, 17 + 1 + colOff].Value = mediaPlan.Affinity;
-                            worksheet.Cells[rowIndex + 2 + rowOff, 18 + 1 + colOff].Value = mediaPlan.PricePerSecond;
-                            worksheet.Cells[rowIndex + 2 + rowOff, 19 + 1 + colOff].Value = mediaPlan.Progcoef;
-                            worksheet.Cells[rowIndex + 2 + rowOff, 20 + 1 + colOff].Value = mediaPlan.Dpcoef;
-                            worksheet.Cells[rowIndex + 2 + rowOff, 21 + 1 + colOff].Value = await _mpConverter.CalculateTermSeascoef(mediaPlan, _chidPricelistDictionary[mediaPlan.chid], _mpTermConverter.ConvertToDTO(term));
-                            worksheet.Cells[rowIndex + 2 + rowOff, 22 + 1 + colOff].Value = await _mpConverter.CalculateTermSeccoef(mediaPlan, _chidPricelistDictionary[mediaPlan.chid], _spotcodeSpotDictionary[spotcode]);
-                            worksheet.Cells[rowIndex + 2 + rowOff, 23 + 1 + colOff].Value = (_spotcodeSpotDictionary[spotcode] as SpotDTO).spotlength;
-                            worksheet.Cells[rowIndex + 2 + rowOff, 24 + 1 + colOff].Value = spotcode;
+                        await AddSpotcode(worksheet, mediaPlan, term, spotcode, visibleColumns, rowOff + rowOffset, colOff);                          
+                        rowOffset += 1;
+                    }                  
+                }
 
+                dateIndex += 1;
+            }
 
-                            for (int columnIndex = 0; columnIndex < numOfColumns; columnIndex++)
-                            {
-                                var excelCell = worksheet.Cells[rowIndex + 2 + rowOff, columnIndex + 1 + colOff];
+        }
 
-                                excelCell.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-                                excelCell.Style.Border.Left.Style = ExcelBorderStyle.Thin;
-                                excelCell.Style.Border.Left.Color.SetColor(System.Drawing.Color.Black);
-                                excelCell.Style.Border.Right.Style = ExcelBorderStyle.Thin;
-                                excelCell.Style.Border.Right.Color.SetColor(System.Drawing.Color.Black);
-                                excelCell.Style.Border.Top.Style = ExcelBorderStyle.Thin;
-                                excelCell.Style.Border.Top.Color.SetColor(System.Drawing.Color.Black);
-                                excelCell.Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
-                                excelCell.Style.Border.Bottom.Color.SetColor(System.Drawing.Color.Black);
-                            }
+        private void AddHeaders(ExcelWorksheet worksheet, bool[] visibleColumns, int rowOff, int colOff)
+        {
+            List<string> columnHeaders = new List<string> { "Date", "Channel", "Program", "Position", "Start time",
+            "End time", "Block time", "Type", "Special", "Amr1", "Amr% 1", "Amr1 Trim", "Amr2", "Amr% 2", "Amr2 Trim", "Amr3",
+            "Amr% 3","Amr3 Trim","Affinity","Prog coef", "Dp coef", "Seas coef", "Sec coef", "CPSP",  "Length", "Spot"};
 
-                            rowIndex += 1;
-                        }
-                    }
+            int numOfColumns = visibleColumns.Count();
+
+            // Set the column headers in Excel
+            int colOffset = 0;
+            for (int i = 0; i < numOfColumns; i++)
+            {
+                if (visibleColumns[i])
+                {
+                    worksheet.Cells[rowOff, colOff + colOffset].Value = columnHeaders[i];
+                    worksheet.Cells[rowOff, colOff + colOffset].Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
+                    worksheet.Cells[rowOff, colOff + colOffset].Style.Fill.BackgroundColor.SetColor(System.Drawing.ColorTranslator.FromHtml("#DAA520"));
+                    colOffset += 1;
                 }
             }
+        }
+        private async Task AddSpotcode(ExcelWorksheet worksheet, MediaPlan mediaPlan, MediaPlanTerm term, char spotcode, bool[] visibleColumns, int rowOff, int colOff)
+        {
+            int colOffset = 0;
+            if (visibleColumns[0])
+            {
+                worksheet.Cells[rowOff, colOff + colOffset].Value = term.Date;
+                colOffset += 1;
+            }
+            if (visibleColumns[1])
+            {
+                worksheet.Cells[rowOff, colOff + colOffset].Value = _chidChannelDictionary[mediaPlan.chid];
+                colOffset += 1;
+            }
+            if (visibleColumns[2])
+            {
+                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Name;               
+                colOffset += 1;
+            }
+            if (visibleColumns[3])
+            {
+                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Position;               
+                colOffset += 1;
+            }
+            if (visibleColumns[4])
+            {
+                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Stime;               
+                colOffset += 1;
+            }
+            if (visibleColumns[5])
+            {
+                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Etime;               
+                colOffset += 1;
+            }
+            if (visibleColumns[6])
+            {
+                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Blocktime ?? "";               
+                colOffset += 1;
+            }
+            if (visibleColumns[7])
+            {
+                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Type;               
+                colOffset += 1;
+            }
+            if (visibleColumns[8])
+            {
+                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Special;               
+                colOffset += 1;
+            }
+            if (visibleColumns[9])
+            {
+                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Amr1;               
+                colOffset += 1;
+            }
+            if (visibleColumns[10])
+            {
+                worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.Amrp1, 2);               
+                colOffset += 1;
+            }
+            if (visibleColumns[11])
+            {
+                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Amr1trim;                
+                colOffset += 1;
+            }
+            if (visibleColumns[12])
+            {
+                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Amr2;                
+                colOffset += 1;
+            }
+            if (visibleColumns[13])
+            {
+                worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.Amrp2, 2);               
+                colOffset += 1;
+            }
+            if (visibleColumns[14])
+            {
+                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Amr2trim;                
+                colOffset += 1;
+            }
+            if (visibleColumns[15])
+            {
+                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Amr3;              
+                colOffset += 1;
+            }
+            if (visibleColumns[16])
+            {
+                worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.Amrp3, 2);                
+                colOffset += 1;
+            }
+            if (visibleColumns[17])
+            {
+                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Amr3trim;
+                colOffset += 1;
+            }
+            if (visibleColumns[18])
+            {
+                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Affinity;
+                colOffset += 1;
+            }
+            if (visibleColumns[19])
+            {
+                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Progcoef;
+                colOffset += 1;
+            }
+            if (visibleColumns[20])
+            {
+                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Dpcoef;
+                colOffset += 1;
+            }
+
+            if (visibleColumns[21])
+            {
+                worksheet.Cells[rowOff, colOff + colOffset].Value = await _mpConverter.CalculateTermSeascoef(mediaPlan, _chidPricelistDictionary[mediaPlan.chid], _mpTermConverter.ConvertToDTO(term));
+                colOffset += 1;
+            }
+            if (visibleColumns[22])
+            {
+                worksheet.Cells[rowOff, colOff + colOffset].Value = await _mpConverter.CalculateTermSeccoef(mediaPlan, _chidPricelistDictionary[mediaPlan.chid], _spotcodeSpotDictionary[spotcode]);
+                colOffset += 1;
+            }
+            if (visibleColumns[23])
+            {
+                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.PricePerSecond;
+                colOffset += 1;
+            }
+            if (visibleColumns[24])
+            {
+                worksheet.Cells[rowOff, colOff + colOffset].Value = (_spotcodeSpotDictionary[spotcode] as SpotDTO).spotlength;
+                colOffset += 1;
+            }
+            if (visibleColumns[25])
+            {
+                worksheet.Cells[rowOff, colOff + colOffset].Value = spotcode;
+                colOffset += 1;
+            }
+
+
         }
     }
 }

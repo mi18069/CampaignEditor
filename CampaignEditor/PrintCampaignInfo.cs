@@ -90,10 +90,6 @@ namespace CampaignEditor
             moved = PopulateSpotsWorksheet(worksheet, spots.ToList(), rowOff + offset[0], colOff + offset[1]);
             offset[1] += moved[1] + colSpace;
 
-            /*var channelCmps = await _channelCmpController.GetChannelCmpsByCmpid(cmpid);
-            moved = await(PopulateChannelsWorksheet(worksheet, channelCmps.ToList(), rowOff + offset[0], colOff + offset[1]));
-            offset[1] += moved[1] + colSpace;*/
-
             var channelCmps = new List<ChannelCmpDTO>();
             foreach (var channel in selectedChannels)
             {

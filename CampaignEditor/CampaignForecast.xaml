@@ -319,7 +319,7 @@
                 </Grid>
             </Border>
 
-            <ScrollViewer Grid.Row="6" Grid.Column="1" Grid.RowSpan="3">
+            <ScrollViewer Grid.Row="6" Grid.Column="1" Grid.RowSpan="3" VerticalScrollBarVisibility="Auto">
                 <Grid >
                     <Grid.RowDefinitions>
                         <RowDefinition Height="50"/>
