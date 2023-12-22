@@ -43,6 +43,7 @@ namespace CampaignEditor.UserControls
 
         public void Initialize()
         {
+            ugGrid.Children.Clear();
             _channelWeekGrids.Clear();
 
             CreateOutboundHeaders();
@@ -128,7 +129,15 @@ namespace CampaignEditor.UserControls
             foreach (var channel in _channels)
             {
                 HideChannel(channel);
+            }
 
+            foreach (var channel in _selectedChannels)
+            {
+                ShowChannel(channel);
+            }
+            if (_selectedChannels.Count > 0)
+            {
+                ShowChannel(dummyChannel);
             }
 
         }

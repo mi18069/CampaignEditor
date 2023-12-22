@@ -424,9 +424,19 @@ namespace CampaignEditor.UserControls
             {
                 AddChannelDataColumn(channel);
             }
+
             foreach (var channel in _channels)
             {
                 HideChannel(channel);
+            }
+
+            foreach (var channel in _selectedChannels)
+            {
+                ShowChannel(channel);
+            }
+            if (_selectedChannels.Count > 0)
+            {
+                ShowChannel(dummyChannel);
             }
 
         }

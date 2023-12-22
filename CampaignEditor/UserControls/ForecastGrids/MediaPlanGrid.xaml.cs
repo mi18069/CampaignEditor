@@ -674,7 +674,7 @@ namespace CampaignEditor.UserControls
                 }
                 else
                 {
-                    var newSpotcode = spotcode.Substring(0, spotcode.Length - 1);
+                    var newSpotcode = spotcode.Substring(0, Math.Max(spotcode.Length - 1, 0));
                     await _mediaPlanTermController.UpdateMediaPlanTerm(
                     new UpdateMediaPlanTermDTO(mpTerm.Xmptermid, mpTerm.Xmpid, mpTerm.Date, newSpotcode));
                     mpTerm.Spotcode = newSpotcode;
@@ -843,7 +843,7 @@ namespace CampaignEditor.UserControls
                         }
                         catch
                         {
-                            MessageBox.Show("Wrong Time Format", "Result", MessageBoxButton.OK, MessageBoxImage.Error);
+                            MessageBox.Show("Wrong Time Format", "Information", MessageBoxButton.OK, MessageBoxImage.Error);
                             isEditingEnded = false;
                             _mediaPlanToUpdate.Stime = _mediaPlanOldValues.Stime;
                             _mediaPlanToUpdate.Etime = _mediaPlanOldValues.Etime;
@@ -955,6 +955,8 @@ namespace CampaignEditor.UserControls
                         MenuItem trimAmr = new MenuItem();
                         trimAmr.Header = "Trim Program Amrs";
                         trimAmr.Click += await TrimAmrs(mediaPlan);
+                        menu.Items.Add(trimAmr);
+
 
                         MenuItem recalculateMediaPlan = new MenuItem();
                         recalculateMediaPlan.Header = "Recalculate program values";
@@ -964,7 +966,14 @@ namespace CampaignEditor.UserControls
                         };
                         menu.Items.Add(recalculateMediaPlan);
 
-                        menu.Items.Add(trimAmr);
+                        MenuItem clearMpTerms = new MenuItem();
+                        clearMpTerms.Header = "Clear program spots";
+                        clearMpTerms.Click += async (obj, ea) =>
+                        {
+                            OnClearMpTerms();
+                        };
+                        menu.Items.Add(clearMpTerms);
+
                     }
 
                 }
@@ -1069,6 +1078,12 @@ namespace CampaignEditor.UserControls
         private void OnRecalculateMediaPlan()
         {
             RecalculateMediaPlan?.Invoke(this, EventArgs.Empty);
+        }
+
+        public event EventHandler ClearMpTerms;
+        private void OnClearMpTerms()
+        {
+            ClearMpTerms?.Invoke(this, EventArgs.Empty);
         }
 
         Dictionary<string, System.Drawing.Color> colors = new Dictionary<string, System.Drawing.Color>();

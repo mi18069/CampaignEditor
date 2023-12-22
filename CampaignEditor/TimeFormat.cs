@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Globalization;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace CampaignEditor
 {
@@ -83,6 +85,35 @@ namespace CampaignEditor
                 return -1;
             else
                 return 0;
+        }
+
+        public static TimeOnly GetAverageTime(TimeOnly time1, TimeOnly time2)
+        {
+            int minutes1 = time1.Hour * 60 + time1.Minute;
+            int minutes2 = time2.Hour * 60 + time2.Minute;
+
+            int averageMinutes = (minutes1 + minutes2) / 2;
+
+            return new TimeOnly(averageMinutes / 60, averageMinutes % 60, 0);
+        }
+
+        public static string TimeOnlyToRepresentative(TimeOnly timeOnly)
+        {
+            return $"{timeOnly.Hour.ToString().PadLeft(2, '0')}:{timeOnly.Minute.ToString().PadLeft(2, '0')}";
+        }
+
+        public static TimeOnly? RepresentativeToTimeOnly(string timeString)
+        {
+            // Parse the time string and convert it to TimeOnly
+            if (TimeOnly.TryParseExact(timeString, "HH:mm", out var time))
+            {
+                return time;
+            }
+            else
+            {
+                return null;
+            }
+
         }
 
         public static string SecIntToReporesentative(int secInt)

@@ -31,6 +31,8 @@ namespace CampaignEditor.UserControls
         {
             _mediaPlans = mediaPlans;
             _dictionary.Clear();
+            _values.Clear();
+            dgGrid.ItemsSource = null;
 
             foreach (ChannelDTO channel in channels)
             {
@@ -39,10 +41,17 @@ namespace CampaignEditor.UserControls
 
             CalculateGoals();
             SubscribeToMediaPlans();
+
+            if (_selectedChannels.Count > 0)
+            {
+                SelectedChannelsChanged(new List<ChannelDTO>(_selectedChannels));
+            }
+
         }
 
         public void SelectedChannelsChanged(IEnumerable<ChannelDTO> selectedChannels)
         {
+            _selectedChannels.Clear();
             foreach (var channel in selectedChannels)
             {
                 _selectedChannels.Insert(0, channel);
@@ -64,7 +73,6 @@ namespace CampaignEditor.UserControls
             }
 
             _values.ReplaceRange(_dictionary.Values);
-            dgGrid.ItemsSource = _values.Where(pg => _selectedChannels.Select(ch => ch.chid).Contains(pg.Channel.chid));
         }
 
         private void RecalculateGoals(int chid)
@@ -80,6 +88,8 @@ namespace CampaignEditor.UserControls
                 _dictionary[chid].Budget += mediaPlan.Price;           
             }
             _values.ReplaceRange(_dictionary.Values);
+            dgGrid.ItemsSource = _values.Where(pg => _selectedChannels.Select(ch => ch.chid).Contains(pg.Channel.chid));
+
         }
 
         public void ResetDictionaryValues(int chid = -1)

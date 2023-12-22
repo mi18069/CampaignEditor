@@ -1,20 +1,16 @@
 ﻿using CampaignEditor.Controllers;
 using CampaignEditor.DTOs.CampaignDTO;
 using Database.DTOs.ChannelDTO;
-using Database.DTOs.EmsTypesDTO;
 using Database.DTOs.SchemaDTO;
 using Database.Entities;
 using Database.Repositories;
-using OfficeOpenXml.Style;
 using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 
 namespace CampaignEditor
 {
@@ -25,6 +21,7 @@ namespace CampaignEditor
 
         private ChannelController _channelController;
         private MediaPlanController _mediaPlanController;
+        private MediaPlanTermController _mediaPlanTermController;
         private EmsTypesController _emsTypesController;
         private ChannelCmpController _channelCmpController;
 
@@ -36,6 +33,7 @@ namespace CampaignEditor
         public bool updateMediaPlan = false;
         public AddSchema(IChannelRepository channelRepository,
             IMediaPlanRepository mediaPlanRepository,
+            IMediaPlanTermRepository mediaPlanTermRepository,
             IEmsTypesRepository emsTypesRepository,
             IChannelCmpRepository channelCmpRepository)
         {
@@ -44,6 +42,7 @@ namespace CampaignEditor
 
             _channelController = new ChannelController(channelRepository);
             _mediaPlanController = new MediaPlanController(mediaPlanRepository);
+            _mediaPlanTermController = new MediaPlanTermController(mediaPlanTermRepository);
             _emsTypesController = new EmsTypesController(emsTypesRepository);
             _channelCmpController = new ChannelCmpController(channelCmpRepository);
         }
@@ -185,10 +184,15 @@ namespace CampaignEditor
                     _schema = MakeSchemaDTO();
                 else
                 {
-                    UpdateMediaPlan();
-                    updateMediaPlan = true;
+                    if (await CheckTerms())
+                    {
+                        UpdateMediaPlan();
+                        updateMediaPlan = true;
+
+                        this.Close();
+                    }
+
                 }
-                this.Close();
             }
         }
 
@@ -198,7 +202,7 @@ namespace CampaignEditor
             int chid = channelItem.chid;
             _mediaPlan.chid = chid;
 
-            string name = tbProgram.Text.Trim();
+            string name = tbProgram.Text.ToUpper().Trim();
             _mediaPlan.Name = name;
 
             string position = cbPosition.Text.Trim();
@@ -257,7 +261,7 @@ namespace CampaignEditor
         {
             var channelItem = cbChannels.SelectedItem as ChannelDTO;
             int chid = channelItem.chid;
-            string name = tbProgram.Text.Trim();
+            string name = tbProgram.Text.ToUpper().Trim();
             string position = cbPosition.Text.Trim();
             string timeFrom = tbTimeFrom.Text.Trim();
             if (!timeFrom.Contains(':'))
@@ -296,8 +300,6 @@ namespace CampaignEditor
 
         private async Task<bool> CheckFields()
         {
-            var timeRegex1 = new Regex(@"^[0-9]{2}:[0-9]{2}$");
-            var timeRegex2 = new Regex(@"^[0-9]{4}$");
             if (cbChannels.SelectedIndex == -1)
             {
                 MessageBox.Show("Assign channel");
@@ -328,26 +330,50 @@ namespace CampaignEditor
                 MessageBox.Show("Assign time from");
                 return false;
             }
-            else if (!timeRegex1.IsMatch(tbTimeFrom.Text.Trim()) && !timeRegex2.IsMatch(tbTimeFrom.Text.Trim()))
+            else if (cbPosition.Text == "INS")
             {
-                MessageBox.Show("Invalid time from value\nPossible formats: HH:mm or HHmm");
-                return false;
+                var timeFrom = TimeFormat.RepresentativeToTimeOnly(tbTimeFrom.Text);
+                var timeTo = TimeFormat.RepresentativeToTimeOnly(tbTimeTo.Text);
+                var timeBlock = TimeFormat.RepresentativeToTimeOnly(tbBlockTime.Text);
+
+                if (!timeFrom.HasValue || !timeTo.HasValue || !timeBlock.HasValue)
+                {
+                    MessageBox.Show("Invalid time from value\nPossible formats: HH:mm or HHmm");
+                    return false;
+                }
+
+                else if (timeBlock.Value < timeFrom.Value || timeBlock.Value > timeTo.Value)
+                {
+                    MessageBox.Show("Block time must be between start and end time");
+                    return false;
+                }
             }
-            else if (tbTimeTo.Text.Trim().Length > 0 &&
-                !timeRegex1.IsMatch(tbTimeTo.Text.Trim()) && !timeRegex2.IsMatch(tbTimeFrom.Text.Trim()))
+            else if (cbPosition.Text == "BET")
             {
-                MessageBox.Show("Invalid time from value\nPossible formats: HH:mm or HHmm");
-                return false;
-            }
-            else if (tbBlockTime.Text.Trim().Length > 0 &&
-                !timeRegex1.IsMatch(tbBlockTime.Text) && !timeRegex2.IsMatch(tbTimeFrom.Text.Trim()))
-            {
-                MessageBox.Show("Invalid time from value\nPossible formats: HH:mm or HHmm");
-                return false;
+                var timeFrom = TimeFormat.RepresentativeToTimeOnly(tbTimeFrom.Text);
+                var timeBlock = TimeFormat.RepresentativeToTimeOnly(tbBlockTime.Text);
+                var timeFromMinus10Min = timeFrom.Value.AddMinutes(-10);
+
+                if (!timeFrom.HasValue || !timeBlock.HasValue)
+                {
+                    MessageBox.Show("Invalid time from value\nPossible formats: HH:mm or HHmm");
+                    return false;
+                }
+
+                if (timeBlock.Value > timeFrom.Value)
+                {
+                    MessageBox.Show("Block time must be before start time");
+                    return false;
+                }
+                else if (timeBlock.Value < timeFromMinus10Min)
+                {
+                    MessageBox.Show("Block time cannot be more than 10 minutes before start time");
+                    return false;
+                }
             }
             else if (tbProgCoef.Text.Trim().Length > 0 && !float.TryParse(tbProgCoef.Text.Trim(), out _))
             {
-                MessageBox.Show("Invalid Prog coef value", "Result", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Invalid Prog coef value", "Information", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
             else if (lbDays.SelectedItems.Count == 0)
@@ -359,6 +385,57 @@ namespace CampaignEditor
             {
                 return true;
             }
+
+            return true;
+        }
+
+        // If days are changed, check if some of them have spot within it, if it has, don't update
+        private async Task<bool> CheckTerms()
+        {
+            List<int> selectedValues = new List<int>();
+
+            foreach (var selectedItem in lbDays.SelectedItems)
+            {
+                if (selectedItem is Tuple<string, int> tuple)
+                {
+                    selectedValues.Add(tuple.Item2);
+                }
+            }
+
+
+            // The problem are days which are deleted from mediaPlan, not the ones we are adding
+            List<int> deletedDays = new List<int>();
+            for (int i = 1; i <= 7; i++)
+            {
+                if (!selectedValues.Contains(i) && _mediaPlan.days.Contains(i.ToString()))
+                {
+                    deletedDays.Add(i);
+                }
+            }
+
+            if (deletedDays.Count == 0)
+                return true;
+
+            
+            var terms = await _mediaPlanTermController.GetAllMediaPlanTermsByXmpid(_mediaPlan.xmpid);
+
+            foreach (int dayOffset in deletedDays)
+            {
+                DayOfWeek day = (DayOfWeek)dayOffset;
+                var termsNum = terms.Where(term => term.date.DayOfWeek == day && 
+                    term.spotcode != null && term.spotcode.Trim().Length > 0).Count();
+                if (termsNum > 0)
+                {
+                    MessageBox.Show("Cannot change program days\nThere is spot assigned on " + day.ToString(), "Information",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+                    {
+                        return false;
+                    }
+                }
+            }
+
+            return true;
+
         }
 
         private void tbTime_LostKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
@@ -374,9 +451,18 @@ namespace CampaignEditor
                 }
                 catch
                 {
-                    MessageBox.Show("Invalid time format", "Result", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show("Invalid time format", "Information", MessageBoxButton.OK, MessageBoxImage.Error);
                     textBox.Text = "";
                 }
+            }          
+
+            if (!tbBlockTime.IsFocused && cbPosition.Text == "BET" && tbTimeFrom.Text != "")
+            {
+                UpdateBetBlocktime();
+            }
+            else if (!tbBlockTime.IsFocused && cbPosition.Text == "INS" && tbTimeTo.Text != "" && tbTimeFrom.Text != "")
+            {
+                UpdateInsBlocktime();
             }
         }
 
@@ -384,7 +470,7 @@ namespace CampaignEditor
         {
             if (!float.TryParse(tbProgCoef.Text.Trim(), out _))
             {
-                MessageBox.Show("Invalid Prog coef value", "Result", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Invalid Prog coef value", "Information", MessageBoxButton.OK, MessageBoxImage.Error);
                 tbProgCoef.Text = "";
             }
         }
@@ -409,6 +495,47 @@ namespace CampaignEditor
             else
             {
                 tbTypeDesc.Text = "";
+            }
+        }
+
+        private void UpdateBetBlocktime()
+        {
+            try
+            {
+                var goodTimeFormat = TimeFormat.ReturnGoodTimeFormat(tbTimeFrom.Text.Trim());
+                var timeOnly = TimeFormat.RepresentativeToTimeOnly(goodTimeFormat);
+
+                if (!timeOnly.HasValue)
+                    return;
+
+                string newTime = TimeFormat.TimeOnlyToRepresentative(timeOnly.Value.AddMinutes(-10));
+                tbBlockTime.Text = newTime;
+            }
+            catch
+            {
+                return;
+            }        
+        }
+
+        private void UpdateInsBlocktime()
+        {
+            try
+            {
+                var goodTimeFormatFrom = TimeFormat.ReturnGoodTimeFormat(tbTimeFrom.Text.Trim());
+                var timeOnlyFrom = TimeFormat.RepresentativeToTimeOnly(goodTimeFormatFrom);
+
+                var goodTimeFormatTo = TimeFormat.ReturnGoodTimeFormat(tbTimeTo.Text.Trim());
+                var timeOnlyTo = TimeFormat.RepresentativeToTimeOnly(goodTimeFormatTo);
+
+                if (!timeOnlyFrom.HasValue || !timeOnlyTo.HasValue)
+                    return;
+
+                TimeOnly averageTime = TimeFormat.GetAverageTime(timeOnlyFrom.Value, timeOnlyTo.Value);
+                tbBlockTime.Text = TimeFormat.TimeOnlyToRepresentative(averageTime);
+            }
+            catch
+            {
+                return;
             }
         }
     }

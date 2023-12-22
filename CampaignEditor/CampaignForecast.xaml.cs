@@ -73,7 +73,7 @@ namespace CampaignEditor.UserControls
         private List<int> _versions = new List<int>();
         private ObservableCollection<ChannelDTO> _channels = new ObservableCollection<ChannelDTO>();
 
-        List<DayOfWeek> filteredDays = new List<DayOfWeek> 
+        List<DayOfWeek> filteredDays = new List<DayOfWeek>
         { DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday,
           DayOfWeek.Friday, DayOfWeek.Saturday, DayOfWeek.Sunday};
 
@@ -94,7 +94,7 @@ namespace CampaignEditor.UserControls
 
         MediaPlanConverter _mpConverter;
         MediaPlanTermConverter _mpTermConverter;
-        
+
 
         public event PropertyChangedEventHandler? PropertyChanged;
         public void OnPropertyChanged([CallerMemberName] string propertyname = null)
@@ -305,6 +305,7 @@ namespace CampaignEditor.UserControls
             // when mediaPlan is changed
             dgMediaPlans.UpdatedMediaPlan += dgMediaPlans_UpdatedMediaPlan;
             dgMediaPlans.RecalculateMediaPlan += dgMediaPlans_RecalculateMediaPlan;
+            dgMediaPlans.ClearMpTerms += dgMediaPlans_ClearMpTerms;
             // When updating Terms
             dgMediaPlans.UpdatedTerm += dgMediaPlans_UpdatedTerm;
         }
@@ -394,7 +395,7 @@ namespace CampaignEditor.UserControls
             await checkIfMaxVersionChanged(version);
 
             // Inserting new MediaPlans in database
-            List<Task> insertingTasks = new List<Task>();       
+            List<Task> insertingTasks = new List<Task>();
             foreach (var channel in _channels)
             {
                 Task task = Task.Run(() => InsertInDatabase(channel.chid, version));
@@ -402,7 +403,7 @@ namespace CampaignEditor.UserControls
             }
             // waiting for all tasks to finish
             await Task.WhenAll(insertingTasks);
-            
+
 
             List<List<MediaPlanDTO>> mediaPlansByChannels = new List<List<MediaPlanDTO>>();
             foreach (ChannelDTO channel in _channels)
@@ -410,7 +411,7 @@ namespace CampaignEditor.UserControls
                 List<MediaPlanDTO> mediaPlans = (await _mediaPlanController.GetAllChannelCmpMediaPlans(channel.chid, _campaign.cmpid, version)).ToList();
                 mediaPlansByChannels.Add(mediaPlans);
             }
-            
+
             // We'll make nChannel threads, and for each thread we'll run startAMRCalculation for each MediaPlan
             List<Task> amrTasks = new List<Task>();
             foreach (List<MediaPlanDTO> mediaPlanList in mediaPlansByChannels)
@@ -429,14 +430,14 @@ namespace CampaignEditor.UserControls
 
         }
 
-        public async Task MakeNewVersion(ObservableCollection<MediaPlanTuple> allMediaPlans) 
+        public async Task MakeNewVersion(ObservableCollection<MediaPlanTuple> allMediaPlans)
         {
             var mpVer = await _mediaPlanVersionController.GetLatestMediaPlanVersion(_campaign.cmpid);
             int newVersion = mpVer.version + 1;
-            await _mediaPlanVersionController.IncrementMediaPlanVersion(mpVer);           
+            await _mediaPlanVersionController.IncrementMediaPlanVersion(mpVer);
 
             // Make new MediaPlan, MediaPlanTerms and MediaPlanHists in database
-            foreach (MediaPlanTuple mediaPlanTuple in allMediaPlans) 
+            foreach (MediaPlanTuple mediaPlanTuple in allMediaPlans)
             {
                 MediaPlan mp = mediaPlanTuple.MediaPlan;
                 MediaPlanDTO mpDTO = _mpConverter.ConvertToDTO(mp);
@@ -462,9 +463,9 @@ namespace CampaignEditor.UserControls
 
                     // Adding MediaPlanHists in database
                     var hists = await _mediaPlanHistController.GetAllMediaPlanHistsByXmpid(mpDTO.xmpid);
-                    
-                    foreach (var hist in hists) 
-                    { 
+
+                    foreach (var hist in hists)
+                    {
                         CreateMediaPlanHistDTO createMpHistDTO = new CreateMediaPlanHistDTO(hist);
                         createMpHistDTO.xmpid = mediaPlan.xmpid;
                         await _mediaPlanHistController.CreateMediaPlanHist(createMpHistDTO);
@@ -474,7 +475,7 @@ namespace CampaignEditor.UserControls
 
             }
 
-            await checkIfMaxVersionChanged(newVersion);            
+            await checkIfMaxVersionChanged(newVersion);
         }
 
         private async Task DeleteVersion(int fromVersion, int toVersion)
@@ -511,7 +512,7 @@ namespace CampaignEditor.UserControls
                 cbVersions.SelectedIndex = cbVersions.Items.Count - 1;
             }
             _cmpVersion = version;
-            
+
         }
 
         public async Task LoadData(int version, bool isEnabled = false)
@@ -554,15 +555,14 @@ namespace CampaignEditor.UserControls
             dgMediaPlans.chidChannelDictionary = chidChannelDictionary;
 
             await dgMediaPlans.Initialize(_campaign);
-            
+
         }
 
         private async Task InitializeCGGrid()
         {
 
-            ObservableCollection<MediaPlan> mediaPlans = new ObservableCollection<MediaPlan>(_allMediaPlans.Select(mp => mp.MediaPlan));    
+            ObservableCollection<MediaPlan> mediaPlans = new ObservableCollection<MediaPlan>(_allMediaPlans.Select(mp => mp.MediaPlan));
             cgGrid.Initialize(mediaPlans, _channels.ToList());
-            tiChannelGoals.Focus();
         }
 
         #region Drag and Drop selected Targets
@@ -661,7 +661,7 @@ namespace CampaignEditor.UserControls
         #region Helper buttons
         private async void btnClear_Click(object sender, RoutedEventArgs e)
         {
-            if (MessageBox.Show("Are you sure you want to clear all spots?", "Result", MessageBoxButton.OKCancel,
+            if (MessageBox.Show("Are you sure you want to clear all spots?", "Question", MessageBoxButton.OKCancel,
                 MessageBoxImage.Question) == MessageBoxResult.OK)
             {
                 await ClearAllMPTerms();
@@ -672,26 +672,29 @@ namespace CampaignEditor.UserControls
 
         private async Task ClearAllMPTerms()
         {
-            DateOnly today = DateOnly.FromDateTime(DateTime.Today);
             foreach (var mediaPlanTuple in _allMediaPlans)
             {
-                foreach (var mediaPlanTerm in mediaPlanTuple.Terms)
-                {
-                    if (mediaPlanTerm == null ||
-                        mediaPlanTerm.Spotcode == null)
-                    {
-                        continue;
-                    }
-                    else if (mediaPlanTerm.Date > today &&
-                        mediaPlanTerm.Spotcode.Trim() != "")
-                    {
-                        mediaPlanTerm.Spotcode = null;
-                        await _mediaPlanTermController.UpdateMediaPlanTerm(
-                            new UpdateMediaPlanTermDTO(_mpTermConverter.ConvertToDTO(mediaPlanTerm)));
-                    }
-                }
-                await RecalculateMPValues(mediaPlanTuple.MediaPlan);
+                await ClearMPTerms(mediaPlanTuple);            
             }
+        }
+        private async Task ClearMPTerms(MediaPlanTuple mediaPlanTuple)
+        {
+            foreach (var mediaPlanTerm in mediaPlanTuple.Terms)
+            {
+                if (mediaPlanTerm == null ||
+                    mediaPlanTerm.Spotcode == null)
+                {
+                    continue;
+                }
+                else if (mediaPlanTerm.Date > DateOnly.FromDateTime(DateTime.Today) &&
+                    mediaPlanTerm.Spotcode.Trim() != "")
+                {
+                    mediaPlanTerm.Spotcode = null;
+                    await _mediaPlanTermController.UpdateMediaPlanTerm(
+                        new UpdateMediaPlanTermDTO(_mpTermConverter.ConvertToDTO(mediaPlanTerm)));
+                }
+            }
+            await RecalculateMPValues(mediaPlanTuple.MediaPlan);
         }
 
 
@@ -703,7 +706,7 @@ namespace CampaignEditor.UserControls
 
         private async void btnFetchData_Click(object sender, RoutedEventArgs e)
         {
-            if (MessageBox.Show("Load data from database?", "Result", MessageBoxButton.OKCancel,
+            if (MessageBox.Show("Load data from database?", "Question", MessageBoxButton.OKCancel,
                 MessageBoxImage.Question) == MessageBoxResult.OK)
             {
                 SetLoadingPage?.Invoke(this, null);
@@ -717,7 +720,7 @@ namespace CampaignEditor.UserControls
 
         private async void btnRecalculateData_Click(object sender, RoutedEventArgs e)
         {
-            if (MessageBox.Show("Recalculate all data values?", "Result", MessageBoxButton.OKCancel,
+            if (MessageBox.Show("Recalculate all data values?", "Question", MessageBoxButton.OKCancel,
      MessageBoxImage.Question) == MessageBoxResult.OK)
             {
                 SetLoadingPage?.Invoke(this, null);
@@ -807,7 +810,7 @@ namespace CampaignEditor.UserControls
                 else
                 {
                     if (MessageBox.Show($"New program conflicts with existing:\n{mediaPlan.name}\n" +
-                        $"This action will replace existing program with new one", "Result", MessageBoxButton.OKCancel, MessageBoxImage.Warning) 
+                        $"This action will replace existing program with new one", "Information", MessageBoxButton.OKCancel, MessageBoxImage.Warning) 
                         == MessageBoxResult.Cancel)
                     {
                         return mediaPlan;
@@ -1121,7 +1124,7 @@ namespace CampaignEditor.UserControls
                 recalculateChannel.Click += async (obj, ea) =>
                 {
                     if (MessageBox.Show($"Recalculate channel values for channel:\n{channel.chname.Trim()}?",
-                        "Result:", MessageBoxButton.OKCancel, MessageBoxImage.Question) == MessageBoxResult.OK)
+                        "Question:", MessageBoxButton.OKCancel, MessageBoxImage.Question) == MessageBoxResult.OK)
                     {
                         SetLoadingPage?.Invoke(this, null);
                         // When pricelists or calculating inside MediaPlans are changed 
@@ -1343,8 +1346,24 @@ namespace CampaignEditor.UserControls
 
             if (initNewTerms)
             {
+                // For keeping information about already assigned spots
+                List<Tuple<DateOnly, string>> assignedSpots = new List<Tuple<DateOnly, string>>();
+                var assignedTermList = mediaPlanTerms.Where(term => term != null && 
+                                              term.Spotcode != null && term.Spotcode.Trim().Length > 0);
+                foreach (MediaPlanTerm assigned in assignedTermList)
+                {
+                    assignedSpots.Add(Tuple.Create(assigned.Date, assigned.Spotcode.Trim()));
+                }
+
                 await _mediaPlanTermController.DeleteMediaPlanTermByXmpId(mediaPlanDTO.xmpid);
                 var newMediaPlanTerms = await MediaPlanToMPTerm(mediaPlanDTO);
+                foreach (var tuple in assignedSpots)
+                {
+                    var term = newMediaPlanTerms.Where(term => term != null && term.Date == tuple.Item1).First();
+                    term.Spotcode = tuple.Item2;
+                    var termDTO = _mpTermConverter.ConvertToDTO(term);
+                    await _mediaPlanTermController.UpdateMediaPlanTerm(new UpdateMediaPlanTermDTO(termDTO));
+                }
                 mediaPlanTerms = newMediaPlanTerms;
             }
 
@@ -1421,13 +1440,45 @@ namespace CampaignEditor.UserControls
             var mediaPlanTuple = dgMediaPlans.Schema.SelectedItem as MediaPlanTuple;
             if (mediaPlanTuple != null)
             {
-                if (MessageBox.Show($"Delete program\n{mediaPlanTuple.MediaPlan.Name.Trim()}?", "Result",
-    MessageBoxButton.OKCancel, MessageBoxImage.Question) == MessageBoxResult.OK)
+                if (MessageBox.Show($"Delete program\n{mediaPlanTuple.MediaPlan.Name.Trim()}?", "Question",
+                    MessageBoxButton.OKCancel, MessageBoxImage.Question) == MessageBoxResult.OK)
                 {
-                    await DeleteTermValues(mediaPlanTuple.Terms);
-                    _allMediaPlans.Remove(mediaPlanTuple);
-                    var mediaPlan = mediaPlanTuple.MediaPlan;
-                    await DeleteMPById(mediaPlan.xmpid);
+                    bool canBeDeleted = false;
+
+                    var firstTerm = mediaPlanTuple.Terms.FirstOrDefault(term => term != null &&
+                                                                term.Spotcode != null && term.Spotcode.Trim().Length > 0);
+                    // If program has spots, check if they can be deleted, if user clear them, then delete program
+                    if (firstTerm != null)
+                    {
+                        if (firstTerm.Date <= DateOnly.FromDateTime(DateTime.Today))
+                        {
+                            MessageBox.Show($"Cannot delete program because it has assigned spots", "Question",
+                                MessageBoxButton.OK, MessageBoxImage.Information);
+                            return;
+                        }
+                        else
+                        {
+                            if (MessageBox.Show($"Program has assigned spots\nThis action will delete it's spots", "Question",
+                                MessageBoxButton.OKCancel, MessageBoxImage.Information) == MessageBoxResult.OK)
+                            {
+                                await ClearMPTerms(mediaPlanTuple);
+                                canBeDeleted = true;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        canBeDeleted = true;
+                    }
+
+                    if (canBeDeleted)
+                    {
+                        await DeleteTermValues(mediaPlanTuple.Terms);
+                        _allMediaPlans.Remove(mediaPlanTuple);
+                        var mediaPlan = mediaPlanTuple.MediaPlan;
+                        await DeleteMPById(mediaPlan.xmpid);
+                    }
+                    
                 }
             }
         }
@@ -1437,7 +1488,7 @@ namespace CampaignEditor.UserControls
             var mediaPlanTuple = dgMediaPlans.Schema.SelectedItem as MediaPlanTuple;
             if (mediaPlanTuple != null)
             {
-                if (MessageBox.Show($"Recalculate values for program\n{mediaPlanTuple.MediaPlan.Name.Trim()}?", "Result", 
+                if (MessageBox.Show($"Recalculate values for program\n{mediaPlanTuple.MediaPlan.Name.Trim()}?", "Question", 
                     MessageBoxButton.OKCancel, MessageBoxImage.Question) == MessageBoxResult.OK)
                 {
                     var mpDTO = await _mediaPlanController.GetMediaPlanById(mediaPlanTuple.MediaPlan.xmpid);
@@ -1449,6 +1500,20 @@ namespace CampaignEditor.UserControls
                     _allMediaPlans.Add(mediaPlanTuple);
                 }
                     
+            }
+        }
+
+        private async void dgMediaPlans_ClearMpTerms(object? sender, EventArgs e)
+        {
+            var mediaPlanTuple = dgMediaPlans.Schema.SelectedItem as MediaPlanTuple;
+            if (mediaPlanTuple != null)
+            {
+                if (MessageBox.Show($"Clear spots for program\n{mediaPlanTuple.MediaPlan.Name.Trim()}?", "Question",
+                    MessageBoxButton.OKCancel, MessageBoxImage.Question) == MessageBoxResult.OK)
+                {
+                    await ClearMPTerms(mediaPlanTuple);
+                }
+
             }
         }
 
