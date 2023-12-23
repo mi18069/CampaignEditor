@@ -43,9 +43,7 @@ namespace CampaignEditor
             Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
             string connectionString = config.ConnectionStrings.ConnectionStrings["cs"].ConnectionString;
             AppSettings.ConnectionString = connectionString;
-
         }
-
 
         // Checks if the username and password are typed correctly
         private async void btnCheckCredentials_Click(object sender, RoutedEventArgs e)

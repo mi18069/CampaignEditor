@@ -75,5 +75,58 @@ namespace CampaignEditor.Controllers
         {
             return await _repository.DeleteSchemaById(id);
         }
+
+        public string CalculateBlocktime(string position, string timeFrom, string? timeTo = null)
+        {
+            string blocktime = "";
+
+            if (position == "BET")
+                blocktime = CalculateBetBlocktime(timeFrom);
+            else if (position == "INS" && timeTo != null)
+                blocktime = CalculateInsBlocktime(timeFrom, timeTo);
+
+            return blocktime;
+        }
+        private string CalculateBetBlocktime(string timeFrom)
+        {
+            try
+            {
+                var goodTimeFormat = TimeFormat.ReturnGoodTimeFormat(timeFrom);
+                var timeOnly = TimeFormat.RepresentativeToTimeOnly(goodTimeFormat);
+
+                if (!timeOnly.HasValue)
+                    return "";
+
+                string newTime = TimeFormat.TimeOnlyToRepresentative(timeOnly.Value.AddMinutes(-10));
+                return newTime;
+            }
+            catch
+            {
+                return "";
+            }
+        }
+
+        private string CalculateInsBlocktime(string timeFrom, string timeTo = "")
+        {
+            try
+            {
+                var goodTimeFormatFrom = TimeFormat.ReturnGoodTimeFormat(timeFrom);
+                var timeOnlyFrom = TimeFormat.RepresentativeToTimeOnly(goodTimeFormatFrom);
+
+                var goodTimeFormatTo = TimeFormat.ReturnGoodTimeFormat(timeTo);
+                var timeOnlyTo = TimeFormat.RepresentativeToTimeOnly(goodTimeFormatTo);
+
+                if (!timeOnlyFrom.HasValue || !timeOnlyTo.HasValue)
+                    return "";
+
+                TimeOnly averageTime = TimeFormat.GetAverageTime(timeOnlyFrom.Value, timeOnlyTo.Value);
+                string newTime = TimeFormat.TimeOnlyToRepresentative(averageTime);
+                return newTime;
+            }
+            catch
+            {
+                return "";
+            }
+        }
     }
 }

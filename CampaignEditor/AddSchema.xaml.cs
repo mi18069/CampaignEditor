@@ -20,6 +20,7 @@ namespace CampaignEditor
         private CampaignDTO _campaign;
 
         private ChannelController _channelController;
+        private SchemaController _schemaController;
         private MediaPlanController _mediaPlanController;
         private MediaPlanTermController _mediaPlanTermController;
         private EmsTypesController _emsTypesController;
@@ -33,6 +34,7 @@ namespace CampaignEditor
         public bool updateMediaPlan = false;
         public AddSchema(IChannelRepository channelRepository,
             IMediaPlanRepository mediaPlanRepository,
+            ISchemaRepository schemaRepository,
             IMediaPlanTermRepository mediaPlanTermRepository,
             IEmsTypesRepository emsTypesRepository,
             IChannelCmpRepository channelCmpRepository)
@@ -42,6 +44,7 @@ namespace CampaignEditor
 
             _channelController = new ChannelController(channelRepository);
             _mediaPlanController = new MediaPlanController(mediaPlanRepository);
+            _schemaController = new SchemaController(schemaRepository);
             _mediaPlanTermController = new MediaPlanTermController(mediaPlanTermRepository);
             _emsTypesController = new EmsTypesController(emsTypesRepository);
             _channelCmpController = new ChannelCmpController(channelCmpRepository);
@@ -456,13 +459,13 @@ namespace CampaignEditor
                 }
             }          
 
-            if (!tbBlockTime.IsFocused && cbPosition.Text == "BET" && tbTimeFrom.Text != "")
+            if (!tbBlockTime.IsFocused && tbTimeFrom.Text != "")
             {
-                UpdateBetBlocktime();
+                tbBlockTime.Text = _schemaController.CalculateBlocktime("BET", tbTimeFrom.Text);
             }
-            else if (!tbBlockTime.IsFocused && cbPosition.Text == "INS" && tbTimeTo.Text != "" && tbTimeFrom.Text != "")
+            else if (!tbBlockTime.IsFocused && tbTimeTo.Text != "" && tbTimeFrom.Text != "")
             {
-                UpdateInsBlocktime();
+                tbBlockTime.Text = _schemaController.CalculateBlocktime("INS", tbTimeFrom.Text, tbTimeTo.Text);
             }
         }
 
@@ -498,45 +501,7 @@ namespace CampaignEditor
             }
         }
 
-        private void UpdateBetBlocktime()
-        {
-            try
-            {
-                var goodTimeFormat = TimeFormat.ReturnGoodTimeFormat(tbTimeFrom.Text.Trim());
-                var timeOnly = TimeFormat.RepresentativeToTimeOnly(goodTimeFormat);
 
-                if (!timeOnly.HasValue)
-                    return;
-
-                string newTime = TimeFormat.TimeOnlyToRepresentative(timeOnly.Value.AddMinutes(-10));
-                tbBlockTime.Text = newTime;
-            }
-            catch
-            {
-                return;
-            }        
-        }
-
-        private void UpdateInsBlocktime()
-        {
-            try
-            {
-                var goodTimeFormatFrom = TimeFormat.ReturnGoodTimeFormat(tbTimeFrom.Text.Trim());
-                var timeOnlyFrom = TimeFormat.RepresentativeToTimeOnly(goodTimeFormatFrom);
-
-                var goodTimeFormatTo = TimeFormat.ReturnGoodTimeFormat(tbTimeTo.Text.Trim());
-                var timeOnlyTo = TimeFormat.RepresentativeToTimeOnly(goodTimeFormatTo);
-
-                if (!timeOnlyFrom.HasValue || !timeOnlyTo.HasValue)
-                    return;
-
-                TimeOnly averageTime = TimeFormat.GetAverageTime(timeOnlyFrom.Value, timeOnlyTo.Value);
-                tbBlockTime.Text = TimeFormat.TimeOnlyToRepresentative(averageTime);
-            }
-            catch
-            {
-                return;
-            }
-        }
+        
     }
 }

@@ -1,12 +1,9 @@
 ﻿using AutoMapper;
 using Dapper;
 using Database.Data;
-using Database.DTOs.GoalsDTO;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using System.Windows.Controls.Primitives;
 
 namespace Database.Repositories
 {
@@ -160,13 +157,12 @@ namespace Database.Repositories
                 "SELECT COUNT(*) FROM tblcmpchn WHERE cmpid = @cmpid",
                 new { cmpid });
 
-            GoalsDTO cmpGoals = await connection.QueryFirstOrDefaultAsync<GoalsDTO>(
-                "SELECT * FROM tblcmpgoals WHERE cmpid = @cmpid",
+            var cmpGoalsCount = await connection.ExecuteScalarAsync<int>(
+                "SELECT COUNT(*) FROM tblcmpgoals WHERE cmpid = @cmpid",
                 new { cmpid });
 
 
-            return cmptgtCount > 0 && cmpspotsCount > 0 && cmpchnCount > 0 && 
-                   (cmpGoals.budget > 0 || cmpGoals.ins > 0 || cmpGoals.grp > 0);
+            return cmptgtCount > 0 && cmpspotsCount > 0 && cmpchnCount > 0 && cmpGoalsCount > 0;
         }
     }
 }

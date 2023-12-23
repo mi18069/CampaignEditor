@@ -246,5 +246,50 @@ namespace CampaignEditor
             }
             return null;
         }
+
+        public static int GetWeeksBetween(DateTime startDate, DateTime endDate)
+        {
+            // Calculate the time difference between two dates
+            int firstWeekNum = GetWeekOfYear(startDate);
+            int lastWeekNum = GetWeekOfYear(endDate);
+
+            if (firstWeekNum > lastWeekNum)
+                lastWeekNum = lastWeekNum + TimeFormat.GetWeeksInYear(startDate.Year);
+
+            // Calculate the number of weeks
+            int weeksBetween;
+            if (firstWeekNum <= lastWeekNum)
+                weeksBetween = lastWeekNum - firstWeekNum;
+            else
+                weeksBetween = TimeFormat.GetWeeksInYear(startDate.Year) - firstWeekNum + lastWeekNum;
+
+            return weeksBetween + 1;
+        }
+
+        public static int GetWeekOfYear(DateTime date)
+        {
+            System.Globalization.CultureInfo cultureInfo = System.Globalization.CultureInfo.CurrentCulture;
+            System.Globalization.Calendar calendar = cultureInfo.Calendar;
+
+            System.Globalization.DateTimeFormatInfo dtfi = cultureInfo.DateTimeFormat;
+            dtfi.FirstDayOfWeek = DayOfWeek.Monday;
+
+            return calendar.GetWeekOfYear(date, dtfi.CalendarWeekRule, dtfi.FirstDayOfWeek);
+        }
+        public static int GetWeekOfYear(DateOnly date)
+        {
+            DateTime dateTime = date.ToDateTime(TimeOnly.Parse("00:01 AM"));
+            return GetWeekOfYear(dateTime);
+        }
+
+        public static int GetWeeksInYear(int year)
+        {
+            DateTimeFormatInfo dfi = DateTimeFormatInfo.CurrentInfo;
+            System.Globalization.Calendar calendar = dfi.Calendar;
+
+            int weeksInYear = calendar.GetWeekOfYear(new DateTime(year, 12, 31), dfi.CalendarWeekRule, dfi.FirstDayOfWeek);
+
+            return weeksInYear;
+        }
     }
 }

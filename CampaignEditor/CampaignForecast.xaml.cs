@@ -2,7 +2,6 @@
 using CampaignEditor.DTOs.CampaignDTO;
 using CampaignEditor.Helpers;
 using CampaignEditor.StartupHelpers;
-using CampaignEditor.UserControls.ForecastGrids;
 using Database.DTOs.ChannelCmpDTO;
 using Database.DTOs.ChannelDTO;
 using Database.DTOs.GoalsDTO;
@@ -13,29 +12,18 @@ using Database.DTOs.SchemaDTO;
 using Database.DTOs.SpotDTO;
 using Database.Entities;
 using Database.Repositories;
-using Microsoft.Win32;
-using OfficeOpenXml;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Diagnostics;
-using System.Diagnostics.Tracing;
-using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Threading;
-using System.Threading.Channels;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Markup;
 using System.Windows.Media;
-using System.Windows.Threading;
-using static CampaignEditor.Campaign;
 
 namespace CampaignEditor.UserControls
 {
@@ -824,6 +812,14 @@ namespace CampaignEditor.UserControls
 
                 }
 
+            }
+            if (schema.blocktime == null || schema.blocktime.Length == 0)
+            {
+                string position = schema.position.Trim();
+                if (position == "INS" || position == "BET")
+                {
+                    schema.blocktime = _schemaController.CalculateBlocktime(position, schema.stime.Trim(), schema.etime.Trim());
+                }
             }
 
             CreateMediaPlanDTO createMediaPlan = new CreateMediaPlanDTO(schema.id, _campaign.cmpid, schema.chid,

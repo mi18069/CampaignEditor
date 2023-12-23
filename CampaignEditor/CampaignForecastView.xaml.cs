@@ -63,6 +63,7 @@ namespace CampaignEditor
             _campaign = campaign;
             this.isReadOnly = isReadOnly;
 
+            // Too slow
             await _onStartupController.RunUpdateUnavailableDates();
 
             var exists = (await _mediaPlanRefController.GetMediaPlanRef(_campaign.cmpid) != null);
