@@ -17,11 +17,13 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Data;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 
@@ -296,16 +298,8 @@ namespace CampaignEditor.UserControls
             dgMediaPlans.ClearMpTerms += dgMediaPlans_ClearMpTerms;
             // When updating Terms
             dgMediaPlans.UpdatedTerm += dgMediaPlans_UpdatedTerm;
+            dgMediaPlans.VisibleTuplesChanged += dgMediaPlans_VisibleTuplesChanged;
         }
-
-        /*private void SubscribeSGGridControllers()
-        {
-            sgGrid._mediaPlanController = _mediaPlanController;
-            sgGrid._mediaPlanTermController = _mediaPlanTermController;
-            sgGrid._spotController = _spotController;
-            sgGrid._channelController = _channelController;
-            sgGrid._allMediaPlans = _allMediaPlans;
-        }*/
 
         private void SubscribeSWGGridControllers()
         {
@@ -1520,6 +1514,16 @@ namespace CampaignEditor.UserControls
 
             await UpdatedTerm(term, spotcode);
         }
+        private async void dgMediaPlans_VisibleTuplesChanged(object? sender, EventArgs e)
+        {
+            CollectionView collectionView = (CollectionView)CollectionViewSource.GetDefaultView(dgMediaPlans.dgMediaPlans.ItemsSource);
+
+            IEnumerable<MediaPlanTuple> visibleTuples = collectionView.OfType<MediaPlanTuple>();
+            swgGrid.VisibleTuplesChanged(visibleTuples);
+            sdgGrid.VisibleTuplesChanged(visibleTuples);
+            cgGrid.VisibleTuplesChanged(visibleTuples);
+        }
+
 
         private async Task UpdatedTerm(MediaPlanTerm term, char? spotcode)
         {

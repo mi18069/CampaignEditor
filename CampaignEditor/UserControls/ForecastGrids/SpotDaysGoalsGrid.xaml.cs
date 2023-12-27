@@ -43,6 +43,7 @@ namespace CampaignEditor.UserControls.ForecastGrids
         private List<ChannelDTO> _visibleChannels = new List<ChannelDTO>();
 
         public ObservableRangeCollection<MediaPlanTuple> _allMediaPlans;
+        public ObservableRangeCollection<MediaPlanTuple> _visibleTuples = new ObservableRangeCollection<MediaPlanTuple>();
         private Dictionary<Char, int> _spotLengths = new Dictionary<char, int>();
 
         private Dictionary<ChannelDTO, Dictionary<DateOnly, Dictionary<SpotDTO, SpotGoals>>> _data;
@@ -109,7 +110,7 @@ namespace CampaignEditor.UserControls.ForecastGrids
         public void TransformData()
         {
             InitializeData();
-            RecalculateGoals();
+            //RecalculateGoals();
         }
 
         // Making appropriate _data structure, with all zero values for SpotGoals
@@ -183,7 +184,7 @@ namespace CampaignEditor.UserControls.ForecastGrids
             var dateTime = date.ToDateTime(TimeOnly.Parse("00:01 AM"));
             int dateIndex = (int)(dateTime - startDate).Days;
 
-            var channelMpTuples = _allMediaPlans.Where(mpt => mpt.MediaPlan.chid == channel.chid);
+            var channelMpTuples = _visibleTuples.Where(mpt => mpt.MediaPlan.chid == channel.chid);
 
             int ins = 0;
             double grp = 0;
@@ -513,6 +514,13 @@ namespace CampaignEditor.UserControls.ForecastGrids
         #endregion
 
         #region Selection changed
+
+        public void VisibleTuplesChanged(IEnumerable<MediaPlanTuple> visibleMpTuples)
+        {
+            _visibleTuples.ReplaceRange(visibleMpTuples);
+            RecalculateGoals();
+        }
+
         public void SelectedChannelsChanged(IEnumerable<ChannelDTO> selectedChannels)
         {
             // Channel is unselected
@@ -911,13 +919,15 @@ namespace CampaignEditor.UserControls.ForecastGrids
             var drawingThickness = ExcelBorderStyle.Thin;
             var drawingColor = System.Drawing.Color.Black;
 
-            for (int i = 1; i <= _data[dummyChannel].Keys.Count(); i++)
+            int spotsCount = _spots.Count;
+
+            for (int i = 0; i < _data[dummyChannel].Keys.Count(); i++)
             {
-                for (int j = 0; j < _spots.Count; j++)
+                for (int j = 0; j < spotsCount; j++)
                 {
                     string label = GetSpotLabel(_spots[j]);
 
-                    var cell = worksheet.Cells[rowOff * i + j, colOff];
+                    var cell = worksheet.Cells[rowOff + spotsCount*i + j, colOff];
                     cell.Value = label;
 
                     // Set the cell color

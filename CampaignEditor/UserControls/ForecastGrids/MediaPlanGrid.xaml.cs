@@ -342,6 +342,8 @@ namespace CampaignEditor.UserControls
             myDataView.Refresh();
             // Use Dispatcher to run RefreshTotalGridValues after layout update
             Dispatcher.BeginInvoke(new Action(() => RefreshTotalGridValues()), DispatcherPriority.ContextIdle);
+        
+            OnVisibleTuplesChanged();
         }
 
         public event EventHandler<SelectionChangedEventArgs> SelectionChanged;
@@ -1086,6 +1088,12 @@ namespace CampaignEditor.UserControls
             ClearMpTerms?.Invoke(this, EventArgs.Empty);
         }
 
+        public event EventHandler VisibleTuplesChanged;
+        private void OnVisibleTuplesChanged()
+        {
+            VisibleTuplesChanged?.Invoke(this, EventArgs.Empty);
+        }
+
         Dictionary<string, System.Drawing.Color> colors = new Dictionary<string, System.Drawing.Color>();
         private void FillColorsDictionary()
         {
@@ -1109,8 +1117,10 @@ namespace CampaignEditor.UserControls
         {
             var selectedChannels = _selectedChannels;
             var selectedChannelsChids = selectedChannels.Select(ch => ch.chid);
-            var mpTuples = _allMediaPlans.Where(mpTuple => selectedChannelsChids.Contains(mpTuple.MediaPlan.chid));
+            //var mpTuples = _allMediaPlans.Where(mpTuple => selectedChannelsChids.Contains(mpTuple.MediaPlan.chid));
+            CollectionView collectionView = (CollectionView)CollectionViewSource.GetDefaultView(dgMediaPlans.ItemsSource);
 
+            IEnumerable<MediaPlanTuple> mpTuples = collectionView.OfType<MediaPlanTuple>();
             if (colors.Count == 0)
             {
                 FillColorsDictionary();

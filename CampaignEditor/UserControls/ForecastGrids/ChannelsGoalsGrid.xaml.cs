@@ -21,6 +21,7 @@ namespace CampaignEditor.UserControls
         Dictionary<int, ProgramGoals> _dictionary = new Dictionary<int, ProgramGoals>();
         ObservableRangeCollection<ProgramGoals> _values = new ObservableRangeCollection<ProgramGoals>();
         ObservableCollection<MediaPlan> _mediaPlans;
+        ObservableRangeCollection<MediaPlan> _visibleMediaPlans = new ObservableRangeCollection<MediaPlan>();
         List<ChannelDTO> _selectedChannels = new List<ChannelDTO>();
         public ChannelsGoalsGrid()
         {
@@ -39,7 +40,7 @@ namespace CampaignEditor.UserControls
                 _dictionary.Add(channel.chid, new ProgramGoals(channel));
             }
 
-            CalculateGoals();
+            //CalculateGoals();
             SubscribeToMediaPlans();
 
             if (_selectedChannels.Count > 0)
@@ -56,13 +57,13 @@ namespace CampaignEditor.UserControls
             {
                 _selectedChannels.Insert(0, channel);
             }
-            dgGrid.ItemsSource = _values.Where(pg => _selectedChannels.Select(ch => ch.chid).Contains(pg.Channel.chid));
+            dgGrid.ItemsSource = _values.Where(pg => _visibleMediaPlans.Select(ch => ch.chid).Contains(pg.Channel.chid));
         }
 
         private void CalculateGoals()
         {
             ResetDictionaryValues();
-            foreach (MediaPlan mediaPlan in _mediaPlans)
+            foreach (MediaPlan mediaPlan in _visibleMediaPlans)
             {
                 int chid = mediaPlan.chid;
                 _dictionary[chid].Insertations += mediaPlan.Insertations;
@@ -73,12 +74,21 @@ namespace CampaignEditor.UserControls
             }
 
             _values.ReplaceRange(_dictionary.Values);
+            dgGrid.ItemsSource = _values.Where(pg => _visibleMediaPlans.Select(ch => ch.chid).Contains(pg.Channel.chid));
+
+        }
+
+        public void VisibleTuplesChanged(IEnumerable<MediaPlanTuple> visibleMpTuples)
+        {
+            var visibleMediaPlans = visibleMpTuples.Select(mpTuple => mpTuple.MediaPlan);
+            _visibleMediaPlans.ReplaceRange(visibleMediaPlans);
+            CalculateGoals();
         }
 
         private void RecalculateGoals(int chid)
         {
             ResetDictionaryValues(chid);
-            var mediaPlans = _mediaPlans.Where(mp => mp.chid == chid);
+            var mediaPlans = _visibleMediaPlans.Where(mp => mp.chid == chid);
             foreach (MediaPlan mediaPlan in mediaPlans)
             {
                 _dictionary[chid].Insertations += mediaPlan.Insertations;

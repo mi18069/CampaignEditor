@@ -621,9 +621,19 @@ namespace CampaignEditor.UserControls
             AddLeftHeadersInWorksheet(worksheet, rowOff + 3, colOff);
 
             int colOffset = 1;
-            for (int weekNum = firstWeekNum; weekNum <= lastWeekNum + 1; weekNum++)
+            int weekCount = TimeFormat.GetWeeksBetween(startDate, endDate) + 1;
+            int weeksInYear = TimeFormat.GetWeeksInYear(startDate.Year);
+
+            for (int i = 0; i < weekCount; i++)
             {
-                AddWeeksHeaderInWorksheet(weekNum, worksheet, rowOff, colOff + colOffset);
+                int currentWeek = firstWeekNum + i;
+
+                if (currentWeek > weeksInYear)
+                {
+                    currentWeek = currentWeek % (weeksInYear + 1) + 1; // so there are no week 0
+                }
+
+                AddWeeksHeaderInWorksheet(currentWeek, worksheet, rowOff, colOff + colOffset);
                 colOffset += 3 * _visibleChannels.Count;
             }
 

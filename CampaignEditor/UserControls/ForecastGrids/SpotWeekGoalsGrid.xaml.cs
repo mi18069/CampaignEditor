@@ -46,6 +46,7 @@ namespace CampaignEditor.UserControls
         private List<ChannelDTO> _visibleChannels = new List<ChannelDTO>();
 
         public ObservableRangeCollection<MediaPlanTuple> _allMediaPlans;
+        public ObservableRangeCollection<MediaPlanTuple> _visibleTuples = new ObservableRangeCollection<MediaPlanTuple>();
         private Dictionary<Char, int> _spotLengths = new Dictionary<char, int>();
 
         private Dictionary<ChannelDTO, Dictionary<int, Dictionary<SpotDTO, SpotGoals>>> _data;
@@ -132,7 +133,7 @@ namespace CampaignEditor.UserControls
         public void TransformData()
         {
             InitializeData();
-            RecalculateGoals();
+            //RecalculateGoals();
         }
 
         // Making appropriate _data structure, with all zero values for SpotGoals
@@ -146,7 +147,7 @@ namespace CampaignEditor.UserControls
             {
                 var weekGoalsDict = new Dictionary<int, Dictionary<SpotDTO, SpotGoals>>();
 
-                for (int i = 0; i <= weeksNum; i++)
+                for (int i = 0; i < weeksNum; i++)
                 {
                     int currentWeek = firstWeekNum + i;
 
@@ -217,7 +218,8 @@ namespace CampaignEditor.UserControls
 
             List<int> weekIndexes = GetWeekIndexes(weekNum);
 
-            var channelMpTuples = _allMediaPlans.Where(mpt => mpt.MediaPlan.chid == channel.chid);
+            //var channelMpTuples = _allMediaPlans.Where(mpt => mpt.MediaPlan.chid == channel.chid);
+            var channelMpTuples = _visibleTuples.Where(mpt => mpt.MediaPlan.chid == channel.chid);
 
             int ins = 0;
             double grp = 0;
@@ -595,6 +597,14 @@ namespace CampaignEditor.UserControls
         #endregion
 
         #region Selection changed
+
+        public void VisibleTuplesChanged(IEnumerable<MediaPlanTuple> visibleMpTuples)
+        {
+            _visibleTuples.ReplaceRange(visibleMpTuples);
+            RecalculateGoals();
+
+        }
+
         public void SelectedChannelsChanged(IEnumerable<ChannelDTO> selectedChannels)
         {
             // Channel is unselected
@@ -1002,13 +1012,15 @@ namespace CampaignEditor.UserControls
             var drawingThickness = ExcelBorderStyle.Thin;
             var drawingColor = System.Drawing.Color.Black;
 
-            for (int i = 1; i <= _data[dummyChannel].Keys.Count(); i++)
+            int spotsCount = _spots.Count;
+
+            for (int i = 0; i < _data[dummyChannel].Keys.Count(); i++)
             {
-                for (int j = 0; j < _spots.Count; j++)
+                for (int j = 0; j < spotsCount; j++)
                 {
                     string label = GetSpotLabel(_spots[j]);
 
-                    var cell = worksheet.Cells[rowOff * i + j, colOff];
+                    var cell = worksheet.Cells[rowOff + spotsCount * i + j, colOff];
                     cell.Value = label;
 
                     // Set the cell color
