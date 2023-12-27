@@ -28,7 +28,7 @@
                       VerticalScrollBarVisibility="Hidden" >
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="auto" SharedSizeGroup="SharedFirstColumn"/>
+                    <ColumnDefinition Width="auto" />
                     <ColumnDefinition Width="auto"/>
                     <ColumnDefinition Width="auto" SharedSizeGroup="SharedThirdColumn"/>
                 </Grid.ColumnDefinitions>

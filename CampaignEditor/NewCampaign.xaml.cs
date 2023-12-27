@@ -199,9 +199,19 @@ namespace CampaignEditor
                 MessageBox.Show("Already exists campaign with this name", "Result: ", MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 return false;
             }
+            else if (!dpStartDate.SelectedDate.HasValue || !dpEndDate.SelectedDate.HasValue)
+            {
+                MessageBox.Show("Select start and end date of campaign", "Result: ", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                return false;
+            }
             else if (dpStartDate.SelectedDate > dpEndDate.SelectedDate)
             {
                 MessageBox.Show("Start date must be prior the end date", "Result: ", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                return false;
+            }
+            else if ((int)(dpEndDate.SelectedDate - dpStartDate.SelectedDate).Value.TotalDays > 365)
+            {
+                MessageBox.Show("Campaign cannot be longer than a year", "Result: ", MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 return false;
             }
             // Check this only if there is selected brand

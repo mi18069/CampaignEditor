@@ -300,14 +300,17 @@ namespace CampaignEditor.UserControls.ForecastGrids
 
             // Add headers
             // Days
-            ugDays.Rows = lastDayNum - firstDayNum + 1 + 1; // last + 1 is for Total footer 
-            for (int i = firstDayNum; i <= lastDayNum + 1; i++) // + 1 is for Total footer 
+            int daysNum = (int)(endDate - startDate).Days + 1 + 1 ; // Last +1 is because we want to have Total footer
+            ugDays.Rows = daysNum;
+            for (int i = 0; i < daysNum; i++) // + 1 is for Total footer 
             {
+                var currentDate = startDate.AddDays(i);
+                int currentDay = GetDayOfYear(currentDate);
 
                 System.Windows.Controls.Border border = new System.Windows.Controls.Border();
                 border.BorderBrush = System.Windows.Media.Brushes.Black;
                 border.Background = System.Windows.Media.Brushes.LightGoldenrodYellow;
-                if (i == firstDayNum)
+                if (currentDay == firstDayNum)
                 {
                     border.BorderThickness = new Thickness(1, 3, 1, 1);
                 }
@@ -320,9 +323,9 @@ namespace CampaignEditor.UserControls.ForecastGrids
                 textBlock.HorizontalAlignment = HorizontalAlignment.Center;
                 textBlock.VerticalAlignment = VerticalAlignment.Center;
                 textBlock.FontWeight = FontWeights.Bold;
-                textBlock.Text = startDate.AddDays(i - firstDayNum).ToShortDateString();
+                textBlock.Text = currentDate.ToShortDateString();
                 // Changing last Day to Total
-                if (i == lastDayNum + 1)
+                if (currentDay == lastDayNum + 1)
                 {
                     textBlock.Text = "Total";
                 }
@@ -334,7 +337,7 @@ namespace CampaignEditor.UserControls.ForecastGrids
 
 
             // Spots
-            for (int i = firstDayNum; i < lastDayNum + 1 + 1 ; i++) // +1 because of Total row
+            for (int i = 0; i < daysNum ; i++) // +1 because of Total row
             {
                 for (int j = 0; j < _spots.Count; j++)
                 {

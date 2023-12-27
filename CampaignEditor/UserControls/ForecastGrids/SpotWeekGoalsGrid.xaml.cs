@@ -116,6 +116,8 @@ namespace CampaignEditor.UserControls
         {
             sgGrid.firstWeekNum = firstWeekNum;
             sgGrid.lastWeekNum = lastWeekNum;
+            sgGrid.startDate = startDate;
+            sgGrid.endDate = endDate;
             sgGrid._spots = _spots;
             sgGrid._channels = _channels;
             sgGrid._selectedChannels = _selectedChannels;
@@ -137,15 +139,22 @@ namespace CampaignEditor.UserControls
         private void InitializeData()
         {
             _data = new Dictionary<ChannelDTO, Dictionary<int, Dictionary<SpotDTO, SpotGoals>>>();
-            int weeksNum = lastWeekNum - firstWeekNum + 1 + 1; // last +1 is for Total header
+            int weeksNum = TimeFormat.GetWeeksBetween(startDate, endDate) + 1;// last +1 is for Total header
 
+            int weeksInYear = TimeFormat.GetWeeksInYear(startDate.Year);
             foreach (var channel in _channels)
             {
                 var weekGoalsDict = new Dictionary<int, Dictionary<SpotDTO, SpotGoals>>();
 
-                for (int i = 0; i < weeksNum; i++)
+                for (int i = 0; i <= weeksNum; i++)
                 {
                     int currentWeek = firstWeekNum + i;
+
+                    if (currentWeek > weeksInYear)
+                    {
+                        currentWeek = currentWeek % (weeksInYear + 1) + 1; // so there are no week 0
+                    }
+
                     var spotSpotGoalsDict = new Dictionary<SpotDTO, SpotGoals>();
 
                     foreach (var spot in _spots)
@@ -349,14 +358,24 @@ namespace CampaignEditor.UserControls
             ugSpots.Children.Clear();
             // Add headers
             // Weeks
-            ugWeeks.Rows = lastWeekNum - firstWeekNum + 1 + 1; // last + 1 is for Total footer 
-            for (int i = firstWeekNum; i <= lastWeekNum + 1; i++) // + 1 is for Total footer 
+            int weeksNum = TimeFormat.GetWeeksBetween(startDate, endDate) + 1; // last + 1 is for Total footer 
+            ugWeeks.Rows = weeksNum;
+            int weeksInYear = TimeFormat.GetWeeksInYear(startDate.Year);
+
+            for (int i = 0; i < weeksNum; i++) 
             {
+                int currentWeek = firstWeekNum + i;
+
+                if (currentWeek > weeksInYear)
+                {
+                    currentWeek = currentWeek % (weeksInYear + 1) + 1; // so there are no week 0
+                }
+
 
                 System.Windows.Controls.Border border = new System.Windows.Controls.Border();
                 border.BorderBrush = System.Windows.Media.Brushes.Black;
                 border.Background = System.Windows.Media.Brushes.LightGoldenrodYellow;
-                if (i == firstWeekNum)
+                if (currentWeek == firstWeekNum)
                 {
                     border.BorderThickness = new Thickness(1, 3, 1, 1);
                 }
@@ -369,23 +388,24 @@ namespace CampaignEditor.UserControls
                 textBlock.HorizontalAlignment = HorizontalAlignment.Center;
                 textBlock.VerticalAlignment = VerticalAlignment.Center;
                 textBlock.FontWeight = FontWeights.Bold;
-                textBlock.Text = GetWeekLabel(i);
+                textBlock.Text = GetWeekLabel(currentWeek);
 
                 // Changing last Week to Total
-                if (i == lastWeekNum + 1)
+                if (currentWeek == lastWeekNum + 1)
                 {
                     textBlock.Text = "Total";
                 }
 
                 border.Child = textBlock;
-
+               
                 ugWeeks.Children.Add(border);
             }
 
 
             // Spots
-            for (int i = firstWeekNum; i < lastWeekNum + 1 + 1; i++) // +1 because of Total row
+            for (int i = 0; i < weeksNum; i++) // +1 because of Total row
             {
+
                 for (int j = 0; j < _spots.Count; j++)
                 {
                     System.Windows.Controls.Border border = new System.Windows.Controls.Border();
@@ -460,7 +480,7 @@ namespace CampaignEditor.UserControls
             System.Globalization.DateTimeFormatInfo dtfi = cultureInfo.DateTimeFormat;
             dtfi.FirstDayOfWeek = DayOfWeek.Monday;
 
-            return calendar.GetWeekOfYear(date, dtfi.CalendarWeekRule, dtfi.FirstDayOfWeek) - 1;
+            return calendar.GetWeekOfYear(date, dtfi.CalendarWeekRule, dtfi.FirstDayOfWeek);
         }
         private int GetWeekOfYear(DateOnly date)
         {

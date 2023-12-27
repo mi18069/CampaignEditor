@@ -24,6 +24,8 @@ namespace CampaignEditor.UserControls
         // for duration of campaign
         public int firstWeekNum;
         public int lastWeekNum;
+        public DateTime startDate;
+        public DateTime endDate;
 
         public List<SpotDTO> _spots { get; set; }
         public List<ChannelDTO> _channels { get; set; }
@@ -58,9 +60,18 @@ namespace CampaignEditor.UserControls
             ugSpots.Children.Clear();
             // Add headers
             // Weeks
-            ugWeeks.Columns = lastWeekNum - firstWeekNum + 1 + 1; // last + 1 is for Total footer 
-            for (int i = firstWeekNum; i <= lastWeekNum + 1; i++) // + 1 is for Total footer 
+            int weeksNum = TimeFormat.GetWeeksBetween(startDate, endDate) + 1; // last + 1 is for Total footer 
+            ugWeeks.Columns = weeksNum;
+            int weeksInYear = TimeFormat.GetWeeksInYear(startDate.Year);
+            for (int i = 0; i < weeksNum; i++)  
             {
+                int currentWeek = firstWeekNum + i;
+
+                if (currentWeek > weeksInYear)
+                {
+                    currentWeek = currentWeek % (weeksInYear + 1) + 1; // so there are no week 0
+                }
+
                 System.Windows.Controls.Border border = new System.Windows.Controls.Border();
                 border.BorderBrush = System.Windows.Media.Brushes.Black;
                 border.Background = System.Windows.Media.Brushes.LightGoldenrodYellow;
@@ -71,10 +82,10 @@ namespace CampaignEditor.UserControls
                 textBlock.HorizontalAlignment = HorizontalAlignment.Center;
                 textBlock.VerticalAlignment = VerticalAlignment.Center;
                 textBlock.FontWeight = FontWeights.Bold;
-                textBlock.Text = GetWeekLabel(i);
+                textBlock.Text = GetWeekLabel(currentWeek);
 
                 // Changing last Week to Total
-                if (i == lastWeekNum + 1)
+                if (currentWeek == lastWeekNum + 1)
                 {
                     textBlock.Text = "Total";
                 }
@@ -115,15 +126,22 @@ namespace CampaignEditor.UserControls
             ugGoals.Columns = ugChannels.Columns * 3;
             ugGrid.Columns = ugChannels.Columns;
 
-            for (int weekNum = firstWeekNum; weekNum <= lastWeekNum + 1; weekNum++)
+            for (int i = 0; i < weeksNum; i++)
             {
+                int currentWeek = firstWeekNum + i;
+
+                if (currentWeek > weeksInYear)
+                {
+                    currentWeek = currentWeek % (weeksInYear + 1) + 1; // so there are no week 0
+                }
+
                 var dict = new Dictionary<ChannelDTO, DataGrid>();
                 foreach (var channel in _channels)
                 {
-                    AddChannelDataColumn(channel, weekNum, dict);
+                    AddChannelDataColumn(channel, currentWeek, dict);
                 }
 
-                _channelWeekGrids.Add(weekNum, dict);
+                _channelWeekGrids.Add(currentWeek, dict);
             }
 
             foreach (var channel in _channels)
