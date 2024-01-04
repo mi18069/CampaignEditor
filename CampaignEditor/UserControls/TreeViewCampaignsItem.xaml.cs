@@ -1,4 +1,4 @@
-﻿using CampaignEditor.DTOs.CampaignDTO;
+﻿using Database.DTOs.CampaignDTO;
 using System.ComponentModel;
 using System.Windows.Controls;
 

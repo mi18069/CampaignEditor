@@ -1,12 +1,8 @@
-﻿using CampaignEditor.DTOs.CampaignDTO;
-using CampaignEditor.DTOs.UserDTO;
-using CampaignEditor.Entities;
+﻿using Database.DTOs.CampaignDTO;
 using Database.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace CampaignEditor.Controllers

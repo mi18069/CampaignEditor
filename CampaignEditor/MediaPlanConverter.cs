@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using CampaignEditor.Controllers;
-using CampaignEditor.DTOs.CampaignDTO;
+using Database.DTOs.CampaignDTO;
 using Database.DTOs.MediaPlanDTO;
 using Database.DTOs.MediaPlanHistDTO;
 using Database.DTOs.MediaPlanTermDTO;
@@ -8,7 +8,6 @@ using Database.DTOs.PricelistDTO;
 using Database.DTOs.SpotDTO;
 using Database.Entities;
 using Database.Repositories;
-using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
 using System.Linq;

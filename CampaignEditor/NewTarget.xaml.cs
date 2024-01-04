@@ -1,9 +1,8 @@
 ﻿using CampaignEditor.Controllers;
-using CampaignEditor.DTOs.CampaignDTO;
+using Database.DTOs.CampaignDTO;
 using Database.DTOs.TargetClassDTO;
 using Database.DTOs.TargetDTO;
 using Database.DTOs.TargetValueDTO;
-using Database.Entities;
 using Database.Repositories;
 using System;
 using System.Collections.Generic;

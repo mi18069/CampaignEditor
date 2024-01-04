@@ -13,7 +13,7 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
-using CampaignEditor.DTOs.CampaignDTO;
+using Database.DTOs.CampaignDTO;
 using CampaignEditor.StartupHelpers;
 using System.ComponentModel;
 using System.Collections.Specialized;

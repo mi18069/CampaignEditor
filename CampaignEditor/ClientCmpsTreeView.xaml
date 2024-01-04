@@ -1,0 +1,45 @@
+﻿<UserControl x:Class="CampaignEditor.ClientCmpsTreeView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:CampaignEditor"
+             xmlns:converters="clr-namespace:CampaignEditor.Converters"
+             xmlns:entities="clr-namespace:Database.Entities;assembly=Database"
+             xmlns:cmpDTO="clr-namespace:Database.DTOs.CampaignDTO;assembly=Database"
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="400" d:Background="White">
+    <UserControl.Resources>
+        <converters:DateComparisonConverter x:Key="DateComparisonConverter"/>
+    </UserControl.Resources>
+    <Grid>
+        <TreeView Name="_tvUsers">
+            <TreeView.ItemTemplate>
+                <HierarchicalDataTemplate DataType="{x:Type entities:ClientCampaignsList}" ItemsSource="{Binding Campaigns}">
+                    <TextBlock Text="{Binding Client.clname}" />
+                    <HierarchicalDataTemplate.ItemTemplate>
+                        <DataTemplate DataType="{x:Type cmpDTO:CampaignDTO}">
+                            <TextBlock Text="{Binding cmpname}">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding cmpsdate, Converter={StaticResource DateComparisonConverter}}" Value="True">
+                                                <Setter Property="Foreground" Value="Orange"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding cmpsdate, Converter={StaticResource DateComparisonConverter}}" Value="False">
+                                                <Setter Property="Foreground" Value="DarkGreen"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding cmpedate, Converter={StaticResource DateComparisonConverter}}" Value="True">
+                                                <Setter Property="Foreground" Value="DarkRed"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </DataTemplate>
+                    </HierarchicalDataTemplate.ItemTemplate>
+                </HierarchicalDataTemplate>
+            </TreeView.ItemTemplate>
+        </TreeView>
+    </Grid>
+</UserControl>

@@ -1,4 +1,4 @@
-﻿using CampaignEditor.DTOs.CampaignDTO;
+﻿using Database.DTOs.CampaignDTO;
 using CampaignEditor.StartupHelpers;
 using Database.DTOs.ActivityDTO;
 using Database.DTOs.BrandDTO;

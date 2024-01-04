@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace CampaignEditor.DTOs.CampaignDTO
+﻿
+namespace Database.DTOs.CampaignDTO
 {
     public class BaseIdentityCampaignDTO : BaseCampaignDTO
     {

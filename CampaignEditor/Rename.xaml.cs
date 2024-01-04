@@ -1,24 +1,10 @@
 ﻿using CampaignEditor.Controllers;
-using CampaignEditor.DTOs.CampaignDTO;
-using CampaignEditor.DTOs.UserDTO;
-using CampaignEditor.Entities;
+using Database.DTOs.CampaignDTO;
 using Database.DTOs.ClientDTO;
-using Database.DTOs.UserClients;
 using Database.Repositories;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.RightsManagement;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace CampaignEditor
 {

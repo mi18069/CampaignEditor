@@ -1,12 +1,10 @@
 ﻿using CampaignEditor.Controllers;
-using CampaignEditor.DTOs.CampaignDTO;
+using Database.DTOs.CampaignDTO;
 using Database.DTOs.BrandDTO;
 using Database.DTOs.ClientDTO;
 using Database.DTOs.CmpBrndDTO;
-using Database.Entities;
 using Database.Repositories;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text.RegularExpressions;

@@ -1,15 +1,12 @@
 ﻿using AutoMapper;
-using CampaignEditor.Controllers;
-using CampaignEditor.DTOs.CampaignDTO;
+using Database.DTOs.CampaignDTO;
 using CampaignEditor.Helpers;
 using CampaignEditor.UserControls;
 using CampaignEditor.UserControls.ForecastGrids;
 using Database.DTOs.ChannelDTO;
 using Database.Entities;
-using Database.Repositories;
 using Microsoft.Win32;
 using OfficeOpenXml;
-using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;

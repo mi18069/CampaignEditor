@@ -1,5 +1,5 @@
 ﻿using CampaignEditor.Controllers;
-using CampaignEditor.DTOs.CampaignDTO;
+using Database.DTOs.CampaignDTO;
 using CampaignEditor.Helpers;
 using Database.DTOs.ChannelDTO;
 using Database.DTOs.SpotDTO;
