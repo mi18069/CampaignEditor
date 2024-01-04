@@ -1,16 +1,9 @@
 ﻿using CampaignEditor.Controllers;
 using CampaignEditor.DTOs.UserDTO;
-using CampaignEditor.Repositories;
-using Database.DTOs.CampaignDTO;
-using Database.DTOs.UserClients;
 using Database.Entities;
-using Database.Repositories;
-using Microsoft.AspNetCore.Mvc.Internal;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;

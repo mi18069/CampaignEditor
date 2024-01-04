@@ -3,14 +3,15 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:CampaignEditor.Converters"
+        xmlns:converters="clr-namespace:CampaignEditor.Converters"
+        xmlns:local="clr-namespace:CampaignEditor"
         mc:Ignorable="d"
         Title="Clients" Height="800" Width="900"
         MinHeight="600" MinWidth="800"
         FontSize="20"
         Closing="Window_Closing">
     <Window.Resources>
-        <local:ToHalfConverterM30 x:Key="toHalfConverter" />
+        <converters:ToHalfConverterM30 x:Key="toHalfConverter"/>
     </Window.Resources>
     <Grid>
         <Button x:Name="btnPassChange" 
@@ -26,7 +27,8 @@
             <TextBlock x:Name="tbUsername" 
                        Width="200"
                        HorizontalAlignment="Left" VerticalAlignment="Top" Margin="100, 5, 0, 0"/>
-            <TreeView x:Name="tvClients" 
+            <local:ClientCmpsTreeView x:Name="tvClients1" Margin="10, 100, 10, 100"/>
+            <TreeView Visibility="Hidden" x:Name="tvClients" 
                   Margin="10, 100, 10, 100"
                   IsTextSearchCaseSensitive="False" IsTextSearchEnabled="True"
                   SelectedItemChanged="tvClients_SelectedItemChanged"
@@ -82,27 +84,32 @@
                     Width="150" Height="40"
                     VerticalAlignment="Top" HorizontalAlignment="Left" Margin="130, 40, 0, 0"
                     Initialized="dpStartDate_Initialized"
-                    SelectedDateChanged="dpStartDate_SelectedDateChanged" Grid.ColumnSpan="2"/>
+                    SelectedDateChanged="dpStartDate_SelectedDateChanged" Grid.ColumnSpan="2"
+                            Loaded="cb_Loaded"/>
                 <CheckBox x:Name="cbDatePicker" Content="   Since:"  
                   IsChecked="True" BorderThickness="5" BorderBrush="Gray"
                   VerticalAlignment="Top" HorizontalAlignment="Left" Margin="20,45,0,0"
                   Checked="cbDatePicker_Checked"
-                  Unchecked="cbDatePicker_Unchecked" Grid.Column="1"/>
+                  Unchecked="cbDatePicker_Unchecked" Grid.Column="1"
+                          Loaded="cb_Loaded"/>
                 <CheckBox x:Name="cbShowActive"  Content="   Active campaigns"
                   IsChecked="True" BorderThickness="5" BorderBrush="Gray"
                   VerticalAlignment="Top" HorizontalAlignment="Left" Margin="20,95,0,0"
                   Checked="cbFilter_Checked"
-                  Unchecked="cbFilter_Unchecked" Grid.Column="1"/>
+                  Unchecked="cbFilter_Unchecked" Grid.Column="1"
+                          Loaded="cb_Loaded"/>
                 <CheckBox x:Name="cbShowNotStarted"  Content="   Not started campaigns"
                   IsChecked="True" BorderThickness="5" BorderBrush="Gray"
                   VerticalAlignment="Top" HorizontalAlignment="Left" Margin="20,145,0,0"
                   Checked="cbFilter_Checked"
-                  Unchecked="cbFilter_Unchecked" Grid.Column="1"/>
+                  Unchecked="cbFilter_Unchecked" Grid.Column="1"
+                          Loaded="cb_Loaded"/>
                 <CheckBox x:Name="cbShowFinished"  Content="   Finished campaigns"
                   IsChecked="True" BorderThickness="5" BorderBrush="Gray"
                   VerticalAlignment="Top" HorizontalAlignment="Left" Margin="20,195,0,0"
                   Checked="cbFilter_Checked"
-                  Unchecked="cbFilter_Unchecked" Grid.Column="1"/>
+                  Unchecked="cbFilter_Unchecked" Grid.Column="1"
+                          Loaded="cb_Loaded"/>
             </Grid>
         </Border>
     </Grid>

@@ -30,6 +30,7 @@ namespace CampaignEditor
                     services.AddFormFactory<AddClient>();
                     services.AddFormFactory<Clients>();
                     services.AddFormFactory<ClientsTreeView>();
+                    services.AddFormFactory<ClientCmpsTreeView>();
                     services.AddFormFactory<NewCampaign>();
                     services.AddFormFactory<NewTarget>();
                     services.AddFormFactory<AssignTargets>();

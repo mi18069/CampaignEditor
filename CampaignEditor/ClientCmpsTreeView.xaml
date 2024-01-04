@@ -14,6 +14,20 @@
     </UserControl.Resources>
     <Grid>
         <TreeView Name="_tvUsers">
+            <TreeView.Resources>
+                <!-- ContextMenu for Clients -->
+                <ContextMenu x:Key="ClientContextMenu">
+                    <MenuItem Header="Client Option 1" />
+                    <MenuItem Header="Client Option 2" />
+                </ContextMenu>
+
+                <!-- ContextMenu for Campaigns -->
+                <ContextMenu x:Key="CampaignContextMenu">
+                    <!-- Add menu items specific to Campaigns -->
+                    <MenuItem Header="Campaign Option 1" />
+                    <MenuItem Header="Campaign Option 2" />
+                </ContextMenu>
+            </TreeView.Resources>
             <TreeView.ItemTemplate>
                 <HierarchicalDataTemplate DataType="{x:Type entities:ClientCampaignsList}" ItemsSource="{Binding Campaigns}">
                     <TextBlock Text="{Binding Client.clname}" />
@@ -24,10 +38,10 @@
                                     <Style TargetType="TextBlock">
                                         <Style.Triggers>
                                             <DataTrigger Binding="{Binding cmpsdate, Converter={StaticResource DateComparisonConverter}}" Value="True">
-                                                <Setter Property="Foreground" Value="Orange"/>
+                                                <Setter Property="Foreground" Value="DarkGreen"/>
                                             </DataTrigger>
                                             <DataTrigger Binding="{Binding cmpsdate, Converter={StaticResource DateComparisonConverter}}" Value="False">
-                                                <Setter Property="Foreground" Value="DarkGreen"/>
+                                                <Setter Property="Foreground" Value="Orange"/>
                                             </DataTrigger>
                                             <DataTrigger Binding="{Binding cmpedate, Converter={StaticResource DateComparisonConverter}}" Value="True">
                                                 <Setter Property="Foreground" Value="DarkRed"/>
