@@ -184,7 +184,10 @@ namespace CampaignEditor
             if (await CheckFields())
             {
                 if (_mediaPlan == null)
+                {
                     _schema = MakeSchemaDTO();
+                    this.Close();
+                }
                 else
                 {
                     if (await CheckTerms())
@@ -459,11 +462,11 @@ namespace CampaignEditor
                 }
             }          
 
-            if (!tbBlockTime.IsFocused && tbTimeFrom.Text != "")
+            if (!tbBlockTime.IsFocused && tbTimeFrom.Text != "" && cbPosition.Text == "BET")
             {
                 tbBlockTime.Text = _schemaController.CalculateBlocktime("BET", tbTimeFrom.Text);
             }
-            else if (!tbBlockTime.IsFocused && tbTimeTo.Text != "" && tbTimeFrom.Text != "")
+            else if (!tbBlockTime.IsFocused && tbTimeTo.Text != "" && tbTimeFrom.Text != "" && cbPosition.Text == "INS")
             {
                 tbBlockTime.Text = _schemaController.CalculateBlocktime("INS", tbTimeFrom.Text, tbTimeTo.Text);
             }

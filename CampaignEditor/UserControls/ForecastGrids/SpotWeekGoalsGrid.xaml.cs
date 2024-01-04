@@ -288,6 +288,11 @@ namespace CampaignEditor.UserControls
         private void RecalculateTotalFooterSpotGoals(ChannelDTO channel, SpotDTO spot)
         {
             var weekNum = lastWeekNum + 1;
+            int weeksInYear = TimeFormat.GetWeeksInYear(startDate.Year);
+            if (weekNum > weeksInYear)
+            {
+                weekNum = weekNum % (weeksInYear + 1) + 1; // so there are no week 0
+            }
             var totalSpotGoals = _data[channel][weekNum][spot];
 
             var channelSpotGoals = _data[channel].SelectMany(dateDict => dateDict.Value
