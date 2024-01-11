@@ -11,6 +11,7 @@ using CampaignEditor.Controllers;
 using CampaignEditor.DTOs.UserDTO;
 using CampaignEditor.Repositories;
 using CampaignEditor.StartupHelpers;
+using CampaignEditor.UserControls;
 using Database.Repositories;
 
 namespace CampaignEditor
@@ -37,7 +38,7 @@ namespace CampaignEditor
         private CampaignController _campaignController;
 
 
-        private ClientsTreeView _clientsTree;
+        //private ClientsTreeView _clientsTree;
 
         public static Clients instance;
         public string searchClientsString = "Search clients";
@@ -85,10 +86,10 @@ namespace CampaignEditor
             IUserClientsRepository userClientsRepository)
         {
             instance = this;
+            this.DataContext = this;
 
             InitializeComponent();
 
-            this.DataContext = this;
             _factoryAddUser = factoryAddUser;
             _factoryAddClient = factoryAddClient;
             _factoryClientsTreeView = factoryClientsTreeView;
@@ -98,9 +99,9 @@ namespace CampaignEditor
             _factoryCampaign = factoryCampaign;
             _campaignController = new CampaignController(campaignRepository);
 
-            _clientsTree = factoryClientsTreeView.Create();
-            _clientsTree.Initialization(MainWindow.user);
-            _ = _clientsTree.InitializeTree();
+            //_clientsTree = factoryClientsTreeView.Create();
+            //_clientsTree.Initialization(MainWindow.user);
+            //_ = _clientsTree.InitializeTree();
 
 
 
@@ -131,13 +132,13 @@ namespace CampaignEditor
         #region Filter ComboBox
         private async void FillFilterByUsersComboBox()
         {
-            cbUsers.Items.Add("All");
+            /*cbUsers.Items.Add("All");
             var usernames = await _clientsTree.GetSupervisedUsernames();
             usernames = usernames.OrderBy(u => u);
             foreach (string username in usernames)
             {
                 cbUsers.Items.Add(username);
-            }
+            }*/
 
         }
 
@@ -167,7 +168,7 @@ namespace CampaignEditor
         private async void tbSearchClients_TextChanged(object sender, TextChangedEventArgs e)
         {
             tvClients1.FilterClientAndCampaign();
-            if (tbSearchClients.Text.Length >= 3 && tbSearchClients.Text != searchClientsString)
+            /*if (tbSearchClients.Text.Length >= 3 && tbSearchClients.Text != searchClientsString)
             {
                 await _clientsTree.UpdateTree();
                 clientsUpdated = true;
@@ -180,7 +181,7 @@ namespace CampaignEditor
                     clientsUpdated = false;
                 }
 
-            }
+            }*/
 
         }
 
@@ -207,7 +208,7 @@ namespace CampaignEditor
         {
             tvClients1.FilterClientAndCampaign();
 
-            if (tbSearchCampaigns.Text.Length >= 3 && tbSearchCampaigns.Text != searchCampaignsString)
+            /*if (tbSearchCampaigns.Text.Length >= 3 && tbSearchCampaigns.Text != searchCampaignsString)
             {
                 _clientsTree.UpdateTree();
                 campaignsUpdated = true;
@@ -220,7 +221,7 @@ namespace CampaignEditor
                     campaignsUpdated = false;
                 }
 
-            }
+            }*/
         }
 
         #endregion
@@ -234,8 +235,8 @@ namespace CampaignEditor
 
         private void cbDatePicker_Checked(object sender, RoutedEventArgs e)
         {
-            if (_clientsTree != null)
-                _clientsTree.UpdateTree();
+            /*if (_clientsTree != null)
+                _clientsTree.UpdateTree();*/
             dpStartDate.IsEnabled = true;
             if (loadedAllCheckBoxes)
                 tvClients1.FilterData();
@@ -244,8 +245,8 @@ namespace CampaignEditor
 
         private void cbDatePicker_Unchecked(object sender, RoutedEventArgs e)
         {
-            if (_clientsTree != null)
-                _clientsTree.UpdateTree();
+            /*if (_clientsTree != null)
+                _clientsTree.UpdateTree();*/
             dpStartDate.IsEnabled = false;
             if (loadedAllCheckBoxes)
                 tvClients1.FilterData();
@@ -253,8 +254,8 @@ namespace CampaignEditor
 
         private void dpStartDate_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (_clientsTree != null)
-                _clientsTree.UpdateTree();
+            /*if (_clientsTree != null)
+                _clientsTree.UpdateTree();*/
             if (loadedAllCheckBoxes)
                 tvClients1.FilterData();
 
@@ -262,8 +263,8 @@ namespace CampaignEditor
 
         private void cbFilter_Checked(object sender, RoutedEventArgs e)
         {
-            if (_clientsTree != null)
-                _clientsTree.UpdateTree();
+            /*if (_clientsTree != null)
+                _clientsTree.UpdateTree();*/
             if (loadedAllCheckBoxes)
                 tvClients1.FilterData();
 
@@ -271,8 +272,8 @@ namespace CampaignEditor
 
         private void cbFilter_Unchecked(object sender, RoutedEventArgs e)
         {
-            if (_clientsTree != null)
-                _clientsTree.UpdateTree();
+            /*if (_clientsTree != null)
+                _clientsTree.UpdateTree();*/
             if (loadedAllCheckBoxes)
                 tvClients1.FilterData();
 
@@ -281,7 +282,7 @@ namespace CampaignEditor
 
         private async void cbUsers_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            _clientsTree.UpdateTree();
+            //_clientsTree.UpdateTree();
             string username = ((string)cbUsers.SelectedValue).Trim();
             if (username == null || username == "All")
                 await tvClients1.Initialize();
@@ -317,8 +318,8 @@ namespace CampaignEditor
 
         private async Task UpdateCanBeDeleted()
         {
-            string clientname = ((HeaderedItemsControl)tvClients.SelectedItem).Header.ToString()!.Trim();
-            CanBeDeleted = await _clientsTree.CheckCanBeDeleted(clientname);
+            /*string clientname = ((HeaderedItemsControl)tvClients.SelectedItem).Header.ToString()!.Trim();
+            CanBeDeleted = await _clientsTree.CheckCanBeDeleted(clientname);*/
 
         }
 
@@ -397,22 +398,22 @@ namespace CampaignEditor
 
         private async void btnNewCampaign_Click(object sender, RoutedEventArgs e)
         {
-            string clientname = ((HeaderedItemsControl)tvClients.SelectedItem).Header.ToString()!.Trim();
+            /*string clientname = ((HeaderedItemsControl)tvClients.SelectedItem).Header.ToString()!.Trim();
             var f = _factoryNewCampaign.Create();
             await f.Initialize(clientname);
             f.ShowDialog();
             if (f.success)
-                await _clientsTree.InitializeTree();
+                await _clientsTree.InitializeTree();*/
         }
 
         private async void btnShowUsersOfClient_Click(object sender, RoutedEventArgs e)
         {
-            var f = _factoryUsersOfClient.Create();
+            /*var f = _factoryUsersOfClient.Create();
             string clientname = ((HeaderedItemsControl)tvClients.SelectedItem).Header.ToString()!.Trim();
             await f.Initialize(clientname);
             f.ShowDialog();
             if (f.IsUpdated)
-                await _clientsTree.InitializeTree();
+                await _clientsTree.InitializeTree();*/
 
         }
 
@@ -431,21 +432,21 @@ namespace CampaignEditor
 
         private async void btnAddClient_Click(object sender, RoutedEventArgs e)
         {
-            var f = _factoryAddClient.Create();
+            /*var f = _factoryAddClient.Create();
             f.ShowDialog();
             if (f.success)
-                await _clientsTree.InitializeTree();
+                await _clientsTree.InitializeTree();*/
         }
         private async void btnDeleteClient_Click(object sender, RoutedEventArgs e)
         {
-            string clientname = ((HeaderedItemsControl)tvClients.SelectedItem).Header.ToString()!.Trim();
-            await _clientsTree.DeleteClient(clientname);
+            /*string clientname = ((HeaderedItemsControl)tvClients.SelectedItem).Header.ToString()!.Trim();
+            await _clientsTree.DeleteClient(clientname);*/
 
         }
 
         private async void btnRenameClient_Click(object sender, RoutedEventArgs e)
         {
-            var f = _factoryRename.Create();
+            /*var f = _factoryRename.Create();
             MenuItem menuItem = (MenuItem)sender;
             string name = ((TreeViewItem)tvClients.SelectedValue).Header.ToString().Trim();
             await f.RenameClient(name);
@@ -453,12 +454,12 @@ namespace CampaignEditor
             if (f.renamed)
             {
                 await _clientsTree.InitializeTree();
-            }
+            }*/
         }
 
         private async void btnRenameCampaign_Click(object sender, RoutedEventArgs e)
         {
-            var f = _factoryRename.Create();
+            /*var f = _factoryRename.Create();
             MenuItem menuItem = (MenuItem)sender;
             string name = ((TreeViewItem)tvClients.SelectedValue).Header.ToString().Trim();
             await f.RenameCampaign(name);
@@ -466,7 +467,7 @@ namespace CampaignEditor
             if (f.renamed)
             {
                 await _clientsTree.InitializeTree();
-            }
+            }*/
         }
 
         private void btnDuplicateCampaign_Click(object sender, RoutedEventArgs e)
@@ -484,7 +485,7 @@ namespace CampaignEditor
 
         private async void btnDeleteCampaign_Click(object sender, RoutedEventArgs e)
         {
-            if (tvClients.SelectedItem != null)
+            /*if (tvClients.SelectedItem != null)
             {
                 var item = tvClients.SelectedItem as TreeViewItem;
                 if (item != null)
@@ -504,7 +505,7 @@ namespace CampaignEditor
                         }
                     }
                 }
-            }
+            }*/
         }
 
 

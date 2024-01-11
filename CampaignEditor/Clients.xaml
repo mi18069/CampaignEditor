@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:converters="clr-namespace:CampaignEditor.Converters"
         xmlns:local="clr-namespace:CampaignEditor"
+        xmlns:userControls="clr-namespace:CampaignEditor.UserControls"
         mc:Ignorable="d"
         Title="Clients" Height="800" Width="900"
         MinHeight="600" MinWidth="800"
@@ -27,7 +28,7 @@
             <TextBlock x:Name="tbUsername" 
                        Width="200"
                        HorizontalAlignment="Left" VerticalAlignment="Top" Margin="100, 5, 0, 0"/>
-            <local:ClientCmpsTreeView x:Name="tvClients1" Margin="10, 100, 10, 100"/>
+            <userControls:ClientCmpsTreeView x:Name="tvClients1" Margin="10, 100, 10, 100"/>
             <TreeView Visibility="Hidden" x:Name="tvClients" 
                   Margin="10, 100, 10, 100"
                   IsTextSearchCaseSensitive="False" IsTextSearchEnabled="True"

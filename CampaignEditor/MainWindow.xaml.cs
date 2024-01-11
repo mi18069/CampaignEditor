@@ -44,18 +44,7 @@ namespace CampaignEditor
             string connectionString = config.ConnectionStrings.ConnectionStrings["cs"].ConnectionString;
             AppSettings.ConnectionString = connectionString;
         }
-
        
-        private int GetWeekOfYear(DateTime date)
-        {
-            System.Globalization.CultureInfo cultureInfo = System.Globalization.CultureInfo.CurrentCulture;
-            System.Globalization.Calendar calendar = cultureInfo.Calendar;
-
-            System.Globalization.DateTimeFormatInfo dtfi = cultureInfo.DateTimeFormat;
-            dtfi.FirstDayOfWeek = DayOfWeek.Monday;
-
-            return calendar.GetWeekOfYear(date, dtfi.CalendarWeekRule, dtfi.FirstDayOfWeek) - 1;
-        }
 
         // Checks if the username and password are typed correctly
         private async void btnCheckCredentials_Click(object sender, RoutedEventArgs e)

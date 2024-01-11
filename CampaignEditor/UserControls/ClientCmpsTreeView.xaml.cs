@@ -4,23 +4,35 @@ using Database.Entities;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Data;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows.Controls;
 using System.Windows.Data;
 
-namespace CampaignEditor
+namespace CampaignEditor.UserControls
 {
     /// <summary>
     /// Interaction logic for ClientCmpsTreeView.xaml
     /// </summary>
+    public class TreeViewData
+    {
+        public int UserLevel { get; set; } = MainWindow.user.usrlevel;
+
+        public string ItemName { get; set; } = new string("AAA");
+
+        public ObservableCollection<ClientCampaignsList>? collection;
+    }
     public partial class ClientCmpsTreeView : UserControl
     {
         public UserController _userController;
         public ClientController _clientController;
         public UserClientsController _userClientsController;
         public CampaignController _campaignController;
+
+        public TreeViewData tvd;
 
         private Clients clientsInstance = Clients.instance;
 
@@ -29,12 +41,15 @@ namespace CampaignEditor
 
         public ClientCmpsTreeView()
         {
+            tvd = new TreeViewData();
             // Default constructor for XAML
             InitializeComponent();
+
         }
 
         public async Task Initialize(UserDTO userDTO = null)
         {
+
             clientCampaignsLists.Clear();
             var clids = new List<int>();
             if (userDTO == null || userDTO.usrlevel == 0)
@@ -153,7 +168,8 @@ namespace CampaignEditor
             }
 
             var dataToFilter = CopyObservable(filteredData);
-            _tvUsers.ItemsSource = dataToFilter;
+            tvd.collection = dataToFilter;
+            _tvUsers.ItemsSource = tvd.collection;
         }
 
         private void ApplyFilters(ObservableCollection<ClientCampaignsList> dataToFilter, bool applySinceFilter, bool applyActiveFilter, bool applyNotStartedFilter, bool applyFinishedFilter)
@@ -186,10 +202,9 @@ namespace CampaignEditor
                 }
             }
 
-            _tvUsers.ItemsSource = dataToFilter;
+            tvd.collection = dataToFilter;
+            _tvUsers.ItemsSource = tvd.collection;
 
         }
-
-
     }
 }
