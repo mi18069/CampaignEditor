@@ -36,5 +36,10 @@ namespace CampaignEditor.Controllers
         {
             return await _repository.DeleteBrandByCmpId(id);
         }
+
+        public async Task<bool> DuplicateCmpBrnd(int oldId, int newId)
+        {
+            return await _repository.DuplicateCmpBrnd(oldId, newId);
+        }
     }
 }

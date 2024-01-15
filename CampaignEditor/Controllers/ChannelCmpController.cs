@@ -1,4 +1,5 @@
-﻿using Database.DTOs.ChannelCmpDTO;
+﻿using AutoMapper.Configuration.Conventions;
+using Database.DTOs.ChannelCmpDTO;
 using Database.DTOs.TargetCmpDTO;
 using Database.Entities;
 using Database.Repositories;
@@ -52,6 +53,11 @@ namespace CampaignEditor.Controllers
         public async Task<bool> DeleteChannelCmpByIds(int cmpid, int plid)
         {
             return await _repository.DeleteChannelCmpByIds(cmpid, plid);
+        }
+
+        public async Task<bool> DuplicateChannelCmp(int oldId, int newId)
+        {
+            return await _repository.DuplicateChannelCmp(oldId, newId);
         }
     }
 }

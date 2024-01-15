@@ -35,7 +35,8 @@
         </ComboBox>
         <Button x:Name="btnUnassign" Background="White" BorderThickness="0"
                 Grid.Row="1" Grid.Column="4"
-                HorizontalAlignment="Right" VerticalAlignment="Center">
+                HorizontalAlignment="Right" VerticalAlignment="Center"
+                Click="btnUnassign_Click">
             <Image Source="\images\red_X.png" Width="25" Height="25"></Image>
         </Button>
     </Grid>

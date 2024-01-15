@@ -14,5 +14,6 @@ namespace Database.Repositories
         Task<bool> UpdateSpot(UpdateSpotDTO spotDTO);
         Task<bool> DeleteSpotsByCmpid(int id);
         Task<bool> DeleteSpotByCmpidAndCode(int id, string code);
+        Task<bool> DuplicateSpot(int oldId, int newId);
     }
 }

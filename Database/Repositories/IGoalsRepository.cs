@@ -11,5 +11,6 @@ namespace Database.Repositories
         Task<IEnumerable<GoalsDTO>> GetAllGoals();
         Task<bool> UpdateGoals(UpdateGoalsDTO goalsDTO);
         Task<bool> DeleteGoalsByCmpid(int id);
+        Task<bool> DuplicateGoals(int oldCmpid, int newCmpid);
     }
 }

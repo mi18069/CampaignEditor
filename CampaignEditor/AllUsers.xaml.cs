@@ -2,13 +2,12 @@
 using CampaignEditor.DTOs.UserDTO;
 using CampaignEditor.Repositories;
 using CampaignEditor.StartupHelpers;
-using Database.DTOs.MediaPlanDTO;
-using Database.Entities;
+using System;
+using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
 
 namespace CampaignEditor
 {
@@ -29,6 +28,9 @@ namespace CampaignEditor
             _userController = new UserController(userRepository);
         }
 
+        public event EventHandler<UserDTO> UserDeletedEvent;
+        public event EventHandler<UserDTO> UserAuthorizationChangedEvent;
+
         public async Task Initialize()
         {
             await PopulateItems();
@@ -46,7 +48,7 @@ namespace CampaignEditor
             foreach (var user in allUsers)
             {
                 var item = new UsersListItem();
-                FillFields(item, user);
+                item.User = user;
                 AddItemEvents(item);
                 lbUsers.Items.Insert(0, item);
             }
@@ -59,9 +61,31 @@ namespace CampaignEditor
 
         private void AddItemEvents(UsersListItem item)
         {
-            item.cbUserLevel.SelectionChanged += CbUserLevel_SelectionChanged;
+            item.UserLevelSelectionChanged += CbUserLevel_SelectionChanged;
             item.MouseDoubleClick += Item_MouseDoubleClick;
             item.MouseRightButtonDown += Item_MouseRightButtonDown;
+            item.BtnUnassignedClicked += Item_BtnUnassignedClicked;
+        }
+        private void DeleteItemEvents(UsersListItem item)
+        {
+            item.UserLevelSelectionChanged -= CbUserLevel_SelectionChanged;
+            item.MouseDoubleClick -= Item_MouseDoubleClick;
+            item.MouseRightButtonDown -= Item_MouseRightButtonDown;
+            item.BtnUnassignedClicked -= Item_BtnUnassignedClicked;
+        }
+        private async void Item_BtnUnassignedClicked(object? sender, UserDTO e)
+        {
+            try
+            {
+                var item = sender as UsersListItem;
+                await DeleteUserFromULItem(item);
+                DeleteItemEvents(item);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
         }
 
         private async void Item_MouseRightButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
@@ -72,7 +96,8 @@ namespace CampaignEditor
             item.Header ="Delete user";
             item.Click += async (obj, ea) =>
             {
-                DeleteUserFromULItem(sender, e);
+                var item = sender as UsersListItem;
+                await DeleteUserFromULItem(item);
             };
 
             menu.Items.Add(item);
@@ -81,17 +106,19 @@ namespace CampaignEditor
 
         }
 
-        private void DeleteUserFromULItem(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private async Task DeleteUserFromULItem(UsersListItem item)
         {
-            var item = sender as UsersListItem;
-            var username = item.lblUsername.Content.ToString()!.Trim();
+            var user = item.User;
 
-            if (MessageBox.Show("Are you sure you want to delete user " + username + "?", "Message", 
+            if (MessageBox.Show("Are you sure you want to delete user " + user.usrname.Trim() + "?", "Message", 
                 MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
             {
                 var f = _factoryUsersAndClients.Create();
-                f.DeleteUserByUsername(username);
-                lbUsers.Items.Remove(item);
+                if (await f.DeleteUser(user))
+                {
+                    lbUsers.Items.Remove(item);
+                    UserDeletedEvent?.Invoke(this, item.User);
+                }
             }
 
 
@@ -107,7 +134,7 @@ namespace CampaignEditor
             var f = _factoryAddUser.Create();
             f.Initialize(user);
             f.ShowDialog();
-            if (f.isAdded)
+            if (f.success)
             {
                 item.lblUsername.Content = f.user.usrname.ToString().Trim();
                 item.cbUserLevel.SelectedIndex = f.user.usrlevel;
@@ -118,10 +145,14 @@ namespace CampaignEditor
         {
             var f = _factoryAddUser.Create();
             f.ShowDialog();
-            if (f.isAdded)
+            if (f.success)
             {
+                if (f.user == null)
+                {
+                    return;
+                }
                 var item = lbUsers.Items[lbUsers.Items.Count - 2] as UsersListItem;
-                FillFields(item, f.user);
+                item.User = f.user;
                 AddItemEvents(item);
             }
             else
@@ -131,37 +162,44 @@ namespace CampaignEditor
 
         }
 
-        private async void CbUserLevel_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        private async void CbUserLevel_SelectionChanged(object sender, UserDTO user)
         {
-            // Traverse the visual tree to find the DataGridRow and DataGridCell that contain the selected cell
-            DependencyObject parent = VisualTreeHelper.GetParent((DependencyObject)sender);
-            while (parent != null && !(parent is UsersListItem))
-            {
-                parent = VisualTreeHelper.GetParent(parent);
-            }
-            if (parent == null)
-            {
-                return; // error
-            }
-
-            var item = parent as UsersListItem;
-            var username = item.lblUsername.Content.ToString()!.Trim();
-            var user = await _userController.GetUserByUsername(username.Trim());
+            var item = sender as UsersListItem;
             user.usrlevel = item.cbUserLevel.SelectedIndex;
-            await _userController.UpdateUser(new UpdateUserDTO(user));
-        }
-
-        private void FillFields(UsersListItem item, UserDTO user)
-        {
-            item.lblUsername.Content = user.usrname.Trim();
-            item.cbUserLevel.SelectedIndex = user.usrlevel;
-            item.authorizationChanged = false;
-            item.btnUnassign.Visibility = Visibility.Collapsed;
+            try
+            {
+                await _userController.UpdateUser(new UpdateUserDTO(user));
+                UserAuthorizationChangedEvent?.Invoke(this, user);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
         }
 
         private void btnClose_Click(object sender, RoutedEventArgs e)
         {
             this.Close();
+        }
+
+        // Deactivating events
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            for (int i=0; i<lbUsers.Items.Count - 1; i++)
+            {
+                UsersListItem item = lbUsers.Items[i] as UsersListItem;
+                DeleteItemEvents(item);
+            }
+            try
+            {
+                var button = lbUsers.Items[lbUsers.Items.Count - 1] as Button;
+                button.Click -= Button_Click;
+            }
+            catch
+            {
+
+            }
         }
 
     }

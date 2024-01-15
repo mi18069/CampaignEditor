@@ -26,8 +26,8 @@
         <Button x:Name="btnSave" Grid.Row="3" Grid.Column="1" Content="Save"
                 Width="100" HorizontalAlignment="Right" Margin="10" 
                 IsEnabled="{Binding Path=isModified, Mode=TwoWay}"
-                Click="btnSave_Click"/>
+                Click="btnSave_Click" Visibility="Collapsed"/>
         <Button x:Name="btnClose" Grid.Row="3" Grid.Column="1" Content="Close"
-                Width="100" HorizontalAlignment="Right" Margin="10, 10, 120, 10" Click="btnClose_Click"/>
+                Width="100" HorizontalAlignment="Right" Margin="10" Click="btnClose_Click"/>
     </Grid>
 </Window>

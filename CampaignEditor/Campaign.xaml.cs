@@ -14,9 +14,8 @@ namespace CampaignEditor
 {
     public partial class Campaign : Window
     {
-        public string cmpname = "";
+        public CampaignDTO _campaign = null;
         ClientDTO _client = null;
-        CampaignDTO _campaign = null;
         bool readOnly = true;
 
         private readonly IAbstractFactory<CampaignOverview> _factoryOverview;
@@ -47,11 +46,10 @@ namespace CampaignEditor
 
         }
 
-        public async Task Initialize(string campaignName, bool isReadOnly)
+        public async Task Initialize(CampaignDTO campaign, bool isReadOnly)
         {
 
-            cmpname = campaignName;
-            _campaign = await _campaignController.GetCampaignByName(campaignName);
+            _campaign = campaign;
             _client = await _clientController.GetClientById(_campaign.clid);
             readOnly = isReadOnly || (TimeFormat.YMDStringToDateTime(_campaign.cmpedate) < DateTime.Now);
             this.Title = "Client: " + _client.clname.Trim() + "  Campaign: " + _campaign.cmpname.Trim();

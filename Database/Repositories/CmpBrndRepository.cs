@@ -71,5 +71,18 @@ namespace Database.Repositories
 
             return affected != 0;
         }
+
+        public async Task<bool> DuplicateCmpBrnd(int oldCmpid, int newCmpid)
+        {
+            using var connection = _context.GetConnection();
+
+            var affected = await connection.ExecuteAsync(
+                @"INSERT INTO tblcmpbrnd (cmpid, brbrand)
+                  SELECT @NewCmpid, brbrand
+                  FROM tblcmpbrnd WHERE cmpid = @OldCmpid;",
+                new { OldCmpid = oldCmpid, NewCmpid = newCmpid });
+
+            return affected != 0;
+        }
     }
 }

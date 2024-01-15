@@ -1,4 +1,6 @@
-﻿using System.ComponentModel;
+﻿using CampaignEditor.DTOs.UserDTO;
+using System;
+using System.ComponentModel;
 using System.Windows.Controls;
 
 
@@ -12,27 +14,27 @@ namespace CampaignEditor
             InitializeComponent();
         }
 
+        public event EventHandler<UserDTO> BtnUnassignedClicked;
+        public event EventHandler<UserDTO> UserLevelSelectionChanged;
+
         #region Properties
 
-        private string _username;
-        private string _userlevel;
+        private UserDTO _user;
         private Image _userIcon;
         private Button _btnUnassign;
 
-        public bool authorizationChanged = false;
+        public bool authorizationChanged = false;      
 
-        [Category("Custom Props")]
-        public string Username
+        public UserDTO User
         {
-            get { return _username; }
-            set { _username = value.Trim() ; lblUsername.Content = value.Trim(); }
-        }
-
-        [Category("Custom Props")]
-        public string Userlevel
-        {
-            get { return _userlevel; }      
-            set { _userlevel = value; cbUserLevel.SelectedIndex = value == "0" ? 0 : value == "1" ? 1 : 2; }
+            get { return _user; }
+            set 
+            { 
+                _user = value;
+                lblUsername.Content = _user.usrname.Trim();
+                cbUserLevel.SelectedIndex = _user.usrlevel;
+                authorizationChanged = false;
+            }
         }
 
         [Category("Custom Props")]
@@ -53,7 +55,13 @@ namespace CampaignEditor
 
         private void cbUserLevel_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            UserLevelSelectionChanged?.Invoke(this, this.User);
             authorizationChanged = true;
+        }
+
+        private void btnUnassign_Click(object sender, System.Windows.RoutedEventArgs e)
+        {
+            BtnUnassignedClicked?.Invoke(this, this.User);
         }
     }
 

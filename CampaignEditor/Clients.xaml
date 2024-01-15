@@ -15,69 +15,70 @@
         <converters:ToHalfConverterM30 x:Key="toHalfConverter"/>
     </Window.Resources>
     <Grid>
-        <Button x:Name="btnPassChange" 
+        <Grid.RowDefinitions>
+            <RowDefinition Height="10"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="10"/>
+        </Grid.RowDefinitions>
+        
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="10"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="0.7*"/>
+            <ColumnDefinition Width="10"/>
+        </Grid.ColumnDefinitions>
+
+        <Button x:Name="btnPassChange" Grid.Row="1" Grid.Column="2"
                     Background="White" IsTabStop="False" BorderThickness="0"
-                    HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0, 10, 20, 0"
+                    HorizontalAlignment="Right" VerticalAlignment="Top"
                     Click="btnPassChange_Click">
             <Image Source="\images\ChangePassIcon.png" Width="40" Height="40" ></Image>
         </Button>
-        <Grid x:Name="GridLeft"
-            Margin="10,10,350,10">
+        <Grid Grid.Row="1" Grid.Column="1">
             <Label x:Name="lblUsername" Content="user: " FontWeight="Bold"
                HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10, 0, 0, 0"/>
             <TextBlock x:Name="tbUsername" 
                        Width="200"
                        HorizontalAlignment="Left" VerticalAlignment="Top" Margin="100, 5, 0, 0"/>
-            <userControls:ClientCmpsTreeView x:Name="tvClients1" Margin="10, 100, 10, 100"/>
-            <TreeView Visibility="Hidden" x:Name="tvClients" 
-                  Margin="10, 100, 10, 100"
-                  IsTextSearchCaseSensitive="False" IsTextSearchEnabled="True"
-                  SelectedItemChanged="tvClients_SelectedItemChanged"
-                  PreviewMouseRightButtonDown="tvClients_PreviewMouseRightButtonDown">
-                <TreeView.Resources>
-                    <ContextMenu x:Key ="ClientContext"  StaysOpen="true">
-                        <MenuItem Header="Users of client" Click="btnShowUsersOfClient_Click"/>
-                        <MenuItem Header="All users" Click="BtnAllUsers_Click" IsEnabled="{Binding Path=isAdministrator}"/>
-                        <MenuItem Header="New campaign" Click="btnNewCampaign_Click" IsEnabled="{Binding Path=isAdministrator}"/>
-                        <MenuItem x:Name="btnRenameClient" Click="btnRenameClient_Click" Header="Rename client"  IsEnabled="{Binding Path=isReadWrite}"/>
-                        <MenuItem Header="New user" Click="btnAddUser_Click" IsEnabled="{Binding Path=isAdministrator}"/>
-                        <MenuItem Header="New client" Click="btnAddClient_Click" IsEnabled="{Binding Path=isAdministrator}"/>
-                        <MenuItem Header="Delete client" Click="btnDeleteClient_Click"  IsEnabled="{Binding Path=CanBeDeleted}"/>
-                    </ContextMenu>
-                    <ContextMenu x:Key="CampaignContext"  StaysOpen="true">
-                        <MenuItem Header="Edit campaign" Click="btnAddCampaign_Click"/>
-                        <MenuItem Header="Rename campaign" Click="btnRenameCampaign_Click" IsEnabled="{Binding Path=isReadWrite}"/>
-                        <!-- <MenuItem Header="Duplicate campaign" Click="btnDuplicateCampaign_Click"  IsEnabled="{Binding Path=isReadWrite}"/> -->
-                        <!-- <MenuItem Header="Delete campaign" Click="btnDeleteCampaign_Click"  IsEnabled="{Binding Path=isAdministrator}"/> -->
-                    </ContextMenu>
-                </TreeView.Resources>
-            </TreeView>
-
-            <TextBox x:Name="tbSearchClients" Foreground="LightGray"
-                     Width="{Binding ElementName=GridLeft, Path=ActualWidth, Converter={StaticResource toHalfConverter}}"
-                 HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,50,0,0" 
+        </Grid>
+        <Grid x:Name="GridLeft" Grid.Row="2" Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="10" />
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="10" />
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="10" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <TextBox x:Name="tbSearchClients" Grid.Row="1" Grid.Column="0" Margin="10"
+                     Foreground="LightGray"
                  TextWrapping="Wrap"
                  PreviewMouseDown="tbSearchClients_PreviewMouseDown"
                  LostFocus="tbSearchClients_LostFocus"
                  TextChanged="tbSearchClients_TextChanged"/>
-            <TextBox x:Name="tbSearchCampaigns" Foreground="LightGray"
-                 Width="{Binding ElementName=GridLeft, Path=ActualWidth, Converter={StaticResource toHalfConverter}}"
-                 HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,50,10,0" 
+            <TextBox x:Name="tbSearchCampaigns" Grid.Row="1" Grid.Column="1" Margin="10"
+                     Foreground="LightGray"
                  TextWrapping="Wrap"
                  PreviewMouseDown="tbSearchCampaigns_PreviewMouseDown"
                  LostFocus="tbSearchCampaigns_LostFocus"
                  TextChanged="tbSearchCampaigns_TextChanged"/>
-            <Label x:Name="lblFilterByUser" Content="Filter by users"
-               Width="135" 
-               HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,180,40"/>
-            <ComboBox x:Name="cbUsers"
+            
+            <userControls:ClientCmpsTreeView x:Name="tvClients" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"/>
+                     
+            <Label x:Name="lblFilterByUser" Grid.Row="4" Grid.Column="0"
+                   Content="Filter by users" HorizontalAlignment="Right"/>
+            <ComboBox x:Name="cbUsers" Grid.Row="4" Grid.Column="1" Margin="10, 0"
                   Width="200"
-                  HorizontalAlignment="Center"  VerticalAlignment="Bottom" Margin="180,0,0,40"
+                  HorizontalAlignment="Left" VerticalAlignment="Center" 
                   SelectionChanged="cbUsers_SelectionChanged"/>
         </Grid>
-        <Border BorderBrush="LightGray" BorderThickness="1" 
-                Width="300" Height="260"
-                HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0, 107, 20, 0">
+        <Border BorderBrush="LightGray" BorderThickness="1" Grid.Row="2" Grid.Column="2"
+                Width="300" Height="260" VerticalAlignment="Top" Margin="0, 60, 0, 0">
             <Grid>
                 <Label x:Name="lblFilter" Content="  Show  " Background="White"
                        HorizontalAlignment="Center" Margin="0, -20, 0, 0"/>

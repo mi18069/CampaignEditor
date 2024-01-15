@@ -24,5 +24,6 @@ namespace Database.Repositories
         Task<bool> DeleteMediaPlanById(int id);
         Task<bool> DeleteMediaPlanByCmpId(int id);
         Task<bool> SetActiveMediaPlanById(int id, bool isActive);
+
     }
 }

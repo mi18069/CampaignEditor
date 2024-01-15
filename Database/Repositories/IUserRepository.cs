@@ -6,7 +6,7 @@ namespace CampaignEditor.Repositories
 {
     public interface IUserRepository
     {
-        Task<bool> CreateUser(CreateUserDTO userDTO);
+        Task<int?> CreateUser(CreateUserDTO userDTO);
         Task<UserDTO> GetUserById(int id);
         Task<UserDTO> GetUserByUsername(string username);
         Task<IEnumerable<UserDTO>> GetAllUsers();

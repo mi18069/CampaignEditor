@@ -20,15 +20,15 @@ namespace Database.Repositories
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
-        public async Task<bool> CreateCampaign(CreateCampaignDTO campaignDTO)
+        public async Task<int?> CreateCampaign(CreateCampaignDTO campaignDTO)
         {
             using var connection = _context.GetConnection();
 
-            var affected = await connection.ExecuteAsync(
+            var newId = await connection.QuerySingleOrDefaultAsync<int?>(
                 "INSERT INTO tblcampaigns (cmprev, cmpown, cmpname, clid, cmpsdate, cmpedate, cmpstime, cmpetime, " +
                     "cmpstatus, sostring, activity, cmpaddedon, cmpaddedat, active, forcec)" +
                     " VALUES (@cmprev, @cmpown, @cmpname, @clid, @cmpsdate, @cmpedate, @cmpstime, @cmpetime, " +
-                        "@cmpstatus, @sostring, @activity, @cmpaddedon, @cmpaddedat, @active, @forcec)",
+                        "@cmpstatus, @sostring, @activity, @cmpaddedon, @cmpaddedat, @active, @forcec) RETURNING cmpid",
             new
             {
                 campaignDTO.cmprev,
@@ -48,7 +48,7 @@ namespace Database.Repositories
                 campaignDTO.forcec
             });
 
-            return affected != 0;
+            return newId;
         }
 
         public async Task<CampaignDTO> GetCampaignById(int cmpid)
@@ -138,6 +138,23 @@ namespace Database.Repositories
 
             var affected = await connection.ExecuteAsync(
                 "DELETE FROM tblcampaigns WHERE clid = @clid", new { clid = userid });
+
+            return affected != 0;
+        }
+
+        public async Task<bool> DeleteCampaignInitialization(int cmpid)
+        {
+            using var connection = _context.GetConnection();
+
+            var affected = await connection.ExecuteAsync(
+                @"DELETE FROM xmphist 
+                  WHERE xmpid IN (SELECT xmpid FROM xmp WHERE cmpid = @Cmpid);
+
+                  DELETE FROM xmpterm 
+                  WHERE xmpid IN (SELECT xmpid FROM xmp WHERE cmpid = @Cmpid);
+
+                  DELETE FROM xmp
+                  WHERE cmpid = @Cmpid;", new { Cmpid = cmpid });
 
             return affected != 0;
         }

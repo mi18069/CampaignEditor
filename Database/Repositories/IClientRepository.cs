@@ -6,9 +6,9 @@ namespace Database.Repositories
 {
     public interface IClientRepository
     {
-        Task<bool> CreateClient(CreateClientDTO clientDTO);
+        Task<int?> CreateClient(CreateClientDTO clientDTO);
         Task<ClientDTO> GetClientById(int id);
-        Task<ClientDTO> GetClientByName(string clname);
+        Task<IEnumerable<ClientDTO>> GetClientsByName(string clname);
         Task<IEnumerable<ClientDTO>> GetAllClients();
         Task<bool> UpdateClient(UpdateClientDTO clientDTO);
         Task<bool> DeleteClientById(int id);

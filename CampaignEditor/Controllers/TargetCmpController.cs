@@ -50,9 +50,10 @@ namespace CampaignEditor.Controllers
             return await _repository.DeleteTargetCmpByCmpid(id);
         }
 
-        public async Task<bool> DeleteSpotByIds(int cmpid, int targid)
+
+        public async Task<bool> DuplicateTargetCmp(int oldId, int newId)
         {
-            return await _repository.DeleteTargetCmpByIds(cmpid, targid);
+            return await _repository.DuplicateTargetCmp(oldId, newId);
         }
     }
 }

@@ -15,31 +15,51 @@
     </UserControl.Resources>
 
     <Grid>
-        <TreeView Name="_tvUsers">
+        <TreeView Name="_tvUsers" MouseDoubleClick="_tvUsers_MouseDoubleClick">
             <TreeView.Resources>
+                <!-- ContextMenu for clicked on empty space -->
+                <ContextMenu x:Key="EmptyContextMenu" >
+                    <ContextMenu.DataContext>
+                        <local:TreeViewData />
+                    </ContextMenu.DataContext>
+                    <MenuItem Header="All users" IsEnabled="{Binding UserLevel, Converter={StaticResource UserLevelToBooleanConverter}, ConverterParameter=2}" Click="AllUsersMenuItem_Click"/>
+                    <MenuItem Header="New user" IsEnabled="{Binding UserLevel, Converter={StaticResource UserLevelToBooleanConverter}, ConverterParameter=1}" Click="NewUserMenuItem_Click"/>
+                    <MenuItem Header="New client" IsEnabled="{Binding UserLevel, Converter={StaticResource UserLevelToBooleanConverter}, ConverterParameter=1}" Click="NewClientMenuItem_Click"/>
+                </ContextMenu>
+
                 <!-- ContextMenu for Clients -->
                 <ContextMenu x:Key="ClientContextMenu" >
                     <ContextMenu.DataContext>
                         <local:TreeViewData />
                     </ContextMenu.DataContext>
-                    <MenuItem Header="Users of client" IsEnabled="{Binding UserLevel, Converter={StaticResource UserLevelToBooleanConverter}, ConverterParameter=2}"/>
-                    <MenuItem Header="All users" IsEnabled="{Binding UserLevel, Converter={StaticResource UserLevelToBooleanConverter}, ConverterParameter=2}"/>
-                    <MenuItem Header="New campaign" IsEnabled="{Binding UserLevel, Converter={StaticResource UserLevelToBooleanConverter}, ConverterParameter=1}"/>
-                    <MenuItem Header="Rename client" IsEnabled="{Binding UserLevel, Converter={StaticResource UserLevelToBooleanConverter}, ConverterParameter=1}"/>
-                    <MenuItem Header="New user" IsEnabled="{Binding UserLevel, Converter={StaticResource UserLevelToBooleanConverter}, ConverterParameter=1}"/>
-                    <MenuItem Header="New client" IsEnabled="{Binding UserLevel, Converter={StaticResource UserLevelToBooleanConverter}, ConverterParameter=1}"/>
-                    <MenuItem Header="Delete client" IsEnabled="{Binding UserLevel, Converter={StaticResource UserLevelToBooleanConverter}, ConverterParameter=1}"/>
+                    <MenuItem Header="Users of client" IsEnabled="{Binding UserLevel, Converter={StaticResource UserLevelToBooleanConverter}, ConverterParameter=2}" Click="UsersOfClientMenuItem_Click"/>
+                    <MenuItem Header="All users" IsEnabled="{Binding UserLevel, Converter={StaticResource UserLevelToBooleanConverter}, ConverterParameter=2}" Click="AllUsersMenuItem_Click"/>
+                    <MenuItem Header="New campaign" IsEnabled="{Binding UserLevel, Converter={StaticResource UserLevelToBooleanConverter}, ConverterParameter=1}" Click="NewCampaignMenuItem_Click"/>
+                    <MenuItem Header="Rename client" IsEnabled="{Binding UserLevel, Converter={StaticResource UserLevelToBooleanConverter}, ConverterParameter=1}" Click="RenameClientMenuItem_Click"/>
+                    <MenuItem Header="New user" IsEnabled="{Binding UserLevel, Converter={StaticResource UserLevelToBooleanConverter}, ConverterParameter=1}" Click="NewUserMenuItem_Click"/>
+                    <MenuItem Header="New client" IsEnabled="{Binding UserLevel, Converter={StaticResource UserLevelToBooleanConverter}, ConverterParameter=1}" Click="NewClientMenuItem_Click"/>
+                    <MenuItem Header="Delete client" IsEnabled="{Binding UserLevel, Converter={StaticResource UserLevelToBooleanConverter}, ConverterParameter=1}" Click="DeleteClientMenuItem_Click"/>
                 </ContextMenu>
 
                 <!-- ContextMenu for Campaigns -->
                 <ContextMenu x:Key="CampaignContextMenu">
-                    <MenuItem Header="Edit campaign" IsEnabled="{Binding UserLevel, Converter={StaticResource UserLevelToBooleanConverter}, ConverterParameter=1}"/>
-                    <MenuItem Header="Rename campaign" IsEnabled="{Binding UserLevel, Converter={StaticResource UserLevelToBooleanConverter}, ConverterParameter=1}"/>
+                    <ContextMenu.DataContext>
+                        <local:TreeViewData />
+                    </ContextMenu.DataContext>
+                    <MenuItem Header="Edit campaign" IsEnabled="{Binding UserLevel, Converter={StaticResource UserLevelToBooleanConverter}, ConverterParameter=1}" Click="EditCampaignMenuItem_Click"/>
+                    <MenuItem Header="Rename campaign" IsEnabled="{Binding UserLevel, Converter={StaticResource UserLevelToBooleanConverter}, ConverterParameter=1}" Click="RenameCampaignMenuItem_Click"/>
+                    <MenuItem Header="Delete campaign" IsEnabled="{Binding UserLevel, Converter={StaticResource UserLevelToBooleanConverter}, ConverterParameter=1}" Click="DeleteCampaignMenuItem_Click"/>
+                    <MenuItem Header="Duplicate campaign" IsEnabled="{Binding UserLevel, Converter={StaticResource UserLevelToBooleanConverter}, ConverterParameter=1}" Click="DuplicateCampaignMenuItem_Click"/>
                 </ContextMenu>
+
             </TreeView.Resources>
+            <TreeView.ContextMenu>
+                <!-- Set one of the context menus as the default -->
+                <StaticResource ResourceKey="EmptyContextMenu"/>
+            </TreeView.ContextMenu>
             <TreeView.ItemTemplate>
                 <HierarchicalDataTemplate DataType="{x:Type entities:ClientCampaignsList}" ItemsSource="{Binding Campaigns}">
-                    <TextBlock Text="{Binding Client.clname}" ContextMenu="{StaticResource ClientContextMenu}" />
+                    <TextBlock Text="{Binding Client.clname}" ContextMenu="{StaticResource ClientContextMenu}"/>
                     <HierarchicalDataTemplate.ItemTemplate>
                         <DataTemplate DataType="{x:Type cmpDTO:CampaignDTO}">
                             <TextBlock Text="{Binding cmpname}" ContextMenu="{StaticResource CampaignContextMenu}">

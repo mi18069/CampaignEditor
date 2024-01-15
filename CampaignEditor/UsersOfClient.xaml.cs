@@ -4,6 +4,7 @@ using CampaignEditor.Repositories;
 using CampaignEditor.StartupHelpers;
 using Database.DTOs.ClientDTO;
 using Database.Repositories;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -25,8 +26,8 @@ namespace CampaignEditor
         private ClientController _clientController;
         private UserController _userController;
 
-        List<string> _unassigned = new List<string>();
-        List<string> _assigned = new List<string>();
+        List<UserDTO> _unassigned = new List<UserDTO>();
+        List<UserDTO> _assigned = new List<UserDTO>();
 
         private bool _isModified;
         private bool _isUpdated = false;
@@ -71,12 +72,14 @@ namespace CampaignEditor
             }
         }
 
+        public event EventHandler<UserDTO> UserAuthorizationChangedEvent;
+        public event EventHandler<UserDTO> UnassignedUserEvent;
+        public event EventHandler<UserDTO> CancelEvent;
 
-        public async Task Initialize(string clientname)
+        public async Task Initialize(ClientDTO client)
         {
-            _client = await _clientController.GetClientByName(clientname);
+            _client = client;
             await PopulateItems();
-
         }
 
         private async Task PopulateItems()
@@ -92,7 +95,7 @@ namespace CampaignEditor
             foreach (var user in users) 
             {
                 var item = new UsersListItem();
-                FillFields(item, user);
+                item.User = user;
                 AddItemEvents(item);                
                 lbUsers.Items.Insert(0, item);
             }
@@ -105,8 +108,30 @@ namespace CampaignEditor
 
         private void AddItemEvents(UsersListItem item)
         {
-            item.cbUserLevel.SelectionChanged += CbUserLevel_SelectionChanged;
-            item.btnUnassign.Click += BtnUnassign_Click;
+            item.BtnUnassignedClicked += BtnUnassign_Click;
+            item.UserLevelSelectionChanged += CbUserLevel_SelectionChanged;
+        }
+
+        private void DeleteItemEvents(UsersListItem item)
+        {
+            item.BtnUnassignedClicked -= BtnUnassign_Click;
+            item.UserLevelSelectionChanged -= CbUserLevel_SelectionChanged;
+        }
+
+        private async void CbUserLevel_SelectionChanged(object sender, UserDTO user)
+        {
+            var item = sender as UsersListItem;
+            user.usrlevel = item.cbUserLevel.SelectedIndex;
+            try
+            {
+                await _userController.UpdateUser(new UpdateUserDTO(user));
+                UserAuthorizationChangedEvent?.Invoke(this, user);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
         }
 
         private async void Button_Click(object sender, RoutedEventArgs e)
@@ -116,12 +141,12 @@ namespace CampaignEditor
             f.ShowDialog();
             if (f.isAssigned)
             {
-                _assigned.Add(f.user.usrname);
+                _assigned.Add(f.user);
                 var item = lbUsers.Items[lbUsers.Items.Count - 2] as UsersListItem;
-                FillFields(item, f.user);
+                item.User = f.user;
                 AddItemEvents(item);
                 isModified = true;
-                await AssignUser(f.user.usrname);
+                await AssignUser(f.user);
             }
             else
             {
@@ -130,64 +155,43 @@ namespace CampaignEditor
                 
         }
 
-        private async void BtnUnassign_Click(object sender, RoutedEventArgs e)
+        private async void BtnUnassign_Click(object sender, UserDTO user)
         {
-            // Traverse the visual tree to find the DataGridRow and DataGridCell that contain the selected cell
-            DependencyObject parent = VisualTreeHelper.GetParent((DependencyObject)sender);
-            while (parent != null && !(parent is UsersListItem))
-            {
-                parent = VisualTreeHelper.GetParent(parent);
-            }
-            if (parent == null)
-            {
-                return; // error
-            }
-            var item = parent as UsersListItem;
-            var username = item.lblUsername.Content.ToString()!.Trim();
-            _unassigned.Add(username);
+            var item = sender as UsersListItem;
+            _unassigned.Add(user);
             lbUsers.Items.Remove(item);
-            isModified = true;
-            await UnassignUser(username);
+            DeleteItemEvents(item);
+            await UnassignUser(user);
         }
 
-        private void CbUserLevel_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
-        {
-            isModified = true;
-        }
 
-        private void FillFields(UsersListItem item, UserDTO user)
+        public async Task UnassignUser(UserDTO user)
         {
-            item.lblUsername.Content = user.usrname.Trim();
-            item.cbUserLevel.SelectedIndex = user.usrlevel;
-            item.authorizationChanged = false;
-        }
-
-        public async Task UnassignUser(string username)
-        {
-            await _factoryUsersAndClients.Create().UnassignUserFromClient(username.Trim(), _client.clname.Trim());
+            await _factoryUsersAndClients.Create().UnassignUserFromClient(user, _client);
             isModified = true;
+            UserAuthorizationChangedEvent?.Invoke(this, user);
         }
-        public async Task AssignUser(string username)
+        public async Task AssignUser(UserDTO user)
         {
             var f = _factoryUsersAndClients.Create();
             f.Initialize(_client);
-            await f.AssignUserToClient(username);
+            await f.AssignUserToClient(user);
             isModified = true;
 
         }
 
         private async void btnClose_Click(object sender, RoutedEventArgs e)
         {
-            if (isModified)
+            /*if (isModified)
             {
                 var f = _factoryUsersAndClients.Create();
                 f.Initialize(_client);
 
-                foreach (var username in _assigned)
+                foreach (var user in _assigned)
                 {
                     try
                     {
-                        await f.UnassignUserFromClient(username.Trim(), _client.clname.Trim());
+                        await f.UnassignUserFromClient(user, _client);
                     }
                     catch
                     {
@@ -196,11 +200,11 @@ namespace CampaignEditor
                     
                 }
 
-                foreach (var username in _unassigned)
+                foreach (var user in _unassigned)
                 {
                     try
                     {
-                        await f.AssignUserToClient(username.Trim());
+                        await f.AssignUserToClient(user);
                     }
                     catch
                     {
@@ -212,12 +216,13 @@ namespace CampaignEditor
 
 
             }
+            CancelEvent?.Invoke(this, null);*/
             this.Close();
         }
 
         private async void btnSave_Click(object sender, RoutedEventArgs e)
         {
-            if (isModified)
+            /*if (isModified)
             {
                 for (int i=0; i<lbUsers.Items.Count-1; i++)
                 {
@@ -231,7 +236,27 @@ namespace CampaignEditor
                 }
                 _isUpdated = true;
             }
-            this.Close();
+            this.Close();*/
+        }
+
+        // Deactivating events
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            for (int i = 0; i < lbUsers.Items.Count - 1; i++)
+            {
+                UsersListItem item = lbUsers.Items[i] as UsersListItem;
+                DeleteItemEvents(item);
+            }
+            try
+            {
+                var button = lbUsers.Items[lbUsers.Items.Count - 1] as Button;
+                button.Click -= Button_Click;
+            }
+            catch
+            {
+
+            }
+
         }
     }
 

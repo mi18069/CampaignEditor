@@ -11,6 +11,9 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Collections.Generic;
+using Database.Entities;
+using System.Reflection;
 
 namespace CampaignEditor
 {
@@ -35,7 +38,7 @@ namespace CampaignEditor
         int tbToEditIndex = 0;
 
         public bool success = false;
-
+        public CampaignDTO _campaign = null;
         public bool canClientBeDeleted = false;
         public NewCampaign(ICampaignRepository campaignRepository, IClientRepository clientRepository,
                            IBrandRepository brandRepository, ICmpBrndRepository cmpBrndRepository)
@@ -49,30 +52,101 @@ namespace CampaignEditor
         }
 
         // For binding client to campaign
-        public async Task Initialize(string clientname)
+        public async Task Initialize(int clientId, CampaignDTO campaign = null)
         {
-            _client = await _clientController.GetClientByName(clientname);
-            canClientBeDeleted = (await _campaignController.GetCampaignsByClientId(_client.clid)).Count() == 0;
-            FillFields();
+            _client = await _clientController.GetClientById(clientId);
+            canClientBeDeleted = (await _campaignController.GetCampaignsByClientId(_client.clid)).Count() == 0;      
+            FillFields(campaign);
             await FillLBBrand();
+            if (campaign != null)
+                await FillTBBrands(campaign);
         }
 
         private async Task FillLBBrand()
         {
             var brands = (await _brandController.GetAllBrands()).OrderBy(b => b.brand);
             Brands = new ObservableCollection<BrandDTO>(brands);
-
         }
-        private void FillFields()
+
+        private async Task FillTBBrands(CampaignDTO campaign)
         {
-            tbName.Text = "";
-            tbClientname.Text = _client.clname.ToString().Trim();
-            dpStartDate.SelectedDate = DateTime.Now;
-            dpEndDate.SelectedDate = DateTime.Now;
-            tbTbStartHours.Text = "02";
-            tbTbStartMinutes.Text = "00";
-            tbTbEndHours.Text = "25";
-            tbTbEndMinutes.Text = "59";
+            var brands = new List<BrandDTO>();
+            var cmpbrnds = await _cmpBrndController.GetCmpBrndsByCmpId(campaign.cmpid);
+
+            if (cmpbrnds.Count() == 0)
+                return;
+
+            foreach (var cmpBrnd in cmpbrnds)
+            {
+                var brand = await _brandController.GetBrandById(cmpBrnd.brbrand);
+                brands.Add(brand);
+            }
+
+            try
+            {
+
+                if (brands[0] == null)
+                    tbBrand1.Text = "";
+                else
+                {
+                    //tbBrand1.Text = brands[0].brand.Trim();
+                    tbToEditIndex = 0;
+                    for (int i=0; i<Brands.Count; i++)
+                    {
+                        var brand = Brands[i];
+                        if (brand.brbrand == brands[0].brbrand)
+                        {
+                            SetBrandText(brand);
+                            break;
+                        }
+                    }
+                }
+                if (brands[1] == null)
+                    tbBrand2.Text = "";
+                else
+                {
+                    //tbBrand2.Text = brands[1].brand.Trim();
+                    tbToEditIndex = 1;
+                    for (int i = 0; i < Brands.Count; i++)
+                    {
+                        var brand = Brands[i];
+                        if (brand.brbrand == brands[1].brbrand)
+                        {
+                            SetBrandText(brand);
+                            break;
+                        }
+                    }
+                }
+
+            }
+            catch
+            {
+            }
+        }
+        private void FillFields(CampaignDTO campaign = null)
+        {
+            if (campaign == null)
+            {
+                tbName.Text = "";
+                tbClientname.Text = _client.clname.ToString().Trim();
+                dpStartDate.SelectedDate = DateTime.Now;
+                dpEndDate.SelectedDate = DateTime.Now;
+                tbTbStartHours.Text = "02";
+                tbTbStartMinutes.Text = "00";
+                tbTbEndHours.Text = "25";
+                tbTbEndMinutes.Text = "59";
+            }
+            else
+            {
+                tbName.Text = campaign.cmpname.Trim() + "_duplicated";
+                tbClientname.Text = _client.clname.ToString().Trim();
+                dpStartDate.SelectedDate = TimeFormat.YMDStringToDateTime(campaign.cmpsdate);
+                dpEndDate.SelectedDate = TimeFormat.YMDStringToDateTime(campaign.cmpedate);
+                tbTbStartHours.Text = campaign.cmpstime.Substring(0, 2);
+                tbTbStartMinutes.Text = campaign.cmpstime.Substring(3, 2);
+                tbTbEndHours.Text = campaign.cmpetime.Substring(0, 2);
+                tbTbEndMinutes.Text = campaign.cmpetime.Substring(3, 2);
+            }
         }
 
         private void tbBrand1_TextChanged(object sender, TextChangedEventArgs e)
@@ -132,14 +206,15 @@ namespace CampaignEditor
             {
                 try
                 {
-                    int cmpid = await CreateCampaign();
+                    var campaign = await CreateCampaign();
                     foreach (var selectedBrand in selectedBrands)
                     {
                         if (selectedBrand != null)
                         {
-                            await CreateCmpBrnd(cmpid, selectedBrand);
+                            await CreateCmpBrnd(campaign.cmpid, selectedBrand);
                         }                    
                     }
+                    _campaign = campaign;
                     success = true;
                     this.Close();
                 }
@@ -157,7 +232,7 @@ namespace CampaignEditor
             await _cmpBrndController.CreateCmpBrnd(cmpBrnd);             
         }
 
-        private async Task<int> CreateCampaign()
+        private async Task<CampaignDTO> CreateCampaign()
         {
             int cmprev = 0;
             int cmpown = MainWindow.user.usrid;
@@ -182,7 +257,7 @@ namespace CampaignEditor
             var campaign = await _campaignController.CreateCampaign(new CreateCampaignDTO(cmprev, cmpown, cmpname, clid, cmpsdate, cmpedate,
                 cmpstime, cmpetime, cmpstatus, sostring, activity, cmpaddedon, cmpaddedat, active, forcec));
             
-            return campaign.cmpid;
+            return campaign;
         }
 
         private async Task<bool> CheckCampaign()
@@ -240,19 +315,24 @@ namespace CampaignEditor
             var brand = lbBrand.SelectedItem as BrandDTO;
             if (brand != null)
             {
-                if (tbToEditIndex == 0)
-                {
-                    tbBrand1.Text = brand.brand;
-                }
-                else if (tbToEditIndex == 1)
-                {
-                    tbBrand2.Text = brand.brand;
-                }
-                selectedBrands[tbToEditIndex] = brand;
-
-                // reset lbBrand
-                lbBrand.Items.Clear();
+                SetBrandText(brand);              
             }
+        }
+
+        private void SetBrandText(BrandDTO brand)
+        {
+            if (tbToEditIndex == 0)
+            {
+                tbBrand1.Text = brand.brand;
+            }
+            else if (tbToEditIndex == 1)
+            {
+                tbBrand2.Text = brand.brand;
+            }
+            selectedBrands[tbToEditIndex] = brand;
+
+            // reset lbBrand
+            lbBrand.Items.Clear();
         }
 
 

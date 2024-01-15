@@ -1,16 +1,18 @@
 ﻿using CampaignEditor.Controllers;
 using CampaignEditor.DTOs.UserDTO;
+using CampaignEditor.Helpers;
+using Database.DTOs.CampaignDTO;
+using Database.DTOs.ClientDTO;
+using Database.DTOs.UserClients;
 using Database.Entities;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Data;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
 
 namespace CampaignEditor.UserControls
 {
@@ -21,9 +23,8 @@ namespace CampaignEditor.UserControls
     {
         public int UserLevel { get; set; } = MainWindow.user.usrlevel;
 
-        public string ItemName { get; set; } = new string("AAA");
-
         public ObservableCollection<ClientCampaignsList>? collection;
+
     }
     public partial class ClientCmpsTreeView : UserControl
     {
@@ -41,6 +42,7 @@ namespace CampaignEditor.UserControls
 
         public ClientCmpsTreeView()
         {
+            this.DataContext = this.tvd;
             tvd = new TreeViewData();
             // Default constructor for XAML
             InitializeComponent();
@@ -65,6 +67,11 @@ namespace CampaignEditor.UserControls
             foreach (var clid in clids)
             {
                 var client = await _clientController.GetClientById(clid);
+
+                // Skip inactive clients
+                if (!client.clactive)
+                    continue;
+
                 var campaigns = await _campaignController.GetCampaignsByClientId(client.clid);
                 campaigns = campaigns.OrderByDescending(cmp => cmp.cmpsdate);
 
@@ -206,5 +213,221 @@ namespace CampaignEditor.UserControls
             _tvUsers.ItemsSource = tvd.collection;
 
         }
+
+        #region Events
+
+        public event EventHandler<ClientContextMenuEventArgs> ClientContextMenuEvent;
+
+        private void UsersOfClientMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            MenuItem menuItem = (MenuItem)sender;
+            ContextMenu contextMenu = (ContextMenu)menuItem.Parent;
+            TextBlock textBlock = (TextBlock)contextMenu.PlacementTarget;
+            ClientCampaignsList clientCampaignsList = (ClientCampaignsList)textBlock.DataContext;
+            ClientDTO client = clientCampaignsList.Client;
+
+            ClientContextMenuEvent?.Invoke(this, new ClientContextMenuEventArgs(client, ClientContextMenuEventArgs.Options.UsersOfClient));
+        }
+        private void NewCampaignMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            MenuItem menuItem = (MenuItem)sender;
+            ContextMenu contextMenu = (ContextMenu)menuItem.Parent;
+            TextBlock textBlock = (TextBlock)contextMenu.PlacementTarget;
+            ClientCampaignsList clientCampaignsList = (ClientCampaignsList)textBlock.DataContext;
+            ClientDTO client = clientCampaignsList.Client;
+
+            ClientContextMenuEvent?.Invoke(this, new ClientContextMenuEventArgs(client, ClientContextMenuEventArgs.Options.NewCampaign));
+        }
+        private void RenameClientMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            MenuItem menuItem = (MenuItem)sender;
+            ContextMenu contextMenu = (ContextMenu)menuItem.Parent;
+            TextBlock textBlock = (TextBlock)contextMenu.PlacementTarget;
+            ClientCampaignsList clientCampaignsList = (ClientCampaignsList)textBlock.DataContext;
+            ClientDTO client = clientCampaignsList.Client;
+
+            ClientContextMenuEvent?.Invoke(this, new ClientContextMenuEventArgs(client, ClientContextMenuEventArgs.Options.RenameClient));
+        }
+        private void DeleteClientMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            MenuItem menuItem = (MenuItem)sender;
+            ContextMenu contextMenu = (ContextMenu)menuItem.Parent;
+            TextBlock textBlock = (TextBlock)contextMenu.PlacementTarget;
+            ClientCampaignsList clientCampaignsList = (ClientCampaignsList)textBlock.DataContext;
+            ClientDTO client = clientCampaignsList.Client;
+
+            ClientContextMenuEvent?.Invoke(this, new ClientContextMenuEventArgs(client, ClientContextMenuEventArgs.Options.DeleteClient));
+        }
+
+        public event EventHandler<UserContextMenuEventArgs> UserContextMenuEvent;
+
+        private void AllUsersMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            UserContextMenuEvent?.Invoke(this, new UserContextMenuEventArgs(UserContextMenuEventArgs.Options.AllUsers));
+        }
+        private void NewUserMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            UserContextMenuEvent?.Invoke(this, new UserContextMenuEventArgs(UserContextMenuEventArgs.Options.NewUser));
+        }
+        private void NewClientMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            UserContextMenuEvent?.Invoke(this, new UserContextMenuEventArgs(UserContextMenuEventArgs.Options.NewClient));
+        }
+
+
+        public event EventHandler<CampaignContextMenuEventArgs> CampaignContextMenuEvent;
+
+        private void EditCampaignMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            MenuItem menuItem = (MenuItem)sender;
+            ContextMenu contextMenu = (ContextMenu)menuItem.Parent;
+            TextBlock textBlock = (TextBlock)contextMenu.PlacementTarget;
+            CampaignDTO campaign = (CampaignDTO)textBlock.DataContext;
+
+            CampaignContextMenuEvent?.Invoke(this, new CampaignContextMenuEventArgs(campaign, CampaignContextMenuEventArgs.Options.EditCampaign));
+        }
+        private void _tvUsers_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+
+            object treeViewItem = _tvUsers.SelectedItem;
+
+            // If clicked object is not campaign, then ignore double click. If it is fire event
+            try
+            {
+                var campaign = (CampaignDTO)treeViewItem;
+                if (campaign != null)
+                {
+                    CampaignContextMenuEvent?.Invoke(this, new CampaignContextMenuEventArgs(campaign, CampaignContextMenuEventArgs.Options.EditCampaign));
+                }
+            }
+            catch
+            {
+                return;
+            }
+
+        }
+        private void RenameCampaignMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            MenuItem menuItem = (MenuItem)sender;
+            ContextMenu contextMenu = (ContextMenu)menuItem.Parent;
+            TextBlock textBlock = (TextBlock)contextMenu.PlacementTarget;
+            CampaignDTO campaign = (CampaignDTO)textBlock.DataContext;
+
+            CampaignContextMenuEvent?.Invoke(this, new CampaignContextMenuEventArgs(campaign, CampaignContextMenuEventArgs.Options.RenameCampaign));
+        }
+        private void DeleteCampaignMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            MenuItem menuItem = (MenuItem)sender;
+            ContextMenu contextMenu = (ContextMenu)menuItem.Parent;
+            TextBlock textBlock = (TextBlock)contextMenu.PlacementTarget;
+            CampaignDTO campaign = (CampaignDTO)textBlock.DataContext;
+
+            CampaignContextMenuEvent?.Invoke(this, new CampaignContextMenuEventArgs(campaign, CampaignContextMenuEventArgs.Options.DeleteCampaign));
+        }
+
+        private void DuplicateCampaignMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            MenuItem menuItem = (MenuItem)sender;
+            ContextMenu contextMenu = (ContextMenu)menuItem.Parent;
+            TextBlock textBlock = (TextBlock)contextMenu.PlacementTarget;
+            CampaignDTO campaign = (CampaignDTO)textBlock.DataContext;
+
+            CampaignContextMenuEvent?.Invoke(this, new CampaignContextMenuEventArgs(campaign, CampaignContextMenuEventArgs.Options.DuplicateCampaign));
+        }
+
+        #endregion
+
+        public void AddClient(ClientDTO client)
+        {
+            var clientCampaigns = new ClientCampaignsList { Client = client };
+            clientCampaignsLists.Insert(0, clientCampaigns);
+            FilterData();
+        }
+
+        public void RenameClient(ClientDTO client)
+        {
+            for (int i = 0; i < clientCampaignsLists.Count; i++)
+            {
+                var ccList = clientCampaignsLists[i];
+                if (ccList.Client.clid == client.clid)
+                {
+                    clientCampaignsLists[i].Client = client;
+                    break;
+                }
+            }
+
+            FilterData();
+        }
+
+        public void RemoveClient(ClientDTO client)
+        {
+            for (int i=0; i<clientCampaignsLists.Count; i++)
+            {
+                var ccList = clientCampaignsLists[i];
+                if (ccList.Client.clid == client.clid)
+                {
+                    clientCampaignsLists.RemoveAt(i);
+                    break;
+                }
+            }
+
+            FilterData();
+        }
+
+        public async Task AddCampaign(CampaignDTO campaign)
+        {
+            var client = await _clientController.GetClientById(campaign.clid);
+
+            clientCampaignsLists.First(cc => cc.Client.clid == client.clid).Campaigns.Insert(0, campaign);
+            FilterData();
+        }
+
+        public async Task RenameCampaign(CampaignDTO campaign)
+        {
+            var client = await _clientController.GetClientById(campaign.clid);
+
+            for (int i = 0; i < clientCampaignsLists.Count; i++)
+            {
+                var ccList = clientCampaignsLists[i];
+                if (ccList.Client.clid == client.clid)
+                {
+                    for (int j=0; j<ccList.Campaigns.Count(); j++)
+                    {
+                        if (ccList.Campaigns[j].cmpid == campaign.cmpid)
+                        {
+                            clientCampaignsLists[i].Campaigns[j] = campaign;
+                            break;
+                        }
+                    }
+                }
+            }
+
+
+            FilterData();
+        }
+
+        public async Task RemoveCampaign(CampaignDTO campaign)
+        {
+            var client = await _clientController.GetClientById(campaign.clid);
+
+            for (int i = 0; i < clientCampaignsLists.Count; i++)
+            {
+                var ccList = clientCampaignsLists[i];
+                if (ccList.Client.clid == client.clid)
+                {
+                    for (int j = 0; j < ccList.Campaigns.Count(); j++)
+                    {
+                        if (ccList.Campaigns[j].cmpid == campaign.cmpid)
+                        {
+                            clientCampaignsLists[i].Campaigns.RemoveAt(j);
+                            break;
+                        }
+                    }
+                }
+            }
+
+            FilterData();
+        }
+
     }
 }

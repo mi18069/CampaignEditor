@@ -24,12 +24,12 @@ namespace CampaignEditor
                 {
                     services.AddSingleton<MainWindow>();
                     services.AddFormFactory<UsersAndClients>();
+                    services.AddFormFactory<CampaignManipulations>();
                     services.AddFormFactory<AssignUser>();
                     services.AddFormFactory<UsersOfClient>();
                     services.AddFormFactory<AddUser>();
                     services.AddFormFactory<AddClient>();
                     services.AddFormFactory<Clients>();
-                    services.AddFormFactory<ClientsTreeView>();
                     services.AddFormFactory<ClientCmpsTreeView>();
                     services.AddFormFactory<NewCampaign>();
                     services.AddFormFactory<NewTarget>();

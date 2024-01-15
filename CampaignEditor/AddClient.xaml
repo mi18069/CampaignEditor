@@ -17,8 +17,9 @@
         <Label x:Name="lblOwnerName" Content="Owner:"
                VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0, 80, 0, 0"/>
         <ComboBox x:Name="cbOwner" 
-                 Width="300"
-                 HorizontalAlignment="Center"  VerticalAlignment="Top" Margin="0,120,0,0"/>
+                  Width="300"
+                  HorizontalAlignment="Center"  VerticalAlignment="Top" Margin="0,120,0,0"
+                  DisplayMemberPath="usrname"/>
         <Button x:Name="btnAddClient" Content="Add client"  
                 Width="150" Height="40"
                 HorizontalContentAlignment="Center" 

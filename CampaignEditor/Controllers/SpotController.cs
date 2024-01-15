@@ -60,5 +60,10 @@ namespace CampaignEditor.Controllers
         {
             return await _repository.DeleteSpotByCmpidAndCode(id, code);
         }
+
+        public async Task<bool> DuplicateSpot(int oldId, int newId)
+        {
+            return await _repository.DuplicateSpot(oldId, newId);
+        }
     }
 }

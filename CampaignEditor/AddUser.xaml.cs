@@ -1,6 +1,7 @@
 ﻿using CampaignEditor.Controllers;
 using CampaignEditor.DTOs.UserDTO;
 using CampaignEditor.Repositories;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -13,8 +14,8 @@ namespace CampaignEditor
     {
         private UserController _userController;
 
-        public bool isAdded = false;
-        public UserDTO user = null;
+        public bool success = false;
+        public UserDTO? user = null;
         public AddUser(IUserRepository userRepository)
         {
             InitializeComponent();
@@ -72,10 +73,24 @@ namespace CampaignEditor
                 }
                 else
                 {
-                    user = await _userController.CreateUser(new CreateUserDTO
-                        (username, password, authorization, email, phone, enabled, father, buy));                    
+                    try
+                    {
+                        user = await _userController.CreateUser(new CreateUserDTO
+                            (username, password, authorization, email, phone, enabled, father, buy));
+                    }
+                    catch(Exception ex)
+                    {
+                        MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+
+                    if (user == null)
+                    {
+                        MessageBox.Show("Cannot create user!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
                 }
-                isAdded = true;
+                success = true;
                 this.Close();
             }
 

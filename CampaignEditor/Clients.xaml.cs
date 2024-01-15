@@ -9,9 +9,13 @@ using System.Windows.Controls;
 using System.Windows.Media;
 using CampaignEditor.Controllers;
 using CampaignEditor.DTOs.UserDTO;
+using CampaignEditor.Entities;
+using CampaignEditor.Helpers;
 using CampaignEditor.Repositories;
 using CampaignEditor.StartupHelpers;
-using CampaignEditor.UserControls;
+using Database.DTOs.CampaignDTO;
+using Database.DTOs.ClientDTO;
+using Database.Entities;
 using Database.Repositories;
 
 namespace CampaignEditor
@@ -25,14 +29,16 @@ namespace CampaignEditor
         private readonly IAbstractFactory<AddUser> _factoryAddUser;
         private readonly IAbstractFactory<UsersOfClient> _factoryUsersOfClient;
         private readonly IAbstractFactory<AddClient> _factoryAddClient;
-        private readonly IAbstractFactory<ClientsTreeView> _factoryClientsTreeView;
         private readonly IAbstractFactory<NewCampaign> _factoryNewCampaign;
         private readonly IAbstractFactory<Rename> _factoryRename;
         private readonly IAbstractFactory<Campaign> _factoryCampaign;
         private readonly IAbstractFactory<AllUsers> _factoryAllUsers;
         private readonly IAbstractFactory<ChangePassword> _factoryChangePassword;
         private readonly IAbstractFactory<DuplicateCampaign> _factoryDuplicateCampaign;
-        private readonly IAbstractFactory<ClientCmpsTreeView> _factoryClientCmpsTreeView;
+        private readonly IAbstractFactory<UsersAndClients> _factoryUsersAndClients;
+
+        private UsersAndClients _usersAndClients;
+        private CampaignManipulations _campaignManipulations;
 
         private UserController _userController;
         private CampaignController _campaignController;
@@ -78,12 +84,13 @@ namespace CampaignEditor
         public bool isAdministrator { get; set; } = false;
         public bool isReadWrite { get; set; } = false;
         public bool isReadOnly { get; set; } = false;
-        public Clients(IAbstractFactory<ClientsTreeView> factoryClientsTreeView, IAbstractFactory<AddUser> factoryAddUser,
+        public Clients(IAbstractFactory<AddUser> factoryAddUser,
             IAbstractFactory<AddClient> factoryAddClient, IAbstractFactory<UsersOfClient> factoryUsersOfClient, IAbstractFactory<NewCampaign> factoryNewCampaign,
             IAbstractFactory<Rename> factoryRename, IAbstractFactory<Campaign> factoryCampaign, ICampaignRepository campaignRepository, IAbstractFactory<AllUsers> factoryAllUsers,
-            IAbstractFactory<ChangePassword> factoryChangePassword, IAbstractFactory<DuplicateCampaign> factoryDuplicateCampaign, IAbstractFactory<ClientCmpsTreeView> factoryClientCmpsTreeView,
+            IAbstractFactory<ChangePassword> factoryChangePassword, IAbstractFactory<DuplicateCampaign> factoryDuplicateCampaign,
             IUserRepository userRepository, IClientRepository clientRepository,
-            IUserClientsRepository userClientsRepository)
+            IUserClientsRepository userClientsRepository, 
+            IAbstractFactory<UsersAndClients> factoryUsersAndClients, IAbstractFactory<CampaignManipulations> factoryCampaignManipulations)
         {
             instance = this;
             this.DataContext = this;
@@ -92,17 +99,11 @@ namespace CampaignEditor
 
             _factoryAddUser = factoryAddUser;
             _factoryAddClient = factoryAddClient;
-            _factoryClientsTreeView = factoryClientsTreeView;
             _factoryUsersOfClient = factoryUsersOfClient;
             _factoryNewCampaign = factoryNewCampaign;
             _factoryRename = factoryRename;
             _factoryCampaign = factoryCampaign;
             _campaignController = new CampaignController(campaignRepository);
-
-            //_clientsTree = factoryClientsTreeView.Create();
-            //_clientsTree.Initialization(MainWindow.user);
-            //_ = _clientsTree.InitializeTree();
-
 
 
             isAdministrator = MainWindow.user.usrlevel == 0;
@@ -110,36 +111,358 @@ namespace CampaignEditor
             isReadOnly = MainWindow.user.usrlevel == 2;
 
             tbUsername.Text = MainWindow.user.usrname.Trim();
-            //tvClients.InitializeComponent();
 
             tbSearchCampaigns.Text = searchCampaignsString;
             tbSearchClients.Text = searchClientsString;
 
-            FillFilterByUsersComboBox();
             _factoryAllUsers = factoryAllUsers;
             _factoryChangePassword = factoryChangePassword;
             _factoryDuplicateCampaign = factoryDuplicateCampaign;
-            _factoryClientCmpsTreeView = factoryClientCmpsTreeView;
+
+            _usersAndClients = factoryUsersAndClients.Create();
+            _campaignManipulations = factoryCampaignManipulations.Create();
 
             _userController = new UserController(userRepository);
-            tvClients1._userController = _userController;
-            tvClients1._clientController = new ClientController(clientRepository);
-            tvClients1._userClientsController = new UserClientsController(userClientsRepository);
-            tvClients1._campaignController = new CampaignController(campaignRepository);
+            tvClients._userController = _userController;
+            tvClients._clientController = new ClientController(clientRepository);
+            tvClients._userClientsController = new UserClientsController(userClientsRepository);
+            tvClients._campaignController = new CampaignController(campaignRepository);
+
+            SubscribeEventsToTvClients();
+
+            FillFilterByUsersComboBox();
+
         }
 
+        private void SubscribeEventsToTvClients()
+        {
+            tvClients.ClientContextMenuEvent += TvClient_ClientContextMenuEvent;
+            tvClients.UserContextMenuEvent += TvUser_UserContextMenuEvent;
+            tvClients.CampaignContextMenuEvent += TvCampaign_CampaignContextMenuEvent;
+        }
+
+        private void TvCampaign_CampaignContextMenuEvent(object? sender, CampaignContextMenuEventArgs e)
+        {
+            Enum option = e.Option;
+            switch (option)
+            {
+                case CampaignContextMenuEventArgs.Options.EditCampaign:
+                    ShowCampaign(e.Campaign);
+                    break;
+                case CampaignContextMenuEventArgs.Options.RenameCampaign:
+                    ShowRenameCampaign(e.Campaign);
+                    break;
+                case CampaignContextMenuEventArgs.Options.DeleteCampaign:
+                    ShowDeleteCampaign(e.Campaign);
+                    break;
+                case CampaignContextMenuEventArgs.Options.DuplicateCampaign:
+                    ShowDuplicateCampaign(e.Campaign);
+                    break;
+            }
+        }
+
+        private void TvUser_UserContextMenuEvent(object? sender, UserContextMenuEventArgs e)
+        {
+            Enum option = e.Option;
+            switch (option)
+            {
+                case UserContextMenuEventArgs.Options.AllUsers:
+                    ShowAllUsers();
+                    break;
+                case UserContextMenuEventArgs.Options.NewUser:
+                    ShowNewUser();
+                    break;
+                case UserContextMenuEventArgs.Options.NewClient:
+                    ShowNewClient();
+                    break;
+            }
+        }
+
+        private void TvClient_ClientContextMenuEvent(object? sender, Helpers.ClientContextMenuEventArgs e)
+        {
+            Enum option = e.Option;
+            switch ( option ) 
+            {
+                case ClientContextMenuEventArgs.Options.UsersOfClient:
+                    ShowUsersOfClient(e.Client);
+                    break;
+                case ClientContextMenuEventArgs.Options.NewCampaign:
+                    ShowNewCampaign(e.Client);
+                    break;
+                case ClientContextMenuEventArgs.Options.RenameClient:
+                    ShowRenameClient(e.Client);
+                    break;
+                case ClientContextMenuEventArgs.Options.DeleteClient:
+                    ShowDeleteClient(e.Client);
+                    break;
+            }
+        }
+
+        #region Context menu options
+        public async void ShowCampaign(CampaignDTO campaign)
+        {
+            // If campaign window is minimized, show it, if campaign is not open,
+            // make new and place it in list of open campaigns 
+            if (openCampaignWindows.Any(w => w._campaign.cmpid == campaign.cmpid))
+            {
+                Campaign window = openCampaignWindows.First(w => w._campaign.cmpid == campaign.cmpid);
+                if (!window.IsVisible)
+                {
+                    window.Show();
+                }
+
+                if (window.WindowState == WindowState.Minimized)
+                {
+                    window.WindowState = WindowState.Normal;
+                }
+
+                // For setting window in front
+                window.Topmost = true;
+                window.Topmost = false;
+
+            }
+            else
+            {
+                var f = _factoryCampaign.Create();
+                await f.Initialize(campaign, isReadOnly);
+                openCampaignWindows.Add(f);
+
+                f.Closing += CampaignWindow_Closing;
+                f.Show();
+                f.Activate();
+
+            }
+
+        }
+
+        // remove from list of opened campaigns
+        private void CampaignWindow_Closing(object sender, EventArgs e)
+        {
+            Campaign window = (Campaign)sender;
+            openCampaignWindows.Remove(window);
+
+        }
+
+        private async void ShowNewCampaign(ClientDTO client)
+        {
+            var f = _factoryNewCampaign.Create();
+            await f.Initialize(client.clid);
+            f.ShowDialog();
+            if (f.success)
+            {
+                if (f._campaign != null)
+                    await tvClients.AddCampaign(f._campaign);
+            }
+
+        }
+
+        private async void ShowUsersOfClient(ClientDTO client)
+        {
+            var f = _factoryUsersOfClient.Create();
+            await f.Initialize(client);
+            f.UnassignedUserEvent += Users_UserAuthorizationChangedEvent;
+            f.UserAuthorizationChangedEvent += Users_UserAuthorizationChangedEvent;
+            f.ShowDialog();
+            f.UnassignedUserEvent -= Users_UserAuthorizationChangedEvent;
+            f.UserAuthorizationChangedEvent -= Users_UserAuthorizationChangedEvent;
+        }
+
+        private async void ShowAllUsers()
+        {
+            var f = _factoryAllUsers.Create();
+            await f.Initialize();
+            f.UserDeletedEvent += Users_UserDeletedEvent;
+            f.UserAuthorizationChangedEvent += Users_UserAuthorizationChangedEvent;
+            f.ShowDialog();
+            f.UserDeletedEvent -= Users_UserDeletedEvent;
+            f.UserAuthorizationChangedEvent -= Users_UserAuthorizationChangedEvent;
+        }
+
+        private async void Users_UserAuthorizationChangedEvent(object? sender, UserDTO user)
+        {
+            int selectedIndex = cbUsers.SelectedIndex;
+            int foundIndex = -1;
+
+            for (int i = 0; i < cbUsers.Items.Count; i++)
+            {
+                if (cbUsers.Items[i].ToString().Trim() == user.usrname.Trim())
+                {
+                    foundIndex = i;
+                    break;
+                }
+            }
+
+            if (selectedIndex == foundIndex)
+            {
+                await tvClients.Initialize(user);
+            }
+        }
+
+        private async void Users_UserDeletedEvent(object? sender, UserDTO user)
+        {
+            int selectedIndex = cbUsers.SelectedIndex;
+            int foundIndex = -1;
+
+            for (int i=0; i<cbUsers.Items.Count; i++)
+            {
+                if (cbUsers.Items[i].ToString().Trim() == user.usrname.Trim())
+                {
+                    foundIndex = i;
+                    break;
+                }
+            }
+
+            if (foundIndex != -1)
+            {
+                cbUsers.Items.RemoveAt(foundIndex);
+            }
+
+            if (selectedIndex == foundIndex)
+            {
+                await tvClients.Initialize(user);
+
+            }
+        }
+
+        private void ShowNewUser()
+        {
+            var f = _factoryAddUser.Create();
+            f.ShowDialog();
+            if (f.success)
+            {
+                if (f.user == null)
+                {
+                    return;
+                }
+                UserDTO user = f.user;
+                cbUsers.Items.Insert(1, user.usrname);
+            }
+        }
+
+        private void ShowNewClient()
+        {
+            var f = _factoryAddClient.Create();
+            f.ShowDialog();
+            if (f.success && f.newClient != null)
+                tvClients.AddClient(f.newClient);
+        }
+
+        private async void ShowDeleteClient(ClientDTO client)
+        {
+            if (MessageBox.Show($"Are you sure you want to delete Client {client.clname.Trim()}?",
+                    "Question", MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.No)
+            {
+                return;
+            }
+
+            if (!await _usersAndClients.CanClientBeDeleted(client))
+            {
+                MessageBox.Show("Cannot delete Client that have active campaigns!", "Error",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            if (!(await _usersAndClients.DeleteClient(client)))
+            {
+                MessageBox.Show($"Cannot delete Client {client.clname.Trim()}!", "Error",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+
+            tvClients.RemoveClient(client);
+
+        }
+
+        private async void ShowRenameClient(ClientDTO client)
+        {
+            var f = _factoryRename.Create();
+            await f.RenameClient(client);
+            f.ShowDialog();
+            if (f.renamed)
+            {
+                tvClients.RenameClient(f._client);
+            }
+        }
+
+        private async void ShowRenameCampaign(CampaignDTO campaign)
+        {
+            var f = _factoryRename.Create();
+            await f.RenameCampaign(campaign);
+            f.ShowDialog();
+            if (f.renamed)
+            {
+                await tvClients.RenameCampaign(campaign);
+            }
+        }
+
+        private async void ShowDeleteCampaign(CampaignDTO campaign)
+        {
+            if (await _campaignManipulations.DeleteCampaign(campaign))
+            {
+                await tvClients.RemoveCampaign(campaign);
+            }
+
+
+        }
+
+        private async void ShowDuplicateCampaign(CampaignDTO campaign)
+        {
+            var f = _factoryNewCampaign.Create();
+            await f.Initialize(campaign.clid, campaign);
+            f.ShowDialog();
+            if (f.success)
+            {
+                if (f._campaign != null)
+                {
+                    await tvClients.AddCampaign(f._campaign);
+                    if (!await _campaignManipulations.DuplicateCampaign(campaign, f._campaign))
+                    {
+                        // Delete campaign if duplication is unsuccessful
+                        if (await _campaignManipulations.DeleteCampaign(campaign))
+                        {
+                            await tvClients.RemoveCampaign(campaign);
+                        }
+                    }
+                }
+            }
+
+        }
+
+
+        #endregion
 
         #region Filter ComboBox
         private async void FillFilterByUsersComboBox()
         {
-            /*cbUsers.Items.Add("All");
-            var usernames = await _clientsTree.GetSupervisedUsernames();
+            cbUsers.Items.Add("All");
+            var usernames = await GetSupervisedUsernames(MainWindow.user);
             usernames = usernames.OrderBy(u => u);
             foreach (string username in usernames)
             {
                 cbUsers.Items.Add(username);
-            }*/
+            }
 
+        }
+
+        private async Task<IEnumerable<string>> GetSupervisedUsernames(UserDTO user)
+        {
+            IEnumerable<UserDTO> users = new List<UserDTO>();
+
+            if (user.usrlevel == 0)
+            {
+                users = await _userController.GetAllUsers();
+            }
+            else
+            {
+                users = users.Append(await _userController.GetUserById(user.usrid));
+            }
+            IEnumerable<string> usernames = new List<string>();
+
+            foreach (UserDTO userDTO in users)
+            {
+                usernames = usernames.Append(userDTO.usrname);
+            }
+            return usernames;
         }
 
         #endregion
@@ -167,21 +490,7 @@ namespace CampaignEditor
 
         private async void tbSearchClients_TextChanged(object sender, TextChangedEventArgs e)
         {
-            tvClients1.FilterClientAndCampaign();
-            /*if (tbSearchClients.Text.Length >= 3 && tbSearchClients.Text != searchClientsString)
-            {
-                await _clientsTree.UpdateTree();
-                clientsUpdated = true;
-            }
-            else
-            {
-                if (clientsUpdated)
-                {
-                    await _clientsTree.UpdateTree();
-                    clientsUpdated = false;
-                }
-
-            }*/
+            tvClients.FilterClientAndCampaign();
 
         }
 
@@ -206,22 +515,7 @@ namespace CampaignEditor
 
         private void tbSearchCampaigns_TextChanged(object sender, TextChangedEventArgs e)
         {
-            tvClients1.FilterClientAndCampaign();
-
-            /*if (tbSearchCampaigns.Text.Length >= 3 && tbSearchCampaigns.Text != searchCampaignsString)
-            {
-                _clientsTree.UpdateTree();
-                campaignsUpdated = true;
-            }
-            else
-            {
-                if (campaignsUpdated)
-                {
-                    _clientsTree.UpdateTree();
-                    campaignsUpdated = false;
-                }
-
-            }*/
+            tvClients.FilterClientAndCampaign();
         }
 
         #endregion
@@ -235,283 +529,67 @@ namespace CampaignEditor
 
         private void cbDatePicker_Checked(object sender, RoutedEventArgs e)
         {
-            /*if (_clientsTree != null)
-                _clientsTree.UpdateTree();*/
             dpStartDate.IsEnabled = true;
             if (loadedAllCheckBoxes)
-                tvClients1.FilterData();
+                tvClients.FilterData();
 
         }
 
         private void cbDatePicker_Unchecked(object sender, RoutedEventArgs e)
         {
-            /*if (_clientsTree != null)
-                _clientsTree.UpdateTree();*/
             dpStartDate.IsEnabled = false;
             if (loadedAllCheckBoxes)
-                tvClients1.FilterData();
+                tvClients.FilterData();
         }
 
         private void dpStartDate_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
         {
-            /*if (_clientsTree != null)
-                _clientsTree.UpdateTree();*/
             if (loadedAllCheckBoxes)
-                tvClients1.FilterData();
+                tvClients.FilterData();
 
         }
 
         private void cbFilter_Checked(object sender, RoutedEventArgs e)
         {
-            /*if (_clientsTree != null)
-                _clientsTree.UpdateTree();*/
             if (loadedAllCheckBoxes)
-                tvClients1.FilterData();
+                tvClients.FilterData();
 
         }
 
         private void cbFilter_Unchecked(object sender, RoutedEventArgs e)
         {
-            /*if (_clientsTree != null)
-                _clientsTree.UpdateTree();*/
             if (loadedAllCheckBoxes)
-                tvClients1.FilterData();
+                tvClients.FilterData();
 
         }
 
 
         private async void cbUsers_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            //_clientsTree.UpdateTree();
-            string username = ((string)cbUsers.SelectedValue).Trim();
+            string username;
+            if (cbUsers.SelectedValue == null)
+            {
+                username = "All";
+            }
+            else
+            {
+                username = ((string)cbUsers.SelectedValue).Trim();
+            }
+
+
             if (username == null || username == "All")
-                await tvClients1.Initialize();
+                await tvClients.Initialize();
             else
             {
                 UserDTO user = await _userController.GetUserByUsername(username);
-                await tvClients1.Initialize(user);
+                await tvClients.Initialize(user);
             }
 
         }
 
-        #endregion
-
-        #region Context menu mechanism
-        // For creating specific context menus based on selected item
-        private async void tvClients_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
-        {
-            TreeViewItem SelectedItem = tvClients.SelectedItem as TreeViewItem;
-            if (SelectedItem is null)
-                return;
-            switch (SelectedItem.Tag.ToString())
-            {
-                case "Client":
-                    await UpdateCanBeDeleted();
-                    tvClients.ContextMenu = tvClients.Resources["ClientContext"] as System.Windows.Controls.ContextMenu;
-                    break;
-                case "Campaign":
-                    tvClients.ContextMenu = tvClients.Resources["CampaignContext"] as System.Windows.Controls.ContextMenu;
-                    break;
-            }
-
-        }
-
-        private async Task UpdateCanBeDeleted()
-        {
-            /*string clientname = ((HeaderedItemsControl)tvClients.SelectedItem).Header.ToString()!.Trim();
-            CanBeDeleted = await _clientsTree.CheckCanBeDeleted(clientname);*/
-
-        }
-
-        // In order to select TreeViewItem on mouse right click
-        private void tvClients_PreviewMouseRightButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
-        {
-            TreeViewItem treeViewItem = VisualUpwardSearch(e.OriginalSource as DependencyObject);
-
-            if (treeViewItem != null)
-            {
-                treeViewItem.Focus();
-                e.Handled = true;
-            }
-
-        }
-
-        static TreeViewItem VisualUpwardSearch(DependencyObject source)
-        {
-            while (source != null && !(source is TreeViewItem))
-                source = VisualTreeHelper.GetParent(source);
-
-            return source as TreeViewItem;
-        }
-
-
-        #endregion
-
-        #region Context menu options
-        public async void btnAddCampaign_Click(object sender, RoutedEventArgs e)
-        {
-            string campaignName = ((HeaderedItemsControl)tvClients.SelectedItem).Header.ToString()!.Trim();
-
-            // If campaign window is minimized, show it, if campaign is not open,
-            // make new and place it in list of open campaigns 
-            if (openCampaignWindows.Any(w => w.cmpname == campaignName))
-            {
-                Campaign window = openCampaignWindows.First(w => w.cmpname == campaignName);
-                if (!window.IsVisible)
-                {
-                    window.Show();
-                }
-
-                if (window.WindowState == WindowState.Minimized)
-                {
-                    window.WindowState = WindowState.Normal;
-                }
-
-                // For setting window in front
-                window.Topmost = true;
-                window.Topmost = false;
-
-                e.Handled = true;
-
-            }
-            else
-            {
-                var f = _factoryCampaign.Create();
-                await f.Initialize(campaignName, isReadOnly);
-                openCampaignWindows.Add(f);
-
-                f.Closing += CampaignWindow_Closing;
-                f.Show();
-                f.Activate();
-
-            }
-
-        }
-
-        // remove from list of opened campaigns
-        private void CampaignWindow_Closing(object sender, EventArgs e)
-        {
-            Campaign window = (Campaign)sender;
-            openCampaignWindows.Remove(window);
-
-        }
-
-        private async void btnNewCampaign_Click(object sender, RoutedEventArgs e)
-        {
-            /*string clientname = ((HeaderedItemsControl)tvClients.SelectedItem).Header.ToString()!.Trim();
-            var f = _factoryNewCampaign.Create();
-            await f.Initialize(clientname);
-            f.ShowDialog();
-            if (f.success)
-                await _clientsTree.InitializeTree();*/
-        }
-
-        private async void btnShowUsersOfClient_Click(object sender, RoutedEventArgs e)
-        {
-            /*var f = _factoryUsersOfClient.Create();
-            string clientname = ((HeaderedItemsControl)tvClients.SelectedItem).Header.ToString()!.Trim();
-            await f.Initialize(clientname);
-            f.ShowDialog();
-            if (f.IsUpdated)
-                await _clientsTree.InitializeTree();*/
-
-        }
-
-        private async void BtnAllUsers_Click(object sender, RoutedEventArgs e)
-        {
-            var f = _factoryAllUsers.Create();
-            await f.Initialize();
-            f.ShowDialog();
-        }
-
-        private void btnAddUser_Click(object sender, RoutedEventArgs e)
-        {
-            var f = _factoryAddUser.Create();
-            f.Show();
-        }
-
-        private async void btnAddClient_Click(object sender, RoutedEventArgs e)
-        {
-            /*var f = _factoryAddClient.Create();
-            f.ShowDialog();
-            if (f.success)
-                await _clientsTree.InitializeTree();*/
-        }
-        private async void btnDeleteClient_Click(object sender, RoutedEventArgs e)
-        {
-            /*string clientname = ((HeaderedItemsControl)tvClients.SelectedItem).Header.ToString()!.Trim();
-            await _clientsTree.DeleteClient(clientname);*/
-
-        }
-
-        private async void btnRenameClient_Click(object sender, RoutedEventArgs e)
-        {
-            /*var f = _factoryRename.Create();
-            MenuItem menuItem = (MenuItem)sender;
-            string name = ((TreeViewItem)tvClients.SelectedValue).Header.ToString().Trim();
-            await f.RenameClient(name);
-            f.ShowDialog();
-            if (f.renamed)
-            {
-                await _clientsTree.InitializeTree();
-            }*/
-        }
-
-        private async void btnRenameCampaign_Click(object sender, RoutedEventArgs e)
-        {
-            /*var f = _factoryRename.Create();
-            MenuItem menuItem = (MenuItem)sender;
-            string name = ((TreeViewItem)tvClients.SelectedValue).Header.ToString().Trim();
-            await f.RenameCampaign(name);
-            f.ShowDialog();
-            if (f.renamed)
-            {
-                await _clientsTree.InitializeTree();
-            }*/
-        }
-
-        private void btnDuplicateCampaign_Click(object sender, RoutedEventArgs e)
-        {
-            var item = tvClients.SelectedItem as TreeViewItem;
-            if (item != null)
-            {
-                var name = item.Header.ToString().Trim();
-                var f = _factoryDuplicateCampaign.Create();
-                f.Initialize(name);
-                f.ShowDialog();
-            }
-
-        }
-
-        private async void btnDeleteCampaign_Click(object sender, RoutedEventArgs e)
-        {
-            /*if (tvClients.SelectedItem != null)
-            {
-                var item = tvClients.SelectedItem as TreeViewItem;
-                if (item != null)
-                {
-                    var name = item.Header.ToString().Trim();
-                    var campaign = await _campaignController.GetCampaignByName(name);
-                    if (campaign != null)
-                    {
-                        if (!campaign.active)
-                        {
-                            await _campaignController.DeleteCampaignById(campaign.cmpid);
-                            await _clientsTree.InitializeTree();
-                        }
-                        else
-                        {
-                            MessageBox.Show("Cannot delete active campaign", "Message", MessageBoxButton.OK);
-                        }
-                    }
-                }
-            }*/
-        }
-
-
-
-
-        #endregion
+        #endregion      
+    
+        
 
 
         private void Window_Closing(object sender, CancelEventArgs e)
@@ -544,8 +622,16 @@ namespace CampaignEditor
             if (checkboxesToLoad == loadedForNow)
             {
                 loadedAllCheckBoxes = true;
-                await tvClients1.Initialize(MainWindow.user);
+                await tvClients.Initialize(MainWindow.user);
             }
+        }
+
+        // Deactivating events
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            tvClients.ClientContextMenuEvent += TvClient_ClientContextMenuEvent;
+            tvClients.UserContextMenuEvent += TvUser_UserContextMenuEvent;
+            tvClients.CampaignContextMenuEvent += TvCampaign_CampaignContextMenuEvent;
         }
     }
 }

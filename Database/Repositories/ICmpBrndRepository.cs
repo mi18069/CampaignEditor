@@ -10,5 +10,6 @@ namespace Database.Repositories
         Task<IEnumerable<CmpBrndDTO>> GetCmpBrndsByCmpId(int id);
         Task<bool> UpdateBrand(CmpBrndDTO cmpbrndDTO);
         Task<bool> DeleteBrandByCmpId(int id);
+        Task<bool> DuplicateCmpBrnd(int oldCmpid, int newCmpid);
     }
 }

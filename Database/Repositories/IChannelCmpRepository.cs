@@ -13,5 +13,6 @@ namespace Database.Repositories
         Task<bool> UpdateChannelCmp(UpdateChannelCmpDTO channelCmpDTO);
         Task<bool> DeleteChannelCmpByCmpid(int id);
         Task<bool> DeleteChannelCmpByIds(int cmpid, int plid);
+        Task<bool> DuplicateChannelCmp(int oldCmpid, int newCmpid);
     }
 }

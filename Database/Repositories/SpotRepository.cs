@@ -117,5 +117,18 @@ namespace Database.Repositories
 
             return affected != 0;
         }
+
+        public async Task<bool> DuplicateSpot(int oldCmpid, int newCmpid)
+        {
+            using var connection = _context.GetConnection();
+
+            var affected = await connection.ExecuteAsync(
+                @"INSERT INTO tblcmpspot (cmpid, spotcode, spotname, spotlength, ignore)
+                  SELECT @NewCmpid, spotcode, spotname, spotlength, ignore
+                  FROM tblcmpspot WHERE cmpid = @OldCmpid;",
+                new { OldCmpid = oldCmpid, NewCmpid = newCmpid });
+
+            return affected != 0;
+        }
     }
 }
