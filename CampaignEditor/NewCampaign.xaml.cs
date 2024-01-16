@@ -59,7 +59,20 @@ namespace CampaignEditor
             FillFields(campaign);
             await FillLBBrand();
             if (campaign != null)
+            {
                 await FillTBBrands(campaign);
+                FillRbTv(campaign);
+            }
+        }
+
+        private void FillRbTv(CampaignDTO campaign)
+        {
+            if (campaign.tv == true)
+            {
+                rbTv.IsChecked = true;
+            }
+            else
+                rbRadio.IsChecked = true;
         }
 
         private async Task FillLBBrand()
@@ -252,10 +265,10 @@ namespace CampaignEditor
             int cmpaddedat = int.Parse(TimeFormat.DTToTimeString(dateTimeNow)); 
             bool active = true;
             bool forcec = false;
-
+            bool tv = rbTv.IsChecked == true ? true : false;
 
             var campaign = await _campaignController.CreateCampaign(new CreateCampaignDTO(cmprev, cmpown, cmpname, clid, cmpsdate, cmpedate,
-                cmpstime, cmpetime, cmpstatus, sostring, activity, cmpaddedon, cmpaddedat, active, forcec));
+                cmpstime, cmpetime, cmpstatus, sostring, activity, cmpaddedon, cmpaddedat, active, forcec, tv));
             
             return campaign;
         }

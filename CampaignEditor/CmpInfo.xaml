@@ -32,6 +32,7 @@
             <RowDefinition Height="10" />
         </Grid.RowDefinitions>
 
+        <Label x:Name="lblTv" FontWeight="Bold" Grid.Row="1" Grid.Column="1"/>
         <CheckBox x:Name="cbActive" Content="Active" Grid.Row="1" Grid.Column="5" 
                   FontSize="12" Checked="cb_Checked" Unchecked="cb_Checked">
             <CheckBox.LayoutTransform>

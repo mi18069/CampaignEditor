@@ -69,6 +69,7 @@ namespace CampaignEditor
             CampaignEventLinker.AddInfo(_campaign.cmpid, this);
             if (campaign != null)
             {
+                lblTv.Content = campaign.tv ? "TV" : "Radio";
                 cbActive.IsChecked = campaign.active;
                 tbName.Text = campaign.cmpname.Trim();
                 tbClientname.Text = client.clname.Trim();
@@ -228,10 +229,11 @@ namespace CampaignEditor
             int cmpaddedat = _campaign.cmpaddedat;
             bool active = (bool)cbActive.IsChecked;
             bool forcec = _campaign.forcec;
+            bool tv = true;
 
             Campaign = new CampaignDTO(cmpid, cmprev, cmpown, cmpname, clid, cmpsdate, cmpedate,
                 cmpstime, cmpetime, cmpstatus, sostring, activity, cmpaddedon, cmpaddedat,
-                active, forcec);
+                active, forcec, tv);
 
         }
 
@@ -317,7 +319,7 @@ namespace CampaignEditor
                 campaign.cmprev, campaign.cmpown, campaign.cmpname, campaign.clid, 
                 campaign.cmpsdate, campaign.cmpedate, campaign.cmpstime, campaign.cmpetime,
                 campaign.cmpstatus, campaign.sostring, campaign.activity, campaign.cmpaddedon,
-                campaign.cmpaddedat, campaign.active, campaign.forcec));
+                campaign.cmpaddedat, campaign.active, campaign.forcec, campaign.tv));
             await UpdateCmpBrnd();
         }
 

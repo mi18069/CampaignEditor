@@ -12,6 +12,7 @@
     <UserControl.Resources>
         <converters:DateComparisonConverter x:Key="DateComparisonConverter"/>
         <converters:UserLevelToBooleanConverter x:Key="UserLevelToBooleanConverter"/>
+        <converters:TvBoolToImageConverter x:Key="TvBoolToImageConverter"/>
     </UserControl.Resources>
 
     <Grid>
@@ -62,23 +63,26 @@
                     <TextBlock Text="{Binding Client.clname}" ContextMenu="{StaticResource ClientContextMenu}"/>
                     <HierarchicalDataTemplate.ItemTemplate>
                         <DataTemplate DataType="{x:Type cmpDTO:CampaignDTO}">
-                            <TextBlock Text="{Binding cmpname}" ContextMenu="{StaticResource CampaignContextMenu}">
-                                <TextBlock.Style>
-                                    <Style TargetType="TextBlock">
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding cmpsdate, Converter={StaticResource DateComparisonConverter}}" Value="True">
-                                                <Setter Property="Foreground" Value="DarkGreen"/>
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding cmpsdate, Converter={StaticResource DateComparisonConverter}}" Value="False">
-                                                <Setter Property="Foreground" Value="Orange"/>
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding cmpedate, Converter={StaticResource DateComparisonConverter}}" Value="True">
-                                                <Setter Property="Foreground" Value="DarkRed"/>
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </TextBlock.Style>
-                            </TextBlock>
+                            <StackPanel Orientation="Horizontal">
+                                <Image Width="20" Height="20" Source="{Binding tv, Converter={StaticResource TvBoolToImageConverter}}" />
+                                <TextBlock Text="{Binding cmpname}" ContextMenu="{StaticResource CampaignContextMenu}">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding cmpsdate, Converter={StaticResource DateComparisonConverter}}" Value="True">
+                                                    <Setter Property="Foreground" Value="DarkGreen"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding cmpsdate, Converter={StaticResource DateComparisonConverter}}" Value="False">
+                                                    <Setter Property="Foreground" Value="Orange"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding cmpedate, Converter={StaticResource DateComparisonConverter}}" Value="True">
+                                                    <Setter Property="Foreground" Value="DarkRed"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </StackPanel>
                         </DataTemplate>
                     </HierarchicalDataTemplate.ItemTemplate>
                 </HierarchicalDataTemplate>

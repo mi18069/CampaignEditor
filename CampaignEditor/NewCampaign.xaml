@@ -27,73 +27,87 @@
             <RowDefinition Height="auto" />
             <RowDefinition Height="auto" />
             <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="60" />
             <RowDefinition Height="10" />
         </Grid.RowDefinitions>
 
-        <Label x:Name="lblName" Content="Name: " Grid.Row="1" Grid.Column="1" 
+        <Grid Grid.Row="1" Grid.Column="3" Grid.ColumnSpan="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="10"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <RadioButton Grid.Column="1"
+                     GroupName="TvRadioGroup" x:Name="rbTv" Content="TV" IsChecked="True" />
+            <RadioButton Grid.Column="2"
+                     GroupName="TvRadioGroup" x:Name="rbRadio" Content="Radio" IsChecked="False" />
+        </Grid>
+        
+
+        <Label x:Name="lblName" Content="Name: " Grid.Row="2" Grid.Column="1" 
                HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10" />
-        <TextBox x:Name="tbName" Grid.Row="1" Grid.Column="2" Grid.ColumnSpan="4"
+        <TextBox x:Name="tbName" Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="4"
                  TextWrapping="NoWrap"
                  VerticalAlignment="Center" Margin="10"/>
 
-        <Label x:Name="lblClient" Content="Client: " Grid.Row="2" Grid.Column="1"
+        <Label x:Name="lblClient" Content="Client: " Grid.Row="3" Grid.Column="1"
                HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="10" />
-        <TextBox x:Name="tbClientname" Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="4" 
+        <TextBox x:Name="tbClientname" Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="4" 
                  HorizontalContentAlignment="Left" FontWeight="Black"
                  VerticalAlignment="Center" Margin="10" IsReadOnly="True"/>
 
-        <Label x:Name="lblStartDate" Content="Start Date: " Grid.Row="3" Grid.Column="1" 
+        <Label x:Name="lblStartDate" Content="Start Date: " Grid.Row="4" Grid.Column="1" 
                HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10" />
-        <DatePicker x:Name="dpStartDate" Grid.Row="3" Grid.Column="2" Grid.ColumnSpan="3" 
+        <DatePicker x:Name="dpStartDate" Grid.Row="4" Grid.Column="2" Grid.ColumnSpan="3" 
                     FirstDayOfWeek="Monday" VerticalAlignment="Center" Margin="10"/>
-        <Label x:Name="lblEndDate" Content="End Date: " Grid.Row="4" Grid.Column="1"
+        <Label x:Name="lblEndDate" Content="End Date: " Grid.Row="5" Grid.Column="1"
                HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10" />
-        <DatePicker x:Name="dpEndDate" Grid.Row="4" Grid.Column="2" Grid.ColumnSpan="3"
+        <DatePicker x:Name="dpEndDate" Grid.Row="5" Grid.Column="2" Grid.ColumnSpan="3"
                     FirstDayOfWeek="Monday" VerticalAlignment="Center" Margin="10"/>
 
-        <Label x:Name="lblTbStart" Content="TB Start: " Grid.Row="5" Grid.Column="1" 
+        <Label x:Name="lblTbStart" Content="TB Start: " Grid.Row="6" Grid.Column="1" 
                HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10" />
-        <TextBox x:Name="tbTbStartHours" MaxLength="2" Grid.Row="5" Grid.Column="2"
+        <TextBox x:Name="tbTbStartHours" MaxLength="2" Grid.Row="6" Grid.Column="2"
                  TextWrapping="Wrap" 
                  VerticalAlignment="Center" Margin="10"/>
-        <Label x:Name="lblDots1" Content=":" Grid.Row="5" Grid.Column="3" FontWeight="Bold" 
+        <Label x:Name="lblDots1" Content=":" Grid.Row="6" Grid.Column="3" FontWeight="Bold" 
                VerticalAlignment="Center" />
-        <TextBox x:Name="tbTbStartMinutes" MaxLength="2" Grid.Row="5" Grid.Column="4"
+        <TextBox x:Name="tbTbStartMinutes" MaxLength="2" Grid.Row="6" Grid.Column="4"
                  TextWrapping="Wrap"
                  VerticalAlignment="Center" Margin="10"/>
-        <Label x:Name="lblTbEnd" Content="TB End: " Grid.Row="6" Grid.Column="1" 
+        <Label x:Name="lblTbEnd" Content="TB End: " Grid.Row="7" Grid.Column="1" 
                VerticalAlignment="Center" Margin="10" />
-        <TextBox x:Name="tbTbEndHours" MaxLength="2" Grid.Row="6" Grid.Column="2"
+        <TextBox x:Name="tbTbEndHours" MaxLength="2" Grid.Row="7" Grid.Column="2"
                  TextWrapping="Wrap"
                  VerticalAlignment="Center" Margin="10"/>
-        <Label x:Name="lblDots2" Content=":" Grid.Row="6" Grid.Column="3" FontWeight="Bold" 
+        <Label x:Name="lblDots2" Content=":" Grid.Row="7" Grid.Column="3" FontWeight="Bold" 
                VerticalAlignment="Center" />
-        <TextBox x:Name="tbTbEndMinutes" MaxLength="2" Grid.Row="6" Grid.Column="4"
+        <TextBox x:Name="tbTbEndMinutes" MaxLength="2" Grid.Row="7" Grid.Column="4"
                  TextWrapping="Wrap"
                  VerticalAlignment="Center" Margin="10"/>
 
-        <Label Content="Brands: " Grid.Row="8" Grid.Column="1" 
+        <Label Content="Brands: " Grid.Row="9" Grid.Column="1" 
                VerticalAlignment="Center" Margin="10"/>
-        <TextBox x:Name="tbBrand1" Grid.Row="8" Grid.Column="2" Grid.ColumnSpan="4" FontSize="14" FontWeight="Bold"
+        <TextBox x:Name="tbBrand1" Grid.Row="9" Grid.Column="2" Grid.ColumnSpan="4" FontSize="14" FontWeight="Bold"
                  TextChanged="tbBrand1_TextChanged" VerticalAlignment="Center" Margin="10" 
                  HorizontalScrollBarVisibility="Auto" MinHeight="30" VerticalContentAlignment="Center"/>
 
-        <TextBox x:Name="tbBrand2" Grid.Row="9" Grid.Column="2" Grid.ColumnSpan="4" FontSize="14" FontWeight="Bold"
+        <TextBox x:Name="tbBrand2" Grid.Row="10" Grid.Column="2" Grid.ColumnSpan="4" FontSize="14" FontWeight="Bold"
                     TextChanged="tbBrand2_TextChanged" VerticalAlignment="Center" Margin="10" 
                  HorizontalScrollBarVisibility="Auto" MinHeight="30" VerticalContentAlignment="Center"/>
         
-        <ListBox x:Name="lbBrand" Grid.Row="10" Grid.Column="1" Grid.ColumnSpan="5"
+        <ListBox x:Name="lbBrand" Grid.Row="11" Grid.Column="1" Grid.ColumnSpan="5"
                  VerticalAlignment="Stretch" IsTextSearchEnabled="False"
                  DisplayMemberPath="brand" Margin="10" FontSize="14"
                  SelectionChanged="lbBrand_SelectionChanged"/>
         
         
-        <Button x:Name="btnSave" Content="Save" Grid.Row="11" Grid.Column="2" Grid.ColumnSpan="4" 
+        <Button x:Name="btnSave" Content="Save" Grid.Row="12" Grid.Column="2" Grid.ColumnSpan="4" 
                 HorizontalAlignment="Right" Width="100" Margin="10, 10, 20, 10"
                 Click="btnSave_Click"/>
-        <Button x:Name="btnCancel" Content="Cancel" Grid.Row="11" Grid.Column="2" Grid.ColumnSpan="4" 
+        <Button x:Name="btnCancel" Content="Cancel" Grid.Row="12" Grid.Column="2" Grid.ColumnSpan="4" 
                 HorizontalAlignment="Right" Width="100" Margin="10, 10, 140, 10"
                 Click="btnCancel_Click"/>
     </Grid>

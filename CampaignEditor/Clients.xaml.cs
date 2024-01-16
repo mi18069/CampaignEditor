@@ -521,6 +521,19 @@ namespace CampaignEditor
         #endregion
 
         #region Filters
+
+        private void tbtnTV_Click(object sender, RoutedEventArgs e)
+        {
+            if (loadedAllCheckBoxes)
+                tvClients.FilterData();
+        }
+
+        private void tbtnRadio_Click(object sender, RoutedEventArgs e)
+        {
+            if (loadedAllCheckBoxes)
+                tvClients.FilterData();
+        }
+
         private void dpStartDate_Initialized(object sender, System.EventArgs e)
         {
             dpStartDate.SelectedDate = DateTime.Now.AddYears(-1);
@@ -614,7 +627,7 @@ namespace CampaignEditor
             f.ShowDialog();
         }
 
-        int checkboxesToLoad = 5;
+        int checkboxesToLoad = 7;
         int loadedForNow = 0;
         private async void cb_Loaded(object sender, RoutedEventArgs e)
         {
@@ -633,5 +646,7 @@ namespace CampaignEditor
             tvClients.UserContextMenuEvent += TvUser_UserContextMenuEvent;
             tvClients.CampaignContextMenuEvent += TvCampaign_CampaignContextMenuEvent;
         }
+
+
     }
 }

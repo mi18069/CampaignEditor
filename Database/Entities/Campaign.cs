@@ -18,6 +18,7 @@
         public int cmpaddedat { get; set; }
         public bool active { get; set; }
         public bool forcec { get; set; }
+        public bool tv { get; set; }
 
     }
 }

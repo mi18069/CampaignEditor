@@ -82,7 +82,7 @@ namespace CampaignEditor
                     _campaign.cmprev, _campaign.cmpown, _campaign.cmpname, _campaign.clid,
                     _campaign.cmpsdate, _campaign.cmpedate, _campaign.cmpstime, _campaign.cmpetime,
                     _campaign.cmpstatus, _campaign.sostring, _campaign.activity, _campaign.cmpaddedon,
-                    _campaign.cmpaddedat, _campaign.active, _campaign.forcec));
+                    _campaign.cmpaddedat, _campaign.active, _campaign.forcec, _campaign.tv));
                     this.Close();
                 }
             }

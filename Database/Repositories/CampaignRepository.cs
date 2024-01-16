@@ -26,9 +26,9 @@ namespace Database.Repositories
 
             var newId = await connection.QuerySingleOrDefaultAsync<int?>(
                 "INSERT INTO tblcampaigns (cmprev, cmpown, cmpname, clid, cmpsdate, cmpedate, cmpstime, cmpetime, " +
-                    "cmpstatus, sostring, activity, cmpaddedon, cmpaddedat, active, forcec)" +
+                    "cmpstatus, sostring, activity, cmpaddedon, cmpaddedat, active, forcec, tv)" +
                     " VALUES (@cmprev, @cmpown, @cmpname, @clid, @cmpsdate, @cmpedate, @cmpstime, @cmpetime, " +
-                        "@cmpstatus, @sostring, @activity, @cmpaddedon, @cmpaddedat, @active, @forcec) RETURNING cmpid",
+                        "@cmpstatus, @sostring, @activity, @cmpaddedon, @cmpaddedat, @active, @forcec, @tv) RETURNING cmpid",
             new
             {
                 campaignDTO.cmprev,
@@ -45,7 +45,8 @@ namespace Database.Repositories
                 campaignDTO.cmpaddedon,
                 campaignDTO.cmpaddedat,
                 campaignDTO.active,
-                campaignDTO.forcec
+                campaignDTO.forcec,
+                campaignDTO.tv
             });
 
             return newId;
@@ -97,7 +98,7 @@ namespace Database.Repositories
             var affected = await connection.ExecuteAsync(
                 "UPDATE tblcampaigns SET cmprev = @cmprev, cmpown = @cmpown, cmpname = @cmpname, clid = @clid, cmpsdate = @cmpsdate, " +
                     "cmpedate = @cmpedate, cmpstime = @cmpstime, cmpetime = @cmpetime, cmpstatus = @cmpstatus, sostring = @sostring, " +
-                    "activity = @activity, cmpaddedon = @cmpaddedon, cmpaddedat = @cmpaddedat, active = @active, forcec = @forcec " +
+                    "activity = @activity, cmpaddedon = @cmpaddedon, cmpaddedat = @cmpaddedat, active = @active, forcec = @forcec, tv = @tv " +
                     "WHERE cmpid = @cmpid",
             new
             {
@@ -116,7 +117,8 @@ namespace Database.Repositories
                 campaignDTO.cmpaddedon,
                 campaignDTO.cmpaddedat,
                 campaignDTO.active,
-                campaignDTO.forcec
+                campaignDTO.forcec,
+                campaignDTO.tv
             });
 
             return affected != 0;

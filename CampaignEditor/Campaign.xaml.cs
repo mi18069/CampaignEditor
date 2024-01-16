@@ -52,7 +52,8 @@ namespace CampaignEditor
             _campaign = campaign;
             _client = await _clientController.GetClientById(_campaign.clid);
             readOnly = isReadOnly || (TimeFormat.YMDStringToDateTime(_campaign.cmpedate) < DateTime.Now);
-            this.Title = "Client: " + _client.clname.Trim() + "  Campaign: " + _campaign.cmpname.Trim();
+            this.Title = "Client: " + _client.clname.Trim() + "  Campaign: " + _campaign.cmpname.Trim()
+                 + (_campaign.tv ? " TV" : " Radio");
 
             CampaignEventLinker.AddCampaign(_campaign.cmpid);
             AssignPagesToTabs();

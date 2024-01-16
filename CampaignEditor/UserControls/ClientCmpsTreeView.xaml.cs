@@ -111,11 +111,21 @@ namespace CampaignEditor.UserControls
         {
             currentFilteredData = CopyObservable(clientCampaignsLists);
 
+            bool applyTvFilter = false;
+            bool applyRadioFilter = false;
             bool applySinceFilter = false;
             bool applyActiveFilter = false;
             bool applyNotStartedFilter = false;
             bool applyFinishedFilter = false;
 
+            if (clientsInstance.tbtnTV.IsChecked == false)
+            {
+                applyTvFilter = true;
+            }
+            if (clientsInstance.tbtnRadio.IsChecked == false)
+            {
+                applyRadioFilter = true;
+            }
             if (clientsInstance.cbDatePicker.IsChecked == true && clientsInstance.dpStartDate.SelectedDate.HasValue)
             {
                 applySinceFilter = true;
@@ -133,7 +143,7 @@ namespace CampaignEditor.UserControls
                 applyFinishedFilter = true;
             }
 
-            ApplyFilters(currentFilteredData, applySinceFilter, applyActiveFilter, applyNotStartedFilter, applyFinishedFilter);
+            ApplyFilters(currentFilteredData, applyTvFilter, applyRadioFilter, applySinceFilter, applyActiveFilter, applyNotStartedFilter, applyFinishedFilter);
             FilterClientAndCampaign();
         }
 
@@ -179,12 +189,20 @@ namespace CampaignEditor.UserControls
             _tvUsers.ItemsSource = tvd.collection;
         }
 
-        private void ApplyFilters(ObservableCollection<ClientCampaignsList> dataToFilter, bool applySinceFilter, bool applyActiveFilter, bool applyNotStartedFilter, bool applyFinishedFilter)
+        private void ApplyFilters(ObservableCollection<ClientCampaignsList> dataToFilter, bool applyTvFilter, bool applyRadioFilter, bool applySinceFilter, bool applyActiveFilter, bool applyNotStartedFilter, bool applyFinishedFilter)
         {
 
             foreach (var cc in dataToFilter)
             {
                 var filteredCampaigns = cc.Campaigns.ToList();
+                if (applyTvFilter)
+                {
+                    filteredCampaigns = filteredCampaigns.Where(cmp => cmp.tv == false).ToList();
+                }
+                if (applyRadioFilter)
+                {
+                    filteredCampaigns = filteredCampaigns.Where(cmp => cmp.tv == true).ToList();
+                }
                 if (applySinceFilter)
                 {
                     DateTime date = clientsInstance.dpStartDate.SelectedDate!.Value;
