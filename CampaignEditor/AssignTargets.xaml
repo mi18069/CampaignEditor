@@ -14,7 +14,9 @@
                 <ListView x:Name="lbTargets"
                       ItemsSource="{Binding TargetsList}"
                       DisplayMemberPath="targname"
-                      SelectionChanged="lb_SelectionChanged">
+                          SelectionMode="Single"
+                      SelectionChanged="lb_SelectionChanged"
+                          GotFocus="lb_GotFocus">
                     <ListView.ItemContainerStyle>
                         <Style TargetType="ListViewItem">
                             <EventSetter Event="PreviewMouseUp" Handler="TargetsItem_PreviewMouseUp"/>
@@ -60,7 +62,9 @@
                 <ListView x:Name="lbSelectedTargets" 
                       ItemsSource="{Binding SelectedTargetsList}"
                       DisplayMemberPath="targname" AllowDrop="True"
-                          SelectionChanged="lb_SelectionChanged">
+                          SelectionMode="Single"
+                          SelectionChanged="lb_SelectionChanged"
+                          GotFocus="lb_GotFocus">
                     <ListView.ItemContainerStyle>
                         <Style TargetType="ListViewItem">
                             <EventSetter Event="PreviewMouseUp"  Handler="SelectedTargetsItem_PreviewMouseUp"/>

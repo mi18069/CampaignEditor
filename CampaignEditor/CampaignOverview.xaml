@@ -237,15 +237,15 @@
                         MinWidth="200" Height="40"
                         HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,10"
                         Click="btnSpots_Click"/>
-                <ScrollViewer x:Name="svSpots" Grid.Row="2" Grid.Column="1">
+                <ScrollViewer x:Name="svSpots" Grid.Row="2" Grid.Column="1" 
+                              VerticalScrollBarVisibility="Auto">
                     <DataGrid 
                           x:Name="dgSpots" 
                           FontSize="15"
                           CanUserSortColumns="False"
                           AutoGenerateColumns="False"
                           HeadersVisibility="Column"
-                          IsReadOnly="True"
-                          Loaded="dgSpots_Loaded">
+                          IsReadOnly="True">
                         <DataGrid.Resources>
                             <Style TargetType="{x:Type DataGridColumnHeader}">
                                 <Setter Property="Background" Value="LightGray"/>

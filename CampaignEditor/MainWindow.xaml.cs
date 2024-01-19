@@ -20,6 +20,8 @@ namespace CampaignEditor
         private readonly IAbstractFactory<Clients> _factoryClients;
         private readonly IAbstractFactory<Config> _factoryConfig;
         private UserController _userController;
+        private OnStartupContoller _onStartupController;
+
 
         private string appPath = Directory.GetCurrentDirectory();
         private string imgPeekPath = "\\images\\PassPeekImg.png";
@@ -28,7 +30,8 @@ namespace CampaignEditor
         public static UserDTO user = null;
         private bool onlyOne = false; // To ensure that only one window is shown
         public MainWindow(IUserRepository userRepository, IAbstractFactory<Clients> factoryClients,
-            IAbstractFactory<Config> factoryConfig)
+            IAbstractFactory<Config> factoryConfig,
+            IDatabaseFunctionsRepository dfRepository)
         {
             
             InitializeComponent();
@@ -36,6 +39,11 @@ namespace CampaignEditor
             _userRepository = userRepository;
             _factoryClients = factoryClients;
             _factoryConfig = factoryConfig;
+
+            _onStartupController = new OnStartupContoller(dfRepository);
+
+            // Let it run in the background on every starting
+            _onStartupController.RunUpdateUnavailableDates();
 
             _userController = new UserController(_userRepository);
             PassShowHide.Source = new BitmapImage(new Uri(appPath + imgPeekPath));

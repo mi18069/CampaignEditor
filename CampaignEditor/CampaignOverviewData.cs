@@ -1,0 +1,162 @@
+﻿using CampaignEditor.Controllers;
+using Database.DTOs.ActivityDTO;
+using Database.DTOs.BrandDTO;
+using Database.DTOs.ChannelDTO;
+using Database.DTOs.CmpBrndDTO;
+using Database.DTOs.GoalsDTO;
+using Database.DTOs.PricelistDTO;
+using Database.DTOs.SpotDTO;
+using Database.DTOs.TargetDTO;
+using Database.Repositories;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace CampaignEditor
+{
+    public class CampaignOverviewData
+    {
+
+        private CmpBrndController _cmpBrndController;
+        private BrandController _brandController;
+
+        private TargetCmpController _targetCmpController;
+        private TargetController _targetController;
+
+        private SpotController _spotController;
+
+        private GoalsController _goalsController;
+
+        private ChannelCmpController _channelCmpController;
+        private ChannelController _channelController;
+        private PricelistChannelsController _pricelistChannelsController;
+        private PricelistController _pricelistController;
+        private ActivityController _activityController;
+
+        public CampaignOverviewData(ICmpBrndRepository cmpBrndRepo, IBrandRepository brandRepo,
+            ITargetCmpRepository targetCmpRepo, ITargetRepository targetRepo, ISpotRepository spotRepo,
+            IGoalsRepository goalsRepo, IChannelCmpRepository channelCmpRepo, IChannelRepository channelRepo,
+            IPricelistChannelsRepository pricelistChannelRepo, IPricelistRepository pricelistRepo,
+            IActivityRepository activityRepo)
+        {
+            _cmpBrndController = new CmpBrndController(cmpBrndRepo);
+            _brandController = new BrandController(brandRepo);
+            _targetCmpController = new TargetCmpController(targetCmpRepo);
+            _targetController = new TargetController(targetRepo);
+            _spotController = new SpotController(spotRepo);
+            _goalsController = new GoalsController(goalsRepo);
+            _channelCmpController = new ChannelCmpController(channelCmpRepo);
+            _channelController = new ChannelController(channelRepo);
+            _pricelistChannelsController = new PricelistChannelsController(pricelistChannelRepo);
+            _pricelistController = new PricelistController(pricelistRepo);
+            _activityController = new ActivityController(activityRepo);
+        }
+
+        public async Task<BrandDTO[]> GetBrands(int cmpid)
+        {
+            BrandDTO[] brands = new BrandDTO[2];
+            List<CmpBrndDTO> cmpBrnds = new List<CmpBrndDTO>();
+            try
+            {
+                cmpBrnds = (List<CmpBrndDTO>)await _cmpBrndController.GetCmpBrndsByCmpId(cmpid);
+                if (cmpBrnds.Count() > 0)
+                {
+                    var brand = await _brandController.GetBrandById((cmpBrnds[0] as CmpBrndDTO).brbrand);
+                    brands[0] = brand;
+                }
+                if (cmpBrnds.Count() > 1)
+                {
+                    var brand = await _brandController.GetBrandById((cmpBrnds[1] as CmpBrndDTO).brbrand);
+                    brands[1] = brand;
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Cannot retrieve data for brands\n {ex.Message}");
+            }
+
+            return brands;
+        }
+
+        public async Task<List<TargetDTO>> GetTargets(int cmpid)
+        {
+            List<TargetDTO> targets = new List<TargetDTO>();
+
+            try
+            {
+                var targetCmps = await _targetCmpController.GetTargetCmpByCmpid(cmpid);
+                targetCmps = targetCmps.OrderBy(tgtCmp => tgtCmp.priority);
+
+                foreach (var targetCmp in targetCmps)
+                {
+                    var target = await _targetController.GetTargetById(targetCmp.targid);
+                    targets.Add(target);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Cannot retrieve data for targets\n {ex.Message}");
+            }
+
+            return targets;
+        }
+
+        public async Task<List<SpotDTO>> GetSpots(int cmpid)
+        {
+            List<SpotDTO> spots = new List<SpotDTO>();
+            try
+            {
+                spots = (List<SpotDTO>)await _spotController.GetSpotsByCmpid(cmpid);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Cannot retrieve data for spots\n {ex.Message}");
+            }
+
+            return spots;
+        }
+
+        public async Task<GoalsDTO> GetGoals(int cmpid)
+        {
+            GoalsDTO goals = null;
+            try
+            {
+                goals = (GoalsDTO)await _goalsController.GetGoalsByCmpid(cmpid);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Cannot retrieve data for goals\n {ex.Message}");
+            }
+
+            return goals;
+        }
+
+        public async Task<List<Tuple<ChannelDTO, PricelistDTO, ActivityDTO>>> GetChannelTuples(int cmpid)
+        {
+            List<Tuple<ChannelDTO, PricelistDTO, ActivityDTO>> tuples = new List<Tuple<ChannelDTO, PricelistDTO, ActivityDTO>>();
+
+            try
+            {
+                var selectedChannels = await _channelCmpController.GetChannelCmpsByCmpid(cmpid);
+
+                foreach (var selected in selectedChannels)
+                {
+                    ChannelDTO channel = await _channelController.GetChannelById(selected.chid);
+                    PricelistDTO pricelist = await _pricelistController.GetPricelistById(selected.plid);
+                    ActivityDTO activity = await _activityController.GetActivityById(selected.actid);
+
+                    var tuple = Tuple.Create(channel, pricelist, activity);
+                    tuples.Add(tuple);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Cannot retrieve data for channels\n {ex.Message}");
+            }
+
+            return tuples;
+        }
+
+    }
+}

@@ -45,6 +45,7 @@ namespace CampaignEditor
                     services.AddFormFactory<GroupChannels>();
                     services.AddFormFactory<Campaign>();
                     services.AddFormFactory<CampaignOverview>();
+                    services.AddFormFactory<CampaignOverviewData>();
                     services.AddFormFactory<CampaignForecast>();
                     services.AddFormFactory<AddSchema>();
                     services.AddFormFactory<AMRTrim>();

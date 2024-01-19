@@ -29,7 +29,6 @@ namespace CampaignEditor
         }
 
         public bool goalsModified = false;
-        public bool shouldClose = false;
         public Goals(IGoalsRepository goalsRepository)
         {
             _goalsController = new GoalsController(goalsRepository);
@@ -179,7 +178,7 @@ namespace CampaignEditor
                 }
             }
             if (!goalsModified || goalsModified && passCheckTest)
-                this.Hide();
+                this.Close();
         }
 
         private bool CheckValues()
@@ -232,7 +231,7 @@ namespace CampaignEditor
         private void btnCancel_Click(object sender, RoutedEventArgs e)
         {
             goalsModified = false;
-            this.Hide();
+            this.Close();
         }
         #endregion
 
@@ -241,17 +240,6 @@ namespace CampaignEditor
             await _goalsController.DeleteGoalsByCmpid(goals.cmpid);
             await _goalsController.CreateGoals(new CreateGoalsDTO(goals.cmpid, goals.budget,
                 goals.grp, goals.ins, goals.rch_f1, goals.rch_f2, goals.rch));
-        }
-
-        // Overriding OnClosing because click on x button should only hide window
-        protected override void OnClosing(CancelEventArgs e)
-        {
-            if (!shouldClose)
-            {
-                e.Cancel = true;
-                Hide();
-            }
-
         }
 
     }

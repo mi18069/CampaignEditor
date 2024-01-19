@@ -18,7 +18,7 @@ namespace CampaignEditor
         ClientDTO _client = null;
         bool readOnly = true;
 
-        private readonly IAbstractFactory<CampaignOverview> _factoryOverview;
+        //private readonly IAbstractFactory<CampaignOverview> _factoryOverview;
         private readonly IAbstractFactory<CampaignForecastView> _factoryForecastView;
         private readonly IAbstractFactory<CampaignValidation> _factoryValidation;
 
@@ -34,7 +34,7 @@ namespace CampaignEditor
             IAbstractFactory<CampaignValidation> factoryValidation)
         {
 
-            _factoryOverview = factoryOverview;
+            factoryCampaignOverview = factoryOverview.Create();
             _factoryForecastView = factoryForecastView;
             _factoryValidation = factoryValidation;
 
@@ -75,7 +75,7 @@ namespace CampaignEditor
             tabValidation.Content = loadingPage.Content;
 
 
-            var factoryCampaignOverview = _factoryOverview.Create();
+            factoryCampaignOverview.ClosePageEvent += Page_ClosePageEvent;
             await factoryCampaignOverview.Initialization(_client, _campaign, readOnly);
             tabOverview.Content = factoryCampaignOverview.Content;
 
@@ -88,24 +88,19 @@ namespace CampaignEditor
             tabValidation.Content = factoryCampaignValidation.Content;
 
 
-        }     
+        }
+
+        private void Page_ClosePageEvent(object? sender, EventArgs e)
+        {
+            this.Close();
+        }
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            // event unbinding
+            factoryCampaignOverview.ClosePageEvent -= Page_ClosePageEvent;
 
-            bool shouldCloseOverview = true;
-            bool shouldCloseForecast = true;
-            if (factoryCampaignOverview != null)
-            {
-                shouldCloseOverview = factoryCampaignOverview.Window_Closing();
-                shouldCloseForecast = factoryCampaignOverview.Window_Closing();
-                CampaignEventLinker.RemoveCampaign(_campaign.cmpid);
-            }
-            if (!shouldCloseOverview && !shouldCloseForecast)
-            {
-                e.Cancel = true;
-            }
-
+            CampaignEventLinker.RemoveCampaign(_campaign.cmpid);
         }
 
     }

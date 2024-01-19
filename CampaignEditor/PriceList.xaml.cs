@@ -36,7 +36,7 @@ namespace CampaignEditor
         private readonly IAbstractFactory<NewTarget> _factoryNewTarget;
 
         private CampaignDTO _campaign;
-        private PricelistDTO _pricelist;
+        public PricelistDTO _pricelist;
 
         // For Plus Icon
         private string appPath = Directory.GetCurrentDirectory();
@@ -399,6 +399,7 @@ namespace CampaignEditor
                     (pricelist.plid, clid, plname, pltype, sectbid, seasid, plactive, price, minprice,
                     prgcoef, pltarg, use2, sectbid2, sectb2st, sectb2en,
                     valfrom, valto, mgtype));
+                _pricelist = await _pricelistController.GetPricelistById(pricelist.plid);
             }
         }
 

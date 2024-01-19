@@ -29,7 +29,7 @@ namespace CampaignEditor
         private CampaignDTO _campaign = null;
 
         public bool success = false;
-
+        public TargetDTO newTarget = null;
         public bool isDataRangeChecked { get; set; } = false;
         public NewTarget(ITargetRepository targetRepository, 
                          ITargetClassRepository targetClassRepository,
@@ -224,7 +224,7 @@ namespace CampaignEditor
                 string targdefi = ParseSelectedTargdefi();
                 string targdefp = ParseSelectedTargdefp();
 
-                _ = await _targetController.CreateTarget(new CreateTargetDTO(targname, targown, 
+                newTarget = await _targetController.CreateTarget(new CreateTargetDTO(targname, targown, 
                                                                          targdesc, targdefi, targdefp));
                 success = true;
                 this.Close();

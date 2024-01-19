@@ -36,7 +36,6 @@ namespace CampaignEditor
         private CampaignDTO _campaign;
         public TabItem tabForecast;
 
-        private OnStartupContoller _onStartupController;
 
         List<DateTime> unavailableDates = new List<DateTime>();
         private bool isReadOnly = true;
@@ -44,8 +43,7 @@ namespace CampaignEditor
             IDatabaseFunctionsRepository databaseFunctionsRepository,
             IMediaPlanVersionRepository mediaPlanVersionRepository,
             IAbstractFactory<CampaignForecast> factoryForecast,
-            IAbstractFactory<CampaignForecastDates> factoryForecastDates,
-            IDatabaseFunctionsRepository dfRepository)
+            IAbstractFactory<CampaignForecastDates> factoryForecastDates)
         {
             _factoryForecast = factoryForecast;
             _factoryForecastDates = factoryForecastDates;
@@ -53,7 +51,6 @@ namespace CampaignEditor
             _mediaPlanRefController = new MediaPlanRefController(mediaPlanRefRepository);
             _databaseFunctionsController = new DatabaseFunctionsController(databaseFunctionsRepository);
             _mediaPlanVersionController = new MediaPlanVersionController(mediaPlanVersionRepository);
-            _onStartupController = new OnStartupContoller(dfRepository);
 
             InitializeComponent();
         }
@@ -62,9 +59,6 @@ namespace CampaignEditor
         {
             _campaign = campaign;
             this.isReadOnly = isReadOnly;
-
-            // Too slow
-            await _onStartupController.RunUpdateUnavailableDates();
 
             var exists = (await _mediaPlanRefController.GetMediaPlanRef(_campaign.cmpid) != null);
             if (exists)

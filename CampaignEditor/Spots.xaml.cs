@@ -23,7 +23,6 @@ namespace CampaignEditor
         private SpotController _spotController;
 
         public bool spotsModified = false;
-        public bool shouldClose = false;
         private ObservableCollection<SpotDTO> _spotlist = new ObservableCollection<SpotDTO>();
         private CampaignDTO _campaign;
 
@@ -213,7 +212,7 @@ namespace CampaignEditor
                 }
                 await UpdateDatabase(Spotlist.ToList());
                 OnSpotsChanged();
-                this.Hide();
+                this.Close();
             }
             
         }
@@ -251,7 +250,8 @@ namespace CampaignEditor
 
         private void btnCancel_Click(object sender, RoutedEventArgs e)
         {
-            this.Hide();
+            spotsModified = false;
+            this.Close();
         }
 
         public async Task UpdateDatabase(List<SpotDTO> spotlist)
@@ -267,17 +267,6 @@ namespace CampaignEditor
             }
         }
 
-
-        // Overriding OnClosing because click on x button should only hide window
-        protected override void OnClosing(CancelEventArgs e)
-        {
-            if (!shouldClose)
-            {
-                e.Cancel = true;
-                Hide();
-            }
-
-        }
    
     }
 }

@@ -96,10 +96,10 @@
         <Label Content="Brand: " Grid.Row="8" Grid.Column="1" 
                VerticalAlignment="Center" Margin="10"/>
         <TextBox x:Name="tbBrand1" Grid.Row="8" Grid.Column="2" Grid.ColumnSpan="4" FontSize="14" FontWeight="Bold"
-                    TextChanged="tbBrand1_TextChanged" VerticalAlignment="Center" Margin="10" 
+                 TextChanged="tbBrand1_TextChanged" VerticalAlignment="Center" Margin="10" 
                  HorizontalScrollBarVisibility="Auto" MinHeight="30" VerticalContentAlignment="Center"/>
         <TextBox x:Name="tbBrand2" Grid.Row="9" Grid.Column="2" Grid.ColumnSpan="4" FontSize="14" FontWeight="Bold"
-                    TextChanged="tbBrand2_TextChanged" VerticalAlignment="Center" Margin="10" 
+                 TextChanged="tbBrand2_TextChanged" VerticalAlignment="Center" Margin="10" 
                  HorizontalScrollBarVisibility="Auto" MinHeight="30" VerticalContentAlignment="Center"/>
         
         <ListBox x:Name="lbBrand" Grid.Row="10" Grid.Column="1" Grid.ColumnSpan="5"
