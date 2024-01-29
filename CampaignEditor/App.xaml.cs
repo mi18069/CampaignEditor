@@ -65,6 +65,7 @@ namespace CampaignEditor
                     services.AddFormFactory<DuplicateCampaign>();
                     services.AddFormFactory<Listing>();
                     services.AddFormFactory<PrintForecast>();
+                    services.AddFormFactory<ImportFromSchema>();
                     services.AddScoped<IDataContext, DataContext>();
                     // Add services
                     Extensions.UserExtensions.AddUserExtensions(services);

@@ -211,7 +211,7 @@
                     </ScrollViewer>
                     <Button Grid.Row="3" Grid.Column="1" x:Name="btnResetDates" Content="Initialize"
                             Margin="0, 10"
-                            Click="InitializeButton_Click"/>
+                            Click="InitializeButton_Click" IsEnabled="False"/>
                 </Grid>
             </Border>
 

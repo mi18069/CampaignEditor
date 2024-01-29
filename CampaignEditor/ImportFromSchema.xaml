@@ -1,0 +1,90 @@
+﻿<Window x:Class="CampaignEditor.ImportFromSchema"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CampaignEditor"
+        mc:Ignorable="d"
+        Title="ImportFromSchema" Height="600" Width="400">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="10" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="10" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="10" />
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="60" />
+            <RowDefinition Height="10" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="1" Grid.Column="1" Margin="0, 0, 0, 10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Label Content="Channel" Grid.Column="0" Margin="0, 0, 10, 0"/>
+            <ComboBox x:Name="cbChannels" Grid.Column="1" VerticalAlignment="Center" 
+                     SelectionChanged="cbChannel_SelectionChanged" DisplayMemberPath="chname"/>
+        </Grid>
+
+        <ScrollViewer x:Name="svListView" Grid.Row="2" Grid.Column="1" HorizontalScrollBarVisibility="Visible">
+            <ListView x:Name="lvSchemas" PreviewMouseWheel="YourListView_PreviewMouseWheel"
+                      SelectionMode="Multiple" HorizontalContentAlignment="Stretch" Loaded="lvSchemas_Loaded">
+                <ListView.View>
+                    <GridView>
+                        <GridViewColumn DisplayMemberBinding="{Binding name}">
+                            <GridViewColumnHeader Click="GridViewColumnHeader_Click" Tag="name">Name</GridViewColumnHeader>
+                        </GridViewColumn>
+                        <GridViewColumn DisplayMemberBinding="{Binding position}">
+                            <GridViewColumnHeader Click="GridViewColumnHeader_Click" Tag="position">Position</GridViewColumnHeader>
+                        </GridViewColumn>
+                        <GridViewColumn DisplayMemberBinding="{Binding stime}">
+                            <GridViewColumnHeader Click="GridViewColumnHeader_Click" Tag="stime">Start Time</GridViewColumnHeader>
+                        </GridViewColumn>
+                        <GridViewColumn DisplayMemberBinding="{Binding etime}">
+                            <GridViewColumnHeader Click="GridViewColumnHeader_Click" Tag="etime">End Time</GridViewColumnHeader>
+                        </GridViewColumn>
+                        <GridViewColumn DisplayMemberBinding="{Binding blocktime}">
+                            <GridViewColumnHeader Click="GridViewColumnHeader_Click" Tag="blocktime">Block Time</GridViewColumnHeader>
+                        </GridViewColumn>
+                        <GridViewColumn DisplayMemberBinding="{Binding days}">
+                            <GridViewColumnHeader Click="GridViewColumnHeader_Click" Tag="days">Days</GridViewColumnHeader>
+                        </GridViewColumn>
+                        <GridViewColumn DisplayMemberBinding="{Binding sdate, StringFormat=dd.MM.yyyy}">
+                            <GridViewColumnHeader Click="GridViewColumnHeader_Click" Tag="sdate">Start Date</GridViewColumnHeader>
+                        </GridViewColumn>
+                        <GridViewColumn DisplayMemberBinding="{Binding edate, StringFormat=dd.MM.yyyy}">
+                            <GridViewColumnHeader Click="GridViewColumnHeader_Click" Tag="edate">End Date</GridViewColumnHeader>
+                        </GridViewColumn>
+                    </GridView>
+                </ListView.View>
+            </ListView>
+        </ScrollViewer>
+        <Grid Grid.Row="3" Grid.Column="1" Margin="0, 10">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <CheckBox x:Name="chbReplaceDuplicates" Grid.Column="0" 
+                      Content="Replace Duplicates" IsChecked="True" 
+                      HorizontalAlignment="Left" VerticalAlignment="Center"/>
+            <Grid  HorizontalAlignment="Right" Grid.Column="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="auto"/>
+                </Grid.ColumnDefinitions>
+                <Button x:Name="btnSave" Grid.Column="3"  Content="Import"
+                Width="70" Click="btnSave_Click"/>
+                <Button x:Name="btnCancel" Grid.Column="1" Content="Cancel"
+                Width="70" Click="btnCancel_Click"/>
+            </Grid>
+        </Grid>
+        
+        
+    </Grid>
+</Window>

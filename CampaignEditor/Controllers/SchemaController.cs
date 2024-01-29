@@ -82,8 +82,15 @@ namespace CampaignEditor.Controllers
 
             if (position == "BET")
                 blocktime = CalculateBetBlocktime(timeFrom);
-            else if (position == "INS" && timeTo != null)
-                blocktime = CalculateInsBlocktime(timeFrom, timeTo);
+            else
+            {
+                if (timeTo != null)
+                    blocktime = CalculateInsBlocktime(timeFrom, timeTo);
+                else
+                {
+                    blocktime = TimeFormat.ReturnGoodTimeFormat(timeFrom);
+                }
+            }
 
             return blocktime;
         }
@@ -92,13 +99,14 @@ namespace CampaignEditor.Controllers
             try
             {
                 var goodTimeFormat = TimeFormat.ReturnGoodTimeFormat(timeFrom);
-                var timeOnly = TimeFormat.RepresentativeToTimeOnly(goodTimeFormat);
 
-                if (!timeOnly.HasValue)
-                    return "";
+                // Convert to minutes
+                int timeMins = TimeStringToMinutes(goodTimeFormat);
 
-                string newTime = TimeFormat.TimeOnlyToRepresentative(timeOnly.Value.AddMinutes(-10));
-                return newTime;
+                // Calculate middle value
+                int newValueMins = timeMins - 10;
+
+                return TimeFormat.MinToRepresentative(newValueMins);
             }
             catch
             {
@@ -111,22 +119,34 @@ namespace CampaignEditor.Controllers
             try
             {
                 var goodTimeFormatFrom = TimeFormat.ReturnGoodTimeFormat(timeFrom);
-                var timeOnlyFrom = TimeFormat.RepresentativeToTimeOnly(goodTimeFormatFrom);
-
                 var goodTimeFormatTo = TimeFormat.ReturnGoodTimeFormat(timeTo);
-                var timeOnlyTo = TimeFormat.RepresentativeToTimeOnly(goodTimeFormatTo);
 
-                if (!timeOnlyFrom.HasValue || !timeOnlyTo.HasValue)
+                // Convert to minutes
+                int startTime = TimeStringToMinutes(goodTimeFormatFrom);
+                int endTime = TimeStringToMinutes(goodTimeFormatTo);
+
+                if (startTime > endTime)
+                {
                     return "";
+                }
+                // Calculate middle value
+                int middleValue = (startTime + endTime)/2;
 
-                TimeOnly averageTime = TimeFormat.GetAverageTime(timeOnlyFrom.Value, timeOnlyTo.Value);
-                string newTime = TimeFormat.TimeOnlyToRepresentative(averageTime);
-                return newTime;
+                return TimeFormat.MinToRepresentative(middleValue);
             }
             catch
             {
                 return "";
             }
         }
+
+        private int TimeStringToMinutes(string timeString)
+        {
+            string[] parts = timeString.Split(':');
+            int hours = int.Parse(parts[0]);
+            int minutes = int.Parse(parts[1]);
+            return hours * 60 + minutes;
+        }
+
     }
 }

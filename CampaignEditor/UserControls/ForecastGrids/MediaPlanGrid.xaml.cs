@@ -873,7 +873,7 @@ namespace CampaignEditor.UserControls
 
         #endregion
 
-        #region ContextMenu
+        #region  Context Menu
         private async void DataGrid_MouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
             // check if it's clicked on header
@@ -929,6 +929,14 @@ namespace CampaignEditor.UserControls
                     OnAddMediaPlanClicked();
                 };
                 menu.Items.Add(addMediaPlanItem);
+
+                MenuItem importMediaPlanItem = new MenuItem();
+                importMediaPlanItem.Header = "Import Program from Schema";
+                importMediaPlanItem.Click += async (obj, ea) =>
+                {
+                    OnImportMediaPlanClicked();
+                };
+                menu.Items.Add(importMediaPlanItem);
 
                 // Traverse the visual tree to get the clicked DataGridCell object
                 while ((dependencyObject != null) && !(dependencyObject is DataGridCell))
@@ -1052,6 +1060,13 @@ namespace CampaignEditor.UserControls
         private void OnAddMediaPlanClicked()
         {
             AddMediaPlanClicked?.Invoke(this, EventArgs.Empty);
+        }
+
+        public event EventHandler ImportMediaPlanClicked;
+
+        private void OnImportMediaPlanClicked()
+        {
+            ImportMediaPlanClicked?.Invoke(this, EventArgs.Empty);
         }
 
         public event EventHandler<UpdateMediaPlanTupleEventArgs> UpdateMediaPlanClicked;

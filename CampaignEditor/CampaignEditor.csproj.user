@@ -49,6 +49,9 @@
     <Compile Update="Channels.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="ImportFromSchema.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="UserControls\ClientCmpsTreeView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -223,6 +226,9 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Channels.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="ImportFromSchema.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="UserControls\ClientCmpsTreeView.xaml">

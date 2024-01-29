@@ -46,6 +46,7 @@ namespace CampaignEditor.UserControls
 
         private readonly IAbstractFactory<AddSchema> _factoryAddSchema;
         private readonly IAbstractFactory<AMRTrim> _factoryAmrTrim;
+        private readonly IAbstractFactory<ImportFromSchema> _factoryImportFromSchema;
         private readonly PrintCampaignInfo _factoryPrintCmpInfo;
         private readonly Listing _factoryListing;
         private readonly PrintForecast _factoryPrintForecast;
@@ -57,7 +58,7 @@ namespace CampaignEditor.UserControls
         private bool isEditableVersion = true;
 
         private CampaignDTO _campaign;
-        private int _cmpVersion;
+        private int _cmpVersion = 1;
         public int CmpVersion { get { return _cmpVersion; } }
         private int _maxVersion = 1;
         private List<int> _versions = new List<int>();
@@ -109,7 +110,8 @@ namespace CampaignEditor.UserControls
             IAbstractFactory<MediaPlanTermConverter> factoryMpTermConverter,
             IAbstractFactory<PrintCampaignInfo> factoryPrintCmpInfo,
             IAbstractFactory<Listing> factoryListing,
-            IAbstractFactory<PrintForecast> factoryPrintForecast)
+            IAbstractFactory<PrintForecast> factoryPrintForecast,
+            IAbstractFactory<ImportFromSchema> factoryImportFromSchema)
         {
             this.DataContext = this;
 
@@ -136,19 +138,11 @@ namespace CampaignEditor.UserControls
             _mpTermConverter = factoryMpTermConverter.Create();
 
             InitializeComponent();
-
-        }
-
-        // Event handler to forward the mouse wheel event to the ScrollViewer
-        private void ScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
-        {
-            var scrollViewer = (ScrollViewer)sender;
-            scrollViewer.ScrollToVerticalOffset(scrollViewer.VerticalOffset - e.Delta);
-            e.Handled = true;
+            _factoryImportFromSchema = factoryImportFromSchema;
         }
 
         #region Triggers
-        public async void OnAddChannelDelegated(object sender, EventArgs e)
+        /*public async void OnAddChannelDelegated(object sender, EventArgs e)
         {
             var mpVersion = await _mediaPlanVersionController.GetLatestMediaPlanVersion(_campaign.cmpid);
             if (mpVersion != null)
@@ -156,7 +150,7 @@ namespace CampaignEditor.UserControls
                 await InitializeChannels();
                 await LoadData(_maxVersion);
             }
-        }
+        }*/
 
         public async void GoalsChanged(object sender, EventArgs e)
         {
@@ -196,28 +190,114 @@ namespace CampaignEditor.UserControls
 
             CampaignEventLinker.AddForecast(_campaign.cmpid, this);
 
+            // REFACTOR THIS
             await _mpConverter.Initialize(campaign);
+
+            await InitializeVersions();
+            await InitializeChannels();
+
+            startDate = TimeFormat.YMDStringToDateTime(_campaign.cmpsdate);
+            endDate = TimeFormat.YMDStringToDateTime(_campaign.cmpedate);
+
+            SubscribeControllers();
+
+            BindLists();
+
+            FillVersions(_maxVersion);
+            FillLvFilterDays();
+            await FillGoals();
+
+        }
+
+        private async Task InitializeVersions()
+        {
 
             var mpVersion = await _mediaPlanVersionController.GetLatestMediaPlanVersion(_campaign.cmpid);
             if (mpVersion != null)
             {
                 _maxVersion = mpVersion.version;
+                _cmpVersion = _maxVersion;
             }
 
-            _cmpVersion = _maxVersion;
-            startDate = TimeFormat.YMDStringToDateTime(_campaign.cmpsdate);
-            endDate = TimeFormat.YMDStringToDateTime(_campaign.cmpedate);
+        }
 
-            dgHist.ItemsSource = _showMPHist;
+        private async Task InitializeChannels()
+        {
+            _channels.Clear();
+            var channelCmps = await _channelCmpController.GetChannelCmpsByCmpid(_campaign.cmpid);
+            foreach (ChannelCmpDTO chnCmp in channelCmps)
+            {
+                ChannelDTO channel = await _channelController.GetChannelById(chnCmp.chid);
+                _channels.Insert(0, channel);
+            }
+        }
 
+        private void SubscribeControllers()
+        {
+            SubscribeDataGridControllers();
+            SubscribeSWGGridControllers();
+            SubscribeSDGGridControllers();
+            SubscribePrintForecastControllers();
+        }
 
-            SubscribeControllers();
-            // Initializing important lists
-            InitializeVersions(_maxVersion);
-            await InitializeChannels();
+        private void SubscribeDataGridControllers()
+        {
+            dgMediaPlans._converter = _mpConverter;
+            dgMediaPlans._factoryAddSchema = _factoryAddSchema;
+            dgMediaPlans._factoryAmrTrim = _factoryAmrTrim;
+            dgMediaPlans._schemaController = _schemaController;
+            dgMediaPlans._mediaPlanController = _mediaPlanController;
+            dgMediaPlans._mediaPlanTermController = _mediaPlanTermController;
+            dgMediaPlans._databaseFunctionsController = _databaseFunctionsController;
+            dgMediaPlans._mpConverter = _mpConverter;
+            dgMediaPlans._spotController = _spotController;
+            dgMediaPlans.AddMediaPlanClicked += dgMediaPlans_AddMediaPlanClicked;
+            dgMediaPlans.ImportMediaPlanClicked += dgMediaPlans_ImportMediaPlanClicked;
+            dgMediaPlans.DeleteMediaPlanClicked += dgMediaPlans_DeleteMediaPlanClicked;
+            // to open Update dialog
+            dgMediaPlans.UpdateMediaPlanClicked += dgMediaPlans_UpdateMediaPlanClicked;
+            // when mediaPlan is changed
+            dgMediaPlans.UpdatedMediaPlan += dgMediaPlans_UpdatedMediaPlan;
+            dgMediaPlans.RecalculateMediaPlan += dgMediaPlans_RecalculateMediaPlan;
+            dgMediaPlans.ClearMpTerms += dgMediaPlans_ClearMpTerms;
+            // When updating Terms
+            dgMediaPlans.UpdatedTerm += dgMediaPlans_UpdatedTerm;
+            dgMediaPlans.VisibleTuplesChanged += dgMediaPlans_VisibleTuplesChanged;
+        }
 
-            FillCbVersions();
-            FillLvFilterDays();
+        private void SubscribeSWGGridControllers()
+        {
+            swgGrid._mediaPlanController = _mediaPlanController;
+            swgGrid._mediaPlanTermController = _mediaPlanTermController;
+            swgGrid._spotController = _spotController;
+            swgGrid._channelController = _channelController;
+            swgGrid._allMediaPlans = _allMediaPlans;
+
+            swgGrid.spotGoalsGrid = sgGrid;
+        }
+
+        private void SubscribeSDGGridControllers()
+        {
+            sdgGrid._mediaPlanController = _mediaPlanController;
+            sdgGrid._mediaPlanTermController = _mediaPlanTermController;
+            sdgGrid._spotController = _spotController;
+            sdgGrid._channelController = _channelController;
+            sdgGrid._allMediaPlans = _allMediaPlans;
+        }
+
+        private void SubscribePrintForecastControllers()
+        {
+            _factoryPrintForecast.lvChannels = lvChannels;
+            _factoryPrintForecast.cgGrid = cgGrid;
+            _factoryPrintForecast.mpGrid = dgMediaPlans;
+            _factoryPrintForecast.sdgGrid = sdgGrid;
+            _factoryPrintForecast.sgGrid = sgGrid;
+            _factoryPrintForecast.swgGrid = swgGrid;
+            _factoryPrintForecast.factoryListing = _factoryListing;
+            _factoryPrintForecast.factoryPrintCmpInfo = _factoryPrintCmpInfo;
+            _factoryPrintForecast._allMediaPlans = _allMediaPlans;
+            _factoryPrintForecast._campaign = _campaign;
+
         }
 
         private void FillLvFilterDays()
@@ -254,79 +334,23 @@ namespace CampaignEditor.UserControls
             //_factoryListing.selectedChannels = _selectedChannels.ToList();
         }
 
-        private void SubscribeControllers()
+        private void BindLists()
         {
-            SubscribeDataGridControllers();
-            SubscribeSWGGridControllers();
-            SubscribeSDGGridControllers();
-            SubscribePrintForecastControllers();
+            dgHist.ItemsSource = _showMPHist;
+            lvChannels.ItemsSource = _channels;
         }
 
-        private void SubscribePrintForecastControllers()
+        private void FillVersions(int maxVersion)
         {
-            _factoryPrintForecast.lvChannels = lvChannels;
-            _factoryPrintForecast.cgGrid = cgGrid;
-            _factoryPrintForecast.mpGrid = dgMediaPlans;
-            _factoryPrintForecast.sdgGrid = sdgGrid;
-            _factoryPrintForecast.sgGrid = sgGrid;
-            _factoryPrintForecast.swgGrid = swgGrid;
-            _factoryPrintForecast.factoryListing = _factoryListing;
-            _factoryPrintForecast.factoryPrintCmpInfo = _factoryPrintCmpInfo;
-            _factoryPrintForecast._allMediaPlans = _allMediaPlans;
-            _factoryPrintForecast._campaign = _campaign;
+            cbVersions.Items.Clear();
 
-        }
-
-        private void SubscribeDataGridControllers()
-        {
-            dgMediaPlans._converter = _mpConverter;
-            dgMediaPlans._factoryAddSchema = _factoryAddSchema;
-            dgMediaPlans._factoryAmrTrim = _factoryAmrTrim;
-            dgMediaPlans._schemaController = _schemaController;
-            dgMediaPlans._mediaPlanController = _mediaPlanController;
-            dgMediaPlans._mediaPlanTermController = _mediaPlanTermController;
-            dgMediaPlans._databaseFunctionsController = _databaseFunctionsController;
-            dgMediaPlans._mpConverter = _mpConverter;
-            dgMediaPlans._spotController = _spotController;
-            dgMediaPlans.AddMediaPlanClicked += dgMediaPlans_AddMediaPlanClicked;
-            dgMediaPlans.DeleteMediaPlanClicked += dgMediaPlans_DeleteMediaPlanClicked;
-            // to open Update dialog
-            dgMediaPlans.UpdateMediaPlanClicked += dgMediaPlans_UpdateMediaPlanClicked;
-            // when mediaPlan is changed
-            dgMediaPlans.UpdatedMediaPlan += dgMediaPlans_UpdatedMediaPlan;
-            dgMediaPlans.RecalculateMediaPlan += dgMediaPlans_RecalculateMediaPlan;
-            dgMediaPlans.ClearMpTerms += dgMediaPlans_ClearMpTerms;
-            // When updating Terms
-            dgMediaPlans.UpdatedTerm += dgMediaPlans_UpdatedTerm;
-            dgMediaPlans.VisibleTuplesChanged += dgMediaPlans_VisibleTuplesChanged;
-        }
-
-        private void SubscribeSWGGridControllers()
-        {
-            swgGrid._mediaPlanController = _mediaPlanController;
-            swgGrid._mediaPlanTermController = _mediaPlanTermController;
-            swgGrid._spotController = _spotController;
-            swgGrid._channelController = _channelController;
-            swgGrid._allMediaPlans = _allMediaPlans;
-
-            swgGrid.spotGoalsGrid = sgGrid;
-        }
-
-        private void SubscribeSDGGridControllers()
-        {
-            sdgGrid._mediaPlanController = _mediaPlanController;
-            sdgGrid._mediaPlanTermController = _mediaPlanTermController;
-            sdgGrid._spotController = _spotController;
-            sdgGrid._channelController = _channelController;
-            sdgGrid._allMediaPlans = _allMediaPlans;
-        }
-
-        private void InitializeVersions(int maxVersion)
-        {
             for (int i = 0; i < maxVersion; i++)
             {
                 _versions.Add(i + 1);
+                cbVersions.Items.Add(i + 1);
             }
+
+            cbVersions.SelectedIndex = cbVersions.Items.Count - 1;
         }
 
         public async Task AddChannels(List<ChannelDTO> channels)
@@ -351,23 +375,6 @@ namespace CampaignEditor.UserControls
             List<MediaPlanDTO> mediaPlans = (await _mediaPlanController.GetAllChannelCmpMediaPlans(chid, _campaign.cmpid, version)).ToList();
             await StartAMRByMediaPlan(_campaign.cmpid, 40, 40, mediaPlans);
 
-        }
-
-        private async Task InitializeChannels()
-        {
-            _channels.Clear();
-            var channelCmps = await _channelCmpController.GetChannelCmpsByCmpid(_campaign.cmpid);
-            List<ChannelDTO> channels = new List<ChannelDTO>();
-            foreach (ChannelCmpDTO chnCmp in channelCmps)
-            {
-                ChannelDTO channel = await _channelController.GetChannelById(chnCmp.chid);
-                channels.Add(channel);
-            }
-
-            foreach (var channel in channels)
-            {
-                _channels.Add(channel);
-            }
         }
 
         // Inserting new Data into database
@@ -503,23 +510,12 @@ namespace CampaignEditor.UserControls
             isEditableVersion = (_maxVersion == _cmpVersion) || isEnabled;
 
             // Filling lvChannels and dictionary
-            FillLvChannels();
             await FillMPList();
-            await FillGoals();
             await FillLoadedDateRanges();
+
             // For dgMediaPlans
             await InitializeDataGrid();
-            await InitializeCGGrid();
             await InitializeGrids();
-        }
-
-        public async Task InitializeGrids()
-        {
-            //await sgGrid.Initialize(_campaign, _cmpVersion);
-            await swgGrid.Initialize(_campaign, _cmpVersion);
-            await sdgGrid.Initialize(_campaign, _cmpVersion);
-            await _factoryListing.Initialize(_campaign);
-            tiSpotGoals.IsSelected = true;
         }
 
         private async Task InitializeDataGrid()
@@ -540,6 +536,15 @@ namespace CampaignEditor.UserControls
 
         }
 
+        public async Task InitializeGrids()
+        {
+            await InitializeCGGrid();
+            //await sgGrid.Initialize(_campaign, _cmpVersion);
+            await swgGrid.Initialize(_campaign, _cmpVersion);
+            await sdgGrid.Initialize(_campaign, _cmpVersion);
+            await _factoryListing.Initialize(_campaign);
+        }
+
         private async Task InitializeCGGrid()
         {
 
@@ -547,7 +552,7 @@ namespace CampaignEditor.UserControls
             cgGrid.Initialize(mediaPlans, _channels.ToList());
         }
 
-        #region Drag and Drop selected Targets
+        #region Drag and Drop selected Channels
         private void ListViewItem_PreviewMouseMove(object sender, MouseEventArgs e)
         {
             if (e.LeftButton == MouseButtonState.Pressed)
@@ -780,23 +785,27 @@ namespace CampaignEditor.UserControls
         }
 
         // reaching or creating mediaPlan
-        private async Task<MediaPlanDTO> SchemaToMP(SchemaDTO schema, int version)
+        private async Task<MediaPlanDTO> SchemaToMP(SchemaDTO schema, int version, bool shouldReplace = false)
         {
             MediaPlanDTO mediaPlan = null;
             // if already exist, fix conflicts
             if ((mediaPlan = await _mediaPlanController.GetMediaPlanBySchemaAndCmpId(schema.id, _campaign.cmpid, version)) != null)
             {
                 // if mediaPlan already exists, return that one
-                if (AreEqualMediaPlanAndSchema(mediaPlan, schema))
+                if (AreEqualMediaPlanAndSchema(mediaPlan, schema) && !shouldReplace)
                     return mediaPlan;
                 else
                 {
-                    if (MessageBox.Show($"New program conflicts with existing:\n{mediaPlan.name}\n" +
-                        $"This action will replace existing program with new one", "Information", MessageBoxButton.OKCancel, MessageBoxImage.Warning) 
-                        == MessageBoxResult.Cancel)
+                    if (!shouldReplace)
                     {
-                        return mediaPlan;
+                        if (MessageBox.Show($"New program conflicts with existing:\n{mediaPlan.name}\n" +
+                            $"This action will replace existing program with new one", "Information", MessageBoxButton.OKCancel, MessageBoxImage.Warning)
+                            == MessageBoxResult.Cancel)
+                        {
+                            return mediaPlan;
+                        }
                     }
+
                     await _mediaPlanTermController.DeleteMediaPlanTermByXmpId(mediaPlan.xmpid);
                     await _mediaPlanHistController.DeleteMediaPlanHistByXmpid(mediaPlan.xmpid);
                     await _mediaPlanController.DeleteMediaPlanById(mediaPlan.xmpid);
@@ -812,7 +821,7 @@ namespace CampaignEditor.UserControls
                 string position = schema.position.Trim();
                 if (position == "INS" || position == "BET")
                 {
-                    schema.blocktime = _schemaController.CalculateBlocktime(position, schema.stime.Trim(), schema.etime.Trim());
+                    schema.blocktime = _schemaController.CalculateBlocktime(position, schema.stime, schema.etime);
                 }
             }
 
@@ -834,7 +843,7 @@ namespace CampaignEditor.UserControls
                    plan1.position == schema.position &&
                    plan1.stime == schema.stime &&
                    plan1.etime == schema.etime &&
-                   plan1.blocktime == schema.blocktime &&
+                   //plan1.blocktime == schema.blocktime && // becaus we sometimes change blocktime when inserting mediaPlan 
                    plan1.days == schema.days &&
                    plan1.sdate == schema.sdate &&
                    plan1.edate == schema.edate; 
@@ -949,20 +958,7 @@ namespace CampaignEditor.UserControls
         #endregion
 
         #region Filling lists
-        private void FillLvChannels()
-        {
-            lvChannels.ItemsSource = _channels;
-        }
 
-        public void FillCbVersions()
-        {
-            cbVersions.Items.Clear();
-            for (int i=0; i<_maxVersion; i++)
-            {
-                cbVersions.Items.Add(i + 1);
-            }
-            cbVersions.SelectedIndex = cbVersions.Items.Count-1;
-        }
 
         private async Task FillMPListByChannel(int daysNum, int chid)
         {
@@ -1412,6 +1408,42 @@ namespace CampaignEditor.UserControls
                     MessageBox.Show("Unable to create Program", "Message", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
 
+            }
+        }
+
+        private async void dgMediaPlans_ImportMediaPlanClicked(object? sender, EventArgs e)
+        {
+            ChannelDTO? selectedChannel = null;
+            if (lvChannels.SelectedItems.Count == 1)
+            {
+                selectedChannel = lvChannels.SelectedItems[0] as ChannelDTO;
+            }
+            var factory = _factoryImportFromSchema.Create();
+            factory.Initialize(_channels, selectedChannel);
+            factory.ShowDialog();
+            if (factory.success)
+            {
+                bool shouldReplace = factory.shouldReplace;
+                var schemasToImport = factory.SchemasToImport;
+                foreach (var schemaToImport in schemasToImport)
+                {
+                    bool duplicated = _allMediaPlans.Any(mpTuple => mpTuple.MediaPlan.schid == schemaToImport.id);
+                    if (duplicated && !shouldReplace)
+                    {
+                        continue;
+                    }
+                    /*if (duplicated && shouldReplace)
+                    {
+                        var tupleToDelete = _allMediaPlans.Where(mpTuple => mpTuple.MediaPlan.schid == schemaToImport.id).First();
+                        _allMediaPlans.Remove(tupleToDelete);
+                    }*/
+
+                    var mediaPlanDTO = await SchemaToMP(schemaToImport, _cmpVersion, shouldReplace);
+                    var mediaPlan = await _mpConverter.ConvertFirstFromDTO(mediaPlanDTO);
+                    var mediaPlanTerms = await MediaPlanToMPTerm(mediaPlanDTO);
+                    var mediaPlanTuple = new MediaPlanTuple(mediaPlan, mediaPlanTerms);
+                    _allMediaPlans.Add(mediaPlanTuple);
+                }
             }
         }
 
