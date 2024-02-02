@@ -4,6 +4,7 @@ using Database.Data;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 
 namespace Database.Repositories
 {
@@ -163,6 +164,27 @@ namespace Database.Repositories
 
 
             return cmptgtCount > 0 && cmpspotsCount > 0 && cmpchnCount > 0 && cmpGoalsCount > 0;
+        }
+
+        public async Task<bool> StartReachCalculation(int cmpid, int segins = 20, int segbet = 60, bool delete = true, bool expr = true, string path = null)
+        {
+            using var connection = _context.GetConnection();                  
+
+            if (path == null)
+            {
+                var affected = await connection.ExecuteAsync(
+                    "SELECT public.obrada_rch(@Cmpid, @Segins, @Segbet, @Delete); ",
+                    new { Cmpid = cmpid, Segins = segins, Segbet = segbet, Delete = delete });
+
+                return affected != 0;
+            }
+            else {
+                var affected = await connection.ExecuteAsync(
+                    "SELECT public.obrada_rch(@Cmpid, @Segins, @Segbet, @Delete, @Expr, @Path); ",
+                    new { Cmpid = cmpid, Segins = segins, Segbet = segbet, Delete = delete, Expr = expr, Path = path });
+
+                return affected != 0;
+            }
         }
     }
 }

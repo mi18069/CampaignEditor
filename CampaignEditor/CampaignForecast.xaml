@@ -183,6 +183,11 @@
                         </DataGrid.Columns>
                     </DataGrid>
                 </TabItem>
+                <TabItem Header="Reach">
+                    <ScrollViewer x:Name="svReach" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Disabled">
+                        <local1:ReachTabItem x:Name="reachGrid"/>
+                    </ScrollViewer>
+                </TabItem>
             </TabControl>
 
 

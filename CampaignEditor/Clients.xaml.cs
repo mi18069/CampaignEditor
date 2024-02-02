@@ -640,12 +640,14 @@ namespace CampaignEditor
         }
 
         // Deactivating events
-        protected override void OnClosing(CancelEventArgs e)
+        /*protected override void OnClosing(CancelEventArgs e)
         {
-            tvClients.ClientContextMenuEvent += TvClient_ClientContextMenuEvent;
-            tvClients.UserContextMenuEvent += TvUser_UserContextMenuEvent;
-            tvClients.CampaignContextMenuEvent += TvCampaign_CampaignContextMenuEvent;
-        }
+            tvClients.ClientContextMenuEvent -= TvClient_ClientContextMenuEvent;
+            tvClients.UserContextMenuEvent -= TvUser_UserContextMenuEvent;
+            tvClients.CampaignContextMenuEvent -= TvCampaign_CampaignContextMenuEvent;
+        }*/
+
+
 
 
     }

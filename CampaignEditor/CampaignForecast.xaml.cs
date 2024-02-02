@@ -238,6 +238,7 @@ namespace CampaignEditor.UserControls
             SubscribeSWGGridControllers();
             SubscribeSDGGridControllers();
             SubscribePrintForecastControllers();
+            SubscribeReachTabItemControllers();
         }
 
         private void SubscribeDataGridControllers()
@@ -298,6 +299,11 @@ namespace CampaignEditor.UserControls
             _factoryPrintForecast._allMediaPlans = _allMediaPlans;
             _factoryPrintForecast._campaign = _campaign;
 
+        }
+
+        public void SubscribeReachTabItemControllers()
+        {
+            reachGrid._databaseFunctionsController = _databaseFunctionsController;
         }
 
         private void FillLvFilterDays()
@@ -543,6 +549,7 @@ namespace CampaignEditor.UserControls
             await swgGrid.Initialize(_campaign, _cmpVersion);
             await sdgGrid.Initialize(_campaign, _cmpVersion);
             await _factoryListing.Initialize(_campaign);
+            reachGrid.Initialize(_campaign);
         }
 
         private async Task InitializeCGGrid()

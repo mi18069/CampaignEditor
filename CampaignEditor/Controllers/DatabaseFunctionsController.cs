@@ -33,7 +33,12 @@ namespace CampaignEditor.Controllers
         {
             return await _repository.CheckForecastPrerequisites(cmpid);
         }
-        
+
+        public async Task<bool> StartReachCalculation(int cmpid, int segins, int segbet, bool delete = true, bool expr = true, string path = null)
+        {
+            return await _repository.StartReachCalculation(cmpid, segins, segbet, delete, expr, path);
+        }
+
 
     }
 }
