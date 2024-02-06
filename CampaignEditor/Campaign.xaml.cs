@@ -5,7 +5,6 @@ using CampaignEditor.StartupHelpers;
 using Database.DTOs.ClientDTO;
 using Database.Repositories;
 using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -26,7 +25,7 @@ namespace CampaignEditor
         private CampaignController _campaignController;
 
         CampaignOverview factoryCampaignOverview;
-
+        CampaignForecastView factoryCampaignForecastView;
 
         public Campaign(IClientRepository clientRepository, ICampaignRepository campaignRepository, 
             IAbstractFactory<CampaignOverview> factoryOverview, 
@@ -35,7 +34,7 @@ namespace CampaignEditor
         {
 
             factoryCampaignOverview = factoryOverview.Create();
-            _factoryForecastView = factoryForecastView;
+            factoryCampaignForecastView = factoryForecastView.Create();
             _factoryValidation = factoryValidation;
 
             _clientController = new ClientController(clientRepository);
@@ -79,7 +78,7 @@ namespace CampaignEditor
             await factoryCampaignOverview.Initialization(_client, _campaign, readOnly);
             tabOverview.Content = factoryCampaignOverview.Content;
 
-            var factoryCampaignForecastView = _factoryForecastView.Create();
+            //var factoryCampaignForecastView = _factoryForecastView.Create();
             factoryCampaignForecastView.tabForecast = tabForecast;
             await factoryCampaignForecastView.Initialize(_campaign, readOnly);
 
@@ -99,6 +98,7 @@ namespace CampaignEditor
         {
             // event unbinding
             factoryCampaignOverview.ClosePageEvent -= Page_ClosePageEvent;
+            factoryCampaignForecastView.CloseForecast();
 
             CampaignEventLinker.RemoveCampaign(_campaign.cmpid);
         }

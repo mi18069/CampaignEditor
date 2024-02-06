@@ -265,5 +265,13 @@ namespace CampaignEditor
                 return false;
         }
 
+        public void CloseForecast()
+        {
+            if (_forecast != null)
+            {
+                _forecast.ClosePage();
+            }
+        }
+
     }
 }

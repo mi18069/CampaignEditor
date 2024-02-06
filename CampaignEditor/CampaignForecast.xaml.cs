@@ -4,7 +4,6 @@ using CampaignEditor.Helpers;
 using CampaignEditor.StartupHelpers;
 using Database.DTOs.ChannelCmpDTO;
 using Database.DTOs.ChannelDTO;
-using Database.DTOs.GoalsDTO;
 using Database.DTOs.MediaPlanDTO;
 using Database.DTOs.MediaPlanHistDTO;
 using Database.DTOs.MediaPlanTermDTO;
@@ -52,8 +51,6 @@ namespace CampaignEditor.UserControls
         private readonly PrintForecast _factoryPrintForecast;
 
 
-        private SelectedMPGoals SelectedMediaPlan = new SelectedMPGoals();
-
         private bool canUserEdit = true;
         private bool isEditableVersion = true;
 
@@ -80,8 +77,6 @@ namespace CampaignEditor.UserControls
         private ObservableRangeCollection<ChannelDTO> _selectedChannels = new ObservableRangeCollection<ChannelDTO>();
 
         private ObservableCollection<MediaPlanHist> _showMPHist = new ObservableCollection<MediaPlanHist>();
-
-        private MPGoals mpGoals = new MPGoals();
 
         MediaPlanConverter _mpConverter;
         MediaPlanTermConverter _mpTermConverter;
@@ -155,7 +150,7 @@ namespace CampaignEditor.UserControls
         public async void GoalsChanged(object sender, EventArgs e)
         {
             SetLoadingPage?.Invoke(this, null);
-            await FillGoals();
+            //await FillGoals();
             SetContentPage?.Invoke(this, null);
 
         }
@@ -176,9 +171,10 @@ namespace CampaignEditor.UserControls
         public async Task Initialize(CampaignDTO campaign, bool isReadOnly)
         {
             _campaign = campaign;
+            startDate = TimeFormat.YMDStringToDateTime(_campaign.cmpsdate);
+            endDate = TimeFormat.YMDStringToDateTime(_campaign.cmpedate);
 
             canUserEdit = !isReadOnly;
-
             if (!canUserEdit)
             {
                 btnClear.IsEnabled = false;
@@ -195,9 +191,7 @@ namespace CampaignEditor.UserControls
 
             await InitializeVersions();
             await InitializeChannels();
-
-            startDate = TimeFormat.YMDStringToDateTime(_campaign.cmpsdate);
-            endDate = TimeFormat.YMDStringToDateTime(_campaign.cmpedate);
+            await InitializeGoals();
 
             SubscribeControllers();
 
@@ -205,7 +199,6 @@ namespace CampaignEditor.UserControls
 
             FillVersions(_maxVersion);
             FillLvFilterDays();
-            await FillGoals();
 
         }
 
@@ -230,6 +223,12 @@ namespace CampaignEditor.UserControls
                 ChannelDTO channel = await _channelController.GetChannelById(chnCmp.chid);
                 _channels.Insert(0, channel);
             }
+        }
+
+        private async Task InitializeGoals()
+        {
+            goalsTreeView._goalsController = _goalsController;
+            await goalsTreeView.Initialize(_campaign);
         }
 
         private void SubscribeControllers()
@@ -315,7 +314,6 @@ namespace CampaignEditor.UserControls
             lvFilterDays.Items.Add(DayOfWeek.Friday);
             lvFilterDays.Items.Add(DayOfWeek.Saturday);
             lvFilterDays.Items.Add(DayOfWeek.Sunday);
-
         }
 
         private void lvFilterDays_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -518,10 +516,12 @@ namespace CampaignEditor.UserControls
             // Filling lvChannels and dictionary
             await FillMPList();
             await FillLoadedDateRanges();
-
             // For dgMediaPlans
             await InitializeDataGrid();
             await InitializeGrids();
+
+            FillGoals();
+
         }
 
         private async Task InitializeDataGrid()
@@ -1156,7 +1156,11 @@ namespace CampaignEditor.UserControls
 
         #region Goals
 
-        private async Task FillGoals()
+        private void FillGoals()
+        {
+            goalsTreeView.FillGoals(_allMediaPlans);
+        }
+        /*private async Task FillGoals()
         {
             GoalsDTO goals = await _goalsController.GetGoalsByCmpid(_campaign.cmpid);
             mpGoals.MediaPlans = new ObservableCollection<MediaPlan>(_allMediaPlans.Select(mp => mp.MediaPlan));
@@ -1254,7 +1258,7 @@ namespace CampaignEditor.UserControls
                     lblReachValue.DataContext = mpGoals;
                 }
             }
-        }
+        }*/
 
         #endregion
 
@@ -1265,10 +1269,8 @@ namespace CampaignEditor.UserControls
             _showMPHist.Clear();
             if (dgMediaPlans.Schema.SelectedItems.Count == 0)
             {
-                pGoals.Visibility = Visibility.Collapsed;
                 return;
             }
-
             else
             {
                 var mediaPlanTuple = dgMediaPlans.Schema.SelectedItems[0] as MediaPlanTuple;
@@ -1279,8 +1281,7 @@ namespace CampaignEditor.UserControls
                 foreach (var mediaPlanHist in mediaPlanHists)
                     _showMPHist.Add(mediaPlanHist);
 
-                pGoals.Visibility = Visibility.Visible;
-                SelectedMediaPlan.MediaPlan = mediaPlan;
+                goalsTreeView.SelectedTupleChanged(mediaPlanTuple);
             }
         }
 
@@ -1638,7 +1639,7 @@ namespace CampaignEditor.UserControls
 
         #endregion
 
-        private async void btnExport_Click(object sender, RoutedEventArgs e)
+        private void btnExport_Click(object sender, RoutedEventArgs e)
         {
             _factoryPrintForecast.ShowDialog();
         }
@@ -1675,13 +1676,32 @@ namespace CampaignEditor.UserControls
             }
         }
 
-        public bool Window_Closing()
+        public void ClosePage()
         {          
             _factoryPrintForecast.shouldClose = true;
             _factoryPrintForecast.Close();
-
-            return true;
+            UnsubscribeEvents();
         }
+
+        private void UnsubscribeEvents()
+        {
+            UnsibscribeDataGridEvents();
+        }
+
+        private void UnsibscribeDataGridEvents()
+        {
+            dgMediaPlans.AddMediaPlanClicked -= dgMediaPlans_AddMediaPlanClicked;
+            dgMediaPlans.ImportMediaPlanClicked -= dgMediaPlans_ImportMediaPlanClicked;
+            dgMediaPlans.DeleteMediaPlanClicked -= dgMediaPlans_DeleteMediaPlanClicked;
+            dgMediaPlans.UpdateMediaPlanClicked -= dgMediaPlans_UpdateMediaPlanClicked;
+            dgMediaPlans.UpdatedMediaPlan -= dgMediaPlans_UpdatedMediaPlan;
+            dgMediaPlans.RecalculateMediaPlan -= dgMediaPlans_RecalculateMediaPlan;
+            dgMediaPlans.ClearMpTerms -= dgMediaPlans_ClearMpTerms;
+            dgMediaPlans.UpdatedTerm -= dgMediaPlans_UpdatedTerm;
+            dgMediaPlans.VisibleTuplesChanged -= dgMediaPlans_VisibleTuplesChanged;
+        }
+
+
     }
    
 }

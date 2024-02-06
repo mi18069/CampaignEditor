@@ -103,7 +103,7 @@ namespace CampaignEditor.UserControls.ForecastGrids
                 string filePath = saveFileDialog.FileName;
 
                 // Create the file
-                File.Create(filePath).Close();
+                //File.Create(filePath).Close();
 
                 return filePath;
             }
