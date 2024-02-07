@@ -14,6 +14,7 @@ using System.Windows.Controls;
 using System.Collections.Generic;
 using Database.Entities;
 using System.Reflection;
+using Database.DTOs.ActivityDTO;
 
 namespace CampaignEditor
 {
@@ -24,11 +25,13 @@ namespace CampaignEditor
         private ClientController _clientController;
         private BrandController _brandController;
         private CmpBrndController _cmpBrndController;
+        private ActivityController _activityController;
 
         private ClientDTO _client;
         BrandDTO[] selectedBrands = new BrandDTO[2];
 
         private ObservableCollection<BrandDTO> _brands = new ObservableCollection<BrandDTO>();
+        private List<ActivityDTO> _activities = new List<ActivityDTO>();
         public ObservableCollection<BrandDTO> Brands
         {
             get { return _brands; }
@@ -41,7 +44,8 @@ namespace CampaignEditor
         public CampaignDTO _campaign = null;
         public bool canClientBeDeleted = false;
         public NewCampaign(ICampaignRepository campaignRepository, IClientRepository clientRepository,
-                           IBrandRepository brandRepository, ICmpBrndRepository cmpBrndRepository)
+                           IBrandRepository brandRepository, ICmpBrndRepository cmpBrndRepository,
+                           IActivityRepository activityRepository)
         {
             this.DataContext = this;
             InitializeComponent();
@@ -49,6 +53,7 @@ namespace CampaignEditor
             _clientController = new ClientController(clientRepository);
             _brandController = new BrandController(brandRepository);
             _cmpBrndController = new CmpBrndController(cmpBrndRepository);
+            _activityController = new ActivityController(activityRepository);
         }
 
         // For binding client to campaign
@@ -58,10 +63,12 @@ namespace CampaignEditor
             canClientBeDeleted = (await _campaignController.GetCampaignsByClientId(_client.clid)).Count() == 0;      
             FillFields(campaign);
             await FillLBBrand();
+            await FillCBAcitivities();
             if (campaign != null)
             {
                 await FillTBBrands(campaign);
                 FillRbTv(campaign);
+                SetActivity(campaign);
             }
         }
 
@@ -75,10 +82,26 @@ namespace CampaignEditor
                 rbRadio.IsChecked = true;
         }
 
+        private void SetActivity(CampaignDTO campaign)
+        {
+            var index = campaign.activity;
+            cbActivities.SelectedIndex = index;
+        }
+
         private async Task FillLBBrand()
         {
             var brands = (await _brandController.GetAllBrands()).OrderBy(b => b.brand);
             Brands = new ObservableCollection<BrandDTO>(brands);
+        }
+
+        private async Task FillCBAcitivities()
+        {
+            var activities = (await _activityController.GetAllActivities()).OrderBy(act => act.actid);
+            foreach (var activity in activities)
+            {
+                _activities.Add(activity);
+            }
+            cbActivities.ItemsSource = _activities;
         }
 
         private async Task FillTBBrands(CampaignDTO campaign)
@@ -257,7 +280,7 @@ namespace CampaignEditor
             string cmpetime = tbTbEndHours.Text.PadLeft(2, '0')+":"+tbTbEndMinutes.Text.PadLeft(2, '0')+":59";
             int cmpstatus = 0;
             string sostring = "1;999;F;01234;012345";
-            int activity = 0;
+            int activity = cbActivities.SelectedIndex;
             DatePicker dpNow = new DatePicker();
             var dateTimeNow = DateTime.Now;
             dpNow.SelectedDate = dateTimeNow;

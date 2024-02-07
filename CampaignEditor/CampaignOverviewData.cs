@@ -1,6 +1,7 @@
 ﻿using CampaignEditor.Controllers;
 using Database.DTOs.ActivityDTO;
 using Database.DTOs.BrandDTO;
+using Database.DTOs.CampaignDTO;
 using Database.DTOs.ChannelDTO;
 using Database.DTOs.CmpBrndDTO;
 using Database.DTOs.GoalsDTO;
@@ -130,6 +131,21 @@ namespace CampaignEditor
             }
 
             return goals;
+        }
+
+        public async Task<ActivityDTO> GetActivity(CampaignDTO campaign)
+        {
+            ActivityDTO activity = null;
+            try
+            {
+                activity = await _activityController.GetActivityById(campaign.activity);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Cannot retrieve data for goals\n {ex.Message}");
+            }
+
+            return activity;
         }
 
         public async Task<List<Tuple<ChannelDTO, PricelistDTO, ActivityDTO>>> GetChannelTuples(int cmpid)

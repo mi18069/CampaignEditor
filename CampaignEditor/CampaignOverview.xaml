@@ -5,7 +5,7 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:CampaignEditor"
       mc:Ignorable="d" 
-      d:Height="700" d:Width="1200" d:MinWidth="1000" d:MinHeight="700"
+      d:Height="700" d:Width="1200" d:MinWidth="1000" d:MinHeight="800"
       FontSize="20"
       Background="White">
 
@@ -43,6 +43,7 @@
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="10" />
+                        <RowDefinition Height="auto" />
                         <RowDefinition Height="auto" />
                         <RowDefinition Height="auto" />
                         <RowDefinition Height="auto" />
@@ -143,7 +144,19 @@
                        HorizontalContentAlignment="Right" FontWeight="DemiBold"/>
                         </Grid>
                     </Border>
-                    <Border x:Name="bBrand1" Grid.Row="9" Grid.Column="1" Grid.ColumnSpan="2" 
+                    <Border x:Name="bActivity" Grid.Row="9" Grid.Column="1" Grid.ColumnSpan="2" 
+                        BorderThickness="0, 0, 0, 1" BorderBrush="Black">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Label x:Name="lblActivity" Content="Activity: " Grid.Column="0"/>
+                            <Label x:Name="lblActivityValue" Grid.Column="1" 
+                       HorizontalContentAlignment="Right" FontWeight="DemiBold"/>
+                        </Grid>
+                    </Border>
+                    <Border x:Name="bBrand1" Grid.Row="10" Grid.Column="1" Grid.ColumnSpan="2" 
                         BorderThickness="0, 0, 0, 1" BorderBrush="Black">
                         <Grid>
                             <Grid.ColumnDefinitions>
@@ -155,7 +168,7 @@
                        HorizontalContentAlignment="Right" FontWeight="DemiBold"/>
                         </Grid>
                     </Border>
-                    <Border x:Name="bBrand2" Grid.Row="10" Grid.Column="1" Grid.ColumnSpan="2" 
+                    <Border x:Name="bBrand2" Grid.Row="11" Grid.Column="1" Grid.ColumnSpan="2" 
                         BorderThickness="0, 0, 0, 1" BorderBrush="Black">
                         <Grid>
                             <Grid.ColumnDefinitions>

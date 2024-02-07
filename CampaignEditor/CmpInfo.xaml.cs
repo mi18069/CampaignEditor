@@ -14,6 +14,8 @@ using System;
 using Database.DTOs.CmpBrndDTO;
 using System.Text.RegularExpressions;
 using Database.Entities;
+using Database.DTOs.ActivityDTO;
+using System.Collections.Generic;
 
 namespace CampaignEditor
 {
@@ -26,8 +28,10 @@ namespace CampaignEditor
         private CampaignController _campaignController;
         private BrandController _brandController;
         private CmpBrndController _cmpBrndController;
+        private ActivityController _activityController;
 
         private ObservableCollection<BrandDTO> _brands = new ObservableCollection<BrandDTO>();
+        private List<ActivityDTO> _activities = new List<ActivityDTO>();
         public ObservableCollection<BrandDTO> Brands
         {
             get { return _brands; }
@@ -50,12 +54,14 @@ namespace CampaignEditor
 
 
         public CmpInfo(ICampaignRepository campaignRepository,
-                       IBrandRepository brandRepository, ICmpBrndRepository cmpBrndRepository)
+                       IBrandRepository brandRepository, ICmpBrndRepository cmpBrndRepository,
+                       IActivityRepository activityRepository)
         {
             this.DataContext = this;
             _campaignController = new CampaignController(campaignRepository);
             _brandController = new BrandController(brandRepository);
             _cmpBrndController = new CmpBrndController(cmpBrndRepository);
+            _activityController = new ActivityController(activityRepository);
 
             InitializeComponent();
         }
@@ -77,6 +83,7 @@ namespace CampaignEditor
 
                 FillTBTextBoxes();
                 await FillLBBrand();
+                await FillCBAcitivities();
                 if (brands != null && brands.Count() > 0)
                     FillTBBrands(brands);
             }
@@ -112,6 +119,17 @@ namespace CampaignEditor
 
         }
 
+        private async Task FillCBAcitivities()
+        {
+            var activities = (await _activityController.GetAllActivities()).OrderBy(act => act.actid);
+            foreach (var activity in activities)
+            {
+                _activities.Add(activity);
+            }
+            cbActivities.ItemsSource = _activities;
+            cbActivities.SelectedIndex = _campaign.activity;
+        }
+
         private async Task FillLBBrand()
         {
             var brands = (await _brandController.GetAllBrands()).OrderBy(b => b.brand);
@@ -145,6 +163,11 @@ namespace CampaignEditor
         }
 
         private void dp_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
+        {
+            isModified = true;
+        }
+
+        private void cbActivities_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             isModified = true;
         }
@@ -202,7 +225,7 @@ namespace CampaignEditor
             string cmpetime = tbTbEndHours.Text.PadLeft(2, '0') + ":" + tbTbEndMinutes.Text.PadLeft(2, '0') + ":59";
             int cmpstatus = 0;
             string sostring = "1;999;F;01234;012345";
-            int activity = 0;
+            int activity = cbActivities.SelectedIndex;
             int cmpaddedon = _campaign.cmpaddedon;
             int cmpaddedat = _campaign.cmpaddedat;
             bool active = (bool)cbActive.IsChecked;
@@ -368,6 +391,5 @@ namespace CampaignEditor
             }
             isModified = true;
         }
-
     }
 }

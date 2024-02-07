@@ -109,10 +109,10 @@ namespace CampaignEditor
             ClosePageEvent?.Invoke(this, new EventArgs());
         }
 
-        private void FillFields()
+        private async Task FillFields()
         {
             FillDGTargets(_targetlist);
-            FillInfo(_campaign, _brands);
+            await FillInfo(_campaign, _brands);
             FillGoals(_goals);
             dgSpots.ItemsSource = _spotlist;
             dgChannels.ItemsSource = _channels;
@@ -166,13 +166,14 @@ namespace CampaignEditor
 
             if (fInfo != null && fInfo.infoModified)
             {
+                _campaign = fInfo.Campaign;
                 _campaignInfo = fInfo.Campaign;
                 _brands = fInfo.SelectedBrands;
-                FillInfo(_campaignInfo, _brands);
+                await FillInfo(_campaignInfo, _brands);
 
             }
         }
-        private void FillInfo(CampaignDTO campaign = null, BrandDTO[] brands = null)
+        private async Task FillInfo(CampaignDTO campaign = null, BrandDTO[] brands = null)
         {
             if (campaign != null)
             {
@@ -192,6 +193,8 @@ namespace CampaignEditor
                 lblDPStartValue.Content = campaign.cmpstime.ToString().Trim();
                 lblDPEndValue.Content = campaign.cmpetime.ToString().Trim();
                 lblActiveValue.Content = campaign.active;
+                var activity = await _campaignOverviewData.GetActivity(_campaign);
+                lblActivityValue.Content = activity.act.Trim();
                 if (brands[0] != null)
                 {
                     lblBrand1Value.Content = brands[0].brand;

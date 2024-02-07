@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CampaignEditor"
         mc:Ignorable="d"
-        Title="NewCampaign" Height="700" Width="500" FontSize="22" ResizeMode="NoResize">
+        Title="NewCampaign" Height="800" Width="500" FontSize="22" ResizeMode="NoResize">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="10" />
@@ -18,6 +18,7 @@
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="10" />
+            <RowDefinition Height="auto" />
             <RowDefinition Height="auto" />
             <RowDefinition Height="auto" />
             <RowDefinition Height="auto" />
@@ -88,26 +89,30 @@
                  TextWrapping="Wrap"
                  VerticalAlignment="Center" Margin="10"/>
 
-        <Label Content="Brands: " Grid.Row="9" Grid.Column="1" 
+        <Label Content="Activity:" Grid.Row="8" Grid.Column="1" Margin="10"/>
+        <ComboBox Name="cbActivities" Grid.Row="8" Grid.Column="2" Grid.ColumnSpan="4"
+                  VerticalAlignment="Center" SelectedIndex="0" DisplayMemberPath="act" Margin="10"/>
+
+        <Label Content="Brands: " Grid.Row="10" Grid.Column="1" 
                VerticalAlignment="Center" Margin="10"/>
-        <TextBox x:Name="tbBrand1" Grid.Row="9" Grid.Column="2" Grid.ColumnSpan="4" FontSize="14" FontWeight="Bold"
+        <TextBox x:Name="tbBrand1" Grid.Row="10" Grid.Column="2" Grid.ColumnSpan="4" FontSize="14" FontWeight="Bold"
                  TextChanged="tbBrand1_TextChanged" VerticalAlignment="Center" Margin="10" 
                  HorizontalScrollBarVisibility="Auto" MinHeight="30" VerticalContentAlignment="Center"/>
 
-        <TextBox x:Name="tbBrand2" Grid.Row="10" Grid.Column="2" Grid.ColumnSpan="4" FontSize="14" FontWeight="Bold"
+        <TextBox x:Name="tbBrand2" Grid.Row="11" Grid.Column="2" Grid.ColumnSpan="4" FontSize="14" FontWeight="Bold"
                     TextChanged="tbBrand2_TextChanged" VerticalAlignment="Center" Margin="10" 
                  HorizontalScrollBarVisibility="Auto" MinHeight="30" VerticalContentAlignment="Center"/>
         
-        <ListBox x:Name="lbBrand" Grid.Row="11" Grid.Column="1" Grid.ColumnSpan="5"
+        <ListBox x:Name="lbBrand" Grid.Row="12" Grid.Column="1" Grid.ColumnSpan="5"
                  VerticalAlignment="Stretch" IsTextSearchEnabled="False"
                  DisplayMemberPath="brand" Margin="10" FontSize="14"
                  SelectionChanged="lbBrand_SelectionChanged"/>
         
         
-        <Button x:Name="btnSave" Content="Save" Grid.Row="12" Grid.Column="2" Grid.ColumnSpan="4" 
+        <Button x:Name="btnSave" Content="Save" Grid.Row="13" Grid.Column="2" Grid.ColumnSpan="4" 
                 HorizontalAlignment="Right" Width="100" Margin="10, 10, 20, 10"
                 Click="btnSave_Click"/>
-        <Button x:Name="btnCancel" Content="Cancel" Grid.Row="12" Grid.Column="2" Grid.ColumnSpan="4" 
+        <Button x:Name="btnCancel" Content="Cancel" Grid.Row="13" Grid.Column="2" Grid.ColumnSpan="4" 
                 HorizontalAlignment="Right" Width="100" Margin="10, 10, 140, 10"
                 Click="btnCancel_Click"/>
     </Grid>
