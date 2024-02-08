@@ -1,9 +1,12 @@
 ﻿using CampaignEditor.Controllers;
 using Database.DTOs.CampaignDTO;
+using Database.Entities;
 using Microsoft.Win32;
 using Ookii.Dialogs.Wpf;
 using System;
 using System.IO;
+using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -16,6 +19,7 @@ namespace CampaignEditor.UserControls.ForecastGrids
     {
 
         public DatabaseFunctionsController _databaseFunctionsController;
+        public ReachController _reachController;
 
         private CampaignDTO _campaign = null;
         public ReachTabItem()
@@ -23,9 +27,42 @@ namespace CampaignEditor.UserControls.ForecastGrids
             InitializeComponent();
         }
 
-        public void Initialize(CampaignDTO campaign)
+        public async Task Initialize(CampaignDTO campaign)
         {
             _campaign = campaign;
+            await GetReach();
+        }
+
+        private async Task GetReach()
+        {
+            var reach = await _reachController.GetFinalReachByCmpid(_campaign.cmpid);
+            if (reach == null)
+            {
+                await RecalculateReach();
+            }
+            else
+            {
+                reachGrid.SetReach(reach);
+            }
+        }
+
+        private async Task RecalculateReach()
+        {
+            visibleGrid.Visibility = Visibility.Collapsed;
+            loadingGrid.Visibility = Visibility.Visible;
+
+            await _databaseFunctionsController.StartReachCalculation(_campaign.cmpid, 20, 60, true, true, null);
+            var reach = await _reachController.GetFinalReachByCmpid(_campaign.cmpid);
+
+            loadingGrid.Visibility = Visibility.Collapsed;
+            visibleGrid.Visibility = Visibility.Visible;
+
+            reachGrid.SetReach(reach);
+        }
+
+        private async void btnRecalculateReach_Click(object sender, RoutedEventArgs e)
+        {
+            await RecalculateReach();
         }
 
         private async void btnExportReach_Click(object sender, RoutedEventArgs e)

@@ -5,7 +5,6 @@ using Database.DTOs.MediaPlanDTO;
 using Database.Entities;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 

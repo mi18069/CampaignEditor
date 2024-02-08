@@ -109,6 +109,9 @@
     <Compile Update="UserControls\ForecastGrids\CampaignGoals\GoalsTreeView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="UserControls\ForecastGrids\ReachGrid.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="UserControls\ForecastGrids\ReachTabItem.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -301,6 +304,9 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="UserControls\ForecastGrids\CampaignGoals\GoalsTreeView.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UserControls\ForecastGrids\ReachGrid.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="UserControls\ForecastGrids\ReachTabItem.xaml">

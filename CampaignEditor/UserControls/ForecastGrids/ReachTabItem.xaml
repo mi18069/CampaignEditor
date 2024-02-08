@@ -7,22 +7,31 @@
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800" d:Background="White">
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="20" Background="LightYellow">
-            <Label Content="Segins: " FontSize="12" Margin="10, 0"/>
-            <TextBox x:Name="tbSegins" Text="20" Width="50" 
+        <Grid x:Name="loadingGrid" Visibility="Collapsed">
+            <Label Content="Loading Reach" HorizontalAlignment="Center" VerticalAlignment="Center"
+                   FontSize="26" FontWeight="Bold" Foreground="Gray"/>
+        </Grid>
+        <Grid x:Name="visibleGrid">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="20" Background="LightYellow">
+                <Label Content="Segins: " FontSize="12" Margin="10, 0"/>
+                <TextBox x:Name="tbSegins" Text="20" Width="50" 
                      FontSize="12" VerticalContentAlignment="Center" Margin="10, 0"/>
-            <Label Content="Segbet: " FontSize="12" Margin="10, 0"/>
-            <TextBox x:Name="tbSegbet" Text="60" Width="50" 
+                <Label Content="Segbet: " FontSize="12" Margin="10, 0"/>
+                <TextBox x:Name="tbSegbet" Text="60" Width="50" 
                      FontSize="12" VerticalContentAlignment="Center" Margin="10, 0"/>
-            <Button x:Name="btnCalculateReach" Content="Recalculate" 
-                    FontSize="12" FontWeight="DemiBold" Background="Orange" Margin="10, 0"/>
-            <Button x:Name="btnExportReach" Content="Export .pln file" 
+                <Button x:Name="btnCalculateReach" Content="Recalculate Reach" 
+                    FontSize="12" FontWeight="DemiBold" Background="Orange" Margin="10, 0"
+                        Click="btnRecalculateReach_Click"/>
+                <Button x:Name="btnExportReach" Content="Export .pln file" 
                     FontSize="12" FontWeight="DemiBold" Background="Orange" Margin="10, 0"
                     Click="btnExportReach_Click"/>
-        </StackPanel>
+            </StackPanel>
+            <local:ReachGrid x:Name="reachGrid" Grid.Row="1"/>
+        </Grid>
     </Grid>
 </UserControl>

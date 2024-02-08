@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System;
 using Database.Repositories;
-using Database.Entities;
 
 namespace CampaignEditor.Controllers
 {
@@ -27,7 +26,7 @@ namespace CampaignEditor.Controllers
             return mpDTO;
         }
 
-            public async Task<MediaPlanDTO> GetMediaPlanById(int id)
+        public async Task<MediaPlanDTO> GetMediaPlanById(int id)
         {
             return await _repository.GetMediaPlanById(id);
         }

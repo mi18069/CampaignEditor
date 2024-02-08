@@ -40,6 +40,7 @@ namespace CampaignEditor.UserControls
         private SpotController _spotController;
         private GoalsController _goalsController;
         private MediaPlanVersionController _mediaPlanVersionController;
+        private ReachController _reachController;
 
         private DatabaseFunctionsController _databaseFunctionsController;
 
@@ -106,7 +107,8 @@ namespace CampaignEditor.UserControls
             IAbstractFactory<PrintCampaignInfo> factoryPrintCmpInfo,
             IAbstractFactory<Listing> factoryListing,
             IAbstractFactory<PrintForecast> factoryPrintForecast,
-            IAbstractFactory<ImportFromSchema> factoryImportFromSchema)
+            IAbstractFactory<ImportFromSchema> factoryImportFromSchema,
+            IReachRepository reachRepository)
         {
             this.DataContext = this;
 
@@ -120,6 +122,7 @@ namespace CampaignEditor.UserControls
             _spotController = new SpotController(spotRepository);
             _goalsController = new GoalsController(goalsRepository);
             _mediaPlanVersionController = new MediaPlanVersionController(mediaPlanVersionRepository);
+            _reachController = new ReachController(reachRepository);
 
             _databaseFunctionsController = new DatabaseFunctionsController(databaseFunctionsRepository);
 
@@ -303,6 +306,7 @@ namespace CampaignEditor.UserControls
         public void SubscribeReachTabItemControllers()
         {
             reachGrid._databaseFunctionsController = _databaseFunctionsController;
+            reachGrid._reachController = _reachController;
         }
 
         private void FillLvFilterDays()
@@ -549,7 +553,7 @@ namespace CampaignEditor.UserControls
             await swgGrid.Initialize(_campaign, _cmpVersion);
             await sdgGrid.Initialize(_campaign, _cmpVersion);
             await _factoryListing.Initialize(_campaign);
-            reachGrid.Initialize(_campaign);
+            await reachGrid.Initialize(_campaign);
         }
 
         private async Task InitializeCGGrid()
