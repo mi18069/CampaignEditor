@@ -36,9 +36,9 @@
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 <UniformGrid x:Name="ugWeeks" Grid.Row="0" Grid.Column="0"
-                     HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Rows="1"/>
+                     HorizontalAlignment="Stretch" VerticalAlignment="Top" Rows="1"/>
                 <UniformGrid x:Name="ugSpots" Grid.Row="0" Grid.Column="1" Columns="1"
-                     HorizontalAlignment="Left" VerticalAlignment="Stretch"/>
+                     HorizontalAlignment="Left" VerticalAlignment="Top"/>
                 <UniformGrid x:Name="ugGrid" Grid.Row="0" Grid.Column="2"
                      HorizontalAlignment="Left" VerticalAlignment="Stretch" 
                              PreviewMouseWheel="ugGrid_PreviewMouseWheel"/>

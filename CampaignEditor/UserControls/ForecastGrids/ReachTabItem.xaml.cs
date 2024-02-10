@@ -1,11 +1,9 @@
 ﻿using CampaignEditor.Controllers;
 using Database.DTOs.CampaignDTO;
-using Database.Entities;
 using Microsoft.Win32;
-using Ookii.Dialogs.Wpf;
 using System;
 using System.IO;
-using System.Runtime.CompilerServices;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -20,6 +18,9 @@ namespace CampaignEditor.UserControls.ForecastGrids
 
         public DatabaseFunctionsController _databaseFunctionsController;
         public ReachController _reachController;
+
+        private int _segins = 20;
+        private int _segbet = 60;
 
         private CampaignDTO _campaign = null;
         public ReachTabItem()
@@ -51,7 +52,7 @@ namespace CampaignEditor.UserControls.ForecastGrids
             visibleGrid.Visibility = Visibility.Collapsed;
             loadingGrid.Visibility = Visibility.Visible;
 
-            await _databaseFunctionsController.StartReachCalculation(_campaign.cmpid, 20, 60, true, true, null);
+            await _databaseFunctionsController.StartReachCalculation(_campaign.cmpid, _segins, _segbet, true, true, null);
             var reach = await _reachController.GetFinalReachByCmpid(_campaign.cmpid);
 
             loadingGrid.Visibility = Visibility.Collapsed;
@@ -62,57 +63,36 @@ namespace CampaignEditor.UserControls.ForecastGrids
 
         private async void btnRecalculateReach_Click(object sender, RoutedEventArgs e)
         {
+            if (!CheckSeginsSegbet())
+            {
+                return;
+            }
             await RecalculateReach();
         }
 
         private async void btnExportReach_Click(object sender, RoutedEventArgs e)
         {
-            int segint;
-            int segbet;
-
-            if (!(int.TryParse(tbSegins.Text, out segint) && int.TryParse(tbSegbet.Text, out segbet)))
+       
+            if (!CheckSeginsSegbet())
             {
-                MessageBox.Show("Invalid values for segint or segbet!", "Error",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
 
-            /*var folderDialog = new VistaFolderBrowserDialog();
-
-            if (folderDialog.ShowDialog().GetValueOrDefault())
-            {
-                int cmpid = _campaign.cmpid;
-                bool delete = true;
-                bool expr = true;
-                string folderPath = folderDialog.SelectedPath.ToString();
-                string? path = CreateFile();
-
-                if (path == null)
-                    return;
-
-                try
-                {
-                    await _databaseFunctionsController.StartReachCalculation(cmpid, segint, segbet, delete, expr, path);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Cannot calculate reach!\n" + ex.Message, "Error",
-                        MessageBoxButton.OK, MessageBoxImage.Error);
-                    return;
-                }
-            }*/
-
-            string? path = CreateAndSaveFile();
-            if (path == null)
+            string? destinationPath = GetDestinationPath();
+            if (destinationPath == null)
                 return;
 
             int cmpid = _campaign.cmpid;
             bool delete = true;
             bool expr = true;
+            string fileName = Path.GetFileName(destinationPath);
 
+            ReachFileManipulation fileManipulation = new ReachFileManipulation(fileName);
             try
             {
-                await _databaseFunctionsController.StartReachCalculation(cmpid, segint, segbet, delete, expr, path);
+                string sourcePath = fileManipulation.GetSourcePath();
+                await _databaseFunctionsController.StartReachCalculation(cmpid, _segins, _segbet, delete, expr, fileManipulation.FunctionPath);
+                fileManipulation.MoveFileToPath(sourcePath, destinationPath);
             }
             catch (Exception ex)
             {
@@ -122,11 +102,11 @@ namespace CampaignEditor.UserControls.ForecastGrids
             }
         }
 
-        private string CreateAndSaveFile()
+        private string GetDestinationPath()
         {
             // Create SaveFileDialog
             SaveFileDialog saveFileDialog = new SaveFileDialog();
-            saveFileDialog.FileName = DateTime.Now.ToString("yyyyMMdd_HHmm");
+            saveFileDialog.FileName = $"pln-{RemoveWhiteSpaces(_campaign.cmpname.Trim())}_" + DateTime.Now.ToString("ddMM_HHmm");
             saveFileDialog.DefaultExt = ".pln";
             saveFileDialog.Filter = "PLN files (*.pln)|*.pln|All files (*.*)|*.*";
 
@@ -139,9 +119,6 @@ namespace CampaignEditor.UserControls.ForecastGrids
                 // Get the selected file path
                 string filePath = saveFileDialog.FileName;
 
-                // Create the file
-                //File.Create(filePath).Close();
-
                 return filePath;
             }
             else
@@ -150,7 +127,13 @@ namespace CampaignEditor.UserControls.ForecastGrids
             }
         }
 
-        private string? CreateFile(string folderPath)
+        public string RemoveWhiteSpaces(string input)
+        {
+            string result = new string(input.Where(c => !char.IsWhiteSpace(c)).ToArray());
+            return result;
+        }       
+
+        /*private string? CreateFile(string folderPath)
         {
             string currentTime = DateTime.Now.ToString("yyyyMMdd_HHmmss");
 
@@ -173,6 +156,23 @@ namespace CampaignEditor.UserControls.ForecastGrids
             }
 
             return filePath;
+        }*/
+
+        private bool CheckSeginsSegbet()
+        {
+            int segins;
+            int segbet;
+
+            if (!(int.TryParse(tbSegins.Text, out segins) && int.TryParse(tbSegbet.Text, out segbet)))
+            {
+                MessageBox.Show("Invalid values for segins or segbet!", "Error",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
+            }
+
+            _segins = segins;
+            _segbet = segbet;
+            return true;
         }
     }
 }
