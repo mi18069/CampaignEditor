@@ -66,7 +66,7 @@ namespace CampaignEditor
 
         public static void AddGoals(int cmpid, Goals goals)
         {
-            for (int i = 0; i < _linkers.Count; i++)
+            /*for (int i = 0; i < _linkers.Count; i++)
             {
                 int linkerCmpid = _linkers[i].cmpid;
                 if (linkerCmpid == cmpid)
@@ -78,7 +78,7 @@ namespace CampaignEditor
                     }
 
                 }
-            }
+            }*/
         }
 
         public static void AddSpots(int cmpid, Spots spots)
@@ -100,7 +100,7 @@ namespace CampaignEditor
 
         public static void AddForecast(int cmpid, CampaignForecast forecast)
         {
-            for (int i = 0; i < _linkers.Count; i++)
+            /*for (int i = 0; i < _linkers.Count; i++)
             {
                 int linkerCmpid = _linkers[i].cmpid;
                 if (linkerCmpid == cmpid)
@@ -127,7 +127,7 @@ namespace CampaignEditor
                     }
 
                 }
-            }
+            }*/
         }
 
         public class CampaignLinker

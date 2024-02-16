@@ -323,6 +323,11 @@ namespace CampaignEditor
                 MessageBox.Show("Campaign cannot be longer than a year", "Result: ", MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 return false;
             }
+            else if (!(dpStartDate.SelectedDate.Value.Date > DateTime.Today.Date))
+            {
+                MessageBox.Show("Start date must be set in future", "Result: ", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                return false;
+            }
             // Check this only if there is selected brand
             else if (selectedBrands[0] == null && tbBrand1.Text.Trim() != "")
             {

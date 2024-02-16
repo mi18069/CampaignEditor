@@ -14,8 +14,6 @@ using System.Linq;
 using System.Windows.Data;
 using CampaignEditor.Helpers;
 using CampaignEditor.Controllers;
-using System.Threading.Tasks;
-using System.Threading.Channels;
 
 namespace CampaignEditor.UserControls
 {
@@ -40,8 +38,6 @@ namespace CampaignEditor.UserControls
         List<ChannelDTO> _channels = new List<ChannelDTO>();
         public MediaPlanController _mediaPlanController { get; set; }
         public MediaPlanTermController _mediaPlanTermController { get; set; }
-        public SpotController _spotController { get; set; }
-        public ChannelController _channelController { get; set; }
         private List<ChannelDTO> _selectedChannels = new List<ChannelDTO>();
         private List<ChannelDTO> _visibleChannels = new List<ChannelDTO>();
 
@@ -61,7 +57,7 @@ namespace CampaignEditor.UserControls
             InitializeComponent();
         }
 
-        public async Task Initialize(CampaignDTO campaign, int version)
+        public void Initialize(CampaignDTO campaign, IEnumerable<ChannelDTO> channels, IEnumerable<SpotDTO> spots, int version)
         {
             _campaign = campaign;
             _version = version;
@@ -83,9 +79,7 @@ namespace CampaignEditor.UserControls
             firstWeekNum = GetWeekOfYear(startDate);
             lastWeekNum = GetWeekOfYear(endDate);
 
-            var spots = await _spotController.GetSpotsByCmpid(_campaign.cmpid);
-            _spots = spots.ToList();
-            _spots = _spots.OrderBy(s => s.spotcode).ToList();
+            _spots.AddRange(spots);
             foreach (var spot in spots)
             {
                 try
@@ -97,14 +91,16 @@ namespace CampaignEditor.UserControls
                 }
             }
 
-            var channelIds = await _mediaPlanController.GetAllChannelsByCmpid(_campaign.cmpid, _version);
+            /*var channelIds = await _mediaPlanController.GetAllChannelsByCmpid(_campaign.cmpid, _version);
             List<ChannelDTO> channels = new List<ChannelDTO>();
             foreach (var chid in channelIds)
             {
                 ChannelDTO channel = await _channelController.GetChannelById(chid);
                 channels.Add(channel);
             }
-            _channels = channels.OrderBy(c => c.chname).ToList();
+            _channels = channels.OrderBy(c => c.chname).ToList();*/
+
+            _channels.AddRange(channels);
             _channels.Add(dummyChannel);
 
             TransformData();

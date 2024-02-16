@@ -45,6 +45,11 @@ namespace Database.Repositories
             var mediaPlanTerm = await connection.QueryFirstOrDefaultAsync<MediaPlanTerm>(
                 "SELECT * FROM xmpterm WHERE xmptermid = @Id", new { Id = id });
 
+            if (mediaPlanTerm != null)
+            {
+                mediaPlanTerm.Spotcode = mediaPlanTerm.Spotcode?.Trim();
+            }
+
             return _mapper.Map<MediaPlanTermDTO>(mediaPlanTerm);
         }
 
@@ -61,7 +66,7 @@ namespace Database.Repositories
                 Xmptermid = item.xmptermid,
                 Xmpid = item.xmpid,
                 Date = DateOnly.FromDateTime(item.datum),
-                Spotcode = item.spotcode
+                Spotcode = item.spotcode != null ? item.spotcode.Trim() : null
             });
 
             return _mapper.Map<MediaPlanTermDTO>(mediaPlanTerm.FirstOrDefault());
@@ -79,7 +84,7 @@ namespace Database.Repositories
                 Xmptermid = item.xmptermid,
                 Xmpid = item.xmpid,
                 Date = DateOnly.FromDateTime(item.datum),
-                Spotcode = item.spotcode
+                Spotcode = item.spotcode != null ? item.spotcode.Trim() : null
             });
 
             return _mapper.Map<IEnumerable<MediaPlanTermDTO>>(allMediaPlanTerms);
@@ -97,7 +102,7 @@ namespace Database.Repositories
                 Xmptermid = item.xmptermid,
                 Xmpid = item.xmpid,
                 Date = DateOnly.FromDateTime(item.datum),
-                Spotcode = item.spotcode
+                Spotcode = item.spotcode != null ? item.spotcode.Trim() : null
             });
 
             return _mapper.Map<IEnumerable<MediaPlanTermDTO>>(allMediaPlanTerms);
@@ -109,6 +114,12 @@ namespace Database.Repositories
 
             var allMediaPlanTerms = await connection.QueryAsync<MediaPlanTerm>
                 ("SELECT * FROM xmpterm");
+
+            foreach (var mediaPlanTerm in allMediaPlanTerms)
+                if (mediaPlanTerm != null)
+                {
+                    mediaPlanTerm.Spotcode = mediaPlanTerm.Spotcode?.Trim();
+                }
 
             return _mapper.Map<IEnumerable<MediaPlanTermDTO>>(allMediaPlanTerms);
         }

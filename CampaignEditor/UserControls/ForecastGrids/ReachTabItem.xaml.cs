@@ -58,6 +58,8 @@ namespace CampaignEditor.UserControls.ForecastGrids
             loadingGrid.Visibility = Visibility.Collapsed;
             visibleGrid.Visibility = Visibility.Visible;
 
+            if (reach == null)
+                return;
             reachGrid.SetReach(reach);
         }
 

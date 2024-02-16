@@ -2,13 +2,11 @@
 using Database.DTOs.CampaignDTO;
 using CampaignEditor.Helpers;
 using CampaignEditor.StartupHelpers;
-using Database.DTOs.ChannelCmpDTO;
 using Database.DTOs.ChannelDTO;
 using Database.DTOs.MediaPlanDTO;
 using Database.DTOs.MediaPlanHistDTO;
 using Database.DTOs.MediaPlanTermDTO;
 using Database.DTOs.SchemaDTO;
-using Database.DTOs.SpotDTO;
 using Database.Entities;
 using Database.Repositories;
 using System;
@@ -50,6 +48,7 @@ namespace CampaignEditor.UserControls
         private readonly PrintCampaignInfo _factoryPrintCmpInfo;
         private readonly Listing _factoryListing;
         private readonly PrintForecast _factoryPrintForecast;
+        private readonly MediaPlanForecastData _forecastData;
 
 
         private bool canUserEdit = true;
@@ -60,7 +59,8 @@ namespace CampaignEditor.UserControls
         public int CmpVersion { get { return _cmpVersion; } }
         private int _maxVersion = 1;
         private List<int> _versions = new List<int>();
-        private ObservableCollection<ChannelDTO> _channels = new ObservableCollection<ChannelDTO>();
+        //private ObservableCollection<ChannelDTO> _channels = new ObservableCollection<ChannelDTO>();
+        //private List<SpotDTO> _spots = new List<SpotDTO>();
 
         List<DayOfWeek> filteredDays = new List<DayOfWeek>
         { DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday,
@@ -108,6 +108,7 @@ namespace CampaignEditor.UserControls
             IAbstractFactory<Listing> factoryListing,
             IAbstractFactory<PrintForecast> factoryPrintForecast,
             IAbstractFactory<ImportFromSchema> factoryImportFromSchema,
+            IAbstractFactory<MediaPlanForecastData> factoryForecastData,
             IReachRepository reachRepository)
         {
             this.DataContext = this;
@@ -134,9 +135,11 @@ namespace CampaignEditor.UserControls
 
             _mpConverter = factoryMpConverter.Create();
             _mpTermConverter = factoryMpTermConverter.Create();
+            _forecastData = factoryForecastData.Create();
 
             InitializeComponent();
             _factoryImportFromSchema = factoryImportFromSchema;
+
         }
 
         #region Triggers
@@ -150,7 +153,7 @@ namespace CampaignEditor.UserControls
             }
         }*/
 
-        public async void GoalsChanged(object sender, EventArgs e)
+        /*public async void GoalsChanged(object sender, EventArgs e)
         {
             SetLoadingPage?.Invoke(this, null);
             //await FillGoals();
@@ -163,10 +166,10 @@ namespace CampaignEditor.UserControls
             SetLoadingPage?.Invoke(this, null);
             await dgMediaPlans.InitializeSpots(_campaign.cmpid);
             await InitializeGrids();
-            await _mpConverter.Initialize(_campaign);
+            //await _mpConverter.Initialize(_campaign);
             SetContentPage?.Invoke(this, null);
 
-        }
+        }*/
 
         #endregion
 
@@ -176,6 +179,14 @@ namespace CampaignEditor.UserControls
             _campaign = campaign;
             startDate = TimeFormat.YMDStringToDateTime(_campaign.cmpsdate);
             endDate = TimeFormat.YMDStringToDateTime(_campaign.cmpedate);
+
+            /*var mps = await _mediaPlanController.GetAllMediaPlansByCmpid(_campaign.cmpid, 2);
+            foreach (var mp in mps)
+            {
+                await _mediaPlanTermController.DeleteMediaPlanTermByXmpId(mp.xmpid);
+                await _mediaPlanHistController.DeleteMediaPlanHistByXmpid(mp.xmpid);
+                await _mediaPlanController.DeleteMediaPlanById(mp.xmpid);
+            }*/
 
             canUserEdit = !isReadOnly;
             if (!canUserEdit)
@@ -189,12 +200,15 @@ namespace CampaignEditor.UserControls
 
             CampaignEventLinker.AddForecast(_campaign.cmpid, this);
 
-            // REFACTOR THIS
-            await _mpConverter.Initialize(campaign);
+
+            await _forecastData.Initialize(_campaign);
+            _mpConverter.Initialize(_forecastData);
 
             await InitializeVersions();
-            await InitializeChannels();
+            //InitializeChannels();
+            //InitializeSpots();
             await InitializeGoals();
+
 
             SubscribeControllers();
 
@@ -217,16 +231,20 @@ namespace CampaignEditor.UserControls
 
         }
 
-        private async Task InitializeChannels()
+        /*private void InitializeChannels()
         {
             _channels.Clear();
-            var channelCmps = await _channelCmpController.GetChannelCmpsByCmpid(_campaign.cmpid);
-            foreach (ChannelCmpDTO chnCmp in channelCmps)
+            foreach (var channel in _forecastData.Channels)
             {
-                ChannelDTO channel = await _channelController.GetChannelById(chnCmp.chid);
                 _channels.Insert(0, channel);
             }
-        }
+        }*/
+
+        /*private void InitializeSpots()
+        {
+            _spots.Clear();
+            _spots.AddRange(_forecastData.Spots);
+        }*/
 
         private async Task InitializeGoals()
         {
@@ -245,7 +263,6 @@ namespace CampaignEditor.UserControls
 
         private void SubscribeDataGridControllers()
         {
-            dgMediaPlans._converter = _mpConverter;
             dgMediaPlans._factoryAddSchema = _factoryAddSchema;
             dgMediaPlans._factoryAmrTrim = _factoryAmrTrim;
             dgMediaPlans._schemaController = _schemaController;
@@ -253,7 +270,7 @@ namespace CampaignEditor.UserControls
             dgMediaPlans._mediaPlanTermController = _mediaPlanTermController;
             dgMediaPlans._databaseFunctionsController = _databaseFunctionsController;
             dgMediaPlans._mpConverter = _mpConverter;
-            dgMediaPlans._spotController = _spotController;
+            dgMediaPlans._mpTermConverter = _mpTermConverter;
             dgMediaPlans.AddMediaPlanClicked += dgMediaPlans_AddMediaPlanClicked;
             dgMediaPlans.ImportMediaPlanClicked += dgMediaPlans_ImportMediaPlanClicked;
             dgMediaPlans.DeleteMediaPlanClicked += dgMediaPlans_DeleteMediaPlanClicked;
@@ -272,8 +289,6 @@ namespace CampaignEditor.UserControls
         {
             swgGrid._mediaPlanController = _mediaPlanController;
             swgGrid._mediaPlanTermController = _mediaPlanTermController;
-            swgGrid._spotController = _spotController;
-            swgGrid._channelController = _channelController;
             swgGrid._allMediaPlans = _allMediaPlans;
 
             swgGrid.spotGoalsGrid = sgGrid;
@@ -283,8 +298,6 @@ namespace CampaignEditor.UserControls
         {
             sdgGrid._mediaPlanController = _mediaPlanController;
             sdgGrid._mediaPlanTermController = _mediaPlanTermController;
-            sdgGrid._spotController = _spotController;
-            sdgGrid._channelController = _channelController;
             sdgGrid._allMediaPlans = _allMediaPlans;
         }
 
@@ -345,7 +358,7 @@ namespace CampaignEditor.UserControls
         private void BindLists()
         {
             dgHist.ItemsSource = _showMPHist;
-            lvChannels.ItemsSource = _channels;
+            lvChannels.ItemsSource = _forecastData.Channels;
         }
 
         private void FillVersions(int maxVersion)
@@ -361,27 +374,12 @@ namespace CampaignEditor.UserControls
             cbVersions.SelectedIndex = cbVersions.Items.Count - 1;
         }
 
-        public async Task AddChannels(List<ChannelDTO> channels)
-        {
-            List<Task> addChannelTask = new List<Task>();
-            foreach (var channel in channels)
-            {
-                Task task = Task.Run(() => InsertDataForChannel(_maxVersion, channel.chid));
-                addChannelTask.Add(task);
-            }
-
-            await Task.WhenAll(addChannelTask);
-            await LoadData(_maxVersion);
-
-        }
-
         public async Task InsertDataForChannel(int version, int chid)
         {
 
             // Inserting new MediaPlans in database
             await InsertInDatabase(chid, version);
             List<MediaPlanDTO> mediaPlans = (await _mediaPlanController.GetAllChannelCmpMediaPlans(chid, _campaign.cmpid, version)).ToList();
-            await StartAMRByMediaPlan(_campaign.cmpid, 40, 40, mediaPlans);
 
         }
 
@@ -393,7 +391,7 @@ namespace CampaignEditor.UserControls
 
             // Inserting new MediaPlans in database
             List<Task> insertingTasks = new List<Task>();
-            foreach (var channel in _channels)
+            foreach (var channel in _forecastData.Channels)
             {
                 Task task = Task.Run(() => InsertInDatabase(channel.chid, version));
                 insertingTasks.Add(task);
@@ -401,9 +399,13 @@ namespace CampaignEditor.UserControls
             // waiting for all tasks to finish
             await Task.WhenAll(insertingTasks);
 
+            await _databaseFunctionsController.StartAMRCalculation(_campaign.cmpid, 40, 40);
+
+            var a = 5;
+
 
             List<List<MediaPlanDTO>> mediaPlansByChannels = new List<List<MediaPlanDTO>>();
-            foreach (ChannelDTO channel in _channels)
+            foreach (ChannelDTO channel in _forecastData.Channels)
             {
                 List<MediaPlanDTO> mediaPlans = (await _mediaPlanController.GetAllChannelCmpMediaPlans(channel.chid, _campaign.cmpid, version)).ToList();
                 mediaPlansByChannels.Add(mediaPlans);
@@ -521,46 +523,39 @@ namespace CampaignEditor.UserControls
             await FillMPList();
             await FillLoadedDateRanges();
             // For dgMediaPlans
-            await InitializeDataGrid();
+            InitializeDataGrid();
             await InitializeGrids();
 
             FillGoals();
 
         }
 
-        private async Task InitializeDataGrid()
+        private void InitializeDataGrid()
         {
             dgMediaPlans.CanUserEdit = canUserEdit && isEditableVersion;
             dgMediaPlans._selectedChannels = _selectedChannels;
             dgMediaPlans._allMediaPlans = _allMediaPlans;
-            dgMediaPlans._filteredDays = filteredDays;
+            dgMediaPlans._filteredDays = filteredDays;          
 
-            Dictionary<int, string> chidChannelDictionary = new Dictionary<int, string>();
-            foreach (ChannelDTO channel in _channels)
-            {
-                chidChannelDictionary.Add(channel.chid, channel.chname.Trim());
-            }
-            dgMediaPlans.chidChannelDictionary = chidChannelDictionary;
-
-            await dgMediaPlans.Initialize(_campaign);
+            dgMediaPlans.Initialize(_campaign, _forecastData.Channels, _forecastData.Spots);
 
         }
 
         public async Task InitializeGrids()
         {
-            await InitializeCGGrid();
-            //await sgGrid.Initialize(_campaign, _cmpVersion);
-            await swgGrid.Initialize(_campaign, _cmpVersion);
-            await sdgGrid.Initialize(_campaign, _cmpVersion);
-            await _factoryListing.Initialize(_campaign);
+            InitializeCGGrid();
+            swgGrid.Initialize(_campaign, _forecastData.Channels, _forecastData.Spots, _cmpVersion);
+            sdgGrid.Initialize(_campaign, _forecastData.Channels, _forecastData.Spots, _cmpVersion);
+            _factoryListing.Initialize(_campaign, _forecastData.Channels, 
+                _forecastData.ChidPricelistDict, _forecastData.SpotcodeSpotDict, _mpConverter);
             await reachGrid.Initialize(_campaign);
         }
 
-        private async Task InitializeCGGrid()
+        private void InitializeCGGrid()
         {
 
             ObservableCollection<MediaPlan> mediaPlans = new ObservableCollection<MediaPlan>(_allMediaPlans.Select(mp => mp.MediaPlan));
-            cgGrid.Initialize(mediaPlans, _channels.ToList());
+            cgGrid.Initialize(mediaPlans, _forecastData.Channels);
         }
 
         #region Drag and Drop selected Channels
@@ -586,16 +581,18 @@ namespace CampaignEditor.UserControls
 
             if (removedIdx < targetIdx)
             {
-                _channels.Insert(targetIdx + 1, droppedData);
-                _channels.RemoveAt(removedIdx);
+                _forecastData.Channels.Insert(targetIdx + 1, droppedData);
+                _forecastData.Channels.RemoveAt(removedIdx);
+                lvChannels.ItemsSource = _forecastData.Channels;
             }
             else
             {
                 int remIdx = removedIdx + 1;
-                if (_channels.Count + 1 > remIdx)
+                if (_forecastData.Channels.Count + 1 > remIdx)
                 {
-                    _channels.Insert(targetIdx, droppedData);
-                    _channels.RemoveAt(remIdx);
+                    _forecastData.Channels.Insert(targetIdx, droppedData);
+                    _forecastData.Channels.RemoveAt(remIdx);
+                    lvChannels.ItemsSource = _forecastData.Channels;
                 }
             }
 
@@ -698,7 +695,8 @@ namespace CampaignEditor.UserControls
 
         private async Task RecalculateMPValues(MediaPlan mediaPlan)
         {
-            await _mpConverter.ComputeExtraProperties(mediaPlan, true);
+            var termsDTO = _mpTermConverter.ConvertToEnumerableDTO(_allMediaPlans.First(mpt => mpt.MediaPlan.xmpid == mediaPlan.xmpid).Terms);
+            _mpConverter.ComputeExtraProperties(mediaPlan, termsDTO, true);
             await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(_mpConverter.ConvertToDTO(mediaPlan)));
         }
 
@@ -755,7 +753,7 @@ namespace CampaignEditor.UserControls
         private async Task CalculateMPValuesForCampaign(int cmpid, int version)
         {
             // Start all tasks and gather them in a list
-            List<Task> calculatingChannelMPTasks = _channels.Select(channel =>
+            List<Task> calculatingChannelMPTasks = _forecastData.Channels.Select(channel =>
                 Task.Run(() => CalculateMPValuesForChannel(cmpid, channel.chid, version)))
                 .ToList();
 
@@ -1002,7 +1000,7 @@ namespace CampaignEditor.UserControls
                     }
                 }
 
-                MediaPlanTuple mpTuple = new MediaPlanTuple(await _mpConverter.ConvertFromDTO(mediaPlan), mediaPlanDates);
+                MediaPlanTuple mpTuple = new MediaPlanTuple(_mpConverter.ConvertFromDTO(mediaPlan, mediaPlanTerms), mediaPlanDates);
                 _concurrentAllMediaPlans.Add(mpTuple);
             }
         } 
@@ -1015,7 +1013,7 @@ namespace CampaignEditor.UserControls
 
 
             List<Task> insertingTasks = new List<Task>();
-            foreach (var channel in _channels)
+            foreach (var channel in _forecastData.Channels)
             {
                 Task task = Task.Run(() => FillMPListByChannel(daysNum, channel.chid));
                 insertingTasks.Add(task);
@@ -1431,7 +1429,7 @@ namespace CampaignEditor.UserControls
                 selectedChannel = lvChannels.SelectedItems[0] as ChannelDTO;
             }
             var factory = _factoryImportFromSchema.Create();
-            factory.Initialize(_channels, selectedChannel);
+            factory.Initialize(_forecastData.Channels, selectedChannel);
             factory.ShowDialog();
             if (factory.success)
             {
@@ -1459,13 +1457,15 @@ namespace CampaignEditor.UserControls
             }
         }
 
-        private async Task DeleteTermValues(IEnumerable<MediaPlanTerm> terms)
+        private void DeleteTermValues(MediaPlanTuple mediaPlanTuple)
         {
+            var mediaPlan = mediaPlanTuple.MediaPlan;
+            var terms = mediaPlanTuple.Terms;
             foreach (var term in terms.Where(term => term != null && term.Spotcode != null 
             && term.Spotcode.Trim().Count() > 0))
             {
                 foreach (char spotcode in term.Spotcode.Trim())
-                    await UpdatedTerm(term, spotcode);
+                    UpdatedTerm(mediaPlan, term, spotcode);
             }
         }
 
@@ -1507,7 +1507,7 @@ namespace CampaignEditor.UserControls
 
                     if (canBeDeleted)
                     {
-                        await DeleteTermValues(mediaPlanTuple.Terms);
+                        DeleteTermValues(mediaPlanTuple);
                         _allMediaPlans.Remove(mediaPlanTuple);
                         var mediaPlan = mediaPlanTuple.MediaPlan;
                         await DeleteMPById(mediaPlan.xmpid);
@@ -1551,14 +1551,16 @@ namespace CampaignEditor.UserControls
             }
         }
 
-        private async void dgMediaPlans_UpdatedTerm(object? sender, UpdatedTermEventArgs e)
+        private void dgMediaPlans_UpdatedTerm(object? sender, UpdatedTermEventArgs e)
         {
             MediaPlanTerm term = e.Term;
             char? spotcode = e.Spotcode;
-
-            await UpdatedTerm(term, spotcode);
+            if (!spotcode.HasValue)
+                return;
+            var mediaPlan = _allMediaPlans.First(mpt => mpt.Terms.Any(t => t != null && t.Xmptermid == term.Xmptermid)).MediaPlan;
+            UpdatedTerm(mediaPlan, term, spotcode.Value);
         }
-        private async void dgMediaPlans_VisibleTuplesChanged(object? sender, EventArgs e)
+        private void dgMediaPlans_VisibleTuplesChanged(object? sender, EventArgs e)
         {
             CollectionView collectionView = (CollectionView)CollectionViewSource.GetDefaultView(dgMediaPlans.dgMediaPlans.ItemsSource);
 
@@ -1569,14 +1571,18 @@ namespace CampaignEditor.UserControls
         }
 
 
-        private async Task UpdatedTerm(MediaPlanTerm term, char? spotcode)
+        private void UpdatedTerm(MediaPlan mediaPlan, MediaPlanTerm term, char spotcode)
         {
-            MediaPlanDTO mediaPlan = await _mediaPlanController.GetMediaPlanById(term.Xmpid);
+            /*MediaPlanDTO mediaPlan = await _mediaPlanController.GetMediaPlanById(term.Xmpid);
             ChannelDTO channel = await _channelController.GetChannelById(mediaPlan.chid);
             DateOnly date = term.Date;
             SpotDTO? spot = null;
             if (spotcode.HasValue)
-                spot = await _spotController.GetSpotsByCmpidAndCode(_campaign.cmpid, spotcode.ToString());
+                spot = await _spotController.GetSpotsByCmpidAndCode(_campaign.cmpid, spotcode.ToString());*/
+
+            var channel = _forecastData.Channels.First(ch => ch.chid == mediaPlan.chid);
+            var date = term.Date;
+            var spot = _forecastData.SpotcodeSpotDict[spotcode];
 
             sdgGrid.RecalculateGoals(channel, date, spot, true);
             swgGrid.RecalculateGoals(channel, date, spot, true);

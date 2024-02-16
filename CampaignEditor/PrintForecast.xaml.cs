@@ -121,7 +121,7 @@ namespace CampaignEditor
                     {
                         var worksheet6 = excelPackage.Workbook.Worksheets.Add("Spot listing");
                         var list = _allMediaPlans.Where(mpTuple => mpTuple.MediaPlan.Insertations > 0 && selectedChannels.Any(ch => ch.chid == mpTuple.MediaPlan.chid)).ToList();
-                        await factoryListing.PopulateWorksheet(list, visibleColumns, worksheet6, 1, 1);
+                        factoryListing.PopulateWorksheet(list, visibleColumns, worksheet6, 1, 1);
                     }
 
                     // Save the Excel package to a memory stream

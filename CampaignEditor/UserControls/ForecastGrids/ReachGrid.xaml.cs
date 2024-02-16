@@ -1,11 +1,7 @@
-﻿using CampaignEditor.Controllers;
-using Database.DTOs.CampaignDTO;
-using Database.DTOs.ReachDTO;
+﻿using Database.DTOs.ReachDTO;
 using System.Collections.Generic;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Input;
 
 namespace CampaignEditor.UserControls.ForecastGrids
 {

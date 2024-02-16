@@ -5,7 +5,6 @@ using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Database.DTOs.ChannelDTO;
 using CampaignEditor.Controllers;
 using Database.Repositories;
@@ -27,9 +26,9 @@ namespace CampaignEditor
 
         public List<ChannelDTO> selectedChannels = new List<ChannelDTO>();
 
-        private Dictionary<int, string> _chidChannelDictionary = new Dictionary<int, string>();
-        private Dictionary<int, PricelistDTO> _chidPricelistDictionary = new Dictionary<int, PricelistDTO>();
-        private Dictionary<char, SpotDTO> _spotcodeSpotDictionary = new Dictionary<char, SpotDTO>();
+        private Dictionary<int, ChannelDTO> _chidChannelDictionary = new Dictionary<int, ChannelDTO>();
+        private Dictionary<int, PricelistDTO> _chidPricelistDictionary;
+        private Dictionary<char, SpotDTO> _spotcodeSpotDictionary;
 
         CampaignDTO _campaign;
 
@@ -40,7 +39,6 @@ namespace CampaignEditor
             ISpotRepository spotRepository, IPricelistChannelsRepository pricelistChannelsRepository,
             IPricelistRepository pricelistRepository)
         {
-            _mpConverter = factoryMpConverter.Create();
             _mpTermConverter = factoryMpTermConverter.Create();
 
             _channelCmpController = new ChannelCmpController(channelCmpRepository);
@@ -49,19 +47,33 @@ namespace CampaignEditor
             _pricelistController = new PricelistController(pricelistRepository);
         }
 
-        public async Task Initialize(CampaignDTO campaign)
+        public void Initialize(CampaignDTO campaign, IEnumerable<ChannelDTO> channels,
+            Dictionary<int, PricelistDTO> chidPricelistDictionary, 
+            Dictionary<char, SpotDTO> spotcodeSpotDictionary,
+            MediaPlanConverter mpConverter)
         {
             _campaign = campaign;
+            _mpConverter = mpConverter;
 
-            var channelCmps = await _channelCmpController.GetChannelCmpsByCmpid(_campaign.cmpid);
+            _chidPricelistDictionary = chidPricelistDictionary;
+            _spotcodeSpotDictionary = spotcodeSpotDictionary;
+
             _chidChannelDictionary.Clear();
+            foreach (var channel in channels)
+            {
+                if (!_chidChannelDictionary.ContainsKey(channel.chid))
+                {
+                    _chidChannelDictionary[channel.chid] = channel;
+                }
+            }
+            /*_chidChannelDictionary.Clear();
             _chidPricelistDictionary.Clear();
-            foreach (var channelCmp in channelCmps)
+            foreach (var channel in channels)
             {
                 try
                 {
-                    var channel = await _channelController.GetChannelById(channelCmp.chid);
-                    _chidChannelDictionary.Add(channel.chid, channel.chname.Trim());
+                    _chidChannelDictionary.Add(channel.chid, channel);
+                    var channelCmp = await _channelCmpController.GetChannelCmpByIds(_campaign.cmpid, channel.chid);
                     var pricelist = await _pricelistController.GetPricelistById(channelCmp.plid);
                     _chidPricelistDictionary.Add(channel.chid, pricelist);
                 }
@@ -70,11 +82,10 @@ namespace CampaignEditor
 
 
             _spotcodeSpotDictionary.Clear();
-            var spots = await _spotController.GetSpotsByCmpid(campaign.cmpid);
             foreach (var spot in spots)
             {
                 _spotcodeSpotDictionary.Add(spot.spotcode.Trim()[0], spot);
-            }
+            }*/
         }
 
         private bool[] TransformVisibleColumns(bool[] visibleGridColumns)
@@ -96,7 +107,7 @@ namespace CampaignEditor
             return visibleColumns;
         }
 
-        public async Task PopulateWorksheet(List<MediaPlanTuple> mpTuples, bool[] visibleGridColumns, ExcelWorksheet worksheet, int rowOff = 1, int colOff = 1)
+        public void PopulateWorksheet(List<MediaPlanTuple> mpTuples, bool[] visibleGridColumns, ExcelWorksheet worksheet, int rowOff = 1, int colOff = 1)
         {
             mpTuples = mpTuples.OrderBy(mpt => mpt.MediaPlan.chid).ThenBy(mpt => mpt.MediaPlan.stime).ToList();
             DateTime startDate = TimeFormat.YMDStringToDateTime(_campaign.cmpsdate);
@@ -133,7 +144,7 @@ namespace CampaignEditor
 
                     foreach (char spotcode in term.Spotcode.Trim())
                     {
-                        await AddSpotcode(worksheet, mediaPlan, term, spotcode, visibleColumns, rowOff + rowOffset, colOff);                          
+                        AddSpotcode(worksheet, mediaPlan, term, spotcode, visibleColumns, rowOff + rowOffset, colOff);                          
                         rowOffset += 1;
                     }                  
                 }
@@ -164,7 +175,7 @@ namespace CampaignEditor
                 }
             }
         }
-        private async Task AddSpotcode(ExcelWorksheet worksheet, MediaPlan mediaPlan, MediaPlanTerm term, char spotcode, bool[] visibleColumns, int rowOff, int colOff)
+        private void AddSpotcode(ExcelWorksheet worksheet, MediaPlan mediaPlan, MediaPlanTerm term, char spotcode, bool[] visibleColumns, int rowOff, int colOff)
         {
             int colOffset = 0;
             if (visibleColumns[0])
@@ -275,12 +286,12 @@ namespace CampaignEditor
 
             if (visibleColumns[21])
             {
-                worksheet.Cells[rowOff, colOff + colOffset].Value = await _mpConverter.CalculateTermSeascoef(mediaPlan, _chidPricelistDictionary[mediaPlan.chid], _mpTermConverter.ConvertToDTO(term));
+                worksheet.Cells[rowOff, colOff + colOffset].Value = _mpConverter.CalculateTermSeascoef(mediaPlan, _chidPricelistDictionary[mediaPlan.chid], _mpTermConverter.ConvertToDTO(term));
                 colOffset += 1;
             }
             if (visibleColumns[22])
             {
-                worksheet.Cells[rowOff, colOff + colOffset].Value = await _mpConverter.CalculateTermSeccoef(mediaPlan, _chidPricelistDictionary[mediaPlan.chid], _spotcodeSpotDictionary[spotcode]);
+                worksheet.Cells[rowOff, colOff + colOffset].Value = _mpConverter.CalculateTermSeccoef(mediaPlan, _chidPricelistDictionary[mediaPlan.chid], _spotcodeSpotDictionary[spotcode]);
                 colOffset += 1;
             }
             if (visibleColumns[23])

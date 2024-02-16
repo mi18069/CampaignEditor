@@ -27,10 +27,9 @@ using Style = System.Windows.Style;
 using MenuItem = System.Windows.Controls.MenuItem;
 using Action = System.Action;
 using CampaignEditor.Helpers;
-using System.Drawing;
-using OfficeOpenXml.FormulaParsing;
 using OfficeOpenXml.Style;
-using Microsoft.Office.Interop.Excel;
+using System.Threading.Channels;
+using Database.DTOs.SpotDTO;
 
 namespace CampaignEditor.UserControls
 {
@@ -45,9 +44,9 @@ namespace CampaignEditor.UserControls
         public MediaPlanController _mediaPlanController { get; set; }
         public MediaPlanTermController _mediaPlanTermController { get; set; }
         public MediaPlanConverter _mpConverter { get; set; }
-        public SpotController _spotController { get; set; }
+        public MediaPlanTermConverter _mpTermConverter { get; set; }
         public DatabaseFunctionsController _databaseFunctionsController { get; set; }
-        public Dictionary<int, string> chidChannelDictionary { get; set; }
+        private Dictionary<int, string> chidChannelDictionary = new Dictionary<int, string>();
 
         private ObservableCollection<TotalItem> totals = new ObservableCollection<TotalItem>();
 
@@ -91,7 +90,6 @@ namespace CampaignEditor.UserControls
 
         public ObservableCollection<ChannelDTO> _selectedChannels = new ObservableCollection<ChannelDTO>();
         public List<DayOfWeek> _filteredDays = new List<DayOfWeek>();
-        public MediaPlanConverter _converter { get; set; }
         CampaignDTO _campaign;
 
         // for duration of campaign
@@ -143,7 +141,7 @@ namespace CampaignEditor.UserControls
             get { return dgMediaPlans; }
         }
         ICollectionView myDataView;
-        public async Task Initialize(CampaignDTO campaign)
+        public void Initialize(CampaignDTO campaign, IEnumerable<ChannelDTO> channels, IEnumerable<SpotDTO> spots)
         {
             tcChannel.Binding = new Binding()
             {
@@ -151,6 +149,12 @@ namespace CampaignEditor.UserControls
                 Converter = new ChidToChannelConverter(),
                 ConverterParameter = chidChannelDictionary
             };
+
+            chidChannelDictionary.Clear();
+            foreach (ChannelDTO channel in channels)
+            {
+                chidChannelDictionary.Add(channel.chid, channel.chname.Trim());
+            }
 
             this.frozenColumnsNum = mediaPlanColumns;
             this.Schema.FrozenColumnCount = frozenColumnsNum;
@@ -163,7 +167,7 @@ namespace CampaignEditor.UserControls
             DeleteDateColumns(frozenColumnsNum);
             InitializeDateColumns();
 
-            await InitializeSpots(_campaign.cmpid);
+            InitializeSpots(spots);
 
 
             myDataView = CollectionViewSource.GetDefaultView(_allMediaPlans);
@@ -314,10 +318,9 @@ namespace CampaignEditor.UserControls
             return count;
         }
 
-        public async Task InitializeSpots(int cmpid)
+        public void InitializeSpots(IEnumerable<SpotDTO> spots)
         {
             spotCodes.Clear();
-            var spots = await _spotController.GetSpotsByCmpid(cmpid);
             for (int i = 0; i < spots.Count(); i++)
             {
                 spotCodes.Add((char)('A' + i));
@@ -375,7 +378,7 @@ namespace CampaignEditor.UserControls
                 var enabledCellColor = Brushes.LightGreen;
                 if (DateTime.TryParse(column.Header.ToString(), out DateTime columnHeaderDate))
                 {
-                    if (columnHeaderDate <= DateTime.Today)
+                    if (columnHeaderDate.Date <= DateTime.Today.Date)
                     {
                         // Apply the dimmed column style
                         disabledCellColor = Brushes.Goldenrod;
@@ -456,31 +459,17 @@ namespace CampaignEditor.UserControls
             }
         }
 
-        private void SimulateTextInput(string text)
-        {
-
-            foreach (char c in text)
-            {
-                var inputEvent = new TextCompositionEventArgs(Keyboard.PrimaryDevice, new TextComposition(InputManager.Current, this, c.ToString()));
-                inputEvent.RoutedEvent = UIElement.PreviewTextInputEvent;
-                InputManager.Current.ProcessInput(inputEvent);
-            }
-        }
+        #region Terms manipulation
 
         private void OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             DataGridCell cell = sender as DataGridCell;
             if (cell == null)
                 return;
-            var mpTerm = GetSelectedMediaPlanTerm(cell);
-            if (mpTerm == null)
-            {
-                return;
-            }
-            SimulateTextInput(lastSpotCell);
+            //SimulateTextInput(lastSpotCell);
+            OnCellPreviewTextInput(sender, new TextCompositionEventArgs
+                (Keyboard.PrimaryDevice, new TextComposition(InputManager.Current, null, lastSpotCell.ToString())));
         }
-
-
 
         private async void OnCellPreviewTextInput(object sender, TextCompositionEventArgs e)
         {
@@ -488,220 +477,164 @@ namespace CampaignEditor.UserControls
                 return;
 
             DataGridCell cell = sender as DataGridCell;
-            TextBlock textBlock = cell.Content as TextBlock;
-
-            DateTime currentDate = DateTime.Now;
-            var mpTerm = GetSelectedMediaPlanTerm(cell);
-            if (mpTerm == null || mpTerm.Date <= DateOnly.FromDateTime(currentDate))
-            {
-                return;
-            }
-
-            int numberOfDays = mpTerm.Date.DayNumber - DateOnly.FromDateTime(startDate).DayNumber;
-
-            char? spotcodeNull = e.Text.Trim()[0];
-            if (spotcodeNull.HasValue)
-            {
-                char spotcode = Char.ToUpper(spotcodeNull.Value);
-                lastSpotCell = spotcode.ToString();
-                if (spotCodes.Contains(spotcode))
-                {
-                    // if cell already have 3 spots, return
-                    if (cell.Content.ToString().Length == 3 ||
-                        (textBlock != null && textBlock.Text.Trim().Length == 3))
-                    {
-                        return;
-
-                    }
-                    else if (textBlock != null)
-                    {
-                        cell.Content = textBlock.Text.Trim() + spotcode.ToString();
-                        totals[numberOfDays].Total += 1;
-                    }
-                    else if (textBlock == null)
-                    {
-                        cell.Content += spotcode.ToString();
-                        totals[numberOfDays].Total += 1;
-                    }
-
-                    await _mediaPlanTermController.UpdateMediaPlanTerm(
-                    new UpdateMediaPlanTermDTO(mpTerm.Xmptermid, mpTerm.Xmpid, mpTerm.Date, cell.Content.ToString()));
-
-
-                    var mediaPlanTuple = dgMediaPlans.SelectedItem as MediaPlanTuple;
-                    if (mediaPlanTuple != null)
-                    {
-                        var mediaPlan = mediaPlanTuple.MediaPlan;
-                        await _converter.ComputeExtraProperties(mediaPlan, true);
-                        await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(_converter.ConvertToDTO(mediaPlan)));
-                    }
-
-
-                    mpTerm.Spotcode = cell.Content.ToString().Trim();
-                    TermUpdated(mpTerm, spotcode);
-
-                }
-                // For entering numbers
-                else if (Char.IsDigit(spotcode))
-                {
-                    int scNum = spotcode - '0';
-                    if (scNum > 0 && scNum <= spotCodes.Count())
-                    {
-                        char spCode = (char)('A' + scNum - 1);
-                        // if cell already have 3 spots, return
-                        if (cell.Content.ToString().Length == 3 ||
-                            (textBlock != null && textBlock.Text.Trim().Length == 3))
-                        {
-                            return;
-
-                        }
-                        else if (textBlock != null)
-                        {
-                            cell.Content = textBlock.Text.Trim() + spCode.ToString();
-                            totals[numberOfDays].Total += 1;
-                        }
-                        else if (textBlock == null)
-                        {
-                            cell.Content += spCode.ToString();
-                            totals[numberOfDays].Total += 1;
-                        }
-
-                        await _mediaPlanTermController.UpdateMediaPlanTerm(
-                        new UpdateMediaPlanTermDTO(mpTerm.Xmptermid, mpTerm.Xmpid, mpTerm.Date, cell.Content.ToString().Trim()));
-
-                        var mediaPlanTuple = dgMediaPlans.SelectedItem as MediaPlanTuple;
-                        if (mediaPlanTuple != null)
-                        {
-                            var mediaPlan = mediaPlanTuple.MediaPlan;
-                            await _converter.ComputeExtraProperties(mediaPlan, true);
-                            await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(_converter.ConvertToDTO(mediaPlan)));
-                        }
-
-                        mpTerm.Spotcode = cell.Content.ToString().Trim();
-                        lastSpotCell = mpTerm.Spotcode;
-                        TermUpdated(mpTerm, spCode);
-
-
-                        //cell.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
-
-                    }
-
-                }
-            }
-
-
-        }
-
-        private async void OnCellPreviewKeyDown(object sender, KeyEventArgs e)
-        {
-
-            DataGridCell cell = sender as DataGridCell;
-
-            // Allow navigation with arrows
-            if (e.Key == Key.Left || e.Key == Key.Right || e.Key == Key.Up || e.Key == Key.Down)
-            {
-                return;
-            }
-
-            // Disable usual mechanisms
-            if ((Keyboard.Modifiers & ModifierKeys.Control) == ModifierKeys.Control)
-            {
-                e.Handled = true;
-            }
-
 
             // if cell is not binded to mediaPlanTerm, or if user don't have privileges disable editing
-            var tuple = (MediaPlanTuple)cell.DataContext;
-            var mpTerms = tuple.Terms;
+            var mediaPlanTuple = (MediaPlanTuple)cell.DataContext;
+            var mpTerms = mediaPlanTuple.Terms;
             var index = cell.Column.DisplayIndex - mediaPlanColumns;
-            MediaPlanTerm mpTerm;
+            MediaPlanTerm? mpTerm;
+            if ((mpTerm = mpTerms[index]) == null)
+                return;
+
+            DateTime currentDate = DateTime.Now;
+            if (mpTerm.Date <= DateOnly.FromDateTime(currentDate))
+            {
+                return;
+            }
+
+            char? spotcodeNull;
             try
             {
-                mpTerm = mpTerms[index];
+                spotcodeNull = e.Text == null ? null : e.Text[0];
             }
             catch
             {
+                spotcodeNull = null;
+            }
+            if (!spotcodeNull.HasValue)
+                return;
+
+            char spotcode = ConvertSpotcodeToChar(spotcodeNull.Value);
+            
+            if (!spotCodes.Contains(spotcode))
+            {
+                e.Handled = true;
                 return;
             }
+
+            lastSpotCell = spotcode.ToString();
+
+            await AddSpotcodeToMpTerm(mpTerm, spotcode);
+            await UpdateMediaPlan(mediaPlanTuple);          
+            TermUpdated(mpTerm, spotcode);
+
+                       
+        }
+
+
+        private char ConvertSpotcodeToChar(char spotcodeChar)
+        {
+            if (Char.IsDigit(spotcodeChar))
+            {
+                int digitCharValue = spotcodeChar - '1';
+                spotcodeChar = (char)('A' + digitCharValue);
+            }
+            return Char.ToUpper(spotcodeChar);
+        }
+
+        private async Task AddSpotcodeToMpTerm(MediaPlanTerm mpTerm, char spotcode)
+        {
+            if (mpTerm.Spotcode != null && mpTerm.Spotcode.Length >= 3)
+                return;
+
+            string newSpotcode = (mpTerm.Spotcode == null ? "" : mpTerm.Spotcode) + spotcode.ToString();
+
+            await _mediaPlanTermController.UpdateMediaPlanTerm(
+                new UpdateMediaPlanTermDTO(mpTerm.Xmptermid, mpTerm.Xmpid, mpTerm.Date, newSpotcode));
+
+            mpTerm.Spotcode = newSpotcode;           
+
+            int numberOfDays = mpTerm.Date.DayNumber - DateOnly.FromDateTime(startDate).DayNumber;
+            totals[numberOfDays].Total += 1;
+
+            // Refactor this
+            //TermUpdated(mpTerm, spotcode);
+        }       
+
+        // For deleting spotcode from mediaPlanTerm
+        private async void OnCellPreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            // Only for deleting spotcode
+            if (!(e.Key == Key.Delete || e.Key == Key.Back))
+                return;
+            
+            DataGridCell cell = sender as DataGridCell;           
+
+            // if cell is not binded to mediaPlanTerm, or if user don't have privileges disable editing
+            var mediaPlanTuple = (MediaPlanTuple)cell.DataContext;
+            var mpTerms = mediaPlanTuple.Terms;
+            var index = cell.Column.DisplayIndex - mediaPlanColumns;
+            MediaPlanTerm? mpTerm;
+            if ((mpTerm = mpTerms[index]) == null)
+                return;
+
             DateTime currentDate = DateTime.Now;
-
-            if (!_canUserEdit || mpTerm == null || mpTerm.Date <= DateOnly.FromDateTime(currentDate))
+            if (!_canUserEdit || mpTerm.Date <= DateOnly.FromDateTime(currentDate))
             {
-                e.Handled = true;
                 return;
             }
 
-            // edit cell
-            var textBlock = cell.Content;
-            var tb2 = cell.Content as TextBlock;
-            string text = "";
-            if (tb2 != null)
+            char? spotcode = await DeleteSpotcodeFromMpTerm(mpTerm);
+            if (spotcode.HasValue)
             {
-                text = tb2.Text;
-            }
-            else if (textBlock != null)
-            {
-                text = textBlock.ToString();
-            }
+                await UpdateMediaPlan(mediaPlanTuple);
+                TermUpdated(mpTerm, spotcode);
+            }     
+        }
 
-            // move focus to the next available cell in a row
-            if (e.Key == Key.Space || e.Key == Key.Enter)
+        private async Task<char?> DeleteSpotcodeFromMpTerm(MediaPlanTerm mpTerm)
+        {
+            if (mpTerm.Spotcode != null && mpTerm.Spotcode.Length > 0)
             {
-                e.Handled = true;
-                cell.MoveFocus(new TraversalRequest(FocusNavigationDirection.Next));
-            }
+                // If old spotcode have only one character, then pass null as parameter, otherwise
+                // pass substring without last spotcode
+                string? newSpotcode = null;
+                if (mpTerm.Spotcode.Length > 0)
+                    newSpotcode = mpTerm.Spotcode.Substring(0, mpTerm.Spotcode.Length - 1);                
 
-            if ((e.Key == Key.Delete || e.Key == Key.Back) && text != null)
-            {
-                e.Handled = true;
-
-                string? spotcode = mpTerm.Spotcode;
-                if (spotcode != null)
-                    spotcode = spotcode.Trim();
-                if (spotcode == null)
+                char? deletedSpotcode = null;
+                try
                 {
-                    return;
+                    deletedSpotcode = mpTerm.Spotcode[mpTerm.Spotcode.Length - 1];
                 }
-                else if (spotcode.Length == 1)
+                catch
                 {
-                    await _mediaPlanTermController.UpdateMediaPlanTerm(
-                    new UpdateMediaPlanTermDTO(mpTerm.Xmptermid, mpTerm.Xmpid, mpTerm.Date, null));
-
-                    mpTerm.Spotcode = null;
-                    cell.Content = "";
-                    TermUpdated(mpTerm, spotcode[0]);
-
-                    int numberOfDays = mpTerm.Date.DayNumber - DateOnly.FromDateTime(startDate).DayNumber;
-                    totals[numberOfDays].Total -= 1;
+                    return null;
                 }
-                else
-                {
-                    var newSpotcode = spotcode.Substring(0, Math.Max(spotcode.Length - 1, 0));
-                    await _mediaPlanTermController.UpdateMediaPlanTerm(
+
+                int numberOfDays = mpTerm.Date.DayNumber - DateOnly.FromDateTime(startDate).DayNumber;
+
+
+                await _mediaPlanTermController.UpdateMediaPlanTerm(
                     new UpdateMediaPlanTermDTO(mpTerm.Xmptermid, mpTerm.Xmpid, mpTerm.Date, newSpotcode));
-                    mpTerm.Spotcode = newSpotcode;
-                    cell.Content = newSpotcode;
-                    TermUpdated(mpTerm, spotcode[spotcode.Length - 1]);
 
-                    int numberOfDays = mpTerm.Date.DayNumber - DateOnly.FromDateTime(startDate).DayNumber;
-                    totals[numberOfDays].Total -= 1;
-                }
+                mpTerm.Spotcode = newSpotcode;
 
-                var mediaPlanTuple = dgMediaPlans.SelectedItem as MediaPlanTuple;
-                if (mediaPlanTuple != null)
-                {
-                    var mediaPlan = mediaPlanTuple.MediaPlan;
-                    await _converter.ComputeExtraProperties(mediaPlan, true);
-                    await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(_converter.ConvertToDTO(mediaPlan)));
-                }
+                totals[numberOfDays].Total -= 1;
 
+                return deletedSpotcode;
+                // Refactor this
+                //TermUpdated(mpTerm, deletedSpotcode);
             }
+
+            return null;
 
         }
 
+        private async Task UpdateMediaPlan(MediaPlanTuple mediaPlanTuple)
+        {
+            var mediaPlan = mediaPlanTuple.MediaPlan;
+            var termsDTO = _mpTermConverter.ConvertToEnumerableDTO(mediaPlanTuple.Terms);
+            _mpConverter.ComputeExtraProperties(mediaPlan, termsDTO, true);
+            await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(_mpConverter.ConvertToDTO(mediaPlan)));
+        }
+
+        #endregion
+
+
         public delegate void UpdatedTermEventHandler(object sender, UpdatedTermEventArgs e);
         public event UpdatedTermEventHandler UpdatedTerm;
-        private void TermUpdated(MediaPlanTerm term, char spotcode)
+        private void TermUpdated(MediaPlanTerm term, char? spotcode)
         {
             var updatedTerm = new UpdatedTermEventArgs(term, spotcode);
             UpdatedTerm?.Invoke(this, updatedTerm);
@@ -714,71 +647,7 @@ namespace CampaignEditor.UserControls
                 e.Handled = true;
                 return;
             }
-        }
-
-        public static T GetVisualChild<T>(Visual parent) where T : Visual
-        {
-            T child = default(T);
-            int numVisuals = VisualTreeHelper.GetChildrenCount(parent);
-            for (int i = 0; i < numVisuals; i++)
-            {
-                Visual visual = (Visual)VisualTreeHelper.GetChild(parent, i);
-                child = visual as T;
-                if (child == null)
-                {
-                    child = GetVisualChild<T>(visual);
-                }
-                if (child != null)
-                {
-                    break;
-                }
-            }
-            return child;
-        }
-
-        private MediaPlanTerm GetSelectedMediaPlanTerm(DataGridCell cell)
-        {
-            // Traverse the visual tree to find the DataGridRow and DataGridCell that contain the selected cell
-            DependencyObject parent = VisualTreeHelper.GetParent(cell);
-            while (parent != null && !(parent is DataGridRow))
-            {
-                parent = VisualTreeHelper.GetParent(parent);
-            }
-            if (parent == null)
-            {
-                return null; // selected cell is not in a DataGridRow
-            }
-            DataGridRow row = parent as DataGridRow;
-
-            parent = VisualTreeHelper.GetParent(cell);
-
-            var selectedCell = cell;
-            // Get the index of the selected cell in the row
-            int columnIndex = selectedCell.Column.DisplayIndex;
-
-            // Get the bound item for the selected row
-            var tuple = row.Item as MediaPlanTuple;
-            if (tuple == null)
-            {
-                return null; // row is not bound to a tuple
-            }
-            ObservableArray<MediaPlanTerm?> mpTerms = tuple.Terms;
-
-            // Get the MediaPlanTerm for the selected cell
-            int rowIndex = row.GetIndex();
-            MediaPlanTerm mpTerm = null;
-            try
-            {
-                mpTerm = mpTerms[columnIndex - frozenColumnsNum];
-
-            }
-            catch
-            {
-                return null;
-            }
-
-            return mpTerm;
-        }
+        }       
 
         #endregion
 
@@ -795,7 +664,7 @@ namespace CampaignEditor.UserControls
             if (mediaPlanTuple != null)
             {
                 _mediaPlanToUpdate = mediaPlanTuple.MediaPlan;
-                _mediaPlanOldValues = _converter.CopyMP(_mediaPlanToUpdate);
+                _mediaPlanOldValues = _mpConverter.CopyMP(_mediaPlanToUpdate);
 
             }
 
@@ -811,7 +680,7 @@ namespace CampaignEditor.UserControls
             if (isEditingEnded)
             {
                 // Compare with the original value and revert if needed
-                if (_mediaPlanToUpdate != null && !_converter.SameMPValues(_mediaPlanToUpdate, _mediaPlanOldValues))
+                if (_mediaPlanToUpdate != null && !_mpConverter.SameMPValues(_mediaPlanToUpdate, _mediaPlanOldValues))
                 {
                     // If coefs are changed, we need to recalculate price
                     double eps = 0.0001;
@@ -820,7 +689,7 @@ namespace CampaignEditor.UserControls
                         Math.Abs(_mediaPlanToUpdate.Seccoef - _mediaPlanOldValues.Seccoef) > eps ||
                         Math.Abs(_mediaPlanToUpdate.Seascoef - _mediaPlanOldValues.Seascoef) > eps)
                     {
-                        await _converter.CoefsChanged(_mediaPlanToUpdate);
+                        _mpConverter.CoefsChanged(_mediaPlanToUpdate);
                     }
                     else if (_mediaPlanToUpdate.Stime != _mediaPlanOldValues.Stime ||
                             _mediaPlanToUpdate.Etime != _mediaPlanOldValues.Etime ||
@@ -855,13 +724,13 @@ namespace CampaignEditor.UserControls
                     }
                     try
                     {
-                        var mpDTO = _converter.ConvertToDTO(_mediaPlanToUpdate);
+                        var mpDTO = _mpConverter.ConvertToDTO(_mediaPlanToUpdate);
                         await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(mpDTO));
-                        _converter.CopyValues(_mediaPlanToUpdate, _mediaPlanToUpdate);
+                        _mpConverter.CopyValues(_mediaPlanToUpdate, _mediaPlanToUpdate);
                     }
                     catch
                     {
-                        _converter.CopyValues(_mediaPlanToUpdate, _mediaPlanOldValues);
+                        _mpConverter.CopyValues(_mediaPlanToUpdate, _mediaPlanOldValues);
                     }
                 }
                 isEditingEnded = false;
@@ -1004,17 +873,7 @@ namespace CampaignEditor.UserControls
             else
                 return FindParent<T>(parent);
         }
-
-        private async Task<RoutedEventHandler> UpdateMediaPlan(MediaPlanTuple mediaPlanTuple)
-        {
-            async void handler(object sender, RoutedEventArgs e)
-            {
-                var f = _factoryAddSchema.Create();
-
-            }
-
-            return handler;
-        }
+        
         private async Task<RoutedEventHandler> TrimAmrs(MediaPlan mediaPlan)
         {
             async void handler(object sender, RoutedEventArgs e)
@@ -1033,7 +892,7 @@ namespace CampaignEditor.UserControls
                     if (f.attributesToTrim[3])
                         mediaPlan.Amrsaletrim = f.newValue;
 
-                    var mpDTO = _converter.ConvertToDTO(mediaPlan);
+                    var mpDTO = _mpConverter.ConvertToDTO(mediaPlan);
 
                     await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(mpDTO));
                 }
@@ -1108,6 +967,8 @@ namespace CampaignEditor.UserControls
         {
             VisibleTuplesChanged?.Invoke(this, EventArgs.Empty);
         }
+
+        #region Print
 
         Dictionary<string, System.Drawing.Color> colors = new Dictionary<string, System.Drawing.Color>();
         private void FillColorsDictionary()
@@ -1414,17 +1275,7 @@ namespace CampaignEditor.UserControls
             excelCell.Style.Border.Bottom.Color.SetColor(color);
         }
 
-        private DataGridCell FindParentDataGridCell(FrameworkElement element)
-        {
-            // Traverse up the visual tree to find the DataGridCell
-            FrameworkElement parent = element;
-            while (parent != null && !(parent is DataGridCell))
-            {
-                parent = VisualTreeHelper.GetParent(parent) as FrameworkElement;
-            }
-
-            return parent as DataGridCell;
-        }
+        #endregion
 
         private void dgMediaPlans_Sorting(object sender, DataGridSortingEventArgs e)
         {

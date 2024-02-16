@@ -19,7 +19,7 @@ namespace CampaignEditor.Controllers
             return await _repository.GetReachByCmpid(cmpid);
         }
 
-        public async Task<ReachDTO> GetFinalReachByCmpid(int cmpid)
+        public async Task<ReachDTO?> GetFinalReachByCmpid(int cmpid)
         {
             return await _repository.GetFinalReachByCmpid(cmpid);
         }

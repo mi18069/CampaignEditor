@@ -34,6 +34,11 @@ namespace CampaignEditor
 
             return mediaPlanTermDTO;
         }
+
+        public IEnumerable<MediaPlanTermDTO> ConvertToEnumerableDTO(IEnumerable<MediaPlanTerm?> mediaPlanTerms)
+        {
+            return _mapper.Map<IEnumerable<MediaPlanTermDTO>>(mediaPlanTerms);
+        }
     }
 
 }
