@@ -17,10 +17,13 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="50" />
             <RowDefinition Height="*" />
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="50" />
             <RowDefinition Height="50" />
         </Grid.RowDefinitions>
-        <Label Grid.Row="1" Grid.Column="1" Content="LOADING..." Foreground="Black" FontSize="60"
-                   HorizontalAlignment="Center" VerticalAlignment="Center">
-        </Label>
+        <TextBlock x:Name="tbMessage" Grid.Row="1" Grid.RowSpan="3" Grid.Column="1" Text="LOADING..." Foreground="Black" FontSize="60"
+                   HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap">
+        </TextBlock>
+        <ProgressBar x:Name="pbBar" Grid.Row="2" Grid.Column="1" Visibility="Collapsed"/>
     </Grid>
 </Page>

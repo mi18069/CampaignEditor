@@ -9,7 +9,6 @@ using Database.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -112,6 +111,7 @@ namespace CampaignEditor
             _forecast.VersionChanged += Forecast_ChangeVersionClicked;
             _forecast.NewVersionClicked += _forecast_NewVersionClicked;
             _forecast.SetLoadingPage += _forecast_SetLoadingPage;
+            _forecast.UpdateProgressBar += _forecast_UpdateProgressBar;
             _forecast.SetContentPage += _forecast_SetContentPage;
         }
 
@@ -246,9 +246,30 @@ namespace CampaignEditor
 
         }
 
-        private void _forecast_SetLoadingPage(object? sender, ChangeVersionEventArgs e)
+        private void _forecast_SetLoadingPage(object? sender, LoadingPageEventArgs e)
         {
+            if (e.progressBarValue > 0)
+            {
+                loadingPage.SetProgressBarVisibility(Visibility.Visible);
+            }
+            else
+            {
+                loadingPage.SetProgressBarVisibility(Visibility.Collapsed);
+            }
+
+            loadingPage.SetContent(e.Message);
             tabForecast.Content = loadingPage.Content;
+        }
+
+        private void _forecast_UpdateProgressBar(object? sender, LoadingPageEventArgs e)
+        {
+            /*await Application.Current.Dispatcher.InvokeAsync(() =>
+            {
+                loadingPage.SetContent(e.Message);
+                loadingPage.SetProgressBarValue(e.progressBarValue);
+            }, DispatcherPriority.Background);*/
+            loadingPage.SetContent(e.Message);
+            loadingPage.SetProgressBarValue(e.progressBarValue);
         }
 
         private void _forecast_SetContentPage(object? sender, ChangeVersionEventArgs e)

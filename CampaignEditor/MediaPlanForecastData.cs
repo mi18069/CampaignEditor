@@ -52,6 +52,7 @@ namespace CampaignEditor
         public Dictionary<int, SeasonalityDTO> PlidSeasonalityDict { get { return _plidSeasonalityDict; } }
         public Dictionary<int, List<SeasonalitiesDTO>> SeasidSeasonalitiesDict { get { return _seasidSeasonalitiesDict; } }
 
+
         public MediaPlanForecastData(IChannelRepository channelRepository, ISpotRepository spotRepository,
             IChannelCmpRepository channelCmpRepository, IPricelistRepository pricelistRepository,
             ISeasonalityRepository seasonalityRepository, ISectableRepository sectableRepository,

@@ -38,7 +38,8 @@
                   Sorting="dgMediaPlans_Sorting"
                   PreviewKeyDown="dgMediaPlans_PreviewKeyDown"
                   SizeChanged="dgMediaPlans_SizeChanged"
-                  Loaded="dgMediaPlans_Loaded">
+                  Loaded="dgMediaPlans_Loaded"
+                  IsReadOnly="True">
             <DataGrid.CellStyle>
                 <Style TargetType="DataGridCell">
                     <Style.Triggers>

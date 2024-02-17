@@ -655,6 +655,7 @@ namespace CampaignEditor.UserControls
 
         private void dgMediaPlans_PreparingCellForEdit(object sender, DataGridPreparingCellForEditEventArgs e)
         {
+
             isEditingEnded = false;
 
             // Access the DataContext (your MediaPlan object)
@@ -782,6 +783,9 @@ namespace CampaignEditor.UserControls
             }
             else
             {
+                if (!CanUserEdit)
+                    return;
+
                 ContextMenu menu = new ContextMenu();
                 MenuItem deleteItem = new MenuItem();
                 deleteItem.Header = "Delete Program";

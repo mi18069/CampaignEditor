@@ -67,6 +67,7 @@ namespace CampaignEditor
                     services.AddFormFactory<PrintForecast>();
                     services.AddFormFactory<ImportFromSchema>();
                     services.AddFormFactory<MediaPlanForecastData>();
+                    services.AddFormFactory<ForecastDataManipulation>();
                     services.AddScoped<IDataContext, DataContext>();
                     // Add services
                     Extensions.UserExtensions.AddUserExtensions(services);
