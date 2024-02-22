@@ -33,7 +33,7 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="auto" />
                 </Grid.ColumnDefinitions>
                 <Label x:Name="lblBudget" Content="Budget: " Grid.Column="0" />
                 <Label x:Name="lblBudgetValue" Grid.Column="1" Content="{Binding BudgetRounded}"
@@ -55,7 +55,7 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="auto" />
                 </Grid.ColumnDefinitions>
                 <Label x:Name="lblGRP" Content="GRP: " Grid.Column="0"/>
                 <Label x:Name="lblGRPValue" Grid.Column="1" Content="{Binding GrpRounded}"
@@ -77,7 +77,7 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="auto" />
                 </Grid.ColumnDefinitions>
                 <Label x:Name="lblInsertations" Content="Insertations: " Grid.Column="0"/>
                 <Label x:Name="lblInsertationsValue" Grid.Column="1" Content="{Binding Insertations}"
@@ -99,13 +99,14 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="auto" />
                 </Grid.ColumnDefinitions>
                 <Label x:Name="lblReach" Content="Reach: " Grid.Column="0"/>
                 <Label x:Name="lblReachValue" Grid.Column="1" 
                     HorizontalContentAlignment="Right" FontWeight="DemiBold"/>
-                <Label x:Name="lblReachTarget" Grid.Column="2" 
+                <Label x:Name="lblReachTarget" Grid.Column="2" Content="0"
                     HorizontalContentAlignment="Right" FontWeight="Light"/>
+
             </Grid>
         </Border>
     </Grid>

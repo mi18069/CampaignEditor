@@ -1,9 +1,9 @@
 ﻿using CampaignEditor.Controllers;
+using CampaignEditor.Helpers;
 using Database.DTOs.CampaignDTO;
 using Database.DTOs.TargetDTO;
 using Microsoft.Win32;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -27,6 +27,8 @@ namespace CampaignEditor.UserControls.ForecastGrids
 
         private CampaignDTO _campaign = null;
         private List<TargetDTO> _targets = new List<TargetDTO>();
+
+        public event EventHandler<UpdateReachEventArgs> UpdateReach;
         public ReachTabItem()
         {
             InitializeComponent();
@@ -66,7 +68,9 @@ namespace CampaignEditor.UserControls.ForecastGrids
 
             if (reach == null)
                 return;
+
             reachGrid.SetReach(reach);
+            UpdateReach?.Invoke(this, new UpdateReachEventArgs(reach));
         }
 
         private async void btnRecalculateReach_Click(object sender, RoutedEventArgs e)
@@ -140,31 +144,6 @@ namespace CampaignEditor.UserControls.ForecastGrids
             string result = new string(input.Where(c => !char.IsWhiteSpace(c)).ToArray());
             return result;
         }       
-
-        /*private string? CreateFile(string folderPath)
-        {
-            string currentTime = DateTime.Now.ToString("yyyyMMdd_HHmmss");
-
-            // Combine the current time with the desired file extension (e.g., .pln)
-            string fileName = $"{currentTime}.pln";
-
-            // Specify the path where you want to create the file
-            string filePath = Path.Combine(folderPath, fileName);
-
-            // Create the file
-            try
-            {
-                File.Create(filePath).Close();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Cannot create .pln file!\n" + ex.Message, "Error",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
-                return null;
-            }
-
-            return filePath;
-        }*/
 
         private bool CheckSeginsSegbet()
         {

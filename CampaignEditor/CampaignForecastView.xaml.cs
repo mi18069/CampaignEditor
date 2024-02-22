@@ -68,7 +68,7 @@ namespace CampaignEditor
                 {
                     await LoadForecast();
                 }
-                var mpVersion = await _mediaPlanVersionController.GetLatestMediaPlanVersion(_campaign.cmpid);
+                /*var mpVersion = await _mediaPlanVersionController.GetLatestMediaPlanVersion(_campaign.cmpid);
                 if (mpVersion == null)
                 {
                     var mpVerDTO = new MediaPlanVersionDTO(_campaign.cmpid, 1);
@@ -78,7 +78,7 @@ namespace CampaignEditor
                 else
                 {
                     await _forecast.LoadData(mpVersion.version);
-                }
+                }*/
                 tabForecast.Content = _forecast.Content;
             }
             else

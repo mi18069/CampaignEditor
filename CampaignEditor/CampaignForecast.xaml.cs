@@ -235,21 +235,6 @@ namespace CampaignEditor.UserControls
 
         }
 
-        /*private void InitializeChannels()
-        {
-            _channels.Clear();
-            foreach (var channel in _forecastData.Channels)
-            {
-                _channels.Insert(0, channel);
-            }
-        }*/
-
-        /*private void InitializeSpots()
-        {
-            _spots.Clear();
-            _spots.AddRange(_forecastData.Spots);
-        }*/
-
         private async Task InitializeGoals()
         {
             goalsTreeView._goalsController = _goalsController;
@@ -324,6 +309,13 @@ namespace CampaignEditor.UserControls
         {
             reachGrid._databaseFunctionsController = _databaseFunctionsController;
             reachGrid._reachController = _reachController;
+            reachGrid.UpdateReach += ReachGrid_UpdateReach;
+        }
+
+        private void ReachGrid_UpdateReach(object? sender, UpdateReachEventArgs e)
+        {
+            var reach = e.Reach;
+            goalsTreeView.UpdateTotalReach(reach);
         }
 
         private void FillLvFilterDays()
@@ -463,14 +455,13 @@ namespace CampaignEditor.UserControls
             }
 
 
-            FillGoals();
+            await FillGoals();
 
         }
 
         public async Task InitializeGrids()
         {
             lvChannels.SelectedItems.Clear();
-            //_selectedChannels.Clear();
 
             InitializeCGGrid();
             swgGrid.Initialize(_campaign, _forecastData.Channels, _forecastData.Spots, _cmpVersion);
@@ -991,10 +982,15 @@ namespace CampaignEditor.UserControls
 
         #region Goals
 
-        private void FillGoals()
+        private async Task FillGoals()
         {
             goalsTreeView.FillGoals(_allMediaPlans);
-        }        
+            var reach = await _reachController.GetFinalReachByCmpid(_campaign.cmpid);
+            if (reach != null)
+            {
+                goalsTreeView.UpdateTotalReach(reach);
+            }
+        }
         #endregion
 
         #region dgMediaPlans
@@ -1424,6 +1420,8 @@ namespace CampaignEditor.UserControls
         private void UnsubscribeEvents()
         {
             UnsibscribeDataGridEvents();
+            reachGrid.UpdateReach -= ReachGrid_UpdateReach;
+
         }
 
         private void UnsibscribeDataGridEvents()
