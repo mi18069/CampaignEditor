@@ -7,27 +7,22 @@
              mc:Ignorable="d" 
              d:DesignHeight="400" d:DesignWidth="400" d:Background="White">
     <Grid>
-        <ScrollViewer x:Name="scrollViewer" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto"
-                      MaxHeight="130" CanContentScroll="True" PreviewMouseWheel="ScrollViewer_PreviewMouseWheel">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
 
-                <ToggleButton Grid.Row="0" Content="Total" x:Name="btnTotal" 
-                              Margin="20, 5" IsChecked="True"
-                              Click="ToggleButton_Click"/>
-                <local:GoalsTotalItem x:Name="totalItem" Grid.Row="1" Visibility="Visible"/>
+        <ToggleButton Grid.Row="0" Content="Total" x:Name="btnTotal" 
+                        Margin="20, 5" IsChecked="True"
+                        Click="ToggleButton_Click"/>
+        <local:GoalsTotalItem x:Name="totalItem" Grid.Row="1" Visibility="Visible"/>
 
-                <ToggleButton Grid.Row="2" Content="Selected" x:Name="btnSelected" 
-                              Margin="20, 5"
-                              Click="ToggleButton_Click"/>
-                <local:GoalsCurrentItem x:Name="selectedItem" Grid.Row="3" Visibility="Collapsed"/>
-            </Grid>
-        </ScrollViewer>
+        <ToggleButton Grid.Row="2" Content="Selected" x:Name="btnSelected" 
+                        Margin="20, 5"
+                        Click="ToggleButton_Click"/>
+        <local:GoalsCurrentItem x:Name="selectedItem" Grid.Row="3" Visibility="Collapsed"/>
     </Grid>
 </UserControl>

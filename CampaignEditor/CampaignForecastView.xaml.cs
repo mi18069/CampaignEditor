@@ -13,6 +13,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Threading;
 
 namespace CampaignEditor
 {
@@ -72,11 +73,11 @@ namespace CampaignEditor
                 {
                     var mpVerDTO = new MediaPlanVersionDTO(_campaign.cmpid, 1);
                     await _mediaPlanVersionController.CreateMediaPlanVersion(mpVerDTO);
-                    await _forecast.LoadData(1, isReadOnly);
+                    await _forecast.LoadData(1);
                 }
                 else
                 {
-                    await _forecast.LoadData(mpVersion.version, isReadOnly);
+                    await _forecast.LoadData(mpVersion.version);
                 }
                 tabForecast.Content = _forecast.Content;
             }
@@ -108,8 +109,6 @@ namespace CampaignEditor
             _forecast = _factoryForecast.Create();
             await _forecast.Initialize(_campaign, isReadOnly);
             _forecast.InitializeButtonClicked += Forecast_InitializeButtonClicked;
-            _forecast.VersionChanged += Forecast_ChangeVersionClicked;
-            _forecast.NewVersionClicked += _forecast_NewVersionClicked;
             _forecast.SetLoadingPage += _forecast_SetLoadingPage;
             _forecast.UpdateProgressBar += _forecast_UpdateProgressBar;
             _forecast.SetContentPage += _forecast_SetContentPage;
@@ -134,7 +133,8 @@ namespace CampaignEditor
                     if (mpVer != null)
                         version = mpVer.version;
 
-                    await _forecast.DeleteData(version);
+                    // Check this
+                    //await _forecast.DeleteData(version);
                     var success = await InitializeNewForecast();
                     if (success)
                     {
@@ -222,30 +222,6 @@ namespace CampaignEditor
             tabForecast.Content = _forecastDates.Content;
         }
 
-        private async void Forecast_ChangeVersionClicked(object sender, ChangeVersionEventArgs e)
-        {
-            tabForecast.Content = loadingPage.Content;
-            //_forecast.EmptyFields();
-            int version = e.Version;
-            await _forecast.LoadData(version, false);
-            tabForecast.Content = _forecast.Content;
-        }
-
-        private async void _forecast_NewVersionClicked(object? sender, ChangeVersionEventArgs e)
-        {
-            int version = _forecast.CmpVersion;
-
-            if (MessageBox.Show("Make new media plan from version: " + version + "?", 
-                "Message: ", MessageBoxButton.OKCancel, MessageBoxImage.Question) == MessageBoxResult.OK)
-            {
-                tabForecast.Content = loadingPage.Content;
-                ObservableCollection<MediaPlanTuple> mpTuplesToCopy = _forecast.dgMediaPlans._allMediaPlans;
-                await _forecast.MakeNewVersion(mpTuplesToCopy);
-                tabForecast.Content = _forecast.Content;
-            }
-
-        }
-
         private void _forecast_SetLoadingPage(object? sender, LoadingPageEventArgs e)
         {
             if (e.progressBarValue > 0)
@@ -263,11 +239,6 @@ namespace CampaignEditor
 
         private void _forecast_UpdateProgressBar(object? sender, LoadingPageEventArgs e)
         {
-            /*await Application.Current.Dispatcher.InvokeAsync(() =>
-            {
-                loadingPage.SetContent(e.Message);
-                loadingPage.SetProgressBarValue(e.progressBarValue);
-            }, DispatcherPriority.Background);*/
             loadingPage.SetContent(e.Message);
             loadingPage.SetProgressBarValue(e.progressBarValue);
         }

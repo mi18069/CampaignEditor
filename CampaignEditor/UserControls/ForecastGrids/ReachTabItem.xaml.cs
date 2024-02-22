@@ -1,7 +1,10 @@
 ﻿using CampaignEditor.Controllers;
 using Database.DTOs.CampaignDTO;
+using Database.DTOs.TargetDTO;
 using Microsoft.Win32;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -23,14 +26,17 @@ namespace CampaignEditor.UserControls.ForecastGrids
         private int _segbet = 60;
 
         private CampaignDTO _campaign = null;
+        private List<TargetDTO> _targets = new List<TargetDTO>();
         public ReachTabItem()
         {
             InitializeComponent();
         }
 
-        public async Task Initialize(CampaignDTO campaign)
+        public async Task Initialize(CampaignDTO campaign, List<TargetDTO> targets)
         {
             _campaign = campaign;
+            _targets = targets.ToList();
+            reachGrid.SetTargets(targets);  
             await GetReach();
         }
 

@@ -1,5 +1,7 @@
 ﻿using Database.DTOs.ReachDTO;
+using Database.DTOs.TargetDTO;
 using System.Collections.Generic;
+using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -10,11 +12,31 @@ namespace CampaignEditor.UserControls.ForecastGrids
     /// </summary>
     public partial class ReachGrid : UserControl
     {
+
+        public string PrimaryText { get; set; } = "Primary";
+        public string SecondaryText { get; set; } = "Secondary";
+
         public ReachGrid()
         {
             InitializeComponent();
             ApplyCellStyle(dgGridFirst);
             ApplyCellStyle(dgGridSecond);
+        }
+
+        public void SetTargets(List<TargetDTO> targets)
+        {
+            PrimaryText = targets[0].targname.Trim();
+            dgGridFirst.DataContext = this;
+            if (targets.Count > 1)
+            {
+                SecondaryText = targets[1].targname.Trim();
+                dgGridSecond.DataContext = this;
+            }
+            else
+            {
+                dgGridSecond.Visibility = Visibility.Collapsed;
+            }
+
         }
 
         public void SetReach(ReachDTO reach)

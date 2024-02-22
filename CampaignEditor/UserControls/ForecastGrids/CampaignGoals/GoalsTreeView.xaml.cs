@@ -50,17 +50,6 @@ namespace CampaignEditor.UserControls.ForecastGrids
             selectedItem.FillGoals(newTuple);
         }
 
-        private void ScrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
-        {
-            var scrollViewer = this.scrollViewer;
-
-            if (scrollViewer != null)
-            {
-                scrollViewer.ScrollToVerticalOffset(scrollViewer.VerticalOffset - e.Delta);
-                e.Handled = true;
-            }
-        }
-
         private void ToggleButton_Click(object sender, RoutedEventArgs e)
         {
             if (sender == btnTotal)

@@ -345,7 +345,6 @@ namespace CampaignEditor.UserControls
             myDataView.Refresh();
             // Use Dispatcher to run RefreshTotalGridValues after layout update
             Dispatcher.BeginInvoke(new Action(() => RefreshTotalGridValues()), DispatcherPriority.ContextIdle);
-        
             OnVisibleTuplesChanged();
         }
 

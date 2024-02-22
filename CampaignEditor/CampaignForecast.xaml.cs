@@ -178,17 +178,8 @@ namespace CampaignEditor.UserControls
             startDate = TimeFormat.YMDStringToDateTime(_campaign.cmpsdate);
             endDate = TimeFormat.YMDStringToDateTime(_campaign.cmpedate);
 
-            /*var mps = await _mediaPlanController.GetAllMediaPlansByCmpid(_campaign.cmpid, 2);
-            foreach (var mp in mps)
-            {
-                await _mediaPlanTermController.DeleteMediaPlanTermByXmpId(mp.xmpid);
-                await _mediaPlanHistController.DeleteMediaPlanHistByXmpid(mp.xmpid);
-                await _mediaPlanController.DeleteMediaPlanById(mp.xmpid);
-            }*/
-
             canUserEdit = !isReadOnly;
-            CheckManipulationButtons(canUserEdit, true);
-
+            //CheckManipulationButtons(canUserEdit, true);
             //CampaignEventLinker.AddForecast(_campaign.cmpid, this);
 
 
@@ -196,6 +187,7 @@ namespace CampaignEditor.UserControls
             _mpConverter.Initialize(_forecastData);
             _forecastDataManipulation.Initialize(_campaign, _forecastData, _mpConverter);
             //await _forecastDataManipulation.DeleteCampaignForecast(_campaign.cmpid);
+            //await _forecastDataManipulation.DeleteCampaignForecastVersion(campaign.cmpid, 2);
 
             await InitializeVersions();
             //InitializeChannels();
@@ -214,13 +206,20 @@ namespace CampaignEditor.UserControls
 
         private void CheckManipulationButtons(bool canUserEdit, bool isEditableVersion)
         {
+            // btnNewVersion is always enabled
             if (!canUserEdit || !isEditableVersion)
             {
                 btnClear.IsEnabled = false;
-                btnNewVersion.IsEnabled = false;
                 btnFetchData.IsEnabled = false;
                 btnRecalculateData.IsEnabled = false;
                 btnResetDates.IsEnabled = false;
+            }
+            else
+            {
+                btnClear.IsEnabled = true;
+                btnFetchData.IsEnabled = true;
+                btnRecalculateData.IsEnabled = true;
+                btnResetDates.IsEnabled = true;
             }
         }
 
@@ -384,14 +383,17 @@ namespace CampaignEditor.UserControls
         public async Task InsertAndLoadData(int version)
         {
 
-            await checkIfMaxVersionChanged(version);
-            
-            SetLoadingPage?.Invoke(this, new LoadingPageEventArgs("LOADING...", 1));
+            if (_maxVersion < version)
+            {
+                AddVersion(version);
+            }
+
+            SetLoadingPage?.Invoke(this, new LoadingPageEventArgs("CREATING NEW MEDIA PLAN...", 1));
             _forecastDataManipulation.UpdateProgressBar += _forecastDataManipulation_UpdateProgressBar;
             await _forecastDataManipulation.InsertData(version);
             _forecastDataManipulation.UpdateProgressBar -= _forecastDataManipulation_UpdateProgressBar;
 
-            await LoadData(version, true);
+            await LoadData(version);
 
         }
 
@@ -400,106 +402,82 @@ namespace CampaignEditor.UserControls
             UpdateProgressBar?.Invoke(this, e);
         }
 
-        public async Task MakeNewVersion(ObservableCollection<MediaPlanTuple> allMediaPlans)
+        public async Task MakeNewVersion(IEnumerable<MediaPlanTuple> allMediaPlans)
         {
-            var mpVer = await _mediaPlanVersionController.GetLatestMediaPlanVersion(_campaign.cmpid);
-            int newVersion = mpVer.version + 1;
-            await _mediaPlanVersionController.IncrementMediaPlanVersion(mpVer);
+            // Updating version in database
+            int newVersion = -1;
+            try
+            {
+                var mpVersion = await _mediaPlanVersionController.GetLatestMediaPlanVersion(_campaign.cmpid);
+                newVersion = mpVersion.version + 1;
+                await _mediaPlanVersionController.UpdateMediaPlanVersion(_campaign.cmpid, newVersion);
+            }
+            catch
+            {
+                MessageBox.Show("Error with inserting new version!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
 
             // Make new MediaPlan, MediaPlanTerms and MediaPlanHists in database
-            foreach (MediaPlanTuple mediaPlanTuple in allMediaPlans)
+            try
             {
-                MediaPlan mp = mediaPlanTuple.MediaPlan;
-                MediaPlanDTO mpDTO = _mpConverter.ConvertToDTO(mp);
-                CreateMediaPlanDTO createMPDTO = new CreateMediaPlanDTO(mpDTO);
-                createMPDTO.version = newVersion;
-
-                var mediaPlan = await _mediaPlanController.CreateMediaPlan(createMPDTO);
-
-                if (mediaPlan != null)
-                {
-                    // Adding MediaPlanTerms in database
-                    foreach (MediaPlanTerm mpTerm in mediaPlanTuple.Terms)
-                    {
-                        if (mpTerm != null)
-                        {
-                            MediaPlanTermDTO mpTermDTO = _mpTermConverter.ConvertToDTO(mpTerm);
-                            CreateMediaPlanTermDTO createMPTermDTO = new CreateMediaPlanTermDTO(mpTermDTO);
-                            createMPTermDTO.xmpid = mediaPlan.xmpid;
-                            await _mediaPlanTermController.CreateMediaPlanTerm(createMPTermDTO);
-                        }
-
-                    }
-
-                    // Adding MediaPlanHists in database
-                    var hists = await _mediaPlanHistController.GetAllMediaPlanHistsByXmpid(mpDTO.xmpid);
-
-                    foreach (var hist in hists)
-                    {
-                        CreateMediaPlanHistDTO createMpHistDTO = new CreateMediaPlanHistDTO(hist);
-                        createMpHistDTO.xmpid = mediaPlan.xmpid;
-                        await _mediaPlanHistController.CreateMediaPlanHist(createMpHistDTO);
-                    }
-
-                }
-
+                await _forecastDataManipulation.InsertNewForecastMediaPlans(allMediaPlans, newVersion);
+                AddVersion(newVersion);
+                //await LoadData(newVersion);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Unable to make new Media Plan!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                await _forecastDataManipulation.DeleteCampaignForecastVersion(_campaign.cmpid, newVersion);
+                await LoadData(newVersion - 1);
             }
 
-            await checkIfMaxVersionChanged(newVersion);
-        }
+        }      
 
-        private async Task DeleteVersion(int fromVersion, int toVersion)
+        private void AddVersion(int version)
         {
-            for (int i = fromVersion; i <= toVersion; i++)
-            {
-                var mps = await _mediaPlanController.GetAllMediaPlansByCmpid(_campaign.cmpid, i);
-                foreach (var mp in mps)
-                {
-                    await _mediaPlanTermController.DeleteMediaPlanTermByXmpId(mp.xmpid);
-                    await _mediaPlanHistController.DeleteMediaPlanHistByXmpid(mp.xmpid);
-                    await _mediaPlanController.DeleteMediaPlanById(mp.xmpid);
-                }
-            }
-            await _mediaPlanVersionController.UpdateMediaPlanVersion(_campaign.cmpid, fromVersion - 1);
-        }
-
-        private async Task StartAMRByMediaPlan(int cmpid, int minusTime, int plusTime, List<MediaPlanDTO> mediaPlans)
-        {
-            foreach (MediaPlanDTO mediaPlan in mediaPlans)
-            {
-                await _databaseFunctionsController.StartAMRCalculation(cmpid, minusTime, plusTime, mediaPlan.xmpid);
-            }
-
-        }
-
-        private async Task checkIfMaxVersionChanged(int version)
-        {
-
-            if (_maxVersion < version)
-            {
-                cbVersions.Items.Add(version);
-                _maxVersion = version;
-                cbVersions.SelectedIndex = cbVersions.Items.Count - 1;
-            }
+            _maxVersion = version;
             _cmpVersion = version;
-
+            cbVersions.Items.Add(version);
+            cbVersions.SelectedIndex = version - 1;
         }
 
-        public async Task LoadData(int version, bool isEnabled = false)
+        public async Task LoadData(int version)
         {
             _cmpVersion = version;
-            isEditableVersion = (_maxVersion == _cmpVersion) || isEnabled;
+            isEditableVersion = (_maxVersion == _cmpVersion);
             CheckManipulationButtons(canUserEdit, isEditableVersion);
 
-            // Filling lvChannels and dictionary
-            await FillMPList();
-            await FillLoadedDateRanges();
-            // For dgMediaPlans
-            InitializeDataGrid();
-            await InitializeGrids();
+            try
+            {
+                // Filling lvChannels and dictionary
+                await FillMPList(version);
+                await FillLoadedDateRanges();
+                InitializeDataGrid();
+
+                await InitializeGrids();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error while loading data!\n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+
 
             FillGoals();
 
+        }
+
+        public async Task InitializeGrids()
+        {
+            lvChannels.SelectedItems.Clear();
+            //_selectedChannels.Clear();
+
+            InitializeCGGrid();
+            swgGrid.Initialize(_campaign, _forecastData.Channels, _forecastData.Spots, _cmpVersion);
+            sdgGrid.Initialize(_campaign, _forecastData.Channels, _forecastData.Spots, _cmpVersion);
+            _factoryListing.Initialize(_campaign, _forecastData.Channels, 
+                    _forecastData.ChidPricelistDict, _forecastData.SpotcodeSpotDict, _mpConverter);
+            await reachGrid.Initialize(_campaign, _forecastData.Targets);
         }
 
         private void InitializeDataGrid()
@@ -507,22 +485,10 @@ namespace CampaignEditor.UserControls
             dgMediaPlans.CanUserEdit = canUserEdit && isEditableVersion;
             dgMediaPlans._selectedChannels = _selectedChannels;
             dgMediaPlans._allMediaPlans = _allMediaPlans;
-            dgMediaPlans._filteredDays = filteredDays;          
+            dgMediaPlans._filteredDays = filteredDays;
 
             dgMediaPlans.Initialize(_campaign, _forecastData.Channels, _forecastData.Spots);
 
-        }
-
-        public async Task InitializeGrids()
-        {
-            //_selectedChannels.Clear();
-            lvChannels.SelectedItems.Clear();
-            InitializeCGGrid();
-            swgGrid.Initialize(_campaign, _forecastData.Channels, _forecastData.Spots, _cmpVersion);
-            sdgGrid.Initialize(_campaign, _forecastData.Channels, _forecastData.Spots, _cmpVersion);
-            _factoryListing.Initialize(_campaign, _forecastData.Channels, 
-                _forecastData.ChidPricelistDict, _forecastData.SpotcodeSpotDict, _mpConverter);
-            await reachGrid.Initialize(_campaign);
         }
 
         private void InitializeCGGrid()
@@ -590,37 +556,25 @@ namespace CampaignEditor.UserControls
         }
 
 
-        public delegate void ChangeVersionEventHandler(object sender, ChangeVersionEventArgs e);
-        public event ChangeVersionEventHandler VersionChanged;
-        private void CbVersions_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private async void CbVersions_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             // Check if any items are selected
             int selectedIndex = cbVersions.SelectedIndex;
             int version = selectedIndex + 1; // Versions start from 1
-            var eventArgs = new ChangeVersionEventArgs(version);
-            VersionChanged?.Invoke(this, eventArgs);
-
+            await LoadData(version);
         }
 
-        public async Task DeleteData(int version)
+        private async void btnNewVersion_Click(object sender, RoutedEventArgs e)
         {
-            await _mediaPlanRefController.DeleteMediaPlanRefById(_campaign.cmpid);
-            var mediaPlans = await _mediaPlanController.GetAllMediaPlansByCmpid(_campaign.cmpid, version);
+            int currentVersion = _cmpVersion;
 
-            foreach (var mediaPlan in mediaPlans)
+            if (MessageBox.Show("Make new media plan from version: " + currentVersion + "?",
+                "Question", MessageBoxButton.OKCancel, MessageBoxImage.Question) == MessageBoxResult.OK)
             {
-                //await DeleteMPById(mediaPlan.xmpid);
-                await SetMPToInactive(mediaPlan.xmpid);
+                SetLoadingPage?.Invoke(this, new LoadingPageEventArgs("MAKING NEW MEDIA PLAN DATA...", 0));
+                await MakeNewVersion(_allMediaPlans);
+                SetContentPage?.Invoke(this, null);
             }
-
-        }
-
-        public event EventHandler<ChangeVersionEventArgs> NewVersionClicked;
-        private void btnNewVersion_Click(object sender, RoutedEventArgs e)
-        {
-            int newVersion = _maxVersion + 1;
-            var eventArgs = new ChangeVersionEventArgs(newVersion);
-            NewVersionClicked?.Invoke(this, eventArgs);
 
         }
 
@@ -897,9 +851,9 @@ namespace CampaignEditor.UserControls
 
         #region Filling lists
 
-        private async Task FillMPList()
+        private async Task FillMPList(int version)
         {
-            var allMediaPlans = await _forecastDataManipulation.MakeMediaPlanTuples(_cmpVersion);
+            var allMediaPlans = await _forecastDataManipulation.MakeMediaPlanTuples(version);
             _allMediaPlans.ReplaceRange(allMediaPlans);
 
         }

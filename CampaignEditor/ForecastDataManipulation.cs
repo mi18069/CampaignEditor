@@ -1,8 +1,8 @@
 ﻿using CampaignEditor.Controllers;
 using CampaignEditor.Helpers;
 using Database.DTOs.CampaignDTO;
-using Database.DTOs.ChannelDTO;
 using Database.DTOs.MediaPlanDTO;
+using Database.DTOs.MediaPlanHistDTO;
 using Database.DTOs.MediaPlanTermDTO;
 using Database.DTOs.SchemaDTO;
 using Database.Entities;
@@ -170,7 +170,7 @@ namespace CampaignEditor
                 {
                     await _databaseFunctionsController.StartAMRCalculation(_campaign.cmpid, 40, 40, mediaPlan.xmpid);
                     calculatingProcess.IncrementProcess();
-                    OnUpdateProgressBar($"Getting referenced data for channels...\n{channelName}\n{calculatingProcess.ProgressPercentage}%", calculatingProcess.ProgressPercentage);
+                    OnUpdateProgressBar($"GETTING REFERENCED DATA FOR CHANNELS...\n{channelName}\n{calculatingProcess.ProgressPercentage}%", calculatingProcess.ProgressPercentage);
                 }
 
             }
@@ -247,18 +247,34 @@ namespace CampaignEditor
 
         public async Task DeleteCampaignForecast(int cmpid)
         {
-            for (int i=0; i<15; i++)
+            var version = await _mediaPlanVersionController.GetLatestMediaPlanVersion(cmpid);
+            if (version == null)
             {
-                var mediaPlans = await _mediaPlanController.GetAllMediaPlansByCmpid(cmpid, i);
-                foreach (var mediaPlan in mediaPlans)
-                {
-                    await DeleteMediaPlan(mediaPlan.xmpid);
-                }
+                await _mediaPlanRefController.DeleteMediaPlanRefById(cmpid);
+                return;
             }
-            await _mediaPlanRefController.DeleteMediaPlanRefById(cmpid);
-            await _mediaPlanVersionController.DeleteMediaPlanVersionById(cmpid);
+            for (int i = version.version; i >= 1; i--)
+            {
+                await DeleteCampaignForecastVersion(cmpid, i);
+            }
+        }
 
+        // Using for deleting processed data when error is encountered
+        public async Task DeleteCampaignForecastVersion(int cmpid, int version)
+        {
+            var mediaPlans = await _mediaPlanController.GetAllMediaPlansByCmpid(cmpid, version);
+            foreach (var mediaPlan in mediaPlans)
+            {
+                await DeleteMediaPlan(mediaPlan.xmpid);
+            }
 
+            if (version == 1)
+            {
+                await _mediaPlanVersionController.DeleteMediaPlanVersionById(cmpid);
+                await _mediaPlanRefController.DeleteMediaPlanRefById(cmpid);
+            }
+            else
+                await _mediaPlanVersionController.UpdateMediaPlanVersion(cmpid, version - 1);
         }
 
         private async Task DeleteMediaPlan(int xmpid)
@@ -476,6 +492,49 @@ namespace CampaignEditor
             await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(_mpConverter.ConvertToDTO(mediaPlanTuple.MediaPlan)));
         }
 
+        #endregion
+
+        #region Adding New MediaPlans
+        public async Task InsertNewForecastMediaPlans(IEnumerable<MediaPlanTuple> mediaPlanTuples, int newVersion)
+        {
+            foreach (MediaPlanTuple mediaPlanTuple in mediaPlanTuples)
+            {
+                MediaPlan mp = mediaPlanTuple.MediaPlan;
+                MediaPlanDTO mpDTO = _mpConverter.ConvertToDTO(mp);
+                CreateMediaPlanDTO createMPDTO = new CreateMediaPlanDTO(mpDTO);
+                createMPDTO.version = newVersion;
+
+                var mediaPlan = await _mediaPlanController.CreateMediaPlan(createMPDTO);
+
+                if (mediaPlan != null)
+                {
+                    // Adding MediaPlanTerms in database
+                    foreach (MediaPlanTerm mpTerm in mediaPlanTuple.Terms)
+                    {
+                        if (mpTerm != null)
+                        {
+                            MediaPlanTermDTO mpTermDTO = _mpTermConverter.ConvertToDTO(mpTerm);
+                            CreateMediaPlanTermDTO createMPTermDTO = new CreateMediaPlanTermDTO(mpTermDTO);
+                            createMPTermDTO.xmpid = mediaPlan.xmpid;
+                            await _mediaPlanTermController.CreateMediaPlanTerm(createMPTermDTO);
+                        }
+
+                    }
+
+                    // Adding MediaPlanHists in database
+                    var hists = await _mediaPlanHistController.GetAllMediaPlanHistsByXmpid(mpDTO.xmpid);
+
+                    foreach (var hist in hists)
+                    {
+                        CreateMediaPlanHistDTO createMpHistDTO = new CreateMediaPlanHistDTO(hist);
+                        createMpHistDTO.xmpid = mediaPlan.xmpid;
+                        await _mediaPlanHistController.CreateMediaPlanHist(createMpHistDTO);
+                    }
+
+                }
+            }
+                     
+        }
         #endregion
     }
 }

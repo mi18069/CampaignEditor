@@ -22,7 +22,8 @@
             <RowDefinition Height="50" />
         </Grid.RowDefinitions>
         <TextBlock x:Name="tbMessage" Grid.Row="1" Grid.RowSpan="3" Grid.Column="1" Text="LOADING..." Foreground="Black" FontSize="60"
-                   HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap">
+                   HorizontalAlignment="Center" VerticalAlignment="Center" TextWrapping="Wrap"
+                   TextAlignment="Center">
         </TextBlock>
         <ProgressBar x:Name="pbBar" Grid.Row="2" Grid.Column="1" Visibility="Collapsed"/>
     </Grid>

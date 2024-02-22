@@ -8,6 +8,7 @@ using Database.DTOs.SeasonalityDTO;
 using Database.DTOs.SectableDTO;
 using Database.DTOs.SectablesDTO;
 using Database.DTOs.SpotDTO;
+using Database.DTOs.TargetDTO;
 using Database.Repositories;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,6 +22,7 @@ namespace CampaignEditor
         private List<ChannelDTO> _channels = new List<ChannelDTO>();
         private List<SpotDTO> _spots = new List<SpotDTO>();
         private List<PricelistDTO> _pricelists = new List<PricelistDTO>();
+        private List<TargetDTO> _targets = new List<TargetDTO>();
 
         private Dictionary<char, SpotDTO> _spotcodeSpotDict = new Dictionary<char, SpotDTO>();
         private Dictionary<int, PricelistDTO> _chidPricelistDict = new Dictionary<int, PricelistDTO>();
@@ -39,10 +41,13 @@ namespace CampaignEditor
         private SeasonalitiesController _seasonalitiesController;
         private SectablesController _sectablesController;
         private PricesController _pricesController;
+        private TargetCmpController _targetCmpController;
+        private TargetController _targetController;
 
         public List<ChannelDTO> Channels { get { return _channels; } }
         public List<SpotDTO> Spots { get { return _spots; } }
         public List<PricelistDTO> Pricelists { get { return _pricelists; } }
+        public List<TargetDTO> Targets { get { return _targets; } }
 
         public Dictionary<char, SpotDTO> SpotcodeSpotDict { get { return _spotcodeSpotDict; } }
         public Dictionary<int, PricelistDTO> ChidPricelistDict { get { return _chidPricelistDict; } }
@@ -57,7 +62,8 @@ namespace CampaignEditor
             IChannelCmpRepository channelCmpRepository, IPricelistRepository pricelistRepository,
             ISeasonalityRepository seasonalityRepository, ISectableRepository sectableRepository,
             ISeasonalitiesRepository seasonalitiesRepository, ISectablesRepository sectablesRepository,
-            IPricesRepository pricesRepository)
+            IPricesRepository pricesRepository, ITargetCmpRepository targetCmpRepository, 
+            ITargetRepository targetRepository)
         {
             _channelController = new ChannelController(channelRepository);
             _spotController = new SpotController(spotRepository);
@@ -68,6 +74,8 @@ namespace CampaignEditor
             _seasonalitiesController = new SeasonalitiesController(seasonalitiesRepository);
             _sectablesController = new SectablesController(sectablesRepository);
             _pricesController = new PricesController(pricesRepository);
+            _targetCmpController = new TargetCmpController(targetCmpRepository);
+            _targetController = new TargetController(targetRepository);
         }
 
         public async Task Initialize(CampaignDTO campaign)
@@ -82,6 +90,7 @@ namespace CampaignEditor
             await InitializeChannels();
             await InitializeSpots();
             await InitializePricelists();
+            await InitializeTargets();
         }
 
         private async Task InitializeChannels()
@@ -117,6 +126,21 @@ namespace CampaignEditor
                 if (!_pricelists.Contains(pricelist))
                 {
                     _pricelists.Add(pricelist);
+                }
+            }
+        }
+
+        private async Task InitializeTargets()
+        {
+            _targets.Clear();
+            var targetCmps = await _targetCmpController.GetTargetCmpByCmpid(_campaign.cmpid);
+            targetCmps = targetCmps.OrderBy(tCmp => tCmp.priority);
+            foreach (var targetCmp in targetCmps)
+            {
+                var target = await _targetController.GetTargetById(targetCmp.targid);
+                if (!_targets.Contains(target))
+                {
+                    _targets.Add(target);
                 }
             }
         }

@@ -12,7 +12,6 @@
             <RowDefinition Height="auto" />
             <RowDefinition Height="auto" />
             <RowDefinition Height="auto" />
-            <RowDefinition Height="auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="10" />
         </Grid.RowDefinitions>
@@ -49,18 +48,6 @@
                 </Grid.ColumnDefinitions>
                 <Label x:Name="lblInsertations" Content="Insertations: " Grid.Column="0"/>
                 <Label x:Name="lblInsertationsValue" Grid.Column="1" Content="{Binding Insertations}"
-                           HorizontalContentAlignment="Right" FontWeight="DemiBold"/>
-            </Grid>
-        </Border>
-        <Border x:Name="bpReach" Grid.Row="4"  
-                            BorderThickness="0, 0, 0, 1" BorderBrush="Black">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <Label x:Name="lblReach" Content="Reach: " Grid.Column="0"/>
-                <Label x:Name="lblReachValue" Grid.Column="1" 
                            HorizontalContentAlignment="Right" FontWeight="DemiBold"/>
             </Grid>
         </Border>

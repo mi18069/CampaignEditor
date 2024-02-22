@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Database.Entities;
+using System;
 
 namespace Database.DTOs.MediaPlanTermDTO
 {
@@ -10,6 +11,11 @@ namespace Database.DTOs.MediaPlanTermDTO
         }
         public CreateMediaPlanTermDTO(MediaPlanTermDTO mpTermDTO)
             : base(mpTermDTO.xmpid, mpTermDTO.date, mpTermDTO.spotcode)
+        {
+        }
+
+        public CreateMediaPlanTermDTO(MediaPlanTerm mpTerm)
+        : base(mpTerm.Xmpid, mpTerm.Date, mpTerm.Spotcode)
         {
         }
     }

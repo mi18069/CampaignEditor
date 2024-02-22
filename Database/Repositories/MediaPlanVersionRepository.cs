@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using Dapper;
 using Database.Data;
-using Database.DTOs.MediaPlanTermDTO;
 using Database.DTOs.MediaPlanVersionDTO;
 using Database.Entities;
 using System;

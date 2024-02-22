@@ -27,7 +27,7 @@
                   GotFocus="DataGrid_GotFocus">
             <DataGrid.RowHeaderTemplate>
                 <DataTemplate>
-                    <TextBlock Text="Primary"/>
+                    <TextBlock x:Name="PrimaryTextBlock" Text="{Binding DataContext.PrimaryText, RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
                 </DataTemplate>
             </DataGrid.RowHeaderTemplate>
             <DataGrid.Columns>
@@ -91,7 +91,7 @@
             </DataGrid.RowStyle>
             <DataGrid.RowHeaderTemplate>
                 <DataTemplate>
-                    <TextBlock Text="Secondary"/>
+                    <TextBlock x:Name="SecondaryTextBlock" Text="{Binding DataContext.SecondaryText, RelativeSource={RelativeSource AncestorType=DataGrid}}"/>
                 </DataTemplate>
             </DataGrid.RowHeaderTemplate>
             <DataGrid.Columns>
