@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Globalization;
+using System.Windows;
 using System.Windows.Data;
+using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
 namespace CampaignEditor.Converters
@@ -11,8 +13,8 @@ namespace CampaignEditor.Converters
         {
             if (value is bool tv)
             {
-                return tv ? new BitmapImage(new Uri("\\images\\tv_icon.png", UriKind.RelativeOrAbsolute)) :
-                            new BitmapImage(new Uri("\\images\\radio_icon1.png", UriKind.RelativeOrAbsolute));
+                return tv ? (ImageSource)Application.Current.FindResource("tv_icon") :
+                            (ImageSource)Application.Current.FindResource("radio_icon");
             }
 
             return null;

@@ -110,7 +110,8 @@ namespace CampaignEditor
             Button btnAddSeas = new Button();
             btnAddSeas.Click += new RoutedEventHandler(btnAddSeas_Click);
             Image imgGreenPlus = new Image();
-            imgGreenPlus.Source = new BitmapImage(new Uri(appPath + imgGreenPlusPath));
+            ImageSource imageSource = (ImageSource)Application.Current.FindResource("plus_icon");
+            imgGreenPlus.Source = imageSource;
             btnAddSeas.Content = imgGreenPlus;
             btnAddSeas.Width = 30;
             btnAddSeas.Height = 30;

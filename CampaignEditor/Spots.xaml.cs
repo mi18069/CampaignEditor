@@ -110,7 +110,8 @@ namespace CampaignEditor
             Button btnAddSpot = new Button();
             btnAddSpot.Click += new RoutedEventHandler(btnAddSpot_Click);
             Image imgGreenPlus = new Image();
-            imgGreenPlus.Source = new BitmapImage(new Uri(appPath + imgGreenPlusPath));
+            ImageSource imageSource = (ImageSource)Application.Current.FindResource("plus_icon");
+            imgGreenPlus.Source = imageSource;
             btnAddSpot.Content = imgGreenPlus;
             btnAddSpot.Width = 30;
             btnAddSpot.Height = 30;

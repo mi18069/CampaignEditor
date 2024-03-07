@@ -62,13 +62,13 @@
                 Width="30" Height="30" Background="White" IsEnabled="false"
                 VerticalAlignment="Center" HorizontalAlignment="Right"
                 Click="btnDeleteChhGr_Click">
-                <Image Source="\images\Red_X.png" Width="20" Height="20"></Image>
+                <Image Source="{StaticResource x_icon}" Width="20" Height="20"></Image>
             </Button>
             <Button x:Name="btnNewChhGr" Grid.Row="1" Grid.Column="2"
                 Width="30" Height="30" Background="White" 
                 VerticalAlignment="Center" HorizontalAlignment="Left"
                 Click="btnNewChhGr_Click">
-                <Image Source="\images\GreenPlus.png" Width="20" Height="20"></Image>
+                <Image Source="{StaticResource plus_icon}" Width="20" Height="20"></Image>
             </Button>
         </Grid>
 
@@ -82,13 +82,13 @@
                 Width="50" Height="50" Background="White" 
                 VerticalAlignment="Bottom"
                 Click="btnToAssigned_Click">
-                <Image Source="\images\RightArrow.png" Width="20" Height="20"></Image>
+                <Image Source="{StaticResource right_arrow_icon}" Width="20" Height="20"></Image>
             </Button>
             <Button x:Name="btnFromAssigned" Grid.Row="2"
                 Width="50" Height="50" Background="White" 
                 VerticalAlignment="Top" 
                 Click="btnFromAssigned_Click">
-                <Image Source="\images\LeftArrow.png" Width="20" Height="20"></Image>
+                <Image Source="{StaticResource left_arrow_icon}" Width="20" Height="20"></Image>
             </Button>
 
         </Grid>

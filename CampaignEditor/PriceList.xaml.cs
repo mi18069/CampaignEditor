@@ -152,7 +152,8 @@ namespace CampaignEditor
             Button btnAddDP = new Button();
             btnAddDP.Click += new RoutedEventHandler(btnAddDP_Click);
             Image imgGreenPlus = new Image();
-            imgGreenPlus.Source = new BitmapImage(new Uri(appPath + imgGreenPlusPath));
+            ImageSource imageSource = (ImageSource)Application.Current.FindResource("plus_icon");
+            imgGreenPlus.Source = imageSource;
             btnAddDP.Content = imgGreenPlus;
             btnAddDP.Width = 30;
             btnAddDP.Height = 30;

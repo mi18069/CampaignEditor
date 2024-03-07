@@ -38,7 +38,7 @@
         <Button x:Name="btnDelete" Grid.Row="1" Grid.Column="5" 
                 Background="White" BorderThickness="0"
                 Click="btnDelete_Click">
-            <Image Source="\images\Red_X.png" Width="20" Height="20"></Image>
+            <Image Source="{StaticResource x_icon}" Width="20" Height="20"></Image>
         </Button>
     </Grid>
 </UserControl>

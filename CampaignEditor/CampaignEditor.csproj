@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
+	<Version>1.0.0.0</Version>
     <TargetFramework>net6.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
@@ -19,8 +20,11 @@
     <None Remove="images\Green_+.jpg" />
     <None Remove="images\LeftArrow.png" />
     <None Remove="images\load_data_icon.png" />
+    <None Remove="images\PassPeekImg.png" />
+    <None Remove="images\PassUnpeekImg.png" />
     <None Remove="images\radio_icon.png" />
     <None Remove="images\radio_icon1.png" />
+    <None Remove="images\radio_icon3.png" />
     <None Remove="images\recalculate_data_icon.jpg" />
     <None Remove="images\recalculate_data_icon.png" />
     <None Remove="images\recalculate_icon.png" />
@@ -46,11 +50,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="EPPlus" Version="6.2.6" />
+    <PackageReference Include="EPPlus" Version="7.0.9" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.0" />
-    <PackageReference Include="System.Configuration.ConfigurationManager" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
+    <PackageReference Include="squirrel.windows" Version="1.9.0" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="8.0.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -64,7 +69,10 @@
     <Resource Include="images\fetch_data_icon.png" />
     <Resource Include="images\GreenPlus.png" />
     <Resource Include="images\LeftArrow.png" />
+    <Resource Include="images\PassPeekImg.png" />
+    <Resource Include="images\PassUnpeekImg.png" />
     <Resource Include="images\radio_icon1.png" />
+    <Resource Include="images\radio_icon3.png" />
     <Resource Include="images\recalculate_data_icon.jpg" />
     <Resource Include="images\recalculate_data_icon.png" />
     <Resource Include="images\Red_X.png" />

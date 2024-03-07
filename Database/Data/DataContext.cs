@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Npgsql;
 using System;
+using System.Text;
 
 namespace Database.Data
 {

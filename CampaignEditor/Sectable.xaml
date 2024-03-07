@@ -62,7 +62,7 @@
                 Background="White" BorderThickness="0"
                 Margin="10,10"
                 Click="btnAdd_Click">
-            <Image Source="\images\GreenPlus.png" Width="20" Height="20"></Image>
+            <Image Source="{StaticResource plus_icon}" Width="20" Height="20"></Image>
         </Button>
 
         <Label Content="Delete from: " Grid.Row="4" Grid.Column="1"
@@ -80,7 +80,7 @@
                 Background="White" BorderThickness="0"
                 Margin="10,10"
                 Click="btnDelete_Click">
-            <Image Source="\images\Red_X.png" Width="20" Height="20"></Image>
+            <Image Source="{StaticResource x_icon}" Width="20" Height="20"></Image>
         </Button>
         
         <DataGrid x:Name="dgSectables" Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="7" Grid.RowSpan="2"

@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CampaignEditor"
         mc:Ignorable="d"
-        Title="MainWindow" Height="400" Width="600"
+        Title="Campaign Editor" Height="400" Width="600"
         FontSize="20" ResizeMode="NoResize"
         PreviewKeyDown="Window_PreviewKeyDown">
     <Grid>
@@ -45,7 +45,7 @@
                 BorderThickness="0" Background="White" IsTabStop="False"
                 VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,30,30,0" 
                 Click="btnConfigDatabase_Click">
-            <Image Source="\images\config_icon.png" Width="30" Height="30" ></Image>
+            <Image Source="{StaticResource config_icon}" Width="30" Height="30" ></Image>
         </Button>
         <Button x:Name="btnCheckCredentials" Content="Log in" HorizontalContentAlignment="Center" 
                 Width="200" Height="40"

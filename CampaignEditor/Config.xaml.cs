@@ -130,6 +130,12 @@ namespace CampaignEditor
         private void btnSave_Click(object sender, RoutedEventArgs e)
         {
 
+            Save();
+
+        }
+
+        private void Save()
+        {
             if (tbServer.Text.Contains(';') ||
                 tbPort.Text.Contains(';') ||
                 tbUsername.Text.Contains(';') ||
@@ -154,13 +160,21 @@ namespace CampaignEditor
                 MessageBox.Show("Cannot save settings: " + ex.Message, "Message", MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
             }
+
+
             // Saving without checkings
             AppSetting setting = new AppSetting();
             setting.SaveConnectionString("cs", encryptedString);
             MessageBox.Show("Connection succesfully saved", "Message", MessageBoxButton.OK, MessageBoxImage.Information);
             this.Close();
-
         }
 
+        private void Window_KeyDown(object sender, System.Windows.Input.KeyEventArgs e)
+        {
+            if (e.Key == System.Windows.Input.Key.Enter)
+            {
+                Save();
+            }
+        }
     }
 }

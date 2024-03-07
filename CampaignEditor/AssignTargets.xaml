@@ -35,26 +35,26 @@
                 Width="100" Height="40"
                 HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0, 80, 0, 0"
                 Click="btnToSelected_Click">
-                <Image Source="\images\RightArrow.png"></Image>
+                <Image Source="{StaticResource right_arrow_icon}"></Image>
             </Button>
             <Button x:Name="btnFromSelected" Background="White"
                 Width="100" Height="40"
                 HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0, 140, 0, 0"
                 Click="btnFromSelected_Click">
-                <Image Source="\images\LeftArrow.png"></Image>
+                <Image Source="{StaticResource left_arrow_icon}"></Image>
             </Button>
             <Button x:Name="btnNewTarget" Background="White"
                 Width="100" Height="40"
                 HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0, 250, 0, 0"
                 Click="btnNewTarget_Click">
-                <Image Source="\images\GreenPlus.png"></Image>
+                <Image Source="{StaticResource plus_icon}"></Image>
             </Button>
             <Button x:Name="btnEditTarget" Background="White"
                 Width="100" Height="40"
                 HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0, 310, 0, 0"
                 IsEnabled="False"
                 Click="btnEditTarget_Click">
-                <Image Source="\images\Edit_Icon2.png"></Image>
+                <Image Source="{StaticResource edit_icon}"></Image>
             </Button>
             <Border BorderBrush="Gray" BorderThickness="1"
             Width="300" Height="100" 

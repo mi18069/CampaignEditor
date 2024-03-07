@@ -22,7 +22,7 @@
             <RowDefinition Height="10"/>
         </Grid.RowDefinitions>
         <Image x:Name="imgUserIcon" Grid.Row="1" Grid.Column="1" 
-               Source="\images\UserIcon.png" Width="45" Height="45"/>
+               Source="{StaticResource user_icon}" Width="45" Height="45"/>
         <Label x:Name="lblUsername" Content="Username" FontWeight="Bold"
                Grid.Row="1" Grid.Column="2"
                HorizontalAlignment="Left" VerticalAlignment="Center"/>
@@ -37,7 +37,7 @@
                 Grid.Row="1" Grid.Column="4"
                 HorizontalAlignment="Right" VerticalAlignment="Center"
                 Click="btnUnassign_Click">
-            <Image Source="\images\red_X.png" Width="25" Height="25"></Image>
+            <Image Source="{StaticResource x_icon}" Width="25" Height="25"></Image>
         </Button>
     </Grid>
 </UserControl>

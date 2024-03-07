@@ -4,18 +4,12 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
 using System.Windows.Media;
-using System.IO;
-using System.Windows.Input;
 
 namespace CampaignEditor.UserControls
 {
     public class ListBoxAddButton : ListBox
     {
         protected Object objectToAdd = null;
-
-        // For Plus Icon
-        private string appPath = Directory.GetCurrentDirectory();
-        private string imgGreenPlusPath = "\\images\\GreenPlus.png";
 
         public ListBoxAddButton()
         {
@@ -25,9 +19,6 @@ namespace CampaignEditor.UserControls
         public void Initialize(object objToAdd)
         {
             objectToAdd = objToAdd;
-            //Type objectType = objectToAdd.GetType();
-            //ConstructorInfo constructor = objectType.GetConstructor(Type.EmptyTypes);
-            //object newObject = constructor.Invoke(new object[] { });
             this.Items.Add(objToAdd);
 
             Button addButton = MakeAddButton();
@@ -41,7 +32,8 @@ namespace CampaignEditor.UserControls
             Button btnAddDP = new Button();
             btnAddDP.Click += new RoutedEventHandler(btnAddDP_Click);
             Image imgGreenPlus = new Image();
-            imgGreenPlus.Source = new BitmapImage(new Uri(appPath + imgGreenPlusPath));
+            ImageSource imageSource = (ImageSource)Application.Current.FindResource("plus_icon");
+            imgGreenPlus.Source = imageSource;
             btnAddDP.Content = imgGreenPlus;
             btnAddDP.Width = 50;
             btnAddDP.Height = 50;

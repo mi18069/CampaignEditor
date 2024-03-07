@@ -72,19 +72,19 @@
                             SelectionChanged="CbVersions_SelectionChanged"/>
                 <Button x:Name="btnNewVersion" Grid.Column="2"
                         Click="btnNewVersion_Click" Margin="10, 0, 0 ,0" BorderThickness="0" Background="White">
-                    <Image Source="\images\GreenPlus.png" Width="20" Height="20"></Image>
+                    <Image Source="{StaticResource plus_icon}" Width="20" Height="20"></Image>
                 </Button>
                 <Button x:Name="btnClear" Grid.Column="3"
                         Click="btnClear_Click"  Margin="10, 0, 0 ,0" BorderThickness="0" Background="White">
-                    <Image Source="\images\Red_X.png" Width="20" Height="20"></Image>
+                    <Image Source="{StaticResource x_icon}" Width="20" Height="20"></Image>
                 </Button>
                 <Button x:Name="btnRecalculateData" Grid.Column="4"
                         Click="btnRecalculateData_Click"  BorderThickness="0" Background="White">
-                    <Image Source="\images\recalculate_data_icon.png" Width="30" Height="30"></Image>
+                    <Image Source="{StaticResource recalculate_data_icon}" Width="30" Height="30"></Image>
                 </Button>
                 <Button x:Name="btnFetchData" Grid.Column="5"
                         Click="btnFetchData_Click"  Margin="5, 0, 0, 0" BorderThickness="0" Background="White">
-                    <Image Source="\images\fetch_data_icon.png" Width="30" Height="30"></Image>
+                    <Image Source="{StaticResource fetch_data_icon}" Width="30" Height="30"></Image>
                 </Button>
 
             </Grid>

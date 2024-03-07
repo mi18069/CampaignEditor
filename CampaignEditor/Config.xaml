@@ -5,7 +5,8 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CampaignEditor"
         mc:Ignorable="d"
-        Title="Config" Height="400" Width="600" FontSize="22" Loaded="Window_Loaded">
+        Title="Config" Height="400" Width="600" FontSize="22" Loaded="Window_Loaded"
+        KeyDown="Window_KeyDown">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="10"/>

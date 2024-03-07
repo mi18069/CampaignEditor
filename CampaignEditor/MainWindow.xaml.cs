@@ -7,10 +7,14 @@ using Database.Repositories;
 using System;
 using System.Configuration;
 using System.IO;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media.Imaging;
-
+using Squirrel;
+using System.Diagnostics;
+using System.Linq;
+using System.Windows.Media;
 
 namespace CampaignEditor
 {
@@ -22,35 +26,71 @@ namespace CampaignEditor
         private UserController _userController;
         private OnStartupContoller _onStartupController;
 
-
-        private string appPath = Directory.GetCurrentDirectory();
-        private string imgPeekPath = "\\images\\PassPeekImg.png";
-        private string imgUnpeekPath = "\\images\\PassUnpeekImg.png";
-
         public static UserDTO user = null;
         private bool onlyOne = false; // To ensure that only one window is shown
         public MainWindow(IUserRepository userRepository, IAbstractFactory<Clients> factoryClients,
             IAbstractFactory<Config> factoryConfig,
             IDatabaseFunctionsRepository dfRepository)
         {
-            
-            InitializeComponent();
+            try
+            {
+                InitializeComponent();
 
-            _userRepository = userRepository;
-            _factoryClients = factoryClients;
-            _factoryConfig = factoryConfig;
+                _userRepository = userRepository;
+                _factoryClients = factoryClients;
+                _factoryConfig = factoryConfig;
 
-            _onStartupController = new OnStartupContoller(dfRepository);
+                _onStartupController = new OnStartupContoller(dfRepository);
 
-            // Let it run in the background on every starting
-            _onStartupController.RunUpdateUnavailableDates();
+                // Let it run in the background on every starting
+                _onStartupController.RunUpdateUnavailableDates();
 
-            _userController = new UserController(_userRepository);
-            PassShowHide.Source = new BitmapImage(new Uri(appPath + imgPeekPath));
-          
-            Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
-            string connectionString = config.ConnectionStrings.ConnectionStrings["cs"].ConnectionString;
-            AppSettings.ConnectionString = connectionString;
+                _userController = new UserController(_userRepository);
+
+                Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+                string connectionString = config.ConnectionStrings.ConnectionStrings["cs"].ConnectionString;
+                AppSettings.ConnectionString = connectionString;
+
+                // Access the image resource from your application resources
+                ImageSource imageSource = (ImageSource)Application.Current.FindResource("pass_peek_icon");
+                // Set the Source property of the Image control
+                PassShowHide.Source = imageSource;
+
+                AddVersionNumber();
+                CheckForUpdates();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error:\n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+
+        }
+
+        private void AddVersionNumber()
+        {
+            System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
+            FileVersionInfo versionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
+            this.Title += $" v. {versionInfo.FileVersion } ";
+        }
+      
+        private async Task CheckForUpdates()
+        {
+            // UpdateManager(@"location\for\updates")
+            using (var manager = new UpdateManager(@"C:\Temp\Releases"))
+            {
+                var updateInfo = await manager.CheckForUpdate();
+
+                if (updateInfo.ReleasesToApply.Any())
+                {
+                    var result = MessageBox.Show("A new version of the application is available. Do you want to install it?", "Update Available", MessageBoxButton.YesNo);
+
+                    if (result == MessageBoxResult.Yes)
+                    {
+                        await manager.UpdateApp();
+                        Application.Current.Shutdown();
+                    }
+                }
+            }
         }
        
 
@@ -129,14 +169,20 @@ namespace CampaignEditor
         }
         void ShowPassword()
         {
-            PassShowHide.Source = new BitmapImage(new Uri(appPath + imgUnpeekPath));
+            // Access the image resource from your application resources
+            ImageSource imageSource = (ImageSource)Application.Current.FindResource("pass_unpeek_icon");
+            // Set the Source property of the Image control
+            PassShowHide.Source = imageSource;
             tbPassword.Visibility = Visibility.Visible;
             pbPassword.Visibility = Visibility.Hidden;
             tbPassword.Text = pbPassword.Password;
         }
         void HidePassword()
         {
-            PassShowHide.Source = new BitmapImage(new Uri(appPath + imgPeekPath));
+            // Access the image resource from your application resources
+            ImageSource imageSource = (ImageSource)Application.Current.FindResource("pass_peek_icon");
+            // Set the Source property of the Image control
+            PassShowHide.Source = imageSource;
             tbPassword.Visibility = Visibility.Hidden;
             pbPassword.Visibility = Visibility.Visible;
             pbPassword.Focus();

@@ -33,7 +33,7 @@
                     Background="White" IsTabStop="False" BorderThickness="0"
                     HorizontalAlignment="Right" VerticalAlignment="Top"
                     Click="btnPassChange_Click">
-            <Image Source="\images\ChangePassIcon.png" Width="40" Height="40" ></Image>
+            <Image Source="{StaticResource change_pass_icon}" Width="40" Height="40" ></Image>
         </Button>
         <Grid Grid.Row="1" Grid.Column="1">
             <Label x:Name="lblUsername" Content="user: " FontWeight="Bold"

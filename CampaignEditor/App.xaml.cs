@@ -6,9 +6,6 @@ using Database.Data;
 using System.Globalization;
 using System.Threading;
 using CampaignEditor.UserControls;
-using CampaignEditor.Converters;
-using System.Windows.Controls;
-using OfficeOpenXml.FormulaParsing.Excel.Functions.DateTime;
 
 namespace CampaignEditor
 {
