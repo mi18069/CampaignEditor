@@ -6,11 +6,9 @@ using Database;
 using Database.Repositories;
 using System;
 using System.Configuration;
-using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
-using System.Windows.Media.Imaging;
 using Squirrel;
 using System.Diagnostics;
 using System.Linq;
@@ -70,13 +68,29 @@ namespace CampaignEditor
         {
             System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
             FileVersionInfo versionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
-            this.Title += $" v. {versionInfo.FileVersion } ";
+            this.Title += $" v.{versionInfo.FileVersion } ";
         }
       
         private async Task CheckForUpdates()
         {
             // UpdateManager(@"location\for\updates")
-            using (var manager = new UpdateManager(@"C:\Temp\Releases"))
+            using (var manager = UpdateManager.GitHubUpdateManager("https://github.com/mi18069/CampaignEditor/releases/latest"))
+            {
+                var updateInfo = await manager.Result.CheckForUpdate();
+
+                if (updateInfo.ReleasesToApply.Any())
+                {
+                    var result = MessageBox.Show("A new version of the application is available. Do you want to install it?", "Update Available", MessageBoxButton.YesNo);
+
+                    if (result == MessageBoxResult.Yes)
+                    {
+                        await manager.Result.UpdateApp();
+                        Application.Current.Shutdown();
+                    }
+                }
+            }
+
+            /*using (var manager = new UpdateManager(@"C:\Temp\Releases"))
             {
                 var updateInfo = await manager.CheckForUpdate();
 
@@ -90,7 +104,7 @@ namespace CampaignEditor
                         Application.Current.Shutdown();
                     }
                 }
-            }
+            }*/
         }
        
 
