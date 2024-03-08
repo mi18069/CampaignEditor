@@ -1,6 +1,8 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <PropertyGroup />
+  <PropertyGroup>
+    <_LastSelectedProfileId>C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\Properties\PublishProfiles\ClickOnceProfile.pubxml</_LastSelectedProfileId>
+  </PropertyGroup>
   <ItemGroup>
     <ApplicationDefinition Update="App.xaml">
       <SubType>Designer</SubType>
@@ -10,7 +12,16 @@
     <Compile Update="AddClient.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="AddSchema.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="AddUser.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="AllUsers.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="AMRTrim.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="AssignTargets.xaml.cs">
@@ -22,10 +33,28 @@
     <Compile Update="Campaign.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="CampaignForecastDates.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="CampaignForecastView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="CampaignOverview.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="CampaignValidation.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="ChangePassword.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Channels.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="ImportFromSchema.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="UserControls\ClientCmpsTreeView.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="Clients.xaml.cs">
@@ -34,10 +63,22 @@
     <Compile Update="CmpInfo.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="Config.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="DuplicateCampaign.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Goals.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="GroupChannels.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Helpers\LabelWindow.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Helpers\LoadingPage.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="NewCampaign.xaml.cs">
@@ -49,6 +90,9 @@
     <Compile Update="PriceList.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="PrintForecast.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="Rename.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -56,6 +100,48 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="CampaignForecast.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="UserControls\ForecastGrids\CampaignGoals\GoalsCurrentItem.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="UserControls\ForecastGrids\CampaignGoals\GoalsTotalItem.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="UserControls\ForecastGrids\CampaignGoals\GoalsTreeView.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="UserControls\ForecastGrids\ReachGrid.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="UserControls\ForecastGrids\ReachTabItem.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="UserControls\ForecastGrids\SpotDaysGoalsGrid.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="UserControls\RulerControls\CanvasTerms.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="UserControls\DateRangeItem.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="UserControls\ForecastGrids\MediaPlanGrid.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="UserControls\ForecastGrids\ChannelsGoalsGrid.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="UserControls\RulerControls\Ruler.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="UserControls\RulerControls\RulerLine.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="UserControls\RulerControls\RulerTimeline.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="UserControls\RulerControls\RulerTimelineCampaign.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="UserControls\SeasonalitiesItem.xaml.cs">
@@ -67,10 +153,25 @@
     <Compile Update="Sectable.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="UserControls\ForecastGrids\SpotGoalsGrid.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="UserControls\ForecastGrids\SpotGoalsSubGrid.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="UserControls\ForecastGrids\SpotGoalsTotalSubGrid.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="UserControls\SpotItem.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="UserControls\ForecastGrids\SpotWeekGoalsGrid.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="UserControls\TargetDPItem.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="UserControls\RulerControls\TermRectangle.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="UserControls\TreeViewCampaignsItem.xaml.cs">
@@ -82,6 +183,21 @@
     <Compile Update="UserControls\UsersListItem.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="UserControls\ValidationItems\CampaignDPItem.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="UserControls\ValidationItems\DateLabelItem.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="UserControls\ValidationItems\ValidationStack.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="UserControls\ValidationItems\VTermEmptyItem.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="UserControls\ValidationItems\VTermItem.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="UsersOfClient.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -90,7 +206,16 @@
     <Page Update="AddClient.xaml">
       <SubType>Designer</SubType>
     </Page>
+    <Page Update="AddSchema.xaml">
+      <SubType>Designer</SubType>
+    </Page>
     <Page Update="AddUser.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="AllUsers.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="AMRTrim.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="AssignTargets.xaml">
@@ -102,10 +227,28 @@
     <Page Update="Campaign.xaml">
       <SubType>Designer</SubType>
     </Page>
+    <Page Update="CampaignForecastDates.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="CampaignForecastView.xaml">
+      <SubType>Designer</SubType>
+    </Page>
     <Page Update="CampaignOverview.xaml">
       <SubType>Designer</SubType>
     </Page>
+    <Page Update="CampaignValidation.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="ChangePassword.xaml">
+      <SubType>Designer</SubType>
+    </Page>
     <Page Update="Channels.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="ImportFromSchema.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UserControls\ClientCmpsTreeView.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="Clients.xaml">
@@ -114,10 +257,22 @@
     <Page Update="CmpInfo.xaml">
       <SubType>Designer</SubType>
     </Page>
+    <Page Update="Config.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="DuplicateCampaign.xaml">
+      <SubType>Designer</SubType>
+    </Page>
     <Page Update="Goals.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="GroupChannels.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Helpers\LabelWindow.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Helpers\LoadingPage.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="MainWindow.xaml">
@@ -132,6 +287,9 @@
     <Page Update="PriceList.xaml">
       <SubType>Designer</SubType>
     </Page>
+    <Page Update="PrintForecast.xaml">
+      <SubType>Designer</SubType>
+    </Page>
     <Page Update="Rename.xaml">
       <SubType>Designer</SubType>
     </Page>
@@ -139,6 +297,48 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="CampaignForecast.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UserControls\ForecastGrids\CampaignGoals\GoalsCurrentItem.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UserControls\ForecastGrids\CampaignGoals\GoalsTotalItem.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UserControls\ForecastGrids\CampaignGoals\GoalsTreeView.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UserControls\ForecastGrids\ReachGrid.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UserControls\ForecastGrids\ReachTabItem.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UserControls\ForecastGrids\SpotDaysGoalsGrid.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UserControls\RulerControls\CanvasTerms.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UserControls\DateRangeItem.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UserControls\ForecastGrids\MediaPlanGrid.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UserControls\ForecastGrids\ChannelsGoalsGrid.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UserControls\RulerControls\Ruler.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UserControls\RulerControls\RulerLine.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UserControls\RulerControls\RulerTimeline.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UserControls\RulerControls\RulerTimelineCampaign.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="UserControls\SeasonalitiesItem.xaml">
@@ -150,10 +350,25 @@
     <Page Update="Sectable.xaml">
       <SubType>Designer</SubType>
     </Page>
+    <Page Update="UserControls\ForecastGrids\SpotGoalsGrid.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UserControls\ForecastGrids\SpotGoalsSubGrid.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UserControls\ForecastGrids\SpotGoalsTotalSubGrid.xaml">
+      <SubType>Designer</SubType>
+    </Page>
     <Page Update="UserControls\SpotItem.xaml">
       <SubType>Designer</SubType>
     </Page>
+    <Page Update="UserControls\ForecastGrids\SpotWeekGoalsGrid.xaml">
+      <SubType>Designer</SubType>
+    </Page>
     <Page Update="UserControls\TargetDPItem.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UserControls\RulerControls\TermRectangle.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="UserControls\TreeViewCampaignsItem.xaml">
@@ -163,6 +378,21 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="UserControls\UsersListItem.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UserControls\ValidationItems\CampaignDPItem.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UserControls\ValidationItems\DateLabelItem.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UserControls\ValidationItems\ValidationStack.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UserControls\ValidationItems\VTermEmptyItem.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UserControls\ValidationItems\VTermItem.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="UsersOfClient.xaml">

@@ -8,7 +8,7 @@ namespace Database.Repositories
     {
         Task<bool> CreateSectables(CreateSectablesDTO sectablesDTO);
         Task<IEnumerable<SectablesDTO>> GetSectablesById(int id);
-        Task<SectablesDTO> GetSectablesByIdAndSec(int id, int sec);
+        Task<SectablesDTO?> GetSectablesByIdAndSec(int id, int sec);
         Task<IEnumerable<SectablesDTO>> GetAllSectables();
         Task<bool> UpdateSectables(UpdateSectablesDTO sectablesDTO);
         Task<bool> DeleteSectablesById(int id);

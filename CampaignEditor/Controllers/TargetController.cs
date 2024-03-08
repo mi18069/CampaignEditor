@@ -53,5 +53,19 @@ namespace CampaignEditor.Controllers
         {
             return await _repository.GetAllClientTargets(clientId);
         }
+
+        // For checking if some client have access to some target by name
+        // For fixing bug where client can't name target because name is already taken
+        // Returns true if there is collision problems
+        public async Task<bool> CheckClientTargetName(string targname, int clid)
+        {
+            var clientTargets = await _repository.GetAllClientTargets(clid);
+            foreach (var clientTarget in clientTargets)
+            {
+                if (clientTarget.targname.Trim() == targname.Trim())
+                    return true;
+            }
+            return false;
+        }
     }
 }

@@ -43,5 +43,10 @@ namespace CampaignEditor.Controllers
         {
             return await _repository.DeleteGoalsByCmpid(id);
         }
+
+        public async Task<bool> DuplicateGoals(int oldId, int newId)
+        {
+            return await _repository.DuplicateGoals(oldId, newId);
+        }
     }
 }

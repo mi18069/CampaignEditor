@@ -20,12 +20,12 @@ namespace Database.Repositories
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
-        public async Task<bool> CreateClient(CreateClientDTO clientDTO)
+        public async Task<int?> CreateClient(CreateClientDTO clientDTO)
         {
             using var connection = _context.GetConnection();
 
-            var affected = await connection.ExecuteAsync(
-                "INSERT INTO tblclients (clname, clactive, spid) VALUES (@Clname, @Clactive, @Spid)",
+            var newId = await connection.QuerySingleOrDefaultAsync<int?>(
+                "INSERT INTO tblclients (clname, clactive, spid) VALUES (@Clname, @Clactive, @Spid) RETURNING clid",
                 new
                 {
                     Clname = clientDTO.clname,
@@ -33,7 +33,7 @@ namespace Database.Repositories
                     Spid = clientDTO.spid
                 });
 
-            return affected != 0;
+            return newId;
         }
 
         public async Task<IEnumerable<ClientDTO>> GetAllClients()
@@ -55,14 +55,14 @@ namespace Database.Repositories
             return _mapper.Map<ClientDTO>(client);
         }
 
-        public async Task<ClientDTO> GetClientByName(string clname)
+        public async Task<IEnumerable<ClientDTO>> GetClientsByName(string clname)
         {
             using var connection = _context.GetConnection();
 
-            var client = await connection.QueryFirstOrDefaultAsync<Client>(
+            var clients = await connection.QueryFirstOrDefaultAsync<Client>(
                 "SELECT * FROM tblclients WHERE clname = @Clname", new { Clname = clname });
 
-            return _mapper.Map<ClientDTO>(client);
+            return _mapper.Map<IEnumerable<ClientDTO>>(clients);
         }
 
         public async Task<bool> UpdateClient(UpdateClientDTO clientDTO)

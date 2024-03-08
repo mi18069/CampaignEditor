@@ -21,12 +21,13 @@ namespace CampaignEditor
                 {
                     services.AddSingleton<MainWindow>();
                     services.AddFormFactory<UsersAndClients>();
+                    services.AddFormFactory<CampaignManipulations>();
                     services.AddFormFactory<AssignUser>();
                     services.AddFormFactory<UsersOfClient>();
                     services.AddFormFactory<AddUser>();
                     services.AddFormFactory<AddClient>();
                     services.AddFormFactory<Clients>();
-                    services.AddFormFactory<ClientsTreeView>();
+                    services.AddFormFactory<ClientCmpsTreeView>();
                     services.AddFormFactory<NewCampaign>();
                     services.AddFormFactory<NewTarget>();
                     services.AddFormFactory<AssignTargets>();
@@ -41,7 +42,29 @@ namespace CampaignEditor
                     services.AddFormFactory<GroupChannels>();
                     services.AddFormFactory<Campaign>();
                     services.AddFormFactory<CampaignOverview>();
+                    services.AddFormFactory<CampaignOverviewData>();
                     services.AddFormFactory<CampaignForecast>();
+                    services.AddFormFactory<AddSchema>();
+                    services.AddFormFactory<AMRTrim>();
+                    services.AddFormFactory<Config>();
+                    services.AddFormFactory<AllUsers>();
+                    services.AddFormFactory<MediaPlanConverter>();
+                    services.AddFormFactory<MediaPlanTermConverter>();
+                    services.AddFormFactory<MediaPlanGrid>();
+                    services.AddFormFactory<CampaignForecastView>();
+                    services.AddFormFactory<CampaignForecastDates>();
+                    services.AddFormFactory<ChangePassword>();
+                    services.AddFormFactory<SpotGoalsGrid>();
+                    services.AddFormFactory<PrintCampaignInfo>();
+                    services.AddFormFactory<CampaignValidation>();
+                    services.AddFormFactory<RulerTimelineCampaign>();
+                    services.AddFormFactory<RulerTimeline>();
+                    services.AddFormFactory<DuplicateCampaign>();
+                    services.AddFormFactory<Listing>();
+                    services.AddFormFactory<PrintForecast>();
+                    services.AddFormFactory<ImportFromSchema>();
+                    services.AddFormFactory<MediaPlanForecastData>();
+                    services.AddFormFactory<ForecastDataManipulation>();
                     services.AddScoped<IDataContext, DataContext>();
                     // Add services
                     Extensions.UserExtensions.AddUserExtensions(services);
@@ -69,6 +92,16 @@ namespace CampaignEditor
                     Database.Extensions.ChannelGroupExtensions.AddChannelGroupExtensions(services);
                     Database.Extensions.ChannelGroupsExtensions.AddChannelGroupsExtensions(services);
                     Database.Extensions.SchemaExtensions.AddSchemaExtensions(services);
+                    Database.Extensions.MediaPlanExtensions.AddMediaPlanExtensions(services);
+                    Database.Extensions.MediaPlanHistExtensions.AddMediaPlanHistExtensions(services);
+                    Database.Extensions.MediaPlanTermExtensions.AddMediaPlanTermExtensions(services);
+                    Database.Extensions.MediaPlanRefExtensions.AddMediaPlanRefExtensions(services);
+                    Database.Extensions.EmsTypesExtensions.AddEmsTypesExtensions(services);
+                    Database.Extensions.DatabaseFunctionsExtensions.AddDatabaseFunctionsExtensions(services);
+                    Database.Extensions.BrandExtensions.AddBrandExtensions(services);
+                    Database.Extensions.CmpBrndExtensions.AddCmpBrndExtensions(services);
+                    Database.Extensions.MediaPlanVersionExtension.AddMediaPlanVersionExtensions(services);
+                    Database.Extensions.ReachExtensions.AddReachExtensions(services);
 
                 }).Build();
 
@@ -81,11 +114,13 @@ namespace CampaignEditor
         protected override async void OnStartup(StartupEventArgs e)
         {
             await AppHost!.StartAsync();
+            ShutdownMode = ShutdownMode.OnLastWindowClose;
 
             var startupForm = AppHost.Services.GetRequiredService<MainWindow>();
             startupForm.Show();
 
             base.OnStartup(e);
+
         }
 
         protected override async void OnExit(ExitEventArgs e)

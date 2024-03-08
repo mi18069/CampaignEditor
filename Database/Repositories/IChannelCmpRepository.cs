@@ -8,10 +8,11 @@ namespace Database.Repositories
     {
         Task<bool> CreateChannelCmp(CreateChannelCmpDTO channelCmpDTO);
         Task<IEnumerable<ChannelCmpDTO>> GetChannelCmpsByCmpid(int id);
-        Task<ChannelCmpDTO> GetChannelCmpByIds(int cmpid, int plid);
+        Task<ChannelCmpDTO> GetChannelCmpByIds(int cmpid, int chid);
         Task<IEnumerable<ChannelCmpDTO>> GetAllChannelCmps();
         Task<bool> UpdateChannelCmp(UpdateChannelCmpDTO channelCmpDTO);
         Task<bool> DeleteChannelCmpByCmpid(int id);
         Task<bool> DeleteChannelCmpByIds(int cmpid, int plid);
+        Task<bool> DuplicateChannelCmp(int oldCmpid, int newCmpid);
     }
 }

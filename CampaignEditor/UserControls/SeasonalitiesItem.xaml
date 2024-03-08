@@ -27,10 +27,10 @@
         </Grid.RowDefinitions>
 
         <Label Content="From: " Grid.Row="1" Grid.Column="1"/>
-        <DatePicker x:Name="dpFrom" Grid.Row="1" Grid.Column="2" Width="100"/>
+        <DatePicker x:Name="dpFrom" Grid.Row="1" Grid.Column="2" FirstDayOfWeek="Monday" Width="100"/>
 
         <Label Content="To: " Grid.Row="1" Grid.Column="4"/>
-        <DatePicker x:Name="dpTo" Grid.Row="1" Grid.Column="5" Width="100"/>
+        <DatePicker x:Name="dpTo" Grid.Row="1" Grid.Column="5" FirstDayOfWeek="Monday" Width="100"/>
 
 
         <TextBox x:Name="tbCoef" Grid.Row="1" Grid.Column="6"
@@ -39,7 +39,7 @@
                 VerticalAlignment="Center"
                 Background="White" BorderThickness="0"
                 Click="btnDelete_Click">
-            <Image Source="\images\Red_X.png" Width="20" Height="20"></Image>
+            <Image Source="{StaticResource x_icon}" Width="20" Height="20"></Image>
         </Button>
     </Grid>
 </UserControl>

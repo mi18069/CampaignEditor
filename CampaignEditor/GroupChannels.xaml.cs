@@ -5,7 +5,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.ComponentModel;
 using CampaignEditor.Controllers;
-using CampaignEditor.DTOs.CampaignDTO;
+using Database.DTOs.CampaignDTO;
 using Database.DTOs.ClientDTO;
 using System.Collections.ObjectModel;
 using Database.Repositories;
@@ -14,6 +14,8 @@ using System.Threading.Tasks;
 using System.Linq;
 using System.Windows.Media;
 using Database.DTOs.ChannelGroupsDTO;
+using System.Windows.Data;
+using Database.Entities;
 
 namespace CampaignEditor
 {
@@ -32,6 +34,7 @@ namespace CampaignEditor
                                 new ObservableCollection<Tuple<ChannelDTO, ChannelGroupDTO>>();
 
         private bool channelsModified = false;
+        public bool shouldClose = false;
 
         private string tbNewChGrStr = "New Channel Group";
         private bool emptyTb = true;
@@ -64,7 +67,7 @@ namespace CampaignEditor
             _channelGroupsController = new ChannelGroupsController(channelGroupsRepository);
 
             InitializeComponent();
-            emptyTb = true;
+
         }
 
         public async Task Initialize(ClientDTO client, CampaignDTO campaign)
@@ -72,6 +75,8 @@ namespace CampaignEditor
             _client = client;
             _campaign = campaign;
 
+            tbNewGroup.Text = tbNewChGrStr;
+            emptyTb = true;
 
             var channelList = await _channelController.GetAllChannels();
             channelList = channelList.OrderBy(c => c.chname);
@@ -100,7 +105,21 @@ namespace CampaignEditor
 
             lvChannels.ItemsSource = ChannelList;
             lvChannelGroups.ItemsSource = ChannelGroupList;
-            dgAssigned.ItemsSource = Assigned;
+
+            lvAssigned.ItemsSource = Assigned;
+            CollectionView view = (CollectionView)CollectionViewSource.GetDefaultView(lvAssigned.ItemsSource);
+            // Add GroupDescription
+            PropertyGroupDescription groupDescription = new PropertyGroupDescription("Item2.chgrname");
+            view.GroupDescriptions.Add(groupDescription);
+
+            // Add SortDescription for groups
+            SortDescription groupSortDescription = new SortDescription("Item2.chgrname", ListSortDirection.Ascending);
+            view.SortDescriptions.Add(groupSortDescription);
+
+            // Add SortDescription
+            SortDescription sortDescription = new SortDescription("Item1.chname", ListSortDirection.Ascending);
+            view.SortDescriptions.Add(sortDescription);
+
         }
 
         #region From and To Assigned
@@ -111,6 +130,7 @@ namespace CampaignEditor
             Assigned.Insert(index, Tuple.Create(channel, channelGroup)!);
             ChannelList.Remove(channel);
             channelsModified = true;
+            CheckDeleteButton(channelGroup.chgrid);
         }
         private void MoveFromAssigned(Tuple<ChannelDTO, ChannelGroupDTO> tuple)
         {
@@ -119,6 +139,8 @@ namespace CampaignEditor
             int index = FindIndex(ChannelList, channel);
             ChannelList.Insert(index, channel);
             channelsModified = true;
+            CheckDeleteButton(tuple.Item2.chgrid);
+
         }
 
         private void btnToAssigned_Click(object sender, RoutedEventArgs e)
@@ -140,10 +162,10 @@ namespace CampaignEditor
 
         private void btnFromAssigned_Click(object sender, RoutedEventArgs e)
         {
-            int n = dgAssigned.SelectedItems.Count;
+            int n = lvAssigned.SelectedItems.Count;
             if (n > 0)
             {
-                var selectedItems = dgAssigned.SelectedItems;
+                var selectedItems = lvAssigned.SelectedItems;
                 for (int i = 0; i < n; i++)
                 {
                     // 0 because we need n iterations, and in each we remove one item
@@ -182,11 +204,41 @@ namespace CampaignEditor
             return index;
         }
 
-        private void DataGridRow_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void ListView_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-            DataGridRow row = sender as DataGridRow;
-            var tuple = row.Item as Tuple<ChannelDTO, ChannelGroupDTO>;
-            MoveFromAssigned(tuple);
+            DependencyObject originalSource = (DependencyObject)e.OriginalSource;
+            ListViewItem clickedItem = FindAncestor<ListViewItem>(originalSource);
+
+            if (clickedItem != null)
+            {
+                try
+                {
+                    if (clickedItem.DataContext is Tuple<ChannelDTO, ChannelGroupDTO> clickedTuple)
+                    {
+                        MoveFromAssigned(clickedTuple);
+                    }
+                }
+                catch
+                {
+                    return;
+                }
+            }
+
+        }
+
+        private static T FindAncestor<T>(DependencyObject current)
+            where T : DependencyObject
+        {
+            do
+            {
+                if (current is T ancestor)
+                {
+                    return ancestor;
+                }
+                current = VisualTreeHelper.GetParent(current);
+            } while (current != null);
+
+            return null;
         }
 
         #endregion
@@ -217,6 +269,11 @@ namespace CampaignEditor
         private async void btnNewChhGr_Click(object sender, RoutedEventArgs e)
         {
             string name = tbNewGroup.Text.Trim();
+            if (String.Equals(name.Trim(), tbNewChGrStr))
+            {
+                MessageBox.Show("Enter name of channel group", "Message", MessageBoxButton.OK, MessageBoxImage.Hand);
+                return;
+            }
             if (name != "" &&
                 await _channelGroupController.GetChannelGroupByNameAndOwner(name, _client.clid) == null)
             {
@@ -264,29 +321,36 @@ namespace CampaignEditor
 
         #endregion
 
-        // Overriding OnClosing because click on x button should only hide window
-        protected override void OnClosing(CancelEventArgs e)
-        {
-            e.Cancel = true;
-            Hide();
-        }
-
-        private async void lvChannelGroups_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void lvChannelGroups_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (lvChannelGroups.SelectedItems.Count > 0)
             {
                 var item = lvChannelGroups.SelectedItems[0] as ChannelGroupDTO;
-                int chgr = item.chgrid;
-                var channelGroups = await _channelGroupsController.GetAllChannelGroupsByChgrid(chgr);
 
-                if (channelGroups.Count() == 0)
+                CheckDeleteButton(item.chgrid);
+                
+            }
+            else
+            {
+                btnDeleteChhGr.IsEnabled = false;
+            }
+        }
+
+        private void CheckDeleteButton(int chgrid)
+        {
+            bool hasAssignedChannels = false;
+            foreach (var tuple in Assigned)
+            {
+                if (tuple.Item2.chgrid == chgrid)
                 {
-                    btnDeleteChhGr.IsEnabled = true;
+                    hasAssignedChannels = true;
+                    break;
                 }
-                else
-                {
-                    btnDeleteChhGr.IsEnabled = false;
-                }
+            }
+
+            if (!hasAssignedChannels)
+            {
+                btnDeleteChhGr.IsEnabled = true;
             }
             else
             {

@@ -2,8 +2,6 @@
 using Dapper;
 using Database.Data;
 using Database.DTOs.PricesDTO;
-using Database.DTOs.SectableDTO;
-using Database.DTOs.SectablesDTO;
 using Database.Entities;
 using System;
 using System.Collections.Generic;
@@ -26,15 +24,16 @@ namespace Database.Repositories
             using var connection = _context.GetConnection();
 
             var affected = await connection.ExecuteAsync(
-                "INSERT INTO tblprices (plid, dps, dpe, price, ispt)" +
-                    "VALUES (@Plid, @Dps, @Dpe, @Price, @Ispt)",
+                "INSERT INTO tblprices (plid, dps, dpe, price, ispt, days)" +
+                    "VALUES (@Plid, @Dps, @Dpe, @Price, @Ispt, @Days)",
             new
             {
                 Plid = pricesDTO.plid,
                 Dps = pricesDTO.dps,
                 Dpe = pricesDTO.dpe,
                 Price = pricesDTO.price,
-                Ispt = pricesDTO.ispt
+                Ispt = pricesDTO.ispt,
+                Days = pricesDTO.days
             });
 
             return affected != 0;
@@ -72,7 +71,7 @@ namespace Database.Repositories
 
             var affected = await connection.ExecuteAsync(
                 "UPDATE tblprices SET prcid = @Prcid, plid = @Plid, " +
-                "dps = @Dps, dpe = @Dpe, price = @Price, ispt = @Ispt " +
+                "dps = @Dps, dpe = @Dpe, price = @Price, ispt = @Ispt, days = @Days " +
                 "WHERE sctid = @Sctid",
             new
             {
@@ -81,7 +80,8 @@ namespace Database.Repositories
                 Dps = pricesDTO.dps,
                 Dpe = pricesDTO.dpe,
                 Price = pricesDTO.price,
-                Ispt = pricesDTO.ispt
+                Ispt = pricesDTO.ispt,
+                Days = pricesDTO.days
             });
 
             return affected != 0;

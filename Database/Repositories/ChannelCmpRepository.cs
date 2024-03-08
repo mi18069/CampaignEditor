@@ -6,6 +6,7 @@ using Database.Entities;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Windows.Controls.Primitives;
 
 namespace Database.Repositories
 {
@@ -40,13 +41,13 @@ namespace Database.Repositories
             return affected != 0;
         }
 
-        public async Task<ChannelCmpDTO> GetChannelCmpByIds(int cmpid, int plid)
+        public async Task<ChannelCmpDTO> GetChannelCmpByIds(int cmpid, int chid)
         {
             using var connection = _context.GetConnection();
 
             var channelCmp = await connection.QueryFirstOrDefaultAsync<ChannelCmp>(
-                "SELECT * FROM tblcmpchn WHERE cmpid = @Cmpid AND plid = @Plid",
-                new { Cmpid = cmpid, Plid = plid });
+                "SELECT * FROM tblcmpchn WHERE cmpid = @Cmpid AND chid = @Chid",
+                new { Cmpid = cmpid, Chid = chid });
 
             return _mapper.Map<ChannelCmpDTO>(channelCmp);
         }
@@ -110,6 +111,21 @@ namespace Database.Repositories
                 new { Id = cmpid, Plid = plid });
 
             return affected != 0;
+        }
+
+        public async Task<bool> DuplicateChannelCmp(int oldCmpid, int newCmpid)
+        {
+
+            using var connection = _context.GetConnection();
+
+            var affected = await connection.ExecuteAsync(
+                @"INSERT INTO tblcmpchn (cmpid, chid, plid, actid, plidbuy, actidbuy)
+                  SELECT @NewCmpid, chid, plid, actid, plidbuy, actidbuy
+                  FROM tblcmpchn WHERE cmpid = @OldCmpid;",
+                new { OldCmpid = oldCmpid, NewCmpid = newCmpid });
+
+            return affected != 0;
+
         }
     }
 }

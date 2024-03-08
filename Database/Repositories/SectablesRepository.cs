@@ -43,15 +43,15 @@ namespace Database.Repositories
 
             return _mapper.Map<IEnumerable<SectablesDTO>>(sectables);
         }
-        public async Task<SectablesDTO> GetSectablesByIdAndSec(int id, int sec)
+        public async Task<SectablesDTO?> GetSectablesByIdAndSec(int id, int sec)
         {
             using var connection = _context.GetConnection();
 
-            var sectables = await connection.QueryAsync<Sectables>(
+            var sectables = await connection.QueryFirstOrDefaultAsync<Sectables>(
                 "SELECT * FROM tblsectables WHERE sctid = @Id AND sec = @Sec", 
                 new { Id = id, Sec = sec });
 
-            return _mapper.Map<SectablesDTO>(sectables);
+            return sectables == null ? null : _mapper.Map<SectablesDTO>(sectables);
         }
 
         public async Task<IEnumerable<SectablesDTO>> GetAllSectables()

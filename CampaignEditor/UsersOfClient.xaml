@@ -3,23 +3,31 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:CampaignEditor"
+        xmlns:local="clr-namespace:CampaignEditor.UserControls" 
         mc:Ignorable="d"
-        Title="UsersOfClient" Height="450" Width="600">
+        Title="Users of Client" Height="450" Width="600" ResizeMode="CanResize">
     <Grid>
-        <ScrollViewer VerticalScrollBarVisibility="Auto" 
-                      Width="500" Height="300"
-                      VerticalAlignment="Center" HorizontalAlignment="Center">
-            <StackPanel x:Name="spUsers"                
-                        CanVerticallyScroll="True">
-                <local:UsersListItem/>
-            </StackPanel>
-        </ScrollViewer>
-        <Label x:Name="lblUsersOfClient" Content="Users of client " FontSize="22" 
-               HorizontalAlignment="Left" VerticalAlignment="Top" Margin="80,20,0,0"/>
-        <Button x:Name="btnClose" Content="Close" 
-                Width="100" Height="40"
-                HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,40,20" Click="btnClose_Click"/>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="10"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="10"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="10"/>
+            <RowDefinition Height="70"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="60"/>
+            <RowDefinition Height="10"/>
+        </Grid.RowDefinitions>
 
+        <Label x:Name="lblUsersOfClient" Content="Users of client " FontSize="22" 
+               HorizontalAlignment="Left" VerticalAlignment="Center" Grid.Row="1" Grid.Column="1"/>
+        <local:ListBoxAddButton Grid.Row="2" Grid.Column="1" x:Name="lbUsers"/>
+        <Button x:Name="btnSave" Grid.Row="3" Grid.Column="1" Content="Save"
+                Width="100" HorizontalAlignment="Right" Margin="10" 
+                IsEnabled="{Binding Path=isModified, Mode=TwoWay}"
+                Click="btnSave_Click" Visibility="Collapsed"/>
+        <Button x:Name="btnClose" Grid.Row="3" Grid.Column="1" Content="Close"
+                Width="100" HorizontalAlignment="Right" Margin="10" Click="btnClose_Click"/>
     </Grid>
 </Window>

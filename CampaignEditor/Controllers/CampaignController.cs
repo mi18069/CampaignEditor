@@ -1,12 +1,8 @@
-﻿using CampaignEditor.DTOs.CampaignDTO;
-using CampaignEditor.DTOs.UserDTO;
-using CampaignEditor.Entities;
+﻿using Database.DTOs.CampaignDTO;
 using Database.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace CampaignEditor.Controllers
@@ -20,11 +16,14 @@ namespace CampaignEditor.Controllers
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
         }
 
-        public async Task<CampaignDTO> CreateCampaign(CreateCampaignDTO campaignDTO)
+        public async Task<CampaignDTO?> CreateCampaign(CreateCampaignDTO campaignDTO)
         {
-            await _repository.CreateCampaign(campaignDTO);
-            var campaign = await _repository.GetCampaignByName(campaignDTO.cmpname);
-            return campaign;
+            var id = await _repository.CreateCampaign(campaignDTO);
+            if (id.HasValue)
+            {
+                return await _repository.GetCampaignById(id.Value);
+            }
+            return null;
         }
 
         public async Task<CampaignDTO> GetCampaignById(int cmpid)
@@ -64,5 +63,11 @@ namespace CampaignEditor.Controllers
             return await _repository.DeleteCampaignsByUserId(userid);
 
         }
+
+        public async Task<bool> DeleteCampaignInitialization(int cmpid)
+        {
+            return await _repository.DeleteCampaignInitialization(cmpid);
+        }
+
     }
 }

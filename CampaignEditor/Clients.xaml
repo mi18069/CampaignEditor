@@ -3,94 +3,165 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:converters="clr-namespace:CampaignEditor.Converters"
         xmlns:local="clr-namespace:CampaignEditor"
+        xmlns:userControls="clr-namespace:CampaignEditor.UserControls"
         mc:Ignorable="d"
         Title="Clients" Height="800" Width="900"
         MinHeight="600" MinWidth="800"
-        FontSize="20">
+        FontSize="20"
+        Closing="Window_Closing">
     <Window.Resources>
-        <local:ToHalfConverter x:Key="toHalfConverter" />
+        <converters:ToHalfConverterM30 x:Key="toHalfConverter"/>
     </Window.Resources>
     <Grid>
-        <Grid x:Name="GridLeft"
-            Margin="10,10,350,10">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="10"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="10"/>
+        </Grid.RowDefinitions>
+        
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="10"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="0.7*"/>
+            <ColumnDefinition Width="10"/>
+        </Grid.ColumnDefinitions>
+
+        <Button x:Name="btnPassChange" Grid.Row="1" Grid.Column="2"
+                    Background="White" IsTabStop="False" BorderThickness="0"
+                    HorizontalAlignment="Right" VerticalAlignment="Top"
+                    Click="btnPassChange_Click">
+            <Image Source="{StaticResource change_pass_icon}" Width="40" Height="40" ></Image>
+        </Button>
+        <Grid Grid.Row="1" Grid.Column="1">
             <Label x:Name="lblUsername" Content="user: " FontWeight="Bold"
                HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10, 0, 0, 0"/>
-            <TreeView x:Name="tvClients" 
-                  Margin="10, 100, 10, 100"
-                  IsTextSearchCaseSensitive="False" IsTextSearchEnabled="True"
-                  SelectedItemChanged="tvClients_SelectedItemChanged"
-                  PreviewMouseRightButtonDown="tvClients_PreviewMouseRightButtonDown">
-                <TreeView.Resources>
-                    <ContextMenu x:Key ="ClientContext"  StaysOpen="true">
-                        <MenuItem Header="Show users" Click="btnShowUsersOfClient_Click"/>
-                        <MenuItem Header="New campaign" Click="btnNewCampaign_Click" IsEnabled="{Binding Path=isAdministrator}"/>
-                        <MenuItem x:Name="btnRenameClient" Click="btnRenameClient_Click" Header="Rename client"  IsEnabled="{Binding Path=isReadWrite}"/>
-                        <MenuItem Header="New user" Click="btnAddUser_Click" IsEnabled="{Binding Path=isAdministrator}"/>
-                        <MenuItem Header="New client" Click="btnAddClient_Click" IsEnabled="{Binding Path=isAdministrator}"/>
-                        <MenuItem Header="Delete client" Click="btnDeleteClient_Click"  IsEnabled="{Binding Path=CanBeDeleted}"/>
-                    </ContextMenu>
-                    <ContextMenu x:Key="CampaignContext"  StaysOpen="true">
-                        <MenuItem Header="Edit campaign" Click="btnAddCampaign_Click" IsEnabled="{Binding Path=isReadWrite}"/>
-                        <MenuItem Header="Rename campaign" Click="btnRenameCampaign_Click" IsEnabled="{Binding Path=isReadWrite}"/>
-                        <MenuItem Header="Delete campaign" IsEnabled="{Binding Path=isAdministrator}"/>
-                    </ContextMenu>
-                </TreeView.Resources>
-            </TreeView>
-
-            <TextBox x:Name="tbSearchClients" Foreground="LightGray"
-                     Width="{Binding ElementName=GridLeft, Path=ActualWidth, Converter={StaticResource toHalfConverter}}"
-                 HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10,50,0,0" 
+            <TextBlock x:Name="tbUsername" 
+                       Width="200"
+                       HorizontalAlignment="Left" VerticalAlignment="Top" Margin="100, 5, 0, 0"/>
+        </Grid>
+        <Grid x:Name="GridLeft" Grid.Row="2" Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="10" />
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="10" />
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="10" />
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <TextBox x:Name="tbSearchClients" Grid.Row="1" Grid.Column="0" Margin="10"
+                     Foreground="LightGray"
                  TextWrapping="Wrap"
                  PreviewMouseDown="tbSearchClients_PreviewMouseDown"
                  LostFocus="tbSearchClients_LostFocus"
                  TextChanged="tbSearchClients_TextChanged"/>
-            <TextBox x:Name="tbSearchCampaigns" Foreground="LightGray"
-                 Width="{Binding ElementName=GridLeft, Path=ActualWidth, Converter={StaticResource toHalfConverter}}"
-                 HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,50,10,0" 
+            <TextBox x:Name="tbSearchCampaigns" Grid.Row="1" Grid.Column="1" Margin="10"
+                     Foreground="LightGray"
                  TextWrapping="Wrap"
                  PreviewMouseDown="tbSearchCampaigns_PreviewMouseDown"
                  LostFocus="tbSearchCampaigns_LostFocus"
                  TextChanged="tbSearchCampaigns_TextChanged"/>
-            <Label x:Name="lblFilterByUser" Content="Filter by users"
-               Width="135" 
-               HorizontalAlignment="Center" VerticalAlignment="Bottom" Margin="0,0,180,40"/>
-            <ComboBox x:Name="cbUsers"
+            
+            <userControls:ClientCmpsTreeView x:Name="tvClients" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2"/>
+                     
+            <Label x:Name="lblFilterByUser" Grid.Row="4" Grid.Column="0"
+                   Content="Filter by users" HorizontalAlignment="Right"/>
+            <ComboBox x:Name="cbUsers" Grid.Row="4" Grid.Column="1" Margin="10, 0"
                   Width="200"
-                  HorizontalAlignment="Center"  VerticalAlignment="Bottom" Margin="180,0,0,40"
+                  HorizontalAlignment="Left" VerticalAlignment="Center" 
                   SelectionChanged="cbUsers_SelectionChanged"/>
         </Grid>
-        <Border BorderBrush="LightGray" BorderThickness="1" 
-                Width="300" Height="260"
-                HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0, 107, 20, 0">
+        <Label x:Name="lblFilter" Grid.Row="2" Grid.Column="2"
+                       Content="  Show  " Background="White"
+                       HorizontalAlignment="Center" Margin="0, 25, 0, 0" />
+        <Border BorderBrush="LightGray" BorderThickness="1" Grid.Row="2" Grid.Column="2"
+                Width="300" Height="260" VerticalAlignment="Top" Margin="0, 60, 0, 0">
             <Grid>
-                <Label x:Name="lblFilter" Content="  Filters  " Background="White"
-                       HorizontalAlignment="Center" Margin="0, -20, 0, 0"/>
-                <DatePicker x:Name="dpStartDate" 
-                    Width="150" Height="40"
-                    VerticalAlignment="Top" HorizontalAlignment="Left" Margin="130, 40, 0, 0"
-                    Initialized="dpStartDate_Initialized"
-                    SelectedDateChanged="dpStartDate_SelectedDateChanged" Grid.ColumnSpan="2"/>
-                <CheckBox x:Name="cbDatePicker" Content="   Since:"  
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="10"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="10"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="10"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="10"/>
+                </Grid.RowDefinitions>
+                <Grid Grid.Row="1" Grid.Column="1">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="5"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="5"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="10"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="10"/>
+                    </Grid.ColumnDefinitions>
+                    <ToggleButton x:Name="tbtnTV" Grid.Row="1" Grid.Column="1" 
+                                        Click="tbtnTV_Click" Background="White" IsChecked="True"
+                                      Loaded="cb_Loaded">
+                        <ToggleButton.Content>
+                            <Label Content="TV" FontWeight="Bold"/>
+                        </ToggleButton.Content>
+                    </ToggleButton>
+                    <ToggleButton x:Name="tbtnRadio" Grid.Row="1" Grid.Column="3" 
+                                        Click="tbtnRadio_Click"  Background="White" IsChecked="True"
+                                      Loaded="cb_Loaded">
+                        <ToggleButton.Content>
+                            <Label Content="RADIO" FontWeight="Bold"/>
+                        </ToggleButton.Content>
+                    </ToggleButton>
+                </Grid>
+                <Grid Grid.Row="2" Grid.Column="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <DatePicker x:Name="dpStartDate" FirstDayOfWeek="Monday"
+                            Grid.Column="1"                  
+                            VerticalAlignment="Center" HorizontalAlignment="Right"
+                            Initialized="dpStartDate_Initialized"
+                            SelectedDateChanged="dpStartDate_SelectedDateChanged"
+                            Loaded="cb_Loaded"/>
+                    <CheckBox x:Name="cbDatePicker" Grid.Column="0" Content="Since:"  
+                              IsChecked="True" BorderThickness="5" BorderBrush="Gray"
+                              VerticalAlignment="Center" HorizontalAlignment="Left"
+                              Checked="cbDatePicker_Checked"
+                              Unchecked="cbDatePicker_Unchecked"
+                              Loaded="cb_Loaded"/>
+                </Grid>
+                
+                <CheckBox x:Name="cbShowActive" Grid.Row="3" Grid.Column="1" Content="   Active campaigns"
                   IsChecked="True" BorderThickness="5" BorderBrush="Gray"
-                  VerticalAlignment="Top" HorizontalAlignment="Left" Margin="20,45,0,0"
-                  Checked="cbDatePicker_Checked"
-                  Unchecked="cbDatePicker_Unchecked" Grid.Column="1"/>
-                <CheckBox x:Name="cbShowActive"  Content="   Active campaigns"
-                  IsChecked="True" BorderThickness="5" BorderBrush="Gray"
-                  VerticalAlignment="Top" HorizontalAlignment="Left" Margin="20,95,0,0"
+                  VerticalAlignment="Center" HorizontalAlignment="Left"
                   Checked="cbFilter_Checked"
-                  Unchecked="cbFilter_Unchecked" Grid.Column="1"/>
-                <CheckBox x:Name="cbShowNotStarted"  Content="   Not started campaigns"
+                  Unchecked="cbFilter_Unchecked"
+                          Loaded="cb_Loaded"/>
+                <CheckBox x:Name="cbShowNotStarted" Grid.Row="4" Grid.Column="1" Content="   Not started campaigns"
                   IsChecked="True" BorderThickness="5" BorderBrush="Gray"
-                  VerticalAlignment="Top" HorizontalAlignment="Left" Margin="20,145,0,0"
+                  VerticalAlignment="Center" HorizontalAlignment="Left"
                   Checked="cbFilter_Checked"
-                  Unchecked="cbFilter_Unchecked" Grid.Column="1"/>
-                <CheckBox x:Name="cbShowFinished"  Content="   Finished campaigns"
+                  Unchecked="cbFilter_Unchecked"
+                          Loaded="cb_Loaded"/>
+                <CheckBox x:Name="cbShowFinished" Grid.Row="5" Grid.Column="1" Content="   Finished campaigns"
                   IsChecked="True" BorderThickness="5" BorderBrush="Gray"
-                  VerticalAlignment="Top" HorizontalAlignment="Left" Margin="20,195,0,0"
+                  VerticalAlignment="Center" HorizontalAlignment="Left"
                   Checked="cbFilter_Checked"
-                  Unchecked="cbFilter_Unchecked" Grid.Column="1"/>
+                  Unchecked="cbFilter_Unchecked" 
+                          Loaded="cb_Loaded"/>
             </Grid>
         </Border>
     </Grid>

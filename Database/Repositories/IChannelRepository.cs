@@ -8,6 +8,7 @@ namespace Database.Repositories
     {
         Task<bool> CreateChannel(CreateChannelDTO channelDTO);
         Task<ChannelDTO> GetChannelById(int id);
+        Task<string> GetChannelNameById(int id);
         Task<ChannelDTO> GetChannelByName(string channelname);
         Task<IEnumerable<ChannelDTO>> GetAllChannels();
         Task<bool> UpdateChannel(UpdateChannelDTO channelDTO);

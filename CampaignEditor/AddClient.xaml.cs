@@ -18,6 +18,7 @@ namespace CampaignEditor
         private UserClientsController _userClientsController;
 
         public bool success = false;
+        public ClientDTO? newClient = null;
         public AddClient(IClientRepository clientRepository, IUserRepository userRepository, 
             IUserClientsRepository userClientsRepository)
         {
@@ -32,22 +33,16 @@ namespace CampaignEditor
 
         private async void FillComboBox()
         {
-            IEnumerable<string> usernames = await _userController.GetAllUsernames();
-            usernames = usernames.OrderBy(u => u);
-            foreach (var username in usernames)
-            {
-                cbOwner.Items.Add(username);
-            }
+            IEnumerable<UserDTO> users = await _userController.GetAllUsers();
+            users = users.OrderBy(u => u.usrname);
+            cbOwner.ItemsSource = users;
         }
 
         private async void btnAddClient_Click(object sender, RoutedEventArgs e)
         {
             string clientName = tbClientName.Text.Trim();
-            if (await _clientController.GetClientByName(clientName) != null)
-            {
-                lblError.Content = "Client already exist";
-            }
-            else if (clientName == "")
+            
+            if (clientName == "")
             {
                 lblError.Content = "Enter client name";
             }
@@ -58,13 +53,47 @@ namespace CampaignEditor
             else
             {
                 CreateClientDTO client = new CreateClientDTO(clientName, true, 0);
-                string ownerName = cbOwner.Items[cbOwner.SelectedIndex].ToString()!.Trim();
-                UserDTO owner = await _userController.GetUserByUsername(ownerName);
-                
-                ClientDTO clientDTO = await _clientController.CreateClient(client);
+                UserDTO owner = cbOwner.SelectedItem as UserDTO;
+
+                ClientDTO clientDTO;
+                try
+                {
+                    clientDTO = await _clientController.CreateClient(client);
+                    if (clientDTO == null)
+                    {
+                        MessageBox.Show("Cannot create client", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+                }
+                catch
+                {
+                    MessageBox.Show("Cannot create client", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+
                 UserClientsDTO userClientsDTO = new UserClientsDTO(clientDTO.clid, owner.usrid);
 
-                await _userClientsController.CreateUserClients(userClientsDTO);
+                try
+                {
+                    await _userClientsController.CreateUserClients(userClientsDTO);
+
+                }
+                catch
+                {
+                    try
+                    {
+                        await _clientController.DeleteClientById(clientDTO.clid);
+                        MessageBox.Show("Error while connecting user to client", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+                    catch
+                    {
+                        MessageBox.Show("Error while connecting user to client", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return;
+                    }
+                }
+
+                newClient = clientDTO;
                 success = true;
                 Close();
             }

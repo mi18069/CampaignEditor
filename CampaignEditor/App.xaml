@@ -1,8 +1,25 @@
 ﻿<Application x:Class="CampaignEditor.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:CampaignEditor">
+             xmlns:local="clr-namespace:CampaignEditor"
+             xmlns:calendar="clr-namespace:CampaignEditor.Helpers"
+             ShutdownMode="OnLastWindowClose">
     <Application.Resources>
-         
+        <ResourceDictionary>
+            <BitmapImage x:Key="change_pass_icon" UriSource="\images\changePassIcon.png"></BitmapImage>
+            <BitmapImage x:Key="config_icon" UriSource="\images\config_icon.png"></BitmapImage>
+            <BitmapImage x:Key="edit_icon" UriSource="\images\Edit_icon2.png"></BitmapImage>
+            <BitmapImage x:Key="fetch_data_icon" UriSource="\images\fetch_data_icon.png"></BitmapImage>
+            <BitmapImage x:Key="plus_icon" UriSource="\images\GreenPlus.png"></BitmapImage>
+            <BitmapImage x:Key="left_arrow_icon" UriSource="\images\LeftArrow.png"></BitmapImage>
+            <BitmapImage x:Key="pass_peek_icon" UriSource="\images\PassPeekImg.png"></BitmapImage>
+            <BitmapImage x:Key="pass_unpeek_icon" UriSource="\images\PassUnpeekImg.png"></BitmapImage>
+            <BitmapImage x:Key="radio_icon" UriSource="\images\radio_icon3.png"></BitmapImage>
+            <BitmapImage x:Key="recalculate_data_icon" UriSource="\images\recalculate_data_icon.png"></BitmapImage>
+            <BitmapImage x:Key="x_icon" UriSource="\images\Red_X.png"></BitmapImage>
+            <BitmapImage x:Key="right_arrow_icon" UriSource="\images\RightArrow.png"></BitmapImage>
+            <BitmapImage x:Key="tv_icon" UriSource="\images\tv_icon.png"></BitmapImage>
+            <BitmapImage x:Key="user_icon" UriSource="\images\UserIcon.png"></BitmapImage>
+        </ResourceDictionary>
     </Application.Resources>
 </Application>

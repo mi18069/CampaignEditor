@@ -7,5 +7,10 @@ namespace Database.DTOs.ClientDTO
             : base(clid, clname, clactive, spid)
         {
         }
+
+        public UpdateClientDTO(ClientDTO client)
+            : base(client.clid, client.clname, client.clactive, client.spid)
+        {
+        }
     }
 }

@@ -91,5 +91,18 @@ namespace Database.Repositories
 
             return affected != 0;
         }
+
+        public async Task<bool> DuplicateGoals(int oldCmpid, int newCmpid)
+        {
+            using var connection = _context.GetConnection();
+
+            var affected = await connection.ExecuteAsync(
+                @"INSERT INTO tblcmpgoals (cmpid, budget, grp, ins, rch_f1, rch_f2, rch)
+                  SELECT @NewCmpid, budget, grp, ins, rch_f1, rch_f2, rch
+                  FROM tblcmpgoals WHERE cmpid = @OldCmpid;",
+                new { OldCmpid = oldCmpid, NewCmpid = newCmpid });
+
+            return affected != 0;
+        }
     }
 }

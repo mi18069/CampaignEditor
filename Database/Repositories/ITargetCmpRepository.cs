@@ -14,5 +14,6 @@ namespace Database.Repositories
         Task<bool> UpdateTargetCmp(UpdateTargetCmpDTO targetCmpDTO);
         Task<bool> DeleteTargetCmpByCmpid(int id);
         Task<bool> DeleteTargetCmpByIds(int cmpid, int targid);
+        Task<bool> DuplicateTargetCmp(int oldCmpid, int newCmpid);
     }
 }

@@ -1,12 +1,15 @@
 ﻿using CampaignEditor.Controllers;
 using CampaignEditor.DTOs.UserDTO;
 using CampaignEditor.Repositories;
+using Database.DTOs.CampaignDTO;
 using Database.DTOs.ClientDTO;
 using Database.DTOs.UserClients;
 using Database.Repositories;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows;
 
 // This class is made in order to simplify process of adding/removing users/clients in database
 
@@ -16,16 +19,22 @@ namespace CampaignEditor
     {
         private ClientController _clientController;
         private UserController _userController;
+        private CampaignController _campaignController;
         private UserClientsController _userClientsController;
+        private MediaPlanRefController _mediaPlanRefController;
 
         private ClientDTO _client = null;
         public UsersAndClients(IClientRepository clientRepository, 
                                IUserRepository userRepository,
-                               IUserClientsRepository userClientsRepository)
+                               IUserClientsRepository userClientsRepository,
+                               ICampaignRepository campaignRepository,
+                               IMediaPlanRefRepository mediaPlanRefRepository)
         {
             _clientController = new ClientController(clientRepository);
             _userController = new UserController(userRepository);
             _userClientsController = new UserClientsController(userClientsRepository);
+            _campaignController = new CampaignController(campaignRepository);
+            _mediaPlanRefController = new MediaPlanRefController(mediaPlanRefRepository);
         }
 
         public void Initialize(ClientDTO client)
@@ -64,49 +73,130 @@ namespace CampaignEditor
         #region Assign/Unassign Users to Clients
 
 
-        public async Task AssignUserToClient(string username)
+        public async Task AssignUserToClient(UserDTO user)
         {
-            UserDTO user = await _userController.GetUserByUsername(username);
-            ClientDTO client = await _clientController.GetClientByName(_client.clname.Trim());
-            var userClient = new UserClientsDTO(client.clid, user.usrid);
+            var userClient = new UserClientsDTO(_client.clid, user.usrid);
             await _userClientsController.CreateUserClients(userClient);
         }
 
-        public async Task UnassignUserFromClient(string username, string clientname)
+        public async Task UnassignUserFromClient(UserDTO user, ClientDTO client)
         {
-            UserDTO user = await _userController.GetUserByUsername(username);
-            ClientDTO client = await _clientController.GetClientByName(clientname);
             await _userClientsController.DeleteUserClients(user.usrid, client.clid);
         }
 
         #endregion
 
+
         #region Delete Users and Clients
-        public async void DeleteUserByUsername(string username)
-        {          
-            UserDTO user = await _userController.GetUserByUsername(username);
-            int userID = user.usrid;
-            var userClients = await _userClientsController.GetAllUserClientsByUserId(userID);
-
-            foreach (UserClientsDTO userClient in userClients)
-            {
-                await _userClientsController.DeleteUserClientsByUserId(userID);
-            }
-            await _userController.DeleteUserByUsername(username);
-        }
-
-        public async void DeleteClientByClientname(string clientname)
+        public async Task<bool> DeleteUser(UserDTO user)
         {
-            ClientDTO client = await _clientController.GetClientByName(clientname);
-            int clientId = client.clid;
-            List<UserClientsDTO> userClients = (List<UserClientsDTO>)await _userClientsController.GetAllUserClientsByClientId(clientId);
-
-            foreach (UserClientsDTO userClient in userClients)
+            IEnumerable<UserClientsDTO> userClients; 
+            try
             {
-                await _userClientsController.DeleteUserClientsByClientId(clientId);
+                userClients = await _userClientsController.GetAllUserClientsByUserId(user.usrid);
+
+                foreach (UserClientsDTO userClient in userClients)
+                {
+                    await _userClientsController.DeleteUserClientsByUserId(user.usrid);
+                }
+
+                await _userController.DeleteUserById(user.usrid);
             }
-            await _clientController.DeleteClientById(clientId);
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
+            }
+            return true;
         }
+
+        public async Task<bool> DeleteClient(ClientDTO client)
+        {
+            // First delete all userClients bounds
+
+            var userClients = await _userClientsController.GetAllUserClientsByClientId(client.clid);
+            try
+            {
+                bool success = await _userClientsController.DeleteUserClientsByClientId(client.clid);
+                if (!success)
+                {
+                    throw new Exception();
+                }
+            }
+            catch
+            {
+                var newUserClients = await _userClientsController.GetAllUserClientsByClientId(client.clid);
+
+                // Try to retrieve deleted userClients bonds
+                if (userClients.Count() != newUserClients.Count())
+                {
+                    var deletedUserClients = new List<UserClientsDTO>();
+                    foreach (var userClient in userClients)
+                    {
+                        if (!newUserClients.Select(uc => uc.usrid).Contains(userClient.usrid))
+                        {
+                            deletedUserClients.Add(userClient);
+                        }
+                    }
+
+
+                    foreach (var userClient in deletedUserClients)
+                    {
+                        try
+                        {
+                            await _userClientsController.CreateUserClients(userClient);
+                        }
+                        catch
+                        {
+                            // cannot retrieve deleted userClient bonds
+                        }
+                    }
+
+                }
+
+                return false;
+            }
+
+            try
+            {
+                // If client have some campaigns then set client to inactive
+                // otherwise, delete that client
+                if (userClients.Count() > 0)
+                {
+                    client.clactive = false;
+                    bool success = await _clientController.UpdateClient(new UpdateClientDTO(client));
+                    if (!success)
+                        return false;
+                }
+                else
+                {
+                    bool success = await _clientController.DeleteClientById(client.clid);
+                    if (!success)
+                        return false;
+                }
+            }
+            catch
+            {
+                return false;
+            }
+
+            return true;
+        }
+
+        public async Task<bool> CanClientBeDeleted(ClientDTO client)
+        {
+            var campaigns = await _campaignController.GetCampaignsByClientId(client.clid);
+
+            // Can't delete Client that have active campaigns
+            foreach (CampaignDTO campaign in campaigns)
+            {
+                if (campaign.active)
+                    return false;
+            }
+
+            return true;
+        }
+
 
         #endregion
     }

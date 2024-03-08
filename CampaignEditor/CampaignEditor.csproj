@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
+	<Version>1.0.0.1</Version>
     <TargetFramework>net6.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
@@ -9,21 +10,52 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="images\ChangePassIcon.png" />
+    <None Remove="images\config_icon.png" />
     <None Remove="images\EditIcon.png" />
     <None Remove="images\Edit_Icon.png" />
     <None Remove="images\Edit_Icon2.png" />
+    <None Remove="images\fetch_data_icon.png" />
     <None Remove="images\GreenPlus.png" />
     <None Remove="images\Green_+.jpg" />
     <None Remove="images\LeftArrow.png" />
+    <None Remove="images\load_data_icon.png" />
+    <None Remove="images\PassPeekImg.png" />
+    <None Remove="images\PassUnpeekImg.png" />
+    <None Remove="images\radio_icon.png" />
+    <None Remove="images\radio_icon1.png" />
+    <None Remove="images\radio_icon3.png" />
+    <None Remove="images\recalculate_data_icon.jpg" />
+    <None Remove="images\recalculate_data_icon.png" />
+    <None Remove="images\recalculate_icon.png" />
     <None Remove="images\Red_X.png" />
+    <None Remove="images\Refresh_icon.png" />
+    <None Remove="images\refresh_icon2.png" />
+    <None Remove="images\refresh_icon3.png" />
     <None Remove="images\RightArrow.png" />
+    <None Remove="images\tv_icon.png" />
     <None Remove="images\UserIcon.png" />
   </ItemGroup>
 
   <ItemGroup>
+    <COMReference Include="Microsoft.Office.Interop.Excel">
+      <WrapperTool>tlbimp</WrapperTool>
+      <VersionMinor>9</VersionMinor>
+      <VersionMajor>1</VersionMajor>
+      <Guid>00020813-0000-0000-c000-000000000046</Guid>
+      <Lcid>0</Lcid>
+      <Isolated>false</Isolated>
+      <EmbedInteropTypes>true</EmbedInteropTypes>
+    </COMReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="EPPlus" Version="7.0.9" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Core" Version="2.2.5" />
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
+    <PackageReference Include="squirrel.windows" Version="1.9.0" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="8.0.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -31,11 +63,23 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="images\ChangePassIcon.png" />
+    <Resource Include="images\config_icon.png" />
     <Resource Include="images\Edit_Icon2.png" />
+    <Resource Include="images\fetch_data_icon.png" />
     <Resource Include="images\GreenPlus.png" />
     <Resource Include="images\LeftArrow.png" />
+    <Resource Include="images\PassPeekImg.png" />
+    <Resource Include="images\PassUnpeekImg.png" />
+    <Resource Include="images\radio_icon1.png" />
+    <Resource Include="images\radio_icon3.png" />
+    <Resource Include="images\recalculate_data_icon.jpg" />
+    <Resource Include="images\recalculate_data_icon.png" />
     <Resource Include="images\Red_X.png" />
+    <Resource Include="images\refresh_icon2.png" />
+    <Resource Include="images\refresh_icon3.png" />
     <Resource Include="images\RightArrow.png" />
+    <Resource Include="images\tv_icon.png" />
     <Resource Include="images\UserIcon.png" />
   </ItemGroup>
 

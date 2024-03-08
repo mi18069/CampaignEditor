@@ -1,7 +1,9 @@
-﻿using Database.DTOs.SchemaDTO;
+﻿using Dapper;
+using Database.DTOs.SchemaDTO;
 using Database.Entities;
 using Database.Repositories;
 using Microsoft.Extensions.DependencyInjection;
+using System.Linq;
 
 namespace Database.Extensions
 {

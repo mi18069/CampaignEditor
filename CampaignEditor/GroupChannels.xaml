@@ -4,19 +4,16 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CampaignEditor"
+        xmlns:converters="clr-namespace:CampaignEditor.Converters"
         mc:Ignorable="d"
         Title="GroupChannels" Height="450" Width="800">
+    <Window.Resources>
+        <converters:TrimConverter x:Key="TrimConverter" />
+    </Window.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="10"/>
             <ColumnDefinition Width="auto"/>
-            <ColumnDefinition Width="auto"/>
-            <ColumnDefinition Width="20"/>
-            <ColumnDefinition Width="auto"/>
-            <ColumnDefinition Width="auto"/>
-            <ColumnDefinition Width="20"/>
-            <ColumnDefinition Width="auto"/>
-            <ColumnDefinition Width="20"/>
             <ColumnDefinition Width="auto"/>
             <ColumnDefinition Width="auto"/>
             <ColumnDefinition Width="*"/>
@@ -32,81 +29,113 @@
             <RowDefinition Height="10"/>
         </Grid.RowDefinitions>
 
-        <Label Content="Channels" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"
+        <Label Content="Channels" Grid.Row="1" Grid.Column="1" 
                HorizontalAlignment="Center"/>
-        <ListView x:Name="lvChannels" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Grid.RowSpan="3"
-                  MinWidth="200" SelectionMode="Multiple"
+        <ListView x:Name="lvChannels" Grid.Row="2" Grid.Column="1" Grid.RowSpan="3"
+                  MinWidth="200" SelectionMode="Multiple" Margin="0, 0, 10, 0"
                   DisplayMemberPath="chname"/>
         
 
-        <Label Content="Channel Group" Grid.Row="1" Grid.Column="4" Grid.ColumnSpan="2"
+        <Label Content="Channel Group" Grid.Row="1" Grid.Column="2"
                HorizontalAlignment="Center"/>
-        <ListView x:Name="lvChannelGroups" Grid.Row="2" Grid.Column="4" Grid.ColumnSpan="2" Grid.RowSpan="2"
-                MinWidth="200" 
+        <ListView x:Name="lvChannelGroups" Grid.Row="2" Grid.Column="2" Grid.RowSpan="2"
+                MinWidth="200" Margin="10, 0, 10, 0"
                 DisplayMemberPath="chgrname"
                 SelectionMode="Single"
                 SelectionChanged="lvChannelGroups_SelectionChanged"/>
-        <TextBox x:Name="tbNewGroup" Grid.Row="4" Grid.Column="4" Grid.ColumnSpan="2"
-                 VerticalAlignment="Center" Text="New Channel Group" Foreground="Gray"
-                 Margin="0, -30, 0, 0"
+
+        <Grid Grid.Row="4" Grid.Column="2" Margin="10, 0, 10, 0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="0.5*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <TextBox x:Name="tbNewGroup" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" 
+                 VerticalAlignment="Center" Foreground="Gray"
                  GotFocus="tbNewGroup_GotFocus"
                  LostFocus="tbNewGroup_LostFocus"/>
-        <Button x:Name="btnNewChhGr" Grid.Row="4" Grid.Column="5"
-                Width="30" Height="30" Background="White" 
-                VerticalAlignment="Center" HorizontalAlignment="Right" Margin="0, 30, 0, 0"
-                Click="btnNewChhGr_Click">
-            <Image Source="\images\GreenPlus.png" Width="20" Height="20"></Image>
-        </Button>
-        <Button x:Name="btnDeleteChhGr" Grid.Row="4" Grid.Column="5"
+            <Button x:Name="btnDeleteChhGr" Grid.Row="1" Grid.Column="0"
                 Width="30" Height="30" Background="White" IsEnabled="false"
-                VerticalAlignment="Center" HorizontalAlignment="Left" Margin="0, 30, 0, 0"
+                VerticalAlignment="Center" HorizontalAlignment="Right"
                 Click="btnDeleteChhGr_Click">
-            <Image Source="\images\Red_X.png" Width="20" Height="20"></Image>
-        </Button>
-        
-        <Button x:Name="btnToAssigned" Grid.Row="3" Grid.Column="7"
+                <Image Source="{StaticResource x_icon}" Width="20" Height="20"></Image>
+            </Button>
+            <Button x:Name="btnNewChhGr" Grid.Row="1" Grid.Column="2"
+                Width="30" Height="30" Background="White" 
+                VerticalAlignment="Center" HorizontalAlignment="Left"
+                Click="btnNewChhGr_Click">
+                <Image Source="{StaticResource plus_icon}" Width="20" Height="20"></Image>
+            </Button>
+        </Grid>
+
+        <Grid Grid.Row="1" Grid.RowSpan="3" Grid.Column="3" Margin="10, 0, 10, 0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="0.3*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Button x:Name="btnToAssigned" Grid.Row="0" 
                 Width="50" Height="50" Background="White" 
-                VerticalAlignment="Center" Margin="0, -80, 0, 0"
+                VerticalAlignment="Bottom"
                 Click="btnToAssigned_Click">
-            <Image Source="\images\RightArrow.png" Width="20" Height="20"></Image>
-        </Button>
-        <Button x:Name="btnFromAssigned" Grid.Row="3" Grid.Column="7"
+                <Image Source="{StaticResource right_arrow_icon}" Width="20" Height="20"></Image>
+            </Button>
+            <Button x:Name="btnFromAssigned" Grid.Row="2"
                 Width="50" Height="50" Background="White" 
-                VerticalAlignment="Center" Margin="0, 0, 0, -80"
+                VerticalAlignment="Top" 
                 Click="btnFromAssigned_Click">
-            <Image Source="\images\LeftArrow.png" Width="20" Height="20"></Image>
-        </Button>
+                <Image Source="{StaticResource left_arrow_icon}" Width="20" Height="20"></Image>
+            </Button>
 
+        </Grid>
 
-        <DataGrid x:Name="dgAssigned" Grid.Row="2" Grid.Column="9" Grid.ColumnSpan="3" Grid.RowSpan="2"
-                  CanUserSortColumns="False"
-                  AutoGenerateColumns="False"
-                  IsReadOnly="True"
-                  >
-            <DataGrid.Resources>
-                <Style TargetType="{x:Type DataGridColumnHeader}">
-                    <Setter Property="Background" Value="LightGray"/>
-                    <Setter Property="FontWeight" Value="SemiBold"/>
-                    <Setter Property="BorderThickness" Value="1,1,1,2"/>
-                    <Setter Property="BorderBrush" Value="black"/>
-                </Style>
-                <Style TargetType="DataGridRow">
-                    <EventSetter Event="MouseDoubleClick" Handler="DataGridRow_MouseDoubleClick"/>
-                </Style>
-            </DataGrid.Resources>
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="Channel" Binding="{Binding Item1.chname, Mode=TwoWay}" Width="*"
-                                    IsReadOnly="True" />
-                <DataGridTextColumn Header="Channel Group" Binding="{Binding Item2.chgrname, Mode=TwoWay}" Width="*"
-                                    IsReadOnly="True"/>
-            </DataGrid.Columns>
-        </DataGrid>
-
-        <Button x:Name="btnCancel" Content="Cancel" Grid.Row="5" Grid.Column="9" Grid.ColumnSpan="3"
-                Width="100" Height="40" HorizontalAlignment="Right" Margin="0, 0, 120,0"
+        <ListView x:Name="lvAssigned" Grid.Row="2" Grid.Column="4" Grid.RowSpan="3" 
+                  SelectionMode="Multiple" MouseDoubleClick="ListView_MouseDoubleClick">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn DisplayMemberBinding="{Binding Item1.chname}"/>
+                    <GridView.ColumnHeaderContainerStyle>
+                        <Style TargetType="GridViewColumnHeader">
+                            <Setter Property="Visibility" Value="Collapsed" />
+                        </Style>
+                    </GridView.ColumnHeaderContainerStyle>
+                </GridView>
+            </ListView.View>
+            <ListView.GroupStyle>
+                <GroupStyle>
+                    <GroupStyle.ContainerStyle>
+                        <Style TargetType="{x:Type GroupItem}">
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate>
+                                        <Expander IsExpanded="True">
+                                            <Expander.Header>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <TextBlock Text="{Binding Name, Converter={StaticResource TrimConverter}}" FontWeight="Bold" Foreground="Gray" VerticalAlignment="Bottom" />
+                                                    <TextBlock Text="{Binding ItemCount}" Foreground="Green" FontWeight="Bold" FontStyle="Italic" Margin="10,0,0,0" VerticalAlignment="Bottom" />
+                                                    <TextBlock Text=" channel(s)" Foreground="Silver" FontStyle="Italic" VerticalAlignment="Bottom" />
+                                                </StackPanel>
+                                            </Expander.Header>
+                                            <ItemsPresenter />
+                                        </Expander>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </GroupStyle.ContainerStyle>
+                </GroupStyle>
+            </ListView.GroupStyle>
+        </ListView>
+        
+        <Button x:Name="btnCancel" Content="Cancel" Grid.Row="5" Grid.Column="4" 
+                Width="100" Height="40" HorizontalAlignment="Right" Margin="0, 0, 130, 0"
                 Click="btnCancel_Click"/>
-        <Button x:Name="btnSave" Content="Save" Grid.Row="5" Grid.Column="9" Grid.ColumnSpan="3" 
-                Width="100" Height="40" HorizontalAlignment="Right" Margin="0"
+        <Button x:Name="btnSave" Content="Save" Grid.Row="5" Grid.Column="4" 
+                Width="100" Height="40" HorizontalAlignment="Right"
                 Click="btnSave_Click"/>
     </Grid>
 </Window>

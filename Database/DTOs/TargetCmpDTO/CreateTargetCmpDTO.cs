@@ -7,5 +7,10 @@ namespace Database.DTOs.TargetCmpDTO
             : base(cmpid, targid, priority)
         {
         }
+
+        public CreateTargetCmpDTO(TargetCmpDTO targetCmp)
+            : base(targetCmp.cmpid, targetCmp.targid, targetCmp.priority)
+        {
+        }
     }
 }

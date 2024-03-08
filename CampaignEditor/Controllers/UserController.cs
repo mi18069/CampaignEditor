@@ -1,5 +1,6 @@
 ﻿using CampaignEditor.DTOs.UserDTO;
 using CampaignEditor.Repositories;
+using Database.DTOs.ClientDTO;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -15,11 +16,14 @@ namespace CampaignEditor.Controllers
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
         }
 
-        public async Task<UserDTO> CreateUser(CreateUserDTO userDTO)
+        public async Task<UserDTO?> CreateUser(CreateUserDTO userDTO)
         {
-            await _repository.CreateUser(userDTO);
-            var user = await _repository.GetUserByUsername(userDTO.usrname);
-            return user;
+            var id = await _repository.CreateUser(userDTO);
+            if (!id.HasValue)
+            {
+                return null;
+            }
+            return await _repository.GetUserById(id.Value);
         }
 
         public async Task<UserDTO> GetUserById(int id)

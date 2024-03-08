@@ -20,13 +20,14 @@ namespace CampaignEditor.Repositories
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
-        public async Task<bool> CreateUser(CreateUserDTO userDTO)
+        public async Task<int?> CreateUser(CreateUserDTO userDTO)
         {
             using var connection = _context.GetConnection();
 
-            var affected = await connection.ExecuteAsync(
-                "INSERT INTO tblusers (usrname, usrpass, usrlevel, email, telefon, enabled, father, buy)" +
-                    "VALUES (@Usrname, @Usrpass, @Usrlevel, @Email, @Telefon, @Enabled, @Father, @Buy)",
+            var newId = await connection.QuerySingleOrDefaultAsync<int?>(
+                "INSERT INTO tblusers (usrname, usrpass, usrlevel, email, telefon, enabled, father, buy) " +
+                    " VALUES (@Usrname, @Usrpass, @Usrlevel, @Email, @Telefon, @Enabled, @Father, @Buy) " +
+                    " RETURNING usrid",
                 new
                 {
                     Usrname = userDTO.usrname,
@@ -39,7 +40,7 @@ namespace CampaignEditor.Repositories
                     Buy = userDTO.buy
                 });
 
-            return affected != 0;
+            return newId;
         }
 
         public async Task<UserDTO> GetUserById(int id)
@@ -86,7 +87,7 @@ namespace CampaignEditor.Repositories
 
             var affected = await connection.ExecuteAsync(
                 "UPDATE tblusers SET usrname = @Usrname, usrpass = @Usrpass, usrlevel = @Usrlevel, " +
-                "email = @Email, telefon = @Telefon, enabled = @Enabled, father = @Father, buy = @Buy" +
+                "email = @Email, telefon = @Telefon, enabled = @Enabled, father = @Father, buy = @Buy " +
                 "WHERE usrid = @Usrid",
                 new
                 {

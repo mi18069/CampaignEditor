@@ -1,20 +1,22 @@
-﻿using CampaignEditor.Controllers;
-using CampaignEditor.DTOs.CampaignDTO;
+﻿using Database.DTOs.CampaignDTO;
 using CampaignEditor.StartupHelpers;
 using Database.DTOs.ActivityDTO;
+using Database.DTOs.BrandDTO;
 using Database.DTOs.ChannelDTO;
 using Database.DTOs.ClientDTO;
 using Database.DTOs.GoalsDTO;
 using Database.DTOs.PricelistDTO;
 using Database.DTOs.SpotDTO;
 using Database.DTOs.TargetDTO;
-using Database.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
+using System.Diagnostics;
+using Database.Entities;
 
 namespace CampaignEditor
 {
@@ -26,58 +28,42 @@ namespace CampaignEditor
         private readonly IAbstractFactory<Goals> _factoryGoals;
         private readonly IAbstractFactory<CmpInfo> _factoryInfo;
 
-
-        private CampaignController _campaignController;
-        private ClientController _clientController;
-        private TargetCmpController _targetCmpController;
+        private CampaignOverviewData _campaignOverviewData;
 
         public ClientDTO _client = null;
         private CampaignDTO _campaign = null;
 
-        private bool isReadOnly = false;
+        public bool isReadOnly = false;
 
-        public static AddCampaign instance;
-
-        AssignTargets assignTargetsFactory = null;
-        Channels assignChannelsFactory = null;
-
-        private bool spotsModified = false;
-        private Spots fSpots = null;
         private List<SpotDTO> _spotlist = new List<SpotDTO>();
 
-        private bool targetsModified = false;
-        private AssignTargets fTargets = null;
         private List<TargetDTO> _targetlist = new List<TargetDTO>();
 
-        private bool goalsModified = false;
-        private Goals fGoals = null;
         private GoalsDTO _goals = null;
 
-        private bool channelsModified = false;
         private Channels fChannels = null;
         private List<Tuple<ChannelDTO, PricelistDTO, ActivityDTO>> _channels = null;
 
-        private bool infoModified = false;
-        private CmpInfo fInfo = null;
         private CampaignDTO _campaignInfo = null;
+        private BrandDTO[] _brands = null;
 
-        public CampaignOverview(ICampaignRepository campaignRepository, ITargetCmpRepository targetCmpRepository,
-            IClientRepository clientRepository, IAbstractFactory<AssignTargets> factoryAssignTargets,
+        public event EventHandler ClosePageEvent;
+        public CampaignOverview(IAbstractFactory<AssignTargets> factoryAssignTargets,
             IAbstractFactory<Channels> factoryChannels, IAbstractFactory<Spots> factorySpots,
-            IAbstractFactory<Goals> factoryGoals, IAbstractFactory<CmpInfo> factoryInfo)
+            IAbstractFactory<Goals> factoryGoals, IAbstractFactory<CmpInfo> factoryInfo,
+            IAbstractFactory<CampaignOverviewData> campaignOverviewData)
         {
             this.DataContext = this;
+            
             _factoryAssignTargets = factoryAssignTargets;
             _factoryChannels = factoryChannels;
             _factorySpots = factorySpots;
             _factoryGoals = factoryGoals;
             _factoryInfo = factoryInfo;
 
-            _campaignController = new CampaignController(campaignRepository);
-            _clientController = new ClientController(clientRepository);
-            _targetCmpController = new TargetCmpController(targetCmpRepository);
-            InitializeComponent();
+            _campaignOverviewData = campaignOverviewData.Create();
 
+            InitializeComponent();
         }
 
         #region Initialization
@@ -87,62 +73,77 @@ namespace CampaignEditor
             _campaign = campaign;
             isReadOnly = _isReadOnly;
 
-            
+            if (isReadOnly){
+                btnCmpInfo.IsEnabled = false;
+                btnAssignTargets.IsEnabled = false;
+                btnSpots.IsEnabled = false;
+                btnGoals.IsEnabled = false;
+                btnChannels.IsEnabled = false;
+            }
 
-            InitializeInfo();
-            await InitializeTargets();
-            await InitializeSpots();
-            await InitializeGoals();
-            await InitializeChannels();
+            try
+            {
+
+                // Create tasks for each initialization method
+                Task infoTask = Task.Run(() => InitializeInfo());
+                Task targetsTask = Task.Run(() => InitializeTargets());
+                Task spotsTask = Task.Run(() => InitializeSpots());
+                Task goalsTask = Task.Run(() => InitializeGoals());
+                Task channelsTask = Task.Run(() => InitializeChannels());
+
+                // Wait for all tasks to complete
+                await Task.WhenAll(infoTask, targetsTask, spotsTask, goalsTask, channelsTask);
+
+                FillFields();
+              
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Cannot retrieve data for campaign!\n" + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                ClosePage();
+            }
+
+        }
+        private void ClosePage()
+        {
+            ClosePageEvent?.Invoke(this, new EventArgs());
+        }
+
+        private async Task FillFields()
+        {
+            FillDGTargets(_targetlist);
+            await FillInfo(_campaign, _brands);
+            FillGoals(_goals);
+            dgSpots.ItemsSource = _spotlist;
+            dgChannels.ItemsSource = _channels;
         }
 
         private async Task InitializeTargets()
         {
-            if (isReadOnly)
-                btnAssignTargets.IsEnabled = false;
-            fTargets = _factoryAssignTargets.Create();
-            await fTargets.Initialize(_campaign);
-            _targetlist = fTargets.SelectedTargetsList.ToList();
-            FillDGTargets(_targetlist);
+            _targetlist = await _campaignOverviewData.GetTargets(_campaign.cmpid);
         }
 
         private async Task InitializeSpots()
         {
-            if (isReadOnly)
-                btnSpots.IsEnabled = false;
-            fSpots = _factorySpots.Create();
-            await fSpots.Initialize(_campaign);
-            dgSpots.ItemsSource = fSpots.Spotlist;
-            _spotlist = fSpots.Spotlist.ToList();
+            _spotlist = await _campaignOverviewData.GetSpots(_campaign.cmpid);
         }
-        private void InitializeInfo()
+        private async Task InitializeInfo()
         {
-            if (isReadOnly)
-                btnCmpInfo.IsEnabled = false;
-            fInfo = _factoryInfo.Create();
-            fInfo.Initialize(_client, _campaign);
-            _campaignInfo = fInfo.Campaign;
-            FillInfo(_campaignInfo);
+
+            _brands = await _campaignOverviewData.GetBrands(_campaign.cmpid);
+
         }
 
         private async Task InitializeGoals()
         {
-            if (isReadOnly)
-                btnGoals.IsEnabled = false;
-            fGoals = _factoryGoals.Create();
-            await fGoals.Initialize(_campaign);
-            _goals = fGoals.Goal;
-            FillGoals(_goals);
+
+            _goals = await _campaignOverviewData.GetGoals(_campaign.cmpid);
         }
 
         private async Task InitializeChannels()
         {
-            if (isReadOnly)
-                btnChannels.IsEnabled = false;
-            fChannels = _factoryChannels.Create();
-            await fChannels.Initialize(_client, _campaign);
-            _channels = fChannels.SelectedChannels;
-            dgChannels.ItemsSource = _channels;
+            _channels = await _campaignOverviewData.GetChannelTuples(_campaign.cmpid);
+
         }
 
         #endregion
@@ -151,17 +152,28 @@ namespace CampaignEditor
 
         private async void btnCmpInfo_Click(object sender, RoutedEventArgs e)
         {
-            fInfo.Initialize(_client, _campaign);
-            fInfo.ShowDialog();
-            if (fInfo.infoModified)
+            CmpInfo fInfo = null;
+            try
             {
+                fInfo = _factoryInfo.Create();
+                await fInfo.Initialize(_client, _campaign, _brands);
+                fInfo.ShowDialog();
+            }
+            catch
+            {
+                return;
+            }
+
+            if (fInfo != null && fInfo.infoModified)
+            {
+                _campaign = fInfo.Campaign;
                 _campaignInfo = fInfo.Campaign;
-                infoModified = true;
-                FillInfo(_campaignInfo);
-                fInfo.infoModified = false;
+                _brands = fInfo.SelectedBrands;
+                await FillInfo(_campaignInfo, _brands);
+
             }
         }
-        private void FillInfo(CampaignDTO campaign = null)
+        private async Task FillInfo(CampaignDTO campaign = null, BrandDTO[] brands = null)
         {
             if (campaign != null)
             {
@@ -181,6 +193,32 @@ namespace CampaignEditor
                 lblDPStartValue.Content = campaign.cmpstime.ToString().Trim();
                 lblDPEndValue.Content = campaign.cmpetime.ToString().Trim();
                 lblActiveValue.Content = campaign.active;
+                var activity = await _campaignOverviewData.GetActivity(_campaign);
+                lblActivityValue.Content = activity.act.Trim();
+                if (brands[0] != null)
+                {
+                    lblBrand1Value.Content = brands[0].brand;
+                    if (lblBrand1Value.Content.ToString().Length > 15)
+                    {
+                        lblBrand1Value.Content = lblBrand1Value.Content.ToString().Substring(0, 14) + "...";
+                    }
+                }
+                else
+                {
+                    lblBrand1Value.Content = "-";
+                }
+                if (brands[1] != null)
+                {
+                    lblBrand2Value.Content = brands[1].brand;
+                    if (lblBrand2Value.Content.ToString().Length > 15)
+                    {
+                        lblBrand2Value.Content = lblBrand2Value.Content.ToString().Substring(0, 14) + "...";
+                    }
+                }
+                else
+                {
+                    lblBrand2Value.Content = "-";
+                }
             }
         }
 
@@ -189,16 +227,25 @@ namespace CampaignEditor
         #region Targets
         private async void btnAssignTargets_Click(object sender, RoutedEventArgs e)
         {
-            await fTargets.Initialize(_campaign, _targetlist);
-            fTargets.ShowDialog();
-            if (fTargets.targetsModified)
+            AssignTargets fTargets = null;
+            try
+            {
+                fTargets = _factoryAssignTargets.Create();
+                await fTargets.Initialize(_campaign, _targetlist);
+                fTargets.ShowDialog();
+            }
+            catch
+            {
+                return;
+            }
+
+            if (fTargets != null && fTargets.targetsModified)
             {
                 _targetlist = fTargets.SelectedTargetsList.ToList();
                 FillDGTargets(_targetlist);
-                targetsModified = true;
-                fTargets.targetsModified = false;
             }
         }
+
         private void FillDGTargets(List<TargetDTO> selectedTargetsList)
         {
 
@@ -222,29 +269,47 @@ namespace CampaignEditor
         #region Channels
         private async void btnChannels_Click(object sender, RoutedEventArgs e)
         {
-
-            await fChannels.Initialize(_client, _campaign, _channels);
-            fChannels.ShowDialog();
-            if (fChannels.channelsModified)
+            Channels fChannels = null;
+            try
             {
-                _channels = fChannels.SelectedChannels;
-                dgChannels.ItemsSource = _channels;
-                channelsModified = true;
-                fChannels.channelsModified = false;
+                fChannels = _factoryChannels.Create();
+                await fChannels.Initialize(_client, _campaign, _channels);
+                fChannels.ShowDialog();
             }
+            catch
+            {
+                return;
+            }
+            if (fChannels != null && (fChannels.channelsModified || fChannels.pricelistChanged))
+            {
+                _channels = await _campaignOverviewData.GetChannelTuples(_campaign.cmpid);
+                dgChannels.ItemsSource = _channels;
+            }
+            if (fChannels != null)
+                fChannels.Close();
         }
         #endregion
 
         #region Spots
         private async void btnSpots_Click(object sender, RoutedEventArgs e)
         {
-            await fSpots.Initialize(_campaign, _spotlist);
-            fSpots.ShowDialog();
-            if (fSpots.spotsModified)
+            Spots fSpots = null;
+
+            try
+            {
+                fSpots = _factorySpots.Create();
+                await fSpots.Initialize(_campaign, _spotlist);
+                fSpots.ShowDialog();
+            }
+            catch
+            {
+                return;
+            }
+            
+            if (fSpots != null && fSpots.spotsModified)
             {
                 _spotlist = fSpots.Spotlist.ToList();
-                spotsModified = true;
-                fSpots.spotsModified = false;
+                dgSpots.ItemsSource = _spotlist;
             }
         }
         #endregion
@@ -252,14 +317,23 @@ namespace CampaignEditor
         #region Goals
         private async void btnGoals_Click(object sender, RoutedEventArgs e)
         {
-            await fGoals.Initialize(_campaign, _goals);
-            fGoals.ShowDialog();
+            Goals fGoals = null;
+
+            try
+            {
+                fGoals = _factoryGoals.Create();
+                await fGoals.Initialize(_campaign, _goals);
+                fGoals.ShowDialog();
+            }
+            catch
+            {
+                return;
+            }
+
             if (fGoals.goalsModified)
             {
                 _goals = fGoals.Goal;
-                goalsModified = true;
                 FillGoals(_goals);
-                fGoals.goalsModified = false;
             }
         }
 
@@ -313,36 +387,9 @@ namespace CampaignEditor
 
         private void btnCancel_Click(object sender, RoutedEventArgs e)
         {
-            //this.Close();
+            ClosePageEvent?.Invoke(this, new EventArgs());
         }
 
-        private async void btnSave_Click(object sender, RoutedEventArgs e)
-        {
-            if (targetsModified)
-            {
-                await fTargets.UpdateDatabase(_targetlist);
-            }
-            if (spotsModified)
-            {
-                await fSpots.UpdateDatabase(_spotlist);
-            }
-            if (goalsModified)
-            {
-                await fGoals.UpdateDatabase(_goals);
-            }
-            if (channelsModified)
-            {
-                await fChannels.UpdateDatabase(_channels);
-            }
-            if (infoModified)
-            {
-                await fInfo.UpdateDatabase(_campaignInfo);
-            }
-        }
 
-        private void dgSpots_Loaded(object sender, RoutedEventArgs e)
-        {
-            svSpots.MaxHeight = dgSpots.ActualHeight;
-        }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Npgsql;
 using System;
+using System.Text;
 
 namespace Database.Data
 {
@@ -15,9 +16,9 @@ namespace Database.Data
 
         public NpgsqlConnection GetConnection()
         {
-            string connectionString = "Server=localhost;port=5433;user id=postgres;password=jovan1999;database=mplaner;";
-            //return new NpgsqlConnection(_configuration.GetConnectionString(connectionString)); // Check this
+            var encryptedString = AppSettings.ConnectionString;
             var connection = new NpgsqlConnection();
+            var connectionString = EncryptionUtility.DecryptString(encryptedString);
             connection.ConnectionString = connectionString;
             return connection;
         }

@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CampaignEditor"
         mc:Ignorable="d"
-        Title="CmpInfo" Height="500" Width="500" FontSize="22">
+        Title="CmpInfo" Height="700" Width="500" FontSize="22">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="10" />
@@ -25,11 +25,15 @@
             <RowDefinition Height="auto" />
             <RowDefinition Height="auto" />
             <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
             <RowDefinition Height="*" />
             <RowDefinition Height="60" />
             <RowDefinition Height="10" />
         </Grid.RowDefinitions>
 
+        <Label x:Name="lblTv" FontWeight="Bold" Grid.Row="1" Grid.Column="1"/>
         <CheckBox x:Name="cbActive" Content="Active" Grid.Row="1" Grid.Column="5" 
                   FontSize="12" Checked="cb_Checked" Unchecked="cb_Checked">
             <CheckBox.LayoutTransform>
@@ -42,7 +46,8 @@
         <TextBox x:Name="tbName" Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="4"
                  TextWrapping="NoWrap"
                  VerticalAlignment="Center" Margin="10" 
-                 TextChanged="tb_TextChanged"/>
+                 TextChanged="tb_TextChanged"
+                 IsReadOnly="True"/>
 
         <Label x:Name="lblClient" Content="Client: " Grid.Row="3" Grid.Column="1"
                HorizontalContentAlignment="Right" HorizontalAlignment="Left" Margin="10" />
@@ -54,12 +59,12 @@
         <Label x:Name="lblStartDate" Content="Start Date: " Grid.Row="4" Grid.Column="1" 
                HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10" />
         <DatePicker x:Name="dpStartDate" Grid.Row="4" Grid.Column="2" Grid.ColumnSpan="3" 
-                    VerticalAlignment="Center" Margin="10"
+                    FirstDayOfWeek="Monday" VerticalAlignment="Center" Margin="10"
                     SelectedDateChanged="dp_SelectedDateChanged"/>
         <Label x:Name="lblEndDate" Content="End Date: " Grid.Row="5" Grid.Column="1"
                HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10" />
         <DatePicker x:Name="dpEndDate" Grid.Row="5" Grid.Column="2" Grid.ColumnSpan="3"
-                    VerticalAlignment="Center" Margin="10"
+                    FirstDayOfWeek="Monday" VerticalAlignment="Center" Margin="10"
                     SelectedDateChanged="dp_SelectedDateChanged"/>
         
         <Label x:Name="lblTbStart" Content="TB Start: " Grid.Row="6" Grid.Column="1" 
@@ -87,10 +92,32 @@
                  VerticalAlignment="Center" Margin="10" 
                  TextChanged="TextBoxes_TextChanged"/>
 
-        <Button x:Name="btnSave" Content="Save" Grid.Row="9" Grid.Column="2" Grid.ColumnSpan="4" 
+        <Label Content="Activity:" Grid.Row="8" Grid.Column="1" Margin="10"/>
+        <ComboBox x:Name="cbActivities" Grid.Row="8" Grid.Column="2" Grid.ColumnSpan="4"
+                  VerticalAlignment="Center" SelectedIndex="0" DisplayMemberPath="act" Margin="10"
+                  SelectionChanged="cbActivities_SelectionChanged"/>
+
+        <Label Content="Brand1: " Grid.Row="9" Grid.Column="1" 
+               VerticalAlignment="Center" Margin="10"/>
+
+        <Label Content="Brand2: " Grid.Row="10" Grid.Column="1" 
+               VerticalAlignment="Center" Margin="10"/>
+        <TextBox x:Name="tbBrand1" Grid.Row="9" Grid.Column="2" Grid.ColumnSpan="4" FontSize="14" FontWeight="Bold"
+                 TextChanged="tbBrand1_TextChanged" VerticalAlignment="Center" Margin="10" 
+                 HorizontalScrollBarVisibility="Auto" MinHeight="30" VerticalContentAlignment="Center"/>
+        <TextBox x:Name="tbBrand2" Grid.Row="10" Grid.Column="2" Grid.ColumnSpan="4" FontSize="14" FontWeight="Bold"
+                 TextChanged="tbBrand2_TextChanged" VerticalAlignment="Center" Margin="10" 
+                 HorizontalScrollBarVisibility="Auto" MinHeight="30" VerticalContentAlignment="Center"/>
+        
+        <ListBox x:Name="lbBrand" Grid.Row="11" Grid.Column="1" Grid.ColumnSpan="5"
+                 VerticalAlignment="Stretch" IsTextSearchEnabled="False"
+                 DisplayMemberPath="brand" Margin="10" FontSize="14"
+                 SelectionChanged="lbBrand_SelectionChanged"/>
+
+        <Button x:Name="btnSave" Content="Save" Grid.Row="12" Grid.Column="2" Grid.ColumnSpan="4" 
                 HorizontalAlignment="Right" Width="100" Margin="10, 10, 20, 10"
                 Click="btnSave_Click"/>
-        <Button x:Name="btnCancel" Content="Cancel" Grid.Row="9" Grid.Column="2" Grid.ColumnSpan="4" 
+        <Button x:Name="btnCancel" Content="Cancel" Grid.Row="12" Grid.Column="2" Grid.ColumnSpan="4" 
                 HorizontalAlignment="Right" Width="100" Margin="10, 10, 140, 10"
                 Click="btnCancel_Click"/>
     </Grid>

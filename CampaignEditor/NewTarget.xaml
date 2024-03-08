@@ -33,9 +33,7 @@
             <Border BorderBrush="LightGray" BorderThickness="1" 
                 Width="340" Height="300"
                 HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,120,10,0">
-                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                    <TextBlock x:Name="tbSelected" Foreground="Gray" TextWrapping="NoWrap"/>
-                </ScrollViewer>
+                <TextBlock x:Name="tbDescription" Foreground="Gray" TextWrapping="Wrap"/>
             </Border>
 
             <Grid Width="330" Height="50" 
@@ -43,18 +41,28 @@
                 <CheckBox x:Name="cbAgeRange"
                       Width="20" Height="20"
                       HorizontalAlignment="Left" Margin="0, 7, 0, 0"/>
-                <Label x:Name="lblAgeRange" Content="Age Range:   From               To" IsEnabled="{Binding ElementName=cbAgeRange, Path=IsChecked}"
-                           VerticalAlignment="Center" Margin="20, 0, 0, 0"/>
-                <TextBox x:Name="tbFrom"  MaxLength="2" HorizontalContentAlignment="Center"
+                <Grid x:Name="AgeRange" VerticalAlignment="Center" Margin="20, 0, 0, 0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="auto" />
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="auto" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Label x:Name="lblAgeRange" Grid.Column="0"
+                           Content="Age Range:   From" IsEnabled="{Binding ElementName=cbAgeRange, Path=IsChecked}"/>
+                    <TextBox x:Name="tbFrom"  Grid.Column="1"
+                             MaxLength="2" HorizontalContentAlignment="Center"
+                             VerticalAlignment="Center"
                      IsEnabled="{Binding ElementName=cbAgeRange, Path=IsChecked}"
-                     Width="50" Height="30"
-                     HorizontalAlignment="Left" Margin="180, 0, 0, 0"
                      TextChanged="tb_TextChanged"/>
-                <TextBox x:Name="tbTo" MaxLength="2" HorizontalContentAlignment="Center"
+                    <Label Content="To" Grid.Column="2" IsEnabled="{Binding ElementName=cbAgeRange, Path=IsChecked}"/>
+                    <TextBox x:Name="tbTo" Grid.Column="3"
+                             MaxLength="2" HorizontalContentAlignment="Center"
+                             VerticalAlignment="Center"
                      IsEnabled="{Binding ElementName=cbAgeRange, Path=IsChecked}"
-                     Width="50" Height="30"
-                     HorizontalAlignment="Left" Margin="275, 0, 0, 0"
                      TextChanged="tb_TextChanged"/>
+                </Grid>
+                
             </Grid>
 
             <CheckBox x:Name="chbGlobal" Content="Global" VerticalContentAlignment="Center"
@@ -67,11 +75,7 @@
             HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,45,10,0" 
             TextWrapping="NoWrap"/>
             <Label x:Name="lblDescription" Content="Description:" FontWeight="Bold"
-               HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,80,240,0"/>
-            <TextBox x:Name="tbDescription" MaxLength="255"
-            Width="230"
-            HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,85,10,0" 
-            TextWrapping="NoWrap"/>
+               HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,80,110,0"/>
             <Button x:Name="btnSave" Content="Save" 
                 Width="120" Height="50"
                 HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,10,10" 

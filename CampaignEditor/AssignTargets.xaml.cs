@@ -1,19 +1,17 @@
 ﻿using CampaignEditor.Controllers;
-using CampaignEditor.DTOs.CampaignDTO;
+using Database.DTOs.CampaignDTO;
 using CampaignEditor.StartupHelpers;
 using Database.DTOs.TargetCmpDTO;
 using Database.DTOs.TargetDTO;
 using Database.Repositories;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-
+using System;
 
 namespace CampaignEditor
 {
@@ -31,10 +29,11 @@ namespace CampaignEditor
         int maxSelected = 3;
 
         CampaignDTO _campaign = null;
-
+        private ListView _selectedListView = null;
         public bool CanBeEdited { get; }
         public ObservableCollection<TargetDTO> TargetsList { get { return _targetsList; } }
         public ObservableCollection<TargetDTO> SelectedTargetsList { get { return _selectedTargetsList; } }
+
 
         public AssignTargets(ITargetRepository targetRepository, 
                              IAbstractFactory<NewTarget> factoryNewTarget,
@@ -49,57 +48,34 @@ namespace CampaignEditor
             this.DataContext = this;
         }
 
-        public async Task Initialize(CampaignDTO campaign, List<TargetDTO> selectedlist = null, bool initialize = false)
+        public async Task Initialize(CampaignDTO campaign, List<TargetDTO> selectedlist)
         {
             _campaign = campaign;
 
-            if (selectedlist == null || initialize == true)
-            {
-                _targetsList.Clear();
-                _selectedTargetsList.Clear();
-                var targets = await _targetController.GetAllClientTargets(_campaign.clid);
-                targets = targets.OrderBy(t => t.targown != 0).ThenBy(t => t.targname);
-                var selectedTargets = await _targetCmpController.GetTargetCmpByCmpid(_campaign.cmpid);
-                selectedTargets.OrderBy(s => s.priority);
-                foreach (var selectedTarget in selectedTargets)
-                {
-                    _selectedTargetsList.Add(await _targetController.GetTargetById(selectedTarget.targid));
-                }
+            _targetsList.Clear();
+            _selectedTargetsList.Clear();
 
-                foreach (var target in targets)
+            var targets = await _targetController.GetAllClientTargets(_campaign.clid);
+            targets = targets.OrderBy(t => t.targown != 0).ThenBy(t => t.targname);
+
+            foreach (var target in targets)
+            {
+                _targetsList.Add(target);
+            }
+
+            
+            foreach (var selectedTarget in selectedlist)
+            {
+                foreach (var target in _targetsList)
                 {
-                    bool inSelected = false;
-                    foreach (var selectedTarget in selectedTargets)
+                    if (target.targid == selectedTarget.targid)
                     {
-                        if (selectedTarget.targid == target.targid)
-                            inSelected = true;
-                    }
-                    if (!inSelected)
-                    {
-                        _targetsList.Add(target);
+                        MoveTargetToSelected(target);
+                        break;
                     }
                 }
             }
-            else
-            {
-                // First return all elements to targetsList, then by order place it in selected
-                while (SelectedTargetsList.Count() > 0)
-                {
-                    MoveTargetFromSelected(SelectedTargetsList[0]); // n times move element from first location
-                }
-
-                foreach (var selectedTarget in selectedlist)
-                {
-                    for (int i = 0; i < TargetsList.Count(); i++)
-                    {
-                        if (TargetsList[i].targid == selectedTarget.targid)
-                        {
-                            MoveTargetToSelected(TargetsList[i]);
-                            i--;
-                        }
-                    }
-                }
-            }
+            
 
             targetsModified = false;
         }
@@ -123,7 +99,7 @@ namespace CampaignEditor
         private void btnToSelected_Click(object sender, RoutedEventArgs e)
         {
             var selectedList = lbTargets.SelectedItems;
-            for (int i=0; i<maxSelected; i++) 
+            for (int i=0; i<maxSelected && i<selectedList.Count; i++) 
             {
                 MoveTargetToSelected(selectedList[i] as TargetDTO);
             }
@@ -132,9 +108,9 @@ namespace CampaignEditor
         private void btnFromSelected_Click(object sender, RoutedEventArgs e)
         {
             var selectedList = lbSelectedTargets.SelectedItems;
-            foreach (var selected in selectedList)
+            for (int i = 0;  i < selectedList.Count; i++)
             {
-                MoveTargetFromSelected(selected as TargetDTO);
+                MoveTargetFromSelected(selectedList[i] as TargetDTO);
             }
         }
         
@@ -177,33 +153,66 @@ namespace CampaignEditor
             await factory.InitializeTree(_campaign);
             factory.ShowDialog();
             if (factory.success)
-                await Initialize(_campaign, SelectedTargetsList.ToList(), true);
+            {
+                if (factory.newTarget != null)
+                {
+                    _targetsList.Insert(0, factory.newTarget);
+                }
+            }
         }
 
         private async void btnEditTarget_Click(object sender, RoutedEventArgs e)
         {
-            var factory = _factoryNewTarget.Create();
-            var target = lbTargets.SelectedItems.Count > 0 ? lbTargets.SelectedItems[0] as TargetDTO :
-                                                             lbSelectedTargets.SelectedItems[0] as TargetDTO;
-
-            
-            if (target != null)
+            if (_selectedListView.SelectedItems.Count == 0) 
             {
-                var success = await factory.InitializeTargetToEdit(_campaign, target);
+                MessageBox.Show("No target selected!", "Message", MessageBoxButton.OK, MessageBoxImage.Hand);
+                return;
             }
 
-            factory.ShowDialog();
+            try
+            {
+                var factory = _factoryNewTarget.Create();
+                var target = _selectedListView.SelectedItems[0] as TargetDTO;
+                await factory.InitializeTargetToEdit(_campaign, target);
+                factory.ShowDialog();
 
-            if (factory.success)
-                await Initialize(_campaign);
-                
+                if (factory.success)
+                {
+                    target = await _targetController.GetTargetById(target.targid);
+                    int index = -1;
+                    var source = (ObservableCollection<TargetDTO>)_selectedListView.ItemsSource;
+                    for (int i=0; i< source.Count(); i++)
+                    {
+                        var viewTarget = source[i];
+                        if (viewTarget.targid == target.targid)
+                        {
+                            index = i;
+                            break;
+                        }
+                    }
+                    if (index != -1)
+                    {
+                        source.RemoveAt(index);
+                        source.Insert(index, target);
+                        targetsModified = true;
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error: " + ex.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+           
+
         }
 
         private async void btnSave_Click(object sender, RoutedEventArgs e)
         {
             targetsModified = true;
-            
-            this.Hide();
+            await UpdateDatabase(SelectedTargetsList.ToList());
+            this.Close();
         }
 
         public async Task UpdateDatabase(List<TargetDTO> targetlist)
@@ -220,7 +229,7 @@ namespace CampaignEditor
 
         private void btnCancel_Click(object sender, RoutedEventArgs e)
         {
-            this.Hide();
+            this.Close();
         }
 
         #region Drag and Drop selected Targets
@@ -265,16 +274,23 @@ namespace CampaignEditor
         #region Edit button mechanism
         private void CheckEdit()
         {
-            if ((lbTargets.SelectedItems.Count + lbSelectedTargets.SelectedItems.Count) == 1)
+            if (_selectedListView.SelectedItems.Count > 0)
                 btnEditTarget.IsEnabled = true;
             else
                 btnEditTarget.IsEnabled = false;
+        }
+
+        private void lb_GotFocus(object sender, RoutedEventArgs e)
+        {
+            _selectedListView = sender as ListView;
         }
 
         private void lb_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             CheckEdit();
         }
+
+
         #endregion
 
         #region Description TextBlock
@@ -282,7 +298,8 @@ namespace CampaignEditor
         {
             var target = lbTargets.SelectedItem as TargetDTO;
             if (target != null)
-                FillTargetTextBlock(target.targdefi);
+                //FillTargetTextBlock(target.targdefi);
+                tbDescription.Text = target.targdesc.Trim();
             CheckEdit();
         }
 
@@ -290,30 +307,22 @@ namespace CampaignEditor
         {
             var target = lbSelectedTargets.SelectedItem as TargetDTO;
             if (target != null)
-                FillTargetTextBlock(target.targdefi);
+                //FillTargetTextBlock(target.targdefi);
+                tbDescription.Text = target.targdesc.Trim();
             CheckEdit();
         }
 
-        private async void FillTargetTextBlock(string targetdefi)
+        /*private async void FillTargetTextBlock(string targetdefi)
         {
             var instance = _factoryNewTarget.Create();
             string text = await instance.ParseTargetdefi(targetdefi);
             tbTargetFilters.Text = text;
-        }
+        }*/
 
-        private void ListViewItem_LostFocus(object sender, RoutedEventArgs e)
-        {
-            tbTargetFilters.Text = "";
-        }
 
         #endregion
 
-        // Overriding OnClosing because click on x button should only hide window
-        protected override void OnClosing(CancelEventArgs e)
-        {
-            e.Cancel = true;
-            Hide();
-        }
+ 
     }
 
 }

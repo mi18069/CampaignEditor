@@ -24,7 +24,7 @@ namespace Database.Repositories
             using var connection = _context.GetConnection();
 
             var affected = await connection.ExecuteAsync(
-                "INSERT INTO tblcmpspot2 (cmpid, spotcode, spotname, spotlength, ignore) " +
+                "INSERT INTO tblcmpspot (cmpid, spotcode, spotname, spotlength, ignore) " +
                     "VALUES (@Cmpid, @Spotcode, @Spotname, @Spotlength, @Ignore)",
             new
             {
@@ -42,7 +42,7 @@ namespace Database.Repositories
             using var connection = _context.GetConnection();
 
             var spot = await connection.QueryFirstOrDefaultAsync<Spot>(
-                "SELECT * FROM tblcmpspot2 WHERE cmpid = @Cmpid AND spotcode = @Spotcode", 
+                "SELECT * FROM tblcmpspot WHERE cmpid = @Cmpid AND spotcode = @Spotcode", 
                 new { Cmpid = id, Spotcode = code });
 
             return _mapper.Map<SpotDTO>(spot);
@@ -53,7 +53,7 @@ namespace Database.Repositories
             using var connection = _context.GetConnection();
 
             var spots = await connection.QueryAsync<Spot>(
-                "SELECT * FROM tblcmpspot2 WHERE cmpid = @Id", new { Id = id });
+                "SELECT * FROM tblcmpspot WHERE cmpid = @Id", new { Id = id });
 
             return _mapper.Map<IEnumerable<SpotDTO>>(spots);
         }
@@ -63,7 +63,7 @@ namespace Database.Repositories
             using var connection = _context.GetConnection();
 
             var spot = await connection.QueryFirstOrDefaultAsync<Spot>(
-                "SELECT * FROM tblcmpspot2 WHERE spotname = @Spotname", new { Spotname = spotname });
+                "SELECT * FROM tblcmpspot WHERE spotname = @Spotname", new { Spotname = spotname });
 
             return _mapper.Map<SpotDTO>(spot);
         }
@@ -72,7 +72,7 @@ namespace Database.Repositories
         {
             using var connection = _context.GetConnection();
 
-            var allSpots = await connection.QueryAsync<Spot>("SELECT * FROM tblcmpspot2");
+            var allSpots = await connection.QueryAsync<Spot>("SELECT * FROM tblcmpspot");
 
             return _mapper.Map<IEnumerable<SpotDTO>>(allSpots);
         }
@@ -82,7 +82,7 @@ namespace Database.Repositories
             using var connection = _context.GetConnection();
 
             var affected = await connection.ExecuteAsync(
-                "UPDATE tblcmpspot2 SET cmpid = @Cmpid, spotcode = @Spotcode, spotname = @Spotname, " +
+                "UPDATE tblcmpspot SET cmpid = @Cmpid, spotcode = @Spotcode, spotname = @Spotname, " +
                 "spotlength = @Spotlength, ignore = @Ignore " +
                 "WHERE spotname = @Spotname",
                 new
@@ -102,7 +102,7 @@ namespace Database.Repositories
             using var connection = _context.GetConnection();
 
             var affected = await connection.ExecuteAsync(
-                "DELETE FROM tblcmpspot2 WHERE cmpid = @Id", new { Id = id });
+                "DELETE FROM tblcmpspot WHERE cmpid = @Id", new { Id = id });
 
             return affected != 0;
         }
@@ -112,8 +112,21 @@ namespace Database.Repositories
             using var connection = _context.GetConnection();
 
             var affected = await connection.ExecuteAsync(
-                "DELETE FROM tblcmpspot2 WHERE cmpid = @Id AND spotcode = @Spotcode", 
+                "DELETE FROM tblcmpspot WHERE cmpid = @Id AND spotcode = @Spotcode", 
                 new { Id = id, Spotcode = code });
+
+            return affected != 0;
+        }
+
+        public async Task<bool> DuplicateSpot(int oldCmpid, int newCmpid)
+        {
+            using var connection = _context.GetConnection();
+
+            var affected = await connection.ExecuteAsync(
+                @"INSERT INTO tblcmpspot (cmpid, spotcode, spotname, spotlength, ignore)
+                  SELECT @NewCmpid, spotcode, spotname, spotlength, ignore
+                  FROM tblcmpspot WHERE cmpid = @OldCmpid;",
+                new { OldCmpid = oldCmpid, NewCmpid = newCmpid });
 
             return affected != 0;
         }

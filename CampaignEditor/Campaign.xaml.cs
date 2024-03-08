@@ -1,79 +1,107 @@
 ﻿using CampaignEditor.Controllers;
-using CampaignEditor.DTOs.CampaignDTO;
+using Database.DTOs.CampaignDTO;
+using CampaignEditor.Helpers;
 using CampaignEditor.StartupHelpers;
-using CampaignEditor.UserControls;
 using Database.DTOs.ClientDTO;
 using Database.Repositories;
+using System;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace CampaignEditor
 {
     public partial class Campaign : Window
     {
-        public string cmpname = "";
+        public CampaignDTO _campaign = null;
         ClientDTO _client = null;
-        CampaignDTO _campaign = null;
         bool readOnly = true;
 
-        private readonly IAbstractFactory<CampaignOverview> _factoryOverview;
-        private readonly IAbstractFactory<CampaignForecast> _factoryForecast;
+        //private readonly IAbstractFactory<CampaignOverview> _factoryOverview;
+        private readonly IAbstractFactory<CampaignForecastView> _factoryForecastView;
+        private readonly IAbstractFactory<CampaignValidation> _factoryValidation;
 
         private ClientController _clientController;
         private CampaignController _campaignController;
 
-        private CampaignOverview factoryCampaignOverview = null;
-        private CampaignForecast factoryCampaignForecast = null;
-        private object currentPage = null;
-
+        CampaignOverview factoryCampaignOverview;
+        CampaignForecastView factoryCampaignForecastView;
 
         public Campaign(IClientRepository clientRepository, ICampaignRepository campaignRepository, 
-            IAbstractFactory<CampaignOverview> factoryOverview, IAbstractFactory<CampaignForecast> factoryForecast)
+            IAbstractFactory<CampaignOverview> factoryOverview, 
+            IAbstractFactory<CampaignForecastView> factoryForecastView,
+            IAbstractFactory<CampaignValidation> factoryValidation)
         {
-            _factoryOverview = factoryOverview;
-            _factoryForecast = factoryForecast;
+
+            factoryCampaignOverview = factoryOverview.Create();
+            factoryCampaignForecastView = factoryForecastView.Create();
+            _factoryValidation = factoryValidation;
 
             _clientController = new ClientController(clientRepository);
             _campaignController = new CampaignController(campaignRepository);
 
             InitializeComponent();
-            
+
+
         }
 
-        public async Task Initialize(string campaignName, bool isReadOnly)
+        public async Task Initialize(CampaignDTO campaign, bool isReadOnly)
         {
-            cmpname = campaignName;
-            _campaign = await _campaignController.GetCampaignByName(campaignName);
+
+            _campaign = campaign;
             _client = await _clientController.GetClientById(_campaign.clid);
-            readOnly = isReadOnly;
-            this.Title = "Client: " + _client.clname.Trim() + "  Campaign: " + _campaign.cmpname.Trim();
+            readOnly = isReadOnly || (TimeFormat.YMDStringToDateTime(_campaign.cmpedate) < DateTime.Now);
+            this.Title = "Client: " + _client.clname.Trim() + "  Campaign: " + _campaign.cmpname.Trim()
+                 + (_campaign.tv ? " TV" : " Radio");
 
-            factoryCampaignOverview = _factoryOverview.Create();
-            factoryCampaignOverview.Initialization(_client, _campaign, isReadOnly);
-            btnOverview_Click(btnOverview, null);
+            CampaignEventLinker.AddCampaign(_campaign.cmpid);
+            AssignPagesToTabs();
+
         }
 
-        private void btnOverview_Click(object sender, RoutedEventArgs e)
+        private async Task AssignPagesToTabs()
         {
-            if (currentPage != factoryCampaignOverview)
-            {
-                currentPage = factoryCampaignOverview;
-                ClientCampaign.Content = currentPage;
-            }
+            //Placing loading page
+            var loadingPage = new LoadingPage();
+
+            TabItem tabOverview = (TabItem)tcTabs.FindName("tiOverview");
+            tabOverview.Content = loadingPage.Content;
+
+            TabItem tabForecast = (TabItem)tcTabs.FindName("tiForecast");
+            tabForecast.Content = loadingPage.Content;
+
+            TabItem tabValidation = (TabItem)tcTabs.FindName("tiValidation");
+            tabValidation.Content = loadingPage.Content;
+
+
+            factoryCampaignOverview.ClosePageEvent += Page_ClosePageEvent;
+            await factoryCampaignOverview.Initialization(_client, _campaign, readOnly);
+            tabOverview.Content = factoryCampaignOverview.Content;
+
+            //var factoryCampaignForecastView = _factoryForecastView.Create();
+            factoryCampaignForecastView.tabForecast = tabForecast;
+            await factoryCampaignForecastView.Initialize(_campaign, readOnly);
+
+            var factoryCampaignValidation = _factoryValidation.Create();
+            await factoryCampaignValidation.Initialize(_campaign);
+            tabValidation.Content = factoryCampaignValidation.Content;
+
+
         }
 
-        private void btnForecast_Click(object sender, RoutedEventArgs e)
+        private void Page_ClosePageEvent(object? sender, EventArgs e)
         {
-            if (factoryCampaignForecast == null)
-            {
-                factoryCampaignForecast = _factoryForecast.Create();
-                factoryCampaignForecast.Initialize(_client, _campaign);
-            }
-            if (currentPage != factoryCampaignForecast)
-            {
-                currentPage = factoryCampaignForecast;
-                ClientCampaign.Content = currentPage;
-            }
+            this.Close();
         }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            // event unbinding
+            factoryCampaignOverview.ClosePageEvent -= Page_ClosePageEvent;
+            factoryCampaignForecastView.CloseForecast();
+
+            CampaignEventLinker.RemoveCampaign(_campaign.cmpid);
+        }
+
     }
 }

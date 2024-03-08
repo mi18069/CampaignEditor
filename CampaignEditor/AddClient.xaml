@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CampaignEditor"
         mc:Ignorable="d"
-        Title="AddClient" Height="300" Width="400"
+        Title="AddClient" Height="300" Width="400" ResizeMode="NoResize"
         FontSize="20">
     <Grid>
         <Label x:Name="lblClientName" Content="Client name:"
@@ -17,8 +17,9 @@
         <Label x:Name="lblOwnerName" Content="Owner:"
                VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0, 80, 0, 0"/>
         <ComboBox x:Name="cbOwner" 
-                 Width="300"
-                 HorizontalAlignment="Center"  VerticalAlignment="Top" Margin="0,120,0,0"/>
+                  Width="300"
+                  HorizontalAlignment="Center"  VerticalAlignment="Top" Margin="0,120,0,0"
+                  DisplayMemberPath="usrname"/>
         <Button x:Name="btnAddClient" Content="Add client"  
                 Width="150" Height="40"
                 HorizontalContentAlignment="Center" 

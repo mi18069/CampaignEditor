@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CampaignEditor"
         mc:Ignorable="d"
-        Title="Channels" Height="600" Width="1400">
+        Title="Channels" Height="650" Width="1400">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="10"/>
@@ -31,6 +31,7 @@
             <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
             <RowDefinition Height="70"/>
             <RowDefinition Height="50"/>
             <RowDefinition Height="10"/>
@@ -39,17 +40,26 @@
         <Label Content="Channels" Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2"
                HorizontalAlignment="Center"/>
         <ListView x:Name="lvChannels" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" Grid.RowSpan="2"
-                  MinWidth="250" Margin="0, 0, 0, 20"
+                  MinWidth="250" 
                   DisplayMemberPath="chname" SelectionMode="Multiple"
-                  SelectionChanged="lvChannels_SelectionChanged"/>
-        <ListBox x:Name="lbChannelGroups" Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2"
-                 DisplayMemberPath="chgrname" MaxHeight="150"
+                  PreviewMouseDoubleClick="lvChannels_PreviewMouseDoubleClick"
+                  MouseDoubleClick="lvChannels_MouseDoubleClick"/>
+        <Label Grid.Row="4" Grid.Column="4" Grid.ColumnSpan="2"  
+               Content="Selected Channels" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <ListBox x:Name="lbSelectedChannels" Grid.Row="5" Grid.Column="4" Grid.ColumnSpan="2"
+                 DisplayMemberPath="chname" Height="100"
+                 SelectionMode="Single"
+                 MouseDoubleClick="lbSelectedChannels_MouseDoubleClick"/>
+        <Label Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2"
+               Content="Channel Groups" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        <ListBox x:Name="lbChannelGroups" Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="2"
+                 DisplayMemberPath="chgrname" Height="100"
                  SelectionChanged="lbChannelGroups_SelectionChanged"
                  SelectionMode="Multiple"/>
-        <Button x:Name="btnEditChannelGroups" Grid.Row="5" Grid.Column="1" 
+        <Button x:Name="btnEditChannelGroups" Grid.Row="6" Grid.Column="1" IsEnabled="True"
                 Margin="20"  Width="30" Height="30" BorderThickness="0" Background="White"
                 Click="btnEditChannelGroups_Click">
-            <Image Source="\images\Edit_Icon2.png"></Image>
+            <Image Source="{StaticResource edit_icon}"></Image>
         </Button>
        
         <Label Content="Pricelists" Grid.Row="1" Grid.Column="4" Grid.ColumnSpan="2"
@@ -59,11 +69,12 @@
                   HorizontalAlignment="Right" VerticalAlignment="Center"
                   Checked="chbActivePricelists_Checked"
                   Unchecked="chbActivePricelists_Unchecked"/>
-        <ListView x:Name="lvPricelists" Grid.Row="2" Grid.Column="4" Grid.ColumnSpan="2" Grid.RowSpan="3"
+        <ListView x:Name="lvPricelists" Grid.Row="2" Grid.Column="4" Grid.ColumnSpan="2" Grid.RowSpan="2"
                 MinWidth="250" 
                 DisplayMemberPath="plname"
                 SelectionMode="Single"
-                PreviewMouseRightButtonDown="lvPricelists_PreviewMouseRightButtonDown">
+                PreviewMouseRightButtonDown="lvPricelists_PreviewMouseRightButtonDown"
+                  MouseDoubleClick="lvPricelists_MouseDoubleClick">
             <ListView.ItemContainerStyle>
                 <Style TargetType="{x:Type ListViewItem}">
                     <Style.Triggers>
@@ -79,21 +90,21 @@
                 </ContextMenu>
             </ListView.Resources>
         </ListView>
-        <Button x:Name="btnEditPricelist" Grid.Row="5" Grid.Column="4" 
+        <Button x:Name="btnEditPricelist" Grid.Row="6" Grid.Column="4" IsEnabled="True"
                 Margin="20"  Width="30" Height="30" BorderThickness="0" Background="White"
                 Visibility="{Binding ElementName=lvPricelists, Path=SelectedItem}"
                 Click="btnEditPricelist_Click">
-            <Image Source="\images\Edit_Icon2.png"></Image>
+            <Image Source="{StaticResource edit_icon}"></Image>
         </Button>
-        <Button x:Name="btnNewPricelist"  Grid.Row="5" Grid.Column="5" 
+        <Button x:Name="btnNewPricelist"  Grid.Row="6" Grid.Column="5" 
                 Margin="20" Width="30" Height="30" BorderThickness="0" Background="White"
                 Click="btnNewPricelist_Click">
-            <Image Source="\images\GreenPlus.png" ></Image>
+            <Image Source="{StaticResource plus_icon}" ></Image>
         </Button>
 
         <Label Content="Acitvities" Grid.Row="1" Grid.Column="7" Grid.ColumnSpan="2"
                HorizontalAlignment="Center"/>
-        <ListView x:Name="lvActivities" Grid.Row="2" Grid.Column="7" Grid.ColumnSpan="2" Grid.RowSpan="3"
+        <ListView x:Name="lvActivities" Grid.Row="2" Grid.Column="7" Grid.ColumnSpan="2" Grid.RowSpan="2"
                     MinWidth="250"
                     DisplayMemberPath="act"
                     SelectionMode="Single"/>
@@ -103,21 +114,22 @@
                 Width="50" Height="50" Background="White" 
                 VerticalAlignment="Center" Margin="0, -80, 0, 0"
                 Click="btnToSelected_Click">
-            <Image Source="\images\RightArrow.png" Width="20" Height="20"></Image>
+            <Image Source="{StaticResource right_arrow_icon}" Width="20" Height="20"></Image>
         </Button>
         <Button x:Name="btnFromSelected" Grid.Row="3" Grid.Column="10"
                 Width="50" Height="50" Background="White" 
                 VerticalAlignment="Center" Margin="0, 0, 0, -80"
                 Click="btnFromSelected_Click">
-            <Image Source="\images\LeftArrow.png" Width="20" Height="20"></Image>
+            <Image Source="{StaticResource left_arrow_icon}" Width="20" Height="20"></Image>
         </Button>
 
 
-        <DataGrid x:Name="dgSelected" Grid.Row="2" Grid.Column="12" Grid.ColumnSpan="3" Grid.RowSpan="3"
+        <DataGrid x:Name="dgSelected" Grid.Row="2" Grid.Column="12" Grid.ColumnSpan="3" Grid.RowSpan="4"
                   CanUserSortColumns="False"
                   AutoGenerateColumns="False"
                   IsReadOnly="True"
-                  ItemsSource="{Binding Path=Selected}">
+                  ItemsSource="{Binding Path=Selected}"
+                  HeadersVisibility="Column">
             <DataGrid.Resources>
                 <Style TargetType="{x:Type DataGridColumnHeader}">
                     <Setter Property="Background" Value="LightGray"/>
@@ -139,10 +151,10 @@
             </DataGrid.Columns>
         </DataGrid>
 
-        <Button x:Name="btnCancel" Content="Cancel" Grid.Row="6" Grid.Column="14"
+        <Button x:Name="btnCancel" Content="Cancel" Grid.Row="7" Grid.Column="14"
                 Width="100" Height="40" HorizontalAlignment="Right" Margin="150, 0"
                 Click="btnCancel_Click"/>
-        <Button x:Name="btnSave" Content="Save" Grid.Row="6" Grid.Column="14" 
+        <Button x:Name="btnSave" Content="Save" Grid.Row="7" Grid.Column="14" 
                 Width="100" Height="40" HorizontalAlignment="Right" Margin="10, 0"
                 Click="btnSave_Click"/>
     </Grid>

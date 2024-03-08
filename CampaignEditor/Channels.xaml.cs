@@ -1,5 +1,5 @@
 ﻿using CampaignEditor.Controllers;
-using CampaignEditor.DTOs.CampaignDTO;
+using Database.DTOs.CampaignDTO;
 using CampaignEditor.StartupHelpers;
 using Database.DTOs.ActivityDTO;
 using Database.DTOs.ChannelCmpDTO;
@@ -7,7 +7,6 @@ using Database.DTOs.ChannelDTO;
 using Database.DTOs.ChannelGroupDTO;
 using Database.DTOs.ClientDTO;
 using Database.DTOs.PricelistDTO;
-using Database.Entities;
 using Database.Repositories;
 using System;
 using System.Collections;
@@ -18,7 +17,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Media;
+using static CampaignEditor.Campaign;
 
 namespace CampaignEditor
 {
@@ -36,6 +37,8 @@ namespace CampaignEditor
         private readonly IAbstractFactory<PriceList> _factoryPriceList;
         private readonly IAbstractFactory<GroupChannels> _factoryGroupChannels;
 
+        GroupChannels fGroupChannels;
+
         private List<ChannelDTO> _allChannelList;
         private ObservableCollection<ChannelDTO> _channelList;
         // This list will serve to get all Pricelists for client
@@ -47,14 +50,16 @@ namespace CampaignEditor
 
         private List<Tuple<ChannelDTO, PricelistDTO, ActivityDTO>> _selectedChannels =
                                 new List<Tuple<ChannelDTO, PricelistDTO, ActivityDTO>>();
+        private List<ChannelDTO> _originalSelectedChannels = new List<ChannelDTO>();
+
 
         private List<PricelistDTO> _pricelistsToBeDeleted = new List<PricelistDTO>();
 
         public bool channelsModified = false;
         public bool canEdit = false;
         private bool onlyActive = false; // For chbActive
-        private bool changePricelist = true;
-        
+        public bool pricelistChanged = false;
+
         #region Getters and Setters for lists
 
         private List<ChannelDTO> AllChannelList
@@ -117,13 +122,21 @@ namespace CampaignEditor
             _factoryGroupChannels = factoryGroupChannels;
 
             InitializeComponent();
+
+            if (MainWindow.user.usrlevel != 0)
+            {
+                btnNewPricelist.IsEnabled = false;
+                btnEditPricelist.IsEnabled = false;
+                btnEditChannelGroups.IsEnabled = false;
+            }
         }
 
         public async Task Initialize(ClientDTO client, CampaignDTO campaign,
-            List<Tuple<ChannelDTO, PricelistDTO, ActivityDTO>> channelList = null)
+            List<Tuple<ChannelDTO, PricelistDTO, ActivityDTO>> channelList)
         {
             this._client = client;
             this._campaign = campaign;
+            //CampaignEventLinker.AddChannels(_campaign.cmpid, this);
             SelectedChannels = channelList;
             await FillLists();
             await FillChannelGroups();
@@ -133,60 +146,45 @@ namespace CampaignEditor
         {
             Selected.Clear();
 
-            if (SelectedChannels == null)
+            _channelList = new ObservableCollection<ChannelDTO>((await _channelController.GetAllChannels()).OrderBy(c => c.chname));
+
+            // Create a ListCollectionView and bind it to the ObservableCollection
+            ListCollectionView channelListView = new ListCollectionView(ChannelList);
+            channelListView.SortDescriptions.Add(new SortDescription("chname", ListSortDirection.Ascending));
+
+            // Set the ListCollectionView as the view for your ObservableCollection
+            lvChannels.ItemsSource = channelListView;
+
+            // Initializing and sorting lists, so it don't have to be sorted later
+            _allPricelistsList = (List<PricelistDTO>)(await _pricelistController.GetAllClientPricelists(_client.clid));
+            _pricelistList = new ObservableCollection<PricelistDTO>((AllPricelistsList).OrderBy(p => p.clid != 0).ThenByDescending(p => p.valfrom));
+            _activityList = new ObservableCollection<ActivityDTO>((await _activityController.GetAllActivities()).OrderBy(a => a.act));
+
+            // Binding to ListViews
+            //lvChannels.ItemsSource = ChannelList;
+            lvPricelists.ItemsSource = PricelistList;
+            lvActivities.ItemsSource = ActivityList;
+
+            AllChannelList = ChannelList.ToList();
+
+            foreach (var selected in SelectedChannels)
             {
-
-                // Initializing and sorting lists, so it don't have to be sorted later
-                _channelList = new ObservableCollection<ChannelDTO>((await _channelController.GetAllChannels()).OrderBy(c => c.chname));
-                _allPricelistsList = (List<PricelistDTO>)(await _pricelistController.GetAllClientPricelists(_client.clid));
-                _pricelistList = new ObservableCollection<PricelistDTO>((AllPricelistsList).OrderBy(p=>p.clid!=0).ThenByDescending(p => p.valfrom));
-                _activityList = new ObservableCollection<ActivityDTO>((await _activityController.GetAllActivities()).OrderBy(a => a.act));
-
-                // Binding to ListViews
-                lvChannels.ItemsSource = ChannelList;
-                lvPricelists.ItemsSource = PricelistList;
-                lvActivities.ItemsSource = ActivityList;
-
-                AllChannelList = ChannelList.ToList();
-
-                var selectedChannels = await _channelCmpController.GetChannelCmpsByCmpid(_campaign.cmpid);
-                if (selectedChannels != null)
+                // If we want to move some channel from channelList to Selected,
+                // first we must find that object in ChannelList
+                foreach (ChannelDTO channel in ChannelList)
                 {
-                    foreach (var selected in selectedChannels)
+                    if (channel.chid == selected.Item1.chid)
                     {
-                        ChannelDTO channel = await _channelController.GetChannelById(selected.chid);
-                        PricelistDTO pricelist = await _pricelistController.GetPricelistById(selected.plid);
-                        ActivityDTO activity = await _activityController.GetActivityById(selected.actid);
-
-                        MoveToSelected(channel, pricelist, activity);
+                        MoveToSelected(channel, selected.Item2, selected.Item3);
+                        break;
                     }
-                    SelectedChannels = Selected.ToList();
+
                 }
             }
-            else
-            {   
-                foreach (var selected in SelectedChannels)
-                {
-                    // If we want to move some channel from channelList to Seleccted,
-                    // first we must find that object in ChannelList, if not,
-                    // just take from selectedList
-                    ChannelDTO selectedChannel = null;
-                    foreach (ChannelDTO channel in ChannelList)
-                    {
-                        if (channel.chname.Trim() == selected.Item1.chname.Trim())
-                        {
-                            selectedChannel = channel;
-                        }
-
-                    }
-                    if (selectedChannel == null)
-                        selectedChannel = selected.Item1;
-                    MoveToSelected(selectedChannel, selected.Item2, selected.Item3);
-                }
-                channelsModified = false;
-            }
+            channelsModified = false;
 
             dgSelected.ItemsSource = Selected;
+            await RefreshPricelists();
         }
 
         #region ToSelected and FromSelected 
@@ -194,10 +192,12 @@ namespace CampaignEditor
         private void MoveToSelected(ChannelDTO channel, PricelistDTO pricelist, ActivityDTO activity)
         {
             var list = Selected.Select(t => t.Item1).ToList(); // making a list to pass to function FindIndex
-            int index = FindIndex(list, channel); // Finding the right index, to keep the list sorted
-            Selected.Insert(index, Tuple.Create(channel, pricelist, activity)!);
+            // We don't want to insert alphabetically, but in adding order
+            //int index = FindIndex(list, channel); // Finding the right index, to keep the list sorted
+            Selected.Add(Tuple.Create(channel, pricelist, activity)!);
             ChannelList.Remove(channel);
             AllChannelList.Remove(channel);
+            lbSelectedChannels.Items.Remove(channel);
             channelsModified = true;
         }
         private void MoveFromSelected(Tuple<ChannelDTO, PricelistDTO, ActivityDTO> tuple)
@@ -212,21 +212,19 @@ namespace CampaignEditor
         private void btnToSelected_Click(object sender, RoutedEventArgs e)
         {
             // At least one item from every listView needs to be selected to execute
-            if (lvChannels.SelectedItems.Count > 0 &&
+            if (lbSelectedChannels.Items.Count > 0 &&
                 lvPricelists.SelectedItems.Count > 0 &&
                 lvActivities.SelectedItems.Count > 0) 
             {
-                int n = lvChannels.SelectedItems.Count;
-                var channels = lvChannels.SelectedItems;
+                int n = lbSelectedChannels.Items.Count;
+                var channels = lbSelectedChannels.Items;
 
                 PricelistDTO pricelist = lvPricelists.SelectedItem as PricelistDTO;
                 ActivityDTO activity = lvActivities.SelectedItem as ActivityDTO;
                 for (int i=0; i<n; i++)
                 {
                     ChannelDTO channel = channels[0] as ChannelDTO; // 0 because we need n iterations, and in each we remove one item
-                    changePricelist = false;
                     MoveToSelected(channel, pricelist, activity);
-                    changePricelist = true;
                 }
             }
         }
@@ -273,15 +271,32 @@ namespace CampaignEditor
 
         #region Selection Changed
 
-        private async void lvChannels_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        private async void lvChannels_PreviewMouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
-            if (!changePricelist && lvChannels.SelectedItems.Count > 0)
-                return;
-            PricelistDTO lastSelected = null;
-            if (lvPricelists.SelectedItems.Count > 0)
+            lvChannels.SelectedItems.Clear();
+
+        }
+
+        private async void lvChannels_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+
+            if (lvChannels.SelectedItems.Count > 0)
             {
-                lastSelected = lvPricelists.SelectedItem as PricelistDTO;
+                ChannelDTO channel = lvChannels.SelectedItem as ChannelDTO;
+                if (channel != null)
+                {
+                    lbSelectedChannels.Items.Add(channel);
+                    ChannelList.Remove(channel);
+                }
+
             }
+
+            await RefreshPricelists();
+
+        }
+
+        private async Task RefreshPricelists()
+        {
             PricelistList.Clear();
             // Making lists of integers for faster transition of elements
             List<int> plids = new List<int>();
@@ -309,7 +324,7 @@ namespace CampaignEditor
                     plids.Add(pricelist.plid);
                 }
             }
-            foreach (ChannelDTO chid in lvChannels.SelectedItems)
+            foreach (ChannelDTO chid in lbSelectedChannels.Items)
             {
                 chids.Add(chid.chid);
             }
@@ -323,20 +338,24 @@ namespace CampaignEditor
             // Clearing and filling with the available pricelists for selected channels
             // == 0 because when more channels are selected, only one should modify lvPricelists
             int selectedIndex = 0;
+            List<PricelistDTO> pricelists = new List<PricelistDTO>();
 
             foreach (int plid in plIds)
             {
                 PricelistDTO pricelist = await _pricelistController.GetPricelistById(plid);
+                pricelists.Add(pricelist);
+            }
+
+            PricelistComparer comparer = new PricelistComparer();
+            pricelists.Sort((a, b) => comparer.Compare(a, b));
+
+            foreach (var pricelist in pricelists)
+            {
                 PricelistList.Add(pricelist);
-                if (lastSelected != null && lastSelected.plid == pricelist.plid)
-                {
-                    lvPricelists.SelectedIndex = selectedIndex;
-                }
-                selectedIndex++;
             }
         }
 
-            // In order to select ListView on mouse right click
+        // In order to select ListView on mouse right click
         private void lvPricelists_PreviewMouseRightButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             ListViewItem listViewItem = VisualUpwardSearch(e.OriginalSource as DependencyObject);
@@ -349,7 +368,6 @@ namespace CampaignEditor
                 e.Handled = true;
             }
         }
-
         static ListViewItem VisualUpwardSearch(DependencyObject source)
         {
             while (source != null && !(source is ListViewItem))
@@ -358,6 +376,22 @@ namespace CampaignEditor
             return source as ListViewItem;
         }
 
+
+        private async void lvPricelists_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            var f = _factoryPriceList.Create();
+            if (lvPricelists.SelectedItems.Count > 0)
+                await f.Initialize(_campaign, lvPricelists.SelectedItem as PricelistDTO);
+            else
+                await f.Initialize(_campaign);
+            f.ShowDialog();
+            if (f.pricelistChanged)
+            {
+                _allPricelistsList = ((await _pricelistController.GetAllClientPricelists(_client.clid))).ToList<PricelistDTO>();
+                //lvChannels_SelectionChanged(lvChannels, null);
+                await RefreshPricelists();
+            }
+        }
 
         #endregion
 
@@ -372,8 +406,22 @@ namespace CampaignEditor
             f.ShowDialog();
             if (f.pricelistChanged)
             {
-                _allPricelistsList = (List<PricelistDTO>)(await _pricelistController.GetAllClientPricelists(_client.clid)); 
-                lvChannels_SelectionChanged(lvChannels, null);
+                _allPricelistsList = ((await _pricelistController.GetAllClientPricelists(_client.clid))).ToList<PricelistDTO>();                
+                await RefreshPricelists();
+                if (f._pricelist == null)
+                    return;
+                for (int i= 0; i<Selected.Count(); i++)
+                {
+                    Tuple<ChannelDTO, PricelistDTO, ActivityDTO> tuple = Selected[i];
+                    if (tuple.Item2.plid == f._pricelist.plid)
+                    {
+                        Tuple<ChannelDTO, PricelistDTO, ActivityDTO> newTuple = Tuple.Create(tuple.Item1, f._pricelist, tuple.Item3);
+                        Selected.RemoveAt(i);
+                        Selected.Insert(i, newTuple);
+                        pricelistChanged = true;
+                        break;
+                    }
+                }
             }
         }
         private async void btnNewPricelist_Click(object sender, RoutedEventArgs e)
@@ -383,20 +431,25 @@ namespace CampaignEditor
             f.ShowDialog();
             if (f.pricelistChanged)
             {
-                _allPricelistsList = (List<PricelistDTO>)(await _pricelistController.GetAllClientPricelists(_client.clid)); 
-                lvChannels_SelectionChanged(lvChannels, null);
+                _allPricelistsList = (List<PricelistDTO>)(await _pricelistController.GetAllClientPricelists(_client.clid));
+                //lvChannels_SelectionChanged(lvChannels, null);
+                await RefreshPricelists();
             }
         }
-        private void chbActivePricelists_Checked(object sender, RoutedEventArgs e)
+        private async void chbActivePricelists_Checked(object sender, RoutedEventArgs e)
         {
             onlyActive = true;
-            lvChannels_SelectionChanged(lvChannels, null);
+            //lvChannels_SelectionChanged(lvChannels, null);
+            await RefreshPricelists();
+
         }
 
-        private void chbActivePricelists_Unchecked(object sender, RoutedEventArgs e)
+        private async void chbActivePricelists_Unchecked(object sender, RoutedEventArgs e)
         {
             onlyActive = false;
-            lvChannels_SelectionChanged(lvChannels, null);
+            //lvChannels_SelectionChanged(lvChannels, null);
+            await RefreshPricelists();
+
         }
         #endregion
 
@@ -404,9 +457,9 @@ namespace CampaignEditor
 
         private async Task FillChannelGroups()
         {
-            var f = _factoryGroupChannels.Create();
-            await f.Initialize(_client, _campaign);
-            lbChannelGroups.ItemsSource = f.ChannelGroupList;
+            fGroupChannels = _factoryGroupChannels.Create();
+            await fGroupChannels.Initialize(_client, _campaign);
+            lbChannelGroups.ItemsSource = fGroupChannels.ChannelGroupList;
         }
         private async void btnEditChannelGroups_Click(object sender, RoutedEventArgs e)
         {
@@ -454,7 +507,36 @@ namespace CampaignEditor
                         continue;
                     }
                 }
-                lvChannels.SelectAll();
+
+
+            }
+            // Remove channels which are in dgSelected and lbSelectedChannels
+            foreach (Tuple<ChannelDTO, PricelistDTO, ActivityDTO> tuple in dgSelected.Items)
+            {
+                ChannelDTO chn = tuple.Item1 as ChannelDTO;
+                for (int i = 0; i < ChannelList.Count; i++)
+                {
+                    ChannelDTO channel = ChannelList[i];
+                    if (chn.chid == channel.chid)
+                    {
+                        ChannelList.RemoveAt(i);
+                        i = ChannelList.Count; // in order to step out of loop
+                    }
+                }
+            }
+
+            foreach (ChannelDTO chn in lbSelectedChannels.Items)
+            {
+                for (int i = 0; i < ChannelList.Count; i++)
+                {
+                    ChannelDTO channel = ChannelList[i];
+                    if (chn.chid == channel.chid)
+                    {
+                        ChannelList.RemoveAt(i);
+                        i = ChannelList.Count; // in order to step out of loop
+                    }
+                }
+
             }
 
         }
@@ -462,11 +544,33 @@ namespace CampaignEditor
         #endregion
 
 
-        private void btnSave_Click(object sender, RoutedEventArgs e)
+        private async void btnSave_Click(object sender, RoutedEventArgs e)
         {
             if (channelsModified)
+            {
                 SelectedChannels = Selected.ToList();
-            this.Hide();
+                await UpdateDatabase(SelectedChannels);
+                var addedChannels = CheckAddedChannels();
+                if (addedChannels.Count > 0)
+                {
+                    //OnAddChannelChangesOccurred();
+                }
+            }
+            this.Close();
+        }
+
+        private List<ChannelDTO> CheckAddedChannels()
+        {
+            List<ChannelDTO> addedChannels = new List<ChannelDTO>();
+            foreach (var channel in SelectedChannels.Select(c => c.Item1).ToList())
+            {
+                if (!_originalSelectedChannels.Contains(channel))
+                {
+                    addedChannels.Add(channel);
+                }
+            }
+
+            return addedChannels;
         }
         private void btnCancel_Click(object sender, RoutedEventArgs e)
         {
@@ -476,7 +580,7 @@ namespace CampaignEditor
                 PricelistList.Add(PricelistsToBeDeleted[0]);
                 PricelistsToBeDeleted.RemoveAt(0);
             }
-            this.Hide();
+            this.Close();
         }
 
         public async Task UpdateDatabase(List<Tuple<ChannelDTO, PricelistDTO, ActivityDTO>> channelList)
@@ -494,22 +598,67 @@ namespace CampaignEditor
             }
         }
 
-        // Overriding OnClosing because click on x button should only hide window
-        protected override void OnClosing(CancelEventArgs e)
-        {
-            e.Cancel = true;
-            Hide();
-        }
-
         #region Context Menu
         private async void miDeletePricelist_Click(object sender, RoutedEventArgs e)
         {
             PricelistDTO pricelist = lvPricelists.SelectedItem as PricelistDTO;
-            //PricelistDTO pricelist = sender as PricelistDTO;
             PricelistsToBeDeleted.Add(pricelist);
             PricelistList.Remove(pricelist);
+            channelsModified = true;
         }
 
         #endregion
+
+        private async void lbSelectedChannels_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (lbSelectedChannels.SelectedItems.Count < 1)
+                return;
+
+            var channel = lbSelectedChannels.SelectedItems[0] as ChannelDTO;
+            if (channel != null)
+            {
+                lbSelectedChannels.Items.Remove(channel);
+                ChannelList.Add(channel);
+            }
+            await RefreshPricelists();
+        }
+
+        public class PricelistComparer : IComparer<PricelistDTO>
+        {
+            public int Compare(PricelistDTO x, PricelistDTO y)
+            {
+                // First, compare the clid values
+                int clidComparison = x.clid.CompareTo(y.clid);
+
+                // If clid values are not equal, sort by clid in ascending order
+                if (clidComparison != 0)
+                {
+                    return clidComparison;
+                }
+
+                // If clid values are equal, check the condition p.clid != 0
+                bool xClidNotZero = x.clid != 0;
+                bool yClidNotZero = y.clid != 0;
+
+                // If both have clid != 0 or both have clid == 0, sort by valfrom in descending order
+                if (xClidNotZero == yClidNotZero)
+                {
+                    return y.valfrom.CompareTo(x.valfrom);
+                }
+
+                // Sort by clid != 0 in descending order
+                return yClidNotZero.CompareTo(xClidNotZero);
+            }
+        }
+
+        // Overriding OnClosing because we need to close all opened windows
+        protected override void OnClosing(CancelEventArgs e)
+        {
+
+            fGroupChannels.shouldClose = true;
+            fGroupChannels.Close();
+            
+        }
+
     }
 }

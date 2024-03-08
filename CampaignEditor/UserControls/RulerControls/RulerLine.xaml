@@ -1,0 +1,16 @@
+﻿<UserControl x:Class="CampaignEditor.UserControls.RulerLine"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:CampaignEditor.UserControls"
+             mc:Ignorable="d" 
+             d:DesignHeight="20" Width="150" d:Background="White">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition x:Name="colLabel" Width="*"/>
+            <ColumnDefinition x:Name="colLine" Width="*"/>
+        </Grid.ColumnDefinitions>
+        <Rectangle x:Name="recLine" Grid.Column="1" Fill="Black" Height="1"/>
+    </Grid>
+</UserControl>

@@ -5,7 +5,7 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:CampaignEditor"
       mc:Ignorable="d" 
-      d:Height="700" d:Width="1200" d:MinWidth="1000" d:MinHeight="700"
+      d:Height="700" d:Width="1200" d:MinWidth="1000" d:MinHeight="800"
       FontSize="20"
       Background="White">
 
@@ -34,9 +34,7 @@
         <ScrollViewer Grid.Row="3" Grid.Column="2" Grid.RowSpan="2" Margin="0,10,0,0"
                       VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Auto"
                       MaxWidth="300">
-            <Border 
-            BorderBrush="LightGray" BorderThickness="1"
-                >
+            <Border BorderBrush="LightGray" BorderThickness="1">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="10" />
@@ -45,6 +43,9 @@
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="10" />
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="auto" />
                         <RowDefinition Height="auto" />
                         <RowDefinition Height="auto" />
                         <RowDefinition Height="auto" />
@@ -143,6 +144,42 @@
                        HorizontalContentAlignment="Right" FontWeight="DemiBold"/>
                         </Grid>
                     </Border>
+                    <Border x:Name="bActivity" Grid.Row="9" Grid.Column="1" Grid.ColumnSpan="2" 
+                        BorderThickness="0, 0, 0, 1" BorderBrush="Black">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Label x:Name="lblActivity" Content="Activity: " Grid.Column="0"/>
+                            <Label x:Name="lblActivityValue" Grid.Column="1" 
+                       HorizontalContentAlignment="Right" FontWeight="DemiBold"/>
+                        </Grid>
+                    </Border>
+                    <Border x:Name="bBrand1" Grid.Row="10" Grid.Column="1" Grid.ColumnSpan="2" 
+                        BorderThickness="0, 0, 0, 1" BorderBrush="Black">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Label x:Name="lblBrand1" Content="Brand 1: " Grid.Column="0"/>
+                            <Label x:Name="lblBrand1Value" Grid.Column="1" 
+                       HorizontalContentAlignment="Right" FontWeight="DemiBold"/>
+                        </Grid>
+                    </Border>
+                    <Border x:Name="bBrand2" Grid.Row="11" Grid.Column="1" Grid.ColumnSpan="2" 
+                        BorderThickness="0, 0, 0, 1" BorderBrush="Black">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <Label x:Name="lblBrand2" Content="Brand 2: " Grid.Column="0"/>
+                            <Label x:Name="lblBrand2Value" Grid.Column="1" 
+                       HorizontalContentAlignment="Right" FontWeight="DemiBold"/>
+                        </Grid>
+                    </Border>
                 </Grid>
             </Border>
         </ScrollViewer>
@@ -173,6 +210,7 @@
                           FontSize="15"
                           CanUserSortColumns="False"
                           AutoGenerateColumns="False"
+                          HeadersVisibility="Column"
                           IsReadOnly="True">
                         <DataGrid.Resources>
                             <Style TargetType="{x:Type DataGridColumnHeader}">
@@ -212,15 +250,15 @@
                         MinWidth="200" Height="40"
                         HorizontalAlignment="Center" VerticalAlignment="Top" Margin="0,10"
                         Click="btnSpots_Click"/>
-                <ScrollViewer x:Name="svSpots" Grid.Row="2" Grid.Column="1"
+                <ScrollViewer x:Name="svSpots" Grid.Row="2" Grid.Column="1" 
                               VerticalScrollBarVisibility="Auto">
                     <DataGrid 
                           x:Name="dgSpots" 
                           FontSize="15"
                           CanUserSortColumns="False"
                           AutoGenerateColumns="False"
-                          IsReadOnly="True"
-                        Loaded="dgSpots_Loaded">
+                          HeadersVisibility="Column"
+                          IsReadOnly="True">
                         <DataGrid.Resources>
                             <Style TargetType="{x:Type DataGridColumnHeader}">
                                 <Setter Property="Background" Value="LightGray"/>
@@ -312,9 +350,6 @@
                        HorizontalContentAlignment="Right" FontWeight="DemiBold"/>
                     </Grid>
                 </Border>
-
-
-
             </Grid>
         </Border>
 
@@ -346,6 +381,7 @@
                           FontSize="15"
                           CanUserSortColumns="False"
                           AutoGenerateColumns="False"
+                          HeadersVisibility="Column"
                           IsReadOnly="True">
                         <DataGrid.Resources>
                             <Style TargetType="{x:Type DataGridColumnHeader}">
@@ -368,12 +404,8 @@
             </Grid>
         </Border>
 
-        <Button x:Name="btnSave" Content="Save" Grid.Row="5" Grid.Column="8"
-                Width="100" Height="40"
-                HorizontalAlignment="Right" 
-                Click="btnSave_Click"/>
-        <Button x:Name="btnCancel" Content="Cancel" Grid.Row="5" Grid.Column="8"
-                Width="100" Height="40" HorizontalAlignment="Left" 
+        <Button x:Name="btnCancel" Content="Close" Grid.Row="5" Grid.Column="8"
+                Width="100" Height="40" HorizontalAlignment="Right" 
                 Click="btnCancel_Click"/>
         <Label x:Name="lblError" Foreground="Red" HorizontalContentAlignment="Right"
                Width="750"

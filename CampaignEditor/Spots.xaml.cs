@@ -1,5 +1,5 @@
 ﻿using CampaignEditor.Controllers;
-using CampaignEditor.DTOs.CampaignDTO;
+using Database.DTOs.CampaignDTO;
 using CampaignEditor.UserControls;
 using Database.DTOs.SpotDTO;
 using Database.Repositories;
@@ -51,13 +51,14 @@ namespace CampaignEditor
         {
             wpSpots.Children.Clear();
             Campaign = campaign;
+            CampaignEventLinker.AddSpots(Campaign.cmpid, this);
             wpSpots.Children.Add(MakeAddButton());
 
             // If spots are called for the first time
             if (spotlist == null)
             {
                 var spots = await _spotController.GetSpotsByCmpid(Campaign.cmpid);
-                spots.OrderBy(s => s.spotcode);
+                spots = spots.OrderBy(s => s.spotcode);
                 foreach (var spot in spots)
                 {
                     Spotlist.Add(spot);
@@ -74,6 +75,15 @@ namespace CampaignEditor
             }
             AddSpotItem();
             ResizeSpotItems();
+        }
+
+        // Define an event to inform when changes occurs
+        public event EventHandler SpotsChanged;
+
+        // Invoke the event
+        protected virtual void OnSpotsChanged()
+        {
+            SpotsChanged?.Invoke(this, EventArgs.Empty);
         }
 
         #region SpotItems
@@ -100,7 +110,8 @@ namespace CampaignEditor
             Button btnAddSpot = new Button();
             btnAddSpot.Click += new RoutedEventHandler(btnAddSpot_Click);
             Image imgGreenPlus = new Image();
-            imgGreenPlus.Source = new BitmapImage(new Uri(appPath + imgGreenPlusPath));
+            ImageSource imageSource = (ImageSource)Application.Current.FindResource("plus_icon");
+            imgGreenPlus.Source = imageSource;
             btnAddSpot.Content = imgGreenPlus;
             btnAddSpot.Width = 30;
             btnAddSpot.Height = 30;
@@ -200,7 +211,9 @@ namespace CampaignEditor
                         Spotlist.Add(spot);
                     }
                 }
-                this.Hide();
+                await UpdateDatabase(Spotlist.ToList());
+                OnSpotsChanged();
+                this.Close();
             }
             
         }
@@ -211,7 +224,7 @@ namespace CampaignEditor
             for(int i=0; i<n-1; i++)
             {
                 SpotItem spotItem = wpSpots.Children[i] as SpotItem;
-                // Don't check last item if it's empty
+                // Don't check item if it's empty
                 if (spotItem.tbLength.Text.Trim().Length == 0 && 
                     spotItem.tbName.Text.Trim().Length == 0)
                 {
@@ -238,7 +251,8 @@ namespace CampaignEditor
 
         private void btnCancel_Click(object sender, RoutedEventArgs e)
         {
-            this.Hide();
+            spotsModified = false;
+            this.Close();
         }
 
         public async Task UpdateDatabase(List<SpotDTO> spotlist)
@@ -254,13 +268,6 @@ namespace CampaignEditor
             }
         }
 
-
-        // Overriding OnClosing because click on x button should only hide window
-        protected override void OnClosing(CancelEventArgs e)
-        {
-            e.Cancel = true;
-            Hide();
-        }
    
     }
 }

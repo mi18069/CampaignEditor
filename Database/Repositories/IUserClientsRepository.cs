@@ -1,5 +1,4 @@
-﻿using CampaignEditor.DTOs.UserDTO;
-using Database.DTOs.UserClients;
+﻿using Database.DTOs.UserClients;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 

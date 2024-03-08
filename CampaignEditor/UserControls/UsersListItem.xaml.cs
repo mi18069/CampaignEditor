@@ -1,8 +1,7 @@
-﻿using System;
+﻿using CampaignEditor.DTOs.UserDTO;
+using System;
 using System.ComponentModel;
-using System.IO;
 using System.Windows.Controls;
-using System.Windows.Media.Imaging;
 
 
 namespace CampaignEditor
@@ -13,32 +12,29 @@ namespace CampaignEditor
         public UsersListItem()
         {      
             InitializeComponent();
-            SetImages();
         }
 
-        private string appPath = Directory.GetCurrentDirectory();
-        private string imgUserIconPath = "\\images\\UserIcon.png";
-        private string imgRedXPath = "\\images\\Red_X.png";
+        public event EventHandler<UserDTO> BtnUnassignedClicked;
+        public event EventHandler<UserDTO> UserLevelSelectionChanged;
 
         #region Properties
 
-        private string _username;
-        private string _userlevel;
+        private UserDTO _user;
         private Image _userIcon;
         private Button _btnUnassign;
 
-        [Category("Custom Props")]
-        public string Username
-        {
-            get { return _username; }
-            set { _username = value.Trim() ; lblUsername.Content = value.Trim(); }
-        }
+        public bool authorizationChanged = false;      
 
-        [Category("Custom Props")]
-        public string Userlevel
+        public UserDTO User
         {
-            get { return _userlevel; }      
-            set { _userlevel = value; lblUserLevel.Content = value; }
+            get { return _user; }
+            set 
+            { 
+                _user = value;
+                lblUsername.Content = _user.usrname.Trim();
+                cbUserLevel.SelectedIndex = _user.usrlevel;
+                authorizationChanged = false;
+            }
         }
 
         [Category("Custom Props")]
@@ -57,18 +53,15 @@ namespace CampaignEditor
 
         #endregion
 
-        private void SetImages()
+        private void cbUserLevel_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            imgUserIcon.Source = new BitmapImage(new Uri(appPath + imgUserIconPath));
-
-            Image imgRedX = new Image();
-            imgRedX.Source = new BitmapImage(new Uri(appPath + imgRedXPath));
-            btnUnassign.Content = imgRedX;
+            UserLevelSelectionChanged?.Invoke(this, this.User);
+            authorizationChanged = true;
         }
 
         private void btnUnassign_Click(object sender, System.Windows.RoutedEventArgs e)
         {
-            UsersOfClient.instance.UnassignUser_Click(Username);
+            BtnUnassignedClicked?.Invoke(this, this.User);
         }
     }
 

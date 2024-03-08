@@ -1,9 +1,8 @@
 ﻿using CampaignEditor.Controllers;
-using CampaignEditor.DTOs.CampaignDTO;
+using Database.DTOs.CampaignDTO;
 using Database.DTOs.TargetClassDTO;
 using Database.DTOs.TargetDTO;
 using Database.DTOs.TargetValueDTO;
-using Database.Entities;
 using Database.Repositories;
 using System;
 using System.Collections.Generic;
@@ -30,7 +29,7 @@ namespace CampaignEditor
         private CampaignDTO _campaign = null;
 
         public bool success = false;
-
+        public TargetDTO newTarget = null;
         public bool isDataRangeChecked { get; set; } = false;
         public NewTarget(ITargetRepository targetRepository, 
                          ITargetClassRepository targetClassRepository,
@@ -108,11 +107,10 @@ namespace CampaignEditor
             targetToEdit = target;
             await InitializeTree(campaign);
             tbName.Text = target.targname.Trim();
-            tbDescription.Text = target.targdesc.Trim();
             btnSaveAs.Visibility = Visibility.Visible;         
             
             var res = await CheckTreeUsingTargetdefi(target.targdefi);
-            PrintInTbSelected();
+            PrintInTbDescription();
 
             if (res == false)
                 return false;
@@ -137,13 +135,14 @@ namespace CampaignEditor
         // For writing in textBox element
         private List<string> GetSelectedStrings()
         {
-            
+
             List<string> selectedStrings = new List<string>();
             foreach (TreeViewModel parent in treeViewList)
             {
                 StringBuilder row = new StringBuilder("");
-                if (parent.IsChecked != false){
-                    row.Append(parent.Name.Trim() + ":\n");
+                if (parent.IsChecked != false)
+                {
+                    row.Append(parent.Name.Trim() + "(");
                 }
                 int i = 0;
                 foreach (TreeViewModel child in parent.Children)
@@ -152,42 +151,49 @@ namespace CampaignEditor
                     {
                         if (i != 0)
                         {
-                            row.Append(",\n");
+                            row.Append(",");
                         }
-                        row.Append(' ', 5);
                         row.Append(child.Name.Trim());
                         i++;
                     }
                 }
+                row.Append(')');
+
                 if (parent.IsChecked != false)
                     selectedStrings.Add(row.ToString());
             }
 
             return selectedStrings;
         }
-        private void PrintInTbSelected()
+        public void PrintInTbDescription()
         {
-            tbSelected.Text = "";
+            tbDescription.Text = "";
             List<string> selectedStrings = GetSelectedStrings();
+            StringBuilder sb = new StringBuilder("");
+
             if (cbAgeRange.IsChecked == true)
             {
                 string from = tbFrom.Text;
                 string to = tbTo.Text;
-                string ageString = "Age Range:\n     " + from + " - " + to;
+                string ageString = "Age Range(" + from + "-" + to + ")";
                 selectedStrings.Add(ageString);
             }
             foreach (string str in selectedStrings)
             {
-                tbSelected.Text += str + "\n";
+                sb.Append(str + "&");
             }
+            if (sb.Length > 0)
+                sb.Remove(sb.Length - 1, 1); // removes last "&"
+
+            tbDescription.Text = sb.ToString();
         }
         private void tb_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
         {
-            PrintInTbSelected();
+            PrintInTbDescription();
         }
         private void CheckBox_Click(object sender, RoutedEventArgs e)
         {
-            PrintInTbSelected();
+            PrintInTbDescription();
         }
 
         #endregion
@@ -218,7 +224,7 @@ namespace CampaignEditor
                 string targdefi = ParseSelectedTargdefi();
                 string targdefp = ParseSelectedTargdefp();
 
-                _ = await _targetController.CreateTarget(new CreateTargetDTO(targname, targown, 
+                newTarget = await _targetController.CreateTarget(new CreateTargetDTO(targname, targown, 
                                                                          targdesc, targdefi, targdefp));
                 success = true;
                 this.Close();
@@ -301,7 +307,7 @@ namespace CampaignEditor
                 return "";
         }
 
-        private string ParseSelectedTargdefp()
+        /*private string ParseSelectedTargdefp()
         {
             StringBuilder sbTargetdefp = new StringBuilder("I;#;Y;N;&;");
             int i = 0;
@@ -342,15 +348,60 @@ namespace CampaignEditor
                 return "I;";
 
             return sbTargetdefp.ToString();
-        }
+        }*/
 
+        private string ParseSelectedTargdefp()
+        {
+            StringBuilder sbTargetdefp = new StringBuilder("I;#;Y;N;"); 
+            bool firstOver10 = true;
+            foreach (TreeViewModel parent in treeViewList)
+            {
+                bool firstValue = true;
+                foreach (TreeViewModel child in parent.Children)
+                {
+
+                    int parentid = (parent.Item as TargetClassDTO).demoid;
+                    if (parentid > 10 && firstOver10) // because there are no parent with demoid == 10
+                    {
+                        string AgeRange = ParseAgeRangeTargetdefp();
+                        if (AgeRange != "")
+                        {
+                            sbTargetdefp.Append("&;" + AgeRange);
+                        }
+                        firstOver10 = false;
+                    }
+
+                    if (child.IsChecked != false)
+                    {
+                        if (firstValue)
+                        {
+                            int id = ConvertToPlaceInTargetdefp(parentid);
+                            string childid = (child.Item as TargetValueDTO).value;
+                            sbTargetdefp.Append("&;C;" + id + ",1" + ";INL," + childid + ";100;");
+                            firstValue = false;
+                        }
+                        else
+                        {
+                            sbTargetdefp.Length = sbTargetdefp.Length - 5; // removing ";100;"
+                            string childid = (child.Item as TargetValueDTO).value;
+                            sbTargetdefp.Append("," + childid + ";100;");
+                        }
+
+                    }
+                }
+            }
+            if (sbTargetdefp.ToString() == "I;#;Y;N;&;")
+                return "I;";
+
+            return sbTargetdefp.ToString();
+        }
         private string ParseAgeRangeTargetdefp()
         {
             if ((bool)cbAgeRange.IsChecked == true)
             {
-                string from = tbFrom.Text;
-                string to = tbTo.Text;
-                return "R;11,3;BET,0" + from + ",0" + to + ";100;";
+                string from = tbFrom.Text.PadLeft(3, '0');
+                string to = tbTo.Text.PadLeft(3, '0');
+                return "R;11,3;BET," + from + "," + to + ";100;";
             }
             else
                 return "";
@@ -482,11 +533,6 @@ namespace CampaignEditor
                 lblError.Content = "Enter name";
                 return false;
             }
-            else if (tbDescription.Text == "")
-            {
-                lblError.Content = "Enter description";
-                return false;
-            }
             else if((bool)cbAgeRange.IsChecked == true)
             {
                 if (!tbFrom.Text.All(Char.IsDigit) || !tbTo.Text.All(Char.IsDigit))
@@ -505,7 +551,7 @@ namespace CampaignEditor
                     return false;
                 }
             }
-            else if (checkname && await _targetController.GetTargetByName(tbName.Text.Trim()) != null)
+            else if (checkname && await _targetController.CheckClientTargetName(tbName.Text, _campaign.clid))
             {
                 lblError.Content = "Target name already exist";
                 return false;

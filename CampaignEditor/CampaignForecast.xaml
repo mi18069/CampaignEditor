@@ -3,56 +3,250 @@
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
-      xmlns:local="clr-namespace:CampaignEditor.UserControls"
+      xmlns:local="clr-namespace:CampaignEditor.UserControls" 
+      xmlns:local1="clr-namespace:CampaignEditor.UserControls.ForecastGrids" 
+      xmlns:converters="clr-namespace:CampaignEditor.Converters"
       mc:Ignorable="d" 
-      d:DesignHeight="450" d:DesignWidth="800"
-      Title="CampaignForecast" Background="White">
-
+      d:DesignHeight="700" d:DesignWidth="1200"
+      Title="CampaignForecast" Background="White"
+      PreviewKeyDown="Page_PreviewKeyDown">
+    <Page.Resources>
+        <converters:InvertBoolConverter x:Key="InvertBoolConverter" />
+        <converters:SecIntConverter x:Key="SecIntConverter" />
+        <converters:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        <converters:ValueComparisonConverter x:Key="ValueComparisonConverter" />
+    </Page.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="10"/>
             <ColumnDefinition Width="auto"/>
             <ColumnDefinition Width="auto"/>
             <ColumnDefinition Width="auto"/>
-            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="1.2*"/>
             <ColumnDefinition Width="10"/>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="10"/>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="150"/>
+            <RowDefinition Height="50"/>
             <RowDefinition Height="10"/>
         </Grid.RowDefinitions>
 
-        <ListView x:Name="lvChannels" Grid.Row="1" Grid.Column="1" 
-                  DisplayMemberPath="chname"/>
-        <ScrollViewer Grid.Row="1" Grid.Column="2" Grid.RowSpan="2"
-                              VerticalScrollBarVisibility="Auto">
-            <DataGrid x:Name="dgSchema" 
-                      FontSize="15"
-                      CanUserSortColumns="False"
-                      AutoGenerateColumns="False"
-                      IsReadOnly="True">
-                <DataGrid.Resources>
-                    <Style TargetType="{x:Type DataGridColumnHeader}">
-                        <Setter Property="Background" Value="LightGray"/>
-                        <Setter Property="FontWeight" Value="SemiBold"/>
-                        <Setter Property="BorderThickness" Value="1,1,1,2"/>
-                        <Setter Property="BorderBrush" Value="black"/>
-                    </Style>
-                </DataGrid.Resources>
-                <DataGrid.Columns>
-                    <DataGridTextColumn Header="Program" Binding="{Binding name, Mode=TwoWay}"
+        <Button x:Name="btnSelectChannels" Grid.Row="1" Grid.Column="1"
+                Content="Select all channels" Height="20" Margin="0, 0, 10, 0"
+                Background="White" Click="btnSelectChannels_Click"/>
+        <ListView x:Name="lvChannels" Grid.Row="2" Grid.Column="1" 
+                    MaxHeight="200"
+                    DisplayMemberPath="chname"
+                    SelectionMode="Multiple" Margin="0, 10 ,10,0"
+                    SelectionChanged="lvChannels_SelectionChanged"
+                    PreviewMouseRightButtonDown="lvChannels_PreviewMouseRightButtonDown"
+                    AllowDrop="True">
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <EventSetter Event="PreviewMouseMove" Handler="ListViewItem_PreviewMouseMove"/>
+                    <EventSetter Event="Drop" Handler="ListViewItem_Drop"/>
+                </Style>
+                </ListView.ItemContainerStyle>
+            </ListView>
+            
+            <Border Grid.Row="3" Grid.Column="1" 
+                BorderBrush="LightGray" BorderThickness="1" Margin="0, 10, 10, 10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Label Grid.Column="0" Content="Version: " HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                <ComboBox Grid.Column="1" x:Name="cbVersions" HorizontalAlignment="Left" VerticalAlignment="Center"
+                            SelectionChanged="CbVersions_SelectionChanged"/>
+                <Button x:Name="btnNewVersion" Grid.Column="2"
+                        Click="btnNewVersion_Click" Margin="10, 0, 0 ,0" BorderThickness="0" Background="White">
+                    <Image Source="{StaticResource plus_icon}" Width="20" Height="20"></Image>
+                </Button>
+                <Button x:Name="btnClear" Grid.Column="3"
+                        Click="btnClear_Click"  Margin="10, 0, 0 ,0" BorderThickness="0" Background="White">
+                    <Image Source="{StaticResource x_icon}" Width="20" Height="20"></Image>
+                </Button>
+                <Button x:Name="btnRecalculateData" Grid.Column="4"
+                        Click="btnRecalculateData_Click"  BorderThickness="0" Background="White">
+                    <Image Source="{StaticResource recalculate_data_icon}" Width="30" Height="30"></Image>
+                </Button>
+                <Button x:Name="btnFetchData" Grid.Column="5"
+                        Click="btnFetchData_Click"  Margin="5, 0, 0, 0" BorderThickness="0" Background="White">
+                    <Image Source="{StaticResource fetch_data_icon}" Width="30" Height="30"></Image>
+                </Button>
+
+            </Grid>
+        </Border>
+            
+        <local:MediaPlanGrid x:Name="dgMediaPlans" 
+                                Grid.Row="1" Grid.Column="2" Grid.RowSpan="6" Grid.ColumnSpan="3" 
+                                SelectionChanged="dgMediaPlans_SelectionChanged"/>
+
+        <TabControl x:Name="tcGrids" Grid.Row="7" Grid.RowSpan="2" Grid.Column="2" Grid.ColumnSpan="3">
+            <TabItem Header="By Weeks 1" x:Name="tiSpotGoals" >
+                <ScrollViewer x:Name="svsg1" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Disabled">
+                    <local:SpotGoalsGrid x:Name="sgGrid" />
+                </ScrollViewer>
+            </TabItem>
+            <TabItem Header="By Weeks 2" x:Name="tiSpotWeekGoals" >
+                <ScrollViewer x:Name="svsg2" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Disabled">
+                    <local:SpotWeekGoalsGrid x:Name="swgGrid" />
+                </ScrollViewer> 
+            </TabItem>
+            <TabItem Header="By Days" x:Name="tiSpotDaysGoals" >
+                <ScrollViewer x:Name="svsg3" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Disabled">
+                    <local1:SpotDaysGoalsGrid x:Name="sdgGrid" />
+                </ScrollViewer>
+            </TabItem>
+            <TabItem x:Name="tiChannelGoals" Header="Channels Goals" Height="20" VerticalAlignment="Top">
+                <local:ChannelsGoalsGrid x:Name="cgGrid"/>
+            </TabItem> 
+            <TabItem Header="Data">
+                <DataGrid x:Name="dgHist" 
+                    VerticalScrollBarVisibility="Visible"
+                    FontSize="13" AlternatingRowBackground="LightGoldenrodYellow"
+                    EnableRowVirtualization="False"
+                    HeadersVisibility="Column"
+                    CanUserAddRows="False"
+                    AutoGenerateColumns="False"
+                    CanUserDeleteRows="False"
+                    SelectionMode="Single"
+                    HorizontalScrollBarVisibility="Hidden">
+                    <DataGrid.RowStyle>
+                        <Style TargetType="DataGridRow">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding outlier}" Value="True">
+                                    <!--<Setter Property="Background" Value="Red"/>-->
+                                    <Setter Property="BorderBrush" Value="Red"/>
+                                    <Setter Property="BorderThickness" Value="3"/>
+                                    <Setter Property="Margin" Value="-3, 0"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGrid.RowStyle>
+                    <DataGrid.CellStyle>
+                        <Style TargetType="DataGridCell">
+                            <Style.Triggers>
+                                <Trigger Property="IsFocused" Value="True">
+                                    <Setter Property="Background" Value="Orange"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGrid.CellStyle>
+                    <DataGrid.Resources>
+                        <Style TargetType="{x:Type DataGridColumnHeader}">
+                            <Setter Property="Background" Value="LightGray"/>
+                            <Setter Property="FontWeight" Value="SemiBold"/>
+                            <Setter Property="BorderThickness" Value="1,1,1,2"/>
+                            <Setter Property="BorderBrush" Value="black"/>
+                        </Style>
+                    </DataGrid.Resources>
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Program" Binding="{Binding name, Mode=TwoWay}"
                                     IsReadOnly="True" />
-                    <DataGridTextColumn Header="Position" Binding="{Binding position, Mode=TwoWay}"
+                        <DataGridTextColumn Header="Datum" Binding="{Binding date, Mode=TwoWay, StringFormat=d, ConverterCulture=en-GB}" 
                                     IsReadOnly="True"/>
-                    <DataGridTextColumn Header="Start time" Binding="{Binding stime, Mode=TwoWay}" 
+                        <DataGridTextColumn Header="Position" Binding="{Binding position, Mode=TwoWay}" 
                                     IsReadOnly="True"/>
-                    <DataGridTextColumn Header="End time" Binding="{Binding etime, Mode=TwoWay}" 
+                        <DataGridTextColumn Header="Start time" Binding="{Binding stime, Mode=TwoWay, Converter={StaticResource SecIntConverter}}" 
                                     IsReadOnly="True"/>
-                </DataGrid.Columns>
-            </DataGrid>
-        </ScrollViewer>
+                        <DataGridTextColumn Header="End time" Binding="{Binding etime, Mode=TwoWay, Converter={StaticResource SecIntConverter}}" 
+                                    IsReadOnly="True"/>
+                        <DataGridTextColumn Header="AMR% 1" Binding="{Binding amrp1, Mode=TwoWay, StringFormat=N2}" 
+                                            IsReadOnly="True" Width="*" />
+                        <DataGridTextColumn Header="AMR% 2" Binding="{Binding amrp2, Mode=TwoWay, StringFormat=N2}" 
+                                            IsReadOnly="True" Width="*"/>
+                        <DataGridTextColumn Header="AMR% 3" Binding="{Binding amrp3, Mode=TwoWay, StringFormat=N2}" 
+                                            IsReadOnly="True" Width="*"/>
+                        <DataGridTextColumn Header="AMR% Sale" Binding="{Binding amrpsale, Mode=TwoWay}" 
+                                            IsReadOnly="True" Width="*"/>
+                        <DataGridCheckBoxColumn Header="Include" Binding="{Binding Active, Mode=TwoWay}"
+                                                IsReadOnly="True">
+                            <DataGridCheckBoxColumn.CellStyle>
+                                <Style TargetType="DataGridCell">
+                                    <EventSetter Event="PreviewMouseDown" Handler="DgHistsChbCell_PreviewMouseDown" />
+                                </Style>
+                            </DataGridCheckBoxColumn.CellStyle>
+                        </DataGridCheckBoxColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </TabItem>
+            <TabItem Header="Reach">
+                <ScrollViewer x:Name="svReach" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Disabled">
+                    <local1:ReachTabItem x:Name="reachGrid"/>
+                </ScrollViewer>
+            </TabItem>
+        </TabControl>
+
+
+        <Border Grid.Row="4" Grid.Column="1" 
+            BorderBrush="LightGray" BorderThickness="1" Margin="0, 0, 10, 10">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="10" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="10" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="10" />
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="10" />
+                </Grid.RowDefinitions>
+
+                <Label Grid.Row="1" Grid.Column="1" Content="Referenced dates" 
+                        FontWeight="Light" HorizontalAlignment="Center"/>
+                <ScrollViewer Grid.Row="2" Grid.Column="1" Height="40" VerticalScrollBarVisibility="Auto">
+                    <StackPanel  x:Name="spLoadedDateRanges"
+                                HorizontalAlignment="Center"/>
+                </ScrollViewer>
+                <Button Grid.Row="3" Grid.Column="1" x:Name="btnResetDates" Content="Initialize"
+                        Click="InitializeButton_Click" IsEnabled="False"/>
+            </Grid>
+        </Border>
+
+        <!-- <Border Grid.Row="5" Grid.Column="1" 
+            BorderBrush="LightGray" BorderThickness="1" 
+                VerticalAlignment="Top" Margin="0, 0, 10, 10">
+            <local1:GoalsTreeView x:Name="goalsTreeView"/>
+        </Border> -->
+
+        <Border Grid.Row="6" Grid.Column="1" Grid.RowSpan="2" 
+                BorderBrush="LightGray" BorderThickness="1" Margin="0, 0, 10, 10">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <Grid >
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
+                    </Grid.RowDefinitions>
+                    <local1:GoalsTreeView x:Name="goalsTreeView" Grid.Row="0" Margin="10"/>
+                    <CheckBox x:Name="chbOnlyIns" Grid.Row="1" 
+                            Content="Show only with insertations" IsChecked="False"
+                            Checked="chbOnlyIns_Checked" Unchecked="chbOnlyIns_Unchecked" Margin="0, 0, 5, 5"/>
+                    <ListView x:Name="lvFilterDays" Grid.Row="2" 
+                            SelectionMode="Multiple"
+                            SelectionChanged="lvFilterDays_SelectionChanged" Margin="0, 5, 5, 5">
+                    </ListView>
+                </Grid>
+            </ScrollViewer>
+        </Border>
+        <Button x:Name="btnExport" Content="Export to Excel" Grid.Row="8" Grid.Column="1"
+                            Click="btnExport_Click" Margin="0, 0, 10, 0"/>
     </Grid>
 </Page>

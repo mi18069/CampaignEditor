@@ -13,11 +13,14 @@ namespace CampaignEditor.Controllers
         {
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
         }
-        public async Task<ClientDTO> CreateClient(CreateClientDTO clientDTO)
+        public async Task<ClientDTO?> CreateClient(CreateClientDTO clientDTO)
         {
-            await _repository.CreateClient(clientDTO);
-            var client = await _repository.GetClientByName(clientDTO.clname);
-            return client;
+            var id = await _repository.CreateClient(clientDTO);
+            if (!id.HasValue)
+            {
+                return null;
+            }
+            return await _repository.GetClientById(id.Value);
         }
 
         public async Task<ClientDTO> GetClientById(int id)
@@ -25,9 +28,9 @@ namespace CampaignEditor.Controllers
             var client = await _repository.GetClientById(id);
             return client;
         }
-        public async Task<ClientDTO> GetClientByName(string clname)
+        public async Task<IEnumerable<ClientDTO>> GetClientsByName(string clname)
         {
-            var client = await _repository.GetClientByName(clname);
+            var client = await _repository.GetClientsByName(clname);
             return client;
         }
 

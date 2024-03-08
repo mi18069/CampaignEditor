@@ -1,8 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
 
 
 namespace CampaignEditor
@@ -32,8 +30,20 @@ namespace CampaignEditor
             int toM;
             double coef;
 
+            int days;
 
-            if (!int.TryParse(tbFromH.Text.Trim(), out fromH) ||
+            if(tbCoef.Text.Trim() == "")
+            {
+                tbCoef.Text = (1.00).ToString();
+            }
+
+            if (tbFromH.Text.Trim() == "" &&
+                tbFromM.Text.Trim() == "" &&
+                tbToH.Text.Trim() == "" &&
+                tbToM.Text.Trim() == "" &&
+                tbDays.Text.Trim() == "")
+                return "empty";
+            else if (!int.TryParse(tbFromH.Text.Trim(), out fromH) ||
                 !int.TryParse(tbFromM.Text.Trim(), out fromM) ||
                 !int.TryParse(tbToH.Text.Trim(), out toH) ||
                 !int.TryParse(tbToM.Text.Trim(), out toM))
@@ -42,17 +52,36 @@ namespace CampaignEditor
                 return "Invalid values for Day Parts";
             else if (!double.TryParse(tbCoef.Text, out coef))
                 return "Invalid value for DP Coef";
-            else 
+            else if (!int.TryParse(tbDays.Text.Trim(), out days))
+                return "Invalid value for DP Days";
+            else if (!CheckDaysIntFormat(tbDays.Text.Trim()))
+                return "Invalid value for DP Days";
+            else
                 return "";
         }
 
+        private bool CheckDaysIntFormat(string number)
+        {
+            int[] numCount = { 0, 1, 1, 1, 1, 1, 1, 1, 0, 0 }; // 0 for 0,8,9 and 1 for 1-7
+            foreach (char n in number)
+            {
+                int num = int.Parse(n.ToString());
+                numCount[num]--;
+            }
+
+            foreach (int num in numCount)
+            {
+                if (num < 0)
+                    return false;
+            }
+
+            return true;
+        }
+
         // Selecting whole text
-        private void tb_GotMouseCapture(object sender, MouseEventArgs e)
+        private void tb_GotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
         {
             var tb = sender as TextBox;
-
-            if (tb.BorderBrush == Brushes.Red)
-                tb.BorderBrush = Brushes.Gray;
 
             tb.SelectAll();
             tb.Focus();
@@ -62,67 +91,7 @@ namespace CampaignEditor
         private void btnDelete_Click(object sender, RoutedEventArgs e)
         {
             ((Panel)this.Parent).Children.Remove(this);
-        }
-
-        // Checking format and range of available values
-        private void tbH_LostFocus(object sender, RoutedEventArgs e)
-        {
-            var tb = sender as TextBox;
-            var content = tb.Text.Trim();
-            int myInt = -1;
-
-            if (content.Length > 0)
-            {
-                myInt = int.TryParse(content, out myInt) ? myInt : -1;
-            }
-            if (content.Length == 1)
-            {
-                tb.Text = "0" + content;
-            }
-            if (myInt < 0) 
-            {
-                tb.BorderBrush = Brushes.Red;
-                tb.Text = "";
-            }
-        }
-
-        private void tbM_LostFocus(object sender, RoutedEventArgs e)
-        {
-            var tb = sender as TextBox;
-            var content = tb.Text.Trim();
-            int myInt = -1;
-
-            if (content.Length > 0)
-            {
-                myInt = int.TryParse(content, out myInt) ? myInt : -1;
-            }
-            if (content.Length == 1)
-            {
-                tb.Text = "0" + content;
-            }
-            if (myInt < 0 || myInt > 59)
-            {
-                tb.BorderBrush = Brushes.Red;
-                tb.Text = "";
-            }
-        }
-
-        private void tbCoef_LostFocus(object sender, RoutedEventArgs e)
-        {
-            var tb = sender as TextBox;
-            var content = tb.Text.Trim();
-            double myDouble = -1;
-
-            if (content.Length > 0)
-            {
-                myDouble = double.TryParse(content, out myDouble) ? myDouble : -1;
-            }
-            if (myDouble < 0)
-            {
-                tb.BorderBrush = Brushes.Red;
-                tb.Text = "";
-            }
-        }
+        }     
 
         private void tb_TextChanged(object sender, TextChangedEventArgs e)
         {
@@ -138,5 +107,23 @@ namespace CampaignEditor
         {
             modified = true;
         }
+
+        private void tbNum_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            if (!char.IsDigit(e.Text, 0))
+            {
+                e.Handled = true; // Suppress non-numeric input
+            }
+        }
+
+        private void tbNum1To7_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            if (!char.IsDigit(e.Text, 0) || e.Text == "0" || e.Text == "8" || e.Text == "9")
+            {
+                e.Handled = true; // Suppress non-numeric input
+            }
+
+        }
+
     }
 }

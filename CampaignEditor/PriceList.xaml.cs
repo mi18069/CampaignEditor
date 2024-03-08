@@ -1,5 +1,5 @@
 ﻿using CampaignEditor.Controllers;
-using CampaignEditor.DTOs.CampaignDTO;
+using Database.DTOs.CampaignDTO;
 using CampaignEditor.StartupHelpers;
 using Database.DTOs.ChannelDTO;
 using Database.DTOs.PricelistChannels;
@@ -13,7 +13,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Runtime.Intrinsics.Arm;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -37,7 +36,7 @@ namespace CampaignEditor
         private readonly IAbstractFactory<NewTarget> _factoryNewTarget;
 
         private CampaignDTO _campaign;
-        private PricelistDTO _pricelist;
+        public PricelistDTO _pricelist;
 
         // For Plus Icon
         private string appPath = Directory.GetCurrentDirectory();
@@ -153,7 +152,8 @@ namespace CampaignEditor
             Button btnAddDP = new Button();
             btnAddDP.Click += new RoutedEventHandler(btnAddDP_Click);
             Image imgGreenPlus = new Image();
-            imgGreenPlus.Source = new BitmapImage(new Uri(appPath + imgGreenPlusPath));
+            ImageSource imageSource = (ImageSource)Application.Current.FindResource("plus_icon");
+            imgGreenPlus.Source = imageSource;
             btnAddDP.Content = imgGreenPlus;
             btnAddDP.Width = 30;
             btnAddDP.Height = 30;
@@ -206,6 +206,7 @@ namespace CampaignEditor
             cbSectable2.Items.Clear();
 
             List<SectableDTO> sectables = (List<SectableDTO>)await _sectableController.GetAllSectablesByOwnerId(_campaign.clid);
+            
             foreach (var sectable in sectables)
             {
                 cbSectable.Items.Add(sectable);
@@ -223,7 +224,7 @@ namespace CampaignEditor
             {
                 cbSeasonality.Items.Add(seasonality);
             }
-
+            
             cbSeasonality.SelectedIndex = index;
         }
         private async Task FillCBTarget(int index = 0)
@@ -248,6 +249,8 @@ namespace CampaignEditor
             await AssignPricelistValues();
             await AssignDayPartsValues();
             await AssignChannelsValues();
+            AssignSectableValues();
+            AssignSeasonalityValues();
         }
         private async Task AssignPricelistValues()
         {
@@ -262,7 +265,14 @@ namespace CampaignEditor
             tbCP.Text = _pricelist.price.ToString();
             tbMinGRP.Text = _pricelist.minprice.ToString();
             chbGRP.IsChecked = _pricelist.mgtype;
-            cbTarget.SelectedItem = await _targetController.GetTargetById(_pricelist.pltarg);
+            var target = await _targetController.GetTargetById(_pricelist.pltarg);
+            for (int i=0; i<cbTarget.Items.Count; i++)
+            {
+                var targ = cbTarget.Items[i] as TargetDTO;
+                if (targ != null && targ.targid == target.targid)
+                    cbTarget.SelectedIndex = i;
+            }
+            //cbTarget.SelectedItem = await _targetController.GetTargetById(_pricelist.pltarg);
             dpValidityFrom.SelectedDate = TimeFormat.YMDStringToDateTime(_pricelist.valfrom.ToString());
             dpValidityTo.SelectedDate = TimeFormat.YMDStringToDateTime(_pricelist.valto.ToString());
         }
@@ -271,6 +281,8 @@ namespace CampaignEditor
             wpDayParts.Children.Clear();
 
             var dpValues = await _pricesController.GetAllPricesByPlId(_pricelist.plid);
+            dpValues = dpValues.OrderBy(dp => dp.dps).ThenBy(dp => dp.days);
+
             foreach (var dp in dpValues)
             {
                 TargetDPItem item = MakeDPItem();
@@ -283,8 +295,9 @@ namespace CampaignEditor
                 item.tbToM.Text = toList[1];
 
                 item.tbCoef.Text = dp.price.ToString();
-
                 item.cbIsPT.IsChecked = dp.ispt;
+                item.tbDays.Text = dp.days.ToString();
+
                 item.modified = false;
 
                 wpDayParts.Children.Add(item);
@@ -314,6 +327,38 @@ namespace CampaignEditor
                 }
             }
         }
+
+        private void AssignSectableValues()
+        {
+
+            for (int index = 0; index < cbSectable.Items.Count; index++)
+            {
+                SectableDTO sectable = cbSectable.Items[index] as SectableDTO;
+                if (sectable.sctid == _pricelist.sectbid)
+                {
+                    cbSectable.SelectedIndex = index;
+                }
+                if (sectable.sctid == _pricelist.sectbid2)
+                {
+                    cbSectable2.SelectedIndex = index;
+                }
+            }
+
+        }
+        private void AssignSeasonalityValues()
+        {
+
+            for (int index = 0; index < cbSeasonality.Items.Count; index++)
+            {
+                SeasonalityDTO seasonality = cbSeasonality.Items[index] as SeasonalityDTO;
+                if (seasonality.seasid == _pricelist.seastbid)
+                {
+                    cbSeasonality.SelectedIndex = index;
+                }
+            }
+
+        }
+        
         #endregion
 
         #region Writing into base
@@ -355,6 +400,7 @@ namespace CampaignEditor
                     (pricelist.plid, clid, plname, pltype, sectbid, seasid, plactive, price, minprice,
                     prgcoef, pltarg, use2, sectbid2, sectb2st, sectb2en,
                     valfrom, valto, mgtype));
+                _pricelist = await _pricelistController.GetPricelistById(pricelist.plid);
             }
         }
 
@@ -389,7 +435,8 @@ namespace CampaignEditor
                 if (item.tbFromH.Text.Trim() == "" ||
                     item.tbFromM.Text.Trim() == "" ||
                     item.tbToH.Text.Trim() == "" ||
-                    item.tbToM.Text.Trim() == "")
+                    item.tbToM.Text.Trim() == "" ||
+                    item.tbDays.Text.Trim() == "")
                 {
                     continue;
                 }
@@ -399,13 +446,15 @@ namespace CampaignEditor
                     string dpe = (item.tbToH.Text.Trim() + ":" + item.tbToM.Text.Trim()).PadLeft(2, '0');
                     float price = float.Parse(item.tbCoef.Text.Trim());
                     bool ispt = (bool)item.cbIsPT.IsChecked;
-                    await _pricesController.CreatePrices(new CreatePricesDTO(pricelist.plid, dps, dpe, price, ispt));
+                    string days = item.tbDays.Text.Trim();
+
+                    await _pricesController.CreatePrices(new CreatePricesDTO(pricelist.plid, dps, dpe, price, ispt, days));
                     created += 1; 
                 }
             }
             if (created == 0)
             {
-                await _pricesController.CreatePrices(new CreatePricesDTO(pricelist.plid, "02:00", "25:59", 1.0f, false));
+                await _pricesController.CreatePrices(new CreatePricesDTO(pricelist.plid, "02:00", "25:59", 1.0f, false, "1234567"));
             }
         }
         #endregion
@@ -416,8 +465,9 @@ namespace CampaignEditor
             if (_pricelist == null)
                 if (await CheckName() == false)
                     return false; 
-            if (CheckCP() && CheckMinGRP() &&
-                CheckValidity() && CheckComboBoxes() && CheckDPs())
+            if (CheckCP() && CheckMinGRP() && 
+                CheckValidity() && CheckComboBoxes() && CheckDPs() &&
+                CheckNonEmptyChannelsSelected())
             {
                 if ((bool)chbSectable2.IsChecked)
                 {
@@ -428,6 +478,25 @@ namespace CampaignEditor
             }
             else
                 return false;
+        }
+
+        private bool CheckNonEmptyChannelsSelected()
+        {
+            bool checkedChannel = false;
+            foreach (CheckBox channelBox in wpChannels.Children)
+            {
+                if ((bool)channelBox.IsChecked)
+                {
+                    checkedChannel = true;
+                    break;
+                }
+            }
+            if (!checkedChannel)
+            {
+                MessageBox.Show("Select at least one channel", "Result", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+
+            return checkedChannel;
         }
 
         // Values in tbSectable2 needs to be 4 chars long integers
@@ -508,7 +577,12 @@ namespace CampaignEditor
         {
             DateTime? fromDate = dpValidityFrom.SelectedDate;
             DateTime? toDate = dpValidityTo.SelectedDate;
-            if (!fromDate.HasValue || !toDate.HasValue)
+            if (toDate == null)
+            {
+                toDate = new DateTime(2999, 01, 01);
+                dpValidityTo.SelectedDate = toDate;
+            }
+            if (!fromDate.HasValue)
             {
                 MessageBox.Show("Select Date Range");
                 return false;
@@ -526,6 +600,7 @@ namespace CampaignEditor
         private bool CheckDPs()
         {
             bool success = true;
+            bool atLeastOne = false;
 
             for (int i=0; i<wpDayParts.Children.Count -1; i++)
             {
@@ -533,11 +608,35 @@ namespace CampaignEditor
                 string validity = "";
                 if ((validity = item.CheckValidity()) != "")
                 {
+                    if (validity == "empty")
+                    {
+                        continue;
+                    }
                     MessageBox.Show(validity);
                     success = false;
                     break;
                 }
+                else
+                {
+                    atLeastOne = true;
+                }
             }
+
+            // If there are no values entered in dpItems, clear and add one, and fill it with default values
+            /*if (!atLeastOne)
+            {
+                wpDayParts.Children.Clear();
+                wpDayParts.Children.Add(MakeDPItem());
+                wpDayParts.Children.Add(MakeAddButton());
+
+                var item = wpDayParts.Children[0] as TargetDPItem;
+                item.tbFromH.Text = "02";
+                item.tbFromM.Text = "00";
+                item.tbToH.Text = "25";
+                item.tbToM.Text = "59";
+                item.tbCoef.Text = "1.00";
+            }*/
+
             return success;
         }
         // Every CheckBox needs to be selected (except cbSectable2)
@@ -771,7 +870,7 @@ namespace CampaignEditor
         }
 
         private void dpValidityTo_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
-        {
+        {   
             pricelistModified = true;
         }
 

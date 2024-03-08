@@ -1,24 +1,10 @@
 ﻿using CampaignEditor.Controllers;
-using CampaignEditor.DTOs.CampaignDTO;
-using CampaignEditor.DTOs.UserDTO;
-using CampaignEditor.Entities;
+using Database.DTOs.CampaignDTO;
 using Database.DTOs.ClientDTO;
-using Database.DTOs.UserClients;
 using Database.Repositories;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.RightsManagement;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace CampaignEditor
 {
@@ -28,7 +14,7 @@ namespace CampaignEditor
         private readonly ClientController _clientController;
         private readonly CampaignController _campaignController;
 
-        private ClientDTO _client = null;
+        public ClientDTO _client = null;
         private CampaignDTO _campaign = null;
 
         private bool clientRenaming = false;
@@ -44,20 +30,20 @@ namespace CampaignEditor
             InitializeComponent();
         }
 
-        public async Task RenameClient(string clientname)
+        public async Task RenameClient(ClientDTO client)
         {
-            _client = await _clientController.GetClientByName(clientname.Trim());
+            _client = client;
             lblRename.Content = "Rename client";
-            tbRename.Text = clientname.Trim();
+            tbRename.Text = client.clname.Trim();
             renamed = false;
             clientRenaming = true;
         }
 
-        public async Task RenameCampaign(string campaignname)
+        public async Task RenameCampaign(CampaignDTO campaign)
         {
-            _campaign = await _campaignController.GetCampaignByName(campaignname.Trim());
+            _campaign = campaign;
             lblRename.Content = "Rename campaign";
-            tbRename.Text = campaignname.Trim();
+            tbRename.Text = campaign.cmpname.Trim();
             renamed = false;
             campaignRenaming = true;
         }
@@ -96,7 +82,7 @@ namespace CampaignEditor
                     _campaign.cmprev, _campaign.cmpown, _campaign.cmpname, _campaign.clid,
                     _campaign.cmpsdate, _campaign.cmpedate, _campaign.cmpstime, _campaign.cmpetime,
                     _campaign.cmpstatus, _campaign.sostring, _campaign.activity, _campaign.cmpaddedon,
-                    _campaign.cmpaddedat, _campaign.active, _campaign.forcec));
+                    _campaign.cmpaddedat, _campaign.active, _campaign.forcec, _campaign.tv));
                     this.Close();
                 }
             }
@@ -120,12 +106,8 @@ namespace CampaignEditor
         private async Task<bool> CheckClientName()
         {
             string clientName = tbRename.Text.Trim();
-            if (await _clientController.GetClientByName(clientName) != null)
-            {
-                lblError.Content = "Client already exist";
-                return false;
-            }
-            else if (clientName == "")
+
+            if (clientName == "")
             {
                 lblError.Content = "Enter client name";
                 return false;

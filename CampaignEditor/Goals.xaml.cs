@@ -1,11 +1,9 @@
 ﻿using CampaignEditor.Controllers;
-using CampaignEditor.DTOs.CampaignDTO;
+using Database.DTOs.CampaignDTO;
 using Database.DTOs.GoalsDTO;
-using Database.Entities;
 using Database.Repositories;
 using System;
 using System.ComponentModel;
-using System.ComponentModel.Design;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
@@ -38,10 +36,20 @@ namespace CampaignEditor
             InitializeComponent();
         }
 
+        // Define an event to inform when changes occurs
+        public event EventHandler GoalsChanged;
+
+        // Invoke the event
+        protected virtual void OnGoalsChanged()
+        {
+            GoalsChanged?.Invoke(this, EventArgs.Empty);
+        }
+
         #region Initialization
         public async Task Initialize(CampaignDTO campaign, GoalsDTO goals = null)
         {
             _campaign = campaign;
+            CampaignEventLinker.AddGoals(_campaign.cmpid, this);
 
             if (goals == null)
             {
@@ -149,7 +157,7 @@ namespace CampaignEditor
         #endregion
 
         #region Save and Cancel
-        private void btnSave_Click(object sender, RoutedEventArgs e)
+        private async void btnSave_Click(object sender, RoutedEventArgs e)
         {
             bool passCheckTest = false;
             if (goalsModified)
@@ -164,10 +172,13 @@ namespace CampaignEditor
                     int rchTo = (bool)cbRCH.IsChecked ? int.Parse(tbRCHTo.Text) : 0;
                     int rch = (bool)cbRCH.IsChecked ? int.Parse(tbRCH.Text) : 0;
                     Goal = new GoalsDTO(_campaign.cmpid, budget, grp, insertations, rchFrom, rchTo, rch);
+
+                    await UpdateDatabase(Goal);
+                    OnGoalsChanged();
                 }
             }
             if (!goalsModified || goalsModified && passCheckTest)
-                this.Hide();
+                this.Close();
         }
 
         private bool CheckValues()
@@ -220,7 +231,7 @@ namespace CampaignEditor
         private void btnCancel_Click(object sender, RoutedEventArgs e)
         {
             goalsModified = false;
-            this.Hide();
+            this.Close();
         }
         #endregion
 
@@ -229,13 +240,6 @@ namespace CampaignEditor
             await _goalsController.DeleteGoalsByCmpid(goals.cmpid);
             await _goalsController.CreateGoals(new CreateGoalsDTO(goals.cmpid, goals.budget,
                 goals.grp, goals.ins, goals.rch_f1, goals.rch_f2, goals.rch));
-        }
-
-        // Overriding OnClosing because click on x button should only hide window
-        protected override void OnClosing(CancelEventArgs e)
-        {
-            e.Cancel = true;
-            Hide();
         }
 
     }

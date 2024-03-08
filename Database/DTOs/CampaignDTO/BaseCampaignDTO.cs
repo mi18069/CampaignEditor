@@ -1,13 +1,13 @@
 ﻿using System;
 
-namespace CampaignEditor.DTOs.CampaignDTO
+namespace Database.DTOs.CampaignDTO
 {
 
     public class BaseCampaignDTO
     {
         public BaseCampaignDTO(int cmprev, int cmpown, string cmpname, int clid, string cmpsdate, string cmpedate, 
             string cmpstime, string cmpetime, int cmpstatus, string sostring, int activity, int cmpaddedon, 
-            int cmpaddedat, bool active, bool forcec)
+            int cmpaddedat, bool active, bool forcec, bool tv)
         {
             this.cmprev = cmprev;
             this.cmpown = cmpown;
@@ -24,6 +24,7 @@ namespace CampaignEditor.DTOs.CampaignDTO
             this.cmpaddedat = cmpaddedat;
             this.active = active;
             this.forcec = forcec;
+            this.tv = tv;
         }
 
         public int cmprev { get; set; }
@@ -41,6 +42,7 @@ namespace CampaignEditor.DTOs.CampaignDTO
         public int cmpaddedat { get; set; }
         public bool active { get; set; }
         public bool forcec { get; set; }
+        public bool tv { get; set; }
     }
 
        

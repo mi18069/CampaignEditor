@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CampaignEditor"
         mc:Ignorable="d"
-        Title="AddUser" Height="500" Width="600"
+        Title="AddUser" Height="500" Width="600" ResizeMode="NoResize"
         FontSize="20">
     <Grid>
         <Label x:Name="lblUsername" Content="Username: " HorizontalContentAlignment="Right" 
@@ -42,9 +42,9 @@
         <ComboBox x:Name="cbAuthorization" HorizontalContentAlignment="Center" FontSize="18"
                   Width="270" Height="30"
                   HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0, 205, 100, 0" SelectedIndex="0">
-            <ComboBoxItem>Read only</ComboBoxItem>
-            <ComboBoxItem>Read and Write</ComboBoxItem>
             <ComboBoxItem>Administrator</ComboBoxItem>
+            <ComboBoxItem>Read and Write</ComboBoxItem>
+            <ComboBoxItem>Read Only</ComboBoxItem>
         </ComboBox>
 
         <Label x:Name="lblEmail" Content="E-mail: " HorizontalContentAlignment="Right" 
@@ -65,10 +65,7 @@
                 Width="100" Height="40"
                 HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,400,100,0"
                 Click="btnAddUser_Click"/>
-        <Button x:Name="btnDeleteUser" Content="Delete user" 
-                Width="100" Height="40"
-                HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,400,450,0"
-                Click="btnDeleteUser_Click"/>
+        
         <Label x:Name="lblError" Content="" Foreground="Red" HorizontalContentAlignment="Right"
                Width="400"
                HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,350,100,0"/>

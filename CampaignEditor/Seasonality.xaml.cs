@@ -11,7 +11,7 @@ using System.Windows.Controls;
 using System.Windows.Media.Imaging;
 using System.Windows.Media;
 using System.IO;
-using CampaignEditor.DTOs.CampaignDTO;
+using Database.DTOs.CampaignDTO;
 
 namespace CampaignEditor
 {
@@ -76,6 +76,8 @@ namespace CampaignEditor
             }
             var addBtn = MakeAddButton();
             wpSeasonalities.Children.Add(addBtn);
+            modifiedSeasonalities = false;
+
         }
         #endregion
 
@@ -108,7 +110,8 @@ namespace CampaignEditor
             Button btnAddSeas = new Button();
             btnAddSeas.Click += new RoutedEventHandler(btnAddSeas_Click);
             Image imgGreenPlus = new Image();
-            imgGreenPlus.Source = new BitmapImage(new Uri(appPath + imgGreenPlusPath));
+            ImageSource imageSource = (ImageSource)Application.Current.FindResource("plus_icon");
+            imgGreenPlus.Source = imageSource;
             btnAddSeas.Content = imgGreenPlus;
             btnAddSeas.Width = 30;
             btnAddSeas.Height = 30;
@@ -156,6 +159,7 @@ namespace CampaignEditor
             {
                 if (_seasonality == null)
                 {
+                    var a = (bool)cbActive.IsChecked;
                     _seasonality = await _seasonalityController.CreateSeasonality(new CreateSeasonalityDTO
                         (tbName.Text.Trim(), (bool)cbActive.IsChecked, _campaign.clid));
                 }

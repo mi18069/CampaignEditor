@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 
 namespace Database.DTOs.SpotDTO
 {
@@ -19,5 +18,30 @@ namespace Database.DTOs.SpotDTO
         public string spotname { get; set; }
         public int spotlength { get; set; }
         public bool ignore { get; set; }
+
+
+        public override bool Equals(object obj)
+        {
+            if (obj == null || GetType() != obj.GetType())
+            {
+                return false;
+            }
+
+            BaseIdentitySpotDTO other = (BaseIdentitySpotDTO)obj;
+
+            return cmpid == other.cmpid &&
+                   spotcode.Trim()[0] == other.spotcode.Trim()[0];
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 17;
+                hash = hash * 23 + cmpid.GetHashCode();
+                hash = hash * 23 + spotcode.GetHashCode();
+                return hash;
+            }
+        }
     }
 }

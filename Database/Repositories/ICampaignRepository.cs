@@ -1,4 +1,4 @@
-﻿using CampaignEditor.DTOs.CampaignDTO;
+﻿using Database.DTOs.CampaignDTO;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -6,7 +6,7 @@ namespace Database.Repositories
 {
     public interface ICampaignRepository
     {
-        Task<bool> CreateCampaign(CreateCampaignDTO campaignDTO);
+        Task<int?> CreateCampaign(CreateCampaignDTO campaignDTO);
         Task<CampaignDTO> GetCampaignById(int cmpid);
         Task<CampaignDTO> GetCampaignByName(string cmpname);
         Task<IEnumerable<CampaignDTO>> GetAllCampaigns();
@@ -14,6 +14,7 @@ namespace Database.Repositories
         Task<bool> UpdateCampaign(UpdateCampaignDTO campaignDTO);
         Task<bool> DeleteCampaignById(int cmpid);
         Task<bool> DeleteCampaignsByUserId(int userid);
+        Task<bool> DeleteCampaignInitialization(int cmpid);
 
     }
 }
