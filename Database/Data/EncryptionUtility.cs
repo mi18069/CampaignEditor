@@ -16,6 +16,7 @@ namespace Database.Data
             );
 
             return Convert.ToBase64String(encryptedData);
+            return "*****";
         }
 
         public static string DecryptString(string encryptedInput)
