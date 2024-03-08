@@ -74,7 +74,7 @@ namespace CampaignEditor
         private async Task CheckForUpdates()
         {
             // UpdateManager(@"location\for\updates")
-            using (var manager = UpdateManager.GitHubUpdateManager("https://github.com/mi18069/CampaignEditor/releases/latest"))
+            using (var manager = UpdateManager.GitHubUpdateManager("https://github.com/mi18069/CampaignEditor"))
             {
                 var updateInfo = await manager.Result.CheckForUpdate();
 
