@@ -68,7 +68,7 @@ namespace CampaignEditor
         {
             System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
             FileVersionInfo versionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
-            this.Title += $" v.{versionInfo.FileVersion } ";
+            this.Title += $" v-{versionInfo.FileVersion } ";
         }
       
         private async Task CheckForUpdates()
