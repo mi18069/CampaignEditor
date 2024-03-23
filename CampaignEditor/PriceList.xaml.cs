@@ -17,7 +17,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
+using System.Runtime.Intrinsics.Arm;
 
 namespace CampaignEditor
 {
@@ -101,11 +101,14 @@ namespace CampaignEditor
         #region DP functionality
         private void btnAddDP_Click(object sender, RoutedEventArgs e)
         {
-            var btnAdd = sender as Button;
-            wpDayParts.Children.Remove(btnAdd);
+            /*var btnAdd = sender as Button;
+            wpDayParts.Children.Remove(btnAdd);*/
 
+            //var dpItem = new Day
+            TargetDPItem dpItem = MakeDPItem();
+            wpDayParts.Children.Insert(wpDayParts.Children.Count - 1, dpItem);
             dayPartsModified = true;
-            UpdateDayParts();
+            //UpdateDayParts();
         }
         private void btnDeleteDP_Click(object sender, RoutedEventArgs e)
         {
@@ -125,7 +128,7 @@ namespace CampaignEditor
         private async Task FillFields()
         {
             await FillChannels();
-            UpdateDayParts();
+            //UpdateDayParts();
             await FillComboBoxes();
         }
         private async Task FillChannels()
@@ -172,7 +175,7 @@ namespace CampaignEditor
 
             return dpItem;
         }
-        private void UpdateDayParts()
+        /*private void UpdateDayParts()
         {
             Button btnAddDP = MakeAddButton();
             TargetDPItem dpItem = MakeDPItem();
@@ -180,7 +183,7 @@ namespace CampaignEditor
 
             wpDayParts.Children.Add(dpItem);
             wpDayParts.Children.Add(btnAddDP);
-        }
+        }*/
 
         private async Task FillComboBoxes()
         {
@@ -284,25 +287,46 @@ namespace CampaignEditor
             var dpValues = await _pricesController.GetAllPricesByPlId(_pricelist.plid);
             dpValues = dpValues.OrderBy(dp => dp.dps).ThenBy(dp => dp.days);
 
-            foreach (var dp in dpValues)
+            if (dpValues.Count() == 0)
             {
                 TargetDPItem item = MakeDPItem();
 
-                string[] fromList = dp.dps.Split(':');
-                string[] toList = dp.dpe.Split(':');
-                item.tbFromH.Text = fromList[0];
-                item.tbFromM.Text = fromList[1];
-                item.tbToH.Text = toList[0];
-                item.tbToM.Text = toList[1];
+                item.tbFromH.Text = "02";
+                item.tbFromM.Text = "00";
+                item.tbToH.Text = "25";
+                item.tbToM.Text = "59";
 
-                item.tbCoef.Text = dp.price.ToString();
-                item.cbIsPT.IsChecked = dp.ispt;
-                item.tbDays.Text = dp.days.ToString();
+                item.tbCoef.Text = "1";
+                item.cbIsPT.IsChecked = false;
+                item.tbDays.Text = "1234567";
 
                 item.modified = false;
 
                 wpDayParts.Children.Add(item);
             }
+            else
+            {
+                foreach (var dp in dpValues)
+                {
+                    TargetDPItem item = MakeDPItem();
+
+                    string[] fromList = dp.dps.Split(':');
+                    string[] toList = dp.dpe.Split(':');
+                    item.tbFromH.Text = fromList[0];
+                    item.tbFromM.Text = fromList[1];
+                    item.tbToH.Text = toList[0];
+                    item.tbToM.Text = toList[1];
+
+                    item.tbCoef.Text = dp.price.ToString();
+                    item.cbIsPT.IsChecked = dp.ispt;
+                    item.tbDays.Text = dp.days.ToString();
+
+                    item.modified = false;
+
+                    wpDayParts.Children.Add(item);
+                }
+            }
+            
 
             Button addButton = MakeAddButton();
             wpDayParts.Children.Add(addButton);

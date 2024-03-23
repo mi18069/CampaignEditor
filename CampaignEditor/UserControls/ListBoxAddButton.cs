@@ -18,6 +18,7 @@ namespace CampaignEditor.UserControls
 
         public void Initialize(object objToAdd)
         {
+           
             objectToAdd = objToAdd;
             this.Items.Add(objToAdd);
 

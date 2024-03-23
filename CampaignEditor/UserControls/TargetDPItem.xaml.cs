@@ -79,12 +79,19 @@ namespace CampaignEditor
         }
 
         // Selecting whole text
-        private void tb_GotKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+
+        private void tb_GotFocus(object sender, RoutedEventArgs e)
         {
             var tb = sender as TextBox;
 
             tb.SelectAll();
-            tb.Focus();
+        }
+
+        private void tb_GotMouseCapture(object sender, MouseEventArgs e)
+        {
+            var tb = sender as TextBox;
+
+            tb.SelectAll();
         }
 
         // Deleting this instance
@@ -124,6 +131,7 @@ namespace CampaignEditor
             }
 
         }
+
 
     }
 }
