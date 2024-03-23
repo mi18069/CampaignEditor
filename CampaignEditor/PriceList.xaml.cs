@@ -207,6 +207,7 @@ namespace CampaignEditor
 
             List<SectableDTO> sectables = (List<SectableDTO>)await _sectableController.GetAllSectablesByOwnerId(_campaign.clid);
             
+
             foreach (var sectable in sectables)
             {
                 cbSectable.Items.Add(sectable);

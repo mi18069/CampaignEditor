@@ -48,7 +48,8 @@
                   Margin="0, 10"
                   Checked="cb_Changed"
                   Unchecked="cb_Changed"
-                  HorizontalAlignment="Right"/>
+                  HorizontalAlignment="Right"
+                  IsChecked="True"/>
 
         <Label Content="Length from: " Grid.Row="4" Grid.Column="1"
                Margin="0,10"/>

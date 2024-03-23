@@ -40,7 +40,7 @@ namespace CampaignEditor
                 
                 
                 /*var connectionString = Environment.GetEnvironmentVariable("Conn_String_Publish");
-                //var connectionString = Environment.GetEnvironmentVariable("Conn_String_Local");
+                //var  connectionString = Environment.GetEnvironmentVariable("Conn_String_Local");
                 if (string.IsNullOrEmpty(connectionString))
                 {
                     // Handle case when environment variable is not set

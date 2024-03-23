@@ -1,7 +1,6 @@
 ﻿using CampaignEditor.Controllers;
 using CampaignEditor.Helpers;
 using Database.DTOs.CampaignDTO;
-using Database.DTOs.ChannelDTO;
 using Database.DTOs.MediaPlanDTO;
 using Database.DTOs.MediaPlanHistDTO;
 using Database.DTOs.MediaPlanTermDTO;
@@ -11,7 +10,6 @@ using Database.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Channels;
 using System.Threading.Tasks;
 using System.Windows;
 

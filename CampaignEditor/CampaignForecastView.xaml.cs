@@ -48,7 +48,7 @@ namespace CampaignEditor
         {
             _factoryForecast = factoryForecast;
             _factoryForecastDates = factoryForecastDates;
-            //_forecastDataManipulation = factoryForecastDataManipulation.Create();
+            _forecastDataManipulation = factoryForecastDataManipulation.Create();
 
             var onStartupController = new OnStartupContoller(databaseFunctionsRepository);
 
@@ -142,6 +142,8 @@ namespace CampaignEditor
                 await _forecastDataManipulation.DeleteCampaignForecastVersion(_campaign.cmpid, mpVer.version);
                 if (mpVer.version == 1)
                     mpVer = null;
+                else
+                    mpVer.version -= 1;
                 await _mediaPlanRefController.DeleteMediaPlanRefById(_campaign.cmpid);
             }
 
@@ -271,7 +273,16 @@ namespace CampaignEditor
 
         public async Task UpdateChannels(List<int> channelsToDelete, List<int> channelsToAdd)
         {
-            await _forecast.ChannelsChanged(channelsToDelete, channelsToAdd);
+            try
+            {
+                await _forecast.ChannelsChanged(channelsToDelete, channelsToAdd);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error while updating channels:\n" + ex.Message, "Error", MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+                return;
+            }
         }
 
         // Inside CampaignForecast

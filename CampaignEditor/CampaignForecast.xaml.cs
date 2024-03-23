@@ -74,6 +74,7 @@ namespace CampaignEditor.UserControls
         private ObservableRangeCollection<MediaPlanTuple> _allMediaPlans =
             new ObservableRangeCollection<MediaPlanTuple>();
 
+        private ObservableRangeCollection<ChannelDTO> _allChannels = new ObservableRangeCollection<ChannelDTO>();
         private ObservableRangeCollection<ChannelDTO> _selectedChannels = new ObservableRangeCollection<ChannelDTO>();
 
         private ObservableCollection<MediaPlanHist> _showMPHist = new ObservableCollection<MediaPlanHist>();
@@ -166,7 +167,6 @@ namespace CampaignEditor.UserControls
             var mpVer = await _mediaPlanVersionController.GetLatestMediaPlanVersion(_campaign.cmpid);
             await _forecastData.Initialize(_campaign);
             _mpConverter.Initialize(_forecastData);
-            lvChannels.ItemsSource = _forecastData.Channels;
           
             await LoadData(mpVer.version);
 
@@ -180,8 +180,7 @@ namespace CampaignEditor.UserControls
             var mpVer = await _mediaPlanVersionController.GetLatestMediaPlanVersion(_campaign.cmpid);
             await _forecastData.Initialize(_campaign);
             _mpConverter.Initialize(_forecastData);
-            lvChannels.ItemsSource = _forecastData.Channels;
-
+            _forecastDataManipulation.Initialize(_campaign, _forecastData, _mpConverter);
 
             foreach (var chid in channelsToDelete)
             {
@@ -198,7 +197,6 @@ namespace CampaignEditor.UserControls
             SetLoadingPage?.Invoke(this, new LoadingPageEventArgs("LOADING...", 1));
 
             await _forecastData.InitializeChannels();
-            lvChannels.ItemsSource = _forecastData.Channels;
             await LoadData(mpVer.version);
 
             SetContentPage?.Invoke(this, null);
@@ -394,7 +392,7 @@ namespace CampaignEditor.UserControls
         private void BindLists()
         {
             dgHist.ItemsSource = _showMPHist;
-            lvChannels.ItemsSource = _forecastData.Channels;
+            lvChannels.ItemsSource = _allChannels;
         }
 
         private void FillVersions(int maxVersion)
@@ -480,6 +478,8 @@ namespace CampaignEditor.UserControls
             isEditableVersion = (_maxVersion == _cmpVersion);
             CheckManipulationButtons(canUserEdit, isEditableVersion);
 
+            _allChannels.ReplaceRange(_forecastData.Channels);
+
             try
             {
 
@@ -555,7 +555,7 @@ namespace CampaignEditor.UserControls
             {
                 _forecastData.Channels.Insert(targetIdx + 1, droppedData);
                 _forecastData.Channels.RemoveAt(removedIdx);
-                lvChannels.ItemsSource = _forecastData.Channels;
+                _allChannels.ReplaceRange(_forecastData.Channels);
             }
             else
             {
@@ -564,7 +564,8 @@ namespace CampaignEditor.UserControls
                 {
                     _forecastData.Channels.Insert(targetIdx, droppedData);
                     _forecastData.Channels.RemoveAt(remIdx);
-                    lvChannels.ItemsSource = _forecastData.Channels;
+                    _allChannels.ReplaceRange(_forecastData.Channels);
+
                 }
             }
 
@@ -940,40 +941,49 @@ namespace CampaignEditor.UserControls
 
         private void lvChannels_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
-            ListViewItem clickedItem = FindAncestor<ListViewItem>((DependencyObject)e.OriginalSource);
-            if (clickedItem != null)
+            //ListViewItem clickedItem = FindAncestor<ListViewItem>((DependencyObject)e.OriginalSource);
+            var channels = lvChannels.SelectedItems.Cast<ChannelDTO>().ToList();
+            //clickedItem != null
+            if (channels.Count > 0)
             {
                 // Do something with the clicked item
-                var channel = clickedItem.DataContext as ChannelDTO;
+                //var channel = clickedItem.DataContext as ChannelDTO;
                 // Call your function for the item
-
                 ContextMenu menu = new ContextMenu();
 
                 MenuItem trimAmrs = new MenuItem();
                 trimAmrs.Header = "Trim Channel Amrs";
                 trimAmrs.Click += async (obj, ea) =>
                 {
-                    var chname = channel.chname;
+                    //var chname = channel.chname;
 
                     var f = _factoryAmrTrim.Create();
-                    f.Initialize("Trim Channel " + chname, 100);
+                    if (channels.Count == 1)
+                        f.Initialize("Trim Channel " + channels[0].chname.Trim(), 100);
+                    else
+                        f.Initialize("Trim Selected Channels ", 100);
+
                     f.ShowDialog();
                     if (f.changed)
                     {
-                        var mediaPlans = _allMediaPlans.Where(mpTuple => mpTuple.MediaPlan.chid == channel.chid).Select(mpTuple => mpTuple.MediaPlan);
-                        foreach (MediaPlan mediaPlan in mediaPlans)
+                        foreach (var channel in channels)
                         {
-                            if (f.attributesToTrim[0])
-                                mediaPlan.Amr1trim = f.newValue;
-                            if (f.attributesToTrim[1])
-                                mediaPlan.Amr2trim = f.newValue;
-                            if (f.attributesToTrim[2])
-                                mediaPlan.Amr3trim = f.newValue;
-                            if (f.attributesToTrim[3])
-                                mediaPlan.Amrsaletrim = f.newValue;
-                            var mpDTO = _mpConverter.ConvertToDTO(mediaPlan);
-                            await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(mpDTO));
+                            var mediaPlans = _allMediaPlans.Where(mpTuple => mpTuple.MediaPlan.chid == channel.chid).Select(mpTuple => mpTuple.MediaPlan);
+                            foreach (MediaPlan mediaPlan in mediaPlans)
+                            {
+                                if (f.attributesToTrim[0])
+                                    mediaPlan.Amr1trim = f.newValue;
+                                if (f.attributesToTrim[1])
+                                    mediaPlan.Amr2trim = f.newValue;
+                                if (f.attributesToTrim[2])
+                                    mediaPlan.Amr3trim = f.newValue;
+                                if (f.attributesToTrim[3])
+                                    mediaPlan.Amrsaletrim = f.newValue;
+                                var mpDTO = _mpConverter.ConvertToDTO(mediaPlan);
+                                await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(mpDTO));
+                            }
                         }
+                        
 
                     }
                 };
@@ -983,12 +993,13 @@ namespace CampaignEditor.UserControls
                 recalculateChannel.Header = "Recalculate channel values";
                 recalculateChannel.Click += async (obj, ea) =>
                 {
-                    if (MessageBox.Show($"Recalculate channel values for channel:\n{channel.chname.Trim()}?",
+                    if (MessageBox.Show($"Recalculate channel values for selected channels?",
                         "Question:", MessageBoxButton.OKCancel, MessageBoxImage.Question) == MessageBoxResult.OK)
                     {
                         SetLoadingPage?.Invoke(this, new LoadingPageEventArgs("Recalculating data", 0));
                         // When pricelists or calculating inside MediaPlans are changed 
-                        await CalculateMPValuesForChannel(_campaign.cmpid, channel.chid, _maxVersion);
+                        foreach (var channel in channels)
+                            await CalculateMPValuesForChannel(_campaign.cmpid, channel.chid, _maxVersion);
 
                         await LoadData(_maxVersion);
                         SetContentPage?.Invoke(this, null);

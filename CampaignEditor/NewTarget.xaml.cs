@@ -49,7 +49,7 @@ namespace CampaignEditor
             _campaign = campaign;
             var treeResult = await SetTree();
 
-            bool isAdmin = MainWindow.user.usrlevel == 0;
+            bool isAdmin = MainWindow.user.usrlevel <= 0;
             chbGlobal.Visibility = isAdmin ? Visibility.Visible : Visibility.Hidden;
             if (chbGlobal.Visibility == Visibility.Visible && targetToEdit != null)
                 chbGlobal.IsChecked = targetToEdit.targown == 0;

@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CampaignEditor"
         mc:Ignorable="d"
-        Title="CmpInfo" Height="700" Width="500" FontSize="22">
+        Title="CmpInfo" Height="800" Width="500" FontSize="22">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="10" />
@@ -110,7 +110,7 @@
                  HorizontalScrollBarVisibility="Auto" MinHeight="30" VerticalContentAlignment="Center"/>
         
         <ListBox x:Name="lbBrand" Grid.Row="11" Grid.Column="1" Grid.ColumnSpan="5"
-                 VerticalAlignment="Stretch" IsTextSearchEnabled="False"
+                 VerticalAlignment="Stretch" IsTextSearchEnabled="False" MinHeight="50"
                  DisplayMemberPath="brand" Margin="10" FontSize="14"
                  SelectionChanged="lbBrand_SelectionChanged"/>
 

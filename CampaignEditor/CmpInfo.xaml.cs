@@ -22,7 +22,7 @@ namespace CampaignEditor
     public partial class CmpInfo : Window
     {
         private CampaignDTO _campaign = null;
-        private BrandDTO[] selectedBrands = new BrandDTO[2];
+        private BrandDTO[] selectedBrands = new BrandDTO[2] { null, null };
         private ClientDTO _client = null;
 
         private CampaignController _campaignController;
@@ -371,7 +371,7 @@ namespace CampaignEditor
 
                 if (tbToEditIndex == 0)
                 {
-                    if (selectedBrands[1].brbrand == brand.brbrand)
+                    if (selectedBrands[1] != null && selectedBrands[1].brbrand == brand.brbrand)
                     {
                         return;
                     }
@@ -379,7 +379,7 @@ namespace CampaignEditor
                 }
                 else if (tbToEditIndex == 1)
                 {
-                    if (selectedBrands[0].brbrand == brand.brbrand)
+                    if (selectedBrands[0] != null && selectedBrands[0].brbrand == brand.brbrand)
                     {
                         return;
                     }
