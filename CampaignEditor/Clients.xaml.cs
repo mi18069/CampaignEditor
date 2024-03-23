@@ -15,6 +15,7 @@ using CampaignEditor.Repositories;
 using CampaignEditor.StartupHelpers;
 using Database.DTOs.CampaignDTO;
 using Database.DTOs.ClientDTO;
+using Database.DTOs.UserClients;
 using Database.Entities;
 using Database.Repositories;
 
@@ -42,6 +43,7 @@ namespace CampaignEditor
 
         private UserController _userController;
         private CampaignController _campaignController;
+        private UserClientsController _userClientsController;
 
 
         //private ClientsTreeView _clientsTree;
@@ -49,6 +51,8 @@ namespace CampaignEditor
         public static Clients instance;
         public string searchClientsString = "Search clients";
         public string searchCampaignsString = "Search campaigns";
+
+        public static Dictionary<int, int> UserClientsAuthentication = new Dictionary<int, int>();
 
         private bool clientsUpdated = false;
         private bool campaignsUpdated = false;
@@ -123,15 +127,32 @@ namespace CampaignEditor
             _campaignManipulations = factoryCampaignManipulations.Create();
 
             _userController = new UserController(userRepository);
+            _userClientsController = new UserClientsController(userClientsRepository);
+
             tvClients._userController = _userController;
             tvClients._clientController = new ClientController(clientRepository);
-            tvClients._userClientsController = new UserClientsController(userClientsRepository);
+            tvClients._userClientsController = _userClientsController;
             tvClients._campaignController = new CampaignController(campaignRepository);
 
             SubscribeEventsToTvClients();
 
             FillFilterByUsersComboBox();
 
+        }
+
+        private async void Clients_Loaded(object sender, RoutedEventArgs e)
+        {
+            var userClients = await _userClientsController.GetAllUserClientsByUserId(MainWindow.user.usrid);
+
+            foreach (var userClient in userClients)
+            {
+                Clients.UserClientsAuthentication.Add(userClient.cliid, userClient.usrlevel);
+            }
+
+            if (MainWindow.user.usrlevel != -1)
+            {
+                btnUsers.Visibility = Visibility.Collapsed;
+            }
         }
 
         private void SubscribeEventsToTvClients()
@@ -166,12 +187,12 @@ namespace CampaignEditor
             Enum option = e.Option;
             switch (option)
             {
-                case UserContextMenuEventArgs.Options.AllUsers:
+                /*case UserContextMenuEventArgs.Options.AllUsers:
                     ShowAllUsers();
                     break;
                 case UserContextMenuEventArgs.Options.NewUser:
                     ShowNewUser();
-                    break;
+                    break;*/
                 case UserContextMenuEventArgs.Options.NewClient:
                     ShowNewClient();
                     break;
@@ -267,6 +288,11 @@ namespace CampaignEditor
             f.UserAuthorizationChangedEvent -= Users_UserAuthorizationChangedEvent;
         }
 
+        private void btnUsers_Click(object sender, RoutedEventArgs e)
+        {
+            ShowAllUsers();
+        }
+
         private async void ShowAllUsers()
         {
             var f = _factoryAllUsers.Create();
@@ -285,7 +311,7 @@ namespace CampaignEditor
 
             for (int i = 0; i < cbUsers.Items.Count; i++)
             {
-                if (cbUsers.Items[i].ToString().Trim() == user.usrname.Trim())
+                if ((cbUsers.Items[i] as UserDTO).usrid == user.usrid)
                 {
                     foundIndex = i;
                     break;
@@ -305,7 +331,7 @@ namespace CampaignEditor
 
             for (int i=0; i<cbUsers.Items.Count; i++)
             {
-                if (cbUsers.Items[i].ToString().Trim() == user.usrname.Trim())
+                if ((cbUsers.Items[i] as UserDTO).usrid == user.usrid)
                 {
                     foundIndex = i;
                     break;
@@ -324,7 +350,7 @@ namespace CampaignEditor
             }
         }
 
-        private void ShowNewUser()
+        /*private void ShowNewUser()
         {
             var f = _factoryAddUser.Create();
             f.ShowDialog();
@@ -337,7 +363,7 @@ namespace CampaignEditor
                 UserDTO user = f.user;
                 cbUsers.Items.Insert(1, user.usrname);
             }
-        }
+        }*/
 
         private void ShowNewClient()
         {
@@ -434,36 +460,29 @@ namespace CampaignEditor
         #region Filter ComboBox
         private async void FillFilterByUsersComboBox()
         {
-            cbUsers.Items.Add("All");
-            var usernames = await GetSupervisedUsernames(MainWindow.user);
-            usernames = usernames.OrderBy(u => u);
-            foreach (string username in usernames)
-            {
-                cbUsers.Items.Add(username);
-            }
+            var users = await GetSupervisedUsers(MainWindow.user);
+            users = users.OrderBy(u => u.usrname);
 
+            cbUsers.ItemsSource = users;
         }
 
-        private async Task<IEnumerable<string>> GetSupervisedUsernames(UserDTO user)
+        private async Task<IEnumerable<UserDTO>> GetSupervisedUsers(UserDTO user)
         {
-            IEnumerable<UserDTO> users = new List<UserDTO>();
+            List<UserDTO> users = new List<UserDTO>();
 
-            if (user.usrlevel == 0)
+            if (user.usrlevel <= 0)
             {
-                users = await _userController.GetAllUsers();
+                users = (await _userController.GetAllUsers()).ToList();
             }
             else
             {
-                users = users.Append(await _userController.GetUserById(user.usrid));
+                users.Add(user);
             }
-            IEnumerable<string> usernames = new List<string>();
-
-            foreach (UserDTO userDTO in users)
-            {
-                usernames = usernames.Append(userDTO.usrname);
-            }
-            return usernames;
+            
+            return users;
         }
+
+       
 
         #endregion
 
@@ -579,24 +598,13 @@ namespace CampaignEditor
 
         private async void cbUsers_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            string username;
-            if (cbUsers.SelectedValue == null)
+            UserDTO user = MainWindow.user;
+            if (cbUsers.SelectedValue != null)
             {
-                username = "All";
-            }
-            else
-            {
-                username = ((string)cbUsers.SelectedValue).Trim();
+                user = cbUsers!.SelectedValue as UserDTO;
             }
 
-
-            if (username == null || username == "All")
-                await tvClients.Initialize();
-            else
-            {
-                UserDTO user = await _userController.GetUserByUsername(username);
-                await tvClients.Initialize(user);
-            }
+            await tvClients.Initialize(user);
 
         }
 
@@ -638,6 +646,7 @@ namespace CampaignEditor
                 await tvClients.Initialize(MainWindow.user);
             }
         }
+
 
         // Deactivating events
         /*protected override void OnClosing(CancelEventArgs e)

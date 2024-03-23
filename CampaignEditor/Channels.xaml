@@ -129,7 +129,8 @@
                   AutoGenerateColumns="False"
                   IsReadOnly="True"
                   ItemsSource="{Binding Path=Selected}"
-                  HeadersVisibility="Column">
+                  HeadersVisibility="Column"
+                  SelectionMode="Extended">
             <DataGrid.Resources>
                 <Style TargetType="{x:Type DataGridColumnHeader}">
                     <Setter Property="Background" Value="LightGray"/>

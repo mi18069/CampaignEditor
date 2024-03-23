@@ -16,16 +16,18 @@ namespace CampaignEditor
         public CampaignDTO _campaign = null;
         ClientDTO _client = null;
         bool readOnly = true;
+        // Variable for checking if forecast is initialized
+        bool isCampaignInitialized = false;
 
         //private readonly IAbstractFactory<CampaignOverview> _factoryOverview;
         private readonly IAbstractFactory<CampaignForecastView> _factoryForecastView;
-        private readonly IAbstractFactory<CampaignValidation> _factoryValidation;
 
         private ClientController _clientController;
         private CampaignController _campaignController;
 
         CampaignOverview factoryCampaignOverview;
         CampaignForecastView factoryCampaignForecastView;
+        CampaignValidation factoryCampaignValidation;
 
         public Campaign(IClientRepository clientRepository, ICampaignRepository campaignRepository, 
             IAbstractFactory<CampaignOverview> factoryOverview, 
@@ -35,7 +37,8 @@ namespace CampaignEditor
 
             factoryCampaignOverview = factoryOverview.Create();
             factoryCampaignForecastView = factoryForecastView.Create();
-            _factoryValidation = factoryValidation;
+            factoryCampaignValidation = factoryValidation.Create();
+
 
             _clientController = new ClientController(clientRepository);
             _campaignController = new CampaignController(campaignRepository);
@@ -50,7 +53,17 @@ namespace CampaignEditor
 
             _campaign = campaign;
             _client = await _clientController.GetClientById(_campaign.clid);
-            readOnly = isReadOnly || (TimeFormat.YMDStringToDateTime(_campaign.cmpedate) < DateTime.Now);
+            int authenticationLevel = 2;
+            try
+            {
+                if (MainWindow.user.usrlevel <= 0)
+                    authenticationLevel = 0;
+                else
+                    authenticationLevel = Clients.UserClientsAuthentication[campaign.clid];
+            }
+            catch { }
+            readOnly = isReadOnly || authenticationLevel == 2 || 
+                (TimeFormat.YMDStringToDateTime(_campaign.cmpedate) < DateTime.Now);
             this.Title = "Client: " + _client.clname.Trim() + "  Campaign: " + _campaign.cmpname.Trim()
                  + (_campaign.tv ? " TV" : " Radio");
 
@@ -81,12 +94,59 @@ namespace CampaignEditor
             //var factoryCampaignForecastView = _factoryForecastView.Create();
             factoryCampaignForecastView.tabForecast = tabForecast;
             await factoryCampaignForecastView.Initialize(_campaign, readOnly);
+            BindOverviewForecastEvents();
+            isCampaignInitialized = factoryCampaignForecastView.alreadyExists;
 
-            var factoryCampaignValidation = _factoryValidation.Create();
             await factoryCampaignValidation.Initialize(_campaign);
             tabValidation.Content = factoryCampaignValidation.Content;
 
+            factoryCampaignForecastView.UpdateValidation += ForecastView_UpdateValidation;
+        }
 
+        private void BindOverviewForecastEvents()
+        {
+            factoryCampaignOverview.GoalsUpdatedEvent += CampaignForecastView_GoalsUpdatedEvent;
+            factoryCampaignOverview.ChannelsUpdatedEvent += CampaignForecastView_ChannelsUpdatedEvent;
+            factoryCampaignOverview.SpotsUpdatedEvent += CampaignForecastView_SpotsUpdatedEvent;
+        }
+
+        private async void CampaignForecastView_SpotsUpdatedEvent(object? sender, EventArgs e)
+        {
+            if (!isCampaignInitialized)
+            {
+                return;
+            }
+
+            await factoryCampaignForecastView.UpdateSpots();
+        }
+
+        private async void CampaignForecastView_GoalsUpdatedEvent(object? sender, EventArgs e)
+        {
+            if (!isCampaignInitialized)
+            {
+                return;
+            }
+
+            await factoryCampaignForecastView.UpdateGoals();
+        }
+
+        private async void CampaignForecastView_ChannelsUpdatedEvent(object? sender, UpdateChannelsEventArgs e)
+        {
+            if (!isCampaignInitialized)
+            {
+                return;
+            }
+            var channelsToDelete = e.channelsToDelete;
+            var channelsToAdd = e.channelsToAdd;
+
+            await factoryCampaignForecastView.UpdateChannels(channelsToDelete, channelsToAdd);
+        }
+
+        private async void ForecastView_UpdateValidation(object? sender, EventArgs e)
+        {
+            await factoryCampaignValidation.Initialize(_campaign);
+            if (!isCampaignInitialized)
+                isCampaignInitialized = true;
         }
 
         private void Page_ClosePageEvent(object? sender, EventArgs e)
@@ -99,6 +159,8 @@ namespace CampaignEditor
             // event unbinding
             factoryCampaignOverview.ClosePageEvent -= Page_ClosePageEvent;
             factoryCampaignForecastView.CloseForecast();
+            factoryCampaignForecastView.UpdateValidation -= ForecastView_UpdateValidation;
+
 
             CampaignEventLinker.RemoveCampaign(_campaign.cmpid);
         }

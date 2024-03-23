@@ -40,7 +40,7 @@ namespace Database.Repositories
         {
             using var connection = _context.GetConnection();
 
-            var allClients = await connection.QueryAsync<Client>("SELECT * FROM tblclients");
+            var allClients = await connection.QueryAsync<Client>("SELECT * FROM tblclients where clactive = true");
 
             return _mapper.Map<IEnumerable<ClientDTO>>(allClients);
         }

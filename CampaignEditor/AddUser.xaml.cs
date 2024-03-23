@@ -22,11 +22,6 @@ namespace CampaignEditor
 
             _userController = new UserController(userRepository);
 
-            // If user don't have administrator privileges, he shouldn't be able to add users to client
-            if (MainWindow.user.usrlevel != 0)
-            {
-                btnAddUser.Visibility = Visibility.Hidden;
-            }
         }
 
         public void Initialize(UserDTO user)

@@ -32,6 +32,7 @@
                     <ColumnDefinition Width="auto" SharedSizeGroup="SharedThirdColumn"/>
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="auto" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
                 <UniformGrid x:Name="ugDays" Grid.Row="0" Grid.Column="0" 
@@ -41,7 +42,7 @@
                      HorizontalAlignment="Left" VerticalAlignment="Stretch"/>
 
                 <UniformGrid x:Name="ugGrid" Grid.Row="0" Grid.Column="2"
-                     HorizontalAlignment="Left" VerticalAlignment="Stretch" 
+                     HorizontalAlignment="Left" VerticalAlignment="Top" 
                              PreviewMouseWheel="ugGrid_PreviewMouseWheel"/>
 
             </Grid>

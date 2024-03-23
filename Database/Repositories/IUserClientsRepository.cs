@@ -12,6 +12,7 @@ namespace Database.Repositories
         Task<IEnumerable<UserClientsDTO>> GetAllUserClients();
         Task<IEnumerable<UserClientsDTO>> GetAllUserClientsByUserId(int id);
         Task<IEnumerable<UserClientsDTO>> GetAllUserClientsByClientId(int id);
+        Task<bool> UpdateUserClients(int clid, int usrid, int usrlevel);
         Task<bool> DeleteUserClientsByUserId(int id);
         Task<bool> DeleteUserClientsByClientId(int id);
         Task<bool> DeleteUserClients(int usrid, int clid);

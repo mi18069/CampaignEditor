@@ -35,7 +35,6 @@
                   PreparingCellForEdit="dgMediaPlans_PreparingCellForEdit"
                   CellEditEnding="dgMediaPlans_CellEditEnding"
                   CurrentCellChanged="dgMediaPlans_CurrentCellChanged"
-                  Sorting="dgMediaPlans_Sorting"
                   PreviewKeyDown="dgMediaPlans_PreviewKeyDown"
                   SizeChanged="dgMediaPlans_SizeChanged"
                   Loaded="dgMediaPlans_Loaded"

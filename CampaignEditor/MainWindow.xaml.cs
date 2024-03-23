@@ -3,15 +3,11 @@ using CampaignEditor.DTOs.UserDTO;
 using CampaignEditor.Repositories;
 using CampaignEditor.StartupHelpers;
 using Database;
-using Database.Repositories;
 using System;
 using System.Configuration;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
-using Squirrel;
 using System.Diagnostics;
-using System.Linq;
 using System.Windows.Media;
 
 namespace CampaignEditor
@@ -22,13 +18,10 @@ namespace CampaignEditor
         private readonly IAbstractFactory<Clients> _factoryClients;
         private readonly IAbstractFactory<Config> _factoryConfig;
         private UserController _userController;
-        private OnStartupContoller _onStartupController;
 
         public static UserDTO user = null;
-        private bool onlyOne = false; // To ensure that only one window is shown
         public MainWindow(IUserRepository userRepository, IAbstractFactory<Clients> factoryClients,
-            IAbstractFactory<Config> factoryConfig,
-            IDatabaseFunctionsRepository dfRepository)
+            IAbstractFactory<Config> factoryConfig)
         {
             try
             {
@@ -37,25 +30,33 @@ namespace CampaignEditor
                 _userRepository = userRepository;
                 _factoryClients = factoryClients;
                 _factoryConfig = factoryConfig;
-
-                _onStartupController = new OnStartupContoller(dfRepository);
-
-                // Let it run in the background on every starting
-                _onStartupController.RunUpdateUnavailableDates();
-
+              
                 _userController = new UserController(_userRepository);
-
+                
+                // With encryption, also change in DataContext.cs
                 Configuration config = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
                 string connectionString = config.ConnectionStrings.ConnectionStrings["cs"].ConnectionString;
                 AppSettings.ConnectionString = connectionString;
+                
+                
+                /*var connectionString = Environment.GetEnvironmentVariable("Conn_String_Publish");
+                //var connectionString = Environment.GetEnvironmentVariable("Conn_String_Local");
+                if (string.IsNullOrEmpty(connectionString))
+                {
+                    // Handle case when environment variable is not set
+                   MessageBox.Show("MyAppConnectionString environment variable not set.",
+                       "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                AppSettings.ConnectionString = connectionString;*/
 
                 // Access the image resource from your application resources
                 ImageSource imageSource = (ImageSource)Application.Current.FindResource("pass_peek_icon");
                 // Set the Source property of the Image control
                 PassShowHide.Source = imageSource;
 
-                AddVersionNumber();
-                CheckForUpdates();
+                // Subscribe to the Loaded event
+                Loaded += MainWindow_Loaded;
+
             }
             catch (Exception ex)
             {
@@ -64,54 +65,23 @@ namespace CampaignEditor
 
         }
 
+        // Event handler for the Loaded event
+        private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            AddVersionNumber();
+        }
+
         private void AddVersionNumber()
         {
             System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
             FileVersionInfo versionInfo = FileVersionInfo.GetVersionInfo(assembly.Location);
-            this.Title += $" v-{versionInfo.FileVersion } ";
+            this.Title += $" v.{versionInfo.FileVersion } ";
         }
-      
-        private async Task CheckForUpdates()
-        {
-            // UpdateManager(@"location\for\updates")
-            using (var manager = UpdateManager.GitHubUpdateManager("https://github.com/mi18069/CampaignEditor/releases/latest"))
-            {
-                var updateInfo = await manager.Result.CheckForUpdate();
 
-                if (updateInfo.ReleasesToApply.Any())
-                {
-                    var result = MessageBox.Show("A new version of the application is available. Do you want to install it?", "Update Available", MessageBoxButton.YesNo);
-
-                    if (result == MessageBoxResult.Yes)
-                    {
-                        await manager.Result.UpdateApp();
-                        Application.Current.Shutdown();
-                    }
-                }
-            }
-
-            /*using (var manager = new UpdateManager(@"C:\Temp\Releases"))
-            {
-                var updateInfo = await manager.CheckForUpdate();
-
-                if (updateInfo.ReleasesToApply.Any())
-                {
-                    var result = MessageBox.Show("A new version of the application is available. Do you want to install it?", "Update Available", MessageBoxButton.YesNo);
-
-                    if (result == MessageBoxResult.Yes)
-                    {
-                        await manager.UpdateApp();
-                        Application.Current.Shutdown();
-                    }
-                }
-            }*/
-        }
-       
 
         // Checks if the username and password are typed correctly
         private async void btnCheckCredentials_Click(object sender, RoutedEventArgs e)
         {
-
             btnCheckCredentials.IsEnabled = false;
             lblError.Content = "";
 
@@ -126,12 +96,10 @@ namespace CampaignEditor
             catch (Exception ex)
             {
                 MessageBox.Show("Database error: " + ex.Message, "Message", MessageBoxButton.OK, MessageBoxImage.Error);
+                btnCheckCredentials.IsEnabled = true;
                 return;
             }
-            finally
-            {
-                btnCheckCredentials.IsEnabled = true;
-            }
+
 
             if (userFound == false)
             {
@@ -139,19 +107,16 @@ namespace CampaignEditor
             }
             else
             {
-                if (!onlyOne)
-                {
-                    onlyOne = true;
                     user = await _userController.GetUserByUsername(username);
 
                     var f = _factoryClients.Create();
                     f.Show();
 
-                    this.Close();
-
-                }
+                    this.Close();            
             }
-                
+            btnCheckCredentials.IsEnabled = true;
+
+
         }
 
         #region passwordMechanism

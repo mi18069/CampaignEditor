@@ -1,6 +1,7 @@
 ﻿using CampaignEditor.Controllers;
 using CampaignEditor.Helpers;
 using Database.DTOs.CampaignDTO;
+using Database.DTOs.ChannelDTO;
 using Database.DTOs.MediaPlanDTO;
 using Database.DTOs.MediaPlanHistDTO;
 using Database.DTOs.MediaPlanTermDTO;
@@ -10,6 +11,7 @@ using Database.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -88,7 +90,7 @@ namespace CampaignEditor
         {
             // Inserting new MediaPlans in database
             await InsertCampaignMediaPlansFromSchemas(version);
-
+            
             var mediaPlansByChannels = await GetMediaPlansByChannel(version);
 
             await StartAmrByListOfChannelMediaPlans(mediaPlansByChannels);
@@ -535,6 +537,48 @@ namespace CampaignEditor
             }
                      
         }
+        #endregion
+
+
+        #region Campaign Overview Checkers
+
+        public async Task<bool> CheckIfChannelCanBeDeleted(int cmpid, int chid)
+        {
+            var mediaPlans = await _mediaPlanController.GetAllMediaPlansByCmpidAndChannelAllVersions(cmpid, chid);
+            foreach (var mediaPlan in mediaPlans)
+            {
+                var hasDedicatedSpots = await _mediaPlanTermController.CheckIfMediaPlanHasSpotsDedicated(mediaPlan.xmpid);
+                if (hasDedicatedSpots)
+                {
+                    MessageBox.Show("Cannot move channel because it has dedicated spots to it", "Error",
+                        MessageBoxButton.OK, MessageBoxImage.Error);
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        public async Task DeleteChannelFromCampaign(int cmpid, int chid)
+        {
+            var mediaPlans = await _mediaPlanController.GetAllMediaPlansByCmpidAndChannelAllVersions(cmpid, chid);
+            foreach (var mediaPlan in mediaPlans)
+            {
+                await DeleteMediaPlan(mediaPlan.xmpid);
+            }
+          
+        }
+
+        public async Task AddChannelInCampaign(int cmpid, int chid, int version)
+        {
+            await InsertChannelMediaPlansFromSchemas(chid, version);
+            var mediaPlansByExactChannel = new List<IEnumerable<MediaPlanDTO>> { await _mediaPlanController.GetAllMediaPlansByCmpidAndChannel(cmpid, chid, version) };
+
+            await StartAmrByListOfChannelMediaPlans(mediaPlansByExactChannel);
+
+            var mediaPlanList = await _mediaPlanController.GetAllMediaPlansByCmpidAndChannel(cmpid, chid, version);
+            await CalculateMPValuesForMediaPlans(mediaPlanList);
+        }
+
         #endregion
     }
 }

@@ -50,8 +50,10 @@ namespace CampaignEditor
 
         private async Task FillBySctAsync(SectableDTO sectable)
         {
+            dgList.Clear();
             tbName.Text = sectable.sctname.Trim();
             cbActive.IsChecked = sectable.sctactive;
+            cbGlobal.IsChecked = sectable.ownedby == 0 ? true : false;
 
             List<SectablesDTO> seccoefs = (List<SectablesDTO>)await _sectablesController.GetSectablesById(sectable.sctid);
             seccoefs = seccoefs.OrderBy(s => s.sec).ToList();
@@ -240,7 +242,8 @@ namespace CampaignEditor
                 }
                 if (modifiedSectable)
                 {
-                    await _sectableController.UpdateSectable(new UpdateSectableDTO(id, tbName.Text.Trim(), false, (bool)cbActive.IsChecked, _campaign.clid));
+                    int owner = (bool)cbGlobal.IsChecked ? 0 : _campaign.clid;
+                    await _sectableController.UpdateSectable(new UpdateSectableDTO(id, tbName.Text.Trim(), false, (bool)cbActive.IsChecked, owner));
                 }
                 success = true;
             }

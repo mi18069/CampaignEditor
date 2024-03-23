@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using CampaignEditor.DTOs.UserDTO;
 using Dapper;
 using Database.Data;
 using Database.DTOs.UserClients;
@@ -25,11 +26,12 @@ namespace Database.Repositories
             using var connection = _context.GetConnection();
 
             var affected = await connection.ExecuteAsync(
-                "INSERT INTO tblclientsusers (cliid, usrid) VALUES (@Cliid, @Usrid)",
+                "INSERT INTO tblclientsusers (cliid, usrid, usrlevel) VALUES (@Cliid, @Usrid, @Usrlevel)",
                 new
                 {
                     Cliid = userClientsDTO.cliid,
-                    Usrid = userClientsDTO.usrid
+                    Usrid = userClientsDTO.usrid,
+                    Usrlevel = userClientsDTO.usrlevel
                 });
 
             return affected != 0;
@@ -52,6 +54,24 @@ namespace Database.Repositories
 
             return _mapper.Map<UserClientsDTO>(userClient);
         }
+
+        public async Task<bool> UpdateUserClients(int clid, int usrid, int usrlevel)
+        {
+            using var connection = _context.GetConnection();
+
+            var affected = await connection.ExecuteAsync(
+                "UPDATE tblclientsusers SET cliid = @Clid, usrid = @Usrid, usrlevel = @Usrlevel " +
+                "WHERE usrid = @Usrid AND cliid = @Clid",
+            new
+            {
+                Usrid = usrid,
+                Clid = clid,
+                Usrlevel = usrlevel
+                });
+
+            return affected != 0;
+        }
+
         public async Task<bool> DeleteUserClientsByClientId(int id)
         {
             using var connection = _context.GetConnection();

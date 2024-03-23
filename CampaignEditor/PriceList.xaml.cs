@@ -75,7 +75,7 @@ namespace CampaignEditor
             _campaign = campaign;
             _pricelist = pricelist;
 
-            bool isAdmin = MainWindow.user.usrlevel == 0;
+            bool isAdmin = MainWindow.user.usrlevel <= 0;
             chbGlobal.Visibility = isAdmin ? Visibility.Visible : Visibility.Collapsed;
             if (chbGlobal.Visibility == Visibility.Visible && _pricelist != null)
                 chbGlobal.IsChecked = _pricelist.clid == 0;

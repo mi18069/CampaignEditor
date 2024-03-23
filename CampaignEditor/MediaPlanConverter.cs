@@ -363,7 +363,7 @@ namespace CampaignEditor
             /*var sectable = await _sectableController.GetSectableById(pricelist.sectbid);
             var sectables = await _sectablesController.GetSectablesByIdAndSec(sectable.sctid, spotDTO.spotlength);*/
             var sectable = _forecastData.PlidSectableDict[pricelist.plid];
-            var sectables = _forecastData.SecidSectablesDict[sectable.sctid].First(secs => secs.sec == spotDTO.spotlength);
+            var sectables = _forecastData.SecidSectablesDict[sectable.sctid].FirstOrDefault(secs => secs.sec == spotDTO.spotlength, null);
             var seccoef = 1.0;
             if (sectable.sctid != 1)
             {
@@ -422,7 +422,7 @@ namespace CampaignEditor
                     {
                         SpotDTO spot = _forecastData.SpotcodeSpotDict[c];
                         //var sec = await _sectablesController.GetSectablesByIdAndSec(sectable.sctid, spot.spotlength);
-                        var sec = _forecastData.SecidSectablesDict[sectable.sctid].First(secs => secs.sec == spot.spotlength);
+                        var sec = _forecastData.SecidSectablesDict[sectable.sctid].FirstOrDefault(secs => secs.sec == spot.spotlength, null);
                         
                         if (sec != null)
                             seccoef += sec.coef * ((double)30 / spot.spotlength);

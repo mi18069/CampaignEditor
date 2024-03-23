@@ -57,6 +57,19 @@ namespace CampaignEditor
             return users;
         }
 
+        public async Task<IEnumerable<Tuple<UserDTO, int>>> GetAllUserAuthorizationsOfClient(int clid)
+        {
+            var userClients = await _userClientsController.GetAllUserClientsByClientId(clid);
+            var usersAuthorization = new List<Tuple<UserDTO, int>>();
+            foreach (var userClient in userClients)
+            {
+                usersAuthorization.Add(Tuple.Create(await _userController.GetUserById(userClient.usrid), userClient.usrlevel));
+            }
+            usersAuthorization = usersAuthorization.OrderBy(ua => ua.Item1.usrname).ToList();
+
+            return usersAuthorization;
+        }
+
         // Used when you need all users except users from one client 
         public async Task<IEnumerable<UserDTO>> GetUsersNotFromClient(string clientname)
         {
@@ -75,7 +88,7 @@ namespace CampaignEditor
 
         public async Task AssignUserToClient(UserDTO user)
         {
-            var userClient = new UserClientsDTO(_client.clid, user.usrid);
+            var userClient = new UserClientsDTO(_client.clid, user.usrid, user.usrlevel);
             await _userClientsController.CreateUserClients(userClient);
         }
 

@@ -53,11 +53,19 @@ namespace CampaignEditor.UserControls
         {
 
             clientCampaignsLists.Clear();
-            var clids = new List<int>();
-            if (userDTO == null || userDTO.usrlevel == 0)
+            /*var clids = new List<int>();
+            if (userDTO == null || userDTO.usrlevel <= 0)
             {
                 clids = (await _userClientsController.GetAllUserClients()).Select(c => c.cliid).ToList();
                 clids = clids.Distinct().ToList();
+            }
+            else
+                clids = (await _userClientsController.GetAllUserClientsByUserId(userDTO.usrid)).Select(c => c.cliid).ToList();*/
+
+            var clids = new List<int>();
+            if (userDTO == null || userDTO.usrlevel <= 0)
+            {
+                clids = (await _clientController.GetAllClients()).Select(client => client.clid).ToList();
             }
             else
                 clids = (await _userClientsController.GetAllUserClientsByUserId(userDTO.usrid)).Select(c => c.cliid).ToList();
@@ -279,14 +287,6 @@ namespace CampaignEditor.UserControls
 
         public event EventHandler<UserContextMenuEventArgs> UserContextMenuEvent;
 
-        private void AllUsersMenuItem_Click(object sender, RoutedEventArgs e)
-        {
-            UserContextMenuEvent?.Invoke(this, new UserContextMenuEventArgs(UserContextMenuEventArgs.Options.AllUsers));
-        }
-        private void NewUserMenuItem_Click(object sender, RoutedEventArgs e)
-        {
-            UserContextMenuEvent?.Invoke(this, new UserContextMenuEventArgs(UserContextMenuEventArgs.Options.NewUser));
-        }
         private void NewClientMenuItem_Click(object sender, RoutedEventArgs e)
         {
             UserContextMenuEvent?.Invoke(this, new UserContextMenuEventArgs(UserContextMenuEventArgs.Options.NewClient));

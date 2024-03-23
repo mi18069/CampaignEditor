@@ -49,6 +49,7 @@ namespace CampaignEditor
             {
                 var item = new UsersListItem();
                 item.User = user;
+                item.UsrLevel = user.usrlevel;
                 AddItemEvents(item);
                 lbUsers.Items.Insert(0, item);
             }
@@ -79,7 +80,6 @@ namespace CampaignEditor
             {
                 var item = sender as UsersListItem;
                 await DeleteUserFromULItem(item);
-                DeleteItemEvents(item);
             }
             catch (Exception ex)
             {
@@ -98,6 +98,7 @@ namespace CampaignEditor
             {
                 var item = sender as UsersListItem;
                 await DeleteUserFromULItem(item);
+                DeleteItemEvents(item);
             };
 
             menu.Items.Add(item);
@@ -109,7 +110,6 @@ namespace CampaignEditor
         private async Task DeleteUserFromULItem(UsersListItem item)
         {
             var user = item.User;
-
             if (MessageBox.Show("Are you sure you want to delete user " + user.usrname.Trim() + "?", "Message", 
                 MessageBoxButton.YesNo, MessageBoxImage.Warning) == MessageBoxResult.Yes)
             {
@@ -168,6 +168,12 @@ namespace CampaignEditor
             user.usrlevel = item.cbUserLevel.SelectedIndex;
             try
             {
+                if (MainWindow.user.usrid == user.usrid)
+                {
+                    MessageBox.Show("You cannot demote yourself", "Message", MessageBoxButton.OK, MessageBoxImage.Error);
+                    item.cbUserLevel.SelectedIndex = 0;
+                    return;
+                }
                 await _userController.UpdateUser(new UpdateUserDTO(user));
                 UserAuthorizationChangedEvent?.Invoke(this, user);
             }

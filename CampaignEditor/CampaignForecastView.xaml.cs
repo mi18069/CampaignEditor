@@ -4,16 +4,13 @@ using CampaignEditor.Helpers;
 using CampaignEditor.StartupHelpers;
 using CampaignEditor.UserControls;
 using Database.DTOs.MediaPlanVersionDTO;
-using Database.Entities;
 using Database.Repositories;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Threading;
 
 namespace CampaignEditor
 {
@@ -22,6 +19,7 @@ namespace CampaignEditor
 
         private readonly IAbstractFactory<CampaignForecast> _factoryForecast; 
         private readonly IAbstractFactory<CampaignForecastDates> _factoryForecastDates;
+        private ForecastDataManipulation _forecastDataManipulation;
 
         private MediaPlanRefController _mediaPlanRefController;
         private DatabaseFunctionsController _databaseFunctionsController;
@@ -31,7 +29,7 @@ namespace CampaignEditor
         private CampaignForecastDates _forecastDates = null;
 
         LoadingPage loadingPage = new LoadingPage();
-        private bool alreadyExists = false;
+        public bool alreadyExists = false;
 
         private CampaignDTO _campaign;
         public TabItem tabForecast;
@@ -39,14 +37,23 @@ namespace CampaignEditor
 
         List<DateTime> unavailableDates = new List<DateTime>();
         private bool isReadOnly = true;
+
+        public event EventHandler UpdateValidation;
         public CampaignForecastView(IMediaPlanRefRepository mediaPlanRefRepository,
             IDatabaseFunctionsRepository databaseFunctionsRepository,
             IMediaPlanVersionRepository mediaPlanVersionRepository,
             IAbstractFactory<CampaignForecast> factoryForecast,
-            IAbstractFactory<CampaignForecastDates> factoryForecastDates)
+            IAbstractFactory<CampaignForecastDates> factoryForecastDates,
+            IAbstractFactory<ForecastDataManipulation> factoryForecastDataManipulation)
         {
             _factoryForecast = factoryForecast;
             _factoryForecastDates = factoryForecastDates;
+            //_forecastDataManipulation = factoryForecastDataManipulation.Create();
+
+            var onStartupController = new OnStartupContoller(databaseFunctionsRepository);
+
+            // Let it run in the background on every starting
+            onStartupController.RunUpdateUnavailableDates();
 
             _mediaPlanRefController = new MediaPlanRefController(mediaPlanRefRepository);
             _databaseFunctionsController = new DatabaseFunctionsController(databaseFunctionsRepository);
@@ -122,52 +129,92 @@ namespace CampaignEditor
         // Inside CampaignForecastDates
         private async void ForecastDates_InitializeButtonClicked(object sender, EventArgs e)
         {
+            var mpVer = await _mediaPlanVersionController.GetLatestMediaPlanVersion(_campaign.cmpid);
+
             if (alreadyExists)
             {
                 if (MessageBox.Show("Current data will be lost\nAre you sure you want to initialize?", "Message: ",
-                    MessageBoxButton.OKCancel, MessageBoxImage.Warning) == MessageBoxResult.OK)
-                {
-                    tabForecast.Content = loadingPage.Content;
-                    var mpVer = await _mediaPlanVersionController.GetLatestMediaPlanVersion(_campaign.cmpid);
-                    int version = 1;
-                    if (mpVer != null)
-                        version = mpVer.version;
-
-                    // Check this
-                    //await _forecast.DeleteData(version);
-                    var success = await InitializeNewForecast();
-                    if (success)
-                    {
-                        tabForecast.Content = _forecast.Content;
-                    }
-                    else
-                    {
-                        tabForecast.Content = _forecastDates.Content;
-                        return;
-                    }
-                }
-                else
+                    MessageBoxButton.OKCancel, MessageBoxImage.Warning) != MessageBoxResult.OK)
                 {
                     return;
                 }
+
+                await _forecastDataManipulation.DeleteCampaignForecastVersion(_campaign.cmpid, mpVer.version);
+                if (mpVer.version == 1)
+                    mpVer = null;
+                await _mediaPlanRefController.DeleteMediaPlanRefById(_campaign.cmpid);
             }
+
+            if (mpVer == null)
+            {
+                mpVer = new MediaPlanVersionDTO(_campaign.cmpid, 0);
+                await _mediaPlanVersionController.CreateMediaPlanVersion(mpVer);
+            }
+            mpVer = await _mediaPlanVersionController.IncrementMediaPlanVersion(mpVer);
+            int version = mpVer.version;
+
+            tabForecast.Content = loadingPage.Content;
+            var success = false;
+            try
+            {
+                success = await InitializeNewForecast(version);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error while initializing MediaPlan\n" + ex.Message, "Error", MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+                await _forecastDataManipulation.DeleteCampaignForecastVersion(_campaign.cmpid, version);
+                success = false;
+            }
+            if (success)
+                tabForecast.Content = _forecast.Content;
             else
             {
-                tabForecast.Content = loadingPage.Content;
-                var success = await InitializeNewForecast();
-                if (success)
-                    tabForecast.Content = _forecast.Content;
-                else
-                {
-                    tabForecast.Content = _forecastDates.Content;
-                    return;
-                }
-                    
+                tabForecast.Content = _forecastDates.Content;
+                return;
             }
+
+            UpdateValidation?.Invoke(this, null);
             alreadyExists = true;
         }
 
-        private async Task<bool> InitializeNewForecast()
+        private async Task<bool> InitializeNewForecast(int version)
+        {
+            if (_forecastDates == null)
+            {
+                await LoadForecastDates();
+            }
+
+            if (_forecast == null)
+            {
+                await LoadForecast();
+            }
+
+            if (!await CheckPrerequisites(_campaign))
+            {
+                MessageBox.Show("Cannot start Forecast.\nNot all required parameters are given", "Message:",
+                                MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
+            }
+            var success = await _forecastDates.InsertMediaPlanRefs();
+            if (!success)
+            {
+                MessageBox.Show("An error occured, please try again", "Message: ",
+                                MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
+            }
+
+            if (_forecast == null)
+            {
+                await LoadForecast();
+            }
+
+            await _forecast.InsertAndLoadData(version);          
+
+            return true;
+        }
+
+        /*private async Task<bool> InitializeNewForecast()
         {
             if (_forecastDates == null)
             {
@@ -209,6 +256,22 @@ namespace CampaignEditor
             
 
             return true;
+        }*/
+
+        // For events from overview
+        public async Task UpdateGoals()
+        {
+            await _forecast.GoalsChanged();
+        }
+
+        public async Task UpdateSpots()
+        {
+            await _forecast.SpotsChanged();
+        }
+
+        public async Task UpdateChannels(List<int> channelsToDelete, List<int> channelsToAdd)
+        {
+            await _forecast.ChannelsChanged(channelsToDelete, channelsToAdd);
         }
 
         // Inside CampaignForecast
@@ -224,16 +287,20 @@ namespace CampaignEditor
 
         private void _forecast_SetLoadingPage(object? sender, LoadingPageEventArgs e)
         {
-            if (e.progressBarValue > 0)
+            if (e != null)
             {
-                loadingPage.SetProgressBarVisibility(Visibility.Visible);
-            }
-            else
-            {
-                loadingPage.SetProgressBarVisibility(Visibility.Collapsed);
+                if (e.progressBarValue > 0)
+                {
+                    loadingPage.SetProgressBarVisibility(Visibility.Visible);
+                }
+                else
+                {
+                    loadingPage.SetProgressBarVisibility(Visibility.Collapsed);
+                }
+
+                loadingPage.SetContent(e.Message);
             }
 
-            loadingPage.SetContent(e.Message);
             tabForecast.Content = loadingPage.Content;
         }
 

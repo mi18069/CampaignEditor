@@ -158,12 +158,9 @@ namespace Database.Repositories
                 "SELECT COUNT(*) FROM tblcmpchn WHERE cmpid = @cmpid",
                 new { cmpid });
 
-            var cmpGoalsCount = await connection.ExecuteScalarAsync<int>(
-                "SELECT COUNT(*) FROM tblcmpgoals WHERE cmpid = @cmpid",
-                new { cmpid });
 
 
-            return cmptgtCount > 0 && cmpspotsCount > 0 && cmpchnCount > 0 && cmpGoalsCount > 0;
+            return cmptgtCount > 0 && cmpspotsCount > 0 && cmpchnCount > 0;
         }
 
         public async Task<bool> StartReachCalculation(int cmpid, int segins = 20, int segbet = 60, bool delete = true, bool expr = true, string path = null)

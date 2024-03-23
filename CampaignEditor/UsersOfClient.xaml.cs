@@ -25,6 +25,7 @@ namespace CampaignEditor
 
         private ClientController _clientController;
         private UserController _userController;
+        private UserClientsController _userClientsController;
 
         List<UserDTO> _unassigned = new List<UserDTO>();
         List<UserDTO> _assigned = new List<UserDTO>();
@@ -54,7 +55,8 @@ namespace CampaignEditor
         public UsersOfClient(IAbstractFactory<UsersAndClients> factoryUsersAndClients,
                              IAbstractFactory<AssignUser> factoryAssignUser,
                              IClientRepository clientRepository,
-                             IUserRepository userRepository)
+                             IUserRepository userRepository,
+                             IUserClientsRepository userClientsRepository)
         {
             
             instance = this;
@@ -65,10 +67,11 @@ namespace CampaignEditor
 
             _clientController = new ClientController(clientRepository);
             _userController = new UserController(userRepository);
+            _userClientsController = new UserClientsController(userClientsRepository);
 
-            if (MainWindow.user.usrlevel == 2)
+            if (MainWindow.user.usrlevel >= 1)
             {
-                this.IsEnabled = false;
+                lbUsers.IsEnabled = false;
             }
         }
 
@@ -89,19 +92,23 @@ namespace CampaignEditor
             
             var f = _factoryUsersAndClients.Create();
             f.Initialize(_client);
-            List<UserDTO> users = (List<UserDTO>)await f.GetAllUsersOfClient();
-            users = users.OrderBy(u => u.usrname).ToList();
+            List<Tuple<UserDTO, int>> usersAuthorizations = (List<Tuple<UserDTO, int>>)await f.GetAllUserAuthorizationsOfClient(_client.clid);
 
-            foreach (var user in users) 
+            foreach (var userAuthorization in usersAuthorizations) 
             {
                 var item = new UsersListItem();
-                item.User = user;
+                item.User = userAuthorization.Item1;
+                item.UsrLevel = userAuthorization.Item2;
                 AddItemEvents(item);                
                 lbUsers.Items.Insert(0, item);
             }
 
             var button = lbUsers.Items[lbUsers.Items.Count - 1] as Button;
             button.Click += Button_Click;
+            if (MainWindow.user.usrlevel > 0)
+            {
+                button.IsEnabled = false;
+            }
             lbUsers.ResizeItems(lbUsers.Items);
             
         }
@@ -121,11 +128,20 @@ namespace CampaignEditor
         private async void CbUserLevel_SelectionChanged(object sender, UserDTO user)
         {
             var item = sender as UsersListItem;
-            user.usrlevel = item.cbUserLevel.SelectedIndex;
+            //user.usrlevel = item.cbUserLevel.SelectedIndex;
+            int userlevel = item.cbUserLevel.SelectedIndex;
+            if (userlevel < user.usrlevel)
+            {
+                MessageBox.Show("Client authorization cannot be greater than user authorization", "Error",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+                item.cbUserLevel.SelectedIndex = user.usrlevel;
+                return;
+            }
             try
             {
-                await _userController.UpdateUser(new UpdateUserDTO(user));
-                UserAuthorizationChangedEvent?.Invoke(this, user);
+                await _userClientsController.UpdateUserClients(_client.clid, user.usrid, userlevel);
+                /*await _userController.UpdateUser(new UpdateUserDTO(user));
+                UserAuthorizationChangedEvent?.Invoke(this, user);*/
             }
             catch (Exception ex)
             {

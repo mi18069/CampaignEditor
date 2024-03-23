@@ -378,14 +378,16 @@ namespace CampaignEditor.UserControls
                 System.Windows.Controls.Border border = new System.Windows.Controls.Border();
                 border.BorderBrush = System.Windows.Media.Brushes.Black;
                 border.Background = System.Windows.Media.Brushes.LightGoldenrodYellow;
-                if (currentWeek == firstWeekNum)
+                /*if (currentWeek == firstWeekNum)
                 {
                     border.BorderThickness = new Thickness(1, 3, 1, 1);
                 }
                 else
                 {
                     border.BorderThickness = new Thickness(1, 1, 1, 1);
-                }
+                }*/
+                border.BorderThickness = new Thickness(1, 1, 1, 1);
+
                 TextBlock textBlock = new TextBlock();
 
                 textBlock.HorizontalAlignment = HorizontalAlignment.Center;
@@ -414,14 +416,15 @@ namespace CampaignEditor.UserControls
                     System.Windows.Controls.Border border = new System.Windows.Controls.Border();
                     border.BorderBrush = System.Windows.Media.Brushes.Black;
                     border.Background = System.Windows.Media.Brushes.LightGoldenrodYellow;
-                    if (j == _spots.Count - 1)
+                    /*if (j == _spots.Count - 1)
                     {
                         border.BorderThickness = new Thickness(1, 1, 1, 2);
                     }
                     else
                     {
                         border.BorderThickness = new Thickness(1, 1, 1, 1);
-                    }
+                    }*/
+                    border.BorderThickness = new Thickness(1, 1, 1, 1);
                     TextBlock textBlock = new TextBlock();
 
                     textBlock.HorizontalAlignment = HorizontalAlignment.Left;

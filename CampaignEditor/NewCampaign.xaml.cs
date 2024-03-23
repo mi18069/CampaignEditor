@@ -15,6 +15,7 @@ using System.Collections.Generic;
 using Database.Entities;
 using System.Reflection;
 using Database.DTOs.ActivityDTO;
+using Database.DTOs.GoalsDTO;
 
 namespace CampaignEditor
 {
@@ -26,6 +27,7 @@ namespace CampaignEditor
         private BrandController _brandController;
         private CmpBrndController _cmpBrndController;
         private ActivityController _activityController;
+        private GoalsController _goalsController;
 
         private ClientDTO _client;
         BrandDTO[] selectedBrands = new BrandDTO[2];
@@ -45,7 +47,7 @@ namespace CampaignEditor
         public bool canClientBeDeleted = false;
         public NewCampaign(ICampaignRepository campaignRepository, IClientRepository clientRepository,
                            IBrandRepository brandRepository, ICmpBrndRepository cmpBrndRepository,
-                           IActivityRepository activityRepository)
+                           IActivityRepository activityRepository, IGoalsRepository goalsRepository)
         {
             this.DataContext = this;
             InitializeComponent();
@@ -54,6 +56,7 @@ namespace CampaignEditor
             _brandController = new BrandController(brandRepository);
             _cmpBrndController = new CmpBrndController(cmpBrndRepository);
             _activityController = new ActivityController(activityRepository);
+            _goalsController = new GoalsController(goalsRepository);
         }
 
         // For binding client to campaign
@@ -250,6 +253,8 @@ namespace CampaignEditor
                             await CreateCmpBrnd(campaign.cmpid, selectedBrand);
                         }                    
                     }
+                    // Add default goals
+                    await _goalsController.CreateGoals(new CreateGoalsDTO(campaign.cmpid, 0, 0, 0, 0, 999, 0));
                     _campaign = campaign;
                     success = true;
                     this.Close();

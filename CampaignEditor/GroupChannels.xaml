@@ -47,29 +47,30 @@
         <Grid Grid.Row="4" Grid.Column="2" Margin="10, 0, 10, 0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
-                <ColumnDefinition Width="0.5*"/>
-                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="0.1*"/>
+                <ColumnDefinition Width="auto"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
-            <TextBox x:Name="tbNewGroup" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3" 
+            <TextBox x:Name="tbNewGroup" Grid.Row="0" Grid.Column="0"
                  VerticalAlignment="Center" Foreground="Gray"
                  GotFocus="tbNewGroup_GotFocus"
                  LostFocus="tbNewGroup_LostFocus"/>
-            <Button x:Name="btnDeleteChhGr" Grid.Row="1" Grid.Column="0"
-                Width="30" Height="30" Background="White" IsEnabled="false"
-                VerticalAlignment="Center" HorizontalAlignment="Right"
-                Click="btnDeleteChhGr_Click">
-                <Image Source="{StaticResource x_icon}" Width="20" Height="20"></Image>
-            </Button>
-            <Button x:Name="btnNewChhGr" Grid.Row="1" Grid.Column="2"
+            <Button x:Name="btnNewChGr" Grid.Row="0" Grid.Column="2"
                 Width="30" Height="30" Background="White" 
                 VerticalAlignment="Center" HorizontalAlignment="Left"
-                Click="btnNewChhGr_Click">
+                Click="btnNewChGr_Click">
                 <Image Source="{StaticResource plus_icon}" Width="20" Height="20"></Image>
             </Button>
+            <Button x:Name="btnDeleteChGr" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3"
+                Width="30" Height="30" Background="White" IsEnabled="false"
+                VerticalAlignment="Center" HorizontalAlignment="Center"
+                Click="btnDeleteChGr_Click">
+                <Image Source="{StaticResource x_icon}" Width="20" Height="20"></Image>
+            </Button>
+            
         </Grid>
 
         <Grid Grid.Row="1" Grid.RowSpan="3" Grid.Column="3" Margin="10, 0, 10, 0">
@@ -131,11 +132,9 @@
             </ListView.GroupStyle>
         </ListView>
         
-        <Button x:Name="btnCancel" Content="Cancel" Grid.Row="5" Grid.Column="4" 
-                Width="100" Height="40" HorizontalAlignment="Right" Margin="0, 0, 130, 0"
-                Click="btnCancel_Click"/>
-        <Button x:Name="btnSave" Content="Save" Grid.Row="5" Grid.Column="4" 
+        <Button x:Name="btnCancel" Content="Close" Grid.Row="5" Grid.Column="4" 
                 Width="100" Height="40" HorizontalAlignment="Right"
-                Click="btnSave_Click"/>
+                Click="btnCancel_Click"/>
+
     </Grid>
 </Window>

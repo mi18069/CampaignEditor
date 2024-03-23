@@ -103,7 +103,7 @@ namespace CampaignEditor.UserControls
                 System.Windows.Controls.Border border = new System.Windows.Controls.Border();
                 border.BorderBrush = System.Windows.Media.Brushes.Black;
                 border.Background = System.Windows.Media.Brushes.LightGoldenrodYellow;
-                border.BorderThickness = new Thickness(1, 1, 1, 2);               
+                border.BorderThickness = new Thickness(1, 1, 1, 1);               
                 TextBlock textBlock = new TextBlock();
 
                 textBlock.HorizontalAlignment = HorizontalAlignment.Left;

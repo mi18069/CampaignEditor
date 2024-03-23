@@ -16,11 +16,18 @@ namespace Database.Data
 
         public NpgsqlConnection GetConnection()
         {
+            // With encrypting
             var encryptedString = AppSettings.ConnectionString;
             var connection = new NpgsqlConnection();
             var connectionString = EncryptionUtility.DecryptString(encryptedString);
             connection.ConnectionString = connectionString;
             return connection;
+            
+            // With environment variables
+            /*var connection = new NpgsqlConnection();
+            var connectionString = AppSettings.ConnectionString;
+            connection.ConnectionString = connectionString;
+            return connection;*/
         }
     }
 }

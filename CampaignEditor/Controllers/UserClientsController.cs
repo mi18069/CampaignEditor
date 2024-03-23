@@ -46,6 +46,10 @@ namespace CampaignEditor.Controllers
         {
             return await _repository.GetAllUserClientsByClientId(id);
         }
+        public async Task<bool> UpdateUserClients(int clid, int usrid, int usrlevel)
+        {
+            return await _repository.UpdateUserClients(clid, usrid, usrlevel);
+        }
         public async Task<bool> DeleteUserClientsByClientId(int id)
         {
             return await _repository.DeleteUserClientsByClientId(id);

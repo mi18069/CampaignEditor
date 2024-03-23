@@ -16,6 +16,7 @@ namespace Database.Repositories
         Task<MediaPlanDTO> GetMediaPlanByName(string name);
         Task<IEnumerable<MediaPlanDTO>> GetAllMediaPlansByCmpid(int cmpid, int version);
         Task<IEnumerable<MediaPlanDTO>> GetAllMediaPlansByCmpidAndChannel(int cmpid, int chid, int version);
+        Task<IEnumerable<MediaPlanDTO>> GetAllMediaPlansByCmpidAndChannelAllVersions(int cmpid, int chid);
         Task<IEnumerable<MediaPlanDTO>> GetAllMediaPlans();
         Task<IEnumerable<int>> GetAllChannelsByCmpid(int cmpid, int version);
         Task<IEnumerable<MediaPlanDTO>> GetAllChannelCmpMediaPlans(int chid, int cmpid, int version);

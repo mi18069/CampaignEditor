@@ -22,6 +22,7 @@ namespace CampaignEditor
         private UserDTO _user;
         private Image _userIcon;
         private Button _btnUnassign;
+        private int _usrlevel = 2;
 
         public bool authorizationChanged = false;      
 
@@ -32,8 +33,25 @@ namespace CampaignEditor
             { 
                 _user = value;
                 lblUsername.Content = _user.usrname.Trim();
-                cbUserLevel.SelectedIndex = _user.usrlevel;
+                _usrlevel = _user.usrlevel;
+                cbUserLevel.SelectedIndex = _usrlevel;
                 authorizationChanged = false;
+            }
+        }
+
+        public int UsrLevel
+        {
+            get { return _usrlevel; }
+            set
+            {
+                _usrlevel = value;
+                cbUserLevel.SelectedIndex = _usrlevel;
+                authorizationChanged = false;
+                if (_usrlevel == -1)
+                {
+                    cbUserLevel.IsEnabled = false;
+                    btnUnassign.IsEnabled = false;
+                }
             }
         }
 

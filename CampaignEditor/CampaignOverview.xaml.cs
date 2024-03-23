@@ -14,9 +14,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
-using System.Diagnostics;
-using Database.Entities;
+using CampaignEditor.Helpers;
 
 namespace CampaignEditor
 {
@@ -48,6 +46,9 @@ namespace CampaignEditor
         private BrandDTO[] _brands = null;
 
         public event EventHandler ClosePageEvent;
+        public event EventHandler GoalsUpdatedEvent;
+        public event EventHandler<UpdateChannelsEventArgs> ChannelsUpdatedEvent;
+        public event EventHandler SpotsUpdatedEvent;
         public CampaignOverview(IAbstractFactory<AssignTargets> factoryAssignTargets,
             IAbstractFactory<Channels> factoryChannels, IAbstractFactory<Spots> factorySpots,
             IAbstractFactory<Goals> factoryGoals, IAbstractFactory<CmpInfo> factoryInfo,
@@ -152,6 +153,7 @@ namespace CampaignEditor
 
         private async void btnCmpInfo_Click(object sender, RoutedEventArgs e)
         {
+            btnCmpInfo.IsEnabled = false;
             CmpInfo fInfo = null;
             try
             {
@@ -161,6 +163,7 @@ namespace CampaignEditor
             }
             catch
             {
+                btnCmpInfo.IsEnabled = true;
                 return;
             }
 
@@ -172,6 +175,8 @@ namespace CampaignEditor
                 await FillInfo(_campaignInfo, _brands);
 
             }
+            btnCmpInfo.IsEnabled = true;
+
         }
         private async Task FillInfo(CampaignDTO campaign = null, BrandDTO[] brands = null)
         {
@@ -227,6 +232,7 @@ namespace CampaignEditor
         #region Targets
         private async void btnAssignTargets_Click(object sender, RoutedEventArgs e)
         {
+            btnAssignTargets.IsEnabled = false;
             AssignTargets fTargets = null;
             try
             {
@@ -236,6 +242,7 @@ namespace CampaignEditor
             }
             catch
             {
+                btnAssignTargets.IsEnabled = true;
                 return;
             }
 
@@ -244,6 +251,8 @@ namespace CampaignEditor
                 _targetlist = fTargets.SelectedTargetsList.ToList();
                 FillDGTargets(_targetlist);
             }
+            btnAssignTargets.IsEnabled = true;
+
         }
 
         private void FillDGTargets(List<TargetDTO> selectedTargetsList)
@@ -269,6 +278,7 @@ namespace CampaignEditor
         #region Channels
         private async void btnChannels_Click(object sender, RoutedEventArgs e)
         {
+            btnChannels.IsEnabled = false;
             Channels fChannels = null;
             try
             {
@@ -278,6 +288,7 @@ namespace CampaignEditor
             }
             catch
             {
+                btnChannels.IsEnabled = true;
                 return;
             }
             if (fChannels != null && (fChannels.channelsModified || fChannels.pricelistChanged))
@@ -285,14 +296,22 @@ namespace CampaignEditor
                 _channels = await _campaignOverviewData.GetChannelTuples(_campaign.cmpid);
                 dgChannels.ItemsSource = _channels;
             }
+            if (fChannels != null && fChannels.updateChannels)
+            {
+                ChannelsUpdatedEvent?.Invoke(this, new UpdateChannelsEventArgs(fChannels.channelsToDelete, fChannels.channelsToAdd));
+            }
             if (fChannels != null)
                 fChannels.Close();
+
+            btnChannels.IsEnabled = true;
+
         }
         #endregion
 
         #region Spots
         private async void btnSpots_Click(object sender, RoutedEventArgs e)
         {
+            btnSpots.IsEnabled = false;
             Spots fSpots = null;
 
             try
@@ -303,6 +322,7 @@ namespace CampaignEditor
             }
             catch
             {
+                btnSpots.IsEnabled = true;
                 return;
             }
             
@@ -310,13 +330,17 @@ namespace CampaignEditor
             {
                 _spotlist = fSpots.Spotlist.ToList();
                 dgSpots.ItemsSource = _spotlist;
+                SpotsUpdatedEvent?.Invoke(this, null);
             }
+            btnSpots.IsEnabled = true;
+
         }
         #endregion
 
         #region Goals
         private async void btnGoals_Click(object sender, RoutedEventArgs e)
         {
+            btnGoals.IsEnabled = false;
             Goals fGoals = null;
 
             try
@@ -327,6 +351,7 @@ namespace CampaignEditor
             }
             catch
             {
+                btnGoals.IsEnabled = true;
                 return;
             }
 
@@ -334,7 +359,12 @@ namespace CampaignEditor
             {
                 _goals = fGoals.Goal;
                 FillGoals(_goals);
+                // For updating goals in forecast
+                GoalsUpdatedEvent?.Invoke(this, null);
             }
+
+            btnGoals.IsEnabled = true;
+
         }
 
         private void FillGoals(GoalsDTO goals = null)

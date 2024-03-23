@@ -19,7 +19,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Media;
-using static CampaignEditor.Campaign;
+using CampaignEditor.Helpers;
 
 namespace CampaignEditor
 {
@@ -33,6 +33,8 @@ namespace CampaignEditor
         private PricelistChannelsController _pricelistChannelsController;
         private ActivityController _activityController;
         private ChannelCmpController _channelCmpController;
+        private ForecastDataManipulation _forecastDataManipulation;
+
 
         private readonly IAbstractFactory<PriceList> _factoryPriceList;
         private readonly IAbstractFactory<GroupChannels> _factoryGroupChannels;
@@ -59,6 +61,11 @@ namespace CampaignEditor
         public bool canEdit = false;
         private bool onlyActive = false; // For chbActive
         public bool pricelistChanged = false;
+
+        public bool updateChannels = false; // for firing event in overview
+        public List<int> channelsToDelete = new List<int>();
+        public List<int> channelsToAdd = new List<int>();
+
 
         #region Getters and Setters for lists
 
@@ -109,7 +116,7 @@ namespace CampaignEditor
         public Channels(IChannelRepository channelRepository, IPricelistRepository pricelistRepository,
             IPricelistChannelsRepository pricelistChannelsRepository, IActivityRepository activityRepository,
             IAbstractFactory<PriceList> factoryPriceList, IChannelCmpRepository channelCmpRepository,
-            IAbstractFactory<GroupChannels> factoryGroupChannels)
+            IAbstractFactory<GroupChannels> factoryGroupChannels, IAbstractFactory<ForecastDataManipulation> factoryForecastDataManipulation)
         {
             this.DataContext = this;
             _channelController = new ChannelController(channelRepository);
@@ -118,12 +125,15 @@ namespace CampaignEditor
             _activityController = new ActivityController(activityRepository);
             _channelCmpController = new ChannelCmpController(channelCmpRepository);
 
+            _forecastDataManipulation = factoryForecastDataManipulation.Create();
+
+
             _factoryPriceList = factoryPriceList;
             _factoryGroupChannels = factoryGroupChannels;
 
             InitializeComponent();
 
-            if (MainWindow.user.usrlevel != 0)
+            if (MainWindow.user.usrlevel == 2)
             {
                 btnNewPricelist.IsEnabled = false;
                 btnEditPricelist.IsEnabled = false;
@@ -175,7 +185,7 @@ namespace CampaignEditor
                 {
                     if (channel.chid == selected.Item1.chid)
                     {
-                        MoveToSelected(channel, selected.Item2, selected.Item3);
+                        MoveToSelected(channel, selected.Item2, selected.Item3, false);
                         break;
                     }
 
@@ -189,7 +199,7 @@ namespace CampaignEditor
 
         #region ToSelected and FromSelected 
 
-        private void MoveToSelected(ChannelDTO channel, PricelistDTO pricelist, ActivityDTO activity)
+        private void MoveToSelected(ChannelDTO channel, PricelistDTO pricelist, ActivityDTO activity, bool addToAdded = true)
         {
             var list = Selected.Select(t => t.Item1).ToList(); // making a list to pass to function FindIndex
             // We don't want to insert alphabetically, but in adding order
@@ -199,22 +209,73 @@ namespace CampaignEditor
             AllChannelList.Remove(channel);
             lbSelectedChannels.Items.Remove(channel);
             channelsModified = true;
+
+            // If channel is added, but it's already in deleted list, then just remove it from deleted list
+            // it it's not in deleted, then put it in added list
+            if (!addToAdded)
+                return;
+            bool added = false;
+            for (int i = 0; i < channelsToDelete.Count(); i++)
+            {
+                if (channelsToDelete[i] == channel.chid)
+                {
+                    channelsToDelete.RemoveAt(i);
+                    added = true;
+                    break;
+                }
+            }
+            if (!added)
+                channelsToAdd.Add(channel.chid);
         }
-        private void MoveFromSelected(Tuple<ChannelDTO, PricelistDTO, ActivityDTO> tuple)
+        private async void MoveFromSelected(Tuple<ChannelDTO, PricelistDTO, ActivityDTO> tuple)
         {
+            if (!await _forecastDataManipulation.CheckIfChannelCanBeDeleted(_campaign.cmpid, tuple.Item1.chid))
+            {
+                return;
+            }
             var channel = tuple.Item1;
             Selected.Remove(tuple);
             int index = FindIndex(ChannelList, channel);
             ChannelList.Insert(index, channel);
             AllChannelList.Insert(index, channel);
             channelsModified = true;
+
+            // If channels in in list to add, but it's deleted, then just delete it from that list,
+            // if it's not previously added, and now it's deleted, then add it in channelsToDelete list
+            bool removed = false;
+            for (int i = 0; i < channelsToAdd.Count(); i++)
+            {
+                if (channelsToAdd[i] == channel.chid)
+                {
+                    channelsToAdd.RemoveAt(i);
+                    removed = true;
+                    break;
+                }
+            }
+            if (!removed)
+                channelsToDelete.Add(channel.chid);
         }
+
+
         private void btnToSelected_Click(object sender, RoutedEventArgs e)
         {
             // At least one item from every listView needs to be selected to execute
-            if (lbSelectedChannels.Items.Count > 0 &&
-                lvPricelists.SelectedItems.Count > 0 &&
-                lvActivities.SelectedItems.Count > 0) 
+            if (lbSelectedChannels.Items.Count == 0)
+            {
+                MessageBox.Show("Select at least one Channel", "Message", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+            else if (lvPricelists.SelectedItems.Count == 0)
+            {
+                MessageBox.Show("Select Pricelist", "Message", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+            else if (lvActivities.SelectedItems.Count == 0)
+            {
+                MessageBox.Show("Select Activity", "Message", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+            else
             {
                 int n = lbSelectedChannels.Items.Count;
                 var channels = lbSelectedChannels.Items;
@@ -232,7 +293,12 @@ namespace CampaignEditor
         private void btnFromSelected_Click(object sender, RoutedEventArgs e)
         {
             int n = dgSelected.SelectedItems.Count;
-            if (n > 0)
+            if (n == 0)
+            {
+                MessageBox.Show("Select at least one Channel", "Message", MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+            else
             {
                 var selectedItems = dgSelected.SelectedItems;
                 for (int i=0; i<n; i++)
@@ -379,6 +445,10 @@ namespace CampaignEditor
 
         private async void lvPricelists_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
+            if (MainWindow.user.usrlevel == 2)
+            {
+                return;
+            }
             var f = _factoryPriceList.Create();
             if (lvPricelists.SelectedItems.Count > 0)
                 await f.Initialize(_campaign, lvPricelists.SelectedItem as PricelistDTO);
@@ -398,6 +468,8 @@ namespace CampaignEditor
         #region Pricelist
         private async void btnEditPricelist_Click(object sender, RoutedEventArgs e)
         {
+            btnEditPricelist.IsEnabled = false;
+
             var f = _factoryPriceList.Create();
             if (lvPricelists.SelectedItems.Count > 0)
                 await f.Initialize(_campaign, lvPricelists.SelectedItem as PricelistDTO);
@@ -423,9 +495,13 @@ namespace CampaignEditor
                     }
                 }
             }
+            btnEditPricelist.IsEnabled = true;
+
         }
         private async void btnNewPricelist_Click(object sender, RoutedEventArgs e)
         {
+            btnNewPricelist.IsEnabled = false;
+
             var f = _factoryPriceList.Create();
             await f.Initialize(_campaign);
             f.ShowDialog();
@@ -435,6 +511,8 @@ namespace CampaignEditor
                 //lvChannels_SelectionChanged(lvChannels, null);
                 await RefreshPricelists();
             }
+            btnNewPricelist.IsEnabled = true;
+
         }
         private async void chbActivePricelists_Checked(object sender, RoutedEventArgs e)
         {
@@ -463,9 +541,15 @@ namespace CampaignEditor
         }
         private async void btnEditChannelGroups_Click(object sender, RoutedEventArgs e)
         {
+            btnEditChannelGroups.IsEnabled = false;
             var f = _factoryGroupChannels.Create();
             await f.Initialize(_client, _campaign);
             f.ShowDialog();
+            if (f.channelsModified)
+            {
+                await FillChannelGroups();
+            }
+            btnEditChannelGroups.IsEnabled = true;
         }
 
         private async void lbChannelGroups_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -546,32 +630,21 @@ namespace CampaignEditor
 
         private async void btnSave_Click(object sender, RoutedEventArgs e)
         {
+            btnSave.IsEnabled = false;
             if (channelsModified)
             {
                 SelectedChannels = Selected.ToList();
                 await UpdateDatabase(SelectedChannels);
-                var addedChannels = CheckAddedChannels();
-                if (addedChannels.Count > 0)
+                if (channelsToAdd.Count() > 0 || channelsToDelete.Count() > 0)
                 {
-                    //OnAddChannelChangesOccurred();
+                    updateChannels = true;
                 }
             }
+            btnSave.IsEnabled = true;
+
             this.Close();
         }
 
-        private List<ChannelDTO> CheckAddedChannels()
-        {
-            List<ChannelDTO> addedChannels = new List<ChannelDTO>();
-            foreach (var channel in SelectedChannels.Select(c => c.Item1).ToList())
-            {
-                if (!_originalSelectedChannels.Contains(channel))
-                {
-                    addedChannels.Add(channel);
-                }
-            }
-
-            return addedChannels;
-        }
         private void btnCancel_Click(object sender, RoutedEventArgs e)
         {
             channelsModified = false;

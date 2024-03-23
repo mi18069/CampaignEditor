@@ -34,13 +34,14 @@
                     <ColumnDefinition Width="*" SharedSizeGroup="SharedSecondColumn"/>
                 </Grid.ColumnDefinitions>
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="auto"/>
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 <UniformGrid x:Name="ugSpots" Grid.Row="0" Grid.Column="0" Columns="1"
-                     HorizontalAlignment="Left" VerticalAlignment="Top"/>
+                     HorizontalAlignment="Left" VerticalAlignment="Stretch"/>
                 
                 <UniformGrid x:Name="ugGrid" Grid.Row="0" Grid.Column="1" Rows="1"
-                     HorizontalAlignment="Left" VerticalAlignment="Stretch" PreviewMouseWheel="ugGrid_PreviewMouseWheel"/>
+                     HorizontalAlignment="Left" VerticalAlignment="Top" PreviewMouseWheel="ugGrid_PreviewMouseWheel"/>
             </Grid>
         </ScrollViewer>
         

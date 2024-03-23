@@ -10,14 +10,14 @@
         Title="Clients" Height="800" Width="900"
         MinHeight="600" MinWidth="800"
         FontSize="20"
-        Closing="Window_Closing">
+        Closing="Window_Closing" Loaded="Clients_Loaded">
     <Window.Resources>
         <converters:ToHalfConverterM30 x:Key="toHalfConverter"/>
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="10"/>
-            <RowDefinition Height="auto"/>
+            <RowDefinition Height="50"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="10"/>
         </Grid.RowDefinitions>
@@ -29,19 +29,37 @@
             <ColumnDefinition Width="10"/>
         </Grid.ColumnDefinitions>
 
-        <Button x:Name="btnPassChange" Grid.Row="1" Grid.Column="2"
+        <Grid Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="auto"/>
+            </Grid.ColumnDefinitions>
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Label x:Name="lblUsername" Content="user: " FontWeight="Bold" Grid.Column="0"
+               HorizontalAlignment="Left" VerticalAlignment="Center" Margin="10, 0, 0, 0"/>
+                <TextBlock x:Name="tbUsername" Grid.Column="1"
+                       HorizontalAlignment="Left" VerticalAlignment="Center" />
+            </Grid>
+
+            <Button x:Name="btnUsers" Content="Users" Grid.Column="1" Padding="10 0 10 0"
+                    IsTabStop="False"
+                    HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0 0 50 0"
+                    Click="btnUsers_Click"/>
+            <Button x:Name="btnPassChange" Grid.Column="2"
                     Background="White" IsTabStop="False" BorderThickness="0"
-                    HorizontalAlignment="Right" VerticalAlignment="Top"
+                    HorizontalAlignment="Right" VerticalAlignment="Center"
                     Click="btnPassChange_Click">
-            <Image Source="{StaticResource change_pass_icon}" Width="40" Height="40" ></Image>
-        </Button>
-        <Grid Grid.Row="1" Grid.Column="1">
-            <Label x:Name="lblUsername" Content="user: " FontWeight="Bold"
-               HorizontalAlignment="Left" VerticalAlignment="Top" Margin="10, 0, 0, 0"/>
-            <TextBlock x:Name="tbUsername" 
-                       Width="200"
-                       HorizontalAlignment="Left" VerticalAlignment="Top" Margin="100, 5, 0, 0"/>
+                <Image Source="{StaticResource change_pass_icon}" Width="40" Height="40" ></Image>
+            </Button>
         </Grid>
+        
+ 
         <Grid x:Name="GridLeft" Grid.Row="2" Grid.Column="1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="10" />
@@ -73,7 +91,7 @@
             <Label x:Name="lblFilterByUser" Grid.Row="4" Grid.Column="0"
                    Content="Filter by users" HorizontalAlignment="Right"/>
             <ComboBox x:Name="cbUsers" Grid.Row="4" Grid.Column="1" Margin="10, 0"
-                  Width="200"
+                  Width="200" DisplayMemberPath="usrname"
                   HorizontalAlignment="Left" VerticalAlignment="Center" 
                   SelectionChanged="cbUsers_SelectionChanged"/>
         </Grid>

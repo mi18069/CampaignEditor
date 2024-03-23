@@ -10,6 +10,7 @@ using Database.DTOs.SectablesDTO;
 using Database.DTOs.SpotDTO;
 using Database.DTOs.TargetDTO;
 using Database.Repositories;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -93,14 +94,14 @@ namespace CampaignEditor
             await InitializeTargets();
         }
 
-        private async Task InitializeChannels()
+        public async Task InitializeChannels()
         {
             _channels.Clear();
             var channelCmps = await _channelCmpController.GetChannelCmpsByCmpid(_campaign.cmpid);
             foreach (var channelCmp in channelCmps)
             {
                 var channel = await _channelController.GetChannelById(channelCmp.chid);
-                if (!_channels.Contains(channel))
+                if (channel != null && !_channels.Any(c => c.chid == channel.chid))
                     _channels.Add(channel);
             }
         }
@@ -111,7 +112,7 @@ namespace CampaignEditor
             var spots = await _spotController.GetSpotsByCmpid(_campaign.cmpid);
             foreach (var spot in spots)
             {
-                if (!_spots.Contains(spot))
+                if (!_spots.Any(s => s.spotcode == spot.spotcode))
                     _spots.Add(spot);
             }
         }
@@ -123,7 +124,7 @@ namespace CampaignEditor
             {
                 var channelCmp = await _channelCmpController.GetChannelCmpByIds(_campaign.cmpid, channel.chid);
                 var pricelist = await _pricelistController.GetPricelistById(channelCmp.plid);
-                if (!_pricelists.Contains(pricelist))
+                if (!_pricelists.Any(p => p.plid == pricelist.plid))
                 {
                     _pricelists.Add(pricelist);
                 }
@@ -138,7 +139,7 @@ namespace CampaignEditor
             foreach (var targetCmp in targetCmps)
             {
                 var target = await _targetController.GetTargetById(targetCmp.targid);
-                if (!_targets.Contains(target))
+                if (!_targets.Any(t => t.targid == target.targid))
                 {
                     _targets.Add(target);
                 }
@@ -187,7 +188,8 @@ namespace CampaignEditor
             foreach (PricelistDTO pricelist in _pricelists)
             {
                 var prices = (await _pricesController.GetAllPricesByPlId(pricelist.plid)).ToArray();
-                _plidPricesDict.Add(pricelist.plid, prices.ToList());
+                if (!_plidPricesDict.ContainsKey(pricelist.plid))
+                    _plidPricesDict.Add(pricelist.plid, prices.ToList());
             }
         }
 

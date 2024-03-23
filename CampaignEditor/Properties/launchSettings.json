@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "CampaignEditor": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "Conn_String_Publish": "Server=192.168.0.112;port=5433;user id=postgres;password=admin123!;database=mplaner;",
+        "Conn_String_Local": "Server=localhost;port=5433;user id=postgres;password=jovan1999;database=mplaner;"
+      },
+      "hotReloadEnabled": false
+    }
+  }
+}

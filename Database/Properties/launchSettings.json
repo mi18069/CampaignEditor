@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "Database": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "ConnString": "Server=localhost;port=5433;user id=postgres;password=jovan1999;database=mplaner;"
+      }
+    }
+  }
+}

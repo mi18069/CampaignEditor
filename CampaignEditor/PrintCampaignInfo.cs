@@ -171,7 +171,6 @@ namespace CampaignEditor
             SetHeaders(worksheet, headers, 1 + 1 + rowOff, 1 + colOff);
 
 
-            // Set the cell values in Excel
             List<string> values = new List<string> { goals.ins != 0 ? goals.ins.ToString() : "-" ,
                                                      goals.grp != 0 ? goals.grp.ToString() : "-",
                                                      goals.budget != 0 ? goals.budget.ToString() : "-"};

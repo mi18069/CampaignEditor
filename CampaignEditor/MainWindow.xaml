@@ -44,7 +44,7 @@
         <Button x:Name="btnConfigDatabase" HorizontalContentAlignment="Center" 
                 BorderThickness="0" Background="White" IsTabStop="False"
                 VerticalAlignment="Top" HorizontalAlignment="Right" Margin="0,30,30,0" 
-                Click="btnConfigDatabase_Click">
+                Click="btnConfigDatabase_Click" >
             <Image Source="{StaticResource config_icon}" Width="30" Height="30" ></Image>
         </Button>
         <Button x:Name="btnCheckCredentials" Content="Log in" HorizontalContentAlignment="Center" 

@@ -108,6 +108,21 @@ namespace Database.Repositories
             return _mapper.Map<IEnumerable<MediaPlanTermDTO>>(allMediaPlanTerms);
         }
 
+        public async Task<bool> CheckIfMediaPlanHasSpotsDedicated(int xmpid)
+        {
+            using var connection = _context.GetConnection();
+
+            // Get the count of terms with spots dedicated for the specified xmpid
+            var termCount = await connection.ExecuteScalarAsync<int>(
+                "SELECT COUNT(*) FROM xmpterm WHERE xmpid = @Xmpid AND (spotcode IS NOT NULL AND spotcode != '')",
+                new { Xmpid = xmpid });
+
+            // Check if the count is 0
+            bool hasSpotsDedicated = termCount > 0;
+
+            return hasSpotsDedicated;
+        }
+
         public async Task<IEnumerable<MediaPlanTermDTO>> GetAllMediaPlanTerms()
         {
             using var connection = _context.GetConnection();

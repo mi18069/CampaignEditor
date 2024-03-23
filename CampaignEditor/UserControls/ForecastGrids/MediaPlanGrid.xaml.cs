@@ -1000,6 +1000,7 @@ namespace CampaignEditor.UserControls
             CollectionView collectionView = (CollectionView)CollectionViewSource.GetDefaultView(dgMediaPlans.ItemsSource);
 
             IEnumerable<MediaPlanTuple> mpTuples = collectionView.OfType<MediaPlanTuple>();
+            mpTuples = mpTuples.OrderBy(mpt => mpt.MediaPlan.chid);
             if (colors.Count == 0)
             {
                 FillColorsDictionary();
@@ -1280,7 +1281,11 @@ namespace CampaignEditor.UserControls
 
         #endregion
 
-        private void dgMediaPlans_Sorting(object sender, DataGridSortingEventArgs e)
+        // To add default sorting by channel, then on selected, add line below in dgMediaPlans xaml file
+        // and uncomment function below
+        // Sorting="dgMediaPlans_Sorting"
+
+        /*private void dgMediaPlans_Sorting(object sender, DataGridSortingEventArgs e)
         {
             e.Handled = true; // Handle sorting manually
 
@@ -1307,7 +1312,7 @@ namespace CampaignEditor.UserControls
                 // Apply the updated sorting
                 collectionView.Refresh();
             }
-        }
+        }*/
 
         #region Synchronize scrolling between total and dgMediaPlan
 

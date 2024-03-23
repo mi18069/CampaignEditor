@@ -23,9 +23,7 @@
                     <ContextMenu.DataContext>
                         <local:TreeViewData />
                     </ContextMenu.DataContext>
-                    <MenuItem Header="All users" IsEnabled="{Binding UserLevel, Converter={StaticResource UserLevelToBooleanConverter}, ConverterParameter=2}" Click="AllUsersMenuItem_Click"/>
-                    <MenuItem Header="New user" IsEnabled="{Binding UserLevel, Converter={StaticResource UserLevelToBooleanConverter}, ConverterParameter=1}" Click="NewUserMenuItem_Click"/>
-                    <MenuItem Header="New client" IsEnabled="{Binding UserLevel, Converter={StaticResource UserLevelToBooleanConverter}, ConverterParameter=1}" Click="NewClientMenuItem_Click"/>
+                    <MenuItem Header="New client" IsEnabled="{Binding UserLevel, Converter={StaticResource UserLevelToBooleanConverter}, ConverterParameter=0}" Click="NewClientMenuItem_Click"/>
                 </ContextMenu>
 
                 <!-- ContextMenu for Clients -->
@@ -34,12 +32,10 @@
                         <local:TreeViewData />
                     </ContextMenu.DataContext>
                     <MenuItem Header="Users of client" IsEnabled="{Binding UserLevel, Converter={StaticResource UserLevelToBooleanConverter}, ConverterParameter=2}" Click="UsersOfClientMenuItem_Click"/>
-                    <MenuItem Header="All users" IsEnabled="{Binding UserLevel, Converter={StaticResource UserLevelToBooleanConverter}, ConverterParameter=2}" Click="AllUsersMenuItem_Click"/>
                     <MenuItem Header="New campaign" IsEnabled="{Binding UserLevel, Converter={StaticResource UserLevelToBooleanConverter}, ConverterParameter=1}" Click="NewCampaignMenuItem_Click"/>
-                    <MenuItem Header="Rename client" IsEnabled="{Binding UserLevel, Converter={StaticResource UserLevelToBooleanConverter}, ConverterParameter=1}" Click="RenameClientMenuItem_Click"/>
-                    <MenuItem Header="New user" IsEnabled="{Binding UserLevel, Converter={StaticResource UserLevelToBooleanConverter}, ConverterParameter=1}" Click="NewUserMenuItem_Click"/>
-                    <MenuItem Header="New client" IsEnabled="{Binding UserLevel, Converter={StaticResource UserLevelToBooleanConverter}, ConverterParameter=1}" Click="NewClientMenuItem_Click"/>
-                    <MenuItem Header="Delete client" IsEnabled="{Binding UserLevel, Converter={StaticResource UserLevelToBooleanConverter}, ConverterParameter=1}" Click="DeleteClientMenuItem_Click"/>
+                    <MenuItem Header="Rename client" IsEnabled="{Binding UserLevel, Converter={StaticResource UserLevelToBooleanConverter}, ConverterParameter=0}" Click="RenameClientMenuItem_Click"/>
+                    <MenuItem Header="New client" IsEnabled="{Binding UserLevel, Converter={StaticResource UserLevelToBooleanConverter}, ConverterParameter=0}" Click="NewClientMenuItem_Click"/>
+                    <MenuItem Header="Delete client" IsEnabled="{Binding UserLevel, Converter={StaticResource UserLevelToBooleanConverter}, ConverterParameter=0}" Click="DeleteClientMenuItem_Click"/>
                 </ContextMenu>
 
                 <!-- ContextMenu for Campaigns -->

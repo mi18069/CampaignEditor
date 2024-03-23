@@ -71,7 +71,7 @@ namespace CampaignEditor
                     return;
                 }
 
-                UserClientsDTO userClientsDTO = new UserClientsDTO(clientDTO.clid, owner.usrid);
+                UserClientsDTO userClientsDTO = new UserClientsDTO(clientDTO.clid, owner.usrid, owner.usrlevel);
 
                 try
                 {

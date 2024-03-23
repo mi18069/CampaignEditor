@@ -151,23 +151,60 @@ namespace CampaignEditor.UserControls
             }
         }*/
 
-        /*public async void GoalsChanged(object sender, EventArgs e)
+        public async Task GoalsChanged()
         {
             SetLoadingPage?.Invoke(this, null);
-            //await FillGoals();
+            await InitializeGoals();
             SetContentPage?.Invoke(this, null);
 
         }
 
-        public async void SpotsChanged(object sender, EventArgs e)
+        public async Task SpotsChanged()
         {
             SetLoadingPage?.Invoke(this, null);
-            await dgMediaPlans.InitializeSpots(_campaign.cmpid);
-            await InitializeGrids();
-            //await _mpConverter.Initialize(_campaign);
+
+            var mpVer = await _mediaPlanVersionController.GetLatestMediaPlanVersion(_campaign.cmpid);
+            await _forecastData.Initialize(_campaign);
+            _mpConverter.Initialize(_forecastData);
+            lvChannels.ItemsSource = _forecastData.Channels;
+          
+            await LoadData(mpVer.version);
+
+            SetContentPage?.Invoke(this, null);
+        }
+
+        public async Task ChannelsChanged(List<int> channelsToDelete, List<int> channelsToAdd)
+        {
+            SetLoadingPage?.Invoke(this, null);
+
+            var mpVer = await _mediaPlanVersionController.GetLatestMediaPlanVersion(_campaign.cmpid);
+            await _forecastData.Initialize(_campaign);
+            _mpConverter.Initialize(_forecastData);
+            lvChannels.ItemsSource = _forecastData.Channels;
+
+
+            foreach (var chid in channelsToDelete)
+            {
+                SetLoadingPage?.Invoke(this, new LoadingPageEventArgs("DELETING CHANNELS...", 1));
+                await _forecastDataManipulation.DeleteChannelFromCampaign(_campaign.cmpid, chid);
+            }
+            foreach (var chid in channelsToAdd)
+            {
+                _forecastDataManipulation.UpdateProgressBar += _forecastDataManipulation_UpdateProgressBar;
+                await _forecastDataManipulation.AddChannelInCampaign(_campaign.cmpid, chid, mpVer.version);
+                _forecastDataManipulation.UpdateProgressBar -= _forecastDataManipulation_UpdateProgressBar;
+            }
+
+            SetLoadingPage?.Invoke(this, new LoadingPageEventArgs("LOADING...", 1));
+
+            await _forecastData.InitializeChannels();
+            lvChannels.ItemsSource = _forecastData.Channels;
+            await LoadData(mpVer.version);
+
             SetContentPage?.Invoke(this, null);
 
-        }*/
+        }
+
 
         #endregion
 
@@ -209,6 +246,7 @@ namespace CampaignEditor.UserControls
             // btnNewVersion is always enabled
             if (!canUserEdit || !isEditableVersion)
             {
+                btnNewVersion.IsEnabled = false;
                 btnClear.IsEnabled = false;
                 btnFetchData.IsEnabled = false;
                 btnRecalculateData.IsEnabled = false;
@@ -216,10 +254,12 @@ namespace CampaignEditor.UserControls
             }
             else
             {
+                btnNewVersion.IsEnabled = true;
                 btnClear.IsEnabled = true;
                 btnFetchData.IsEnabled = true;
                 btnRecalculateData.IsEnabled = true;
-                btnResetDates.IsEnabled = true;
+                if (startDate >= DateTime.Now)
+                    btnResetDates.IsEnabled = true;
             }
         }
 
@@ -442,11 +482,12 @@ namespace CampaignEditor.UserControls
 
             try
             {
+
                 // Filling lvChannels and dictionary
                 await FillMPList(version);
                 await FillLoadedDateRanges();
                 InitializeDataGrid();
-
+ 
                 await InitializeGrids();
             }
             catch (Exception ex)

@@ -2,8 +2,8 @@
 {
     public class UserClientsDTO : BaseIdentityUserClientsDTO
     {
-        public UserClientsDTO(int cliid, int usrid) 
-            : base(cliid, usrid)
+        public UserClientsDTO(int cliid, int usrid, int usrlevel) 
+            : base(cliid, usrid, usrlevel)
         {
         }
     }

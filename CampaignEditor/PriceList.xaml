@@ -60,7 +60,7 @@
         <Button x:Name="btnEditSectable" Grid.Row="3" Grid.Column="5" 
                 Width="30" Height="30" BorderThickness="0" Background="White" Margin="0,10"
                 Click="btnEditSectable_Click" Visibility="Hidden">
-            <Image Source="\images\Edit_Icon2.png"></Image>
+            <Image Source="{StaticResource edit_icon}"></Image>
         </Button>
         <Button x:Name="btnNewSectable" Grid.Row="3" Grid.Column="6" 
                 Width="30" Height="30" BorderThickness="0" Background="White"
@@ -109,7 +109,7 @@
         <Button x:Name="btnEditSeasonality" Grid.Row="6" Grid.Column="5" 
                 Width="30" Height="30" BorderThickness="0" Background="White" Margin="0,10"
                 Click="btnEditSeasonality_Click" Visibility="Hidden">
-            <Image Source="\images\Edit_Icon2.png"></Image>
+            <Image Source="{StaticResource edit_icon}"></Image>
         </Button>
         <Button x:Name="btnNewSeasonality" Grid.Row="6" Grid.Column="6" 
                 Width="30" Height="30" BorderThickness="0" Background="White"
@@ -123,7 +123,7 @@
                  TextChanged="tbCP_TextChanged"/>
         <CheckBox x:Name="chbGRP" Content="Zero GRP Only" Grid.Row="8" Grid.Column="4" Margin="10, 10, 10, 12"
                   VerticalAlignment="Bottom" VerticalContentAlignment="Center" FontSize="8"
-                  Checked="chbGRP_Checked" Unchecked="chbGRP_Unchecked">
+                  Checked="chbGRP_Checked" Unchecked="chbGRP_Unchecked" IsChecked="True">
             <CheckBox.LayoutTransform>
                 <ScaleTransform ScaleX="1.5" ScaleY="1.5" />
             </CheckBox.LayoutTransform>
@@ -141,7 +141,7 @@
         <Button x:Name="btnEditTarget" Grid.Row="9" Grid.Column="5" 
                 Width="30" Height="30" BorderThickness="0" Background="White" Margin="0,10"
                 Click="btnEditTarget_Click" Visibility="Hidden">
-            <Image Source="\images\Edit_Icon2.png"></Image>
+            <Image Source="{StaticResource edit_icon}"></Image>
         </Button>
         <Button x:Name="btnNewTarget" Grid.Row="9" Grid.Column="6" 
                 Width="30" Height="30" BorderThickness="0" Background="White"

@@ -551,6 +551,57 @@ namespace Database.Repositories
             return _mapper.Map<IEnumerable<MediaPlanDTO>>(mediaPlans);
         }
 
+        public async Task<IEnumerable<MediaPlanDTO>> GetAllMediaPlansByCmpidAndChannelAllVersions(int cmpid, int chid)
+        {
+            using var connection = _context.GetConnection();
+
+            var mediaPlans = await connection.QueryAsync<dynamic>(
+                "SELECT * FROM xmp WHERE cmpid = @Cmpid AND chid = @Chid ",
+                new { Cmpid = cmpid, Chid = chid});
+
+            mediaPlans = mediaPlans.Select(item => new MediaPlan()
+            {
+                xmpid = item.xmpid,
+                schid = item.schid,
+                cmpid = item.cmpid,
+                chid = item.chid,
+                name = (string)item.naziv.Trim(),
+                version = item.verzija,
+                position = item.pozicija,
+                stime = item.vremeod,
+                etime = item.vremedo == null ? null : item.vremedo,
+                blocktime = item.vremerbl == null ? null : item.vremerbl,
+                days = item.dani,
+                type = item.tipologija,
+                special = item.specijal,
+                sdate = DateOnly.FromDateTime(item.datumod),
+                edate = item.datumdo == null ? null : DateOnly.FromDateTime(item.datumdo),
+                progcoef = (float)item.progkoef,
+                created = DateOnly.FromDateTime(item.datumkreiranja),
+                modified = item.datumizmene == null ? null : DateOnly.FromDateTime(item.datumizmene),
+                amr1 = (double)item.amr1,
+                amr1trim = item.amr1trim,
+                amr2 = (double)item.amr2,
+                amr2trim = item.amr2trim,
+                amr3 = (double)item.amr3,
+                amr3trim = item.amr3trim,
+                amrsale = (double)item.amrsale,
+                amrsaletrim = item.amrsaletrim,
+                amrp1 = (double)item.amrp1,
+                amrp2 = (double)item.amrp2,
+                amrp3 = (double)item.amrp3,
+                amrpsale = (double)item.amrpsale,
+                dpcoef = (double)item.dpkoef,
+                seascoef = (double)item.seaskoef,
+                seccoef = (double)item.seckoef,
+                price = (double)item.price,
+                active = item.active,
+                pps = item.pps != null ? (double)item.pps : 0.0
+            });
+
+            return _mapper.Map<IEnumerable<MediaPlanDTO>>(mediaPlans);
+        }
+
         public async Task<IEnumerable<MediaPlanDTO>> GetAllMediaPlansWithinDate(DateOnly sdate, DateOnly edate)
         {
             using var connection = _context.GetConnection();

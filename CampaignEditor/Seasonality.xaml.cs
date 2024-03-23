@@ -8,7 +8,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media.Imaging;
 using System.Windows.Media;
 using System.IO;
 using Database.DTOs.CampaignDTO;
@@ -63,6 +62,8 @@ namespace CampaignEditor
         {
             tbName.Text = seasonality.seasname.Trim();
             cbActive.IsChecked = seasonality.seasactive;
+            cbGlobal.IsChecked = seasonality.ownedby == 0 ? true : false;
+            wpSeasonalities.Children.Clear();
 
             List<SeasonalitiesDTO> seascoefs = (List<SeasonalitiesDTO>)await _seasonalitiesController.GetSeasonalitiesById(seasonality.seasid);
             seascoefs = seascoefs.OrderBy(s => s.stdt).ToList();
@@ -159,7 +160,6 @@ namespace CampaignEditor
             {
                 if (_seasonality == null)
                 {
-                    var a = (bool)cbActive.IsChecked;
                     _seasonality = await _seasonalityController.CreateSeasonality(new CreateSeasonalityDTO
                         (tbName.Text.Trim(), (bool)cbActive.IsChecked, _campaign.clid));
                 }
@@ -186,7 +186,8 @@ namespace CampaignEditor
                 }
                 if (modifiedSeasonality)
                 {
-                    await _seasonalityController.UpdateSeasonality(new UpdateSeasonalityDTO(id, tbName.Text.Trim(), (bool)cbActive.IsChecked, _campaign.clid));
+                    int owner = (bool)cbGlobal.IsChecked ? 0 : _campaign.clid;
+                    await _seasonalityController.UpdateSeasonality(new UpdateSeasonalityDTO(id, tbName.Text.Trim(), (bool)cbActive.IsChecked, owner));
                 }
                 success = true;
             }
