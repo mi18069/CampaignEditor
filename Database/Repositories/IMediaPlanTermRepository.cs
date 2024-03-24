@@ -7,6 +7,7 @@ namespace Database.Repositories
 {
     public interface IMediaPlanTermRepository
     {
+        Task<bool> SetTermSerialNumber();
         Task<bool> CreateMediaPlanTerm(CreateMediaPlanTermDTO mediaPlanTermDTO);
         Task<MediaPlanTermDTO> GetMediaPlanTermById(int id);
         Task<MediaPlanTermDTO> GetMediaPlanTermByXmpidAndDate(int id, DateOnly date);

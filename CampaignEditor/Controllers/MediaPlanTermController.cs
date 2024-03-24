@@ -16,7 +16,15 @@ namespace CampaignEditor.Controllers
         }
         public async Task<MediaPlanTermDTO> CreateMediaPlanTerm(CreateMediaPlanTermDTO mediaPlanTermDTO)
         {
-            await _repository.CreateMediaPlanTerm(mediaPlanTermDTO);
+            try
+            {
+                await _repository.CreateMediaPlanTerm(mediaPlanTermDTO);
+            }
+            catch
+            {
+                await _repository.SetTermSerialNumber();
+                await _repository.CreateMediaPlanTerm(mediaPlanTermDTO);
+            }
             return await _repository.GetMediaPlanTermByXmpidAndDate(mediaPlanTermDTO.xmpid, mediaPlanTermDTO.date);
         }
 

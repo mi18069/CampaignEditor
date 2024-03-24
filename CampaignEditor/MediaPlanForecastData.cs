@@ -104,6 +104,7 @@ namespace CampaignEditor
                 if (channel != null && !_channels.Any(c => c.chid == channel.chid))
                     _channels.Add(channel);
             }
+            _channels = _channels.OrderBy(ch => ch.chname).ToList();
         }
 
         private async Task InitializeSpots()

@@ -20,6 +20,27 @@ namespace Database.Repositories
             _context = context ?? throw new ArgumentNullException(nameof(context));
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
+
+        public async Task<bool> SetTermSerialNumber()
+        {
+            using var connection = _context.GetConnection();
+
+            var affected = await connection.ExecuteAsync(
+                @"
+                    DO $$
+                    DECLARE
+                        max_xmptermid INTEGER;
+                    BEGIN
+                        SELECT MAX(xmptermid) INTO max_xmptermid FROM xmpterm;
+    
+                        -- Step 2: Set the sequence value to the next value after the maximum xmptermid
+                        EXECUTE format('ALTER SEQUENCE xmpterm_xmptermid_seq RESTART WITH %s', max_xmptermid + 1);
+                    END $$;
+                ");
+
+
+            return affected != 0;
+        }
         public async Task<bool> CreateMediaPlanTerm(CreateMediaPlanTermDTO mediaPlanTermDTO)
         {
             using var connection = _context.GetConnection();

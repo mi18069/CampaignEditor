@@ -1,7 +1,6 @@
 ﻿using CampaignEditor.Helpers;
 using Database.DTOs.ChannelDTO;
 using Database.Entities;
-using Microsoft.Office.Interop.Excel;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
 using System;
@@ -33,7 +32,7 @@ namespace CampaignEditor.UserControls
             _mediaPlans = mediaPlans;
             _dictionary.Clear();
             _values.Clear();
-            dgGrid.ItemsSource = null;
+            dgGrid.ItemsSource = _values;
 
             foreach (ChannelDTO channel in channels)
             {
@@ -55,9 +54,19 @@ namespace CampaignEditor.UserControls
             _selectedChannels.Clear();
             foreach (var channel in selectedChannels)
             {
-                _selectedChannels.Insert(0, channel);
+                _selectedChannels.Add(channel);
             }
-            dgGrid.ItemsSource = _values.Where(pg => _visibleMediaPlans.Select(ch => ch.chid).Contains(pg.Channel.chid));
+            UpdateOrder(selectedChannels);
+        }
+
+        public void UpdateOrder(IEnumerable<ChannelDTO> selectedChannels)
+        {
+            List<ProgramGoals> selectedInOrder = new List<ProgramGoals>();
+            foreach (var channel in selectedChannels)
+            {
+                selectedInOrder.Add(_dictionary.First(kv => kv.Key == channel.chid).Value);
+            }
+            _values.ReplaceRange(selectedInOrder);
         }
 
         private void CalculateGoals()
@@ -74,8 +83,8 @@ namespace CampaignEditor.UserControls
             }
 
             _values.ReplaceRange(_dictionary.Values);
-            dgGrid.ItemsSource = _values.Where(pg => _visibleMediaPlans.Select(ch => ch.chid).Contains(pg.Channel.chid));
-
+            /*dgGrid.ItemsSource = _values.Where(pg => _visibleMediaPlans.Select(ch => ch.chid).Contains(pg.Channel.chid));
+            */
         }
 
         public void VisibleTuplesChanged(IEnumerable<MediaPlanTuple> visibleMpTuples)
@@ -98,8 +107,8 @@ namespace CampaignEditor.UserControls
                 _dictionary[chid].Budget += mediaPlan.Price;           
             }
             _values.ReplaceRange(_dictionary.Values);
-            dgGrid.ItemsSource = _values.Where(pg => _selectedChannels.Select(ch => ch.chid).Contains(pg.Channel.chid));
-
+            /*dgGrid.ItemsSource = _values.Where(pg => _selectedChannels.Select(ch => ch.chid).Contains(pg.Channel.chid));
+            */
         }
 
         public void ResetDictionaryValues(int chid = -1)

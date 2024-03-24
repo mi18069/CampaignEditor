@@ -47,6 +47,7 @@ namespace CampaignEditor.UserControls
 
         private Dictionary<ChannelDTO, Dictionary<int, Dictionary<SpotDTO, SpotGoals>>> _data;
         private Dictionary<ChannelDTO, DataGrid> _channelGrids = new Dictionary<ChannelDTO, DataGrid>();
+        private Dictionary<ChannelDTO, System.Windows.Controls.Border> channelBorderDict = new Dictionary<ChannelDTO, System.Windows.Controls.Border>();
 
         private ChannelDTO dummyChannel = new ChannelDTO(-1, "Total", true, 0, "", 0, 0); // Dummy channel for Total Column
 
@@ -66,6 +67,7 @@ namespace CampaignEditor.UserControls
             _spotLengths.Clear();
             _channels.Clear();
             _channelGrids.Clear();
+            channelBorderDict.Clear();
             ugChannels.Children.Clear();
             ugGoals.Children.Clear();
             ugWeeks.Children.Clear();
@@ -450,20 +452,26 @@ namespace CampaignEditor.UserControls
             {
                 AddChannelDataColumn(channel);
             }
+            UpdateUgChannelOrder(_channels);
 
             foreach (var channel in _channels)
             {
                 HideChannel(channel);
             }
 
-            foreach (var channel in _selectedChannels)
+            for (int i = 0; i < _channels.Count * 3; i++)
+            {
+                ugGoals.Children[i].Visibility = Visibility.Collapsed;
+            }
+
+            /*foreach (var channel in _selectedChannels)
             {
                 ShowChannel(channel);
             }
             if (_selectedChannels.Count > 0)
             {
                 ShowChannel(dummyChannel);
-            }
+            }*/
 
         }
 
@@ -514,8 +522,8 @@ namespace CampaignEditor.UserControls
             textBlock.Text = channel.chname.Trim();
 
             border.Child = textBlock;
-            ugChannels.Children.Add(border);
-
+            //ugChannels.Children.Add(border);
+            channelBorderDict[channel] = border;
             AddChannelGoalsHeader();
         }
 
@@ -592,7 +600,7 @@ namespace CampaignEditor.UserControls
             dataGrid.Columns.Add(grpColumn);
             dataGrid.Columns.Add(budColumn);
 
-            ugGrid.Children.Add(dataGrid);
+            //ugGrid.Children.Add(dataGrid);
             dataGrid.ItemsSource = columnData;
 
             _channelGrids.Add(channel, dataGrid);
@@ -675,12 +683,23 @@ namespace CampaignEditor.UserControls
 
                 spotGoalsGrid.HideChannel(dummyChannel);
             }
+
+            spotGoalsGrid.UpdateUgGoals();
+            // for ugGoals, just show how many children needs to be shown
+            for (int i = 0; i < _visibleChannels.Count * 3; i++)
+            {
+                ugGoals.Children[i].Visibility = Visibility.Visible;
+            }
+            for (int i = _visibleChannels.Count * 3; i < _channels.Count * 3; i++)
+            {
+                ugGoals.Children[i].Visibility = Visibility.Collapsed;
+            }
         }
 
         private void ShowChannel(ChannelDTO channel)
         {
             // Showing Channel and Goals headers
-            for (int i = 0; i < _channels.Count; i++)
+            /*for (int i = 0; i < _channels.Count; i++)
             {
                 if (_channels[i].chid == channel.chid)
                 {
@@ -690,7 +709,10 @@ namespace CampaignEditor.UserControls
                         ugGoals.Children[i * 3 + j].Visibility = Visibility.Visible;
                     }
                 }
-            }
+            }*/
+
+            var border = channelBorderDict[channel];
+            border.Visibility = Visibility.Visible;
 
             //Showing channelGrid
             var dataGrid = _channelGrids[channel];
@@ -700,7 +722,7 @@ namespace CampaignEditor.UserControls
         private void HideChannel(ChannelDTO channel)
         {
             // Hiding Channel and Goals headers
-            for (int i = 0; i < _channels.Count; i++)
+            /*for (int i = 0; i < _channels.Count; i++)
             {
                 if (_channels[i].chid == channel.chid)
                 {
@@ -710,11 +732,56 @@ namespace CampaignEditor.UserControls
                         ugGoals.Children[i * 3 + j].Visibility = Visibility.Collapsed;
                     }
                 }
-            }
+            }*/
+
+            var border = channelBorderDict[channel];
+            border.Visibility = Visibility.Collapsed;
 
             //Hiding channelGrid
             var dataGrid = _channelGrids[channel];
             dataGrid.Visibility = Visibility.Collapsed;
+        }
+
+        private void UpdateListsOrder(IEnumerable<ChannelDTO> channels, bool addDummyChannel = false)
+        {
+            _channels = channels.ToList();
+            if (addDummyChannel)
+                _channels.Add(dummyChannel);
+            // visible channels aren't sorted, but channels are
+            List<ChannelDTO> visibleChannels = new List<ChannelDTO>();
+            foreach (var channel in _channels)
+            {
+                foreach (var visibleChannel in _visibleChannels)
+                {
+                    if (channel.chid == visibleChannel.chid)
+                    {
+                        visibleChannels.Add(channel);
+                        break;
+                    }
+                }
+            }
+            _visibleChannels = visibleChannels.ToList();
+
+            spotGoalsGrid._channels = _channels;
+            spotGoalsGrid._visibleChannels = _visibleChannels;
+        }
+
+        public void UpdateUgChannelOrder(IEnumerable<ChannelDTO> channels, bool addDummyChannel = false)
+        {
+            ugChannels.Children.Clear();
+            ugGrid.Children.Clear();
+            UpdateListsOrder(channels, addDummyChannel);
+
+            foreach (var channel in channels)
+            {
+                ugChannels.Children.Add(channelBorderDict[channel]);
+                ugGrid.Children.Add(_channelGrids[channel]);
+            }
+            if (addDummyChannel)
+            {
+                ugChannels.Children.Add(channelBorderDict[dummyChannel]);
+                ugGrid.Children.Add(_channelGrids[dummyChannel]);
+            }
         }
 
         #endregion
@@ -937,15 +1004,14 @@ namespace CampaignEditor.UserControls
         #region Export to Excel
         public void PopulateWorksheet(ExcelWorksheet worksheet, int rowOff = 1, int colOff = 1)
         {
-            var visibleChannels = _visibleChannels;
-
-            if (visibleChannels.Count == 0)
+            if (_visibleChannels.Count == 0)
                 return;
+
 
             AddLeftHeadersInWorksheet(worksheet, rowOff + 2, colOff);
 
             int colOffset = 2;
-            foreach (var channel in visibleChannels)
+            foreach (var channel in _visibleChannels)
             {
                 AddChannelInWorksheet(channel, worksheet, rowOff, colOff + colOffset);
                 colOffset += 3;

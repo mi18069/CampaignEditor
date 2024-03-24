@@ -569,6 +569,16 @@ namespace CampaignEditor.UserControls
                 }
             }
 
+            ChangeChannelsOrderInGrids();
+
+        }
+
+        private void ChangeChannelsOrderInGrids()
+        {
+            sgGrid.UpdateUgChannelOrder(_forecastData.Channels, true);
+            swgGrid.UpdateUgChannelOrder(_forecastData.Channels, true);
+            sdgGrid.UpdateUgChannelOrder(_forecastData.Channels, true);
+            cgGrid.UpdateOrder(_forecastData.Channels);
         }
 
         #endregion
@@ -922,14 +932,25 @@ namespace CampaignEditor.UserControls
         #endregion
 
         #region lvChannels
-        private void lvChannels_SelectionChanged(object sender, SelectionChangedEventArgs e)
+
+        private List<ChannelDTO> GetSelectedChannelsInOrder()
         {
             List<ChannelDTO> channels = new List<ChannelDTO>();
-            foreach (ChannelDTO channel in lvChannels.SelectedItems)
+            for (int i = 0; i < lvChannels.Items.Count; i++)
             {
-                channels.Add(channel);
+                ListViewItem item = lvChannels.ItemContainerGenerator.ContainerFromIndex(i) as ListViewItem;
+
+                if (item != null && item.IsSelected)
+                {
+                    channels.Add(lvChannels.Items[i] as ChannelDTO);
+                }
             }
-            _selectedChannels.ReplaceRange(channels);
+            return channels;
+        }
+        private void lvChannels_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            
+            _selectedChannels.ReplaceRange(GetSelectedChannelsInOrder());
 
             sdgGrid.SelectedChannelsChanged(_selectedChannels);
             swgGrid.SelectedChannelsChanged(_selectedChannels);
