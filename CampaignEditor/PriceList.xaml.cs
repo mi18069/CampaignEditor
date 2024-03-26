@@ -17,7 +17,6 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using System.Runtime.Intrinsics.Arm;
 
 namespace CampaignEditor
 {
@@ -128,8 +127,16 @@ namespace CampaignEditor
         private async Task FillFields()
         {
             await FillChannels();
-            //UpdateDayParts();
+            FillDefaultWpDayParts();
             await FillComboBoxes();
+        }
+
+        private void FillDefaultWpDayParts()
+        {
+            var item = MakeEmptyDPItem();
+            wpDayParts.Children.Add(item);
+            Button addButton = MakeAddButton();
+            wpDayParts.Children.Add(addButton);
         }
         private async Task FillChannels()
         {
@@ -165,6 +172,24 @@ namespace CampaignEditor
             btnAddDP.HorizontalAlignment = HorizontalAlignment.Center;
 
             return btnAddDP;
+        }
+
+        private TargetDPItem MakeEmptyDPItem()
+        {
+            TargetDPItem item = MakeDPItem();
+
+            item.tbFromH.Text = "02";
+            item.tbFromM.Text = "00";
+            item.tbToH.Text = "25";
+            item.tbToM.Text = "59";
+
+            item.tbCoef.Text = "1";
+            item.cbIsPT.IsChecked = false;
+            item.tbDays.Text = "1234567";
+
+            item.modified = false;
+
+            return item;
         }
 
         private TargetDPItem MakeDPItem()
@@ -289,19 +314,7 @@ namespace CampaignEditor
 
             if (dpValues.Count() == 0)
             {
-                TargetDPItem item = MakeDPItem();
-
-                item.tbFromH.Text = "02";
-                item.tbFromM.Text = "00";
-                item.tbToH.Text = "25";
-                item.tbToM.Text = "59";
-
-                item.tbCoef.Text = "1";
-                item.cbIsPT.IsChecked = false;
-                item.tbDays.Text = "1234567";
-
-                item.modified = false;
-
+                var item = MakeEmptyDPItem();
                 wpDayParts.Children.Add(item);
             }
             else

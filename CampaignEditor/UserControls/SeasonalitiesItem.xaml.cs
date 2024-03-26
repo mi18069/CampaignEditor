@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Globalization;
+using System.Runtime.Intrinsics.Arm;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -43,6 +45,28 @@ namespace CampaignEditor
             else
                 return null;
             
+        }
+
+        public string CheckFields()
+        {
+            DateTime? selectedDateFrom = dpFrom.SelectedDate;
+            DateTime? selectedDateTo = dpTo.SelectedDate;
+            if (!selectedDateFrom.HasValue || !selectedDateTo.HasValue)
+            {
+                return "Date values missing";
+            }
+            if (selectedDateFrom.Value > selectedDateTo.Value)
+            {
+                return "Start date must be before end date";
+            }
+
+            double coef = 0.0;
+            if (tbCoef.Text.Trim().Contains(',') || !double.TryParse(tbCoef.Text.Trim(), out coef))
+            {
+                return "Invalid coefficient value entered";
+            }
+
+            return string.Empty;
         }
 
     }

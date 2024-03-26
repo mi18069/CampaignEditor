@@ -33,7 +33,10 @@ namespace CampaignEditor
 
             _sectablesController = new SectablesController(sectablesRepository);
             _sectableController = new SectableController(sectableRepository);
-
+            if (MainWindow.user.usrlevel <= 0)
+            {
+                cbGlobal.Visibility = Visibility.Visible;
+            }
         }
 
         public async void Initialize(CampaignDTO campaign, SectableDTO sectable = null)

@@ -38,6 +38,11 @@ namespace CampaignEditor
 
             _seasonalitiesController = new SeasonalitiesController(seasonalitiesRepository);
             _seasonalityController = new SeasonalityController(seasonalityRepository);
+
+            if (MainWindow.user.usrlevel <= 0)
+            {
+                cbGlobal.Visibility = Visibility.Visible;
+            }
         }
 
         public async void Initialize(CampaignDTO campaign, SeasonalityDTO seasonality = null)
@@ -156,6 +161,14 @@ namespace CampaignEditor
             {
                 this.Close();
             }
+
+            string errorMessage = CheckSeasonalities();
+
+            if ( errorMessage != string.Empty)
+            {
+                MessageBox.Show(errorMessage, "Error", MessageBoxButton.OK, MessageBoxImage.Error );
+                return;
+            }
             else
             {
                 if (_seasonality == null)
@@ -193,6 +206,59 @@ namespace CampaignEditor
             }
             this.Close();
         }
+
+        private string CheckSeasonalities()
+        {
+            string errorString = string.Empty;
+            for (int i = 0; i < wpSeasonalities.Children.Count - 1; i++)
+            {
+                SeasonalitiesItem seasonalitiesItem = (wpSeasonalities.Children[i] as SeasonalitiesItem)!;
+                errorString = seasonalitiesItem.CheckFields();
+                if (errorString != string.Empty)
+                {
+                    return errorString; 
+                }
+
+            }
+
+            if (CheckOverlapping())
+            {
+                return "Overlapping date values";
+            }
+
+            return errorString;
+        }
+
+        private bool CheckOverlapping()
+        {
+            if (wpSeasonalities.Children.Count <= 1)
+            {
+                return false;
+            }
+
+            List<Tuple<DateTime, DateTime>> startEndDate = new List<Tuple<DateTime, DateTime>>();
+
+            for (int i = 0; i < wpSeasonalities.Children.Count - 1; i++)
+            {
+                SeasonalitiesItem seasonalitiesItem = (wpSeasonalities.Children[i] as SeasonalitiesItem)!;
+                var startDate = seasonalitiesItem.dpFrom.SelectedDate!.Value;
+                var endDate = seasonalitiesItem.dpTo.SelectedDate!.Value;
+                startEndDate.Add(Tuple.Create(startDate, endDate));
+            }
+
+            startEndDate.OrderBy(sed => sed.Item1);
+
+            for (int i = 0; i < startEndDate.Count() - 1; i++)
+            {
+                if (startEndDate[i].Item2 > startEndDate[i + 1].Item1)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        } 
+
 
         private void btnCancel_Click(object sender, RoutedEventArgs e)
         {
