@@ -111,8 +111,18 @@ namespace CampaignEditor
                     int ymdFrom = TimeFormat.DateTimeToInt(start);
                     int ymdTo = TimeFormat.DateTimeToInt(consecutiveEnd);
 
-                    await _mediaPlanRefController.CreateMediaPlanRef(
-                        new MediaPlanRefDTO(_campaign.cmpid, ymdFrom, ymdTo));
+                    try
+                    {
+                        await _mediaPlanRefController.CreateMediaPlanRef(
+                            new MediaPlanRefDTO(_campaign.cmpid, ymdFrom, ymdTo));
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("Error while creating referenced dates:\n" + ex.Message,
+                            "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        return false;
+                    }
+
 
                     start = FindConsecutiveStart(consecutiveEnd.AddDays(1), end);
                 } 

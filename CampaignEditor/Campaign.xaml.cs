@@ -110,6 +110,13 @@ namespace CampaignEditor
             factoryCampaignOverview.SpotsUpdatedEvent += CampaignForecastView_SpotsUpdatedEvent;
         }
 
+        private void UnbindOverviewForecastEvents()
+        {
+            factoryCampaignOverview.GoalsUpdatedEvent -= CampaignForecastView_GoalsUpdatedEvent;
+            factoryCampaignOverview.ChannelsUpdatedEvent -= CampaignForecastView_ChannelsUpdatedEvent;
+            factoryCampaignOverview.SpotsUpdatedEvent -= CampaignForecastView_SpotsUpdatedEvent;
+        }
+
         private async void CampaignForecastView_SpotsUpdatedEvent(object? sender, EventArgs e)
         {
             if (!isCampaignInitialized)
@@ -160,7 +167,7 @@ namespace CampaignEditor
             factoryCampaignOverview.ClosePageEvent -= Page_ClosePageEvent;
             factoryCampaignForecastView.CloseForecast();
             factoryCampaignForecastView.UpdateValidation -= ForecastView_UpdateValidation;
-
+            UnbindOverviewForecastEvents();
 
             CampaignEventLinker.RemoveCampaign(_campaign.cmpid);
         }

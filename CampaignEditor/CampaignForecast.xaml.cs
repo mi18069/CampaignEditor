@@ -10,7 +10,6 @@ using Database.DTOs.SchemaDTO;
 using Database.Entities;
 using Database.Repositories;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -23,6 +22,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Diagnostics;
 
 namespace CampaignEditor.UserControls
 {
@@ -55,11 +55,7 @@ namespace CampaignEditor.UserControls
 
         private CampaignDTO _campaign;
         private int _cmpVersion = 1;
-        public int CmpVersion { get { return _cmpVersion; } }
         private int _maxVersion = 1;
-        private List<int> _versions = new List<int>();
-        //private ObservableCollection<ChannelDTO> _channels = new ObservableCollection<ChannelDTO>();
-        //private List<SpotDTO> _spots = new List<SpotDTO>();
 
         List<DayOfWeek> filteredDays = new List<DayOfWeek>
         { DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday,
@@ -69,7 +65,6 @@ namespace CampaignEditor.UserControls
         DateTime startDate;
         DateTime endDate;
 
-        private ConcurrentBag<MediaPlanTuple> _concurrentAllMediaPlans = new ConcurrentBag<MediaPlanTuple>();
 
         private ObservableRangeCollection<MediaPlanTuple> _allMediaPlans =
             new ObservableRangeCollection<MediaPlanTuple>();
@@ -142,15 +137,6 @@ namespace CampaignEditor.UserControls
         }
 
         #region Triggers
-        /*public async void OnAddChannelDelegated(object sender, EventArgs e)
-        {
-            var mpVersion = await _mediaPlanVersionController.GetLatestMediaPlanVersion(_campaign.cmpid);
-            if (mpVersion != null)
-            {
-                await InitializeChannels();
-                await LoadData(_maxVersion);
-            }
-        }*/
 
         public async Task GoalsChanged()
         {
@@ -165,7 +151,7 @@ namespace CampaignEditor.UserControls
             SetLoadingPage?.Invoke(this, null);
 
             var mpVer = await _mediaPlanVersionController.GetLatestMediaPlanVersion(_campaign.cmpid);
-            await _forecastData.Initialize(_campaign);
+            await _forecastData.InitializeSpots();
             _mpConverter.Initialize(_forecastData);
           
             await LoadData(mpVer.version);
@@ -178,13 +164,14 @@ namespace CampaignEditor.UserControls
             SetLoadingPage?.Invoke(this, null);
 
             var mpVer = await _mediaPlanVersionController.GetLatestMediaPlanVersion(_campaign.cmpid);
-            await _forecastData.Initialize(_campaign);
+
+            await _forecastData.InitializeChannels(true);
             _mpConverter.Initialize(_forecastData);
             _forecastDataManipulation.Initialize(_campaign, _forecastData, _mpConverter);
 
             foreach (var chid in channelsToDelete)
             {
-                SetLoadingPage?.Invoke(this, new LoadingPageEventArgs("DELETING CHANNELS...", 1));
+                SetLoadingPage?.Invoke(this, new LoadingPageEventArgs("DELETING CHANNELS...", 0));
                 await _forecastDataManipulation.DeleteChannelFromCampaign(_campaign.cmpid, chid);
             }
             foreach (var chid in channelsToAdd)
@@ -194,9 +181,8 @@ namespace CampaignEditor.UserControls
                 _forecastDataManipulation.UpdateProgressBar -= _forecastDataManipulation_UpdateProgressBar;
             }
 
-            SetLoadingPage?.Invoke(this, new LoadingPageEventArgs("LOADING...", 1));
+            SetLoadingPage?.Invoke(this, new LoadingPageEventArgs("LOADING...", 0));
 
-            await _forecastData.InitializeChannels();
             await LoadData(mpVer.version);
 
             SetContentPage?.Invoke(this, null);
@@ -214,21 +200,13 @@ namespace CampaignEditor.UserControls
             endDate = TimeFormat.YMDStringToDateTime(_campaign.cmpedate);
 
             canUserEdit = !isReadOnly;
-            //CheckManipulationButtons(canUserEdit, true);
-            //CampaignEventLinker.AddForecast(_campaign.cmpid, this);
-
 
             await _forecastData.Initialize(_campaign);
             _mpConverter.Initialize(_forecastData);
             _forecastDataManipulation.Initialize(_campaign, _forecastData, _mpConverter);
-            //await _forecastDataManipulation.DeleteCampaignForecast(_campaign.cmpid);
-            //await _forecastDataManipulation.DeleteCampaignForecastVersion(campaign.cmpid, 2);
 
             await InitializeVersions();
-            //InitializeChannels();
-            //InitializeSpots();
             await InitializeGoals();
-
 
             SubscribeControllers();
 
@@ -237,29 +215,7 @@ namespace CampaignEditor.UserControls
             FillVersions(_maxVersion);
             FillLvFilterDays();
 
-        }
-
-        private void CheckManipulationButtons(bool canUserEdit, bool isEditableVersion)
-        {
-            // btnNewVersion is always enabled
-            if (!canUserEdit || !isEditableVersion)
-            {
-                btnNewVersion.IsEnabled = false;
-                btnClear.IsEnabled = false;
-                btnFetchData.IsEnabled = false;
-                btnRecalculateData.IsEnabled = false;
-                btnResetDates.IsEnabled = false;
-            }
-            else
-            {
-                btnNewVersion.IsEnabled = true;
-                btnClear.IsEnabled = true;
-                btnFetchData.IsEnabled = true;
-                btnRecalculateData.IsEnabled = true;
-                if (startDate >= DateTime.Now)
-                    btnResetDates.IsEnabled = true;
-            }
-        }
+        }       
 
         private async Task InitializeVersions()
         {
@@ -386,7 +342,6 @@ namespace CampaignEditor.UserControls
 
             var selectedChannels = lvChannels.SelectedItems.Cast<ChannelDTO>();
             _selectedChannels.ReplaceRange(selectedChannels);
-            //_factoryListing.selectedChannels = _selectedChannels.ToList();
         }
 
         private void BindLists()
@@ -401,7 +356,6 @@ namespace CampaignEditor.UserControls
 
             for (int i = 0; i < maxVersion; i++)
             {
-                _versions.Add(i + 1);
                 cbVersions.Items.Add(i + 1);
             }
 
@@ -498,6 +452,28 @@ namespace CampaignEditor.UserControls
 
             await FillGoals();
 
+        }
+
+        private void CheckManipulationButtons(bool canUserEdit, bool isEditableVersion)
+        {
+            // btnNewVersion is always enabled
+            if (!canUserEdit || !isEditableVersion)
+            {
+                btnNewVersion.IsEnabled = false;
+                btnClear.IsEnabled = false;
+                btnFetchData.IsEnabled = false;
+                btnRecalculateData.IsEnabled = false;
+                btnResetDates.IsEnabled = false;
+            }
+            else
+            {
+                btnNewVersion.IsEnabled = true;
+                btnClear.IsEnabled = true;
+                btnFetchData.IsEnabled = true;
+                btnRecalculateData.IsEnabled = true;
+                if (startDate >= DateTime.Now)
+                    btnResetDates.IsEnabled = true;
+            }
         }
 
         public async Task InitializeGrids()
@@ -671,20 +647,7 @@ namespace CampaignEditor.UserControls
             }
         }
 
-        #endregion
-        
-
-        private async Task SetMPToInactive(int xmpid)
-        {
-            await _mediaPlanController.SetActiveMediaPlanById(xmpid, false);
-        }
-
-        private async Task DeleteMPById(int xmpid)
-        {
-            await _mediaPlanHistController.DeleteMediaPlanHistByXmpid(xmpid);
-            await _mediaPlanTermController.DeleteMediaPlanTermByXmpId(xmpid);
-            await _mediaPlanController.DeleteMediaPlanById(xmpid);
-        }
+        #endregion     
 
 
         #endregion
@@ -716,181 +679,6 @@ namespace CampaignEditor.UserControls
             var mediaPlan = await _mpConverter.ConvertFirstFromDTO(mediaPlanDTO);
             await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(_mpConverter.ConvertToDTO(mediaPlan)));
         }
-
-        #region Inserting in database
-
-        // reaching or creating mediaPlan
-        private async Task<MediaPlanDTO> SchemaToMP(SchemaDTO schema, int version, bool shouldReplace = false)
-        {
-            MediaPlanDTO mediaPlan = null;
-            // if already exist, fix conflicts
-            if ((mediaPlan = await _mediaPlanController.GetMediaPlanBySchemaAndCmpId(schema.id, _campaign.cmpid, version)) != null)
-            {
-                // if mediaPlan already exists, return that one
-                if (AreEqualMediaPlanAndSchema(mediaPlan, schema) && !shouldReplace)
-                    return mediaPlan;
-                else
-                {
-                    if (!shouldReplace)
-                    {
-                        if (MessageBox.Show($"New program conflicts with existing:\n{mediaPlan.name}\n" +
-                            $"This action will replace existing program with new one", "Information", MessageBoxButton.OKCancel, MessageBoxImage.Warning)
-                            == MessageBoxResult.Cancel)
-                        {
-                            return mediaPlan;
-                        }
-                    }
-
-                    await _mediaPlanTermController.DeleteMediaPlanTermByXmpId(mediaPlan.xmpid);
-                    await _mediaPlanHistController.DeleteMediaPlanHistByXmpid(mediaPlan.xmpid);
-                    await _mediaPlanController.DeleteMediaPlanById(mediaPlan.xmpid);
-
-                    var itemToRemove = _allMediaPlans.Where(item => item.MediaPlan.schid == schema.id).First();
-                    _allMediaPlans.Remove(itemToRemove);
-
-                }
-
-            }
-            if (schema.blocktime == null || schema.blocktime.Length == 0)
-            {
-                string position = schema.position.Trim();
-                if (position == "INS" || position == "BET")
-                {
-                    schema.blocktime = _schemaController.CalculateBlocktime(position, schema.stime, schema.etime);
-                }
-            }
-
-            CreateMediaPlanDTO createMediaPlan = new CreateMediaPlanDTO(schema.id, _campaign.cmpid, schema.chid,
-            schema.name.Trim(), version, schema.position, schema.stime, schema.etime, schema.blocktime,
-            schema.days, schema.type, schema.special, schema.sdate, schema.edate, schema.progcoef,
-            schema.created, schema.modified, 0, 100, 0, 100, 0, 100, 0, 100, 0, 0, 0, 0, 1, 1, 1, 0, true, 0);
-
-            return await _mediaPlanController.CreateMediaPlan(createMediaPlan);
-
-
-        }
-
-        public bool AreEqualMediaPlanAndSchema(MediaPlanDTO plan1, SchemaDTO schema)
-        {
-            return plan1.schid == schema.id &&
-                   plan1.chid == schema.chid &&
-                   plan1.name.Trim() == schema.name.Trim() &&
-                   plan1.position == schema.position &&
-                   plan1.stime == schema.stime &&
-                   plan1.etime == schema.etime &&
-                   //plan1.blocktime == schema.blocktime && // becaus we sometimes change blocktime when inserting mediaPlan 
-                   plan1.days == schema.days &&
-                   plan1.sdate == schema.sdate &&
-                   plan1.edate == schema.edate; 
-        }
-
-        private async Task<ObservableArray<MediaPlanTerm?>> MediaPlanToMPTerm(MediaPlanDTO mediaPlan)
-        {
-
-            List<DateTime> availableDates = GetAvailableDates(mediaPlan);
-            DateTime started = startDate;
-
-            int n = (int)(endDate - startDate).TotalDays;
-            var mediaPlanDates = new ObservableArray<MediaPlanTerm?>(n+1);
-
-            List<DateTime> sorted = availableDates.OrderBy(d => d).ToList();
-
-            for (int i = 0, j = 0; i <= n; i++)
-            {
-                if (j >= sorted.Count())
-                {
-                    mediaPlanDates[i] = null;
-                    continue;
-                }
-                if (started.AddDays(i).Date == sorted[j].Date)
-                {
-                    CreateMediaPlanTermDTO mpTerm = new CreateMediaPlanTermDTO(mediaPlan.xmpid, DateOnly.FromDateTime(sorted[j]), null);
-                    mediaPlanDates[i] = _mpTermConverter.ConvertFromDTO(await _mediaPlanTermController.CreateMediaPlanTerm(mpTerm));
-                    j++;
-                }
-                else
-                {
-                    mediaPlanDates[i] = null;
-                }
-            }
-
-            return mediaPlanDates;
-        }
-        private List<DateTime> GetAvailableDates(MediaPlanDTO mediaPlan)
-        {
-            List<DateTime> dates = new List<DateTime>();
-
-            var sDate = startDate > mediaPlan.sdate.ToDateTime(TimeOnly.MinValue) ? startDate : mediaPlan.sdate.ToDateTime(TimeOnly.MinValue);
-            var eDate = !mediaPlan.edate.HasValue ? endDate : 
-                        endDate < mediaPlan.edate.Value.ToDateTime(TimeOnly.MinValue) ? endDate : mediaPlan.edate.Value.ToDateTime(TimeOnly.MinValue);
-
-            foreach (char c in mediaPlan.days)
-            {
-                switch (c)
-                {
-                    case '1':
-                        var mondays = GetWeekdaysBetween(sDate, eDate, DayOfWeek.Monday);
-                        foreach (DateTime date in mondays)
-                            dates.Add(date);
-                        break;
-                    case '2':
-                        var tuesdays = GetWeekdaysBetween(sDate, eDate, DayOfWeek.Tuesday);
-                        foreach (DateTime date in tuesdays)
-                            dates.Add(date);
-                        break;
-                    case '3':
-                        var wednesdays = GetWeekdaysBetween(sDate, eDate, DayOfWeek.Wednesday);
-                        foreach (DateTime date in wednesdays)
-                            dates.Add(date);
-                        break;
-                    case '4':
-                        var thursdays = GetWeekdaysBetween(sDate, eDate, DayOfWeek.Thursday);
-                        foreach (DateTime date in thursdays)
-                            dates.Add(date);
-                        break;
-                    case '5':
-                        var fridays = GetWeekdaysBetween(sDate, eDate, DayOfWeek.Friday);
-                        foreach (DateTime date in fridays)
-                            dates.Add(date);
-                        break;
-                    case '6':
-                        var saturdays = GetWeekdaysBetween(sDate, eDate, DayOfWeek.Saturday);
-                        foreach (DateTime date in saturdays)
-                            dates.Add(date);
-                        break;
-                    case '7':
-                        var sundays = GetWeekdaysBetween(sDate, eDate, DayOfWeek.Sunday);
-                        foreach (DateTime date in sundays)
-                            dates.Add(date);
-                        break;
-                }
-
-            }
-            return dates;
-
-        }
-
-        private List<DateTime> GetWeekdaysBetween(DateTime startDate, DateTime endDate, DayOfWeek dayOfWeek)
-        {
-            var dates = new List<DateTime>();
-
-            // calculate the number of days between the start date and the next occurrence of the day of the week
-            var daysToAdd = ((int)dayOfWeek - (int)startDate.DayOfWeek + 7) % 7;
-
-            // get the first date in the range
-            var date = startDate.AddDays(daysToAdd);
-
-            // add the day of the week repeatedly to get all the dates in the range
-            while (date <= endDate)
-            {
-                dates.Add(date);
-                date = date.AddDays(7);
-            }
-
-            return dates;
-        }
-
-        #endregion
 
         #region Filling lists
 
@@ -1036,19 +824,6 @@ namespace CampaignEditor.UserControls
             e.Handled = true;
         }
 
-        private static T FindAncestor<T>(DependencyObject current) where T : DependencyObject
-        {
-            do
-            {
-                if (current is T ancestor)
-                {
-                    return ancestor;
-                }
-                current = VisualTreeHelper.GetParent(current);
-            } while (current != null);
-            return null;
-        }
-
         #endregion
 
         #endregion
@@ -1154,7 +929,7 @@ namespace CampaignEditor.UserControls
                 }
 
                 await _mediaPlanTermController.DeleteMediaPlanTermByXmpId(mediaPlanDTO.xmpid);
-                var newMediaPlanTerms = await MediaPlanToMPTerm(mediaPlanDTO);
+                var newMediaPlanTerms = await _forecastDataManipulation.MediaPlanToMPTerm(mediaPlanDTO);
                 foreach (var tuple in assignedSpots)
                 {
                     var term = newMediaPlanTerms.Where(term => term != null && term.Date == tuple.Item1).First();
@@ -1203,7 +978,7 @@ namespace CampaignEditor.UserControls
                     var schema = await _schemaController.CreateGetSchema(f._schema);
                     if (schema != null)
                     {
-                        MediaPlanDTO mediaPlanDTO = await SchemaToMP(schema, _cmpVersion);
+                        MediaPlanDTO mediaPlanDTO =  await _forecastDataManipulation.SchemaToMP(schema, _cmpVersion);
 
                         if (_allMediaPlans.Any(mp => mp.MediaPlan.xmpid == mediaPlanDTO.xmpid))
                         {
@@ -1211,7 +986,7 @@ namespace CampaignEditor.UserControls
                         }
                         await _databaseFunctionsController.StartAMRCalculation(_campaign.cmpid, 40, 40, mediaPlanDTO.xmpid);
                         var mediaPlan = await _mpConverter.ConvertFirstFromDTO(mediaPlanDTO);
-                        var mediaPlanTerms = await MediaPlanToMPTerm(mediaPlanDTO);
+                        var mediaPlanTerms = await _forecastDataManipulation.MediaPlanToMPTerm(mediaPlanDTO);
                         var mpTuple = new MediaPlanTuple(mediaPlan, mediaPlanTerms);
                         _allMediaPlans.Add(mpTuple);
                     }
@@ -1251,9 +1026,9 @@ namespace CampaignEditor.UserControls
                         _allMediaPlans.Remove(tupleToDelete);
                     }*/
 
-                    var mediaPlanDTO = await SchemaToMP(schemaToImport, _cmpVersion, shouldReplace);
+                    var mediaPlanDTO = await _forecastDataManipulation.SchemaToMP(schemaToImport, _cmpVersion, shouldReplace);
                     var mediaPlan = await _mpConverter.ConvertFirstFromDTO(mediaPlanDTO);
-                    var mediaPlanTerms = await MediaPlanToMPTerm(mediaPlanDTO);
+                    var mediaPlanTerms = await _forecastDataManipulation.MediaPlanToMPTerm(mediaPlanDTO);
                     var mediaPlanTuple = new MediaPlanTuple(mediaPlan, mediaPlanTerms);
                     _allMediaPlans.Add(mediaPlanTuple);
                 }
@@ -1313,7 +1088,7 @@ namespace CampaignEditor.UserControls
                         DeleteTermValues(mediaPlanTuple);
                         _allMediaPlans.Remove(mediaPlanTuple);
                         var mediaPlan = mediaPlanTuple.MediaPlan;
-                        await DeleteMPById(mediaPlan.xmpid);
+                        await _forecastDataManipulation.DeleteMediaPlan(mediaPlan.xmpid);
                     }
                     
                 }
@@ -1389,7 +1164,7 @@ namespace CampaignEditor.UserControls
 
         #region Page
 
-        // to prevent page from closing this page on backspace 
+        // to prevent event from closing this page on backspace 
         private void Page_PreviewKeyDown(object sender, KeyEventArgs e)
         {
 
@@ -1493,7 +1268,7 @@ namespace CampaignEditor.UserControls
         private void UnsubscribeEvents()
         {
             UnsibscribeDataGridEvents();
-            reachGrid.UpdateReach -= ReachGrid_UpdateReach;
+            UnsibscribeReachGridEvents();
 
         }
 
@@ -1510,8 +1285,13 @@ namespace CampaignEditor.UserControls
             dgMediaPlans.VisibleTuplesChanged -= dgMediaPlans_VisibleTuplesChanged;
         }
 
+        private void UnsibscribeReachGridEvents()
+        {
+            reachGrid.UpdateReach -= ReachGrid_UpdateReach;
+        }
+
 
     }
-   
+
 }
             

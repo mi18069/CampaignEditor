@@ -14,7 +14,7 @@ using System.Windows.Controls;
 
 namespace CampaignEditor
 {
-    public partial class CampaignForecastView : Page
+    public partial class CampaignForecastView : System.Windows.Controls.Page
     {
 
         private readonly IAbstractFactory<CampaignForecast> _factoryForecast; 
@@ -75,17 +75,7 @@ namespace CampaignEditor
                 {
                     await LoadForecast();
                 }
-                /*var mpVersion = await _mediaPlanVersionController.GetLatestMediaPlanVersion(_campaign.cmpid);
-                if (mpVersion == null)
-                {
-                    var mpVerDTO = new MediaPlanVersionDTO(_campaign.cmpid, 1);
-                    await _mediaPlanVersionController.CreateMediaPlanVersion(mpVerDTO);
-                    await _forecast.LoadData(1);
-                }
-                else
-                {
-                    await _forecast.LoadData(mpVersion.version);
-                }*/
+
                 tabForecast.Content = _forecast.Content;
             }
             else
@@ -101,20 +91,36 @@ namespace CampaignEditor
 
         private async Task LoadForecastDates()
         {
-            // Changed to execute in startup
-            //await _databaseFunctionsController.RunUpdateUnavailableDates();
             unavailableDates = (await _databaseFunctionsController.GetAllUnavailableDates()).ToList();
 
             _forecastDates = _factoryForecastDates.Create();
             _forecastDates.CancelButtonClicked += ForecastDates_CancelButtonClicked;
             _forecastDates.InitializeButtonClicked += ForecastDates_InitializeButtonClicked;
-            await _forecastDates.Initialize(_campaign, unavailableDates, isReadOnly);
+            try
+            {
+                await _forecastDates.Initialize(_campaign, unavailableDates, isReadOnly);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error in initialization of Referenced data:\n" + ex.Message, "Error:",
+                                MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
         }
 
         private async Task LoadForecast()
         {
             _forecast = _factoryForecast.Create();
-            await _forecast.Initialize(_campaign, isReadOnly);
+            try
+            {
+                await _forecast.Initialize(_campaign, isReadOnly);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error in initialization of Forecast:\n" + ex.Message, "Error:",
+                                MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }          
             _forecast.InitializeButtonClicked += Forecast_InitializeButtonClicked;
             _forecast.SetLoadingPage += _forecast_SetLoadingPage;
             _forecast.UpdateProgressBar += _forecast_UpdateProgressBar;
@@ -201,64 +207,24 @@ namespace CampaignEditor
             var success = await _forecastDates.InsertMediaPlanRefs();
             if (!success)
             {
-                MessageBox.Show("An error occured, please try again", "Message: ",
+                MessageBox.Show("An error occured, please try again", "Error: ",
                                 MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
 
-            if (_forecast == null)
+            try
             {
-                await LoadForecast();
+                await _forecast!.InsertAndLoadData(version);
             }
-
-            await _forecast.InsertAndLoadData(version);          
+            catch (Exception ex)
+            {
+                MessageBox.Show("An error occured while initializing Forecast!\n" + ex.Message, "Error: ",
+                                MessageBoxButton.OK, MessageBoxImage.Error);
+                return false;
+            }
 
             return true;
         }
-
-        /*private async Task<bool> InitializeNewForecast()
-        {
-            if (_forecastDates == null)
-            {
-                await LoadForecastDates();
-            }
-
-            if (! await CheckPrerequisites(_campaign))
-            {
-                MessageBox.Show("Cannot start Forecast.\nNot all required parameters are given", "Message:",
-                                MessageBoxButton.OK, MessageBoxImage.Error);
-                return false;
-            }
-            var success = await _forecastDates.InsertMediaPlanRefs();
-            if (!success)
-            {
-                MessageBox.Show("An error occured, please try again", "Message: ",
-                                MessageBoxButton.OK, MessageBoxImage.Error);
-                return false;
-            }
-            var mpVer = await _mediaPlanVersionController.GetLatestMediaPlanVersion(_campaign.cmpid);
-
-            if (_forecast == null)
-            {
-                await LoadForecast();
-            }
-            if (mpVer == null)
-            {
-                var mpVerDTO = new MediaPlanVersionDTO(_campaign.cmpid, 1);
-                await _mediaPlanVersionController.CreateMediaPlanVersion(mpVerDTO);
-                await _forecast.InsertAndLoadData(1);
-            }
-            else
-            {
-                mpVer = await _mediaPlanVersionController.IncrementMediaPlanVersion(mpVer);
-                await LoadForecast();
-
-                await _forecast.InsertAndLoadData(mpVer.version);
-            }
-            
-
-            return true;
-        }*/
 
         // For events from overview
         public async Task UpdateGoals()
@@ -292,7 +258,7 @@ namespace CampaignEditor
             {
                 await LoadForecastDates();
             }
-            await _forecastDates.LoadGridInit();
+            await _forecastDates!.LoadGridInit();
             tabForecast.Content = _forecastDates.Content;
         }
 
@@ -339,7 +305,18 @@ namespace CampaignEditor
         {
             if (_forecast != null)
             {
+                _forecast.InitializeButtonClicked -= Forecast_InitializeButtonClicked;
+                _forecast.SetLoadingPage -= _forecast_SetLoadingPage;
+                _forecast.UpdateProgressBar -= _forecast_UpdateProgressBar;
+                _forecast.SetContentPage -= _forecast_SetContentPage;
+
                 _forecast.ClosePage();
+            }
+
+            if (_forecastDates != null)
+            {
+                _forecastDates.CancelButtonClicked -= ForecastDates_CancelButtonClicked;
+                _forecastDates.InitializeButtonClicked -= ForecastDates_InitializeButtonClicked;
             }
         }
 

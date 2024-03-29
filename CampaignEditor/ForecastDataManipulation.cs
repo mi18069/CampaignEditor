@@ -9,6 +9,7 @@ using Database.Entities;
 using Database.Repositories;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -36,6 +37,8 @@ namespace CampaignEditor
 
         private ObservableRangeCollection<MediaPlanTuple> _allMediaPlans =
             new ObservableRangeCollection<MediaPlanTuple>();
+
+        private Dictionary<DayOfWeek, List<DateTime>> daysDateDict = new Dictionary<DayOfWeek, List<DateTime>>();
 
         private DateTime startDate;
         private DateTime endDate;
@@ -82,17 +85,27 @@ namespace CampaignEditor
 
             startDate = TimeFormat.YMDStringToDateTime(_campaign.cmpsdate);
             endDate = TimeFormat.YMDStringToDateTime(_campaign.cmpedate);
+
+            InitializeDaysDateDict(startDate, endDate);
+        }
+
+        private void InitializeDaysDateDict(DateTime startDate, DateTime endDate)
+        {
+            daysDateDict[DayOfWeek.Monday] = GetWeekdaysBetween(startDate, endDate, DayOfWeek.Monday);
+            daysDateDict[DayOfWeek.Tuesday] = GetWeekdaysBetween(startDate, endDate, DayOfWeek.Tuesday);
+            daysDateDict[DayOfWeek.Wednesday] = GetWeekdaysBetween(startDate, endDate, DayOfWeek.Wednesday);
+            daysDateDict[DayOfWeek.Thursday] = GetWeekdaysBetween(startDate, endDate, DayOfWeek.Thursday);
+            daysDateDict[DayOfWeek.Friday] = GetWeekdaysBetween(startDate, endDate, DayOfWeek.Friday);
+            daysDateDict[DayOfWeek.Saturday] = GetWeekdaysBetween(startDate, endDate, DayOfWeek.Saturday);
+            daysDateDict[DayOfWeek.Sunday] = GetWeekdaysBetween(startDate, endDate, DayOfWeek.Sunday);
         }
 
         public async Task InsertData(int version)
         {
             // Inserting new MediaPlans in database
-            await InsertCampaignMediaPlansFromSchemas(version);
+            var mediaPlansByChannels = await InsertCampaignMediaPlansFromSchemas(version);
             
-            var mediaPlansByChannels = await GetMediaPlansByChannel(version);
-
             await StartAmrByListOfChannelMediaPlans(mediaPlansByChannels);
-
 
             // Getting newly updated mediaPlans
             mediaPlansByChannels = await GetMediaPlansByChannel(version);
@@ -127,21 +140,32 @@ namespace CampaignEditor
         }
 
         // Adding mediaPlans in database from corresponding schemas
-        private async Task InsertCampaignMediaPlansFromSchemas(int version)
+        private async Task<List<List<MediaPlanDTO>>> InsertCampaignMediaPlansFromSchemas(int version)
         {
-            List<Task> insertingTasks = new List<Task>();
+            List<Task<List<MediaPlanDTO>>> insertingTasks = new List<Task<List<MediaPlanDTO>>>();
             foreach (var channel in _forecastData.Channels)
             {
-                Task task = Task.Run(() => InsertChannelMediaPlansFromSchemas(channel.chid, version));
+                Task<List<MediaPlanDTO>> task = Task.Run(() => InsertChannelMediaPlansFromSchemas(channel.chid, version));
                 insertingTasks.Add(task);
             }
 
             // waiting for all tasks to finish
             await Task.WhenAll(insertingTasks);
+
+            // Collect the results from completed tasks
+            List<List<MediaPlanDTO>> allMediaPlans = new List<List<MediaPlanDTO>>();
+            foreach (var task in insertingTasks)
+            {
+                allMediaPlans.Add(await task);
+            }
+
+            return allMediaPlans;
         }
 
-        private async Task InsertChannelMediaPlansFromSchemas(int chid, int version)
+        private async Task<List<MediaPlanDTO>> InsertChannelMediaPlansFromSchemas(int chid, int version)
         {
+            List<MediaPlanDTO> mediaPlans = new List<MediaPlanDTO>();
+
             var schemas = await _schemaController.GetAllChannelSchemasWithinDateAndTime(
                 chid, DateOnly.FromDateTime(startDate), 
                 DateOnly.FromDateTime(endDate),
@@ -150,9 +174,10 @@ namespace CampaignEditor
             foreach (var schema in schemas)
             {
                 MediaPlanDTO mediaPlan = await SchemaToMP(schema, version, true);
+                mediaPlans.Add(mediaPlan);
                 _ = await MediaPlanToMPTerm(mediaPlan);
             }
-
+            return mediaPlans;
         }       
 
         private async Task StartAmrByListOfChannelMediaPlans(IEnumerable<IEnumerable<MediaPlanDTO>> mediaPlansByChannels)
@@ -166,14 +191,17 @@ namespace CampaignEditor
                 if (mediaPlanList.Count == 0)
                     continue;
                 var channelName = _forecastData.Channels.First(ch => ch.chid == mediaPlanList[0].chid).chname.Trim();
+                
                 foreach (var mediaPlan in mediaPlanList)
                 {
                     await _databaseFunctionsController.StartAMRCalculation(_campaign.cmpid, 40, 40, mediaPlan.xmpid);
+
                     calculatingProcess.IncrementProcess();
                     OnUpdateProgressBar($"GETTING REFERENCED DATA FOR CHANNELS...\n{channelName}\n{calculatingProcess.ProgressPercentage}%", calculatingProcess.ProgressPercentage);
                 }
 
             }
+
         }
 
         private async Task CalculateMPValuesForMediaPlans(IEnumerable<MediaPlanDTO> mediaPlansDTO)
@@ -195,7 +223,7 @@ namespace CampaignEditor
 
 
         // reaching or creating mediaPlan
-        private async Task<MediaPlanDTO> SchemaToMP(SchemaDTO schema, int version, bool shouldReplace = false)
+        public async Task<MediaPlanDTO> SchemaToMP(SchemaDTO schema, int version, bool shouldReplace = false)
         {
             MediaPlanDTO mediaPlan = null;
             // if already exist, fix conflicts
@@ -277,7 +305,7 @@ namespace CampaignEditor
                 await _mediaPlanVersionController.UpdateMediaPlanVersion(cmpid, version - 1);
         }
 
-        private async Task DeleteMediaPlan(int xmpid)
+        public async Task DeleteMediaPlan(int xmpid)
         {
             await _mediaPlanTermController.DeleteMediaPlanTermByXmpId(xmpid);
             await _mediaPlanHistController.DeleteMediaPlanHistByXmpid(xmpid);
@@ -287,26 +315,28 @@ namespace CampaignEditor
         public bool AreEqualMediaPlanAndSchema(MediaPlanDTO plan1, SchemaDTO schema)
         {
             return plan1.schid == schema.id &&
-                   plan1.chid == schema.chid &&
+                   plan1.chid == schema.chid && 
                    plan1.name.Trim() == schema.name.Trim() &&
                    plan1.position == schema.position &&
                    plan1.stime == schema.stime &&
                    plan1.etime == schema.etime &&
-                   //plan1.blocktime == schema.blocktime && // becaus we sometimes change blocktime when inserting mediaPlan 
+                   //plan1.blocktime == schema.blocktime && // because we sometimes change blocktime when inserting mediaPlan 
                    plan1.days == schema.days &&
                    plan1.sdate == schema.sdate &&
                    plan1.edate == schema.edate;
         }
 
-        private async Task<ObservableArray<MediaPlanTerm?>> MediaPlanToMPTerm(MediaPlanDTO mediaPlan)
+        public async Task<ObservableArray<MediaPlanTerm?>> MediaPlanToMPTerm(MediaPlanDTO mediaPlan)
         {
-            List<DateTime> availableDates = GetAvailableDates(mediaPlan);
-            DateTime started = startDate;
+            /*List<DateTime> availableDates = GetAvailableDates(mediaPlan);
+            List<DateTime> sorted = availableDates.OrderBy(d => d).ToList();*/
+
+            var sorted = GetAllDayDates(mediaPlan);
 
             int n = (int)(endDate - startDate).TotalDays;
             var mediaPlanDates = new ObservableArray<MediaPlanTerm?>(n + 1);
 
-            List<DateTime> sorted = availableDates.OrderBy(d => d).ToList();
+            DateTime started = startDate;
 
             for (int i = 0, j = 0; i <= n; i++)
             {
@@ -381,6 +411,78 @@ namespace CampaignEditor
             }
             return dates;
 
+        }
+
+        private List<DateTime> GetAllDayDates(MediaPlanDTO mediaPlan)
+        {
+            List<DateTime> dates = new List<DateTime>();
+
+            var sDate = startDate > mediaPlan.sdate.ToDateTime(TimeOnly.MinValue) ? startDate : mediaPlan.sdate.ToDateTime(TimeOnly.MinValue);
+            var eDate = !mediaPlan.edate.HasValue ? endDate :
+                        endDate < mediaPlan.edate.Value.ToDateTime(TimeOnly.MinValue) ? endDate : mediaPlan.edate.Value.ToDateTime(TimeOnly.MinValue);
+
+            int firstDayInt = ((int)sDate.DayOfWeek + 6) % 7; // so that monday is 0 and sunday 6 etc
+            int addedDays = 0; // For knowing offset
+            int addedAfterFirst = 0; // For knowing how many elements are added after first day
+            int startFromIndex = 0;
+            foreach (char c in mediaPlan.days)
+            {
+                switch (c)
+                {
+                    case '1':
+                        startFromIndex = 0 - firstDayInt < 0 ? addedDays : addedAfterFirst++;
+                        AddRangeByMerging(dates, daysDateDict[DayOfWeek.Monday], startFromIndex, addedDays++);                       
+                        break;
+                    case '2':
+                        startFromIndex = 1 - firstDayInt < 0 ? addedDays : addedAfterFirst++;
+                        AddRangeByMerging(dates, daysDateDict[DayOfWeek.Tuesday], startFromIndex, addedDays++);
+                        break;
+                    case '3':
+                        startFromIndex = 2 - firstDayInt < 0 ? addedDays : addedAfterFirst++;
+                        AddRangeByMerging(dates, daysDateDict[DayOfWeek.Wednesday], startFromIndex, addedDays++);
+                        break;
+                    case '4':
+                        startFromIndex = 3 - firstDayInt < 0 ? addedDays : addedAfterFirst++;
+                        AddRangeByMerging(dates, daysDateDict[DayOfWeek.Thursday], startFromIndex, addedDays++);
+                        break;
+                    case '5':
+                        startFromIndex = 4 - firstDayInt < 0 ? addedDays : addedAfterFirst++;
+                        AddRangeByMerging(dates, daysDateDict[DayOfWeek.Friday], startFromIndex, addedDays++);
+                        break;
+                    case '6':
+                        startFromIndex = 5 - firstDayInt < 0 ? addedDays : addedAfterFirst++;
+                        AddRangeByMerging(dates, daysDateDict[DayOfWeek.Saturday], startFromIndex, addedDays++);
+                        break;
+                    case '7':
+                        startFromIndex = 6 - firstDayInt < 0 ? addedDays : addedAfterFirst++;
+                        AddRangeByMerging(dates, daysDateDict[DayOfWeek.Sunday], startFromIndex, addedDays++);
+                        break;
+                }
+
+            }
+            var sorted = dates.OrderBy(d => d).ToList();
+
+            while(sorted.Count() > 0 && sorted[0].Date < sDate) 
+            {
+                sorted.RemoveAt(0);
+            }
+
+            int n = sorted.Count();
+            while (n > 0 && sorted[n-1].Date > eDate)
+            {
+                sorted.RemoveAt(n-1);
+                n--;
+            }
+            return sorted;
+
+        }
+
+        private void AddRangeByMerging(List<DateTime> dates, List<DateTime> newDates, int startFromIndex, int offset)
+        {
+            for (int i=0; i<newDates.Count(); i++)
+            {
+                dates.Insert(startFromIndex + i*(offset+1), newDates[i]);
+            }
         }
 
         private List<DateTime> GetWeekdaysBetween(DateTime startDate, DateTime endDate, DayOfWeek dayOfWeek)
@@ -568,11 +670,14 @@ namespace CampaignEditor
 
         public async Task AddChannelInCampaign(int cmpid, int chid, int version)
         {
-            await InsertChannelMediaPlansFromSchemas(chid, version);
-            var mediaPlansByExactChannel = new List<IEnumerable<MediaPlanDTO>> { await _mediaPlanController.GetAllMediaPlansByCmpidAndChannel(cmpid, chid, version) };
+            var mediaPlansByChannels = await InsertChannelMediaPlansFromSchemas(chid, version);
+            List<List<MediaPlanDTO>> mediaPlansForAmrFunction = new List<List<MediaPlanDTO>>
+            {
+                mediaPlansByChannels
+            };
 
-            await StartAmrByListOfChannelMediaPlans(mediaPlansByExactChannel);
-
+            await StartAmrByListOfChannelMediaPlans(mediaPlansForAmrFunction);
+         
             var mediaPlanList = await _mediaPlanController.GetAllMediaPlansByCmpidAndChannel(cmpid, chid, version);
             await CalculateMPValuesForMediaPlans(mediaPlanList);
         }

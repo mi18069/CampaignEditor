@@ -9,6 +9,7 @@ using Database.DTOs.SectableDTO;
 using Database.DTOs.SectablesDTO;
 using Database.DTOs.SpotDTO;
 using Database.DTOs.TargetDTO;
+using Database.Entities;
 using Database.Repositories;
 using System;
 using System.Collections.Generic;
@@ -83,53 +84,14 @@ namespace CampaignEditor
         {
             _campaign = campaign;
             await InitializeLists();
-            await InitializeDictionaries();
         }
 
         private async Task InitializeLists()
         {
-            await InitializeChannels();
-            await InitializeSpots();
-            await InitializePricelists();
             await InitializeTargets();
-        }
-
-        public async Task InitializeChannels()
-        {
-            _channels.Clear();
-            var channelCmps = await _channelCmpController.GetChannelCmpsByCmpid(_campaign.cmpid);
-            foreach (var channelCmp in channelCmps)
-            {
-                var channel = await _channelController.GetChannelById(channelCmp.chid);
-                if (channel != null && !_channels.Any(c => c.chid == channel.chid))
-                    _channels.Add(channel);
-            }
-            _channels = _channels.OrderBy(ch => ch.chname).ToList();
-        }
-
-        private async Task InitializeSpots()
-        {
-            _spots.Clear();
-            var spots = await _spotController.GetSpotsByCmpid(_campaign.cmpid);
-            foreach (var spot in spots)
-            {
-                if (!_spots.Any(s => s.spotcode == spot.spotcode))
-                    _spots.Add(spot);
-            }
-        }
-
-        private async Task InitializePricelists()
-        {
-            _pricelists.Clear();
-            foreach (var channel in _channels)
-            {
-                var channelCmp = await _channelCmpController.GetChannelCmpByIds(_campaign.cmpid, channel.chid);
-                var pricelist = await _pricelistController.GetPricelistById(channelCmp.plid);
-                if (!_pricelists.Any(p => p.plid == pricelist.plid))
-                {
-                    _pricelists.Add(pricelist);
-                }
-            }
+            await InitializeSpots();
+            await InitializeChannels();
+            await InitializePricelists();
         }
 
         private async Task InitializeTargets()
@@ -147,80 +109,113 @@ namespace CampaignEditor
             }
         }
 
-        private async Task InitializeDictionaries()
+        public async Task InitializeSpots()
         {
-            await InitializeSpotcodeSpotDictionary();
-            await InitializeChidPricelistDictionary();
-            await InitializePlidPricesDictionary();
-            await InitializeSectablesDiscionary();
-            await InitializeSeasonalitiesDictionary();
-        }
-
-        private async Task InitializeSpotcodeSpotDictionary()
-        {
+            _spots.Clear();
             _spotcodeSpotDict.Clear();
+
             var spots = await _spotController.GetSpotsByCmpid(_campaign.cmpid);
-            foreach (var spot in spots)
+            foreach (var spot in spots.Distinct())
             {
                 char spotcode = spot.spotcode.Trim()[0];
-                if(!_spotcodeSpotDict.ContainsKey(spotcode))
-                    _spotcodeSpotDict.Add(spotcode, spot);
-
+                _spots.Add(spot);
+                _spotcodeSpotDict[spotcode] = spot;
             }
         }
 
-        private async Task InitializeChidPricelistDictionary()
+        public async Task InitializeChannels(bool addNewPricelist = false)
         {
+            _channels.Clear();
+
+            var channelCmps = await _channelCmpController.GetChannelCmpsByCmpid(_campaign.cmpid);
+            foreach (var channelCmp in channelCmps)
+            {
+                var channel = await _channelController.GetChannelById(channelCmp.chid);
+
+                if (channel != null)
+                {
+                    _channels.Add(channel);
+
+                    // When adding new Channel, there is no need to reinitialize old pricelists
+                    // just add new pricelist in dictionary if it's not already in it
+                    if (addNewPricelist && !_chidPricelistDict.ContainsKey(channel.chid))
+                    {
+                        var pricelist = await _pricelistController.GetPricelistById(channelCmp.plid);
+                        _chidPricelistDict[channel.chid] = pricelist;
+
+                        if (!_pricelists.Any(p => p.plid == pricelist.plid))
+                        {
+                            _pricelists.Add(pricelist);
+                            await AddInPricelistsDictionary(pricelist);
+                        }
+                    }
+                }
+
+            }
+            _channels = _channels.OrderBy(ch => ch.chname).ToList();
+        }      
+
+        private async Task InitializePricelists()
+        {
+            _pricelists.Clear();
             _chidPricelistDict.Clear();
+
+            _plidPricesDict.Clear();
+            _plidSectableDict.Clear();
+            _secidSectablesDict.Clear();
+            _plidSeasonalityDict.Clear();
+            _seasidSeasonalitiesDict.Clear();
+
             foreach (var channel in _channels)
             {
                 var channelCmp = await _channelCmpController.GetChannelCmpByIds(_campaign.cmpid, channel.chid);
                 var pricelist = await _pricelistController.GetPricelistById(channelCmp.plid);
-                if (!_chidPricelistDict.ContainsKey(channelCmp.chid))
+                _chidPricelistDict[channelCmp.chid] = pricelist;
+                if (!_pricelists.Any(p => p.plid == pricelist.plid))
                 {
-                    _chidPricelistDict.Add(channelCmp.chid, pricelist);
+                    _pricelists.Add(pricelist);
+                    await AddInPricelistsDictionary(pricelist);
                 }
             }
+
         }
 
-        private async Task InitializePlidPricesDictionary()
+        private async Task AddInPricelistsDictionary(PricelistDTO pricelist)
         {
-            _plidPricesDict.Clear();
-            foreach (PricelistDTO pricelist in _pricelists)
-            {
-                var prices = (await _pricesController.GetAllPricesByPlId(pricelist.plid)).ToArray();
-                if (!_plidPricesDict.ContainsKey(pricelist.plid))
-                    _plidPricesDict.Add(pricelist.plid, prices.ToList());
-            }
+            await AddPricesInDict(pricelist);
+            await AddSectableInDict(pricelist);
+            await AddSeasonalityInDict(pricelist);
         }
 
-        private async Task InitializeSectablesDiscionary()
+        private async Task AddPricesInDict(PricelistDTO pricelist)
         {
-            _plidSectableDict.Clear();
-            _secidSectablesDict.Clear();
-            foreach (var pricelist in _pricelists)
+            var prices = (await _pricesController.GetAllPricesByPlId(pricelist.plid));
+            _plidPricesDict[pricelist.plid] = prices.ToList();
+        }
+
+        private async Task AddSectableInDict(PricelistDTO pricelist)
+        {
+            var sectable = await _sectableController.GetSectableById(pricelist.sectbid);
+            _plidSectableDict[pricelist.plid] = sectable;
+
+            if (!_secidSectablesDict.ContainsKey(sectable.sctid))
             {
-                var sectable = await _sectableController.GetSectableById(pricelist.sectbid);
-                _plidSectableDict.Add(pricelist.plid, sectable);
                 var sectables = await _sectablesController.GetSectablesById(sectable.sctid);
-                if (!_secidSectablesDict.ContainsKey(sectable.sctid))
-                    _secidSectablesDict.Add(sectable.sctid, sectables.ToList());
+                _secidSectablesDict[sectable.sctid] = sectables.ToList();
             }
-
         }
 
-        private async Task InitializeSeasonalitiesDictionary()
+        private async Task AddSeasonalityInDict(PricelistDTO pricelist)
         {
-            _plidSeasonalityDict.Clear();
-            _seasidSeasonalitiesDict.Clear();
-            foreach (var pricelist in _pricelists)
+            var seasonality = await _seasonalityController.GetSeasonalityById(pricelist.seastbid);
+            _plidSeasonalityDict[pricelist.plid] = seasonality;
+
+            if (!_seasidSeasonalitiesDict.ContainsKey(seasonality.seasid))
             {
-                var seasonality = await _seasonalityController.GetSeasonalityById(pricelist.seastbid);
-                _plidSeasonalityDict.Add(pricelist.plid, seasonality);
                 var seasonalities = await _seasonalitiesController.GetSeasonalitiesById(seasonality.seasid);
-                if (!_seasidSeasonalitiesDict.ContainsKey(seasonality.seasid))
-                    _seasidSeasonalitiesDict.Add(seasonality.seasid, seasonalities.ToList());
+                _seasidSeasonalitiesDict[seasonality.seasid] = seasonalities.ToList();
             }
         }
+       
     }
 }

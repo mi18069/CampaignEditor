@@ -43,7 +43,6 @@ namespace CampaignEditor
 
         public void Initialize(MediaPlanForecastData forecastData)
         {
-
             _forecastData = forecastData;
         }     
 
