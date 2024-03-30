@@ -102,6 +102,7 @@ namespace CampaignEditor
                     Database.Extensions.CmpBrndExtensions.AddCmpBrndExtensions(services);
                     Database.Extensions.MediaPlanVersionExtension.AddMediaPlanVersionExtensions(services);
                     Database.Extensions.ReachExtensions.AddReachExtensions(services);
+                    Database.Extensions.DayPartExtensions.AddDayPartExtensions(services);
 
                 }).Build();
 

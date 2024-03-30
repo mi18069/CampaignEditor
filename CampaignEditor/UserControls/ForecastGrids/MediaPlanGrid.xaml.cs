@@ -772,12 +772,13 @@ namespace CampaignEditor.UserControls
                         column.Visibility = item.IsChecked ? Visibility.Hidden : Visibility.Visible;
                         item.IsChecked = column.Visibility == Visibility.Visible ? true : false;
                         Dispatcher.BeginInvoke(new Action(() => SetTotalsWidth()), DispatcherPriority.ContextIdle);
-
                     };
+
+                    item.StaysOpenOnClick = true;
 
                     menu.Items.Add(item);
                 }
-
+                menu.StaysOpen = true;
                 Schema.ContextMenu = menu;
             }
             else
