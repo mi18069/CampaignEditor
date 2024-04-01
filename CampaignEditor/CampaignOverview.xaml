@@ -5,7 +5,7 @@
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:CampaignEditor"
       mc:Ignorable="d" 
-      d:Height="700" d:Width="1200" d:MinWidth="1000" d:MinHeight="800"
+      d:Height="700" d:Width="1200" d:MinWidth="1000" d:MinHeight="850"
       FontSize="20"
       Background="White">
 
@@ -43,6 +43,7 @@
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="10" />
+                        <RowDefinition Height="auto" />
                         <RowDefinition Height="auto" />
                         <RowDefinition Height="auto" />
                         <RowDefinition Height="auto" />
@@ -180,6 +181,11 @@
                        HorizontalContentAlignment="Right" FontWeight="DemiBold"/>
                         </Grid>
                     </Border>
+                    <Button x:Name="btnDayParts" Content="Client Day parts" 
+                            Grid.Row="12" Grid.Column="1" Width="200" Height="40" Margin="10"
+                            Click="btnDayParts_Click">
+                        
+                    </Button>
                 </Grid>
             </Border>
         </ScrollViewer>

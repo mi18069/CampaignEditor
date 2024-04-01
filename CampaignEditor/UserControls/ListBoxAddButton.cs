@@ -4,6 +4,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
 using System.Windows.Media;
+using System.Collections.Generic;
 
 namespace CampaignEditor.UserControls
 {
@@ -26,6 +27,24 @@ namespace CampaignEditor.UserControls
             this.Items.Add(addButton);
 
             ResizeItems(this.Items);
+        }
+
+        public List<object> GetItems()
+        {
+            List<object> itemsList = new List<object>();
+
+            // Get the type of objectToAdd
+            Type objectType = objectToAdd.GetType();
+
+            // Iterate through the ListBox items
+            foreach (object item in this.Items)
+            {
+                itemsList.Add(item);
+            }
+
+            // Remove button
+            itemsList.RemoveAt(itemsList.Count-1);
+            return itemsList;
         }
 
         private Button MakeAddButton()
@@ -53,6 +72,7 @@ namespace CampaignEditor.UserControls
             this.Items.Insert(this.Items.Count - 1, newObject);
             ResizeItems(this.Items);
         }
+
 
         private void listBox_SizeChanged(object sender, SizeChangedEventArgs e)
         {

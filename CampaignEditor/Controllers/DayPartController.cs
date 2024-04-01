@@ -14,9 +14,10 @@ namespace CampaignEditor.Controllers
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
         }
 
-        public async Task<bool> CreateDayPart(CreateDayPartDTO dayPartDTO)
+        public async Task<DayPartDTO> CreateDayPart(CreateDayPartDTO dayPartDTO)
         {
-            return await _repository.CreateDayPart(dayPartDTO);
+            var dpId = await _repository.CreateDayPart(dayPartDTO);
+            return await _repository.GetDayPartById(dpId);
         }
         public async Task<DayPartDTO> GetDayPartById(int id)
         {

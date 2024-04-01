@@ -20,13 +20,14 @@ namespace Database.Repositories
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
-        public async Task<bool> CreateDPTime(CreateDPTimeDTO dpTimeDTO)
+        public async Task<int> CreateDPTime(CreateDPTimeDTO dpTimeDTO)
         {
             using var connection = _context.GetConnection();
 
-            var affected = await connection.ExecuteAsync(
+            var newId = await connection.QueryFirstOrDefaultAsync<int>(
                 "INSERT INTO tbldptime (dpid, stime, etime) " +
-                "VALUES (@Dpid, @Stime, @Etime)",
+                "VALUES (@Dpid, @Stime, @Etime) " +
+                "RETURNING dptimeid",
             new
             {
                 Dpid = dpTimeDTO.dpid,
@@ -34,7 +35,7 @@ namespace Database.Repositories
                 Etime = dpTimeDTO.etime
             });
 
-            return affected != 0;
+            return newId;
         }
 
         public async Task<DPTimeDTO> GetDPTimeById(int id)
@@ -85,6 +86,16 @@ namespace Database.Repositories
 
             var affected = await connection.ExecuteAsync(
                 "DELETE FROM tbldptime WHERE dptimeid = @Id", new { Id = id });
+
+            return affected != 0;
+        }
+
+        public async Task<bool> DeleteDPTimeByDPId(int id)
+        {
+            using var connection = _context.GetConnection();
+
+            var affected = await connection.ExecuteAsync(
+                "DELETE FROM tbldptime WHERE dpid = @Id", new { Id = id });
 
             return affected != 0;
         }

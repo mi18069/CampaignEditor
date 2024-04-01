@@ -4,6 +4,8 @@ using Database.DTOs.BrandDTO;
 using Database.DTOs.CampaignDTO;
 using Database.DTOs.ChannelDTO;
 using Database.DTOs.CmpBrndDTO;
+using Database.DTOs.DayPartDTO;
+using Database.DTOs.DPTimeDTO;
 using Database.DTOs.GoalsDTO;
 using Database.DTOs.PricelistDTO;
 using Database.DTOs.SpotDTO;
@@ -35,11 +37,14 @@ namespace CampaignEditor
         private PricelistController _pricelistController;
         private ActivityController _activityController;
 
+        private DayPartController _dayPartController;
+        private DPTimeController _dpTimeController;
+
         public CampaignOverviewData(ICmpBrndRepository cmpBrndRepo, IBrandRepository brandRepo,
             ITargetCmpRepository targetCmpRepo, ITargetRepository targetRepo, ISpotRepository spotRepo,
             IGoalsRepository goalsRepo, IChannelCmpRepository channelCmpRepo, IChannelRepository channelRepo,
             IPricelistChannelsRepository pricelistChannelRepo, IPricelistRepository pricelistRepo,
-            IActivityRepository activityRepo)
+            IActivityRepository activityRepo, IDayPartRepository dayPartRepository, IDPTimeRepository dPTimeRepository)
         {
             _cmpBrndController = new CmpBrndController(cmpBrndRepo);
             _brandController = new BrandController(brandRepo);
@@ -52,6 +57,8 @@ namespace CampaignEditor
             _pricelistChannelsController = new PricelistChannelsController(pricelistChannelRepo);
             _pricelistController = new PricelistController(pricelistRepo);
             _activityController = new ActivityController(activityRepo);
+            _dayPartController = new DayPartController(dayPartRepository);
+            _dpTimeController = new DPTimeController(dPTimeRepository);
         }
 
         public async Task<BrandDTO[]> GetBrands(int cmpid)
@@ -172,6 +179,26 @@ namespace CampaignEditor
             }
 
             return tuples;
+        }
+
+        public async Task<Dictionary<DayPartDTO, List<DPTimeDTO>>> GetClientDayParts(int clid)
+        {
+            Dictionary<DayPartDTO, List<DPTimeDTO>> dictionary = new Dictionary<DayPartDTO, List<DPTimeDTO>>();
+
+            var dayParts = await _dayPartController.GetAllClientDayParts(clid);
+            foreach (var dayPart in dayParts)
+            {
+                List<DPTimeDTO> dpTimesList = new List<DPTimeDTO>();
+                var dpTimes = await _dpTimeController.GetAllDPTimesByDPId(dayPart.dpid);
+                foreach (var dpTime in dpTimes) 
+                {
+                    dpTimesList.Add(dpTime);
+                }
+                dpTimesList = dpTimesList.OrderBy(dpt => dpt.stime).ToList();
+                dictionary[dayPart] = dpTimesList;
+            }
+
+            return dictionary;
         }
 
     }

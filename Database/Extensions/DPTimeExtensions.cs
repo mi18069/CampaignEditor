@@ -9,7 +9,7 @@ namespace Database.Extensions
     {
         public static void AddDPTimeExtensions(this IServiceCollection services)
         {
-            services.AddScoped<IDayPartRepository, DayPartRepository>();
+            services.AddScoped<IDPTimeRepository, DPTimeRepository>();
             services.AddAutoMapper(configuration => {
                 configuration.CreateMap<DPTimeDTO, DPTime>().ReverseMap();
             });

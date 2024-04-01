@@ -13,9 +13,10 @@ namespace CampaignEditor.Controllers
         {
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
         }
-        public async Task<bool> CreateDPTime(CreateDPTimeDTO dpTimeDTO)
+        public async Task<DPTimeDTO> CreateDPTime(CreateDPTimeDTO dpTimeDTO)
         {
-            return await _repository.CreateDPTime(dpTimeDTO);
+            int id = await _repository.CreateDPTime(dpTimeDTO);
+            return await _repository.GetDPTimeById(id);
         }
 
         public async Task<DPTimeDTO> GetDPTimeById(int id)
@@ -36,6 +37,11 @@ namespace CampaignEditor.Controllers
         public async Task<bool> DeleteDPTime(int id)
         {
             return await _repository.DeleteDPTime(id);
+        }
+
+        public async Task<bool> DeleteDPTimeByDPId(int id)
+        {
+            return await _repository.DeleteDPTimeByDPId(id);
         }
     }
 }

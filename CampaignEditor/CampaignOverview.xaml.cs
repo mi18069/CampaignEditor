@@ -15,6 +15,8 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using CampaignEditor.Helpers;
+using Database.DTOs.DayPartDTO;
+using Database.DTOs.DPTimeDTO;
 
 namespace CampaignEditor
 {
@@ -25,6 +27,7 @@ namespace CampaignEditor
         private readonly IAbstractFactory<Spots> _factorySpots;
         private readonly IAbstractFactory<Goals> _factoryGoals;
         private readonly IAbstractFactory<CmpInfo> _factoryInfo;
+        private readonly IAbstractFactory<ClientDayParts> _factoryClientDayParts;
 
         private CampaignOverviewData _campaignOverviewData;
 
@@ -45,6 +48,8 @@ namespace CampaignEditor
         private CampaignDTO _campaignInfo = null;
         private BrandDTO[] _brands = null;
 
+        private Dictionary<DayPartDTO, List<DPTimeDTO>> _dayPartsDict = null;
+
         public event EventHandler ClosePageEvent;
         public event EventHandler GoalsUpdatedEvent;
         public event EventHandler<UpdateChannelsEventArgs> ChannelsUpdatedEvent;
@@ -52,15 +57,16 @@ namespace CampaignEditor
         public CampaignOverview(IAbstractFactory<AssignTargets> factoryAssignTargets,
             IAbstractFactory<Channels> factoryChannels, IAbstractFactory<Spots> factorySpots,
             IAbstractFactory<Goals> factoryGoals, IAbstractFactory<CmpInfo> factoryInfo,
-            IAbstractFactory<CampaignOverviewData> campaignOverviewData)
+            IAbstractFactory<CampaignOverviewData> campaignOverviewData, IAbstractFactory<ClientDayParts> factoryClientDayParts)
         {
             this.DataContext = this;
-            
+
             _factoryAssignTargets = factoryAssignTargets;
             _factoryChannels = factoryChannels;
             _factorySpots = factorySpots;
             _factoryGoals = factoryGoals;
             _factoryInfo = factoryInfo;
+            _factoryClientDayParts = factoryClientDayParts;
 
             _campaignOverviewData = campaignOverviewData.Create();
 
@@ -80,6 +86,7 @@ namespace CampaignEditor
                 btnSpots.IsEnabled = false;
                 btnGoals.IsEnabled = false;
                 btnChannels.IsEnabled = false;
+                btnDayParts.IsEnabled = false;
             }
 
             try
@@ -91,9 +98,10 @@ namespace CampaignEditor
                 Task spotsTask = Task.Run(() => InitializeSpots());
                 Task goalsTask = Task.Run(() => InitializeGoals());
                 Task channelsTask = Task.Run(() => InitializeChannels());
+                Task dayPartsTask = Task.Run(() => InitializeDayParts());
 
                 // Wait for all tasks to complete
-                await Task.WhenAll(infoTask, targetsTask, spotsTask, goalsTask, channelsTask);
+                await Task.WhenAll(infoTask, targetsTask, spotsTask, goalsTask, channelsTask, dayPartsTask);
 
                 FillFields();
               
@@ -144,6 +152,12 @@ namespace CampaignEditor
         private async Task InitializeChannels()
         {
             _channels = await _campaignOverviewData.GetChannelTuples(_campaign.cmpid);
+
+        }
+
+        private async Task InitializeDayParts()
+        {
+            _dayPartsDict = await _campaignOverviewData.GetClientDayParts(_client.clid);
 
         }
 
@@ -415,11 +429,43 @@ namespace CampaignEditor
         }
         #endregion
 
+        #region DayParts
+
+        private void btnDayParts_Click(object sender, RoutedEventArgs e)
+        {
+            btnDayParts.IsEnabled = false;
+            ClientDayParts fDayParts = null;
+
+            try
+            {
+                fDayParts = _factoryClientDayParts.Create();
+                fDayParts.Initialize(_client, _dayPartsDict);
+                fDayParts.ShowDialog();
+            }
+            catch
+            {
+                btnDayParts.IsEnabled = true;
+                return;
+            }
+
+            if (fDayParts.dpModified)
+            {
+                _dayPartsDict = fDayParts.DayPartsDict;
+                //FillGoals(_goals);
+                // For updating goals in forecast
+                //GoalsUpdatedEvent?.Invoke(this, null);
+            }
+
+            btnDayParts.IsEnabled = true;
+        }
+
+        #endregion
+
+
         private void btnCancel_Click(object sender, RoutedEventArgs e)
         {
             ClosePageEvent?.Invoke(this, new EventArgs());
         }
-
 
     }
 }

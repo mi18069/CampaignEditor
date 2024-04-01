@@ -6,10 +6,11 @@ namespace Database.Repositories
 {
     public interface IDPTimeRepository
     {
-        Task<bool> CreateDPTime(CreateDPTimeDTO dpTimeDTO);
+        Task<int> CreateDPTime(CreateDPTimeDTO dpTimeDTO);
         Task<DPTimeDTO> GetDPTimeById(int id);
         Task<IEnumerable<DPTimeDTO>> GetAllDPTimesByDPId(int dpId);
         Task<bool> UpdateDPTime(UpdateDPTimeDTO dpTimeDTO);
         Task<bool> DeleteDPTime(int id);
+        Task<bool> DeleteDPTimeByDPId(int id);
     }
 }

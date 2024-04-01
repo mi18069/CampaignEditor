@@ -20,21 +20,22 @@ namespace Database.Repositories
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
-        public async Task<bool> CreateDayPart(CreateDayPartDTO dayPartDTO)
+        public async Task<int> CreateDayPart(CreateDayPartDTO dayPartDTO)
         {
             using var connection = _context.GetConnection();
 
-            var affected = await connection.ExecuteAsync(
+            int newDpid = await connection.QueryFirstOrDefaultAsync<int>(
                 "INSERT INTO tbldp (clid, name, days) " +
-                "VALUES (@Clid, @Name, @Days)",
-            new
-            {
-                Clid = dayPartDTO.clid,
-                Name = dayPartDTO.name,
-                Days = dayPartDTO.days
-            });
+                "VALUES (@Clid, @Name, @Days) " +
+                "RETURNING dpid",
+                new
+                {
+                    Clid = dayPartDTO.clid,
+                    Name = dayPartDTO.name,
+                    Days = dayPartDTO.days
+                });
 
-            return affected != 0;
+            return newDpid;
         }
         public async Task<DayPartDTO> GetDayPartById(int id)
         {
