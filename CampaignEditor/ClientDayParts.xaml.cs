@@ -91,6 +91,7 @@ namespace CampaignEditor
             {
                 if (dayPartItem.CheckModified())
                 {
+                    dpModified = true;
                     return true;
                 }
             }

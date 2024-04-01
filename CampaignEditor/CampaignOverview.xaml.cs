@@ -54,6 +54,7 @@ namespace CampaignEditor
         public event EventHandler GoalsUpdatedEvent;
         public event EventHandler<UpdateChannelsEventArgs> ChannelsUpdatedEvent;
         public event EventHandler SpotsUpdatedEvent;
+        public event EventHandler DayPartsUpdatedEvent;
         public CampaignOverview(IAbstractFactory<AssignTargets> factoryAssignTargets,
             IAbstractFactory<Channels> factoryChannels, IAbstractFactory<Spots> factorySpots,
             IAbstractFactory<Goals> factoryGoals, IAbstractFactory<CmpInfo> factoryInfo,
@@ -453,7 +454,7 @@ namespace CampaignEditor
                 _dayPartsDict = fDayParts.DayPartsDict;
                 //FillGoals(_goals);
                 // For updating goals in forecast
-                //GoalsUpdatedEvent?.Invoke(this, null);
+                DayPartsUpdatedEvent?.Invoke(this, null);
             }
 
             btnDayParts.IsEnabled = true;

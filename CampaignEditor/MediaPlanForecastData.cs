@@ -1,6 +1,8 @@
 ﻿using CampaignEditor.Controllers;
 using Database.DTOs.CampaignDTO;
 using Database.DTOs.ChannelDTO;
+using Database.DTOs.DayPartDTO;
+using Database.DTOs.DPTimeDTO;
 using Database.DTOs.PricelistDTO;
 using Database.DTOs.PricesDTO;
 using Database.DTOs.SeasonalitiesDTO;
@@ -33,6 +35,7 @@ namespace CampaignEditor
         private Dictionary<int, List<SectablesDTO>> _secidSectablesDict = new Dictionary<int, List<SectablesDTO>>();
         private Dictionary<int, SeasonalityDTO> _plidSeasonalityDict = new Dictionary<int, SeasonalityDTO>();
         private Dictionary<int, List<SeasonalitiesDTO>> _seasidSeasonalitiesDict = new Dictionary<int, List<SeasonalitiesDTO>>();
+        private Dictionary<DayPartDTO, List<DPTimeDTO>> _dayPartsDict = new Dictionary<DayPartDTO, List<DPTimeDTO>>();
 
         private ChannelController _channelController;
         private SpotController _spotController;
@@ -45,6 +48,8 @@ namespace CampaignEditor
         private PricesController _pricesController;
         private TargetCmpController _targetCmpController;
         private TargetController _targetController;
+        private DayPartController _dayPartController;
+        private DPTimeController _dpTimeController;
 
         public List<ChannelDTO> Channels { get { return _channels; } }
         public List<SpotDTO> Spots { get { return _spots; } }
@@ -58,6 +63,7 @@ namespace CampaignEditor
         public Dictionary<int, List<SectablesDTO>> SecidSectablesDict { get { return _secidSectablesDict; } }
         public Dictionary<int, SeasonalityDTO> PlidSeasonalityDict { get { return _plidSeasonalityDict; } }
         public Dictionary<int, List<SeasonalitiesDTO>> SeasidSeasonalitiesDict { get { return _seasidSeasonalitiesDict; } }
+        public Dictionary<DayPartDTO, List<DPTimeDTO>> DayPartsDict { get { return _dayPartsDict; } }
 
 
         public MediaPlanForecastData(IChannelRepository channelRepository, ISpotRepository spotRepository,
@@ -65,7 +71,8 @@ namespace CampaignEditor
             ISeasonalityRepository seasonalityRepository, ISectableRepository sectableRepository,
             ISeasonalitiesRepository seasonalitiesRepository, ISectablesRepository sectablesRepository,
             IPricesRepository pricesRepository, ITargetCmpRepository targetCmpRepository, 
-            ITargetRepository targetRepository)
+            ITargetRepository targetRepository,
+            IDayPartRepository dayPartRepository, IDPTimeRepository dPTimeRepository)
         {
             _channelController = new ChannelController(channelRepository);
             _spotController = new SpotController(spotRepository);
@@ -78,6 +85,8 @@ namespace CampaignEditor
             _pricesController = new PricesController(pricesRepository);
             _targetCmpController = new TargetCmpController(targetCmpRepository);
             _targetController = new TargetController(targetRepository);
+            _dayPartController = new DayPartController(dayPartRepository);
+            _dpTimeController = new DPTimeController(dPTimeRepository);
         }
 
         public async Task Initialize(CampaignDTO campaign)
@@ -92,6 +101,7 @@ namespace CampaignEditor
             await InitializeSpots();
             await InitializeChannels();
             await InitializePricelists();
+            await InitializeDayParts();
         }
 
         private async Task InitializeTargets()
@@ -214,6 +224,22 @@ namespace CampaignEditor
             {
                 var seasonalities = await _seasonalitiesController.GetSeasonalitiesById(seasonality.seasid);
                 _seasidSeasonalitiesDict[seasonality.seasid] = seasonalities.ToList();
+            }
+        }
+
+        public async Task InitializeDayParts()
+        {
+            _dayPartsDict.Clear();
+            var dayParts = await _dayPartController.GetAllClientDayParts(_campaign.clid);
+            foreach (var dayPart in dayParts)
+            {
+                List<DPTimeDTO> dpTimesList = new List<DPTimeDTO>();
+                var dpTimes = await _dpTimeController.GetAllDPTimesByDPId(dayPart.dpid);
+                foreach (var dpTime in dpTimes)
+                {
+                    dpTimesList.Add(dpTime);
+                }
+                _dayPartsDict[dayPart] = dpTimesList;
             }
         }
        

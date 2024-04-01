@@ -28,8 +28,9 @@ using MenuItem = System.Windows.Controls.MenuItem;
 using Action = System.Action;
 using CampaignEditor.Helpers;
 using OfficeOpenXml.Style;
-using System.Threading.Channels;
 using Database.DTOs.SpotDTO;
+using Database.DTOs.DayPartDTO;
+using Database.DTOs.DPTimeDTO;
 
 namespace CampaignEditor.UserControls
 {
@@ -47,6 +48,8 @@ namespace CampaignEditor.UserControls
         public MediaPlanTermConverter _mpTermConverter { get; set; }
         public DatabaseFunctionsController _databaseFunctionsController { get; set; }
         private Dictionary<int, string> chidChannelDictionary = new Dictionary<int, string>();
+        public Dictionary<DayPartDTO, List<DPTimeDTO>> _dayPartsDict = new Dictionary<DayPartDTO, List<DPTimeDTO>>();
+
 
         private ObservableCollection<TotalItem> totals = new ObservableCollection<TotalItem>();
 
@@ -56,7 +59,7 @@ namespace CampaignEditor.UserControls
         string lastSpotCell = "";
 
         // number of frozen columns
-        public int mediaPlanColumns = 29;
+        public int mediaPlanColumns = 30;
 
         double dataColumnWidth = 51;
 
@@ -148,6 +151,13 @@ namespace CampaignEditor.UserControls
                 Path = new PropertyPath("MediaPlan.chid"),
                 Converter = new ChidToChannelConverter(),
                 ConverterParameter = chidChannelDictionary
+            };
+
+            tcDayPart.Binding = new Binding()
+            {
+                Path = new PropertyPath("MediaPlan.blocktime"),
+                Converter = new BlockTimeToDayPartConverter(),
+                ConverterParameter = _dayPartsDict
             };
 
             chidChannelDictionary.Clear();

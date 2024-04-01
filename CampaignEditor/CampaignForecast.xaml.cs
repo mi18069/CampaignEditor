@@ -159,6 +159,19 @@ namespace CampaignEditor.UserControls
             SetContentPage?.Invoke(this, null);
         }
 
+        public async Task DayPartsChanged()
+        {
+            SetLoadingPage?.Invoke(this, null);
+
+            await _forecastData.InitializeDayParts();
+            if (dgMediaPlans != null)
+                dgMediaPlans._dayPartsDict = _forecastData.DayPartsDict;
+
+            lvChannels.UnselectAll();
+
+            SetContentPage?.Invoke(this, null);
+        }
+
         public async Task ChannelsChanged(List<int> channelsToDelete, List<int> channelsToAdd)
         {
             SetLoadingPage?.Invoke(this, null);
@@ -494,7 +507,7 @@ namespace CampaignEditor.UserControls
             dgMediaPlans._selectedChannels = _selectedChannels;
             dgMediaPlans._allMediaPlans = _allMediaPlans;
             dgMediaPlans._filteredDays = filteredDays;
-
+            dgMediaPlans._dayPartsDict = _forecastData.DayPartsDict;
             dgMediaPlans.Initialize(_campaign, _forecastData.Channels, _forecastData.Spots);
 
         }

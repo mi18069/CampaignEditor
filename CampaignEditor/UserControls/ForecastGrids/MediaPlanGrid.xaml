@@ -62,6 +62,8 @@
                 <DataGridTextColumn Header="Channel" x:Name="tcChannel"
                                         IsReadOnly="True" />
                 <DataGridTextColumn Header="Program" Binding="{Binding MediaPlan.Name, Mode=TwoWay}"/>
+                <DataGridTextColumn Header="DayPart" x:Name="tcDayPart"
+                                        IsReadOnly="True" />
                 <DataGridComboBoxColumn Header="Position" SelectedItemBinding="{Binding MediaPlan.Position, Mode=TwoWay}">
                     <DataGridComboBoxColumn.ElementStyle>
                         <Style TargetType="ComboBox"/>

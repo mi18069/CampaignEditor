@@ -237,6 +237,11 @@ namespace CampaignEditor
             await _forecast.SpotsChanged();
         }
 
+        public async Task UpdateDayParts()
+        {
+            await _forecast.DayPartsChanged();
+        }
+
         public async Task UpdateChannels(List<int> channelsToDelete, List<int> channelsToAdd)
         {
             try
