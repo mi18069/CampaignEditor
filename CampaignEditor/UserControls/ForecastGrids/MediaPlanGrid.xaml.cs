@@ -184,39 +184,27 @@ namespace CampaignEditor.UserControls
                 var mediaPlan = ((MediaPlanTuple)d).MediaPlan;
                 var mpTerms = ((MediaPlanTuple)d).Terms;
 
-                /*if (filterByIns == true)
+                var result = _selectedChannels.Any(c => c.chid == mediaPlan.chid);
+
+                if (result && filterByDays)
                 {
-                    return _selectedChannels.Any(c => c.chid == mediaPlan.chid) &&
-                                           mediaPlan.Insertations > 0 &&
-                                           mpTerms.Any(t => t != null && 
-                                           _filteredDays.Contains(t.Date.DayOfWeek) &&
-                                           _filteredDayParts.Select(dp => dp.dpid).Contains(mediaPlan.DayPart.dpid));
+                    result = mpTerms.Any(t => t != null && _filteredDays.Contains(t.Date.DayOfWeek));
                 }
 
-                return _selectedChannels.Any(c => c.chid == mediaPlan.chid) &&
-                                           mpTerms.Any(t => t != null && _filteredDays.Contains(t.Date.DayOfWeek));*/
-
-                var channels = _selectedChannels.Any(c => c.chid == mediaPlan.chid);
-
-                if (channels && filterByDays)
+                if (result && filterByIns)
                 {
-                    channels = mpTerms.Any(t => t != null && _filteredDays.Contains(t.Date.DayOfWeek));
+                    result = mediaPlan.Insertations > 0;
                 }
 
-                if (channels && filterByIns)
-                {
-                    channels = mediaPlan.Insertations > 0;
-                }
-
-                if (channels && filterByDP)
+                if (result && filterByDP)
                 {
                     if (mediaPlan.DayPart == null)
-                        channels = false;
+                        result = false;
                     else
-                        channels = _filteredDayParts.Select(dp => dp.dpid).Contains(mediaPlan.DayPart.dpid);
+                        result = _filteredDayParts.Select(dp => dp.dpid).Contains(mediaPlan.DayPart.dpid);
                 }
 
-                return channels;
+                return result;
             };
 
             _allMediaPlans.CollectionChanged += OnCollectionChanged;
@@ -384,6 +372,18 @@ namespace CampaignEditor.UserControls
             SelectionChanged?.Invoke(sender, e);
         }
 
+        public List<MediaPlanTuple> GetVisibleMediaPlanTuples()
+        {
+            List<MediaPlanTuple> visibleItems = new List<MediaPlanTuple>();
+
+            // Iterate through the sorted and filtered collection view to get visible items
+            foreach (MediaPlanTuple mediaPlanTuple in myDataView)
+            {
+                visibleItems.Add(mediaPlanTuple);
+            }
+
+            return visibleItems;
+        }
 
         #region DgMediaPlans
 

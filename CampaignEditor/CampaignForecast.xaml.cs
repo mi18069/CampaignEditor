@@ -1273,6 +1273,7 @@ namespace CampaignEditor.UserControls
 
         private void btnExport_Click(object sender, RoutedEventArgs e)
         {
+            _factoryPrintForecast.visibleTuples = dgMediaPlans.GetVisibleMediaPlanTuples();
             _factoryPrintForecast.ShowDialog();
         }
 

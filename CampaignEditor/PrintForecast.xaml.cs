@@ -15,7 +15,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Threading;
 
 namespace CampaignEditor
 {
@@ -41,6 +40,8 @@ namespace CampaignEditor
         private readonly IMapper _mapper;
 
         private bool[] visibleColumns = new bool[30];
+        public List<MediaPlanTuple> visibleTuples = new List<MediaPlanTuple>();
+
 
 
         public PrintForecast(IMapper mapper)
@@ -120,8 +121,8 @@ namespace CampaignEditor
                     if (chbListing.IsChecked == true)
                     {
                         var worksheet6 = excelPackage.Workbook.Worksheets.Add("Spot listing");
-                        var list = _allMediaPlans.Where(mpTuple => mpTuple.MediaPlan.Insertations > 0 && selectedChannels.Any(ch => ch.chid == mpTuple.MediaPlan.chid)).ToList();
-                        factoryListing.PopulateWorksheet(list, visibleColumns, worksheet6, 1, 1);
+                        //var list = _allMediaPlans.Where(mpTuple => mpTuple.MediaPlan.Insertations > 0 && selectedChannels.Any(ch => ch.chid == mpTuple.MediaPlan.chid)).ToList();
+                        factoryListing.PopulateWorksheet(visibleTuples, visibleColumns, worksheet6, 1, 1);
                     }
 
                     // Save the Excel package to a memory stream

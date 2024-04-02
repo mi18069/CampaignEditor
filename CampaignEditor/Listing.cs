@@ -25,6 +25,7 @@ namespace CampaignEditor
         private PricelistController _pricelistController;
 
         public List<ChannelDTO> selectedChannels = new List<ChannelDTO>();
+        public List<MediaPlanTuple> visibleTuples = new List<MediaPlanTuple>();
 
         private Dictionary<int, ChannelDTO> _chidChannelDictionary = new Dictionary<int, ChannelDTO>();
         private Dictionary<int, PricelistDTO> _chidPricelistDictionary;
@@ -90,19 +91,19 @@ namespace CampaignEditor
 
         private bool[] TransformVisibleColumns(bool[] visibleGridColumns)
         {
-            bool[] visibleColumns = new bool[26];
+            bool[] visibleColumns = new bool[27];
             visibleColumns[0] = true;
-            for (int i = 0; i < 17; i++)
+            for (int i = 0; i < 18; i++)
             {
                 visibleColumns[i + 1] = visibleGridColumns[i];
             }
             // Skipping Amr sale columns
-            for (int i = 20; i < 25; i++)
+            for (int i = 21; i < 26; i++)
             {
                 visibleColumns[i] = visibleGridColumns[i];
             }
             // Skipping CPP and Ins
-            visibleColumns[25] = visibleGridColumns[27]; // CPSP
+            visibleColumns[26] = visibleGridColumns[28]; // CPSP
 
             return visibleColumns;
         }
@@ -156,7 +157,7 @@ namespace CampaignEditor
 
         private void AddHeaders(ExcelWorksheet worksheet, bool[] visibleColumns, int rowOff, int colOff)
         {
-            List<string> columnHeaders = new List<string> { "Date", "Channel", "Program", "Position", "Start time",
+            List<string> columnHeaders = new List<string> { "Date", "Channel", "Program", "Day Part", "Position", "Start time",
             "End time", "Block time", "Type", "Special", "Amr1", "Amr% 1", "Amr1 Trim", "Amr2", "Amr% 2", "Amr2 Trim", "Amr3",
             "Amr% 3","Amr3 Trim","Affinity","Prog coef", "Dp coef", "Seas coef", "Sec coef", "CPSP",  "Length", "Spot"};
 
@@ -185,7 +186,7 @@ namespace CampaignEditor
             }
             if (visibleColumns[1])
             {
-                worksheet.Cells[rowOff, colOff + colOffset].Value = _chidChannelDictionary[mediaPlan.chid];
+                worksheet.Cells[rowOff, colOff + colOffset].Value = _chidChannelDictionary[mediaPlan.chid].chname;
                 colOffset += 1;
             }
             if (visibleColumns[2])
@@ -195,116 +196,122 @@ namespace CampaignEditor
             }
             if (visibleColumns[3])
             {
-                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Position;               
+                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.DayPart == null ? "" : 
+                    mediaPlan.DayPart.name.Trim();
                 colOffset += 1;
             }
             if (visibleColumns[4])
             {
-                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Stime;               
+                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Position;               
                 colOffset += 1;
             }
             if (visibleColumns[5])
             {
-                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Etime;               
+                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Stime;               
                 colOffset += 1;
             }
             if (visibleColumns[6])
             {
-                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Blocktime ?? "";               
+                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Etime;               
                 colOffset += 1;
             }
             if (visibleColumns[7])
             {
-                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Type;               
+                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Blocktime ?? "";               
                 colOffset += 1;
             }
             if (visibleColumns[8])
             {
-                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Special;               
+                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Type;               
                 colOffset += 1;
             }
             if (visibleColumns[9])
             {
-                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Amr1;               
+                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Special;               
                 colOffset += 1;
             }
             if (visibleColumns[10])
             {
-                worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.Amrp1, 2);               
+                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Amr1;               
                 colOffset += 1;
             }
             if (visibleColumns[11])
             {
-                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Amr1trim;                
+                worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.Amrp1, 2);               
                 colOffset += 1;
             }
             if (visibleColumns[12])
             {
-                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Amr2;                
+                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Amr1trim;                
                 colOffset += 1;
             }
             if (visibleColumns[13])
             {
-                worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.Amrp2, 2);               
+                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Amr2;                
                 colOffset += 1;
             }
             if (visibleColumns[14])
             {
-                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Amr2trim;                
+                worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.Amrp2, 2);               
                 colOffset += 1;
             }
             if (visibleColumns[15])
             {
-                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Amr3;              
+                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Amr2trim;                
                 colOffset += 1;
             }
             if (visibleColumns[16])
             {
-                worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.Amrp3, 2);                
+                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Amr3;              
                 colOffset += 1;
             }
             if (visibleColumns[17])
             {
-                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Amr3trim;
+                worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.Amrp3, 2);                
                 colOffset += 1;
             }
             if (visibleColumns[18])
             {
-                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Affinity;
+                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Amr3trim;
                 colOffset += 1;
             }
             if (visibleColumns[19])
             {
-                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Progcoef;
+                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Affinity;
                 colOffset += 1;
             }
             if (visibleColumns[20])
+            {
+                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Progcoef;
+                colOffset += 1;
+            }
+            if (visibleColumns[21])
             {
                 worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Dpcoef;
                 colOffset += 1;
             }
 
-            if (visibleColumns[21])
+            if (visibleColumns[22])
             {
                 worksheet.Cells[rowOff, colOff + colOffset].Value = _mpConverter.CalculateTermSeascoef(mediaPlan, _chidPricelistDictionary[mediaPlan.chid], _mpTermConverter.ConvertToDTO(term));
                 colOffset += 1;
             }
-            if (visibleColumns[22])
+            if (visibleColumns[23])
             {
                 worksheet.Cells[rowOff, colOff + colOffset].Value = _mpConverter.CalculateTermSeccoef(mediaPlan, _chidPricelistDictionary[mediaPlan.chid], _spotcodeSpotDictionary[spotcode]);
                 colOffset += 1;
             }
-            if (visibleColumns[23])
+            if (visibleColumns[24])
             {
                 worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.PricePerSecond;
                 colOffset += 1;
             }
-            if (visibleColumns[24])
+            if (visibleColumns[25])
             {
                 worksheet.Cells[rowOff, colOff + colOffset].Value = (_spotcodeSpotDictionary[spotcode] as SpotDTO).spotlength;
                 colOffset += 1;
             }
-            if (visibleColumns[25])
+            if (visibleColumns[26])
             {
                 worksheet.Cells[rowOff, colOff + colOffset].Value = spotcode;
                 colOffset += 1;
