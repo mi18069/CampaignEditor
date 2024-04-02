@@ -1,6 +1,8 @@
-﻿using System;
+﻿using Database.DTOs.DayPartDTO;
+using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Windows.Markup;
 
 namespace Database.Entities
 {
@@ -50,6 +52,8 @@ namespace Database.Entities
         private int _length;
 
         private int _insertations;
+
+        private DayPartDTO _dayPart;
 
         public double Affinity
         {
@@ -373,6 +377,12 @@ namespace Database.Entities
                 pps = value;
                 OnPropertyChanged();
             }
+        }
+
+        public DayPartDTO DayPart
+        {
+            get { return _dayPart; }
+            set { _dayPart = value; }
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;

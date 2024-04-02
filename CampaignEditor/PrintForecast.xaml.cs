@@ -40,7 +40,7 @@ namespace CampaignEditor
 
         private readonly IMapper _mapper;
 
-        private bool[] visibleColumns = new bool[29];
+        private bool[] visibleColumns = new bool[30];
 
 
         public PrintForecast(IMapper mapper)

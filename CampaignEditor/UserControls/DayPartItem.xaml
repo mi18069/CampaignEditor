@@ -7,19 +7,19 @@
              mc:Ignorable="d" 
              d:DesignHeight="100" d:DesignWidth="200" d:Background="White"
              Unloaded="UserControl_Unloaded">
-    <Grid Margin="10, 0">
+    <Grid Margin="10, 0, 20, 0">
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <Grid Grid.Row="0" Margin="0, 0, 0, 15">
+        <Grid Grid.Row="0" Margin="0, 0, 0, 15" Background="White">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="auto"/>
                 <ColumnDefinition Width="auto"/>
             </Grid.ColumnDefinitions>
-            <TextBox x:Name="tbName" Text="" Grid.Column="0" 
+            <TextBox x:Name="tbName" Text="" Grid.Column="0" VerticalAlignment="Center"
                      MaxLength="63" TextWrapping="WrapWithOverflow" TextChanged="tbName_TextChanged"/>
             <Button x:Name="btnDelete" Grid.Column="1"
                     BorderThickness="0" Background="White" Click="btnDelete_Click" Margin="10, 0">

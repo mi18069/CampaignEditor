@@ -62,7 +62,7 @@
                 <DataGridTextColumn Header="Channel" x:Name="tcChannel"
                                         IsReadOnly="True" />
                 <DataGridTextColumn Header="Program" Binding="{Binding MediaPlan.Name, Mode=TwoWay}"/>
-                <DataGridTextColumn Header="DayPart" x:Name="tcDayPart"
+                <DataGridTextColumn Header="DayPart" Binding="{Binding MediaPlan.DayPart.name, Mode=TwoWay}"
                                         IsReadOnly="True" />
                 <DataGridComboBoxColumn Header="Position" SelectedItemBinding="{Binding MediaPlan.Position, Mode=TwoWay}">
                     <DataGridComboBoxColumn.ElementStyle>
@@ -73,14 +73,16 @@
                     </DataGridComboBoxColumn.EditingElementStyle>
                 </DataGridComboBoxColumn>
                 
-                <DataGridTextColumn Header="Start time" Binding="{Binding MediaPlan.Stime, Mode=TwoWay}">
+                <DataGridTextColumn Header="Start time" Binding="{Binding MediaPlan.Stime, Mode=TwoWay}"
+                                    Visibility="Collapsed">
                     <DataGridTextColumn.EditingElementStyle>
                         <Style TargetType="{x:Type TextBox}">
                             <Setter Property="MaxLength" Value="5"/>
                         </Style>
                     </DataGridTextColumn.EditingElementStyle>
                 </DataGridTextColumn>
-                <DataGridTextColumn Header="End time" Binding="{Binding MediaPlan.Etime, Mode=TwoWay}">
+                <DataGridTextColumn Header="End time" Binding="{Binding MediaPlan.Etime, Mode=TwoWay}"
+                                    Visibility="Collapsed">
                     <DataGridTextColumn.EditingElementStyle>
                         <Style TargetType="{x:Type TextBox}">
                             <Setter Property="MaxLength" Value="5"/>
@@ -130,8 +132,10 @@
                                             IsReadOnly="True"/>
                 <DataGridTextColumn Header="Prog Coef" Binding="{Binding MediaPlan.Progcoef, Mode=TwoWay, StringFormat=N2}" />
                 <DataGridTextColumn Header="DP Coef" Binding="{Binding MediaPlan.Dpcoef, StringFormat=N2}"/>
-                <DataGridTextColumn Header="Seas Coef" Binding="{Binding MediaPlan.Seascoef, StringFormat=N2}"/>
-                <DataGridTextColumn Header="Sec Coef" Binding="{Binding MediaPlan.Seccoef, StringFormat=N2}"/>
+                <DataGridTextColumn Header="Seas Coef" Binding="{Binding MediaPlan.Seascoef, StringFormat=N2}"
+                                    Visibility="Collapsed"/>
+                <DataGridTextColumn Header="Sec Coef" Binding="{Binding MediaPlan.Seccoef, StringFormat=N2}"
+                                    Visibility="Collapsed"/>
                 <DataGridTextColumn Header="CPP" Binding="{Binding MediaPlan.Cpp, StringFormat=N2}"/>
                 <DataGridTextColumn Header="Ins" Binding="{Binding MediaPlan.Insertations}"
                                         IsReadOnly="True"/>

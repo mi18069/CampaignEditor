@@ -22,7 +22,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Diagnostics;
+using Database.DTOs.DayPartDTO;
 
 namespace CampaignEditor.UserControls
 {
@@ -57,9 +57,8 @@ namespace CampaignEditor.UserControls
         private int _cmpVersion = 1;
         private int _maxVersion = 1;
 
-        List<DayOfWeek> filteredDays = new List<DayOfWeek>
-        { DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday,
-          DayOfWeek.Friday, DayOfWeek.Saturday, DayOfWeek.Sunday};
+        List<DayOfWeek> filteredDays;
+        List<DayPartDTO> filteredDayParts = new List<DayPartDTO>();
 
         // for duration of campaign
         DateTime startDate;
@@ -164,8 +163,11 @@ namespace CampaignEditor.UserControls
             SetLoadingPage?.Invoke(this, null);
 
             await _forecastData.InitializeDayParts();
-            if (dgMediaPlans != null)
-                dgMediaPlans._dayPartsDict = _forecastData.DayPartsDict;
+            _mpConverter.Initialize(_forecastData);
+            foreach (var mediaPlan in _allMediaPlans.Select(mpt => mpt.MediaPlan))
+            {
+                _mpConverter.SetDayPart(mediaPlan);
+            }
 
             lvChannels.UnselectAll();
 
@@ -225,10 +227,16 @@ namespace CampaignEditor.UserControls
 
             BindLists();
 
+            InitializeListViews();
+            
+        }       
+
+        private void InitializeListViews()
+        {
             FillVersions(_maxVersion);
             FillLvFilterDays();
-
-        }       
+            FillLvFilterDayParts();
+        }
 
         private async Task InitializeVersions()
         {
@@ -327,13 +335,20 @@ namespace CampaignEditor.UserControls
 
         private void FillLvFilterDays()
         {
-            lvFilterDays.Items.Add(DayOfWeek.Monday);
-            lvFilterDays.Items.Add(DayOfWeek.Tuesday);
-            lvFilterDays.Items.Add(DayOfWeek.Wednesday);
-            lvFilterDays.Items.Add(DayOfWeek.Thursday);
-            lvFilterDays.Items.Add(DayOfWeek.Friday);
-            lvFilterDays.Items.Add(DayOfWeek.Saturday);
-            lvFilterDays.Items.Add(DayOfWeek.Sunday);
+            filteredDays = new List<DayOfWeek>
+            { DayOfWeek.Monday, DayOfWeek.Tuesday, DayOfWeek.Wednesday, DayOfWeek.Thursday,
+                DayOfWeek.Friday, DayOfWeek.Saturday, DayOfWeek.Sunday};
+
+            foreach (var day in filteredDays)
+            {
+                lvFilterDays.Items.Add(day);
+            }
+        }
+
+        private void FillLvFilterDayParts()
+        {
+            filteredDayParts = _forecastData.DayPartsDict.Select(kv => kv.Key).ToList();
+            lvFilterDayParts.ItemsSource = filteredDayParts;
         }
 
         private void lvFilterDays_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -350,8 +365,31 @@ namespace CampaignEditor.UserControls
                     filteredDays.Add(day);
             }
 
-
+            dgMediaPlans.filterByDays = !(filteredDays.Count() == 0 || filteredDays.Count() == lvFilterDays.Items.Count);
             dgMediaPlans._filteredDays = filteredDays;
+
+            var selectedChannels = lvChannels.SelectedItems.Cast<ChannelDTO>();
+            _selectedChannels.ReplaceRange(selectedChannels);
+        }
+
+        private void lvFilterDayParts_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            filteredDayParts.Clear();
+            if (lvFilterDayParts.SelectedItems.Count == 0)
+            {
+                foreach (DayPartDTO dayPart in lvFilterDayParts.Items)
+                    filteredDayParts.Add(dayPart);
+            }
+            else
+            {
+                foreach (DayPartDTO day in lvFilterDayParts.SelectedItems)
+                    filteredDayParts.Add(day);
+            }
+
+            dgMediaPlans.filterByDP = !(filteredDayParts.Count == 0 ||
+                                      filteredDayParts.Count() == _forecastData.DayPartsDict.Count());
+
+            dgMediaPlans._filteredDayParts = filteredDayParts;
 
             var selectedChannels = lvChannels.SelectedItems.Cast<ChannelDTO>();
             _selectedChannels.ReplaceRange(selectedChannels);
@@ -507,7 +545,6 @@ namespace CampaignEditor.UserControls
             dgMediaPlans._selectedChannels = _selectedChannels;
             dgMediaPlans._allMediaPlans = _allMediaPlans;
             dgMediaPlans._filteredDays = filteredDays;
-            dgMediaPlans._dayPartsDict = _forecastData.DayPartsDict;
             dgMediaPlans.Initialize(_campaign, _forecastData.Channels, _forecastData.Spots);
 
         }

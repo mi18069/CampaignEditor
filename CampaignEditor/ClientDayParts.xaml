@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:CampaignEditor"
         xmlns:controls="clr-namespace:CampaignEditor.UserControls"
         mc:Ignorable="d"
-        Title="ClientDayParts" Height="450" Width="800">
+        Title="ClientDayParts" Height="450" Width="400">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="10"/>

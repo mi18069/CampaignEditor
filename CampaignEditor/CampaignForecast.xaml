@@ -234,6 +234,7 @@
                         <RowDefinition Height="auto"/>
                         <RowDefinition Height="auto"/>
                         <RowDefinition Height="auto"/>
+                        <RowDefinition Height="auto"/>
                     </Grid.RowDefinitions>
                     <local1:GoalsTreeView x:Name="goalsTreeView" Grid.Row="0" Margin="10"/>
                     <CheckBox x:Name="chbOnlyIns" Grid.Row="1" 
@@ -242,6 +243,10 @@
                     <ListView x:Name="lvFilterDays" Grid.Row="2" 
                             SelectionMode="Multiple"
                             SelectionChanged="lvFilterDays_SelectionChanged" Margin="0, 5, 5, 5">
+                    </ListView>
+                    <ListView x:Name="lvFilterDayParts" Grid.Row="3" DisplayMemberPath="name"
+                            SelectionMode="Multiple"
+                            SelectionChanged="lvFilterDayParts_SelectionChanged" Margin="0, 5, 5, 5">
                     </ListView>
                 </Grid>
             </ScrollViewer>

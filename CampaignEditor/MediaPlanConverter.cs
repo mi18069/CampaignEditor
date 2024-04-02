@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
 using CampaignEditor.Controllers;
+using Database.DTOs.DayPartDTO;
+using Database.DTOs.DPTimeDTO;
 using Database.DTOs.MediaPlanDTO;
 using Database.DTOs.MediaPlanHistDTO;
 using Database.DTOs.MediaPlanTermDTO;
@@ -11,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows.Navigation;
 
 namespace CampaignEditor
 {
@@ -63,8 +66,32 @@ namespace CampaignEditor
 
             // Perform additional computations and set extra properties
             ComputeExtraProperties(mediaPlan, terms, calculatePrice);
+            SetDayPart(mediaPlan);
 
             return mediaPlan;
+        }
+
+        public void SetDayPart(MediaPlan mediaPlan)
+        {
+            if (mediaPlan.blocktime == null)
+            {
+                mediaPlan.DayPart = null;
+                return;
+            }
+
+            string time = mediaPlan.blocktime;
+            foreach (var dayPart in _forecastData.DayPartsDict.Keys)
+            {
+                foreach (var dpTime in _forecastData.DayPartsDict[dayPart])
+                {
+                    if ((String.Compare(dpTime.stime, time) <= 0) &&
+                        (String.Compare(dpTime.etime, time) >= 0))
+                    {
+                        mediaPlan.DayPart = dayPart;
+                        return;
+                    }
+                }
+            }
         }
 
         public async Task CalculateAMRs(MediaPlan mediaPlan)
@@ -179,16 +206,14 @@ namespace CampaignEditor
             var terms = await _mediaPlanTermController.GetAllMediaPlanTermsByXmpid(mediaPlan.xmpid);
 
             ComputeExtraProperties(mediaPlan, terms, calculatePrice);
-
-        }
+        }      
 
         public void ComputeExtraProperties(MediaPlan mediaPlan, IEnumerable<MediaPlanTermDTO> terms, bool calculatePrice = false)
         {
 
             var pricelist = _forecastData.ChidPricelistDict[mediaPlan.chid];
-
             CalculateLengthAndInsertations(mediaPlan, terms);
-
+            
             if (calculatePrice)
             {
                 CalculateAvgSeasSecCoefs(mediaPlan, pricelist, terms);
