@@ -942,7 +942,7 @@ namespace CampaignEditor.UserControls
         {
             MediaPlan mediaPlan = e.MediaPlan;
             
-            await UpdatedMediaPlan(mediaPlan, true);
+            await UpdatedMediaPlan(mediaPlan, false);
         }
         private async Task UpdatedMediaPlan(MediaPlan mediaPlan, bool updateSchema = false)
         {

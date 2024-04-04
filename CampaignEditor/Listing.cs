@@ -19,11 +19,6 @@ namespace CampaignEditor
         private MediaPlanConverter _mpConverter;
         private MediaPlanTermConverter _mpTermConverter;
 
-        private ChannelController _channelController;
-        private ChannelCmpController _channelCmpController;
-        private SpotController _spotController;
-        private PricelistController _pricelistController;
-
         public List<ChannelDTO> selectedChannels = new List<ChannelDTO>();
         public List<MediaPlanTuple> visibleTuples = new List<MediaPlanTuple>();
 
@@ -34,18 +29,9 @@ namespace CampaignEditor
         CampaignDTO _campaign;
 
 
-        public Listing(IAbstractFactory<MediaPlanConverter> factoryMpConverter,
-            IAbstractFactory<MediaPlanTermConverter> factoryMpTermConverter,
-            IChannelRepository channelRepository, IChannelCmpRepository channelCmpRepository,
-            ISpotRepository spotRepository, IPricelistChannelsRepository pricelistChannelsRepository,
-            IPricelistRepository pricelistRepository)
+        public Listing(IAbstractFactory<MediaPlanTermConverter> factoryMpTermConverter)
         {
             _mpTermConverter = factoryMpTermConverter.Create();
-
-            _channelCmpController = new ChannelCmpController(channelCmpRepository);
-            _channelController = new ChannelController(channelRepository);
-            _spotController = new SpotController(spotRepository);
-            _pricelistController = new PricelistController(pricelistRepository);
         }
 
         public void Initialize(CampaignDTO campaign, IEnumerable<ChannelDTO> channels,
@@ -67,26 +53,6 @@ namespace CampaignEditor
                     _chidChannelDictionary[channel.chid] = channel;
                 }
             }
-            /*_chidChannelDictionary.Clear();
-            _chidPricelistDictionary.Clear();
-            foreach (var channel in channels)
-            {
-                try
-                {
-                    _chidChannelDictionary.Add(channel.chid, channel);
-                    var channelCmp = await _channelCmpController.GetChannelCmpByIds(_campaign.cmpid, channel.chid);
-                    var pricelist = await _pricelistController.GetPricelistById(channelCmp.plid);
-                    _chidPricelistDictionary.Add(channel.chid, pricelist);
-                }
-                catch { }
-            }
-
-
-            _spotcodeSpotDictionary.Clear();
-            foreach (var spot in spots)
-            {
-                _spotcodeSpotDictionary.Add(spot.spotcode.Trim()[0], spot);
-            }*/
         }
 
         private bool[] TransformVisibleColumns(bool[] visibleGridColumns)

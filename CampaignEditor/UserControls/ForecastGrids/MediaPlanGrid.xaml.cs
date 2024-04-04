@@ -127,7 +127,7 @@ namespace CampaignEditor.UserControls
 
             InitializeComponent();
 
-            dgMediaPlans.IsManipulationEnabled = _canUserEdit;
+            dgMediaPlans.IsManipulationEnabled = true;
 
             // For combobox in Position column
             var positionColumn = dgMediaPlans.Columns.FirstOrDefault(c => c.Header.ToString() == "Position") as DataGridComboBoxColumn;

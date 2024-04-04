@@ -37,8 +37,7 @@
                   CurrentCellChanged="dgMediaPlans_CurrentCellChanged"
                   PreviewKeyDown="dgMediaPlans_PreviewKeyDown"
                   SizeChanged="dgMediaPlans_SizeChanged"
-                  Loaded="dgMediaPlans_Loaded"
-                  IsReadOnly="True">
+                  Loaded="dgMediaPlans_Loaded">
             <DataGrid.CellStyle>
                 <Style TargetType="DataGridCell">
                     <Style.Triggers>
@@ -61,10 +60,12 @@
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Channel" x:Name="tcChannel"
                                         IsReadOnly="True" />
-                <DataGridTextColumn Header="Program" Binding="{Binding MediaPlan.Name, Mode=TwoWay}"/>
+                <DataGridTextColumn Header="Program" Binding="{Binding MediaPlan.Name, Mode=TwoWay}"
+                                    IsReadOnly="True"/>
                 <DataGridTextColumn Header="DayPart" Binding="{Binding MediaPlan.DayPart.name, Mode=TwoWay}"
                                         IsReadOnly="True" />
-                <DataGridComboBoxColumn Header="Position" SelectedItemBinding="{Binding MediaPlan.Position, Mode=TwoWay}">
+                <DataGridComboBoxColumn Header="Position" SelectedItemBinding="{Binding MediaPlan.Position, Mode=TwoWay}"
+                                        IsReadOnly="True">
                     <DataGridComboBoxColumn.ElementStyle>
                         <Style TargetType="ComboBox"/>
                     </DataGridComboBoxColumn.ElementStyle>
@@ -74,7 +75,7 @@
                 </DataGridComboBoxColumn>
                 
                 <DataGridTextColumn Header="Start time" Binding="{Binding MediaPlan.Stime, Mode=TwoWay}"
-                                    Visibility="Collapsed">
+                                    Visibility="Collapsed" IsReadOnly="True">
                     <DataGridTextColumn.EditingElementStyle>
                         <Style TargetType="{x:Type TextBox}">
                             <Setter Property="MaxLength" Value="5"/>
@@ -82,65 +83,72 @@
                     </DataGridTextColumn.EditingElementStyle>
                 </DataGridTextColumn>
                 <DataGridTextColumn Header="End time" Binding="{Binding MediaPlan.Etime, Mode=TwoWay}"
-                                    Visibility="Collapsed">
+                                    Visibility="Collapsed" IsReadOnly="True">
                     <DataGridTextColumn.EditingElementStyle>
                         <Style TargetType="{x:Type TextBox}">
                             <Setter Property="MaxLength" Value="5"/>
                         </Style>
                     </DataGridTextColumn.EditingElementStyle>
                 </DataGridTextColumn>
-                <DataGridTextColumn Header="Block time" Binding="{Binding MediaPlan.Blocktime , Mode=TwoWay}">
+                <DataGridTextColumn Header="Block time" Binding="{Binding MediaPlan.Blocktime , Mode=TwoWay}"
+                                    IsReadOnly="True">
                     <DataGridTextColumn.EditingElementStyle>
                         <Style TargetType="{x:Type TextBox}">
                             <Setter Property="MaxLength" Value="5"/>
                         </Style>
                     </DataGridTextColumn.EditingElementStyle>
                 </DataGridTextColumn>
-                <DataGridTextColumn Header="Type" Binding="{Binding MediaPlan.Type, Mode=TwoWay}" Visibility="Collapsed"/>
+                <DataGridTextColumn Header="Type" Binding="{Binding MediaPlan.Type, Mode=TwoWay}" 
+                                    Visibility="Collapsed" IsReadOnly="True"/>
                 <DataGridCheckBoxColumn Header="Special" Binding="{Binding MediaPlan.Special, Mode=TwoWay}" 
-                                        Visibility="Collapsed"/>
+                                        Visibility="Collapsed" IsReadOnly="True"/>
 
                 <DataGridTextColumn Header="AMR 1" Binding="{Binding MediaPlan.Amr1, Mode=TwoWay, StringFormat=N2}" 
                                              IsReadOnly="True" Visibility="Collapsed" />
                 <DataGridTextColumn Header="AMR% 1" Binding="{Binding MediaPlan.Amrp1, Mode=TwoWay, StringFormat=N2}" 
                                             IsReadOnly="True"/>
                 <DataGridTextColumn Header="AMR 1 Trim" Binding="{Binding MediaPlan.Amr1trim, Mode=TwoWay}" 
-                                             Visibility="Collapsed"/>
+                                             Visibility="Collapsed" IsReadOnly="True"/>
 
                 <DataGridTextColumn Header="AMR 2" Binding="{Binding MediaPlan.Amr2, Mode=TwoWay, StringFormat=N2}" 
-                                            IsReadOnly="True" Visibility="Collapsed"/>
+                                            Visibility="Collapsed" IsReadOnly="True"/>
                 <DataGridTextColumn Header="AMR% 2" Binding="{Binding MediaPlan.Amrp2, Mode=TwoWay, StringFormat=N2}" 
-                                            IsReadOnly="True" Visibility="Collapsed"/>
+                                            Visibility="Collapsed" IsReadOnly="True"/>
                 <DataGridTextColumn Header="AMR 2 Trim" Binding="{Binding MediaPlan.Amr2trim, Mode=TwoWay}" 
-                                             Visibility="Collapsed"/>
+                                             Visibility="Collapsed" IsReadOnly="True"/>
 
                 <DataGridTextColumn Header="AMR 3" Binding="{Binding MediaPlan.Amr3, Mode=TwoWay, StringFormat=N2}" 
-                                            IsReadOnly="True" Visibility="Collapsed"/>
+                                            Visibility="Collapsed" IsReadOnly="True"/>
                 <DataGridTextColumn Header="AMR% 3" Binding="{Binding MediaPlan.Amrp3, Mode=TwoWay, StringFormat=N2}" 
-                                            IsReadOnly="True" Visibility="Collapsed"/>
+                                            Visibility="Collapsed" IsReadOnly="True"/>
                 <DataGridTextColumn Header="AMR 3 Trim" Binding="{Binding MediaPlan.Amr3trim, Mode=TwoWay}" 
-                                             Visibility="Collapsed"/>
+                                             Visibility="Collapsed" IsReadOnly="True"/>
 
                 <DataGridTextColumn Header="AMR Sale" Binding="{Binding MediaPlan.Amrsale, Mode=TwoWay, StringFormat=N2}"
-                                        IsReadOnly="True" Visibility="Collapsed"/>
+                                        Visibility="Collapsed" IsReadOnly="True"/>
                 <DataGridTextColumn Header="AMR% Sale" Binding="{Binding MediaPlan.Amrpsale, Mode=TwoWay, StringFormat=N2}" 
                                             IsReadOnly="True"/>
                 <DataGridTextColumn Header="AMR Sale Trim" Binding="{Binding MediaPlan.Amrsaletrim, Mode=TwoWay}" 
-                                             Visibility="Collapsed"/>
+                                             Visibility="Collapsed" IsReadOnly="True"/>
 
                 <DataGridTextColumn Header="Affinity" Binding="{Binding MediaPlan.Affinity, StringFormat=N2}"
                                             IsReadOnly="True"/>
-                <DataGridTextColumn Header="Prog Coef" Binding="{Binding MediaPlan.Progcoef, Mode=TwoWay, StringFormat=N2}" />
-                <DataGridTextColumn Header="DP Coef" Binding="{Binding MediaPlan.Dpcoef, StringFormat=N2}"/>
+                <DataGridTextColumn Header="Prog Coef" Binding="{Binding MediaPlan.Progcoef, Mode=TwoWay, StringFormat=N2}" 
+                                    />
+                <DataGridTextColumn Header="DP Coef" Binding="{Binding MediaPlan.Dpcoef, StringFormat=N2}"
+                                    IsReadOnly="True"/>
                 <DataGridTextColumn Header="Seas Coef" Binding="{Binding MediaPlan.Seascoef, StringFormat=N2}"
-                                    Visibility="Collapsed"/>
+                                    Visibility="Collapsed" IsReadOnly="True"/>
                 <DataGridTextColumn Header="Sec Coef" Binding="{Binding MediaPlan.Seccoef, StringFormat=N2}"
-                                    Visibility="Collapsed"/>
-                <DataGridTextColumn Header="CPP" Binding="{Binding MediaPlan.Cpp, StringFormat=N2}"/>
+                                    Visibility="Collapsed" IsReadOnly="True"/>
+                <DataGridTextColumn Header="CPP" Binding="{Binding MediaPlan.Cpp, StringFormat=N2}"
+                                    IsReadOnly="True"/>
                 <DataGridTextColumn Header="Ins" Binding="{Binding MediaPlan.Insertations}"
                                         IsReadOnly="True"/>
-                <DataGridTextColumn Header="CPSP" Binding="{Binding MediaPlan.PricePerSecond, StringFormat=N2}"/>
-                <DataGridTextColumn Header="Cost" Binding="{Binding MediaPlan.Price, StringFormat=N2}"/>
+                <DataGridTextColumn Header="CPSP" Binding="{Binding MediaPlan.PricePerSecond, StringFormat=N2}"
+                                    IsReadOnly="True"/>
+                <DataGridTextColumn Header="Cost" Binding="{Binding MediaPlan.Price, StringFormat=N2}"
+                                    IsReadOnly="True"/>
             </DataGrid.Columns>
         </DataGrid>
         <Border Grid.Row="1" BorderThickness="2" BorderBrush="Black" x:Name="bTotal">

@@ -72,6 +72,19 @@ namespace CampaignEditor
             {
                 FillByMP(_mediaPlan);
             }
+            FillProgCoef();
+        }
+
+        private async Task FillProgCoef()
+        {
+            tbProgCoef.Text = 1.0f.ToString();
+
+            if (_mediaPlan != null)
+            {
+                tbProgCoef.IsReadOnly = true;
+                var schema = await _schemaController.GetSchemaById(_mediaPlan.schid);
+                tbProgCoef.Text = schema.progcoef.ToString();
+            }
         }
 
         private void FillByMP(MediaPlan mediaPlan) 
@@ -80,7 +93,6 @@ namespace CampaignEditor
             tbTimeFrom.Text = mediaPlan.stime.ToString();
             tbTimeTo.Text = mediaPlan.etime?.ToString();
             tbBlockTime.Text = mediaPlan.blocktime?.ToString();
-            tbProgCoef.Text = mediaPlan.progcoef.ToString();
         }
 
         private async Task FillLbType()
@@ -254,12 +266,13 @@ namespace CampaignEditor
             DateOnly? dateTo = dpTo.SelectedDate.HasValue ? DateOnly.FromDateTime(dpTo.SelectedDate.Value) : null;
             _mediaPlan.edate = dateTo;
 
-            float progcoef = 1.0f;
+            // DP coef is updating only on double-click in mediaPlan, not here
+            /*float progcoef = 1.0f;
             if (tbProgCoef.Text.Trim().Length > 0 && float.TryParse(tbProgCoef.Text.Trim(), out float progCoef))
             {
                 progcoef = progCoef;
             }
-            _mediaPlan.Progcoef = progcoef;
+            _mediaPlan.Progcoef = progcoef;*/
 
         }
 
