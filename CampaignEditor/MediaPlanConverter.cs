@@ -1,7 +1,5 @@
 ﻿using AutoMapper;
 using CampaignEditor.Controllers;
-using Database.DTOs.DayPartDTO;
-using Database.DTOs.DPTimeDTO;
 using Database.DTOs.MediaPlanDTO;
 using Database.DTOs.MediaPlanHistDTO;
 using Database.DTOs.MediaPlanTermDTO;
@@ -13,7 +11,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Windows.Navigation;
 
 namespace CampaignEditor
 {

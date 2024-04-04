@@ -30,6 +30,7 @@ using CampaignEditor.Helpers;
 using OfficeOpenXml.Style;
 using Database.DTOs.SpotDTO;
 using Database.DTOs.DayPartDTO;
+using Database.DTOs.ClientProgCoefDTO;
 
 namespace CampaignEditor.UserControls
 {
@@ -45,6 +46,7 @@ namespace CampaignEditor.UserControls
         public MediaPlanTermController _mediaPlanTermController { get; set; }
         public MediaPlanConverter _mpConverter { get; set; }
         public MediaPlanTermConverter _mpTermConverter { get; set; }
+        public ClientProgCoefController _clientProgCoefController { get; set; }
         public DatabaseFunctionsController _databaseFunctionsController { get; set; }
         private Dictionary<int, string> chidChannelDictionary = new Dictionary<int, string>();
 
@@ -707,13 +709,18 @@ namespace CampaignEditor.UserControls
         {
             if (isEditingEnded)
             {
+                bool progCoefEdited = false;
                 // Compare with the original value and revert if needed
                 if (_mediaPlanToUpdate != null && !_mpConverter.SameMPValues(_mediaPlanToUpdate, _mediaPlanOldValues))
                 {
                     // If coefs are changed, we need to recalculate price
                     double eps = 0.0001;
-                    if (Math.Abs(_mediaPlanToUpdate.Progcoef - _mediaPlanOldValues.Progcoef) > eps ||
-                        Math.Abs(_mediaPlanToUpdate.Dpcoef - _mediaPlanOldValues.Dpcoef) > eps ||
+                    if (Math.Abs(_mediaPlanToUpdate.Progcoef - _mediaPlanOldValues.Progcoef) > eps)
+                    {
+                        progCoefEdited = true;
+                        _mpConverter.CoefsChanged(_mediaPlanToUpdate);
+                    }
+                    else if (Math.Abs(_mediaPlanToUpdate.Dpcoef - _mediaPlanOldValues.Dpcoef) > eps ||
                         Math.Abs(_mediaPlanToUpdate.Seccoef - _mediaPlanOldValues.Seccoef) > eps ||
                         Math.Abs(_mediaPlanToUpdate.Seascoef - _mediaPlanOldValues.Seascoef) > eps)
                     {
@@ -755,6 +762,38 @@ namespace CampaignEditor.UserControls
                         var mpDTO = _mpConverter.ConvertToDTO(_mediaPlanToUpdate);
                         await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(mpDTO));
                         _mpConverter.CopyValues(_mediaPlanToUpdate, _mediaPlanToUpdate);
+
+                        if (progCoefEdited)
+                        {
+                            var clprogcoef = await _clientProgCoefController.GetClientProgCoef(_campaign.clid, mpDTO.schid);
+                            if (clprogcoef == null)
+                            {
+                                var newClientProgCoef = new ClientProgCoefDTO(_campaign.clid, mpDTO.schid, mpDTO.progcoef);
+                                try
+                                {
+                                    await _clientProgCoefController.CreateClientProgCoef(newClientProgCoef);
+                                }
+                                catch (Exception ex)
+                                {
+                                    MessageBox.Show("Unable to change prog coef! \n" + ex.Message, "Error",
+                                        MessageBoxButton.OK, MessageBoxImage.Error);
+                                }
+                            }
+                            else
+                            {
+                                clprogcoef.progcoef = mpDTO.progcoef;
+                                try
+                                {
+                                    await _clientProgCoefController.UpdateClientProgCoef(clprogcoef);
+                                }
+                                catch (Exception ex)
+                                {
+                                    MessageBox.Show("Unable to change prog coef! \n" + ex.Message, "Error",
+                                        MessageBoxButton.OK, MessageBoxImage.Error);
+                                }
+
+                            }
+                        }
                     }
                     catch
                     {
