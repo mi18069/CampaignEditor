@@ -23,6 +23,8 @@ namespace CampaignEditor
         private MediaPlanHistController _mediaPlanHistController;
         private MediaPlanTermController _mediaPlanTermController;
 
+        private Dictionary<Tuple<int, SpotDTO>, SpotCoefs> _plidSpotCoefsDict = new Dictionary<Tuple<int, SpotDTO>, SpotCoefs>();
+
         public MediaPlanConverter(IMediaPlanHistRepository mediaPlanHistRepository,
             IMediaPlanTermRepository mediaPlanTermRepository)
         {
@@ -44,7 +46,95 @@ namespace CampaignEditor
         public void Initialize(MediaPlanForecastData forecastData)
         {
             _forecastData = forecastData;
-        }     
+            FillPlidSpotCoefsDict();
+        }            
+
+        private void FillPlidSpotCoefsDict()
+        {
+            _plidSpotCoefsDict.Clear();
+
+            foreach (var pricelist in _forecastData.Pricelists)
+            {
+                var sectable = _forecastData.PlidSectableDict[pricelist.plid];               
+
+                var seasonality = _forecastData.PlidSeasonalityDict[pricelist.plid];
+                var seasonalities = _forecastData.SeasidSeasonalitiesDict[seasonality.seasid];
+
+                    
+                foreach (var spot in _forecastData.Spots)
+                {
+                    List<DateRangeSeasCoef> dateRanges = new List<DateRangeSeasCoef>();
+
+                    var sectables = _forecastData.SecidSectablesDict[sectable.sctid].FirstOrDefault(secs => secs.sec == spot.spotlength, null);
+                    var seccoef = 1.0;
+                    /*if (sectable.sctid != 1)
+                    {
+                        seccoef = sectables == null ? 1 : sectables.coef * ((double)30 / spot.spotlength);
+                    }*/
+                    seccoef = sectables == null ? 1 : sectables.coef * ((double)30 / spot.spotlength);
+
+                    if (seasonality == null || seasonalities == null || seasonalities.Count == 0)
+                    {
+                        var seasCoef = 1.0;
+                        DateRangeSeasCoef dateRange = new DateRangeSeasCoef(TimeFormat.YMDStringToDateOnly(pricelist.valfrom.ToString()),
+                                                        TimeFormat.YMDStringToDateOnly(pricelist.valto.ToString()),
+                                                        seasCoef);
+                        dateRanges.Add(dateRange);
+                    }
+                    foreach (var seasonalityRange in seasonalities)
+                    {
+   
+                        var seasCoef = seasonalityRange.coef;
+                        DateRangeSeasCoef dateRange = new DateRangeSeasCoef(TimeFormat.YMDStringToDateOnly(seasonalityRange.stdt),
+                                                        TimeFormat.YMDStringToDateOnly(seasonalityRange.endt),
+                                                        seasCoef);
+                        dateRanges.Add(dateRange);
+                    }
+
+                    _plidSpotCoefsDict[Tuple.Create(pricelist.plid, spot)] = new SpotCoefs(dateRanges, seccoef);
+
+                }
+
+            }
+            
+        }
+
+        public List<SpotCoefsTable> GetProgramSpotCoefs(MediaPlan mediaPlan)
+        {
+            var chid = mediaPlan.chid;
+            var pricelist = _forecastData.ChidPricelistDict[chid];
+
+            List<SpotCoefsTable> spotCoefsTables = new List<SpotCoefsTable>();
+            foreach (var spot in _forecastData.Spots)
+            {
+                var spotCoefs = _plidSpotCoefsDict[Tuple.Create(pricelist.plid, spot)];
+
+                foreach (var dateRange in spotCoefs.dateRanges)
+                {
+                    double price = 0.0;
+                    var seascoef = dateRange.seascoef;
+                    var seccoef = spotCoefs.seccoef;
+                    double coefs = seascoef * seccoef * mediaPlan.Progcoef * mediaPlan.Dpcoef;
+
+                    if (pricelist.pltype == 1)
+                    {
+                        price = coefs * spot.spotlength;
+                    }
+                    // For cpp pricelists
+                    else
+                    {
+                        price = (pricelist.price / 30) * spot.spotlength * mediaPlan.Amrpsale * coefs;
+                    }
+
+                    SpotCoefsTable spotCoefsTable = new SpotCoefsTable(spot, dateRange,
+                                                    seccoef, price);
+
+                    spotCoefsTables.Add(spotCoefsTable);
+                }
+            }
+
+            return spotCoefsTables;
+        }
 
         public async Task<MediaPlan> ConvertFirstFromDTO(MediaPlanDTO mediaPlanDTO)
         {
@@ -307,6 +397,7 @@ namespace CampaignEditor
                 if (mediaPlan.Amrp1 > 0)
                 {
                     mediaPlan.Cpp = mediaPlan.Price / (mediaPlan.Amrp1);
+                    //mediaPlan.Cpp = (mediaPlan.Price / (mediaPlan.Amrp1)) * (mediaPlan.Length / 30);
                 }
                 else
                 {
@@ -386,11 +477,12 @@ namespace CampaignEditor
             var sectable = _forecastData.PlidSectableDict[pricelist.plid];
             var sectables = _forecastData.SecidSectablesDict[sectable.sctid].FirstOrDefault(secs => secs.sec == spotDTO.spotlength, null);
             var seccoef = 1.0;
-            if (sectable.sctid != 1)
+            /*if (sectable.sctid != 1)
             {
                 seccoef = sectables == null ? 1 : sectables.coef * ((double)30 / spotDTO.spotlength);
-            }
-            
+            }*/
+            seccoef = sectables == null ? 1 : sectables.coef * ((double)30 / spotDTO.spotlength);
+
             return seccoef;
         }
 

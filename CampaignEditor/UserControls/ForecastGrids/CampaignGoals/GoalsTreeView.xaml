@@ -5,9 +5,11 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:CampaignEditor.UserControls.ForecastGrids"
              mc:Ignorable="d" 
-             d:DesignHeight="400" d:DesignWidth="400" d:Background="White">
+             d:DesignHeight="400" d:DesignWidth="400" d:Background="White" >
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -24,5 +26,17 @@
                         Margin="20, 5"
                         Click="ToggleButton_Click"/>
         <local:GoalsCurrentItem x:Name="selectedItem" Grid.Row="3" Visibility="Collapsed"/>
+
+        <ToggleButton Grid.Row="4" Content="Spot Coefs" x:Name="btnSpotCoefs" 
+                        Margin="20, 5"
+                        Click="ToggleButton_Click"/>
+        <DataGrid x:Name="dgSpotCoefs" Grid.Row="5" Visibility="Collapsed" IsReadOnly="True" Margin="5, 0"
+                  HeadersVisibility="Column" MaxWidth="200">
+            <DataGridTextColumn Header="Spot" Binding="{Binding GetSpot}"/>
+            <DataGridTextColumn Header="Sec Coef" Binding="{Binding SecCoef.Name}"/>
+            <DataGridTextColumn Header="Dates" Binding="{Binding GetDateRange}"/>
+            <DataGridTextColumn Header="Seas Coef" Binding="{Binding SeasCoef}"/>
+            <DataGridTextColumn Header="Price" Binding="{Binding Price}"/>
+        </DataGrid>
     </Grid>
 </UserControl>

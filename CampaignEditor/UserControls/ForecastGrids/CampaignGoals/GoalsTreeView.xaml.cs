@@ -22,10 +22,10 @@ namespace CampaignEditor.UserControls.ForecastGrids
 
         public GoalsController _goalsController;
 
-        private MPGoals mpGoals = new MPGoals();
         private ObservableRangeCollection<MediaPlanTuple> _allMediaPlans;
+        private ObservableRangeCollection<SpotCoefsTable> _spotCoefsTable =  new ObservableRangeCollection<SpotCoefsTable>();
         private GoalsDTO _goals;
-
+        public MediaPlanConverter _mpConverter;
         public GoalsTreeView()
         {
             InitializeComponent();
@@ -36,6 +36,8 @@ namespace CampaignEditor.UserControls.ForecastGrids
             _campaign = campaign;
             _goals = await _goalsController.GetGoalsByCmpid(_campaign.cmpid);
             totalItem.InitializeFields(_goals);
+            dgSpotCoefs.Items.Clear();
+            dgSpotCoefs.ItemsSource = _spotCoefsTable;
         }
 
         public void FillGoals(IEnumerable<MediaPlanTuple> allMediaPlans)
@@ -58,6 +60,8 @@ namespace CampaignEditor.UserControls.ForecastGrids
         public void SelectedTupleChanged(MediaPlanTuple newTuple)
         {
             selectedItem.FillGoals(newTuple);
+            var spotCoefs = _mpConverter.GetProgramSpotCoefs(newTuple.MediaPlan);
+            _spotCoefsTable.ReplaceRange(spotCoefs);
         }
 
         private void ToggleButton_Click(object sender, RoutedEventArgs e)
@@ -69,6 +73,10 @@ namespace CampaignEditor.UserControls.ForecastGrids
             else if (sender == btnSelected)
             {
                 selectedItem.Visibility = btnSelected.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
+            }
+            else if (sender == btnSpotCoefs)
+            {
+                dgSpotCoefs.Visibility = btnSpotCoefs.IsChecked == true ? Visibility.Visible : Visibility.Collapsed;
             }
         }
 

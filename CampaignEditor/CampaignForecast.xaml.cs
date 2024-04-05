@@ -256,6 +256,7 @@ namespace CampaignEditor.UserControls
         private async Task InitializeGoals()
         {
             goalsTreeView._goalsController = _goalsController;
+            goalsTreeView._mpConverter = _mpConverter;
             await goalsTreeView.Initialize(_campaign);
         }
 

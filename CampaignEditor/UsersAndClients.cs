@@ -21,20 +21,24 @@ namespace CampaignEditor
         private UserController _userController;
         private CampaignController _campaignController;
         private UserClientsController _userClientsController;
-        private MediaPlanRefController _mediaPlanRefController;
+        private DayPartController _dayPartController;
+        private DPTimeController _dpTimeController;
 
         private ClientDTO _client = null;
         public UsersAndClients(IClientRepository clientRepository, 
                                IUserRepository userRepository,
                                IUserClientsRepository userClientsRepository,
                                ICampaignRepository campaignRepository,
-                               IMediaPlanRefRepository mediaPlanRefRepository)
+                               IMediaPlanRefRepository mediaPlanRefRepository,
+                               IDayPartRepository dayPartRepository,
+                               IDPTimeRepository dpTimeRepository)
         {
             _clientController = new ClientController(clientRepository);
             _userController = new UserController(userRepository);
             _userClientsController = new UserClientsController(userClientsRepository);
             _campaignController = new CampaignController(campaignRepository);
-            _mediaPlanRefController = new MediaPlanRefController(mediaPlanRefRepository);
+            _dayPartController = new DayPartController(dayPartRepository);
+            _dpTimeController = new DPTimeController(dpTimeRepository);
         }
 
         public void Initialize(ClientDTO client)
@@ -183,6 +187,14 @@ namespace CampaignEditor
                 }
                 else
                 {
+                    // Delete dayParts binded to that client
+                    var dayParts = await _dayPartController.GetAllClientDayParts(client.clid);
+                    foreach (var dayPart in dayParts)
+                    {
+                        await _dpTimeController.DeleteDPTimeByDPId(dayPart.dpid);
+                        await _dayPartController.DeleteDayPart(dayPart.dpid);
+                    }
+
                     bool success = await _clientController.DeleteClientById(client.clid);
                     if (!success)
                         return false;
