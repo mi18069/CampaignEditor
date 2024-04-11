@@ -20,6 +20,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Media;
 using CampaignEditor.Helpers;
+using Database.Entities;
 
 namespace CampaignEditor
 {
@@ -113,6 +114,7 @@ namespace CampaignEditor
         }
         #endregion
 
+        public event EventHandler<UpdatePricelistEventArgs> PricelistUpdatedEvent;
         public Channels(IChannelRepository channelRepository, IPricelistRepository pricelistRepository,
             IPricelistChannelsRepository pricelistChannelsRepository, IActivityRepository activityRepository,
             IAbstractFactory<PriceList> factoryPriceList, IChannelCmpRepository channelCmpRepository,
@@ -455,11 +457,16 @@ namespace CampaignEditor
             else
                 await f.Initialize(_campaign);
             f.ShowDialog();
-            if (f.pricelistChanged)
+            if (f.pricelistChanged || f.sectableModified || f.seasonalityModified)
             {
                 _allPricelistsList = ((await _pricelistController.GetAllClientPricelists(_client.clid))).ToList<PricelistDTO>();
                 //lvChannels_SelectionChanged(lvChannels, null);
                 await RefreshPricelists();
+                pricelistChanged = true;
+                if (f._pricelist != null)
+                {
+                    PricelistUpdatedEvent?.Invoke(this, new UpdatePricelistEventArgs(f._pricelist));
+                }
             }
         }
 
@@ -494,6 +501,11 @@ namespace CampaignEditor
                         break;
                     }
                 }
+
+                if (f._pricelist != null)
+                {
+                    PricelistUpdatedEvent?.Invoke(this, new UpdatePricelistEventArgs(f._pricelist));
+                }
             }
             btnEditPricelist.IsEnabled = true;
 
@@ -510,6 +522,7 @@ namespace CampaignEditor
                 _allPricelistsList = (List<PricelistDTO>)(await _pricelistController.GetAllClientPricelists(_client.clid));
                 //lvChannels_SelectionChanged(lvChannels, null);
                 await RefreshPricelists();
+                pricelistChanged = true;
             }
             btnNewPricelist.IsEnabled = true;
 
@@ -544,6 +557,7 @@ namespace CampaignEditor
             btnEditChannelGroups.IsEnabled = false;
             var f = _factoryGroupChannels.Create();
             await f.Initialize(_client, _campaign);
+
             f.ShowDialog();
             if (f.channelsModified)
             {

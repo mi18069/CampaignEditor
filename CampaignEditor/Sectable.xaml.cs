@@ -24,6 +24,8 @@ namespace CampaignEditor
         private SectableDTO _sectable = null;
         private CampaignDTO _campaign = null;
 
+        public SectableDTO Sec { get { return _sectable; } }
+
         ObservableCollection<Tuple<int, double>> dgList = new ObservableCollection<Tuple<int, double>>();
 
         public Sectable(ISectableRepository sectableRepository,

@@ -1,9 +1,11 @@
 ﻿using CampaignEditor.Controllers;
 using CampaignEditor.Helpers;
 using Database.DTOs.CampaignDTO;
+using Database.DTOs.ChannelDTO;
 using Database.DTOs.MediaPlanDTO;
 using Database.DTOs.MediaPlanHistDTO;
 using Database.DTOs.MediaPlanTermDTO;
+using Database.DTOs.PricelistDTO;
 using Database.DTOs.SchemaDTO;
 using Database.Entities;
 using Database.Repositories;
@@ -601,6 +603,15 @@ namespace CampaignEditor
             var termsDTO = _mpTermConverter.ConvertToEnumerableDTO(mediaPlanTuple.Terms);
             _mpConverter.ComputeExtraProperties(mediaPlanTuple.MediaPlan, termsDTO, true);
             await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(_mpConverter.ConvertToDTO(mediaPlanTuple.MediaPlan)));
+        }
+
+        public async Task RecalculatePricelistMediaPlans(IEnumerable<MediaPlanTuple> mpTuples)
+        {
+            
+            foreach (var mpTuple in mpTuples)
+            {
+                await RecalculateMPValues(mpTuple);
+            }
         }
 
         #endregion

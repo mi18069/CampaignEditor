@@ -51,6 +51,7 @@ namespace CampaignEditor
         private DayPartController _dayPartController;
         private DPTimeController _dpTimeController;
 
+        public CampaignDTO Campaign { get {return _campaign; } }
         public List<ChannelDTO> Channels { get { return _channels; } }
         public List<SpotDTO> Spots { get { return _spots; } }
         public List<PricelistDTO> Pricelists { get { return _pricelists; } }
@@ -165,7 +166,7 @@ namespace CampaignEditor
             _channels = _channels.OrderBy(ch => ch.chname).ToList();
         }      
 
-        private async Task InitializePricelists()
+        public async Task InitializePricelists()
         {
             _pricelists.Clear();
             _chidPricelistDict.Clear();

@@ -1,9 +1,11 @@
 ﻿using AutoMapper;
 using CampaignEditor.Controllers;
+using Database.DTOs.CampaignDTO;
 using Database.DTOs.MediaPlanDTO;
 using Database.DTOs.MediaPlanHistDTO;
 using Database.DTOs.MediaPlanTermDTO;
 using Database.DTOs.PricelistDTO;
+using Database.DTOs.SeasonalitiesDTO;
 using Database.DTOs.SpotDTO;
 using Database.Entities;
 using Database.Repositories;
@@ -66,20 +68,19 @@ namespace CampaignEditor
                     List<DateRangeSeasCoef> dateRanges = new List<DateRangeSeasCoef>();
 
                     var sectables = _forecastData.SecidSectablesDict[sectable.sctid].FirstOrDefault(secs => secs.sec == spot.spotlength, null);
-                    var seccoef = 1.0;
-                    /*if (sectable.sctid != 1)
-                    {
-                        seccoef = sectables == null ? 1 : sectables.coef * ((double)30 / spot.spotlength);
-                    }*/
-                    seccoef = sectables == null ? 1 : sectables.coef * ((double)30 / spot.spotlength);
+                    double seccoef = sectables == null ? 0.0 : sectables.coef;
 
                     if (seasonality == null || seasonalities == null || seasonalities.Count == 0)
                     {
                         var seasCoef = 1.0;
-                        DateRangeSeasCoef dateRange = new DateRangeSeasCoef(TimeFormat.YMDStringToDateOnly(pricelist.valfrom.ToString()),
-                                                        TimeFormat.YMDStringToDateOnly(pricelist.valto.ToString()),
+                        DateRangeSeasCoef dateRange = new DateRangeSeasCoef(TimeFormat.YMDStringToDateOnly(_forecastData.Campaign.cmpsdate),
+                                                        TimeFormat.YMDStringToDateOnly(_forecastData.Campaign.cmpsdate),
                                                         seasCoef);
                         dateRanges.Add(dateRange);
+                    }
+                    else
+                    {
+                        seasonalities = GetConsecutiveSeasonalityRanges(_forecastData.Campaign ,seasonalities);
                     }
                     foreach (var seasonalityRange in seasonalities)
                     {
@@ -97,6 +98,76 @@ namespace CampaignEditor
 
             }
             
+        }
+
+        private List<SeasonalitiesDTO> GetConsecutiveSeasonalityRanges(CampaignDTO campaign, IEnumerable<SeasonalitiesDTO> seasonalities)
+        {
+            List<SeasonalitiesDTO> consecutiveSeasonalities = new List<SeasonalitiesDTO>();
+
+            var orderedSeasonlities = seasonalities.OrderBy(seas => seas.stdt).ToList();
+            DateOnly startDate = TimeFormat.YMDStringToDateOnly(campaign.cmpsdate);
+            DateOnly endDate = TimeFormat.YMDStringToDateOnly(campaign.cmpedate);
+            DateOnly currentDate = startDate;           
+
+
+
+            foreach (var seasonalitiesRange in orderedSeasonlities)
+            {
+                if (TimeFormat.YMDStringToDateOnly(seasonalitiesRange.endt) < startDate)
+                    continue;
+                if (TimeFormat.YMDStringToDateOnly(seasonalitiesRange.stdt) > endDate)
+                    break;
+                // Check if the current date is before the start date of the next interval
+                if (currentDate < TimeFormat.YMDStringToDateOnly(seasonalitiesRange.stdt))
+                {
+                    // Add interval from current date to the start date of the next interval
+                    var seasonalitiesPreRangePart = new SeasonalitiesDTO
+                    (
+                        seasid: -1,
+                        stdt: currentDate.ToString("yyyyMMdd"),
+                        endt: TimeFormat.YMDStringToDateOnly(seasonalitiesRange.stdt).AddDays(-1).ToString("yyyyMMdd"),
+                        coef: 1.0
+                    );
+                    consecutiveSeasonalities.Add(seasonalitiesPreRangePart);
+                    currentDate = TimeFormat.YMDStringToDateOnly(seasonalitiesPreRangePart.endt).AddDays(1);
+
+                }
+                
+                var maxStartDate = startDate > currentDate ?
+                    startDate : currentDate;
+
+                var minEndDate = endDate < TimeFormat.YMDStringToDateOnly(seasonalitiesRange.endt) ?
+                    endDate : TimeFormat.YMDStringToDateOnly(seasonalitiesRange.endt);
+
+                var seasonalitiesRangePart = new SeasonalitiesDTO
+                (
+                    seasid: seasonalitiesRange.seasid,
+                    stdt: maxStartDate.ToString("yyyyMMdd"),
+                    endt: minEndDate.ToString("yyyyMMdd"),
+                    coef: seasonalitiesRange.coef
+                );
+                consecutiveSeasonalities.Add(seasonalitiesRangePart);
+                
+
+                // Update current date to the end date of the current interval plus one day
+                currentDate = TimeFormat.YMDStringToDateOnly(seasonalitiesRange.endt).AddDays(1);
+            }
+
+            // Add the interval from the last end date to the end date of the campaign
+            if (currentDate <= endDate)
+            {
+                var seasonalitiesRangePart = new SeasonalitiesDTO
+                (
+                    seasid: -1,
+                    stdt: currentDate.ToString("yyyyMMdd"),
+                    endt: endDate.ToString("yyyyMMdd"),
+                    coef: 1.0
+                );
+                consecutiveSeasonalities.Add(seasonalitiesRangePart);
+            }
+
+            return consecutiveSeasonalities;
+
         }
 
         public List<SpotCoefsTable> GetProgramSpotCoefs(MediaPlan mediaPlan)
@@ -308,7 +379,7 @@ namespace CampaignEditor
             }
 
             CalculatePricePerSeconds(mediaPlan, pricelist);
-            CalculateCPP(mediaPlan, pricelist);
+            CalculateCPP(mediaPlan, pricelist, terms);
 
         }
 
@@ -389,7 +460,7 @@ namespace CampaignEditor
             }
         }
 
-        private void CalculateCPP(MediaPlan mediaPlan, PricelistDTO pricelist)
+        private void CalculateCPP(MediaPlan mediaPlan, PricelistDTO pricelist, IEnumerable<MediaPlanTermDTO> terms)
         {
             // For seconds pricelists
             if (pricelist.pltype == 1)
@@ -407,7 +478,36 @@ namespace CampaignEditor
             // For cpp pricelists
             else
             {
+                //CalculateAvgCpp(mediaPlan, pricelist, terms);
                 mediaPlan.Cpp = pricelist.price;
+            }
+        }
+
+        private void CalculateAvgCpp(MediaPlan mediaPlan, PricelistDTO pricelist, IEnumerable<MediaPlanTermDTO> terms)
+        {
+            int cppCount = 0;
+            double cpp = 0.0;
+
+            foreach (var term in terms)
+            {
+                if (term != null && term.spotcode != null)
+                {
+                    foreach (char c in term.spotcode.Trim())
+                    {
+                        SpotDTO spot = _forecastData.SpotcodeSpotDict[c];
+                        cpp += (pricelist.price / (double)30) * spot.spotlength;
+                        cppCount += 1;
+                    }
+                }
+            }
+
+            if (cppCount == 0)
+            {
+                mediaPlan.Cpp = pricelist.price;
+            }
+            else
+            {
+                mediaPlan.Cpp = cpp / cppCount;
             }
         }
 
@@ -459,6 +559,12 @@ namespace CampaignEditor
                         double seascoef = CalculateTermSeascoef(mediaPlan, pricelist, mpTerm);
                         double coefs = seascoef * seccoef * mediaPlan.Progcoef * mediaPlan.Dpcoef;
 
+                        if (coefs == 0)
+                        {
+                            price = 0.0;
+                            break;
+                        }
+                            
                         price += (pricelist.price / 30) * spotDTO.spotlength * mediaPlan.Amrpsale * coefs;
                     }
                 }
@@ -481,8 +587,8 @@ namespace CampaignEditor
             {
                 seccoef = sectables == null ? 1 : sectables.coef * ((double)30 / spotDTO.spotlength);
             }*/
-            seccoef = sectables == null ? 1 : sectables.coef * ((double)30 / spotDTO.spotlength);
-
+            seccoef = sectables == null ? 0.0 : sectables.coef;
+            //seccoef *= ((double)spotDTO.spotlength / 30);
             return seccoef;
         }
 
@@ -518,11 +624,11 @@ namespace CampaignEditor
             mediaPlan.Seccoef = seccoef;*/
 
             var sectable = _forecastData.PlidSectableDict[pricelist.plid];
-            if (sectable.sctid == 1)
+            /*if (sectable.sctid == 1)
             {
                 mediaPlan.Seccoef = 1.0;
                 return;
-            }
+            }*/
 
             int secCount = 0;
             double seccoef = 0.0;
@@ -536,11 +642,18 @@ namespace CampaignEditor
                         SpotDTO spot = _forecastData.SpotcodeSpotDict[c];
                         //var sec = await _sectablesController.GetSectablesByIdAndSec(sectable.sctid, spot.spotlength);
                         var sec = _forecastData.SecidSectablesDict[sectable.sctid].FirstOrDefault(secs => secs.sec == spot.spotlength, null);
-                        
-                        if (sec != null)
-                            seccoef += sec.coef * ((double)30 / spot.spotlength);
+
+                        /*if (sec != null)
+                            seccoef += sec.coef * ((double)spot.spotlength / 30);
                         else
-                            seccoef += 1.0;
+                            seccoef += 1.0 * ((double)spot.spotlength / 30);*/
+                        if (sec != null)
+                            seccoef += sec.coef;
+                        else
+                        {
+                            mediaPlan.Seccoef = 0.0;
+                            return;
+                        }
                         secCount += 1;
                     }
                 }            

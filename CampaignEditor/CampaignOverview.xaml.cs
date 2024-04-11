@@ -53,6 +53,7 @@ namespace CampaignEditor
         public event EventHandler ClosePageEvent;
         public event EventHandler GoalsUpdatedEvent;
         public event EventHandler<UpdateChannelsEventArgs> ChannelsUpdatedEvent;
+        public event EventHandler<UpdatePricelistEventArgs> PricelistUpdatedEvent;
         public event EventHandler SpotsUpdatedEvent;
         public event EventHandler DayPartsUpdatedEvent;
         public CampaignOverview(IAbstractFactory<AssignTargets> factoryAssignTargets,
@@ -299,7 +300,10 @@ namespace CampaignEditor
             {
                 fChannels = _factoryChannels.Create();
                 await fChannels.Initialize(_client, _campaign, _channels);
+                fChannels.PricelistUpdatedEvent += FChannels_PricelistUpdatedEvent;
                 fChannels.ShowDialog();
+                fChannels.PricelistUpdatedEvent -= FChannels_PricelistUpdatedEvent;
+
             }
             catch
             {
@@ -320,6 +324,11 @@ namespace CampaignEditor
 
             btnChannels.IsEnabled = true;
 
+        }
+
+        private void FChannels_PricelistUpdatedEvent(object? sender, UpdatePricelistEventArgs e)
+        {
+            PricelistUpdatedEvent?.Invoke(this, e);
         }
         #endregion
 

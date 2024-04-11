@@ -21,6 +21,8 @@ namespace CampaignEditor
 
         private SeasonalityDTO _seasonality = null;
 
+        public SeasonalityDTO Seas { get { return _seasonality; } }
+
         public bool success = false;
         private bool modifiedSeasonalities = false;
         private bool modifiedSeasonality = false;
@@ -246,7 +248,7 @@ namespace CampaignEditor
                 startEndDate.Add(Tuple.Create(startDate, endDate));
             }
 
-            startEndDate.OrderBy(sed => sed.Item1);
+            startEndDate = startEndDate.OrderBy(sed => sed.Item1).ToList();
 
             for (int i = 0; i < startEndDate.Count() - 1; i++)
             {

@@ -107,6 +107,7 @@ namespace CampaignEditor
         {
             factoryCampaignOverview.GoalsUpdatedEvent += CampaignForecastView_GoalsUpdatedEvent;
             factoryCampaignOverview.ChannelsUpdatedEvent += CampaignForecastView_ChannelsUpdatedEvent;
+            factoryCampaignOverview.PricelistUpdatedEvent += CampaignForecastView_PricelistUpdatedEvent;
             factoryCampaignOverview.SpotsUpdatedEvent += CampaignForecastView_SpotsUpdatedEvent;
             factoryCampaignOverview.DayPartsUpdatedEvent += CampaignForecastView_DayPartsUpdatedEvent;
         }
@@ -115,6 +116,7 @@ namespace CampaignEditor
         {
             factoryCampaignOverview.GoalsUpdatedEvent -= CampaignForecastView_GoalsUpdatedEvent;
             factoryCampaignOverview.ChannelsUpdatedEvent -= CampaignForecastView_ChannelsUpdatedEvent;
+            factoryCampaignOverview.PricelistUpdatedEvent -= CampaignForecastView_PricelistUpdatedEvent;
             factoryCampaignOverview.SpotsUpdatedEvent -= CampaignForecastView_SpotsUpdatedEvent;
             factoryCampaignOverview.DayPartsUpdatedEvent -= CampaignForecastView_DayPartsUpdatedEvent;
 
@@ -160,6 +162,18 @@ namespace CampaignEditor
             var channelsToAdd = e.channelsToAdd;
 
             await factoryCampaignForecastView.UpdateChannels(channelsToDelete, channelsToAdd);
+        }
+
+        private async void CampaignForecastView_PricelistUpdatedEvent(object? sender, UpdatePricelistEventArgs e)
+        {
+            if (!isCampaignInitialized)
+            {
+                return;
+            }
+
+            var pricelist = e.pricelist;
+
+            await factoryCampaignForecastView.UpdatePricelist(pricelist);
         }
 
         private async void ForecastView_UpdateValidation(object? sender, EventArgs e)

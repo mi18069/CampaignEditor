@@ -11,6 +11,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using Database.DTOs.PricelistDTO;
 
 namespace CampaignEditor
 {
@@ -251,6 +252,20 @@ namespace CampaignEditor
             catch (Exception ex)
             {
                 MessageBox.Show("Error while updating channels:\n" + ex.Message, "Error", MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+                return;
+            }
+        }
+
+        public async Task UpdatePricelist(PricelistDTO pricelist)
+        {
+            try
+            {
+                await _forecast.PricelistChanged(pricelist);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error while updating pricelist:\n" + ex.Message, "Error", MessageBoxButton.OK,
                     MessageBoxImage.Error);
                 return;
             }

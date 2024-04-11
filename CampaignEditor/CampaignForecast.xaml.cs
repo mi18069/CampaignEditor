@@ -23,6 +23,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using Database.DTOs.DayPartDTO;
+using Database.DTOs.PricelistDTO;
 
 namespace CampaignEditor.UserControls
 {
@@ -155,7 +156,7 @@ namespace CampaignEditor.UserControls
             var mpVer = await _mediaPlanVersionController.GetLatestMediaPlanVersion(_campaign.cmpid);
             await _forecastData.InitializeSpots();
             _mpConverter.Initialize(_forecastData);
-          
+            goalsTreeView._mpConverter = _mpConverter;
             await LoadData(mpVer.version);
 
             SetContentPage?.Invoke(this, null);
@@ -167,6 +168,7 @@ namespace CampaignEditor.UserControls
 
             await _forecastData.InitializeDayParts();
             _mpConverter.Initialize(_forecastData);
+            FillLvFilterDayParts();
             foreach (var mediaPlan in _allMediaPlans.Select(mpt => mpt.MediaPlan))
             {
                 _mpConverter.SetDayPart(mediaPlan);
@@ -202,6 +204,38 @@ namespace CampaignEditor.UserControls
             SetLoadingPage?.Invoke(this, new LoadingPageEventArgs("LOADING...", 0));
 
             await LoadData(mpVer.version);
+
+            SetContentPage?.Invoke(this, null);
+
+        }
+
+        public async Task PricelistChanged(PricelistDTO pricelist)
+        {
+            SetLoadingPage?.Invoke(this, null);
+
+            await _forecastData.InitializePricelists();
+            _mpConverter.Initialize(_forecastData);
+            _forecastDataManipulation.Initialize(_campaign, _forecastData, _mpConverter);
+
+            var channelIds = new List<int>();
+            foreach (var keyValue in _forecastData.ChidPricelistDict)
+            {
+                if (keyValue.Value.plid == pricelist.plid)
+                {
+                    channelIds.Add(keyValue.Key);
+                }
+            }
+            foreach (var channelId in channelIds)
+            {
+                /*var mpTuples = _allMediaPlans.Where(mpt => mpt.MediaPlan.chid == channelId);
+                await _forecastDataManipulation.RecalculatePricelistMediaPlans(mpTuples);*/
+                await CalculateMPValuesForChannel(_campaign.cmpid, channelId, _maxVersion);
+            }
+
+
+            SetLoadingPage?.Invoke(this, new LoadingPageEventArgs("LOADING...", 0));
+
+            await LoadData(_maxVersion);
 
             SetContentPage?.Invoke(this, null);
 
@@ -352,8 +386,8 @@ namespace CampaignEditor.UserControls
 
         private void FillLvFilterDayParts()
         {
-            filteredDayParts = _forecastData.DayPartsDict.Select(kv => kv.Key).ToList();
-            lvFilterDayParts.ItemsSource = filteredDayParts;
+            var filterDayParts = _forecastData.DayPartsDict.Select(kv => kv.Key).ToList();
+            lvFilterDayParts.ItemsSource = filterDayParts;
         }
 
         private void lvFilterDays_SelectionChanged(object sender, SelectionChangedEventArgs e)

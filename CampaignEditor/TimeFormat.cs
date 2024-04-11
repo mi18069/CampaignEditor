@@ -21,6 +21,7 @@ namespace CampaignEditor
 
             return year + month + day;
         }
+        
         public static string? DTToTimeString(DateTime dt)
         {
 

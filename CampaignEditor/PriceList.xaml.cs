@@ -44,6 +44,8 @@ namespace CampaignEditor
         private bool pricelistModified = false;
         private bool pricelistChannelsModified = false;
         private bool dayPartsModified = false;
+        public bool sectableModified = false;
+        public bool seasonalityModified = false;
 
         public bool pricelistChanged = false;
         public PriceList(IAbstractFactory<Sectable> factorySectable, IAbstractFactory<Seasonality> factorySeasonality,
@@ -771,7 +773,12 @@ namespace CampaignEditor
             factory.Initialize(_campaign);
             factory.ShowDialog();
             if (factory.success)
-                await FillCBSectable(index);
+            {
+                var sec = factory.Sec;
+                cbSectable.Items.Add(sec);
+                cbSectable.SelectedIndex = cbSectable.Items.Count - 1;
+                sectableModified = true;
+            }
 
         }
         private async void btnEditSectable_Click(object sender, RoutedEventArgs e)
@@ -783,18 +790,26 @@ namespace CampaignEditor
             factory.Initialize(_campaign, sectable);
             factory.ShowDialog();
             if (factory.success)
-                await FillCBSectable(index);
+            {
+                cbSeasonality.Items[index] = factory.Sec;
+                cbSeasonality.SelectedIndex = index;
+                sectableModified = true;
+            }
         }
 
         private async void btnNewSeasonality_Click(object sender, RoutedEventArgs e)
         {
             var factory = _factorySeasonality.Create();
-            int index = cbSeasonality.Items.Count;
 
             factory.Initialize(_campaign);
             factory.ShowDialog();
             if (factory.success)
-                await FillCBSeasonality(index);
+            {
+                var seas = factory.Seas;
+                cbSeasonality.Items.Add(seas);
+                cbSeasonality.SelectedIndex = cbSeasonality.Items.Count-1;
+                seasonalityModified = true;
+            }
         }
         private async void btnEditSeasonality_Click(object sender, RoutedEventArgs e)
         {
@@ -805,7 +820,11 @@ namespace CampaignEditor
             factory.Initialize(_campaign, seasonality);
             factory.ShowDialog();
             if (factory.success)
-                await FillCBSeasonality(index);
+            {
+                cbSeasonality.Items[index] = factory.Seas;
+                cbSeasonality.SelectedIndex = index;
+                seasonalityModified = true;
+            }
         }
         #endregion
 
@@ -830,6 +849,7 @@ namespace CampaignEditor
 
         private void btnCancel_Click(object sender, RoutedEventArgs e)
         {
+            
             this.Close();
         }
 
