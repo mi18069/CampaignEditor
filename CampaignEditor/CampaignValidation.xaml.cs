@@ -1,7 +1,5 @@
 ﻿using CampaignEditor.Controllers;
 using Database.DTOs.CampaignDTO;
-using CampaignEditor.Entities;
-using CampaignEditor.UserControls;
 using Database.DTOs.ChannelDTO;
 using Database.Repositories;
 using System;
@@ -13,7 +11,7 @@ using System.Windows.Controls;
 namespace CampaignEditor
 {
     /// <summary>
-    /// Page in which we'll graphically see times of reserved and realized ads
+    /// Page in which we'll graphically see times of reserved and realized terms
     /// </summary>
     public partial class CampaignValidation : Page
     {

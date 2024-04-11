@@ -106,6 +106,7 @@ namespace CampaignEditor
                     Database.Extensions.DayPartExtensions.AddDayPartExtensions(services);
                     Database.Extensions.DPTimeExtensions.AddDPTimeExtensions(services);
                     Database.Extensions.ClientProgCoefExtensions.AddClientProgCoefExtensions(services);
+                    Database.Extensions.MediaPlanRealizedExtensions.AddMediaPlanRealizedExtensions(services);
 
                 }).Build();
 
