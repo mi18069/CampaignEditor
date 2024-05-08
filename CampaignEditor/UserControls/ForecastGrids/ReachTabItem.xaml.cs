@@ -1,6 +1,7 @@
 ﻿using CampaignEditor.Controllers;
 using CampaignEditor.Helpers;
 using Database.DTOs.CampaignDTO;
+using Database.DTOs.ReachDTO;
 using Database.DTOs.TargetDTO;
 using Microsoft.Win32;
 using System;
@@ -59,9 +60,18 @@ namespace CampaignEditor.UserControls.ForecastGrids
         {
             visibleGrid.Visibility = Visibility.Collapsed;
             loadingGrid.Visibility = Visibility.Visible;
+            ReachDTO reach = null;
+            try
+            {
+                await _databaseFunctionsController.StartReachCalculation(_campaign.cmpid, _segins, _segbet, true, true, null);
+                reach = await _reachController.GetFinalReachByCmpid(_campaign.cmpid);
+            }
+            catch (Exception ex) 
+            {
+                MessageBox.Show("Error while recalculating data: " + ex.Message,
+                    "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
 
-            await _databaseFunctionsController.StartReachCalculation(_campaign.cmpid, _segins, _segbet, true, true, null);
-            var reach = await _reachController.GetFinalReachByCmpid(_campaign.cmpid);
 
             loadingGrid.Visibility = Visibility.Collapsed;
             visibleGrid.Visibility = Visibility.Visible;

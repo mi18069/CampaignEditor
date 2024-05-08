@@ -15,9 +15,15 @@ namespace CampaignEditor.Controllers
             _repository = repository ?? throw new ArgumentNullException(nameof(repository));
         }
 
-        public async Task<bool> CreatePricelist(CreatePricelistDTO pricelistDTO)
+        public async Task<PricelistDTO> CreatePricelist(CreatePricelistDTO pricelistDTO)
         {
-            return await _repository.CreatePricelist(pricelistDTO);
+            var newId =  await _repository.CreatePricelist(pricelistDTO);
+            if (newId != -1)
+            {
+                return await _repository.GetPricelistById(newId);
+            }
+
+            return null;
         }
 
         public async Task<PricelistDTO> GetPricelistById(int id)

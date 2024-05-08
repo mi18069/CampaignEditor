@@ -615,6 +615,7 @@ namespace CampaignEditor.UserControls.ForecastGrids
                     }
                 }
             }*/
+
             var border = channelBorderDict[channel];
             border.Visibility = Visibility.Visible;
 

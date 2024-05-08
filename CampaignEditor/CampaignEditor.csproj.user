@@ -54,6 +54,9 @@
     <Compile Update="ClientDayParts.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="DuplicatePricelist.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="ImportFromSchema.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -255,6 +258,9 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="ClientDayParts.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="DuplicatePricelist.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="ImportFromSchema.xaml">

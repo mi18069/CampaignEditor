@@ -6,7 +6,7 @@ namespace Database.Repositories
 {
     public interface IPricelistRepository
     {
-        Task<bool> CreatePricelist(CreatePricelistDTO pricelistDTO);
+        Task<int> CreatePricelist(CreatePricelistDTO pricelistDTO);
         Task<PricelistDTO> GetPricelistById(int id);
         Task<PricelistDTO> GetPricelistByName(string pricelistname);
         Task<PricelistDTO> GetClientPricelistByName(int clid, string pricelistname);

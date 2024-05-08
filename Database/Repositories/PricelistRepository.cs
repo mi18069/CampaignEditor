@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Dapper;
 using Database.Data;
+using Database.DTOs.MediaPlanDTO;
 using Database.DTOs.PricelistDTO;
 using Database.Entities;
 using System;
@@ -20,15 +21,16 @@ namespace Database.Repositories
             _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper));
         }
 
-        public async Task<bool> CreatePricelist(CreatePricelistDTO pricelistDTO)
+        public async Task<int> CreatePricelist(CreatePricelistDTO pricelistDTO)
         {
             using var connection = _context.GetConnection();
 
-            var affected = await connection.ExecuteAsync(
+            var result = await connection.ExecuteScalarAsync<int>(
                 "INSERT INTO tblpricelist (clid, plname, pltype, sectbid, seastbid, plactive, price, minprice, " +
                 "prgcoef, pltarg, use2, sectbid2, sectb2st, sectb2en, valfrom, valto, mgtype) " +
                     "VALUES (@Clid, @Plname, @Pltype, @Sectbid, @Seastbid, @Plactive, @Price, @Minprice, " +
-                    "@Prgcoef, @Pltarg, @Use2, @Sectbid2, @Sectb2st, @Sectb2en, @Valfrom, @Valto, @Mgtype)",
+                    "@Prgcoef, @Pltarg, @Use2, @Sectbid2, @Sectb2st, @Sectb2en, @Valfrom, @Valto, @Mgtype) " +
+                    "RETURNING plid",
             new
                 {
                 Clid = pricelistDTO.clid,
@@ -51,7 +53,16 @@ namespace Database.Repositories
             });
 
 
-            return affected != 0;
+            if (result != null)
+            {
+                // Successfully inserted, 'result' contains the newly inserted MediaPlan with Id
+                return result;
+            }
+            else
+            {
+                // Insertion failed, handle accordingly (e.g., throw an exception)
+                return -1;
+            }
         }
 
         public async Task<PricelistDTO> GetPricelistById(int id)

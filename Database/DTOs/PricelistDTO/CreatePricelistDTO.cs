@@ -7,5 +7,10 @@ namespace Database.DTOs.PricelistDTO
             : base(clid, plname, pltype, sectbid, seastbid, plactive, price, minprice, prgcoef, pltarg, use2, sectbid2, sectb2st, sectb2en, valfrom, valto, mgtype)
         {
         }
+
+        public CreatePricelistDTO(PricelistDTO pricelist)
+            : base(pricelist.clid, pricelist.plname, pricelist.pltype, pricelist.sectbid, pricelist.seastbid, pricelist.plactive, pricelist.price, pricelist.minprice, pricelist.prgcoef, pricelist.pltarg, pricelist.use2, pricelist.sectbid2, pricelist.sectb2st, pricelist.sectb2en, pricelist.valfrom, pricelist.valto, pricelist.mgtype)
+        {
+        }
     }
 }

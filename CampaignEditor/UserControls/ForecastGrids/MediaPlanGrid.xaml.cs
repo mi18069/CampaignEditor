@@ -31,6 +31,7 @@ using OfficeOpenXml.Style;
 using Database.DTOs.SpotDTO;
 using Database.DTOs.DayPartDTO;
 using Database.DTOs.ClientProgCoefDTO;
+using System.Data;
 
 namespace CampaignEditor.UserControls
 {

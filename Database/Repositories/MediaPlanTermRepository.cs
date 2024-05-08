@@ -90,7 +90,7 @@ namespace Database.Repositories
                 Spotcode = item.spotcode != null ? item.spotcode.Trim() : null
             });
 
-            return _mapper.Map<MediaPlanTermDTO>(mediaPlanTerm.FirstOrDefault());
+            return _mapper.Map<MediaPlanTermDTO>(mediaPlanTerm.First());
         }
 
         public async Task<IEnumerable<MediaPlanTermDTO>> GetAllMediaPlanTermsByXmpid(int xmpid)

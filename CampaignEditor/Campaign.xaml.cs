@@ -108,6 +108,7 @@ namespace CampaignEditor
             factoryCampaignOverview.GoalsUpdatedEvent += CampaignForecastView_GoalsUpdatedEvent;
             factoryCampaignOverview.ChannelsUpdatedEvent += CampaignForecastView_ChannelsUpdatedEvent;
             factoryCampaignOverview.PricelistUpdatedEvent += CampaignForecastView_PricelistUpdatedEvent;
+            factoryCampaignOverview.TargetsUpdatedEvent += CampaignForecastView_TargetsUpdatedEvent;
             factoryCampaignOverview.SpotsUpdatedEvent += CampaignForecastView_SpotsUpdatedEvent;
             factoryCampaignOverview.DayPartsUpdatedEvent += CampaignForecastView_DayPartsUpdatedEvent;
         }
@@ -117,6 +118,7 @@ namespace CampaignEditor
             factoryCampaignOverview.GoalsUpdatedEvent -= CampaignForecastView_GoalsUpdatedEvent;
             factoryCampaignOverview.ChannelsUpdatedEvent -= CampaignForecastView_ChannelsUpdatedEvent;
             factoryCampaignOverview.PricelistUpdatedEvent -= CampaignForecastView_PricelistUpdatedEvent;
+            factoryCampaignOverview.TargetsUpdatedEvent -= CampaignForecastView_TargetsUpdatedEvent;
             factoryCampaignOverview.SpotsUpdatedEvent -= CampaignForecastView_SpotsUpdatedEvent;
             factoryCampaignOverview.DayPartsUpdatedEvent -= CampaignForecastView_DayPartsUpdatedEvent;
 
@@ -130,6 +132,16 @@ namespace CampaignEditor
             }
 
             await factoryCampaignForecastView.UpdateDayParts();
+        }
+
+        private async void CampaignForecastView_TargetsUpdatedEvent(object? sender, EventArgs e)
+        {
+            if (!isCampaignInitialized)
+            {
+                return;
+            }
+
+            await factoryCampaignForecastView.UpdateTargets();
         }
 
         private async void CampaignForecastView_SpotsUpdatedEvent(object? sender, EventArgs e)

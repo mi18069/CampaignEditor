@@ -6,8 +6,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Database.DTOs.ChannelDTO;
-using CampaignEditor.Controllers;
-using Database.Repositories;
 using Database.DTOs.CampaignDTO;
 using Database.DTOs.SpotDTO;
 using Database.DTOs.PricelistDTO;

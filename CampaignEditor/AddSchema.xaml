@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CampaignEditor.UserControls"
         mc:Ignorable="d"
-        Title="Add MediaPlan" Height="570" Width="400" ResizeMode="NoResize">
+        Title="Add/Update Program" Height="570" Width="400" ResizeMode="NoResize">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="10" />

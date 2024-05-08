@@ -66,7 +66,8 @@ namespace CampaignEditor.UserControls.ForecastGrids
                 var server = serverValue.Remove(serverValue.Length - 1, 1);
                 if (String.Compare(server, "localhost") == 0)
                     return "C:";
-                else
+                else 
+                    //return @"\\" + server + @"\C$\";
                     return @"\\" + server + @"\C$\";
             }
             catch

@@ -33,23 +33,23 @@
             </DataGrid.RowHeaderTemplate>
             <DataGrid.Columns>
                 <DataGridTextColumn Width="100" Header="1+"
-                                    IsReadOnly="True" Binding="{Binding rch1, Mode=TwoWay}" />
+                                    IsReadOnly="True" Binding="{Binding Rch1}" />
                 <DataGridTextColumn Width="100" Header="2+"
-                                    IsReadOnly="True" Binding="{Binding rch12, Mode=TwoWay}" />
+                                    IsReadOnly="True" Binding="{Binding Rch12}" />
                 <DataGridTextColumn Width="100" Header="3+"
-                                    IsReadOnly="True" Binding="{Binding rch13, Mode=TwoWay}" />
+                                    IsReadOnly="True" Binding="{Binding Rch13}" />
                 <DataGridTextColumn Width="100" Header="4+"
-                                    IsReadOnly="True" Binding="{Binding rch14, Mode=TwoWay}" />
+                                    IsReadOnly="True" Binding="{Binding Rch14}" />
                 <DataGridTextColumn Width="100" Header="5+"
-                                    IsReadOnly="True" Binding="{Binding rch15, Mode=TwoWay}" />
+                                    IsReadOnly="True" Binding="{Binding Rch15}" />
                 <DataGridTextColumn Width="100" Header="6+"
-                                    IsReadOnly="True" Binding="{Binding rch16, Mode=TwoWay}" />
+                                    IsReadOnly="True" Binding="{Binding Rch16}" />
                 <DataGridTextColumn Width="100" Header="7+"
-                                    IsReadOnly="True" Binding="{Binding rch17, Mode=TwoWay}" />
+                                    IsReadOnly="True" Binding="{Binding Rch17}" />
                 <DataGridTextColumn Width="100" Header="8+"
-                                    IsReadOnly="True" Binding="{Binding rch18, Mode=TwoWay}" />
+                                    IsReadOnly="True" Binding="{Binding Rch18}" />
                 <DataGridTextColumn Width="100" Header="9+"
-                                    IsReadOnly="True" Binding="{Binding rch19, Mode=TwoWay}" />
+                                    IsReadOnly="True" Binding="{Binding Rch19}" />
             </DataGrid.Columns>
             <DataGrid.Resources>
                 <Style TargetType="{x:Type DataGridColumnHeader}">
@@ -98,23 +98,23 @@
             </DataGrid.RowHeaderTemplate>
             <DataGrid.Columns>
                 <DataGridTextColumn Width="100"
-                                    IsReadOnly="True" Binding="{Binding rch2, Mode=TwoWay}"/>
+                                    IsReadOnly="True" Binding="{Binding Rch2}"/>
                 <DataGridTextColumn Width="100"
-                                    IsReadOnly="True" Binding="{Binding rch22, Mode=TwoWay}" />
+                                    IsReadOnly="True" Binding="{Binding Rch22}" />
                 <DataGridTextColumn Width="100"
-                                    IsReadOnly="True" Binding="{Binding rch23, Mode=TwoWay}" />
+                                    IsReadOnly="True" Binding="{Binding Rch23}" />
                 <DataGridTextColumn Width="100"
-                                    IsReadOnly="True" Binding="{Binding rch24, Mode=TwoWay}" />
+                                    IsReadOnly="True" Binding="{Binding Rch24}" />
                 <DataGridTextColumn Width="100"
-                                    IsReadOnly="True" Binding="{Binding rch25, Mode=TwoWay}" />
+                                    IsReadOnly="True" Binding="{Binding Rch25}" />
                 <DataGridTextColumn Width="100"
-                                    IsReadOnly="True" Binding="{Binding rch26, Mode=TwoWay}" />
+                                    IsReadOnly="True" Binding="{Binding Rch26}" />
                 <DataGridTextColumn Width="100"
-                                    IsReadOnly="True" Binding="{Binding rch27, Mode=TwoWay}" />
+                                    IsReadOnly="True" Binding="{Binding Rch27}" />
                 <DataGridTextColumn Width="100"
-                                    IsReadOnly="True" Binding="{Binding rch28, Mode=TwoWay}" />
+                                    IsReadOnly="True" Binding="{Binding Rch28}" />
                 <DataGridTextColumn Width="100"
-                                    IsReadOnly="True" Binding="{Binding rch29, Mode=TwoWay}" />
+                                    IsReadOnly="True" Binding="{Binding Rch29}" />
             </DataGrid.Columns>
             <DataGrid.Resources>
                 <Style TargetType="{x:Type DataGridColumnHeader}">

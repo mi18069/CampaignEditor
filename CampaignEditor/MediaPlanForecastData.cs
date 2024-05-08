@@ -105,7 +105,7 @@ namespace CampaignEditor
             await InitializeDayParts();
         }
 
-        private async Task InitializeTargets()
+        public async Task InitializeTargets()
         {
             _targets.Clear();
             var targetCmps = await _targetCmpController.GetTargetCmpByCmpid(_campaign.cmpid);

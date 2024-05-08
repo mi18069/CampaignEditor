@@ -4,6 +4,7 @@ using Database.DTOs.ChannelDTO;
 using Database.DTOs.SchemaDTO;
 using Database.Entities;
 using Database.Repositories;
+using Mono.Cecil.Cil;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -72,7 +73,7 @@ namespace CampaignEditor
             {
                 FillByMP(_mediaPlan);
             }
-            FillProgCoef();
+            await FillProgCoef();
         }
 
         private async Task FillProgCoef()
@@ -248,9 +249,13 @@ namespace CampaignEditor
             _mediaPlan.Blocktime = blockTime;
 
             string days = "";
-            foreach (Tuple<string, int> day in lbDays.SelectedItems)
+            // Keeps the order
+            foreach (Tuple<string, int> day in lbDays.Items)
             {
-                days += day.Item2.ToString();
+                if (lbDays.SelectedItems.Contains(day))
+                {
+                    days += day.Item2.ToString();
+                }
             }
             _mediaPlan.days = days;
 
@@ -351,44 +356,43 @@ namespace CampaignEditor
             }
             else if (cbPosition.Text == "INS")
             {
-                var timeFrom = TimeFormat.RepresentativeToTimeOnly(tbTimeFrom.Text);
-                var timeTo = TimeFormat.RepresentativeToTimeOnly(tbTimeTo.Text);
-                var timeBlock = TimeFormat.RepresentativeToTimeOnly(tbBlockTime.Text);
-
-                if (!timeFrom.HasValue || !timeTo.HasValue || !timeBlock.HasValue)
+                if (!TimeFormat.IsGoodRepresentativeTimeFormat(tbTimeFrom.Text) || 
+                    !TimeFormat.IsGoodRepresentativeTimeFormat(tbTimeTo.Text) ||
+                    !TimeFormat.IsGoodRepresentativeTimeFormat(tbBlockTime.Text))
                 {
-                    MessageBox.Show("Invalid time from value\nPossible formats: HH:mm or HHmm");
+                    MessageBox.Show("Invalid time from value\nPossible formats: HH:mm or HHmm\nBetween 02:00 and 25:59");
                     return false;
                 }
-
-                else if (timeBlock.Value < timeFrom.Value || timeBlock.Value > timeTo.Value)
+                else if (!(String.Compare(tbTimeFrom.Text, tbBlockTime.Text) <= 0 &&
+                         String.Compare(tbBlockTime.Text, tbTimeTo.Text) <= 0))
                 {
                     MessageBox.Show("Block time must be between start and end time");
                     return false;
                 }
+                
             }
             else if (cbPosition.Text == "BET")
             {
-                var timeFrom = TimeFormat.RepresentativeToTimeOnly(tbTimeFrom.Text);
-                var timeBlock = TimeFormat.RepresentativeToTimeOnly(tbBlockTime.Text);
-                var timeFromMinus10Min = timeFrom.Value.AddMinutes(-10);
-
-                if (!timeFrom.HasValue || !timeBlock.HasValue)
+                if (!TimeFormat.IsGoodRepresentativeTimeFormat(tbTimeFrom.Text) ||
+                    !TimeFormat.IsGoodRepresentativeTimeFormat(tbTimeTo.Text) ||
+                    !TimeFormat.IsGoodRepresentativeTimeFormat(tbBlockTime.Text))
                 {
-                    MessageBox.Show("Invalid time from value\nPossible formats: HH:mm or HHmm");
+                    MessageBox.Show("Invalid time value\nPossible formats: HH:mm or HHmm\nBetween 02:00 and 25:59");
                     return false;
                 }
-
-                if (timeBlock.Value > timeFrom.Value)
+                else if (String.Compare(tbTimeFrom.Text, tbBlockTime.Text) < 0)
                 {
                     MessageBox.Show("Block time must be before start time");
                     return false;
                 }
-                else if (timeBlock.Value < timeFromMinus10Min)
+
+                int minutesBetween = TimeFormat.CalculateMinutesBetweenRepresentatives(tbTimeFrom.Text, tbBlockTime.Text);
+                if (minutesBetween > 10)
                 {
                     MessageBox.Show("Block time cannot be more than 10 minutes before start time");
                     return false;
                 }
+
             }
             else if (tbProgCoef.Text.Trim().Length > 0 && !float.TryParse(tbProgCoef.Text.Trim(), out _))
             {

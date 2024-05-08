@@ -470,7 +470,7 @@ namespace CampaignEditor
         {
             List<UserDTO> users = new List<UserDTO>();
 
-            if (user.usrlevel <= 0)
+            if (user.usrlevel < 0)
             {
                 users = (await _userController.GetAllUsers()).ToList();
             }

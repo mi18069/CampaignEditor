@@ -6,14 +6,12 @@ using Database.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
 
 namespace CampaignEditor
 {
@@ -37,9 +35,6 @@ namespace CampaignEditor
             set { _campaign = value; }
         }
 
-        // For Plus Icon
-        private string appPath = Directory.GetCurrentDirectory();
-        private string imgGreenPlusPath = "\\images\\GreenPlus.png";
         public Spots(ISpotRepository spotRepository)
         {
             _spotController = new SpotController(spotRepository);

@@ -63,7 +63,7 @@ namespace CampaignEditor.UserControls
                 clids = (await _userClientsController.GetAllUserClientsByUserId(userDTO.usrid)).Select(c => c.cliid).ToList();*/
 
             var clids = new List<int>();
-            if (userDTO == null || userDTO.usrlevel <= 0)
+            if (userDTO == null || userDTO.usrlevel < 0)
             {
                 clids = (await _clientController.GetAllClients()).Select(client => client.clid).ToList();
             }

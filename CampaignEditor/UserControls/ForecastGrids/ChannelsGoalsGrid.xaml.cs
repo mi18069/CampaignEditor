@@ -40,7 +40,7 @@ namespace CampaignEditor.UserControls
             }
 
             //CalculateGoals();
-            SubscribeToMediaPlans();
+            //SubscribeToMediaPlans();
 
             if (_selectedChannels.Count > 0)
             {
@@ -94,7 +94,7 @@ namespace CampaignEditor.UserControls
             CalculateGoals();
         }
 
-        private void RecalculateGoals(int chid)
+        public void RecalculateGoals(int chid)
         {
             ResetDictionaryValues(chid);
             var mediaPlans = _visibleMediaPlans.Where(mp => mp.chid == chid);
@@ -134,7 +134,7 @@ namespace CampaignEditor.UserControls
             }
         }
 
-        public void SubscribeToMediaPlans()
+        /*public void SubscribeToMediaPlans()
         {
             foreach (MediaPlan mediaPlan in _mediaPlans)
             { 
@@ -151,7 +151,7 @@ namespace CampaignEditor.UserControls
                 RecalculateGoals(mp.chid);
             }
 
-        }
+        }*/
 
         private void AddHeader(ExcelWorksheet worksheet, int rowOff = 1, int colOff = 1)
         {

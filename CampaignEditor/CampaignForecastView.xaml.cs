@@ -233,6 +233,11 @@ namespace CampaignEditor
             await _forecast.GoalsChanged();
         }
 
+        public async Task UpdateTargets()
+        {
+            await _forecast.TargetsChanged();
+        }
+
         public async Task UpdateSpots()
         {
             await _forecast.SpotsChanged();

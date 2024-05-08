@@ -39,7 +39,7 @@ namespace Database.Repositories
                 WITH RECURSIVE all_dates AS (
                   SELECT 
                     GREATEST(
-                      CURRENT_DATE - INTERVAL '12' MONTH, 
+                      CURRENT_DATE - INTERVAL '3' MONTH, 
                       CAST('2019-04-19' AS TIMESTAMP)
                     ) AS date
                   FROM emsfiles.norecords
@@ -165,20 +165,23 @@ namespace Database.Repositories
 
         public async Task<bool> StartReachCalculation(int cmpid, int segins = 20, int segbet = 60, bool delete = true, bool expr = true, string path = null)
         {
-            using var connection = _context.GetConnection();                  
+            using var connection = _context.GetConnection();
+            var commandTimeout = 900; // Set the timeout value in seconds
 
             if (path == null)
             {
                 var affected = await connection.ExecuteAsync(
                     "SELECT public.obrada_rch(@Cmpid, @Segins, @Segbet, @Delete); ",
-                    new { Cmpid = cmpid, Segins = segins, Segbet = segbet, Delete = delete });
+                    new { Cmpid = cmpid, Segins = segins, Segbet = segbet, Delete = delete },
+                    commandTimeout: commandTimeout);
 
                 return affected != 0;
             }
             else {
                 var affected = await connection.ExecuteAsync(
                     "SELECT public.obrada_rch(@Cmpid, @Segins, @Segbet, @Delete, @Expr, @Path); ",
-                    new { Cmpid = cmpid, Segins = segins, Segbet = segbet, Delete = delete, Expr = expr, Path = path });
+                    new { Cmpid = cmpid, Segins = segins, Segbet = segbet, Delete = delete, Expr = expr, Path = path },
+                    commandTimeout: commandTimeout);
 
                 return affected != 0;
             }

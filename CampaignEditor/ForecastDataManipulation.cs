@@ -1,11 +1,9 @@
 ﻿using CampaignEditor.Controllers;
 using CampaignEditor.Helpers;
 using Database.DTOs.CampaignDTO;
-using Database.DTOs.ChannelDTO;
 using Database.DTOs.MediaPlanDTO;
 using Database.DTOs.MediaPlanHistDTO;
 using Database.DTOs.MediaPlanTermDTO;
-using Database.DTOs.PricelistDTO;
 using Database.DTOs.SchemaDTO;
 using Database.Entities;
 using Database.Repositories;
@@ -108,8 +106,9 @@ namespace CampaignEditor
         {
             // Inserting new MediaPlans in database
             var mediaPlansByChannels = await InsertCampaignMediaPlansFromSchemas(version);
-            
-            await StartAmrByListOfChannelMediaPlans(mediaPlansByChannels);
+
+            await RecalculateMediaPlans(version, mediaPlansByChannels);
+            /*await StartAmrByListOfChannelMediaPlans(mediaPlansByChannels);
 
             // Getting newly updated mediaPlans
             mediaPlansByChannels = await GetMediaPlansByChannel(version);
@@ -122,8 +121,29 @@ namespace CampaignEditor
                 Task task = Task.Run(() => CalculateMPValuesForMediaPlans(mediaPlanList));
                 calculatingTasks.Add(task);
             }
-            await Task.WhenAll(calculatingTasks);
+            await Task.WhenAll(calculatingTasks);*/
 
+        }
+
+        public async Task RecalculateMediaPlans(int version, IEnumerable<IEnumerable<MediaPlanDTO>> mediaPlansByChannels = null)
+        {
+
+            // Getting newly updated mediaPlans
+            if (mediaPlansByChannels == null)
+                mediaPlansByChannels = await GetMediaPlansByChannel(version);
+
+            await StartAmrByListOfChannelMediaPlans(mediaPlansByChannels);
+
+
+            // Calculating additional values for mediaPlans
+            // Making nChannel threads, and for each thread we'll run startAMRCalculation for each MediaPlan for that channel
+            List<Task> calculatingTasks = new List<Task>();
+            foreach (List<MediaPlanDTO> mediaPlanList in mediaPlansByChannels)
+            {
+                Task task = Task.Run(() => CalculateMPValuesForMediaPlans(mediaPlanList));
+                calculatingTasks.Add(task);
+            }
+            await Task.WhenAll(calculatingTasks);
         }
 
         private async Task<List<List<MediaPlanDTO>>> GetMediaPlansByChannel(int version)
@@ -177,9 +197,17 @@ namespace CampaignEditor
 
             foreach (var schema in schemas)
             {
-                MediaPlanDTO mediaPlan = await SchemaToMP(schema, version, true);
-                mediaPlans.Add(mediaPlan);
-                _ = await MediaPlanToMPTerm(mediaPlan);
+                try
+                {
+                    MediaPlanDTO mediaPlan = await SchemaToMP(schema, version, true);
+                    mediaPlans.Add(mediaPlan);
+                    _ = await MediaPlanToMPTerm(mediaPlan);
+                }
+                catch
+                {
+                    continue;
+                }
+                
             }
             return mediaPlans;
         }       
@@ -252,8 +280,15 @@ namespace CampaignEditor
                     await _mediaPlanHistController.DeleteMediaPlanHistByXmpid(mediaPlan.xmpid);
                     await _mediaPlanController.DeleteMediaPlanById(mediaPlan.xmpid);
 
-                    var itemToRemove = _allMediaPlans.First(item => item.MediaPlan.schid == schema.id);
-                    _allMediaPlans.Remove(itemToRemove);
+                    try
+                    {
+                        var itemToRemove = _allMediaPlans.First(item => item.MediaPlan.schid == schema.id);
+                        _allMediaPlans.Remove(itemToRemove);
+                    }
+                    catch
+                    {
+                        // If something isn't initialized right, then item may not be in collection to delete
+                    }
 
                 }
 
@@ -316,11 +351,18 @@ namespace CampaignEditor
                 await _mediaPlanVersionController.UpdateMediaPlanVersion(cmpid, version - 1);
         }
 
-        public async Task DeleteMediaPlan(int xmpid)
+        public async Task DeleteMediaPlan(int xmpid, int schToDelete = -1)
         {
             await _mediaPlanTermController.DeleteMediaPlanTermByXmpId(xmpid);
             await _mediaPlanHistController.DeleteMediaPlanHistByXmpid(xmpid);
             await _mediaPlanController.DeleteMediaPlanById(xmpid);
+
+            /*if (schToDelete != -1)
+            {
+                if (MessageBox.Show("Do you want to also delete this program from program schema?\n", "Question",
+                    MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                        await _schemaController.DeleteSchemaById(schToDelete);
+            }*/
         }
 
         public bool AreEqualMediaPlanAndSchema(MediaPlanDTO plan1, SchemaDTO schema)
@@ -358,9 +400,18 @@ namespace CampaignEditor
                 }
                 if (started.AddDays(i).Date == sorted[j].Date)
                 {
-                    CreateMediaPlanTermDTO mpTerm = new CreateMediaPlanTermDTO(mediaPlan.xmpid, DateOnly.FromDateTime(sorted[j]), null);
-                    mediaPlanDates[i] = _mpTermConverter.ConvertFromDTO(await _mediaPlanTermController.CreateMediaPlanTerm(mpTerm));
-                    j++;
+                    try
+                    {
+                        CreateMediaPlanTermDTO mpTerm = new CreateMediaPlanTermDTO(mediaPlan.xmpid, DateOnly.FromDateTime(sorted[j]), null);
+                        mediaPlanDates[i] = _mpTermConverter.ConvertFromDTO(await _mediaPlanTermController.CreateMediaPlanTerm(mpTerm));
+                        j++;
+
+                    }
+                    catch
+                    {
+                        continue;
+                    }
+                    
                 }
                 else
                 {
@@ -370,7 +421,7 @@ namespace CampaignEditor
 
             return mediaPlanDates;
         }
-        private List<DateTime> GetAvailableDates(MediaPlanDTO mediaPlan)
+        /*private List<DateTime> GetAvailableDates(MediaPlanDTO mediaPlan)
         {
             List<DateTime> dates = new List<DateTime>();
 
@@ -422,7 +473,7 @@ namespace CampaignEditor
             }
             return dates;
 
-        }
+        }*/
 
         private List<DateTime> GetAllDayDates(MediaPlanDTO mediaPlan)
         {
@@ -436,7 +487,11 @@ namespace CampaignEditor
             int addedDays = 0; // For knowing offset
             int addedAfterFirst = 0; // For knowing how many elements are added after first day
             int startFromIndex = 0;
-            foreach (char c in mediaPlan.days)
+            char[] daysChars = mediaPlan.days.Trim().ToArray();
+            Array.Sort(daysChars);
+            string days = new string(daysChars);
+
+            foreach (char c in days)
             {
                 switch (c)
                 {

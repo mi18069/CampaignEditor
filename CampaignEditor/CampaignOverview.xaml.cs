@@ -54,6 +54,7 @@ namespace CampaignEditor
         public event EventHandler GoalsUpdatedEvent;
         public event EventHandler<UpdateChannelsEventArgs> ChannelsUpdatedEvent;
         public event EventHandler<UpdatePricelistEventArgs> PricelistUpdatedEvent;
+        public event EventHandler TargetsUpdatedEvent;
         public event EventHandler SpotsUpdatedEvent;
         public event EventHandler DayPartsUpdatedEvent;
         public CampaignOverview(IAbstractFactory<AssignTargets> factoryAssignTargets,
@@ -266,6 +267,7 @@ namespace CampaignEditor
             {
                 _targetlist = fTargets.SelectedTargetsList.ToList();
                 FillDGTargets(_targetlist);
+                TargetsUpdatedEvent?.Invoke(this, null);
             }
             btnAssignTargets.IsEnabled = true;
 

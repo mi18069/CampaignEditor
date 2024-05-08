@@ -33,13 +33,10 @@ namespace CampaignEditor
         private readonly IAbstractFactory<Sectable> _factorySectable;
         private readonly IAbstractFactory<Seasonality> _factorySeasonality;
         private readonly IAbstractFactory<NewTarget> _factoryNewTarget;
+        private readonly IAbstractFactory<DuplicatePricelist> _factoryDuplicatePricelist;
 
         private CampaignDTO _campaign;
         public PricelistDTO _pricelist;
-
-        // For Plus Icon
-        private string appPath = Directory.GetCurrentDirectory();
-        private string imgGreenPlusPath = "\\images\\GreenPlus.png";
 
         private bool pricelistModified = false;
         private bool pricelistChannelsModified = false;
@@ -49,7 +46,7 @@ namespace CampaignEditor
 
         public bool pricelistChanged = false;
         public PriceList(IAbstractFactory<Sectable> factorySectable, IAbstractFactory<Seasonality> factorySeasonality,
-            IAbstractFactory<NewTarget> factoryNewTarget,
+            IAbstractFactory<NewTarget> factoryNewTarget, IAbstractFactory<DuplicatePricelist> factoryDuplicatePricelist,
             IChannelRepository channelRepository, IPricesRepository pricesRepository,
             IPricelistRepository pricelistRepository, IPricelistChannelsRepository pricelistChannelsRepository,
             ISectableRepository sectableRepository, ISeasonalityRepository seasonalityRepository,
@@ -58,6 +55,7 @@ namespace CampaignEditor
             _factorySectable = factorySectable;
             _factorySeasonality = factorySeasonality;
             _factoryNewTarget = factoryNewTarget;
+            _factoryDuplicatePricelist = factoryDuplicatePricelist;
 
             _sectableController = new SectableController(sectableRepository);
             _seasonalityController = new SeasonalityController(seasonalityRepository);
@@ -410,7 +408,6 @@ namespace CampaignEditor
                 clid = 0;
             string plname = tbName.Text.Trim();
             int pltype = cbType.SelectedIndex; // Place in combobox corresponds to int value
-            int chid = 0; // Don't know what this field does
             int sectbid = (cbSectable.SelectedValue as SectableDTO)!.sctid; // By default, first value is selected
             int seasid = (cbSeasonality.SelectedValue as SeasonalityDTO)!.seasid;
             bool plactive = true;
@@ -428,11 +425,10 @@ namespace CampaignEditor
 
             if (pricelist == null)
             {
-                await _pricelistController.CreatePricelist(new CreatePricelistDTO
+                _pricelist = await _pricelistController.CreatePricelist(new CreatePricelistDTO
                     (clid, plname, pltype, sectbid, seasid, plactive, price, minprice,
                     prgcoef, pltarg, use2, sectbid2, sectb2st, sectb2en,
                     valfrom, valto, mgtype));
-                _pricelist = await _pricelistController.GetClientPricelistByName(_campaign.clid, tbName.Text.Trim());
             }
             else
             {
@@ -791,8 +787,8 @@ namespace CampaignEditor
             factory.ShowDialog();
             if (factory.success)
             {
-                cbSeasonality.Items[index] = factory.Sec;
-                cbSeasonality.SelectedIndex = index;
+                cbSectable.Items[index] = factory.Sec;
+                cbSectable.SelectedIndex = index;
                 sectableModified = true;
             }
         }
@@ -845,6 +841,31 @@ namespace CampaignEditor
                 }
                 this.Close();
             }
+        }
+
+        private async void btnSaveAs_Click(object sender, RoutedEventArgs e)
+        {
+            if (await CheckValues())
+            {
+                // Copy values
+                // Make new pricelist
+                // inside CreateOrUpdatePricelist function _pricelist will be updated 
+                await CreateOrUpdatePricelist();
+                await CreateOrUpdatePricelistChannels(_pricelist);
+                await CreateOrUpdateDayparts(_pricelist);
+                pricelistChanged = true;
+                
+                this.Close();
+            }
+        }
+
+        private async void btnCopyPricelist_Click(object sender, RoutedEventArgs e)
+        {
+            if (_pricelist == null)
+                return;
+            var f = _factoryDuplicatePricelist.Create();
+            await f.Initialize(_pricelist);
+            f.ShowDialog();
         }
 
         private void btnCancel_Click(object sender, RoutedEventArgs e)
@@ -941,8 +962,9 @@ namespace CampaignEditor
             pricelistChannelsModified = true;
         }
 
+
         #endregion
 
-        
+
     }
 }

@@ -124,6 +124,31 @@ namespace CampaignEditor
 
         }
 
+        public static bool IsGoodRepresentativeTimeFormat(string timeString)
+        {
+            if (timeString.Length != 5)
+            {
+                return false;
+            }
+            if (timeString[2] != ':')
+            {
+                return false;
+            }
+            int hours, minutes;
+            if (!int.TryParse(timeString.Substring(0, 2), out hours) ||
+                !int.TryParse(timeString.Substring(3, 2), out minutes))
+            {
+                return false;
+            }
+
+            if (hours >= 02 && hours <= 25 && minutes >= 0 && minutes <= 59)
+            {
+                return true;
+            }
+            
+            return false;
+        }
+
         public static string SecIntToReporesentative(int secInt)
         {
             int hours = secInt / 3600; // Calculate the number of hours
@@ -180,10 +205,23 @@ namespace CampaignEditor
             
         }
 
+        public static int RepresentativeToMins(string timeString)
+        {
+            if (!IsGoodRepresentativeTimeFormat(timeString))
+            {
+                return -1;
+            }
+            
+            int hours = int.Parse(timeString.Substring(0, 2));
+            int minutes = int.Parse(timeString.Substring(3, 2));
+
+            return hours * 60 + minutes;
+        }
+
         public static int CalculateMinutesBetweenRepresentatives(string time1, string time2)
         {
             // Parse the hours and minutes from the time strings
-            if (DateTime.TryParseExact(time1, "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime dateTime1) &&
+            /*if (DateTime.TryParseExact(time1, "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime dateTime1) &&
                 DateTime.TryParseExact(time2, "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime dateTime2))
             {
                 // Calculate the time difference in minutes
@@ -194,7 +232,9 @@ namespace CampaignEditor
             {
                 // Handle invalid time format
                 throw new ArgumentException("Invalid time format. Use 'hh:mm' format.");
-            }
+            }*/
+            return Math.Abs(RepresentativeToMins(time2) - RepresentativeToMins(time1));
+
         }
 
         // Transforms hhmm format to hh:mm

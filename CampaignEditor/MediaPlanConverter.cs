@@ -68,7 +68,7 @@ namespace CampaignEditor
                     List<DateRangeSeasCoef> dateRanges = new List<DateRangeSeasCoef>();
 
                     var sectables = _forecastData.SecidSectablesDict[sectable.sctid].FirstOrDefault(secs => secs.sec == spot.spotlength, null);
-                    double seccoef = sectables == null ? 0.0 : sectables.coef;
+                    double seccoef = sectables == null ? (double)spot.spotlength/30 : sectables.coef;
 
                     if (seasonality == null || seasonalities == null || seasonalities.Count == 0)
                     {
@@ -224,7 +224,6 @@ namespace CampaignEditor
 
             // Perform additional computations and set extra properties
             ComputeExtraProperties(mediaPlan, terms, calculatePrice);
-            SetDayPart(mediaPlan);
 
             return mediaPlan;
         }
@@ -368,6 +367,7 @@ namespace CampaignEditor
 
         public void ComputeExtraProperties(MediaPlan mediaPlan, IEnumerable<MediaPlanTermDTO> terms, bool calculatePrice = false)
         {
+            SetDayPart(mediaPlan);
 
             var pricelist = _forecastData.ChidPricelistDict[mediaPlan.chid];
             CalculateLengthAndInsertations(mediaPlan, terms);
@@ -587,7 +587,7 @@ namespace CampaignEditor
             {
                 seccoef = sectables == null ? 1 : sectables.coef * ((double)30 / spotDTO.spotlength);
             }*/
-            seccoef = sectables == null ? 0.0 : sectables.coef;
+            seccoef = sectables == null ? (double)spotDTO.spotlength/30 : sectables.coef;
             //seccoef *= ((double)spotDTO.spotlength / 30);
             return seccoef;
         }
@@ -651,8 +651,10 @@ namespace CampaignEditor
                             seccoef += sec.coef;
                         else
                         {
-                            mediaPlan.Seccoef = 0.0;
-                            return;
+                            //mediaPlan.Seccoef = 0.0;
+                            //return;
+                            //mediaPlan.Seccoef += (double)spot.spotlength/30;
+                            seccoef += (double)spot.spotlength / 30;
                         }
                         secCount += 1;
                     }

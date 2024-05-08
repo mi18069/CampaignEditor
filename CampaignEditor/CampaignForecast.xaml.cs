@@ -149,6 +149,21 @@ namespace CampaignEditor.UserControls
 
         }
 
+        public async Task TargetsChanged()
+        {
+            SetLoadingPage?.Invoke(this, null);
+
+            var mpVer = await _mediaPlanVersionController.GetLatestMediaPlanVersion(_campaign.cmpid);
+            await _forecastData.InitializeTargets();
+            goalsTreeView._mpConverter = _mpConverter;
+            _forecastDataManipulation.UpdateProgressBar += _forecastDataManipulation_UpdateProgressBar;
+            await _forecastDataManipulation.RecalculateMediaPlans(mpVer.version);
+            _forecastDataManipulation.UpdateProgressBar -= _forecastDataManipulation_UpdateProgressBar;
+            await LoadData(mpVer.version);
+
+            SetContentPage?.Invoke(this, null);
+        }
+
         public async Task SpotsChanged()
         {
             SetLoadingPage?.Invoke(this, null);
@@ -157,6 +172,7 @@ namespace CampaignEditor.UserControls
             await _forecastData.InitializeSpots();
             _mpConverter.Initialize(_forecastData);
             goalsTreeView._mpConverter = _mpConverter;
+            await CalculateMPValuesForCampaign(_campaign.cmpid, _maxVersion);
             await LoadData(mpVer.version);
 
             SetContentPage?.Invoke(this, null);
@@ -527,12 +543,13 @@ namespace CampaignEditor.UserControls
             try
             {
 
+                await InitializeGrids();
+
                 // Filling lvChannels and dictionary
                 await FillMPList(version);
                 await FillLoadedDateRanges();
                 InitializeDataGrid();
  
-                await InitializeGrids();
             }
             catch (Exception ex)
             {
@@ -575,7 +592,8 @@ namespace CampaignEditor.UserControls
             sdgGrid.Initialize(_campaign, _forecastData.Channels, _forecastData.Spots, _cmpVersion);
             _factoryListing.Initialize(_campaign, _forecastData.Channels, 
                     _forecastData.ChidPricelistDict, _forecastData.SpotcodeSpotDict, _mpConverter);
-            await reachGrid.Initialize(_campaign, _forecastData.Targets);
+            // should be awaitable, but it takes too long now
+            reachGrid.Initialize(_campaign, _forecastData.Targets);
         }
 
         private void InitializeDataGrid()
@@ -813,7 +831,8 @@ namespace CampaignEditor.UserControls
         private List<ChannelDTO> GetSelectedChannelsInOrder()
         {
             List<ChannelDTO> channels = new List<ChannelDTO>();
-            for (int i = 0; i < lvChannels.Items.Count; i++)
+
+            /*for (int i = 0; i < lvChannels.Items.Count; i++)
             {
                 ListViewItem item = lvChannels.ItemContainerGenerator.ContainerFromIndex(i) as ListViewItem;
 
@@ -821,6 +840,11 @@ namespace CampaignEditor.UserControls
                 {
                     channels.Add(lvChannels.Items[i] as ChannelDTO);
                 }
+            }*/
+
+            foreach (ChannelDTO channel in lvChannels.SelectedItems)
+            {
+                channels.Add(channel);
             }
             return channels;
         }
@@ -953,6 +977,44 @@ namespace CampaignEditor.UserControls
             }
         }
 
+        private async void dgMediaPlans_AddMediaPlanClicked(object? sender, EventArgs e)
+        {
+            var f = _factoryAddSchema.Create();
+            ChannelDTO selectedChannel = null;
+            if (lvChannels.SelectedItems.Count == 1)
+            {
+                selectedChannel = lvChannels.SelectedItem as ChannelDTO;
+            }
+            await f.Initialize(_campaign, selectedChannel);
+            f.ShowDialog();
+            if (f._schema != null)
+            {
+                try
+                {
+                    var schema = await _schemaController.CreateGetSchema(f._schema);
+                    if (schema != null)
+                    {
+                        MediaPlanDTO mediaPlanDTO = await _forecastDataManipulation.SchemaToMP(schema, _cmpVersion);
+
+                        if (_allMediaPlans.Any(mp => mp.MediaPlan.xmpid == mediaPlanDTO.xmpid))
+                        {
+                            return;
+                        }
+                        await _databaseFunctionsController.StartAMRCalculation(_campaign.cmpid, 40, 40, mediaPlanDTO.xmpid);
+                        var mediaPlan = await _mpConverter.ConvertFirstFromDTO(mediaPlanDTO);
+                        var mediaPlanTerms = await _forecastDataManipulation.MediaPlanToMPTerm(mediaPlanDTO);
+                        var mpTuple = new MediaPlanTuple(mediaPlan, mediaPlanTerms);
+                        _allMediaPlans.Add(mpTuple);
+                    }
+                }
+                catch
+                {
+                    MessageBox.Show("Unable to create Program", "Message", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+
+            }
+        }
+
         private async void dgMediaPlans_UpdateMediaPlanClicked(object? sender, UpdateMediaPlanTupleEventArgs e)
         {
             MediaPlanTuple mediaPlanTuple = e.MediaPlanTuple;
@@ -1035,7 +1097,19 @@ namespace CampaignEditor.UserControls
                 schema.stime = mediaPlan.stime;
                 schema.etime = mediaPlan.etime;
                 schema.blocktime = mediaPlan.blocktime;
-                await _schemaController.UpdateSchema(new UpdateSchemaDTO(schema));
+                schema.days = mediaPlan.days;
+                schema.position = mediaPlan.position;
+                schema.name = mediaPlan.name.Trim();
+                schema.type = mediaPlan.type;
+
+                try
+                {
+                    await _schemaController.UpdateSchema(new UpdateSchemaDTO(schema));
+                }
+                catch
+                {
+
+                }
             }
 
             await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(mediaPlanDTO));
@@ -1045,48 +1119,10 @@ namespace CampaignEditor.UserControls
             await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(_mpConverter.ConvertToDTO(newMediaPlan)));
             var mpTupleNew = new MediaPlanTuple(newMediaPlan, mediaPlanTerms);
 
-            _allMediaPlans.Remove(mediaPlanTuple);
-            _allMediaPlans.Add(mpTupleNew);
-        }      
-
-
-        private async void dgMediaPlans_AddMediaPlanClicked(object? sender, EventArgs e)
-        {
-            var f = _factoryAddSchema.Create();
-            ChannelDTO selectedChannel = null;
-            if (lvChannels.SelectedItems.Count == 1)
-            {
-                selectedChannel = lvChannels.SelectedItem as ChannelDTO;
-            }
-            await f.Initialize(_campaign, selectedChannel);
-            f.ShowDialog();
-            if (f._schema != null)
-            {
-                try
-                {
-                    var schema = await _schemaController.CreateGetSchema(f._schema);
-                    if (schema != null)
-                    {
-                        MediaPlanDTO mediaPlanDTO =  await _forecastDataManipulation.SchemaToMP(schema, _cmpVersion);
-
-                        if (_allMediaPlans.Any(mp => mp.MediaPlan.xmpid == mediaPlanDTO.xmpid))
-                        {
-                            return;
-                        }
-                        await _databaseFunctionsController.StartAMRCalculation(_campaign.cmpid, 40, 40, mediaPlanDTO.xmpid);
-                        var mediaPlan = await _mpConverter.ConvertFirstFromDTO(mediaPlanDTO);
-                        var mediaPlanTerms = await _forecastDataManipulation.MediaPlanToMPTerm(mediaPlanDTO);
-                        var mpTuple = new MediaPlanTuple(mediaPlan, mediaPlanTerms);
-                        _allMediaPlans.Add(mpTuple);
-                    }
-                }
-                catch
-                {
-                    MessageBox.Show("Unable to create Program", "Message", MessageBoxButton.OK, MessageBoxImage.Error);
-                }
-
-            }
-        }
+            var isRemoved = _allMediaPlans.Remove(mediaPlanTuple);
+            if (isRemoved)
+                _allMediaPlans.Add(mpTupleNew);
+        }            
 
         private async void dgMediaPlans_ImportMediaPlanClicked(object? sender, EventArgs e)
         {
@@ -1177,7 +1213,7 @@ namespace CampaignEditor.UserControls
                         DeleteTermValues(mediaPlanTuple);
                         _allMediaPlans.Remove(mediaPlanTuple);
                         var mediaPlan = mediaPlanTuple.MediaPlan;
-                        await _forecastDataManipulation.DeleteMediaPlan(mediaPlan.xmpid);
+                        await _forecastDataManipulation.DeleteMediaPlan(mediaPlan.xmpid, mediaPlan.schid);
                     }
                     
                 }
@@ -1247,6 +1283,7 @@ namespace CampaignEditor.UserControls
 
             sdgGrid.RecalculateGoals(channel, date, spot, true);
             swgGrid.RecalculateGoals(channel, date, spot, true);
+            cgGrid.RecalculateGoals(channel.chid);
         }
 
         #endregion

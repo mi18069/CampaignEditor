@@ -26,6 +26,7 @@ namespace CampaignEditor
         private ObservableCollection<TargetDTO> _targetsList = new ObservableCollection<TargetDTO>();
         private ObservableCollection<TargetDTO> _selectedTargetsList = new ObservableCollection<TargetDTO>();
 
+        private List<TargetDTO> _selectedOnEntry = new List<TargetDTO>();
         int maxSelected = 3;
 
         CampaignDTO _campaign = null;
@@ -34,7 +35,14 @@ namespace CampaignEditor
         public ObservableCollection<TargetDTO> TargetsList { get { return _targetsList; } }
         public ObservableCollection<TargetDTO> SelectedTargetsList { get { return _selectedTargetsList; } }
 
+        // Define an event to inform when changes occurs
+        public event EventHandler TargetsChanged;
 
+        // Invoke the event
+        protected virtual void OnTargetsChanged()
+        {
+            TargetsChanged?.Invoke(this, EventArgs.Empty);
+        }
         public AssignTargets(ITargetRepository targetRepository, 
                              IAbstractFactory<NewTarget> factoryNewTarget,
                              ITargetCmpRepository targetCmpRepository)
@@ -66,6 +74,7 @@ namespace CampaignEditor
             
             foreach (var selectedTarget in selectedlist)
             {
+                _selectedOnEntry.Add(selectedTarget);
                 foreach (var target in _targetsList)
                 {
                     if (target.targid == selectedTarget.targid)
@@ -194,7 +203,14 @@ namespace CampaignEditor
                     {
                         source.RemoveAt(index);
                         source.Insert(index, target);
-                        targetsModified = true;
+                        foreach (var selectedTarget in _selectedOnEntry)
+                        {
+                            if (selectedTarget.targid == target.targid)
+                            {
+                                targetsModified = true;
+                                break;
+                            }
+                        }
                     }
                 }
 
@@ -210,9 +226,30 @@ namespace CampaignEditor
 
         private async void btnSave_Click(object sender, RoutedEventArgs e)
         {
-            targetsModified = true;
-            await UpdateDatabase(SelectedTargetsList.ToList());
+            if (targetsModified || IsSelectedChanged(SelectedTargetsList.ToList(), _selectedOnEntry))
+            {
+                targetsModified = true;
+                await UpdateDatabase(SelectedTargetsList.ToList());
+                OnTargetsChanged();
+            }
             this.Close();
+        }
+
+        private bool IsSelectedChanged(List<TargetDTO> selectedAtEnd, List<TargetDTO> selectedOnEntry)
+        {
+            if (selectedAtEnd.Count() != selectedOnEntry.Count())
+            {
+                return true;
+            }
+            for (int i=0; i<selectedOnEntry.Count(); i++)
+            {
+                TargetDTO selectedTarget = selectedOnEntry[i];
+                if (selectedTarget.targid != selectedAtEnd[i].targid)
+                {
+                    return true;
+                }
+            }
+            return false;
         }
 
         public async Task UpdateDatabase(List<TargetDTO> targetlist)
