@@ -132,10 +132,10 @@ namespace Database.Entities
 
         public decimal Amr1
         {
-            get { return amr1 * ((decimal)amr1trim / 100); }
+            get { return amr1 * (amr1trim / 100.0M); }
             set
             {
-                amr1 = value * (100 / (decimal)amr1trim);
+                amr1 = value * (100.0M / amr1trim);
                 OnPropertyChanged();
                 //OnPropertyChanged(nameof(Amrp1));
             }

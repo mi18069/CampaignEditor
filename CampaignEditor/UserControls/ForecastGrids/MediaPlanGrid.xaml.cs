@@ -855,6 +855,14 @@ namespace CampaignEditor.UserControls
                     return;
 
                 ContextMenu menu = new ContextMenu();
+                MenuItem copyNameItem = new MenuItem();
+                copyNameItem.Header = "Copy Program Name";
+                copyNameItem.Click += async (obj, ea) =>
+                {
+                    OnCopyNameClicked();
+                };
+                menu.Items.Add(copyNameItem);
+
                 MenuItem deleteItem = new MenuItem();
                 deleteItem.Header = "Delete Program";
                 deleteItem.Click += async (obj, ea) =>
@@ -1012,6 +1020,13 @@ namespace CampaignEditor.UserControls
         private void OnUpdatedMediaPlan(MediaPlan mediaPlan)
         {
             UpdatedMediaPlan?.Invoke(this, new UpdateMediaPlanEventArgs(mediaPlan));
+        }
+
+        public event EventHandler CopyNameClicked;
+
+        private void OnCopyNameClicked()
+        {
+            CopyNameClicked?.Invoke(this, EventArgs.Empty);
         }
 
         public event EventHandler DeleteMediaPlanClicked;

@@ -347,6 +347,7 @@ namespace CampaignEditor.UserControls
             dgMediaPlans._clientProgCoefController = _clientProgCoefController;
             dgMediaPlans.AddMediaPlanClicked += dgMediaPlans_AddMediaPlanClicked;
             dgMediaPlans.ImportMediaPlanClicked += dgMediaPlans_ImportMediaPlanClicked;
+            dgMediaPlans.CopyNameClicked += dgMediaPlans_CopyNameClicked;
             dgMediaPlans.DeleteMediaPlanClicked += dgMediaPlans_DeleteMediaPlanClicked;
             // to open Update dialog
             dgMediaPlans.UpdateMediaPlanClicked += dgMediaPlans_UpdateMediaPlanClicked;
@@ -358,6 +359,8 @@ namespace CampaignEditor.UserControls
             dgMediaPlans.UpdatedTerm += dgMediaPlans_UpdatedTerm;
             dgMediaPlans.VisibleTuplesChanged += dgMediaPlans_VisibleTuplesChanged;
         }
+
+
 
         private void SubscribeSWGGridControllers()
         {
@@ -1203,6 +1206,16 @@ namespace CampaignEditor.UserControls
                 foreach (char spotcode in term.Spotcode.Trim())
                     UpdatedTerm(mediaPlan, term, spotcode);
             }
+        }
+
+        private void dgMediaPlans_CopyNameClicked(object? sender, EventArgs e)
+        {
+            var mediaPlanTuple = dgMediaPlans.Schema.SelectedItem as MediaPlanTuple;
+            // String value to copy to the clipboard
+            string textToCopy = mediaPlanTuple.MediaPlan.Name.Trim();
+
+            // Copy the string value to the clipboard
+            Clipboard.SetText(textToCopy);
         }
 
         private async void dgMediaPlans_DeleteMediaPlanClicked(object? sender, EventArgs e)
