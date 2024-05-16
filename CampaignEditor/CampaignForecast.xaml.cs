@@ -1475,6 +1475,25 @@ namespace CampaignEditor.UserControls
             cgGrid.VisibleTuplesChanged(visibleTuples);
             gridShowSelected = false;
         }
+
+        private void Border_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            e.Handled = true;
+
+            // Get the ScrollViewer containing the DataGrid
+            ScrollViewer scrollViewer = svBorder;
+            // Calculate the new vertical offset based on the mouse wheel delta
+            double newVerticalOffset = scrollViewer.VerticalOffset - e.Delta*0.3;
+
+            // Ensure the new vertical offset is within bounds
+            if (newVerticalOffset < 0)
+                newVerticalOffset = 0;
+            else if (newVerticalOffset > scrollViewer.ScrollableHeight)
+                newVerticalOffset = scrollViewer.ScrollableHeight;
+
+            // Set the new vertical offset
+            scrollViewer.ScrollToVerticalOffset(newVerticalOffset);
+        }
     }
 
 }

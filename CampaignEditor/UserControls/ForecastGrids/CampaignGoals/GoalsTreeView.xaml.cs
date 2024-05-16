@@ -132,5 +132,6 @@ namespace CampaignEditor.UserControls.ForecastGrids
 
             return Decimal.ToDouble(value);
         }
+
     }
 }

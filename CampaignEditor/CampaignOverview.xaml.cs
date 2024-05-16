@@ -494,7 +494,7 @@ namespace CampaignEditor
             else
                 return;
             // Calculate the new vertical offset based on the mouse wheel delta
-            double newVerticalOffset = scrollViewer.VerticalOffset - e.Delta;
+            double newVerticalOffset = scrollViewer.VerticalOffset - e.Delta*0.1;
 
             // Ensure the new vertical offset is within bounds
             if (newVerticalOffset < 0)

@@ -30,8 +30,8 @@
         <ToggleButton Grid.Row="4" Content="Spot Coefs" x:Name="btnSpotCoefs" 
                         Margin="20, 5"
                         Click="ToggleButton_Click"/>
-        <DataGrid x:Name="dgSpotCoefs" Grid.Row="5" Visibility="Collapsed" IsReadOnly="True" Margin="5, 0"
-                  HeadersVisibility="Column" MaxWidth="200" MaxHeight="250">
+        <DataGrid x:Name="dgSpotCoefs" Grid.Row="5" Visibility="Collapsed" IsReadOnly="True" Margin="2, 0"
+                  HeadersVisibility="Column" MaxWidth="180" MaxHeight="250">
             <DataGridTextColumn Header="Spot" Binding="{Binding GetSpotcode}"/>
             <DataGridTextColumn Header="Secs" Binding="{Binding GetSeconds}"/>
             <DataGridTextColumn Header="Sec Coef" Binding="{Binding SecCoef.Name}"/>
