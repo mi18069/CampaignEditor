@@ -23,7 +23,7 @@ namespace CampaignEditor
     /// </summary>
     public partial class PrintForecast : Window
     {
-        public ListView lvChannels;
+        public ObservableRangeCollection<ChannelDTO> _selectedChannels;
         public ChannelsGoalsGrid cgGrid;
         public MediaPlanGrid mpGrid;
         public SpotDaysGoalsGrid sdgGrid;
@@ -51,7 +51,7 @@ namespace CampaignEditor
             _mapper = mapper;
         }
 
-        public void MakeVisibleColumnsMask()
+        public void MakeVisibleColumnsMask(bool hideSensitiveData = false)
         {
             for (int i=0; i<mpGrid.mediaPlanColumns; i++)
             {
@@ -59,6 +59,10 @@ namespace CampaignEditor
                 if (column.Visibility == Visibility.Visible)
                 {
                     visibleColumns[i] = true;
+                    if (hideSensitiveData && CheckIfColumnIsSensitive(column))
+                    {
+                        visibleColumns[i] = false;
+                    }
                 }
                 else
                 {
@@ -68,17 +72,32 @@ namespace CampaignEditor
 
         }
 
+        private bool CheckIfColumnIsSensitive(DataGridColumn column)
+        {
+            string? headerName = column.Header.ToString();
+            if (headerName == null)
+                return true;
+
+            if (headerName == "Channel" || headerName == "Program" || headerName == "DayPart"
+                || headerName == "Position" || headerName == "Start time" || headerName == "End time"
+                || headerName == "Block time" || headerName == "Type" || headerName == "Special" || headerName == "Ins")
+                return false;
+
+            return true;
+        }
+
         private async void btnPrint_Click(object sender, RoutedEventArgs e)
         {
-            MakeVisibleColumnsMask();
-            await PrintForecastGrids();
+            bool hideSensitiveData = (bool)chbHideSensitiveData.IsChecked;
+            MakeVisibleColumnsMask(hideSensitiveData);
+            await PrintForecastGrids(hideSensitiveData);
             this.Hide();
         }
 
-        private async Task PrintForecastGrids()
+        private async Task PrintForecastGrids(bool hideSensitiveData = false)
         {
             var selectedChannels = new List<ChannelDTO>();
-            foreach (ChannelDTO channel in lvChannels.SelectedItems)
+            foreach (ChannelDTO channel in _selectedChannels)
             {
                 selectedChannels.Add(channel);
             }
@@ -88,15 +107,14 @@ namespace CampaignEditor
                 ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
                 using (var excelPackage = new ExcelPackage(memoryStream))
                 {
-
                     // Create a new worksheet
                     var worksheet0 = excelPackage.Workbook.Worksheets.Add("Campaign Info");
-                    await factoryPrintCmpInfo.PrintData(_campaign.cmpid, selectedChannels, worksheet0, 0, 0);
+                    await factoryPrintCmpInfo.PrintData(_campaign.cmpid, selectedChannels, worksheet0, 0, 0, hideSensitiveData);
 
                     if (chbMpGrid.IsChecked == true)
                     {
                         var worksheet1 = excelPackage.Workbook.Worksheets.Add("Program Schema");
-                        mpGrid.PopulateWorksheet(visibleColumns, worksheet1, 1, 1);
+                        mpGrid.PopulateWorksheet(visibleTuples, visibleColumns, worksheet1, 1, 1);
                     }
                     if (chbWeeks1.IsChecked == true)
                     {

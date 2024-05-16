@@ -1,5 +1,5 @@
-﻿using Database.DTOs.MediaPlanTermDTO;
-using Database.Entities;
+﻿using Database.Entities;
+using System;
 using System.Windows.Controls;
 namespace CampaignEditor.UserControls.ValidationItems
 {
@@ -22,9 +22,21 @@ namespace CampaignEditor.UserControls.ValidationItems
             }
             else
             {
-                lblTime.Content = termTuple.MediaPlan.blocktime.ToString();
+                lblTime.Content = "Block time: " + termTuple.MediaPlan.blocktime.ToString();
             }
-            
+            if (termTuple.MediaPlan.DayPart == null)
+            {
+                lblDayPart.Content = "Day part: - ";
+            }
+            else
+            {
+                lblDayPart.Content = "Day part: " + termTuple.MediaPlan.DayPart.name.ToString();
+            }
+            lblPosition.Content = "Pos: " + termTuple.MediaPlan.position.ToString();
+            lblAMR1.Content = "Amr%1: " + Math.Round(termTuple.MediaPlan.amrp1, 2).ToString();
+            lblAMR2.Content = "Amr%2: " + Math.Round(termTuple.MediaPlan.amrp2, 2).ToString();
+            lblAMR3.Content = "Amr%3: " + Math.Round(termTuple.MediaPlan.amrp3, 2).ToString();
+            lblPrice.Content = "Price: " + Math.Round(termTuple.Price, 2).ToString();
         }
     }
 }

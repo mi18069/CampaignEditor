@@ -26,6 +26,11 @@ namespace CampaignEditor.Controllers
             return null;
         }
 
+        public async Task<bool> IsPricelistInUse(int plid)
+        {
+            return await _repository.IsPricelistInUse(plid);
+        }
+
         public async Task<PricelistDTO> GetPricelistById(int id)
         {
             var pricelist = await _repository.GetPricelistById(id);

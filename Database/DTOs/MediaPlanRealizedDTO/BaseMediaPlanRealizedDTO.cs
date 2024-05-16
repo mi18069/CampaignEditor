@@ -3,11 +3,14 @@ namespace Database.DTOs.MediaPlanRealizedDTO
 {
     public class BaseMediaPlanRealizedDTO
     {
-        public BaseMediaPlanRealizedDTO(string name, int stime, int etime, int chid, int dure, int durf, string date, int emsnum, int posinbr, int totalspotnum, int breaktype, int spotnum, int brandnum, double amrp1, double amrp2, double amrp3, double amrpsale, double cpp, double dpcoef, double seascoef, double seccoef, double progcoef, double price, int status)
+        public BaseMediaPlanRealizedDTO(int cmpid, string name, int stime, int etime, string stimestr, string etimestr, int chid, int dure, int durf, string date, int emsnum, int posinbr, int totalspotnum, int breaktype, int spotnum, int brandnum, double amrp1, double amrp2, double amrp3, double amrpsale, double cpp, double dpcoef, double seascoef, double seccoef, double progcoef, double price, int status)
         {
+            this.cmpid = cmpid;
             this.name = name;
             this.stime = stime;
             this.etime = etime;
+            this.stimestr = stimestr;
+            this.etimestr = etimestr;
             this.chid = chid;
             this.dure = dure;
             this.durf = durf;
@@ -31,9 +34,12 @@ namespace Database.DTOs.MediaPlanRealizedDTO
             this.status = status;
         }
 
+        public int cmpid { get; set; }
         public string name { get; set; }
         public int stime { get; set; }
         public int etime { get; set; }
+        public string stimestr { get; set; }
+        public string etimestr { get; set; }
         public int chid { get; set; }
         public int dure { get; set; }
         public int durf { get; set; }

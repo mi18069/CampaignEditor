@@ -302,11 +302,11 @@ namespace CampaignEditor
                 }
             }
 
-            float progcoef = schema.progcoef;
+            decimal progcoef = schema.progcoef;
             var clientProgCoef = await _clientProgCoefController.GetClientProgCoef(_campaign.clid, schema.id);
             if (clientProgCoef != null)
             {
-                progcoef = (float)clientProgCoef.progcoef;
+                progcoef = (decimal)clientProgCoef.progcoef;
             }
 
             CreateMediaPlanDTO createMediaPlan = new CreateMediaPlanDTO(schema.id, _campaign.cmpid, schema.chid,

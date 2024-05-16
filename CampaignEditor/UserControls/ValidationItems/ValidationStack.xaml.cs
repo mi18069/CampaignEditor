@@ -1,4 +1,5 @@
 ﻿using CampaignEditor.Controllers;
+using CampaignEditor.Helpers;
 using Database.DTOs.CampaignDTO;
 using Database.DTOs.ChannelDTO;
 using Database.Entities;
@@ -31,6 +32,9 @@ namespace CampaignEditor.UserControls.ValidationItems
         public MediaPlanController _mediaPlanController;
         public MediaPlanTermController _mediaPlanTermController;
         public SpotController _spotController;
+        public MediaPlanConverter _mpConverter;
+        public MediaPlanForecastData _forecastData;
+        public ObservableRangeCollection<MediaPlanTuple> _allMediaPlans;
 
         public ValidationStack()
         {
@@ -54,17 +58,21 @@ namespace CampaignEditor.UserControls.ValidationItems
         {
             List<TermTuple> termTuples = new List<TermTuple>();
 
-            var mediaPlans = await _mediaPlanController.GetAllChannelCmpMediaPlans(chid, _campaign.cmpid, _campaignVersion);
-
-            foreach (var mediaPlan in mediaPlans)
+            //var mediaPlans = await _mediaPlanController.GetAllChannelCmpMediaPlans(chid, _campaign.cmpid, _campaignVersion);
+            var mediaPlanTuples = _allMediaPlans.Where(mpt => mpt.MediaPlan.chid == chid);
+            foreach (var mediaPlanTuple in mediaPlanTuples)
             {
-                var mediaPlanTerms = await _mediaPlanTermController.GetAllNotNullMediaPlanTermsByXmpid(mediaPlan.xmpid);
+                //var mediaPlanTerms = await _mediaPlanTermController.GetAllNotNullMediaPlanTermsByXmpid(mediaPlan.xmpid);
+                var mediaPlanTerms = mediaPlanTuple.Terms.Where(t => t != null && t.Spotcode != null);
                 foreach (var mediaPlanTerm in mediaPlanTerms)
                 {
-                    foreach (char spotcode in mediaPlanTerm.spotcode.Trim())
+                    foreach (char spotcode in mediaPlanTerm!.Spotcode!.Trim())
                     {
-                        var spot = await _spotController.GetSpotsByCmpidAndCode(mediaPlan.cmpid, spotcode.ToString());
-                        TermTuple termTuple = new TermTuple(mediaPlan, mediaPlanTerm, spot);
+                        var spot = _forecastData.SpotcodeSpotDict[spotcode];
+                        // It's better to have info from allMediaPlans
+                        var mediaPlan = mediaPlanTuple.MediaPlan;
+                        var price = _mpConverter.GetProgramSpotPrice(mediaPlan, mediaPlanTerm, spot);
+                        TermTuple termTuple = new TermTuple(mediaPlan, mediaPlanTerm, spot, price);
                         termTuples.Add(termTuple);
                     }
                    
@@ -73,10 +81,10 @@ namespace CampaignEditor.UserControls.ValidationItems
 
             _dayTuples.Clear();
 
-            termTuples = termTuples.OrderBy(tt=>tt.MediaPlanTerm.date).ThenBy(tt => tt.MediaPlan.stime).ToList();
+            termTuples = termTuples.OrderBy(tt=>tt.MediaPlanTerm.Date).ThenBy(tt => tt.MediaPlan.stime).ToList();
             foreach (DateOnly date in _dates)
             {
-                List<TermTuple> dayTuples = termTuples.Where(tt => tt.MediaPlanTerm.date == date).ToList();
+                List<TermTuple> dayTuples = termTuples.Where(tt => tt.MediaPlanTerm.Date == date).ToList();
                 _dayTuples.Add(Tuple.Create(date, dayTuples));
             }
 
@@ -89,8 +97,8 @@ namespace CampaignEditor.UserControls.ValidationItems
 
             foreach (var tuple in dayTuples)
             {
-                if (tuple.Item2.Count == 0)
-                    continue;
+                /*if (tuple.Item2.Count == 0)
+                    continue;*/
 
                 string date = tuple.Item1.ToString();
                 DateLabelItem dli = new DateLabelItem(date);

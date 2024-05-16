@@ -11,7 +11,8 @@ namespace CampaignEditor.UserControls.ForecastGrids
     {
 
         private readonly string _fileName;
-        private readonly string _defaultPath = @"\pln_temp\";
+        //private readonly string _defaultPath = @"\pln_temp\";
+        private readonly string _defaultPath = @"\tmp\";
         private string _sourceDir = string.Empty;
         public string SourcePath { get; private set; }
         public string FunctionPath { get; private set; }
@@ -30,8 +31,11 @@ namespace CampaignEditor.UserControls.ForecastGrids
                 return null;
             }
 
-            _sourceDir = connPath + _defaultPath;
+            /*_sourceDir = connPath + _defaultPath;
             SourcePath = connPath + _defaultPath + _fileName;
+            FunctionPath = _defaultPath + _fileName;*/
+            _sourceDir = connPath ;
+            SourcePath = connPath  + _fileName;
             FunctionPath = _defaultPath + _fileName;
 
             try
@@ -68,7 +72,7 @@ namespace CampaignEditor.UserControls.ForecastGrids
                     return "C:";
                 else 
                     //return @"\\" + server + @"\C$\";
-                    return @"\\" + server + @"\C$\";
+                    return @"\\" + server + @"\tmp\";
             }
             catch
             {

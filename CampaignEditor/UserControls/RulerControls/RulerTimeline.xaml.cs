@@ -33,7 +33,7 @@ namespace CampaignEditor.UserControls
 
         public async Task LoadData(int cmpid, int chid, DateOnly date, int version)
         {
-            List<TermTuple> termTuples = new List<TermTuple>();
+            /*List<TermTuple> termTuples = new List<TermTuple>();
 
             var mediaPlans = await _mediaPlanController.GetAllChannelCmpMediaPlans(chid, cmpid, version); 
 
@@ -47,7 +47,7 @@ namespace CampaignEditor.UserControls
                         foreach (char spotcode in mediaPlanTerm.spotcode.Trim())
                         {
                             var spot = await _spotController.GetSpotsByCmpidAndCode(mediaPlan.cmpid, spotcode.ToString());
-                            TermTuple termTuple = new TermTuple(mediaPlan, mediaPlanTerm, spot);
+                            TermTuple termTuple = new TermTuple(mediaPlan, mediaPlanTerm, spot, 0.0);
                             termTuples.Add(termTuple);
                         }
                     }
@@ -57,12 +57,12 @@ namespace CampaignEditor.UserControls
 
             termTuples = termTuples.OrderBy(tt => tt.MediaPlan.stime).ToList();
 
-            DrawTermsInCanvas(termTuples);
+            DrawTermsInCanvas(termTuples);*/
         }
 
         private void DrawTermsInCanvas(List<TermTuple> termTuples)
         {
-            canvas.ClearCanvas();
+            /*canvas.ClearCanvas();
 
             for (int i=0; i<termTuples.Count(); i++)
             {
@@ -78,14 +78,14 @@ namespace CampaignEditor.UserControls
                     TermTuple termTupleNext = termTuples[i + 1];
 
                     if (termTupleNext.MediaPlan.etime != null &&
-                        termTupleNext.MediaPlanTerm.xmptermid == termTuple.MediaPlanTerm.xmptermid)
+                        termTupleNext.MediaPlanTerm.Xmptermid == termTuple.MediaPlanTerm.Xmptermid)
                     {
                         canvas.DrawTermRectangle(termTuple, 1);
                         i++;
                     }
                 }
                                 
-            }
+            }*/
         }
     }
 }

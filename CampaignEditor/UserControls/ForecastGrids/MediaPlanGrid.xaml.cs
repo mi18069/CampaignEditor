@@ -715,7 +715,7 @@ namespace CampaignEditor.UserControls
                 if (_mediaPlanToUpdate != null && !_mpConverter.SameMPValues(_mediaPlanToUpdate, _mediaPlanOldValues))
                 {
                     // If coefs are changed, we need to recalculate price
-                    double eps = 0.0001;
+                    decimal eps = 0.0001M;
                     if (Math.Abs(_mediaPlanToUpdate.Progcoef - _mediaPlanOldValues.Progcoef) > eps)
                     {
                         progCoefEdited = true;
@@ -1061,14 +1061,13 @@ namespace CampaignEditor.UserControls
             colors.Add("day", day);
         }
 
-        public void PopulateWorksheet(bool[] visibleColumns, ExcelWorksheet worksheet, int rowOff = 1, int colOff = 1)
+        public void PopulateWorksheet(IEnumerable<MediaPlanTuple> mpTuples, bool[] visibleColumns, ExcelWorksheet worksheet, int rowOff = 1, int colOff = 1, bool hideSensitive = false)
         {
             var selectedChannels = _selectedChannels;
             var selectedChannelsChids = selectedChannels.Select(ch => ch.chid);
             //var mpTuples = _allMediaPlans.Where(mpTuple => selectedChannelsChids.Contains(mpTuple.MediaPlan.chid));
             CollectionView collectionView = (CollectionView)CollectionViewSource.GetDefaultView(dgMediaPlans.ItemsSource);
 
-            IEnumerable<MediaPlanTuple> mpTuples = collectionView.OfType<MediaPlanTuple>();
             mpTuples = mpTuples.OrderBy(mpt => mpt.MediaPlan.chid);
             if (colors.Count == 0)
             {

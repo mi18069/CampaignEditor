@@ -20,12 +20,12 @@ namespace Database.Entities
             get { return SpotGoals.Sum(sg => sg.Insertations); }
         }
 
-        public double Grp
+        public decimal Grp
         {
             get { return SpotGoals.Sum(sg => sg.Grp); }
         }
 
-        public double Budget
+        public decimal Budget
         {
             get { return SpotGoals.Sum(sg => sg.Budget); }
         }

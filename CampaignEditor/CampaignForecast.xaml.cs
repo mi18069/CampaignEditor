@@ -48,7 +48,6 @@ namespace CampaignEditor.UserControls
         private readonly PrintCampaignInfo _factoryPrintCmpInfo;
         private readonly Listing _factoryListing;
         private readonly PrintForecast _factoryPrintForecast;
-        private readonly MediaPlanForecastData _forecastData;
         private ForecastDataManipulation _forecastDataManipulation;
 
 
@@ -67,17 +66,24 @@ namespace CampaignEditor.UserControls
         DateTime endDate;
 
 
-        private ObservableRangeCollection<MediaPlanTuple> _allMediaPlans =
-            new ObservableRangeCollection<MediaPlanTuple>();
+        /*private ObservableRangeCollection<MediaPlanTuple> _allMediaPlans =
+            new ObservableRangeCollection<MediaPlanTuple>();*/
+        public ObservableRangeCollection<MediaPlanTuple> _allMediaPlans;
 
         private ObservableRangeCollection<ChannelDTO> _allChannels = new ObservableRangeCollection<ChannelDTO>();
         private ObservableRangeCollection<ChannelDTO> _selectedChannels = new ObservableRangeCollection<ChannelDTO>();
+        private ObservableRangeCollection<ChannelDTO> _gridDisplayChannels = new ObservableRangeCollection<ChannelDTO>();
+
+
 
         private ObservableCollection<MediaPlanHist> _showMPHist = new ObservableCollection<MediaPlanHist>();
 
-        MediaPlanConverter _mpConverter;
-        MediaPlanTermConverter _mpTermConverter;
+        public MediaPlanForecastData _forecastData;
+        public MediaPlanConverter _mpConverter;
 
+        MediaPlanTermConverter _mpTermConverter;
+        private bool gridShowSelected = true;
+        private bool gridFirstOpening = true;
 
         public event PropertyChangedEventHandler? PropertyChanged;
         public void OnPropertyChanged([CallerMemberName] string propertyname = null)
@@ -96,13 +102,13 @@ namespace CampaignEditor.UserControls
             IDatabaseFunctionsRepository databaseFunctionsRepository,
             IAbstractFactory<AddSchema> factoryAddSchema,
             IAbstractFactory<AMRTrim> factoryAmrTrim,
-            IAbstractFactory<MediaPlanConverter> factoryMpConverter,
+            //IAbstractFactory<MediaPlanConverter> factoryMpConverter,
             IAbstractFactory<MediaPlanTermConverter> factoryMpTermConverter,
             IAbstractFactory<PrintCampaignInfo> factoryPrintCmpInfo,
             IAbstractFactory<Listing> factoryListing,
             IAbstractFactory<PrintForecast> factoryPrintForecast,
             IAbstractFactory<ImportFromSchema> factoryImportFromSchema,
-            IAbstractFactory<MediaPlanForecastData> factoryForecastData,
+            //IAbstractFactory<MediaPlanForecastData> factoryForecastData,
             IReachRepository reachRepository,
             IAbstractFactory<ForecastDataManipulation> factoryForecastDataManipulation,
             IClientProgCoefRepository clientProgCoefRepository)
@@ -128,9 +134,9 @@ namespace CampaignEditor.UserControls
             _factoryListing = factoryListing.Create();
             _factoryPrintForecast = factoryPrintForecast.Create();
 
-            _mpConverter = factoryMpConverter.Create();
+            //_mpConverter = factoryMpConverter.Create();
             _mpTermConverter = factoryMpTermConverter.Create();
-            _forecastData = factoryForecastData.Create();
+            //_forecastData = factoryForecastData.Create();
 
             _forecastDataManipulation = factoryForecastDataManipulation.Create();
 
@@ -141,6 +147,15 @@ namespace CampaignEditor.UserControls
 
         #region Triggers
 
+        public async Task CampaignChanged(CampaignDTO campaign)
+        {
+            SetLoadingPage?.Invoke(this, null);
+
+            _forecastDataManipulation.Initialize(campaign, _forecastData, _mpConverter);
+            _campaign = campaign;
+
+            SetContentPage?.Invoke(this, null);
+        }
         public async Task GoalsChanged()
         {
             SetLoadingPage?.Invoke(this, null);
@@ -154,7 +169,7 @@ namespace CampaignEditor.UserControls
             SetLoadingPage?.Invoke(this, null);
 
             var mpVer = await _mediaPlanVersionController.GetLatestMediaPlanVersion(_campaign.cmpid);
-            await _forecastData.InitializeTargets();
+            //await _forecastData.InitializeTargets();
             goalsTreeView._mpConverter = _mpConverter;
             _forecastDataManipulation.UpdateProgressBar += _forecastDataManipulation_UpdateProgressBar;
             await _forecastDataManipulation.RecalculateMediaPlans(mpVer.version);
@@ -169,8 +184,8 @@ namespace CampaignEditor.UserControls
             SetLoadingPage?.Invoke(this, null);
 
             var mpVer = await _mediaPlanVersionController.GetLatestMediaPlanVersion(_campaign.cmpid);
-            await _forecastData.InitializeSpots();
-            _mpConverter.Initialize(_forecastData);
+            //await _forecastData.InitializeSpots();
+            //_mpConverter.Initialize(_forecastData);
             goalsTreeView._mpConverter = _mpConverter;
             await CalculateMPValuesForCampaign(_campaign.cmpid, _maxVersion);
             await LoadData(mpVer.version);
@@ -182,8 +197,8 @@ namespace CampaignEditor.UserControls
         {
             SetLoadingPage?.Invoke(this, null);
 
-            await _forecastData.InitializeDayParts();
-            _mpConverter.Initialize(_forecastData);
+            //await _forecastData.InitializeDayParts();
+            //_mpConverter.Initialize(_forecastData);
             FillLvFilterDayParts();
             foreach (var mediaPlan in _allMediaPlans.Select(mpt => mpt.MediaPlan))
             {
@@ -201,8 +216,8 @@ namespace CampaignEditor.UserControls
 
             var mpVer = await _mediaPlanVersionController.GetLatestMediaPlanVersion(_campaign.cmpid);
 
-            await _forecastData.InitializeChannels(true);
-            _mpConverter.Initialize(_forecastData);
+            //await _forecastData.InitializeChannels(true);
+            //_mpConverter.Initialize(_forecastData);
             _forecastDataManipulation.Initialize(_campaign, _forecastData, _mpConverter);
 
             foreach (var chid in channelsToDelete)
@@ -229,8 +244,8 @@ namespace CampaignEditor.UserControls
         {
             SetLoadingPage?.Invoke(this, null);
 
-            await _forecastData.InitializePricelists();
-            _mpConverter.Initialize(_forecastData);
+            //await _forecastData.InitializePricelists();
+            //_mpConverter.Initialize(_forecastData);
             _forecastDataManipulation.Initialize(_campaign, _forecastData, _mpConverter);
 
             var channelIds = new List<int>();
@@ -269,8 +284,8 @@ namespace CampaignEditor.UserControls
 
             canUserEdit = !isReadOnly;
 
-            await _forecastData.Initialize(_campaign);
-            _mpConverter.Initialize(_forecastData);
+            /*await _forecastData.Initialize(_campaign);
+            _mpConverter.Initialize(_forecastData);*/
             _forecastDataManipulation.Initialize(_campaign, _forecastData, _mpConverter);
 
             await InitializeVersions();
@@ -281,8 +296,8 @@ namespace CampaignEditor.UserControls
             BindLists();
 
             InitializeListViews();
-            
-        }       
+
+        }
 
         private void InitializeListViews()
         {
@@ -362,7 +377,7 @@ namespace CampaignEditor.UserControls
 
         private void SubscribePrintForecastControllers()
         {
-            _factoryPrintForecast.lvChannels = lvChannels;
+            _factoryPrintForecast._selectedChannels = _gridDisplayChannels;
             _factoryPrintForecast.cgGrid = cgGrid;
             _factoryPrintForecast.mpGrid = dgMediaPlans;
             _factoryPrintForecast.sdgGrid = sdgGrid;
@@ -478,6 +493,9 @@ namespace CampaignEditor.UserControls
                 AddVersion(version);
             }
 
+            await _forecastData.Initialize(_campaign);
+            _mpConverter.Initialize(_forecastData);
+
             SetLoadingPage?.Invoke(this, new LoadingPageEventArgs("CREATING NEW MEDIA PLAN...", 1));
             _forecastDataManipulation.UpdateProgressBar += _forecastDataManipulation_UpdateProgressBar;
             await _forecastDataManipulation.InsertData(version);
@@ -522,7 +540,7 @@ namespace CampaignEditor.UserControls
                 await LoadData(newVersion - 1);
             }
 
-        }      
+        }
 
         private void AddVersion(int version)
         {
@@ -549,7 +567,7 @@ namespace CampaignEditor.UserControls
                 await FillMPList(version);
                 await FillLoadedDateRanges();
                 InitializeDataGrid();
- 
+
             }
             catch (Exception ex)
             {
@@ -590,8 +608,8 @@ namespace CampaignEditor.UserControls
             InitializeCGGrid();
             swgGrid.Initialize(_campaign, _forecastData.Channels, _forecastData.Spots, _cmpVersion);
             sdgGrid.Initialize(_campaign, _forecastData.Channels, _forecastData.Spots, _cmpVersion);
-            _factoryListing.Initialize(_campaign, _forecastData.Channels, 
-                    _forecastData.ChidPricelistDict, _forecastData.SpotcodeSpotDict, _mpConverter);
+            _factoryListing.Initialize(_campaign, _forecastData.Channels,
+                _forecastData.SpotcodeSpotDict, _mpConverter);
             // should be awaitable, but it takes too long now
             reachGrid.Initialize(_campaign, _forecastData.Targets);
         }
@@ -850,12 +868,27 @@ namespace CampaignEditor.UserControls
         }
         private void lvChannels_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            
             _selectedChannels.ReplaceRange(GetSelectedChannelsInOrder());
 
-            sdgGrid.SelectedChannelsChanged(_selectedChannels);
-            swgGrid.SelectedChannelsChanged(_selectedChannels);
-            cgGrid.SelectedChannelsChanged(_selectedChannels);
+            ChangeGridDisplayData(_selectedChannels);          
+        }
+
+        private void ChangeGridDisplayData(IEnumerable<ChannelDTO> displayChannels)
+        {
+            if (gridFirstOpening == true)
+            {
+                gridFirstOpening = false;
+                return;
+            }
+            if (gridShowSelected == true)
+            {
+                _gridDisplayChannels.ReplaceRange(displayChannels);
+                sdgGrid.SelectedChannelsChanged(displayChannels);
+                swgGrid.SelectedChannelsChanged(displayChannels);
+                cgGrid.SelectedChannelsChanged(displayChannels);
+            }
+            
+           
 
         }
 
@@ -1267,10 +1300,14 @@ namespace CampaignEditor.UserControls
         {
             CollectionView collectionView = (CollectionView)CollectionViewSource.GetDefaultView(dgMediaPlans.dgMediaPlans.ItemsSource);
 
-            IEnumerable<MediaPlanTuple> visibleTuples = collectionView.OfType<MediaPlanTuple>();
-            swgGrid.VisibleTuplesChanged(visibleTuples);
-            sdgGrid.VisibleTuplesChanged(visibleTuples);
-            cgGrid.VisibleTuplesChanged(visibleTuples);
+            if (gridShowSelected == true)
+            {
+                IEnumerable<MediaPlanTuple> visibleTuples = collectionView.OfType<MediaPlanTuple>();
+                swgGrid.VisibleTuplesChanged(visibleTuples);
+                sdgGrid.VisibleTuplesChanged(visibleTuples);
+                cgGrid.VisibleTuplesChanged(visibleTuples);
+            }
+
         }
 
 
@@ -1338,7 +1375,7 @@ namespace CampaignEditor.UserControls
                     var mediaPlan = mediaPlanTuple.MediaPlan;
 
                     await _mpConverter.CalculateAMRs(mediaPlan);
-
+                    await _mpConverter.ComputeExtraProperties(mediaPlan, true);
                     await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(_mpConverter.ConvertToDTO(mediaPlan)));
                 }
             }
@@ -1349,7 +1386,11 @@ namespace CampaignEditor.UserControls
 
         private void btnExport_Click(object sender, RoutedEventArgs e)
         {
-            _factoryPrintForecast.visibleTuples = dgMediaPlans.GetVisibleMediaPlanTuples();
+            if (gridShowSelected == true)
+                _factoryPrintForecast.visibleTuples = dgMediaPlans.GetVisibleMediaPlanTuples();
+            else
+                _factoryPrintForecast.visibleTuples = _allMediaPlans.ToList();
+
             _factoryPrintForecast.ShowDialog();
         }
 
@@ -1417,7 +1458,23 @@ namespace CampaignEditor.UserControls
             reachGrid.UpdateReach -= ReachGrid_UpdateReach;
         }
 
+        private void rbGridShowSelected_Checked(object sender, RoutedEventArgs e)
+        {
+            gridShowSelected = true;
+            _gridDisplayChannels.ReplaceRange(_selectedChannels);
+            ChangeGridDisplayData(_selectedChannels);
+        }
 
+        private void rbGridShowAll_Checked(object sender, RoutedEventArgs e)
+        {
+            _gridDisplayChannels.ReplaceRange(_forecastData.Channels);
+            ChangeGridDisplayData(_gridDisplayChannels);
+            IEnumerable<MediaPlanTuple> visibleTuples = _allMediaPlans;
+            swgGrid.VisibleTuplesChanged(visibleTuples);
+            sdgGrid.VisibleTuplesChanged(visibleTuples);
+            cgGrid.VisibleTuplesChanged(visibleTuples);
+            gridShowSelected = false;
+        }
     }
 
 }

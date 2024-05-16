@@ -11,7 +11,6 @@ using Database.DTOs.TargetDTO;
 using Database.Repositories;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -294,6 +293,11 @@ namespace CampaignEditor
             tbCP.Text = _pricelist.price.ToString();
             tbMinGRP.Text = _pricelist.minprice.ToString();
             chbGRP.IsChecked = _pricelist.mgtype;
+            /*if (_pricelist.fixprice != 0)
+            {
+                chbFixed.IsChecked = true;
+                tbFixed.Text = _pricelist.fixprice.ToString();
+            }*/
             var target = await _targetController.GetTargetById(_pricelist.pltarg);
             for (int i=0; i<cbTarget.Items.Count; i++)
             {
@@ -411,8 +415,8 @@ namespace CampaignEditor
             int sectbid = (cbSectable.SelectedValue as SectableDTO)!.sctid; // By default, first value is selected
             int seasid = (cbSeasonality.SelectedValue as SeasonalityDTO)!.seasid;
             bool plactive = true;
-            float price = float.Parse(tbCP.Text.Trim());
-            float minprice = float.Parse(tbMinGRP.Text.Trim());
+            decimal price = decimal.Parse(tbCP.Text.Trim());
+            decimal minprice = decimal.Parse(tbMinGRP.Text.Trim());
             bool prgcoef = false;
             int pltarg = (cbTarget.SelectedValue as TargetDTO)!.targid;
             bool use2 = (bool)chbSectable2.IsChecked;
@@ -422,9 +426,20 @@ namespace CampaignEditor
             int valfrom = int.Parse(TimeFormat.DPToYMDString(dpValidityFrom));
             int valto = int.Parse(TimeFormat.DPToYMDString(dpValidityTo));
             bool mgtype = (bool)chbGRP.IsChecked;
+            /*decimal fixPrice = 0.0f;
+            if ((bool)chbFixed.IsChecked && !decimal.TryParse(tbFixed.Text, out fixPrice))
+            {
+                MessageBox.Show("Value for fixed price is invalid!", "Error",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }*/
 
             if (pricelist == null)
             {
+                /*_pricelist = await _pricelistController.CreatePricelist(new CreatePricelistDTO
+                    (clid, plname, pltype, sectbid, seasid, plactive, price, minprice,
+                    prgcoef, pltarg, use2, sectbid2, sectb2st, sectb2en,
+                    valfrom, valto, mgtype, fixPrice));*/
                 _pricelist = await _pricelistController.CreatePricelist(new CreatePricelistDTO
                     (clid, plname, pltype, sectbid, seasid, plactive, price, minprice,
                     prgcoef, pltarg, use2, sectbid2, sectb2st, sectb2en,
@@ -480,7 +495,7 @@ namespace CampaignEditor
                 {
                     string dps = (item.tbFromH.Text.Trim() + ":" + item.tbFromM.Text.Trim()).PadLeft(2, '0');
                     string dpe = (item.tbToH.Text.Trim() + ":" + item.tbToM.Text.Trim()).PadLeft(2, '0');
-                    float price = float.Parse(item.tbCoef.Text.Trim());
+                    decimal price = decimal.Parse(item.tbCoef.Text.Trim());
                     bool ispt = (bool)item.cbIsPT.IsChecked;
                     string days = item.tbDays.Text.Trim();
 
@@ -490,17 +505,17 @@ namespace CampaignEditor
             }
             if (created == 0)
             {
-                await _pricesController.CreatePrices(new CreatePricesDTO(pricelist.plid, "02:00", "25:59", 1.0f, false, "1234567"));
+                await _pricesController.CreatePrices(new CreatePricesDTO(pricelist.plid, "02:00", "25:59", 1.0M, false, "1234567"));
             }
         }
         #endregion
 
         #region Check Values
-        private async Task<bool> CheckValues()
+        private async Task<bool> CheckValues(bool saveAs = false)
         {
-            if (_pricelist == null)
-                if (await CheckName() == false)
-                    return false; 
+            if (await CheckName(saveAs) == false)
+                return false; 
+
             if (CheckCP() && CheckMinGRP() && 
                 CheckValidity() && CheckComboBoxes() && CheckDPs() &&
                 CheckNonEmptyChannelsSelected())
@@ -560,7 +575,7 @@ namespace CampaignEditor
         }
         // Name should be longer than 0 chars and shouldn't 
         // have the same name as another pricelist from the same client
-        private async Task<bool> CheckName()
+        private async Task<bool> CheckName(bool checkSameName)
         {
             string name = tbName.Text.Trim();
             if (name.Length <= 0)
@@ -568,23 +583,28 @@ namespace CampaignEditor
                 MessageBox.Show("Enter name");
                 return false;
             }
-            else if ((await _pricelistController.GetClientPricelistByName(_campaign.clid, name)) != null)
+            var pricelistWithSameName = await _pricelistController.GetClientPricelistByName(_campaign.clid, name);
+            if (pricelistWithSameName != null && (_pricelist == null ||  
+                    (_pricelist != null && pricelistWithSameName.plid != _pricelist.plid) || 
+                    checkSameName))
             {
                 MessageBox.Show("Name already exist");
                 return false;
             }
             else
+            {
                 return true;
+            }
         }
         private bool CheckCP()
         {
             string cp = tbCP.Text.Trim();
-            double cpDouble = 0;
+            decimal cpdecimal = 0;
             if (cp.Length <= 0)
             {
                 MessageBox.Show("Enter CP(/I/P/S)");
                 return false;
-            }else if(!double.TryParse(cp, out cpDouble))
+            }else if(!decimal.TryParse(cp, out cpdecimal))
             {
                 MessageBox.Show("Value for CP(/I/P/S) is not valid");
                 return false;
@@ -595,13 +615,13 @@ namespace CampaignEditor
         private bool CheckMinGRP()
         {
             string grp = tbMinGRP.Text.Trim();
-            double grpDouble = 0;
+            decimal grpdecimal = 0;
             if (grp.Length <= 0)
             {
                 MessageBox.Show("Enter MinGRP");
                 return false;
             }
-            else if (!double.TryParse(grp, out grpDouble))
+            else if (!decimal.TryParse(grp, out grpdecimal))
             {
                 MessageBox.Show("Value for MinGRP is not valid");
                 return false;
@@ -637,10 +657,12 @@ namespace CampaignEditor
         {
             bool success = true;
             bool atLeastOne = false;
+            List<TargetDPItem> items = new List<TargetDPItem>();
 
             for (int i=0; i<wpDayParts.Children.Count -1; i++)
             {
                 TargetDPItem item = (TargetDPItem)wpDayParts.Children[i];
+                items.Add(item);
                 string validity = "";
                 if ((validity = item.CheckValidity()) != "")
                 {
@@ -673,7 +695,37 @@ namespace CampaignEditor
                 item.tbCoef.Text = "1.00";
             }*/
 
+            items = items.OrderBy(item => item.GetSTime()).ToList();
+            for (int i=0; i<items.Count()-1; i++)
+            {
+                for (int j=i+1; j<items.Count(); j++)
+                {
+                    if (String.Compare(items[i].GetETime(),items[j].GetSTime()) >= 0)
+                    {
+                        if (CheckOverlappingDays(items[i].GetDays(), items[j].GetDays()))
+                        {
+                            MessageBox.Show($"Intercepting intervals!\n{items[i]} and \n{items[j]}");
+                            return false;                    
+                        }
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+            }
+
             return success;
+        }
+
+        private bool CheckOverlappingDays(string days1, string days2)
+        {
+            foreach (char day in days1)
+            {
+                if (days2.Contains(day))
+                    return true;
+            }
+            return false;
         }
         // Every CheckBox needs to be selected (except cbSectable2)
         private bool CheckComboBoxes()
@@ -845,7 +897,7 @@ namespace CampaignEditor
 
         private async void btnSaveAs_Click(object sender, RoutedEventArgs e)
         {
-            if (await CheckValues())
+            if (await CheckValues(true))
             {
                 // Copy values
                 // Make new pricelist
@@ -928,13 +980,36 @@ namespace CampaignEditor
             pricelistModified = true;
         }
 
-        private void chbGRP_Checked(object sender, RoutedEventArgs e)
+        private bool checkedFirst = true;
+        private void chb_Checked(object sender, RoutedEventArgs e)
         {
+            if (checkedFirst)
+            {
+                checkedFirst = false;
+                return;
+            }
+            if (((CheckBox)sender).Name == "chbGRP")
+            {
+                chbFixed.IsChecked = false;
+                tbFixed.IsEnabled = false;
+            }
+            else if(((CheckBox)sender).Name == "chbFixed")
+            {
+                chbGRP.IsChecked = false;
+            }
             pricelistModified = true;
         }
 
-        private void chbGRP_Unchecked(object sender, RoutedEventArgs e)
+        private void chb_Unchecked(object sender, RoutedEventArgs e)
         {
+            if (((CheckBox)sender).Name == "chbGRP")
+            {
+                tbFixed.IsEnabled = true;
+            }
+            else if (((CheckBox)sender).Name == "chbFixed")
+            {
+                tbFixed.IsEnabled = false;
+            }
             pricelistModified = true;
         }
 

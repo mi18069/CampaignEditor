@@ -9,10 +9,10 @@ namespace Database.Entities
     {
         private ChannelDTO channel;
         private int insertations;
-        private double grp1;
-        private double grp2;
-        private double grp3;
-        private double budget;
+        private decimal grp1;
+        private decimal grp2;
+        private decimal grp3;
+        private decimal budget;
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -28,26 +28,26 @@ namespace Database.Entities
             set { insertations = value; }
         }
 
-        public double Grp1
+        public decimal Grp1
         {
             get { return grp1; }
             set { grp1 = value; }
         }
-        public double Grp2
+        public decimal Grp2
         {
             get { return grp2; }
             set { grp2 = value; }
         }
-        public double Grp3
+        public decimal Grp3
         {
             get { return grp3; }
             set { grp3 = value; }
         }
 
-        public double Budget
+        public decimal Budget
         {
             get { return budget; }
-            set { budget = value; }
+            set { budget = value;}
         }
         public ProgramGoals(ChannelDTO channel)
         {
@@ -57,6 +57,17 @@ namespace Database.Entities
             Grp2 = 0;
             Grp3 = 0;
             Budget = 0;
+        }
+
+        public void SetValues(ProgramGoals pg)
+        {
+            Insertations = pg.Insertations;
+            Grp1 = pg.Grp1;
+            Grp2 = pg.Grp2;
+            Grp3 = pg.Grp3;
+            Budget = pg.Budget;
+            OnPropertyChanged();
+
         }
 
         public void OnPropertyChanged([CallerMemberName] string propertyname = null)

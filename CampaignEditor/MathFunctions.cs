@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CampaignEditor
 {
@@ -12,7 +9,7 @@ namespace CampaignEditor
         public static T ArithmeticMean<T>(IEnumerable<T> array)
         {
 
-            dynamic sum = 0.0;
+            dynamic sum = 0.0M;
             if (array.Count() == 0)
                 return sum;
 

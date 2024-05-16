@@ -52,6 +52,7 @@ namespace CampaignEditor
 
         public event EventHandler ClosePageEvent;
         public event EventHandler GoalsUpdatedEvent;
+        public event EventHandler<UpdateCampaignEventArgs> CampaignUpdatedEvent;
         public event EventHandler<UpdateChannelsEventArgs> ChannelsUpdatedEvent;
         public event EventHandler<UpdatePricelistEventArgs> PricelistUpdatedEvent;
         public event EventHandler TargetsUpdatedEvent;
@@ -187,6 +188,7 @@ namespace CampaignEditor
             if (fInfo != null && fInfo.infoModified)
             {
                 _campaign = fInfo.Campaign;
+                CampaignUpdatedEvent?.Invoke(this, new UpdateCampaignEventArgs(fInfo.Campaign));
                 _campaignInfo = fInfo.Campaign;
                 _brands = fInfo.SelectedBrands;
                 await FillInfo(_campaignInfo, _brands);
@@ -479,5 +481,29 @@ namespace CampaignEditor
             ClosePageEvent?.Invoke(this, new EventArgs());
         }
 
+        private void dataGrid_PreviewMouseWheel(object sender, System.Windows.Input.MouseWheelEventArgs e)
+        {
+            e.Handled = true;
+
+            // Get the ScrollViewer containing the DataGrid
+            ScrollViewer scrollViewer;
+            if ((sender as DataGrid).Name == "dgSpots")
+                scrollViewer = svSpots;
+            else if ((sender as DataGrid).Name == "dgChannels")
+                scrollViewer = svChannels;
+            else
+                return;
+            // Calculate the new vertical offset based on the mouse wheel delta
+            double newVerticalOffset = scrollViewer.VerticalOffset - e.Delta;
+
+            // Ensure the new vertical offset is within bounds
+            if (newVerticalOffset < 0)
+                newVerticalOffset = 0;
+            else if (newVerticalOffset > scrollViewer.ScrollableHeight)
+                newVerticalOffset = scrollViewer.ScrollableHeight;
+
+            // Set the new vertical offset
+            scrollViewer.ScrollToVerticalOffset(newVerticalOffset);
+        }
     }
 }

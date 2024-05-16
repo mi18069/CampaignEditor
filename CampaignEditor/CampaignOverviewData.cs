@@ -116,6 +116,7 @@ namespace CampaignEditor
             try
             {
                 spots = (List<SpotDTO>)await _spotController.GetSpotsByCmpid(cmpid);
+                spots = spots.OrderBy(s => s.spotcode).ToList();
             }
             catch (Exception ex)
             {

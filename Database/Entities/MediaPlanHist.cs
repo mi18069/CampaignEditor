@@ -26,14 +26,14 @@ namespace Database.Entities
         public string? etime { get; set; }
         public DateOnly date { get; set; }
         public float progcoef { get; set; }
-        public double amr1 { get; set; }
-        public double amr2 { get; set; }
-        public double amr3 { get; set; }
-        public double amrsale { get; set; }
-        public double amrp1 { get; set; }
-        public double amrp2 { get; set; }
-        public double amrp3 { get; set; }
-        public double amrpsale { get; set; }
+        public decimal amr1 { get; set; }
+        public decimal amr2 { get; set; }
+        public decimal amr3 { get; set; }
+        public decimal amrsale { get; set; }
+        public decimal amrp1 { get; set; }
+        public decimal amrp2 { get; set; }
+        public decimal amrp3 { get; set; }
+        public decimal amrpsale { get; set; }
         public bool active { get; set; }
         public bool outlier { get; set; }
 

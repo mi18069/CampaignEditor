@@ -4,7 +4,7 @@ namespace Database.DTOs.MediaPlanHistDTO
 {
     public class BaseMediaPlanHistDTO
     {
-        public BaseMediaPlanHistDTO(int xmpid, int schid, int chid, string name, string position, string stime, string? etime, DateOnly date, float progcoef, double amr1, double amr2, double amr3, double amrsale, double amrp1, double amrp2, double amrp3, double amrpsale, bool active, bool outlier)
+        public BaseMediaPlanHistDTO(int xmpid, int schid, int chid, string name, string position, string stime, string? etime, DateOnly date, float progcoef, decimal amr1, decimal amr2, decimal amr3, decimal amrsale, decimal amrp1, decimal amrp2, decimal amrp3, decimal amrpsale, bool active, bool outlier)
         {
             this.xmpid = xmpid;
             this.schid = schid;
@@ -36,14 +36,14 @@ namespace Database.DTOs.MediaPlanHistDTO
         public string? etime { get; set; }
         public DateOnly date { get; set; }
         public float progcoef { get; set; }
-        public double amr1 { get; set; }
-        public double amr2 { get; set; }
-        public double amr3 { get; set; }
-        public double amrsale { get; set; }
-        public double amrp1 { get; set; }
-        public double amrp2 { get; set; }
-        public double amrp3 { get; set; }
-        public double amrpsale { get; set; }
+        public decimal amr1 { get; set; }
+        public decimal amr2 { get; set; }
+        public decimal amr3 { get; set; }
+        public decimal amrsale { get; set; }
+        public decimal amrp1 { get; set; }
+        public decimal amrp2 { get; set; }
+        public decimal amrp3 { get; set; }
+        public decimal amrpsale { get; set; }
         public bool active { get; set; }
         public bool? outlier { get; set; }
     }

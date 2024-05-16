@@ -26,7 +26,7 @@ namespace CampaignEditor
 
         public SectableDTO Sec { get { return _sectable; } }
 
-        ObservableCollection<Tuple<int, double>> dgList = new ObservableCollection<Tuple<int, double>>();
+        ObservableCollection<Tuple<int, decimal>> dgList = new ObservableCollection<Tuple<int, decimal>>();
 
         public Sectable(ISectableRepository sectableRepository,
             ISectablesRepository sectablesRepository)
@@ -112,11 +112,11 @@ namespace CampaignEditor
         {
             int from = 0;
             int to = 0;
-            double coef = 0;
+            decimal coef = 0;
 
             if (int.TryParse(tbAddFrom.Text, out from) &&
                 int.TryParse(tbAddTo.Text, out to) &&
-                double.TryParse(tbCoef.Text, out coef))
+                decimal.TryParse(tbCoef.Text, out coef))
             {
                 InsertRange(from, to, coef);
                 modifiedSectables = true;
@@ -136,7 +136,7 @@ namespace CampaignEditor
                 FillDGSectables();
             }
         }
-        private void InsertRange(int startRange, int endRange, double coef)
+        private void InsertRange(int startRange, int endRange, decimal coef)
         {
             // Find the correct position for the first number in the range using binary search
             int low = 0;

@@ -68,13 +68,13 @@ namespace CampaignEditor
                     List<DateRangeSeasCoef> dateRanges = new List<DateRangeSeasCoef>();
 
                     var sectables = _forecastData.SecidSectablesDict[sectable.sctid].FirstOrDefault(secs => secs.sec == spot.spotlength, null);
-                    double seccoef = sectables == null ? (double)spot.spotlength/30 : sectables.coef;
+                    decimal seccoef = sectables == null ? (decimal)spot.spotlength/30 : sectables.coef;
 
                     if (seasonality == null || seasonalities == null || seasonalities.Count == 0)
                     {
-                        var seasCoef = 1.0;
+                        var seasCoef = 1.0M;
                         DateRangeSeasCoef dateRange = new DateRangeSeasCoef(TimeFormat.YMDStringToDateOnly(_forecastData.Campaign.cmpsdate),
-                                                        TimeFormat.YMDStringToDateOnly(_forecastData.Campaign.cmpsdate),
+                                                        TimeFormat.YMDStringToDateOnly(_forecastData.Campaign.cmpedate),
                                                         seasCoef);
                         dateRanges.Add(dateRange);
                     }
@@ -126,7 +126,7 @@ namespace CampaignEditor
                         seasid: -1,
                         stdt: currentDate.ToString("yyyyMMdd"),
                         endt: TimeFormat.YMDStringToDateOnly(seasonalitiesRange.stdt).AddDays(-1).ToString("yyyyMMdd"),
-                        coef: 1.0
+                        coef: 1.0M
                     );
                     consecutiveSeasonalities.Add(seasonalitiesPreRangePart);
                     currentDate = TimeFormat.YMDStringToDateOnly(seasonalitiesPreRangePart.endt).AddDays(1);
@@ -161,7 +161,7 @@ namespace CampaignEditor
                     seasid: -1,
                     stdt: currentDate.ToString("yyyyMMdd"),
                     endt: endDate.ToString("yyyyMMdd"),
-                    coef: 1.0
+                    coef: 1.0M
                 );
                 consecutiveSeasonalities.Add(seasonalitiesRangePart);
             }
@@ -182,14 +182,14 @@ namespace CampaignEditor
 
                 foreach (var dateRange in spotCoefs.dateRanges)
                 {
-                    double price = 0.0;
+                    decimal price = 0.0M;
                     var seascoef = dateRange.seascoef;
                     var seccoef = spotCoefs.seccoef;
-                    double coefs = seascoef * seccoef * mediaPlan.Progcoef * mediaPlan.Dpcoef;
+                    decimal coefs = seascoef * seccoef * mediaPlan.Progcoef * mediaPlan.Dpcoef;
 
                     if (pricelist.pltype == 1)
                     {
-                        price = coefs * spot.spotlength;
+                        price = coefs * 30;
                     }
                     // For cpp pricelists
                     else
@@ -205,6 +205,42 @@ namespace CampaignEditor
             }
 
             return spotCoefsTables;
+        }
+
+        public decimal GetProgramSpotPrice(MediaPlan mediaPlan, MediaPlanTerm mpTerm,  SpotDTO spot)
+        {
+            var chid = mediaPlan.chid;
+            var pricelist = _forecastData.ChidPricelistDict[chid];
+
+            var spotCoefs = _plidSpotCoefsDict[Tuple.Create(pricelist.plid, spot)];
+            decimal price = 0.0M;
+
+            foreach (var dateRange in spotCoefs.dateRanges)
+            {
+                if (mpTerm.Date < dateRange.fromDate || mpTerm.Date > dateRange.toDate)
+                    continue;
+                else
+                {
+                    var seascoef = dateRange.seascoef;
+                    var seccoef = spotCoefs.seccoef;
+                    decimal coefs = seascoef * seccoef * mediaPlan.Progcoef * mediaPlan.Dpcoef;
+
+                    if (pricelist.pltype == 1)
+                    {
+                        price = coefs * spot.spotlength;
+                    }
+                    // For cpp pricelists
+                    else
+                    {
+                        price = (pricelist.price / 30.0M) * spot.spotlength * mediaPlan.Amrpsale * coefs;
+                    }
+                }
+                
+
+            }
+            
+
+            return price;
         }
 
         public async Task<MediaPlan> ConvertFirstFromDTO(MediaPlanDTO mediaPlanDTO)
@@ -318,7 +354,7 @@ namespace CampaignEditor
                 }
             }
             
-            mediaPlan.Dpcoef = 1.0;
+            mediaPlan.Dpcoef = 1.0M;
             return;
 
         }
@@ -390,7 +426,7 @@ namespace CampaignEditor
 
             var pricelist = _forecastData.ChidPricelistDict[mediaPlan.chid];
 
-            double coefs = mediaPlan.Progcoef * mediaPlan.Dpcoef * mediaPlan.Seascoef * mediaPlan.Seccoef;
+            decimal coefs = mediaPlan.Progcoef * mediaPlan.Dpcoef * mediaPlan.Seascoef * mediaPlan.Seccoef;
 
 
             // For seconds type pricelists
@@ -439,7 +475,7 @@ namespace CampaignEditor
             // For seconds type pricelists
             if (pricelist.pltype == 1)
             {
-                double coefs = mediaPlan.Progcoef * mediaPlan.Dpcoef * mediaPlan.Seascoef;
+                decimal coefs = mediaPlan.Progcoef * mediaPlan.Dpcoef * mediaPlan.Seascoef;
 
                 if (mediaPlan.Amrp1 > 0)
                 {
@@ -486,7 +522,7 @@ namespace CampaignEditor
         private void CalculateAvgCpp(MediaPlan mediaPlan, PricelistDTO pricelist, IEnumerable<MediaPlanTermDTO> terms)
         {
             int cppCount = 0;
-            double cpp = 0.0;
+            decimal cpp = 0.0M;
 
             foreach (var term in terms)
             {
@@ -495,7 +531,7 @@ namespace CampaignEditor
                     foreach (char c in term.spotcode.Trim())
                     {
                         SpotDTO spot = _forecastData.SpotcodeSpotDict[c];
-                        cpp += (pricelist.price / (double)30) * spot.spotlength;
+                        cpp += (pricelist.price / (decimal)30) * spot.spotlength;
                         cppCount += 1;
                     }
                 }
@@ -521,7 +557,7 @@ namespace CampaignEditor
 
         private void CalculatePriceSecondsPricelist(MediaPlan mediaPlan, PricelistDTO pricelist, IEnumerable<MediaPlanTermDTO> terms)
         {
-            double price = 0;
+            decimal price = 0;
             foreach (MediaPlanTermDTO mpTerm in terms)
             {
                 if (mpTerm != null && mpTerm.spotcode != null)
@@ -530,11 +566,12 @@ namespace CampaignEditor
                     {
                         SpotDTO spotDTO = _forecastData.SpotcodeSpotDict[spotcode];
 
-                        double seccoef = CalculateTermSeccoef(mediaPlan, pricelist, spotDTO);
-                        double seascoef = CalculateTermSeascoef(mediaPlan, pricelist, mpTerm);
-                        double coefs = seascoef * seccoef * mediaPlan.Progcoef * mediaPlan.Dpcoef;
+                        decimal seccoef = CalculateTermSeccoef(mediaPlan, spotDTO);
+                        decimal seascoef = CalculateTermSeascoef(mediaPlan, mpTerm);
+                        decimal coefs = seascoef * seccoef * mediaPlan.Progcoef * mediaPlan.Dpcoef;
 
-                        price += coefs * spotDTO.spotlength;
+                        //price += coefs * spotDTO.spotlength;
+                        price += coefs * 30;
                     }
                 }
                
@@ -546,7 +583,7 @@ namespace CampaignEditor
 
         private void CalculatePriceCPPPricelist(MediaPlan mediaPlan, PricelistDTO pricelist, IEnumerable<MediaPlanTermDTO> terms)
         {
-            double price = 0;
+            decimal price = 0;
             foreach (MediaPlanTermDTO mpTerm in terms)
             {
                 if (mpTerm != null && mpTerm.spotcode != null)
@@ -555,13 +592,13 @@ namespace CampaignEditor
                     {
                         SpotDTO spotDTO = _forecastData.SpotcodeSpotDict[spotcode];
 
-                        double seccoef = CalculateTermSeccoef(mediaPlan, pricelist, spotDTO);
-                        double seascoef = CalculateTermSeascoef(mediaPlan, pricelist, mpTerm);
-                        double coefs = seascoef * seccoef * mediaPlan.Progcoef * mediaPlan.Dpcoef;
+                        decimal seccoef = CalculateTermSeccoef(mediaPlan, spotDTO);
+                        decimal seascoef = CalculateTermSeascoef(mediaPlan, mpTerm);
+                        decimal coefs = seascoef * seccoef * mediaPlan.Progcoef * mediaPlan.Dpcoef;
 
                         if (coefs == 0)
                         {
-                            price = 0.0;
+                            price = 0.0M;
                             break;
                         }
                             
@@ -575,32 +612,34 @@ namespace CampaignEditor
 
         }    
 
-        public double CalculateTermSeccoef(MediaPlan mediaPlan, PricelistDTO pricelist, SpotDTO spotDTO)
+        public decimal CalculateTermSeccoef(MediaPlan mediaPlan, SpotDTO spotDTO)
         {
 
             /*var sectable = await _sectableController.GetSectableById(pricelist.sectbid);
             var sectables = await _sectablesController.GetSectablesByIdAndSec(sectable.sctid, spotDTO.spotlength);*/
+            var pricelist = _forecastData.ChidPricelistDict[mediaPlan.chid];
             var sectable = _forecastData.PlidSectableDict[pricelist.plid];
             var sectables = _forecastData.SecidSectablesDict[sectable.sctid].FirstOrDefault(secs => secs.sec == spotDTO.spotlength, null);
-            var seccoef = 1.0;
+            var seccoef = 1.0M;
             /*if (sectable.sctid != 1)
             {
-                seccoef = sectables == null ? 1 : sectables.coef * ((double)30 / spotDTO.spotlength);
+                seccoef = sectables == null ? 1 : sectables.coef * ((decimal)30 / spotDTO.spotlength);
             }*/
-            seccoef = sectables == null ? (double)spotDTO.spotlength/30 : sectables.coef;
-            //seccoef *= ((double)spotDTO.spotlength / 30);
+            seccoef = sectables == null ? (decimal)spotDTO.spotlength/30 : sectables.coef;
+            //seccoef *= ((decimal)spotDTO.spotlength / 30);
             return seccoef;
         }
 
-        public double CalculateTermSeascoef(MediaPlan mediaPlan, PricelistDTO pricelist, MediaPlanTermDTO mpTerm)
+        public decimal CalculateTermSeascoef(MediaPlan mediaPlan, MediaPlanTermDTO mpTerm)
         {
             /*var seasonality = await _seasonalityController.GetSeasonalityById(pricelist.seastbid);
 
             var seasonalities = await _seasonalitiesController.GetSeasonalitiesById(seasonality.seasid);*/
 
+            var pricelist = _forecastData.ChidPricelistDict[mediaPlan.chid];
             var seasonality = _forecastData.PlidSeasonalityDict[pricelist.plid];
             var seasonalities = _forecastData.SeasidSeasonalitiesDict[seasonality.seasid];
-            double seasCoef = 1.0;
+            decimal seasCoef = 1.0M;
 
             foreach (var seas in seasonalities)
             {
@@ -631,7 +670,7 @@ namespace CampaignEditor
             }*/
 
             int secCount = 0;
-            double seccoef = 0.0;
+            decimal seccoef = 0.0M;
 
             foreach (var term in terms)
             {
@@ -644,17 +683,17 @@ namespace CampaignEditor
                         var sec = _forecastData.SecidSectablesDict[sectable.sctid].FirstOrDefault(secs => secs.sec == spot.spotlength, null);
 
                         /*if (sec != null)
-                            seccoef += sec.coef * ((double)spot.spotlength / 30);
+                            seccoef += sec.coef * ((decimal)spot.spotlength / 30);
                         else
-                            seccoef += 1.0 * ((double)spot.spotlength / 30);*/
+                            seccoef += 1.0 * ((decimal)spot.spotlength / 30);*/
                         if (sec != null)
                             seccoef += sec.coef;
                         else
                         {
                             //mediaPlan.Seccoef = 0.0;
                             //return;
-                            //mediaPlan.Seccoef += (double)spot.spotlength/30;
-                            seccoef += (double)spot.spotlength / 30;
+                            //mediaPlan.Seccoef += (decimal)spot.spotlength/30;
+                            seccoef += (decimal)spot.spotlength / 30;
                         }
                         secCount += 1;
                     }
@@ -663,7 +702,7 @@ namespace CampaignEditor
 
             if (secCount == 0)
             {
-                mediaPlan.Seccoef = 1.0;
+                mediaPlan.Seccoef = 1.0M;
             }
             else
             {
@@ -680,7 +719,7 @@ namespace CampaignEditor
             var seasonality = _forecastData.PlidSeasonalityDict[pricelist.plid];
             var seasonalities = _forecastData.SeasidSeasonalitiesDict[seasonality.seasid];
 
-            double seasCoef = 0;
+            decimal seasCoef = 0;
             int seasCount = 0;
             foreach (var term in terms)
             {
@@ -703,7 +742,7 @@ namespace CampaignEditor
 
             if (seasCount == 0)
             {
-                mediaPlan.Seascoef = 1.0;
+                mediaPlan.Seascoef = 1.0M;
             }
             else
             {
@@ -731,16 +770,39 @@ namespace CampaignEditor
                 return;
 
             // Calculate the median and median absolute deviation (MAD) of the amrp1 attribute
-            double median = CalculateMedian(mediaPlanHistList.Select(x => x.amrp1).ToList());
-            double mad = CalculateMAD(mediaPlanHistList.Select(x => x.amrp1).ToList(), median);
+            decimal median = CalculateMedian(mediaPlanHistList.Select(x => x.amrp1).ToList());
+            decimal mad = CalculateMAD(mediaPlanHistList.Select(x => x.amrp1).ToList(), median);
 
+            List<MediaPlanHist> outliers = new List<MediaPlanHist>();
             // Set the threshold for outlier detection
-            double threshold = 3.5; // Adjust this value based on your requirements
+            decimal threshold = 3.5M; // Adjust this value based on your requirements
+                                      // Check if MAD is zero
+            if (mad == 0)
+            {
+                // Handle the case when MAD is zero (e.g., assign a default value)
+                // For example, you can set the threshold to a very large value to ignore outliers
+                threshold = decimal.MaxValue; // Set to a very large value
 
+                // Find the outliers in the list
+                outliers = mediaPlanHistList.Where(x => Math.Abs(x.amrp1 - median) > threshold).ToList();
+            }
+            else
+            {
+                // Set the threshold for outlier detection
+                threshold = 3.5M; // Adjust this value based on your requirements
+
+                // Find the outliers in the list
+                outliers = mediaPlanHistList.Where(x =>
+                    Math.Abs(x.amrp1 - median) / mad > threshold).ToList();
+            }
             // Find the outliers in the list
-            List<MediaPlanHist> outliers = mediaPlanHistList.Where(x =>
-                Math.Abs(x.amrp1 - median) / mad > threshold).ToList();
+            /*outliers = mediaPlanHistList.Where(x =>
+                Math.Abs(x.amrp1 - median) / mad > threshold).ToList();*/
 
+            /*if (mad == 0)
+            {
+                var a = CalculateMAD(mediaPlanHistList.Select(x => x.amrp1).ToList(), median);
+            }*/
             foreach (var outlier in outliers)
             {
                 outlier.outlier = true;
@@ -748,22 +810,21 @@ namespace CampaignEditor
             }
         }
 
-        public double CalculateMedian(List<double> values)
+        public decimal CalculateMedian(List<decimal> values)
         {
-            List<double> sortedValues = values.OrderBy(x => x).ToList();
+            List<decimal> sortedValues = values.OrderBy(x => x).ToList();
             int count = sortedValues.Count;
 
             if (count % 2 == 0)
-                return (sortedValues[count / 2 - 1] + sortedValues[count / 2]) / 2.0;
+                return (sortedValues[count / 2 - 1] + sortedValues[count / 2]) / 2.0M;
             else
                 return sortedValues[count / 2];
         }
 
-        public double CalculateMAD(List<double> values, double median)
+        public decimal CalculateMAD(List<decimal> values, decimal median)
         {
-            List<double> absoluteDeviations = values.Select(x => Math.Abs(x - median)).ToList();
-            double mad = CalculateMedian(absoluteDeviations);
-
+            List<decimal> absoluteDeviations = values.Select(x => Math.Abs(x - median)).ToList();
+            decimal mad = CalculateMedian(absoluteDeviations);
             return mad;
         }
 
@@ -822,7 +883,7 @@ namespace CampaignEditor
         public bool SameMPValues(MediaPlan mediaPlan1, MediaPlan mediaPlan2)
         {
 
-            double eps = 0.0001;
+            decimal eps = 0.0001M;
 
             return
             mediaPlan1.xmpid == mediaPlan2.xmpid &&

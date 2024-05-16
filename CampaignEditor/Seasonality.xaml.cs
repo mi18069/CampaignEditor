@@ -190,7 +190,7 @@ namespace CampaignEditor
                         SeasonalitiesItem seasonalitiesItem = (wpSeasonalities.Children[i] as SeasonalitiesItem)!;
                         string? stdt = seasonalitiesItem.FromDPToString(seasonalitiesItem.dpFrom);
                         string? endt = seasonalitiesItem.FromDPToString(seasonalitiesItem.dpTo);
-                        double coef = double.Parse(seasonalitiesItem.tbCoef.Text.Trim());
+                        decimal coef = decimal.Parse(seasonalitiesItem.tbCoef.Text.Trim());
 
                         if (stdt != null && endt != null)
                         {

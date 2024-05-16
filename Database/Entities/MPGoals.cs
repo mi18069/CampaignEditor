@@ -8,11 +8,11 @@ namespace Database.Entities
     public class MPGoals : INotifyCollectionChanged, INotifyPropertyChanged
     {
         private ObservableCollection<MediaPlan> mediaPlans;
-        private double grp;
+        private decimal grp;
         private int insertations;
-        private double budget;
+        private decimal budget;
 
-        public double Grp
+        public decimal Grp
         {
             get { return grp; }
             set
@@ -23,7 +23,7 @@ namespace Database.Entities
             }
         }
 
-        public double GrpRounded
+        public decimal GrpRounded
         {
             get { return Math.Round(grp, 2); }
             set
@@ -42,7 +42,7 @@ namespace Database.Entities
                 OnPropertyChanged(nameof(Insertations));
             }
         }
-        public double Budget
+        public decimal Budget
         {
             get { return budget; }
             set
@@ -53,7 +53,7 @@ namespace Database.Entities
             }
         }
 
-        public double BudgetRounded
+        public decimal BudgetRounded
         {
             get { return Math.Round(budget, 2); }
             set
@@ -116,9 +116,9 @@ namespace Database.Entities
 
         private void CalculateGoals()
         {
-            var budget = 0.0;
-            var grp = 0.0;
-            var insertations = 0;
+            decimal budget = 0.0M;
+            decimal grp = 0.0M;
+            int insertations = 0;
 
             foreach (var mediaPlan in mediaPlans)
             {

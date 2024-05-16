@@ -1,16 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Database.DTOs.PricelistDTO
 {
     public class BasePricelistDTO
     {
         public BasePricelistDTO(int clid, string plname, int pltype, 
-            int sectbid, int seastbid, bool plactive, float price, 
-            float minprice, bool prgcoef, int pltarg, 
+            int sectbid, int seastbid, bool plactive, decimal price, 
+            decimal minprice, bool prgcoef, int pltarg, 
             bool use2, int sectbid2, int sectb2st, int sectb2en, 
             int valfrom, int valto, bool mgtype)
         {
@@ -39,8 +35,8 @@ namespace Database.DTOs.PricelistDTO
         public int sectbid { get; set; }
         public int seastbid { get; set; }
         public bool plactive { get; set; }
-        public float price { get; set; }
-        public float minprice { get; set; }
+        public decimal price { get; set; }
+        public decimal minprice { get; set; }
         public bool prgcoef { get; set; }
         public int pltarg { get; set; }
         public string a2chn { get; set; }
@@ -51,5 +47,6 @@ namespace Database.DTOs.PricelistDTO
         public int valfrom { get; set; }
         public int valto { get; set; }
         public bool mgtype { get; set; }
+
     }
 }

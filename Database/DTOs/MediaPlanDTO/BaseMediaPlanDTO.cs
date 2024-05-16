@@ -4,7 +4,7 @@ namespace Database.DTOs.MediaPlanDTO
 {
     public class BaseMediaPlanDTO
     {
-        public BaseMediaPlanDTO(int schid, int cmpid, int chid, string name, int version, string position, string stime, string? etime, string? blocktime, string days, string type, bool special, DateOnly sdate, DateOnly? edate, float progcoef, DateOnly created, DateOnly? modified, double amr1, int amr1trim, double amr2, int amr2trim, double amr3, int amr3trim, double amrsale, int amrsaletrim, double amrp1, double amrp2, double amrp3, double amrpsale, double dpcoef, double seascoef, double seccoef, double price, bool active, double pps)
+        public BaseMediaPlanDTO(int schid, int cmpid, int chid, string name, int version, string position, string stime, string? etime, string? blocktime, string days, string type, bool special, DateOnly sdate, DateOnly? edate, decimal progcoef, DateOnly created, DateOnly? modified, decimal amr1, int amr1trim, decimal amr2, int amr2trim, decimal amr3, int amr3trim, decimal amrsale, int amrsaletrim, decimal amrp1, decimal amrp2, decimal amrp3, decimal amrpsale, decimal dpcoef, decimal seascoef, decimal seccoef, decimal price, bool active, decimal pps)
         {
             this.schid = schid;
             this.cmpid = cmpid;
@@ -57,27 +57,27 @@ namespace Database.DTOs.MediaPlanDTO
         public bool special { get; set; }
         public DateOnly sdate { get; set; }
         public DateOnly? edate { get; set; }
-        public float progcoef { get; set; }
+        public decimal progcoef { get; set; }
         public DateOnly created { get; set; }
         public DateOnly? modified { get; set; }
-        public double amr1 { get; set; }
+        public decimal amr1 { get; set; }
         public int amr1trim { get; set; }
-        public double amr2 { get; set; }
+        public decimal amr2 { get; set; }
         public int amr2trim { get; set; }
-        public double amr3 { get; set; }
+        public decimal amr3 { get; set; }
         public int amr3trim { get; set; }
-        public double amrsale { get; set; }
+        public decimal amrsale { get; set; }
         public int amrsaletrim { get; set; }
-        public double amrp1 { get; set; }
-        public double amrp2 { get; set; }
-        public double amrp3 { get; set; }
-        public double amrpsale { get; set; }
-        public double dpcoef { get; set; }
-        public double seascoef { get; set; }
-        public double seccoef { get; set; }
-        public double price { get; set; }
+        public decimal amrp1 { get; set; }
+        public decimal amrp2 { get; set; }
+        public decimal amrp3 { get; set; }
+        public decimal amrpsale { get; set; }
+        public decimal dpcoef { get; set; }
+        public decimal seascoef { get; set; }
+        public decimal seccoef { get; set; }
+        public decimal price { get; set; }
         public bool active { get; set; }
 
-        public double pps { get; set; }
+        public decimal pps { get; set; }
     }
 }

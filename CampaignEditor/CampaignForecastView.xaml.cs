@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using Database.DTOs.PricelistDTO;
+using Database.Entities;
 
 namespace CampaignEditor
 {
@@ -35,6 +36,9 @@ namespace CampaignEditor
         private CampaignDTO _campaign;
         public TabItem tabForecast;
 
+        public MediaPlanForecastData _forecastData;
+        public MediaPlanConverter _mpConverter;
+        public ObservableRangeCollection<MediaPlanTuple> _allMediaPlans;
 
         List<DateTime> unavailableDates = new List<DateTime>();
         private bool isReadOnly = true;
@@ -112,6 +116,10 @@ namespace CampaignEditor
         private async Task LoadForecast()
         {
             _forecast = _factoryForecast.Create();
+            _forecast._forecastData = _forecastData;
+            _forecast._mpConverter = _mpConverter;
+            _forecast._allMediaPlans = _allMediaPlans;
+
             try
             {
                 await _forecast.Initialize(_campaign, isReadOnly);
@@ -228,6 +236,10 @@ namespace CampaignEditor
         }
 
         // For events from overview
+        public async Task UpdateCampaign(CampaignDTO campaign)
+        {
+            await _forecast.CampaignChanged(campaign);
+        }
         public async Task UpdateGoals()
         {
             await _forecast.GoalsChanged();

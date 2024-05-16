@@ -31,7 +31,7 @@ namespace Database.Entities
         [Column("datumdo")]
         public DateOnly? edate { get; set; }
         [Column("progkoef")]
-        public float progcoef { get; set; }
+        public decimal progcoef { get; set; }
         [Column("datumkreiranja")]
         public DateOnly created { get; set; }
         [Column("datumizmene")]

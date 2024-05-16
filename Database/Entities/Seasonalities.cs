@@ -6,7 +6,7 @@ namespace Database.Entities
         public int seasid { get; set; }
         public string stdt { get; set; }
         public string endt { get; set; }
-        public double coef { get; set; }
+        public decimal coef { get; set; }
 
     }
 }

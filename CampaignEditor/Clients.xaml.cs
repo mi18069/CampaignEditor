@@ -220,8 +220,15 @@ namespace CampaignEditor
         }
 
         #region Context menu options
+        bool onlyOneCampaign = false;
         public async void ShowCampaign(CampaignDTO campaign)
         {
+            if (onlyOneCampaign)
+            {
+                return;
+            }
+            onlyOneCampaign = true;
+
             // If campaign window is minimized, show it, if campaign is not open,
             // make new and place it in list of open campaigns 
             if (openCampaignWindows.Any(w => w._campaign.cmpid == campaign.cmpid))
@@ -253,7 +260,7 @@ namespace CampaignEditor
                 f.Activate();
 
             }
-
+            onlyOneCampaign = false;
         }
 
         // remove from list of opened campaigns

@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-	<Version>1.0.0.17</Version>
+	<Version>1.0.0.20</Version>
     <TargetFramework>net6.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
@@ -19,8 +19,10 @@
     <None Remove="images\GreenPlus.png" />
     <None Remove="images\LeftArrow.png" />
     <None Remove="images\load_data_icon.png" />
+    <None Remove="images\minus_shrink_icon.png" />
     <None Remove="images\PassPeekImg.png" />
     <None Remove="images\PassUnpeekImg.png" />
+    <None Remove="images\plus_extend_icon.png" />
     <None Remove="images\RadioIcon.png" />
     <None Remove="images\radio_icon.png" />
     <None Remove="images\RecalculateDataIcon.png" />
@@ -68,8 +70,10 @@
     <Resource Include="images\FetchDataIcon.png" />
     <Resource Include="images\GreenPlus.png" />
     <Resource Include="images\LeftArrow.png" />
+    <Resource Include="images\minus_shrink_icon.png" />
     <Resource Include="images\PassPeekImg.png" />
     <Resource Include="images\PassUnpeekImg.png" />
+    <Resource Include="images\plus_extend_icon.png" />
     <Resource Include="images\RadioIcon.png" />
     <Resource Include="images\RecalculateDataIcon.png" />
     <Resource Include="images\RedX.png" />

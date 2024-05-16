@@ -24,30 +24,30 @@ namespace Database.Entities
         public bool special { get; set; }
         public DateOnly sdate { get; set; }
         public DateOnly? edate { get; set; }
-        public float progcoef { get; set; }
+        public decimal progcoef { get; set; }
         public DateOnly created { get; set; }
         public DateOnly? modified { get; set; }
-        public double amr1 { get; set; }
+        public decimal amr1 { get; set; }
         public int amr1trim { get; set; }
-        public double amr2 { get; set; }
+        public decimal amr2 { get; set; }
         public int amr2trim { get; set; }
-        public double amr3 { get; set; }
+        public decimal amr3 { get; set; }
         public int amr3trim { get; set; }
-        public double amrsale { get; set; }
+        public decimal amrsale { get; set; }
         public int amrsaletrim { get; set; }
-        public double amrp1 { get; set; }
-        public double amrp2 { get; set; }
-        public double amrp3 { get; set; }
-        public double amrpsale { get; set; }
-        public double dpcoef { get; set; }
-        public double seascoef { get; set; }
-        public double seccoef { get; set; }
-        public double price { get; set; }
+        public decimal amrp1 { get; set; }
+        public decimal amrp2 { get; set; }
+        public decimal amrp3 { get; set; }
+        public decimal amrpsale { get; set; }
+        public decimal dpcoef { get; set; }
+        public decimal seascoef { get; set; }
+        public decimal seccoef { get; set; }
+        public decimal price { get; set; }
         public bool active { get; set; }
 
-        public double pps { get; set; }
+        public decimal pps { get; set; }
 
-        private double cpp;
+        private decimal cpp;
 
         private int _length;
 
@@ -55,7 +55,7 @@ namespace Database.Entities
 
         private DayPartDTO _dayPart;
 
-        public double Affinity
+        public decimal Affinity
         {
             get { return Amrpsale != 0 ? (Amrp1 / Amrpsale) * 100 : 0; }
         }
@@ -130,57 +130,57 @@ namespace Database.Entities
             }
         }
 
-        public double Amr1
+        public decimal Amr1
         {
-            get { return amr1 * ((double)amr1trim / 100); }
+            get { return amr1 * ((decimal)amr1trim / 100); }
             set
             {
-                amr1 = value * (100 / (double)amr1trim);
+                amr1 = value * (100 / (decimal)amr1trim);
                 OnPropertyChanged();
                 //OnPropertyChanged(nameof(Amrp1));
             }
         }
 
-        public double Amr2
+        public decimal Amr2
         {
-            get { return amr2 * ((double)amr2trim / 100); }
+            get { return amr2 * ((decimal)amr2trim / 100); }
             set
             {
-                amr2 = value * (100 / (double)amr2trim);
+                amr2 = value * (100 / (decimal)amr2trim);
                 OnPropertyChanged();
                 //OnPropertyChanged(nameof(Amrp2));
 
             }
         }
 
-        public double Amr3
+        public decimal Amr3
         {
-            get { return amr3 * ((double)amr3trim / 100); }
+            get { return amr3 * ((decimal)amr3trim / 100); }
             set
             {
-                amr3 = value * (100 / (double)amr3trim);
+                amr3 = value * (100 / (decimal)amr3trim);
                 OnPropertyChanged();
                 //OnPropertyChanged(nameof(Amrp3));
             }
         }
 
-        public double Amrsale
+        public decimal Amrsale
         {
-            get { return amrsale * ((double)amrsaletrim / 100); }
+            get { return amrsale * ((decimal)amrsaletrim / 100); }
             set
             {
-                amrsale = value * (100 / (double)amrsaletrim);
+                amrsale = value * (100 / (decimal)amrsaletrim);
                 OnPropertyChanged();
                 //OnPropertyChanged(nameof(Amrpsale));
             }
         }
 
-        public double Amrp1
+        public decimal Amrp1
         {
-            get { return amrp1 * ((double)amr1trim / 100); }
+            get { return amrp1 * ((decimal)amr1trim / 100); }
             set
             {
-                amrp1 = value * (100 / (double)amr1trim);
+                amrp1 = value * (100 / (decimal)amr1trim);
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(Affinity));
                 OnPropertyChanged(nameof(PricePerSecond));
@@ -188,12 +188,12 @@ namespace Database.Entities
             }
         }
 
-        public double Amrp2
+        public decimal Amrp2
         {
-            get { return amrp2 * ((double)amr2trim / 100); }
+            get { return amrp2 * ((decimal)amr2trim / 100); }
             set
             {
-                amrp2 = value * (100 / (double)amr2trim);
+                amrp2 = value * (100 / (decimal)amr2trim);
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(Affinity));
                 OnPropertyChanged(nameof(PricePerSecond));
@@ -201,12 +201,12 @@ namespace Database.Entities
             }
         }
 
-        public double Amrp3
+        public decimal Amrp3
         {
-            get { return amrp3 * ((double)amr3trim / 100); }
+            get { return amrp3 * ((decimal)amr3trim / 100); }
             set
             {
-                amrp3 = value * (100 / (double)amr3trim);
+                amrp3 = value * (100 / (decimal)amr3trim);
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(Affinity));
                 OnPropertyChanged(nameof(PricePerSecond));
@@ -214,12 +214,12 @@ namespace Database.Entities
             }
         }
 
-        public double Amrpsale
+        public decimal Amrpsale
         {
-            get { return amrpsale * ((double)amrsaletrim /100); }
+            get { return amrpsale * ((decimal)amrsaletrim /100); }
             set
             {
-                amrpsale = value * (100 / (double)amrsaletrim);
+                amrpsale = value * (100 / (decimal)amrsaletrim);
                 OnPropertyChanged();
                 OnPropertyChanged(nameof(Affinity));
                 OnPropertyChanged(nameof(PricePerSecond));
@@ -286,7 +286,7 @@ namespace Database.Entities
             }
         }
 
-        public double Dpcoef
+        public decimal Dpcoef
         {
             get { return dpcoef; }
             set
@@ -297,7 +297,7 @@ namespace Database.Entities
             }
         }
 
-        public float Progcoef
+        public decimal Progcoef
         {
             get { return progcoef; }
             set
@@ -308,7 +308,7 @@ namespace Database.Entities
             }
         }
 
-        public double Seascoef
+        public decimal Seascoef
         {
             get { return seascoef; }
             set
@@ -319,7 +319,7 @@ namespace Database.Entities
             }
         }
 
-        public double Seccoef
+        public decimal Seccoef
         {
             get { return seccoef; }
             set
@@ -343,12 +343,12 @@ namespace Database.Entities
             }
         }
 
-        public double AvgLength
+        public decimal AvgLength
         {
-            get { return (double)_length / (Insertations == 0 ? 1 : Insertations) ; }
+            get { return (decimal)_length / (Insertations == 0 ? 1 : Insertations) ; }
         }
 
-        public double Cpp 
+        public decimal Cpp 
         { 
             get { return cpp; }
             set 
@@ -358,7 +358,12 @@ namespace Database.Entities
             } 
         }
 
-        public double Price
+        public decimal Grp
+        {
+            get { return Insertations * Amrp1; }
+        }
+
+        public decimal Price
         {
             get { return price; }
             set 
@@ -369,7 +374,7 @@ namespace Database.Entities
             }
         }
 
-        public double PricePerSecond
+        public decimal PricePerSecond
         {
             get { return pps; }
             set

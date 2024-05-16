@@ -6,6 +6,7 @@ using Database.DTOs.PricelistDTO;
 using Database.Entities;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace Database.Repositories
@@ -27,7 +28,7 @@ namespace Database.Repositories
 
             var result = await connection.ExecuteScalarAsync<int>(
                 "INSERT INTO tblpricelist (clid, plname, pltype, sectbid, seastbid, plactive, price, minprice, " +
-                "prgcoef, pltarg, use2, sectbid2, sectb2st, sectb2en, valfrom, valto, mgtype) " +
+                "prgcoef, pltarg, use2, sectbid2, sectb2st, sectb2en, valfrom, valto, mgtype, fixprice) " +
                     "VALUES (@Clid, @Plname, @Pltype, @Sectbid, @Seastbid, @Plactive, @Price, @Minprice, " +
                     "@Prgcoef, @Pltarg, @Use2, @Sectbid2, @Sectb2st, @Sectb2en, @Valfrom, @Valto, @Mgtype) " +
                     "RETURNING plid",
@@ -63,6 +64,26 @@ namespace Database.Repositories
                 // Insertion failed, handle accordingly (e.g., throw an exception)
                 return -1;
             }
+        }
+
+        public async Task<bool> IsPricelistInUse(int plid)
+        {
+            using var connection = _context.GetConnection();
+
+            string query = "";
+
+
+            var row = await connection.QueryAsync<int>(
+            @"
+            SELECT COUNT(*) 
+            FROM tblcmpchn 
+            WHERE plid = @Plid
+            ", new { Plid = plid });
+
+            // Check if any rows were returned
+            bool hasRows = row.FirstOrDefault() > 0;
+
+            return hasRows;
         }
 
         public async Task<PricelistDTO> GetPricelistById(int id)
@@ -120,7 +141,7 @@ namespace Database.Repositories
                 "UPDATE tblpricelist SET clid = @Clid, plname = @Plname, pltype = @Pltype, " +
                 "sectbid = @Sectbid, seastbid = @Seastbid, plactive = @Plactive, price = @Price, minprice = @Minprice, " +
                 "prgcoef = @Prgcoef, pltarg = @Pltarg, use2 = @Use2, sectbid2 = @Sectbid2, " +
-                "sectb2st = @Sectb2st, sectb2en = @Sectb2en, valfrom = @Valfrom, valto = @Valto, mgtype = @Mgtype " +
+                "sectb2st = @Sectb2st, sectb2en = @Sectb2en, valfrom = @Valfrom, valto = @Valto, mgtype = @Mgtype, " +
                 "WHERE plid = @Plid",
                 new
                 {
@@ -142,7 +163,7 @@ namespace Database.Repositories
                     Valfrom = pricelistDTO.valfrom,
                     Valto = pricelistDTO.valto,
                     Mgtype = pricelistDTO.mgtype
-                }) ;
+                });
 
             return affected != 0;
         }
@@ -155,6 +176,5 @@ namespace Database.Repositories
 
             return affected != 0;
         }
-
     }
 }

@@ -3,9 +3,12 @@
     public class MediaPlanRealized
     {
         public int id { get; set; }
+        public int cmpid { get; set; }
         public string name { get; set; }
         public int stime { get; set; }
         public int etime { get; set; }
+        public string stimestr { get; set; }
+        public string etimestr { get; set; }
         public int chid { get; set; }
         public int dure { get; set; }
         public int durf { get; set; }

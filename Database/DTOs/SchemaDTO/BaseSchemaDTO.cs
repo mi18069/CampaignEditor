@@ -4,7 +4,7 @@ namespace Database.DTOs.SchemaDTO
 {
     public class BaseSchemaDTO
     {
-        public BaseSchemaDTO(int chid, string name, string position, string stime, string? etime, string? blocktime, string days, string type, bool special, DateOnly sdate, DateOnly? edate, float progcoef, DateOnly created, DateOnly? modified)
+        public BaseSchemaDTO(int chid, string name, string position, string stime, string? etime, string? blocktime, string days, string type, bool special, DateOnly sdate, DateOnly? edate, decimal progcoef, DateOnly created, DateOnly? modified)
         {
             this.chid = chid;
             this.name = name;
@@ -33,7 +33,7 @@ namespace Database.DTOs.SchemaDTO
         public bool special { get; set; }
         public DateOnly sdate { get; set; }
         public DateOnly? edate { get; set; }
-        public float progcoef { get; set; }
+        public decimal progcoef { get; set; }
         public DateOnly created { get; set; }
         public DateOnly? modified { get; set; }
     }

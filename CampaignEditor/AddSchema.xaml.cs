@@ -272,8 +272,8 @@ namespace CampaignEditor
             _mediaPlan.edate = dateTo;
 
             // DP coef is updating only on double-click in mediaPlan, not here
-            /*float progcoef = 1.0f;
-            if (tbProgCoef.Text.Trim().Length > 0 && float.TryParse(tbProgCoef.Text.Trim(), out float progCoef))
+            /*decimal progcoef = 1.0f;
+            if (tbProgCoef.Text.Trim().Length > 0 && decimal.TryParse(tbProgCoef.Text.Trim(), out decimal progCoef))
             {
                 progcoef = progCoef;
             }
@@ -311,8 +311,8 @@ namespace CampaignEditor
             bool special = (bool)chbSpecial.IsChecked;
             DateOnly dateFrom = DateOnly.FromDateTime(dpFrom.SelectedDate.Value);
             DateOnly? dateTo = dpTo.SelectedDate.HasValue ? DateOnly.FromDateTime(dpTo.SelectedDate.Value) : null;
-            float progcoef = 1.0f;
-            if (tbProgCoef.Text.Trim().Length > 0 && float.TryParse(tbProgCoef.Text.Trim(), out float progCoef))
+            decimal progcoef = 1.0M;
+            if (tbProgCoef.Text.Trim().Length > 0 && decimal.TryParse(tbProgCoef.Text.Trim(), out decimal progCoef))
             {
                 progcoef = progCoef;
             }
@@ -394,7 +394,7 @@ namespace CampaignEditor
                 }
 
             }
-            else if (tbProgCoef.Text.Trim().Length > 0 && !float.TryParse(tbProgCoef.Text.Trim(), out _))
+            else if (tbProgCoef.Text.Trim().Length > 0 && !decimal.TryParse(tbProgCoef.Text.Trim(), out _))
             {
                 MessageBox.Show("Invalid Prog coef value", "Information", MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
@@ -491,7 +491,7 @@ namespace CampaignEditor
 
         private void tbProgCoef_LostKeyboardFocus(object sender, System.Windows.Input.KeyboardFocusChangedEventArgs e)
         {
-            if (!float.TryParse(tbProgCoef.Text.Trim(), out _))
+            if (!decimal.TryParse(tbProgCoef.Text.Trim(), out _))
             {
                 MessageBox.Show("Invalid Prog coef value", "Information", MessageBoxButton.OK, MessageBoxImage.Error);
                 tbProgCoef.Text = "";

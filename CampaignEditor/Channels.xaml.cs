@@ -56,7 +56,6 @@ namespace CampaignEditor
         private List<ChannelDTO> _originalSelectedChannels = new List<ChannelDTO>();
 
 
-        private List<PricelistDTO> _pricelistsToBeDeleted = new List<PricelistDTO>();
 
         public bool channelsModified = false;
         public bool canEdit = false;
@@ -86,11 +85,7 @@ namespace CampaignEditor
             get { return _pricelistList;  }
             set { _pricelistList = value; }
         }
-        private List<PricelistDTO> PricelistsToBeDeleted
-        {
-            get { return _pricelistsToBeDeleted; }
-            set { _pricelistsToBeDeleted = value; }
-        }
+
         private List<PricelistDTO> AllPricelistsList
         {
             get { return _allPricelistsList; }
@@ -717,11 +712,6 @@ namespace CampaignEditor
         private void btnCancel_Click(object sender, RoutedEventArgs e)
         {
             channelsModified = false;
-            while (PricelistsToBeDeleted.Count > 0)
-            {
-                PricelistList.Add(PricelistsToBeDeleted[0]);
-                PricelistsToBeDeleted.RemoveAt(0);
-            }
             this.Close();
         }
 
@@ -734,20 +724,35 @@ namespace CampaignEditor
                     (_campaign.cmpid, channel.Item1.chid, channel.Item2.plid, channel.Item3.actid, -1, -1);
                 await _channelCmpController.CreateChannelCmp(channelCmp);
             }
-            foreach (PricelistDTO pricelist in PricelistsToBeDeleted)
-            {
-                await _pricelistChannelsController.DeleteAllPricelistChannelsByPlid(pricelist.plid);
-                await _pricelistController.DeletePricelistById(pricelist.plid);
-            }
         }
 
         #region Context Menu
         private async void miDeletePricelist_Click(object sender, RoutedEventArgs e)
         {
             PricelistDTO pricelist = lvPricelists.SelectedItem as PricelistDTO;
-            PricelistsToBeDeleted.Add(pricelist);
-            PricelistList.Remove(pricelist);
-            channelsModified = true;
+            if (pricelist == null)
+                return;
+            if (!await CanPricelistBeDeleted(pricelist.plid))
+            {
+                MessageBox.Show("Cannot delete pricelist because it's in use!", "Error",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+            else
+            {
+                await _pricelistChannelsController.DeleteAllPricelistChannelsByPlid(pricelist.plid);
+                await _pricelistController.DeletePricelistById(pricelist.plid);
+                PricelistList.Remove(pricelist);
+                channelsModified = true;
+            }
+
+        }
+
+        private async Task<bool> CanPricelistBeDeleted(int plid)
+        {
+            bool isInUse = await _pricelistController.IsPricelistInUse(plid);
+            bool isInSelected = Selected.Where(tuple => tuple.Item2.plid == plid).Count() > 0;
+            return !isInUse && !isInSelected;
         }
 
         #endregion

@@ -58,7 +58,7 @@ namespace CampaignEditor
 
         }
 
-        public async Task PrintData(int cmpid, IEnumerable<ChannelDTO> selectedChannels, ExcelWorksheet worksheet, int rowOff = 0, int colOff = 0)
+        public async Task PrintData(int cmpid, IEnumerable<ChannelDTO> selectedChannels, ExcelWorksheet worksheet, int rowOff = 0, int colOff = 0, bool hideSensitive = false)
         {
             int[] moved = new int[] { 0, 0 }; // How much each grid takes space
             int[] offset = new int[] { rowOff, colOff }; // How much each grid takes space
@@ -66,23 +66,28 @@ namespace CampaignEditor
             int colSpace = 1;
 
             var campaign = await _campaignController.GetCampaignById(cmpid);
-            moved = await PopulateInfoWorksheet(worksheet, campaign, rowOff + offset[0], colOff + offset[1]);
+            moved = await PopulateInfoWorksheet(worksheet, campaign, rowOff + offset[0], colOff + offset[1], hideSensitive);
             offset[1] += moved[1] + colSpace;
 
-            var targetCmps = await _targetCmpController.GetTargetCmpByCmpid(cmpid);
-            targetCmps = targetCmps.OrderBy(tcmp => tcmp.priority);
-            List<TargetDTO> targets = new List<TargetDTO>();
-            foreach (var targetCmp in targetCmps)
+            if (!hideSensitive)
             {
-                targets.Add(await _targetController.GetTargetById(targetCmp.targid));
-            }
-            moved = PopulateTargetsWorksheet(worksheet, targets, rowOff + offset[0], colOff + offset[1]);
-            offset[0] += moved[0] + rowSpace;
+                var targetCmps = await _targetCmpController.GetTargetCmpByCmpid(cmpid);
+                targetCmps = targetCmps.OrderBy(tcmp => tcmp.priority);
+                List<TargetDTO> targets = new List<TargetDTO>();
+                foreach (var targetCmp in targetCmps)
+                {
+                    targets.Add(await _targetController.GetTargetById(targetCmp.targid));
+                }
 
-            var goals = await _goalsController.GetGoalsByCmpid(cmpid);
-            moved = PopulateGoalsWorksheet(worksheet, goals, rowOff + offset[0], colOff + offset[1]);
-            offset[0] = rowOff;
-            offset[1] += moved[1] + colSpace;
+                moved = PopulateTargetsWorksheet(worksheet, targets, rowOff + offset[0], colOff + offset[1]);
+                offset[0] += moved[0] + rowSpace;
+
+                var goals = await _goalsController.GetGoalsByCmpid(cmpid);
+                moved = PopulateGoalsWorksheet(worksheet, goals, rowOff + offset[0], colOff + offset[1]);
+                offset[0] = rowOff;
+                offset[1] += moved[1] + colSpace;
+            }
+            
 
             var spots = await _spotController.GetSpotsByCmpid(cmpid);
             spots = spots.OrderBy(s => s.spotcode);
@@ -95,7 +100,7 @@ namespace CampaignEditor
                 var channelCmp = await _channelCmpController.GetChannelCmpByIds(campaign.cmpid, channel.chid);
                 channelCmps.Add(channelCmp);
             }
-            moved = await (PopulateChannelsWorksheet(worksheet, channelCmps, rowOff + offset[0], colOff + offset[1]));
+            moved = await PopulateChannelsWorksheet(worksheet, channelCmps, rowOff + offset[0], colOff + offset[1], hideSensitive);
             offset[1] += moved[1] + colSpace;
 
         }
@@ -242,67 +247,87 @@ namespace CampaignEditor
             return new int[] { rowMoved, colMoved };
         }
         
-        public async Task<int[]> PopulateChannelsWorksheet(ExcelWorksheet worksheet, List<ChannelCmpDTO> channelCmps, int rowOff = 0, int colOff = 0)
+        public async Task<int[]> PopulateChannelsWorksheet(ExcelWorksheet worksheet, List<ChannelCmpDTO> channelCmps, int rowOff = 0, int colOff = 0, bool hideSensitive = false)
         {
             int descSize = 3;
+            if (hideSensitive)
+                descSize = 1;
+
             // Set Desctiption to data
             SetDescription(worksheet, "Channels", 1 + rowOff, 1 + colOff, descSize - 1);
 
             List<string> headers = new List<string>();
-            List<string> pricelists = new List<string>();
-            List<string> activities = new List<string>();
 
             foreach (var channelCmp in channelCmps)
             {
-                headers.Add((await _channelController.GetChannelById(channelCmp.chid)).chname);
-                pricelists.Add((await _pricelistController.GetPricelistById(channelCmp.plid)).plname);
-                activities.Add((await _activityController.GetActivityById(channelCmp.actid)).act);
+                headers.Add((await _channelController.GetChannelById(channelCmp.chid)).chname);              
             }
 
             // Set the column headers in Excel
             SetHeaders(worksheet, headers, 1 + 1 + rowOff, 1 + colOff);
-            // Set values
-            SetValues(worksheet, pricelists, 1 + 1 + rowOff, 2 + colOff);
-            SetValues(worksheet, activities, 1 + 1 + rowOff, 3 + colOff);
+            
+            if (!hideSensitive)
+            {
+                List<string> pricelists = new List<string>();
+                List<string> activities = new List<string>();
+
+                foreach (var channelCmp in channelCmps)
+                {
+                    pricelists.Add((await _pricelistController.GetPricelistById(channelCmp.plid)).plname);
+                    activities.Add((await _activityController.GetActivityById(channelCmp.actid)).act);
+                }
+                SetValues(worksheet, pricelists, 1 + 1 + rowOff, 2 + colOff);
+                SetValues(worksheet, activities, 1 + 1 + rowOff, 3 + colOff);
+            }            
 
             int rowMoved = headers.Count + 1;
             int colMoved = descSize;
             return new int[] { rowMoved, colMoved };
         }
 
-        public async Task<int[]> PopulateInfoWorksheet(ExcelWorksheet worksheet, CampaignDTO campaign, int rowOff = 0, int colOff = 0)
+        public async Task<int[]> PopulateInfoWorksheet(ExcelWorksheet worksheet, CampaignDTO campaign, int rowOff = 0, int colOff = 0, bool hideSensitive = false)
         {
             int descSize = 2;
             // Set Desctiption to data
             SetDescription(worksheet, "CAMPAIGN INFO", 1 + rowOff, 1 + colOff, descSize - 1);
 
             List<string> headers = new List<string> { "Client", "Campaign", "Start date",
-            "End date", "DP Start", "DP End", "Active", "Brand 1", "Brand 2"};
-            // Set the column headers in Excel
-            SetHeaders(worksheet, headers, 1 + 1 + rowOff, 1 + colOff);
-
+            "End date"};
 
             // Set the cell values in Excel
-            List<string> values = new List<string>();
-            values.Add((await _clientController.GetClientById(campaign.clid)).clname.Trim());
-            values.Add(campaign.cmpname.Trim());
-            values.Add(TimeFormat.YMDStringToRepresentative(campaign.cmpsdate));
-            values.Add(TimeFormat.YMDStringToRepresentative(campaign.cmpedate));
-            values.Add(campaign.cmpstime.Substring(0, 5));
-            values.Add(campaign.cmpetime.Substring(0, 5));
-            values.Add(campaign.active.ToString());
-            var cmpBrands = await _cmpBrndController.GetCmpBrndsByCmpId(campaign.cmpid);
-            foreach (var cmpBrand in cmpBrands)
+            List<string> values = new List<string>
             {
-                values.Add((await _brandController.GetBrandById(cmpBrand.brbrand)).brand);
-            }
-            int brandCount = cmpBrands.Count();
-            while(brandCount < 2)
+                (await _clientController.GetClientById(campaign.clid)).clname.Trim(),
+                campaign.cmpname.Trim(),
+                TimeFormat.YMDStringToRepresentative(campaign.cmpsdate),
+                TimeFormat.YMDStringToRepresentative(campaign.cmpedate)
+            };
+
+            if (!hideSensitive)
             {
-                values.Add("-");
-                brandCount++;
+                headers.Add("DP Start");
+                headers.Add("DP End");
+                headers.Add("Active");
+                headers.Add("Brand 1");
+                headers.Add("Brand 2");
+
+                values.Add(campaign.cmpstime.Substring(0, 5));
+                values.Add(campaign.cmpetime.Substring(0, 5));
+                values.Add(campaign.active.ToString());
+                var cmpBrands = await _cmpBrndController.GetCmpBrndsByCmpId(campaign.cmpid);
+                foreach (var cmpBrand in cmpBrands)
+                {
+                    values.Add((await _brandController.GetBrandById(cmpBrand.brbrand)).brand);
+                }
+                int brandCount = cmpBrands.Count();
+                while (brandCount < 2)
+                {
+                    values.Add("-");
+                    brandCount++;
+                }
             }
 
+            SetHeaders(worksheet, headers, 1 + 1 + rowOff, 1 + colOff);
             SetValues(worksheet, values, 1 + 1 + rowOff, 2 + colOff);
 
             int rowMoved = headers.Count + 1;

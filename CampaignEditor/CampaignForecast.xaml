@@ -251,7 +251,26 @@
                 </Grid>
             </ScrollViewer>
         </Border>
-        <Button x:Name="btnExport" Content="Export to Excel" Grid.Row="8" Grid.Column="1"
-                            Click="btnExport_Click" Margin="0, 0, 10, 0"/>
+        <Grid Grid.Row="8" Grid.Column="1" Margin="0, 0, 10, 0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="10"/>
+                <ColumnDefinition Width="auto"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Button x:Name="btnExport" Grid.Row="0" Grid.RowSpan="2" Grid.Column="0"
+                    Content="Export to Excel" 
+                            Click="btnExport_Click" />
+            <RadioButton x:Name="rbGridShowSelected" Grid.Row="0" Grid.Column="2" 
+                         IsChecked="True" Content="Selected" GroupName="GridDisplay"
+                         Checked="rbGridShowSelected_Checked" VerticalAlignment="Center"/>
+            <RadioButton x:Name="rbGridShowAll" Grid.Row="1" Grid.Column="2" 
+                         IsChecked="False" Content="All" GroupName="GridDisplay"
+                         Checked="rbGridShowAll_Checked" VerticalAlignment="Center"/>
+        </Grid>
+
     </Grid>
 </Page>

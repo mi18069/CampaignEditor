@@ -6,7 +6,6 @@ using OfficeOpenXml.Style;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Linq;
 using System.Windows.Controls;
 
@@ -66,6 +65,7 @@ namespace CampaignEditor.UserControls
             {
                 selectedInOrder.Add(_dictionary.First(kv => kv.Key == channel.chid).Value);
             }
+  
             _values.ReplaceRange(selectedInOrder);
         }
 
@@ -106,9 +106,8 @@ namespace CampaignEditor.UserControls
                 _dictionary[chid].Grp3 += mediaPlan.Insertations * mediaPlan.Amrp3;
                 _dictionary[chid].Budget += mediaPlan.Price;           
             }
-            _values.ReplaceRange(_dictionary.Values);
-            /*dgGrid.ItemsSource = _values.Where(pg => _selectedChannels.Select(ch => ch.chid).Contains(pg.Channel.chid));
-            */
+            _values.ReplaceRange(_dictionary.Values.Where(pg => _selectedChannels
+                                            .Select(ch => ch.chid).Contains(pg.Channel.chid)));
         }
 
         public void ResetDictionaryValues(int chid = -1)
@@ -133,25 +132,6 @@ namespace CampaignEditor.UserControls
                 _dictionary[chid].Insertations = 0;
             }
         }
-
-        /*public void SubscribeToMediaPlans()
-        {
-            foreach (MediaPlan mediaPlan in _mediaPlans)
-            { 
-                mediaPlan.PropertyChanged += MediaPlan_PropertyChanged;
-            }
-        }
-
-        private void MediaPlan_PropertyChanged(object sender, PropertyChangedEventArgs e)
-        {
-            // Handle the changes in the MediaPlanTerm attributes here
-            var mp = sender as MediaPlan;
-            if (mp != null)
-            {
-                RecalculateGoals(mp.chid);
-            }
-
-        }*/
 
         private void AddHeader(ExcelWorksheet worksheet, int rowOff = 1, int colOff = 1)
         {

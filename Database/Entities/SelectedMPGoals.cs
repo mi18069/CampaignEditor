@@ -6,13 +6,13 @@ namespace Database.Entities
     public class SelectedMPGoals : INotifyPropertyChanged
     {
         private MediaPlan mediaPlan;
-        private double grp;
+        private decimal grp;
         private int insertations;
-        private double budget;
+        private decimal budget;
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        public double Grp
+        public decimal Grp
         {
             get { return Math.Round(grp, 2); }
             set
@@ -30,7 +30,7 @@ namespace Database.Entities
                 OnPropertyChanged(nameof(Insertations));
             }
         }
-        public double Budget
+        public decimal Budget
         {
             get { return Math.Round(budget, 2); }
             set
@@ -69,7 +69,7 @@ namespace Database.Entities
         {
             Budget = mediaPlan.Price;
             Insertations = mediaPlan.Insertations;
-            Grp = mediaPlan.Insertations * mediaPlan.Amrp1;
+            Grp = mediaPlan.Grp;
         }
 
         protected virtual void OnPropertyChanged(string propertyName)

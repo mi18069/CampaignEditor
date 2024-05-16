@@ -8,6 +8,7 @@ using System;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using Database.Entities;
 
 namespace CampaignEditor
 {
@@ -19,29 +20,36 @@ namespace CampaignEditor
         // Variable for checking if forecast is initialized
         bool isCampaignInitialized = false;
 
-        //private readonly IAbstractFactory<CampaignOverview> _factoryOverview;
-        private readonly IAbstractFactory<CampaignForecastView> _factoryForecastView;
 
         private ClientController _clientController;
-        private CampaignController _campaignController;
 
         CampaignOverview factoryCampaignOverview;
         CampaignForecastView factoryCampaignForecastView;
         CampaignValidation factoryCampaignValidation;
 
-        public Campaign(IClientRepository clientRepository, ICampaignRepository campaignRepository, 
+        private MediaPlanForecastData _forecastData;
+        private MediaPlanConverter _mpConverter;
+
+        private ObservableRangeCollection<MediaPlanTuple> _allMediaPlans =
+            new ObservableRangeCollection<MediaPlanTuple>();
+
+        public Campaign(IClientRepository clientRepository, 
             IAbstractFactory<CampaignOverview> factoryOverview, 
             IAbstractFactory<CampaignForecastView> factoryForecastView,
-            IAbstractFactory<CampaignValidation> factoryValidation)
+            IAbstractFactory<CampaignValidation> factoryValidation,
+            IAbstractFactory<MediaPlanForecastData> factoryForecastData,
+            IAbstractFactory<MediaPlanConverter> factoryMpConverter)
         {
 
             factoryCampaignOverview = factoryOverview.Create();
             factoryCampaignForecastView = factoryForecastView.Create();
             factoryCampaignValidation = factoryValidation.Create();
 
+            _forecastData = factoryForecastData.Create();
+            _mpConverter = factoryMpConverter.Create();
+
 
             _clientController = new ClientController(clientRepository);
-            _campaignController = new CampaignController(campaignRepository);
 
             InitializeComponent();
 
@@ -50,8 +58,11 @@ namespace CampaignEditor
 
         public async Task Initialize(CampaignDTO campaign, bool isReadOnly)
         {
-
             _campaign = campaign;
+
+            await _forecastData.Initialize(_campaign);
+            _mpConverter.Initialize(_forecastData);
+
             _client = await _clientController.GetClientById(_campaign.clid);
             int authenticationLevel = 2;
             try
@@ -91,12 +102,17 @@ namespace CampaignEditor
             await factoryCampaignOverview.Initialization(_client, _campaign, readOnly);
             tabOverview.Content = factoryCampaignOverview.Content;
 
-            //var factoryCampaignForecastView = _factoryForecastView.Create();
             factoryCampaignForecastView.tabForecast = tabForecast;
+            factoryCampaignForecastView._forecastData = _forecastData;
+            factoryCampaignForecastView._mpConverter = _mpConverter;
+            factoryCampaignForecastView._allMediaPlans = _allMediaPlans;
             await factoryCampaignForecastView.Initialize(_campaign, readOnly);
             BindOverviewForecastEvents();
             isCampaignInitialized = factoryCampaignForecastView.alreadyExists;
 
+            factoryCampaignValidation._forecastData = _forecastData;
+            factoryCampaignValidation._mpConverter = _mpConverter;
+            factoryCampaignValidation._allMediaPlans = _allMediaPlans;
             await factoryCampaignValidation.Initialize(_campaign);
             tabValidation.Content = factoryCampaignValidation.Content;
 
@@ -105,6 +121,7 @@ namespace CampaignEditor
 
         private void BindOverviewForecastEvents()
         {
+            factoryCampaignOverview.CampaignUpdatedEvent += CampaignForecastView_CampaignUpdatedEvent;
             factoryCampaignOverview.GoalsUpdatedEvent += CampaignForecastView_GoalsUpdatedEvent;
             factoryCampaignOverview.ChannelsUpdatedEvent += CampaignForecastView_ChannelsUpdatedEvent;
             factoryCampaignOverview.PricelistUpdatedEvent += CampaignForecastView_PricelistUpdatedEvent;
@@ -115,6 +132,7 @@ namespace CampaignEditor
 
         private void UnbindOverviewForecastEvents()
         {
+            factoryCampaignOverview.CampaignUpdatedEvent -= CampaignForecastView_CampaignUpdatedEvent;
             factoryCampaignOverview.GoalsUpdatedEvent -= CampaignForecastView_GoalsUpdatedEvent;
             factoryCampaignOverview.ChannelsUpdatedEvent -= CampaignForecastView_ChannelsUpdatedEvent;
             factoryCampaignOverview.PricelistUpdatedEvent -= CampaignForecastView_PricelistUpdatedEvent;
@@ -124,6 +142,23 @@ namespace CampaignEditor
 
         }
 
+        private async void CampaignForecastView_CampaignUpdatedEvent(object? sender, UpdateCampaignEventArgs e)
+        {
+            if (!isCampaignInitialized)
+            {
+                return;
+            }
+
+            var campaign = e.Campaign;
+            if (campaign == null)
+            {
+                return;
+            }
+
+            _forecastData.Campaign = campaign;
+            await factoryCampaignForecastView.UpdateCampaign(campaign);
+        }
+
         private async void CampaignForecastView_DayPartsUpdatedEvent(object? sender, EventArgs e)
         {
             if (!isCampaignInitialized)
@@ -131,6 +166,8 @@ namespace CampaignEditor
                 return;
             }
 
+            await _forecastData.InitializeDayParts();
+            _mpConverter.Initialize(_forecastData);
             await factoryCampaignForecastView.UpdateDayParts();
         }
 
@@ -141,6 +178,7 @@ namespace CampaignEditor
                 return;
             }
 
+            await _forecastData.InitializeTargets();
             await factoryCampaignForecastView.UpdateTargets();
         }
 
@@ -151,6 +189,8 @@ namespace CampaignEditor
                 return;
             }
 
+            await _forecastData.InitializeSpots();
+            _mpConverter.Initialize(_forecastData);
             await factoryCampaignForecastView.UpdateSpots();
         }
 
@@ -173,6 +213,8 @@ namespace CampaignEditor
             var channelsToDelete = e.channelsToDelete;
             var channelsToAdd = e.channelsToAdd;
 
+            await _forecastData.InitializeChannels(true);
+            _mpConverter.Initialize(_forecastData);
             await factoryCampaignForecastView.UpdateChannels(channelsToDelete, channelsToAdd);
         }
 
@@ -184,7 +226,8 @@ namespace CampaignEditor
             }
 
             var pricelist = e.pricelist;
-
+            await _forecastData.InitializePricelists();
+            _mpConverter.Initialize(_forecastData);
             await factoryCampaignForecastView.UpdatePricelist(pricelist);
         }
 

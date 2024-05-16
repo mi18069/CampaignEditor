@@ -51,7 +51,8 @@ namespace CampaignEditor
         private DayPartController _dayPartController;
         private DPTimeController _dpTimeController;
 
-        public CampaignDTO Campaign { get {return _campaign; } }
+        public CampaignDTO Campaign { get {return _campaign; }
+            set { _campaign = value; } }
         public List<ChannelDTO> Channels { get { return _channels; } }
         public List<SpotDTO> Spots { get { return _spots; } }
         public List<PricelistDTO> Pricelists { get { return _pricelists; } }
@@ -132,6 +133,8 @@ namespace CampaignEditor
                 _spots.Add(spot);
                 _spotcodeSpotDict[spotcode] = spot;
             }
+
+            _spots = _spots.OrderBy(s => s.spotcode).ToList();
         }
 
         public async Task InitializeChannels(bool addNewPricelist = false)

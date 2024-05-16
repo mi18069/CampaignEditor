@@ -20,6 +20,8 @@
             <BitmapImage x:Key="right_arrow_icon" UriSource="\images\RightArrow.png"></BitmapImage>
             <BitmapImage x:Key="tv_icon" UriSource="\images\TvIcon.png"></BitmapImage>
             <BitmapImage x:Key="user_icon" UriSource="\images\UserIcon.png"></BitmapImage>
+            <BitmapImage x:Key="minus_shrink_icon" UriSource="\images\minus_shrink_icon.png"></BitmapImage>
+            <BitmapImage x:Key="plus_extend_icon" UriSource="\images\plus_extend_icon.png"></BitmapImage>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

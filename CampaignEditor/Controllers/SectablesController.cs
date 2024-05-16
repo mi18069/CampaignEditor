@@ -28,7 +28,7 @@ namespace CampaignEditor.Controllers
         }
 
         // Searches for id and sec, if it isn't found, create new, if it's found update it
-        public async Task<SectablesDTO> CreateOrUpdateSectablesByIdAndSec(int id, int sec, double coef)
+        public async Task<SectablesDTO> CreateOrUpdateSectablesByIdAndSec(int id, int sec, decimal coef)
         {
             var sectables = await _repository.GetSectablesByIdAndSec(id, sec);
             if (sectables == null)

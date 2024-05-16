@@ -1,6 +1,8 @@
 ﻿using CampaignEditor.Controllers;
+using CampaignEditor.Helpers;
 using Database.DTOs.CampaignDTO;
 using Database.DTOs.ChannelDTO;
+using Database.Entities;
 using Database.Repositories;
 using System;
 using System.Collections.Generic;
@@ -26,6 +28,9 @@ namespace CampaignEditor
         private List<ChannelDTO> _channels = new List<ChannelDTO>();
         private List<DateOnly> _dates = new List<DateOnly>();
 
+        public MediaPlanForecastData _forecastData;
+        public MediaPlanConverter _mpConverter;
+        public ObservableRangeCollection<MediaPlanTuple> _allMediaPlans;
 
         public CampaignValidation(
             IChannelCmpRepository channelCmpRepository,
@@ -66,6 +71,9 @@ namespace CampaignEditor
                 validationStack._spotController = _spotController;
                 validationStack._channels = _channels;
                 validationStack._dates = _dates;
+                validationStack._mpConverter = _mpConverter;
+                validationStack._forecastData = _forecastData;
+                validationStack._allMediaPlans = _allMediaPlans;
 
                 await validationStack.Initialize(campaign);
             }
@@ -78,19 +86,18 @@ namespace CampaignEditor
 
         private async Task FillChannels(CampaignDTO campaign)
         {
-            var channelCmps = await _channelCmpController.GetChannelCmpsByCmpid(campaign.cmpid);
+            /*var channelCmps = await _channelCmpController.GetChannelCmpsByCmpid(campaign.cmpid);
             List<ChannelDTO> channels = new List<ChannelDTO>();
 
             foreach (var channelCmp in channelCmps)
             {
                 var channel = await _channelController.GetChannelById(channelCmp.chid);
                 channels.Add(channel);
-            }
+            }*/
 
-            channels = channels.OrderBy(c => c.chname).ToList();
-
-            _channels = channels;
-            FillChannelsComboBox(channels);
+            
+            _channels = _forecastData.Channels;
+            FillChannelsComboBox(_channels);
         }
 
         private void FillChannelsComboBox(IEnumerable<ChannelDTO> channels)

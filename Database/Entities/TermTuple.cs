@@ -7,19 +7,24 @@ namespace Database.Entities
 {
     public class TermTuple
     {
-        private MediaPlanDTO _mediaPlan;
-        private MediaPlanTermDTO _mediaPlanTerm;
+        private MediaPlan _mediaPlan;
+        private MediaPlanTerm _mediaPlanTerm;
         private SpotDTO _spot;
+        private decimal _price;
 
-        public MediaPlanDTO MediaPlan { get { return _mediaPlan; } }
-        public MediaPlanTermDTO MediaPlanTerm { get { return _mediaPlanTerm; } }
+        public MediaPlan MediaPlan { get { return _mediaPlan; } }
+        public MediaPlanTerm MediaPlanTerm { get { return _mediaPlanTerm; } }
         public SpotDTO Spot { get { return _spot; } }
 
-        public TermTuple(MediaPlanDTO mediaPlan, MediaPlanTermDTO mediaPlanTerm, SpotDTO spot)
+        public decimal Price { get { return _price; } }
+
+        public TermTuple(MediaPlan mediaPlan, MediaPlanTerm mediaPlanTerm, SpotDTO spot,
+            decimal price)
         {
             _mediaPlan = mediaPlan;
             _mediaPlanTerm = mediaPlanTerm;
             _spot = spot;
+            _price = price;
         }
     }
 }

@@ -26,17 +26,20 @@ namespace Database.Repositories
             using var connection = _context.GetConnection();
 
             var affected = await connection.ExecuteAsync(
-                "INSERT INTO xmpre (naziv, vremeod, vremedo, chid, dure, durf, datum, bremisije  " +
+                "INSERT INTO xmpre (naziv, cmpid, vremeod, vremedo, vremeodv, vremedov, chid, dure, durf, datum, bremisije  " +
                 " pozinbr, totalspotbr, breaktype, brspot, brbrand, amrp1, amrp2, amrp3, amrpsale " +
                 " cpp, dpcoef, seascoef, progcoef, cena, status " + 
-                "VALUES (@Name, @Stime, @Etime, @Chid, @Dure, @Durf, @Date, @Emsnum, " +
+                "VALUES (@Name, @Cmpid, @Stime, @Etime, @Stimestr, @Etimestr, @Chid, @Dure, @Durf, @Date, @Emsnum, " +
                 " @Posinbr, @Totalspotnum, @Breaktype, @Spotnum, @Brandnum, @Amrp1, @Amrp2, @Amrp3, @Amrpsale " +
                 "@Cpp, @Dpcoef, @Seascoef, @Progcoef, @Price, @Status ) ",
             new
             {
                 Name = mediaPlanRealizedDTO.name.Trim(),
+                Cmpid = mediaPlanRealizedDTO.cmpid,
                 Stime = mediaPlanRealizedDTO.stime,
                 Etime = mediaPlanRealizedDTO.etime,
+                Stimestr = mediaPlanRealizedDTO.stimestr,
+                Etimestr = mediaPlanRealizedDTO.etimestr,
                 Chid = mediaPlanRealizedDTO.chid,
                 Dure = mediaPlanRealizedDTO.dure,
                 Durf = mediaPlanRealizedDTO.durf,
@@ -190,8 +193,8 @@ namespace Database.Repositories
 
 
             var affected = await connection.ExecuteAsync(
-                "UPDATE xmpre SET id = @Id, naziv = @Name, vremeod = @Stime, vremedo = @Etime, " +
-                "chid = @Chid, dure = @Dure, durf = @Durf, datum = @Date, bremisije = @Emsnum  " +
+                "UPDATE xmpre SET id = @Id, cmpid = @Cmpid, naziv = @Name, vremeod = @Stime, vremedo = @Etime, " +
+                " vremeodv = @Stimestr, vremedov = @Etimestr, chid = @Chid, dure = @Dure, durf = @Durf, datum = @Date, bremisije = @Emsnum  " +
                 " pozinbr = @Posinbr, totalspotbr = @Totalspotnum, breaktype = @Breaktype, " +
                 " brspot = @Spotnum, brbrand = @Brandnum, amrp1 = @Amrp1, amrp2 = @Amrp2, amrp3 = @Amrp3, " +
                 " amrpsale = @Amrpsale, cpp = @Cpp, dpcoef = @Dpcoef, seascoef = @Seascoef, " +
@@ -201,8 +204,11 @@ namespace Database.Repositories
                 {
                     Id = mediaPlanRealizedDTO.id,
                     Name = mediaPlanRealizedDTO.name.Trim(),
+                    Cmpid = mediaPlanRealizedDTO.cmpid,
                     Stime = mediaPlanRealizedDTO.stime,
                     Etime = mediaPlanRealizedDTO.etime,
+                    Stimestr = mediaPlanRealizedDTO.stimestr,
+                    Etimestr = mediaPlanRealizedDTO.etimestr,
                     Chid = mediaPlanRealizedDTO.chid,
                     Dure = mediaPlanRealizedDTO.dure,
                     Durf = mediaPlanRealizedDTO.durf,

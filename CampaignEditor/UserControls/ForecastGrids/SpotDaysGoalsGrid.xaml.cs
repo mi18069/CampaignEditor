@@ -185,8 +185,8 @@ namespace CampaignEditor.UserControls.ForecastGrids
             var channelMpTuples = _visibleTuples.Where(mpt => mpt.MediaPlan.chid == channel.chid);
 
             int ins = 0;
-            double grp = 0;
-            double budget = 0;
+            decimal grp = 0;
+            decimal budget = 0;
             foreach (var mpTuple in channelMpTuples)
             {
                 var term = mpTuple.Terms[dateIndex];
@@ -235,8 +235,8 @@ namespace CampaignEditor.UserControls.ForecastGrids
                                                 .Select(spotSpotGoalsDict => spotSpotGoalsDict.Value));
            
             int ins = 0;
-            double grp = 0;
-            double budget = 0;
+            decimal grp = 0;
+            decimal budget = 0;
             foreach (var spotGoal in channelSpotGoals)
             {
                 ins += spotGoal.Insertations;
@@ -267,8 +267,8 @@ namespace CampaignEditor.UserControls.ForecastGrids
             var totalSpotGoals = _data[dummyChannel][date][spot];
 
             int ins = 0;
-            double grp = 0;
-            double budget = 0;
+            decimal grp = 0;
+            decimal budget = 0;
 
             var channelSpotGoals = _data.Where(dict => _selectedChannels.Contains(dict.Key)) //  all selected channels
                                         .SelectMany(dict => dict.Value) // use only values

@@ -96,7 +96,7 @@ namespace Database.Repositories
                     special = item.specijal,
                     sdate = DateOnly.FromDateTime(item.datumod),
                     edate = item.datumdo == null ? null : DateOnly.FromDateTime(item.datumdo),
-                    progcoef = (float)item.progkoef,
+                    progcoef = (decimal)item.progkoef,
                     created = DateOnly.FromDateTime(item.datumkreiranja),
                     modified = item.datumizmene == null ? null : DateOnly.FromDateTime(item.datumizmene)
                 });
@@ -202,7 +202,7 @@ namespace Database.Repositories
                 special = item.specijal,
                 sdate = DateOnly.FromDateTime(item.datumod),
                 edate = item.datumdo == null ? null : DateOnly.FromDateTime(item.datumdo),
-                progcoef = (float)item.progkoef,
+                progcoef = (decimal)item.progkoef,
                 created = DateOnly.FromDateTime(item.datumkreiranja),
                 modified = item.datumizmene == null ? null : DateOnly.FromDateTime(item.datumizmene)
             });
@@ -231,7 +231,7 @@ namespace Database.Repositories
                 special = item.specijal,
                 sdate = DateOnly.FromDateTime(item.datumod),
                 edate = item.datumdo == null ? null : DateOnly.FromDateTime(item.datumdo),
-                progcoef = (float)item.progkoef,
+                progcoef = (decimal)item.progkoef,
                 created = DateOnly.FromDateTime(item.datumkreiranja),
                 modified = item.datumizmene == null ? null : DateOnly.FromDateTime(item.datumizmene)
             });
@@ -260,7 +260,7 @@ namespace Database.Repositories
                 special = item.specijal,
                 sdate = DateOnly.FromDateTime(item.datumod),
                 edate = item.datumdo == null ? null : DateOnly.FromDateTime(item.datumdo),
-                progcoef = (float)item.progkoef,
+                progcoef = (decimal)item.progkoef,
                 created = DateOnly.FromDateTime(item.datumkreiranja),
                 modified = item.datumizmene == null ? null : DateOnly.FromDateTime(item.datumizmene)
             });
@@ -292,7 +292,7 @@ namespace Database.Repositories
                 special = item.specijal,
                 sdate = DateOnly.FromDateTime(item.datumod),
                 edate = item.datumdo == null ? null : DateOnly.FromDateTime(item.datumdo),
-                progcoef = (float)item.progkoef,
+                progcoef = (decimal)item.progkoef,
                 created = DateOnly.FromDateTime(item.datumkreiranja),
                 modified = item.datumizmene == null ? null : DateOnly.FromDateTime(item.datumizmene)
             });
@@ -321,7 +321,7 @@ namespace Database.Repositories
                 special = item.specijal,
                 sdate = DateOnly.FromDateTime(item.datumod),
                 edate = item.datumdo == null ? null : DateOnly.FromDateTime(item.datumdo),
-                progcoef = (float)item.progkoef,
+                progcoef = (decimal)item.progkoef,
                 created = DateOnly.FromDateTime(item.datumkreiranja),
                 modified = item.datumizmene == null ? null : DateOnly.FromDateTime(item.datumizmene)
             });

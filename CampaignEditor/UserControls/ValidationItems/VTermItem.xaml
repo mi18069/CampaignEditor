@@ -11,13 +11,27 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
         <TextBlock x:Name="tbName" Grid.Row="0"
-                   HorizontalAlignment="Center" VerticalAlignment="Center" FontWeight="Bold"/>
-        <Label x:Name="lblTime" Grid.Row="1"
+                   HorizontalAlignment="Center" VerticalAlignment="Center" 
+                   FontWeight="Bold" FontSize="14"/>
+        <UniformGrid Grid.Row="1" Rows="3">
+            <Label x:Name="lblTime"
                    HorizontalAlignment="Center" VerticalAlignment="Center"/>
-        <Label x:Name="lblInfo" Grid.Row="2"
+            <Label x:Name="lblDayPart"
                    HorizontalAlignment="Center" VerticalAlignment="Center" />
+            <Label x:Name="lblPosition"
+                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+            <Label x:Name="lblAMR1"
+                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+            <Label x:Name="lblAMR2"
+                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+            <Label x:Name="lblAMR3"
+                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+            <Label x:Name="lblPrice"
+                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+        </UniformGrid>
+        
+        
     </Grid>
 </UserControl>

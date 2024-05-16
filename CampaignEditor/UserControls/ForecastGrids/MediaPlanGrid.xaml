@@ -160,7 +160,7 @@
                 <Label x:Name="lblTotal" Grid.Column="0" HorizontalContentAlignment="Right"
                        Content="TOTAL:" FontWeight="Bold" />
                 <ScrollViewer x:Name="svTotals" Grid.Column="1" CanContentScroll="True" HorizontalAlignment="Left"
-                      VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Hidden">
+                      VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Hidden" >
                     <ItemsControl x:Name="icTotals" HorizontalContentAlignment="Stretch">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>

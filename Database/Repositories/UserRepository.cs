@@ -86,7 +86,7 @@ namespace CampaignEditor.Repositories
             using var connection = _context.GetConnection();
 
             var affected = await connection.ExecuteAsync(
-                "UPDATE tblusers SET usrname = @Usrname, usrpass = @Usrpass, usrlevel = @Usrlevel, " +
+                "UPDATE tblusers SET usrname = LOWER(@Usrname), usrpass = LOWER(@Usrpass), usrlevel = @Usrlevel, " +
                 "email = @Email, telefon = @Telefon, enabled = @Enabled, father = @Father, buy = @Buy " +
                 "WHERE usrid = @Usrid",
                 new
@@ -130,7 +130,7 @@ namespace CampaignEditor.Repositories
             using var connection = _context.GetConnection();
 
             var affected = await connection.QueryFirstAsync<int>(
-                "SELECT COUNT(*) FROM tblusers WHERE usrname = @username AND usrpass = @password", new {username = username, password = password});
+                "SELECT COUNT(*) FROM tblusers WHERE usrname = LOWER(@username) AND usrpass = LOWER(@password)", new {username = username, password = password});
 
             return affected > 0;
         }

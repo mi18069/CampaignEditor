@@ -21,6 +21,24 @@ namespace CampaignEditor
             return retString;
         }
 
+        public string GetSTime()
+        {
+            return tbFromH.Text.Trim() + ":" + tbFromM.Text.Trim();
+        }
+        public string GetETime()
+        {
+            return tbToH.Text.Trim() + ":" + tbToM.Text.Trim();
+        }
+        public string GetDays()
+        {
+            return tbDays.Text.Trim();
+        }
+
+        public override string ToString()
+        {
+            return "Time: " + GetSTime() + " - " + GetETime() + " Days: " + GetDays();
+        }
+
         // Checking text and time 
         private string CheckFields()
         {

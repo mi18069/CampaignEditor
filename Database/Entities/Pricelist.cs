@@ -10,8 +10,8 @@ namespace Database.Entities
         public int sectbid { get; set; }
         public int seastbid { get; set; }
         public bool plactive { get; set; }
-        public float price { get; set; }
-        public float minprice { get; set; }
+        public decimal price { get; set; }
+        public decimal minprice { get; set; }
         public bool prgcoef { get; set; }
         public int pltarg { get; set; }
         public bool use2 { get; set; }

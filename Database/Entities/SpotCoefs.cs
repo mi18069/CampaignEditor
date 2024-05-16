@@ -6,9 +6,9 @@ namespace Database.Entities
     {
 
         public List<DateRangeSeasCoef> dateRanges { get; private set; }
-        public double seccoef { get; set; }
+        public decimal seccoef { get; set; }
 
-        public SpotCoefs(List<DateRangeSeasCoef> dateRanges, double seccoef)
+        public SpotCoefs(List<DateRangeSeasCoef> dateRanges, decimal seccoef)
         {
             this.dateRanges = dateRanges;
             this.seccoef = seccoef;

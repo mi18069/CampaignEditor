@@ -6,10 +6,10 @@ namespace Database.Entities
     {
         public DateOnly fromDate { get; set; }
         public DateOnly toDate { get; set; }
-        public double seascoef { get; set; }
+        public decimal seascoef { get; set; }
 
 
-        public DateRangeSeasCoef(DateOnly fromDate, DateOnly toDate, double seascoef)
+        public DateRangeSeasCoef(DateOnly fromDate, DateOnly toDate, decimal seascoef)
         {
             this.fromDate = fromDate;
             this.toDate = toDate;

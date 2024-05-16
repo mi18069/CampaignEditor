@@ -21,7 +21,7 @@ namespace CampaignEditor
 {
     public partial class CmpInfo : Window
     {
-        private CampaignDTO _campaign = null;
+        private CampaignDTO _campaign;
         private BrandDTO[] selectedBrands = new BrandDTO[2] { null, null };
         private ClientDTO _client = null;
 

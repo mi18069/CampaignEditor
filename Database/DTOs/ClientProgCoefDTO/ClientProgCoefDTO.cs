@@ -2,7 +2,7 @@
 {
     public class ClientProgCoefDTO
     {
-        public ClientProgCoefDTO(int clid, int schid, double progcoef)
+        public ClientProgCoefDTO(int clid, int schid, decimal progcoef)
         {
             this.clid = clid;
             this.schid = schid;
@@ -11,6 +11,6 @@
 
         public int clid { get; set; }
         public int schid { get; set; }
-        public double progcoef { get; set; }
+        public decimal progcoef { get; set; }
     }
 }

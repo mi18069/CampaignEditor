@@ -21,7 +21,6 @@ namespace CampaignEditor
         public List<MediaPlanTuple> visibleTuples = new List<MediaPlanTuple>();
 
         private Dictionary<int, ChannelDTO> _chidChannelDictionary = new Dictionary<int, ChannelDTO>();
-        private Dictionary<int, PricelistDTO> _chidPricelistDictionary;
         private Dictionary<char, SpotDTO> _spotcodeSpotDictionary;
 
         CampaignDTO _campaign;
@@ -33,14 +32,12 @@ namespace CampaignEditor
         }
 
         public void Initialize(CampaignDTO campaign, IEnumerable<ChannelDTO> channels,
-            Dictionary<int, PricelistDTO> chidPricelistDictionary, 
             Dictionary<char, SpotDTO> spotcodeSpotDictionary,
             MediaPlanConverter mpConverter)
         {
             _campaign = campaign;
             _mpConverter = mpConverter;
 
-            _chidPricelistDictionary = chidPricelistDictionary;
             _spotcodeSpotDictionary = spotcodeSpotDictionary;
 
             _chidChannelDictionary.Clear();
@@ -257,12 +254,12 @@ namespace CampaignEditor
 
             if (visibleColumns[22])
             {
-                worksheet.Cells[rowOff, colOff + colOffset].Value = _mpConverter.CalculateTermSeascoef(mediaPlan, _chidPricelistDictionary[mediaPlan.chid], _mpTermConverter.ConvertToDTO(term));
+                worksheet.Cells[rowOff, colOff + colOffset].Value = _mpConverter.CalculateTermSeascoef(mediaPlan, _mpTermConverter.ConvertToDTO(term));
                 colOffset += 1;
             }
             if (visibleColumns[23])
             {
-                worksheet.Cells[rowOff, colOff + colOffset].Value = _mpConverter.CalculateTermSeccoef(mediaPlan, _chidPricelistDictionary[mediaPlan.chid], _spotcodeSpotDictionary[spotcode]);
+                worksheet.Cells[rowOff, colOff + colOffset].Value = _mpConverter.CalculateTermSeccoef(mediaPlan, _spotcodeSpotDictionary[spotcode]);
                 colOffset += 1;
             }
             if (visibleColumns[24])

@@ -32,7 +32,8 @@
                         Click="ToggleButton_Click"/>
         <DataGrid x:Name="dgSpotCoefs" Grid.Row="5" Visibility="Collapsed" IsReadOnly="True" Margin="5, 0"
                   HeadersVisibility="Column" MaxWidth="200" MaxHeight="250">
-            <DataGridTextColumn Header="Spot" Binding="{Binding GetSpot}"/>
+            <DataGridTextColumn Header="Spot" Binding="{Binding GetSpotcode}"/>
+            <DataGridTextColumn Header="Secs" Binding="{Binding GetSeconds}"/>
             <DataGridTextColumn Header="Sec Coef" Binding="{Binding SecCoef.Name}"/>
             <DataGridTextColumn Header="Dates" Binding="{Binding GetDateRange}"/>
             <DataGridTextColumn Header="Seas Coef" Binding="{Binding SeasCoef}"/>

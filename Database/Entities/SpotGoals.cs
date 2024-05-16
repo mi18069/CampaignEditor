@@ -11,8 +11,8 @@ namespace Database.Entities
     {
 
         private int insertations;
-        private double grp;
-        private double budget;
+        private decimal grp;
+        private decimal budget;
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -26,7 +26,7 @@ namespace Database.Entities
             }
         }
 
-        public double Grp
+        public decimal Grp
         {
             get { return grp; }
             set 
@@ -36,7 +36,7 @@ namespace Database.Entities
             }
         }
 
-        public double Budget
+        public decimal Budget
         {
             get { return budget; }
             set 
