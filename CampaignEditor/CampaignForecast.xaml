@@ -251,7 +251,7 @@
                                             IsReadOnly="True" Width="*"/>
                             <DataGridTextColumn Header="AMR% 3" Binding="{Binding amrp3, Mode=TwoWay, StringFormat=N2}" 
                                             IsReadOnly="True" Width="*"/>
-                            <DataGridTextColumn Header="AMR% Sale" Binding="{Binding amrpsale, Mode=TwoWay}" 
+                            <DataGridTextColumn Header="AMR% Sale" Binding="{Binding amrpsale, Mode=TwoWay, StringFormat=N2}" 
                                             IsReadOnly="True" Width="*"/>
                             <DataGridCheckBoxColumn Header="Include" Binding="{Binding Active, Mode=TwoWay}"
                                                 IsReadOnly="True">

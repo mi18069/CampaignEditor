@@ -40,6 +40,12 @@ namespace CampaignEditor.UserControls.ForecastGrids
             dgSpotCoefs.ItemsSource = _spotCoefsTable;
         }
 
+        public async Task GoalsChanged()
+        {
+            _goals = await _goalsController.GetGoalsByCmpid(_campaign.cmpid);
+            totalItem.InitializeFields(_goals);
+        }
+
         public void FillGoals(IEnumerable<MediaPlanTuple> allMediaPlans)
         {
             _allMediaPlans = (ObservableRangeCollection<MediaPlanTuple>)allMediaPlans;
@@ -53,7 +59,7 @@ namespace CampaignEditor.UserControls.ForecastGrids
             int lowerBound = _goals.rch_f1;
             int upperBound = _goals.rch_f2;
 
-            double reachValue = ReturnSubtractedReach(lowerBound, upperBound, reach);
+            decimal reachValue = ReturnSubtractedReach(lowerBound, upperBound, reach);
             totalItem.UpdateReach(reachValue);
         }
 
@@ -80,20 +86,20 @@ namespace CampaignEditor.UserControls.ForecastGrids
             }
         }
 
-        private double ReturnSubtractedReach(int lowerBound, int upperBound, ReachDTO reach)
+        private decimal ReturnSubtractedReach(int lowerBound, int upperBound, ReachDTO reach)
         {
-            double minuend = ReturnReachBoundValue(lowerBound, reach);
-            double subtrahend = ReturnReachBoundValue(upperBound, reach);
+            decimal minuend = ReturnReachBoundValue(lowerBound, reach);
+            decimal subtrahend = ReturnReachBoundValue(upperBound, reach);
           
             if (minuend == subtrahend)
             {
                 return minuend;
             }
-            double difference = minuend - subtrahend;
+            decimal difference = minuend - subtrahend;
             return Math.Max(0, difference);
         }
 
-        private double ReturnReachBoundValue(int bound, ReachDTO reach)
+        private decimal ReturnReachBoundValue(int bound, ReachDTO reach)
         {
             decimal value = 0;
             switch (bound)
@@ -130,7 +136,7 @@ namespace CampaignEditor.UserControls.ForecastGrids
                     return 0;
             }
 
-            return Decimal.ToDouble(value);
+            return value;
         }
 
     }

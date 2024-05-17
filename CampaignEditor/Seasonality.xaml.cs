@@ -79,7 +79,7 @@ namespace CampaignEditor
                 var seasItem = MakeSeasItem();
                 seasItem.dpFrom.SelectedDate = seasItem.FromStringToDateTime(seascoef.stdt);
                 seasItem.dpTo.SelectedDate = seasItem.FromStringToDateTime(seascoef.endt);
-                seasItem.tbCoef.Text = seascoef.coef.ToString().Trim();
+                seasItem.tbCoef.Text = seascoef.coef.ToString("0.0###").Trim();
                 wpSeasonalities.Children.Add(seasItem);
             }
             var addBtn = MakeAddButton();

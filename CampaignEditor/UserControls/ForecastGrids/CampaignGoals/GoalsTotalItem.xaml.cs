@@ -6,6 +6,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace CampaignEditor.UserControls.ForecastGrids
 {
@@ -16,6 +17,7 @@ namespace CampaignEditor.UserControls.ForecastGrids
     {
         private MPGoals mpGoals = new MPGoals();
 
+        decimal reachTarget = 0;
         public GoalsTotalItem()
         {
             InitializeComponent();
@@ -89,6 +91,7 @@ namespace CampaignEditor.UserControls.ForecastGrids
                 }
             }
             lblReachTarget.Content = "/" + (goals.rch != 0 ? goals.rch.ToString() + "%" : " - ");
+            reachTarget = goals.rch;
         }
 
         public void FillGoals(IEnumerable<MediaPlanTuple> allMediaPlans)
@@ -99,9 +102,22 @@ namespace CampaignEditor.UserControls.ForecastGrids
             lblInsertationsValue.DataContext = mpGoals;              
         }
 
-        public void UpdateReach(double reach)
+        public void UpdateReach(decimal reach)
         {
-            lblReachValue.Content = Math.Round(reach, 2);
+            lblReachValue.Content = Math.Round(reach, 4);
+            UpdateReachColor(reach);
+        }
+
+        private void UpdateReachColor(decimal reach)
+        {
+            if (reach > reachTarget)
+            {
+                lblReachValue.Foreground = Brushes.Green;
+            }
+            else
+            {
+                lblReachValue.Foreground = Brushes.Red;
+            }
         }
     }
 }

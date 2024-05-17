@@ -40,7 +40,7 @@
                                 HorizontalContentAlignment="Right" FontWeight="DemiBold">
                     <Label.Foreground>
                         <MultiBinding Converter="{StaticResource ValueComparisonConverter}">
-                            <Binding Path="Budget" />
+                            <Binding Path="BudgetRounded" />
                             <Binding Path="Content" ElementName="lblBudgetTarget" />
                         </MultiBinding>
                     </Label.Foreground>
@@ -62,7 +62,7 @@
                     HorizontalContentAlignment="Right" FontWeight="DemiBold">
                     <Label.Foreground>
                         <MultiBinding Converter="{StaticResource ValueComparisonConverter}">
-                            <Binding Path="Grp" />
+                            <Binding Path="GrpRounded" />
                             <Binding Path="Content" ElementName="lblGRPTarget" />
                         </MultiBinding>
                     </Label.Foreground>

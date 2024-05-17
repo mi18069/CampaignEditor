@@ -30,10 +30,10 @@ namespace Database.Repositories
                 "INSERT INTO tblpricelist (clid, plname, pltype, sectbid, seastbid, plactive, price, minprice, " +
                 "prgcoef, pltarg, use2, sectbid2, sectb2st, sectb2en, valfrom, valto, mgtype, fixprice) " +
                     "VALUES (@Clid, @Plname, @Pltype, @Sectbid, @Seastbid, @Plactive, @Price, @Minprice, " +
-                    "@Prgcoef, @Pltarg, @Use2, @Sectbid2, @Sectb2st, @Sectb2en, @Valfrom, @Valto, @Mgtype) " +
+                    "@Prgcoef, @Pltarg, @Use2, @Sectbid2, @Sectb2st, @Sectb2en, @Valfrom, @Valto, @Mgtype, @Fixprice) " +
                     "RETURNING plid",
             new
-                {
+            {
                 Clid = pricelistDTO.clid,
                 Plname = pricelistDTO.plname,
                 Pltype = pricelistDTO.pltype,
@@ -50,7 +50,8 @@ namespace Database.Repositories
                 Sectb2en = pricelistDTO.sectb2en,
                 Valfrom = pricelistDTO.valfrom,
                 Valto = pricelistDTO.valto,
-                Mgtype = pricelistDTO.mgtype
+                Mgtype = pricelistDTO.mgtype,
+                Fixprice = pricelistDTO.fixprice
             });
 
 
@@ -141,7 +142,7 @@ namespace Database.Repositories
                 "UPDATE tblpricelist SET clid = @Clid, plname = @Plname, pltype = @Pltype, " +
                 "sectbid = @Sectbid, seastbid = @Seastbid, plactive = @Plactive, price = @Price, minprice = @Minprice, " +
                 "prgcoef = @Prgcoef, pltarg = @Pltarg, use2 = @Use2, sectbid2 = @Sectbid2, " +
-                "sectb2st = @Sectb2st, sectb2en = @Sectb2en, valfrom = @Valfrom, valto = @Valto, mgtype = @Mgtype, " +
+                "sectb2st = @Sectb2st, sectb2en = @Sectb2en, valfrom = @Valfrom, valto = @Valto, mgtype = @Mgtype, fixprice = @Fixprice " +
                 "WHERE plid = @Plid",
                 new
                 {
@@ -162,7 +163,8 @@ namespace Database.Repositories
                     Sectb2en = pricelistDTO.sectb2en,
                     Valfrom = pricelistDTO.valfrom,
                     Valto = pricelistDTO.valto,
-                    Mgtype = pricelistDTO.mgtype
+                    Mgtype = pricelistDTO.mgtype,
+                    Fixprice = pricelistDTO.fixprice
                 });
 
             return affected != 0;

@@ -8,7 +8,7 @@ namespace Database.DTOs.PricelistDTO
             int sectbid, int seastbid, bool plactive, decimal price, 
             decimal minprice, bool prgcoef, int pltarg, 
             bool use2, int sectbid2, int sectb2st, int sectb2en, 
-            int valfrom, int valto, bool mgtype)
+            int valfrom, int valto, bool mgtype, decimal fixprice)
         {
             this.clid = clid;
             this.plname = plname ?? throw new ArgumentNullException(nameof(plname));
@@ -27,6 +27,7 @@ namespace Database.DTOs.PricelistDTO
             this.valfrom = valfrom;
             this.valto = valto;
             this.mgtype = mgtype;
+            this.fixprice = fixprice;
         }
 
         public int clid { get; set; }
@@ -47,6 +48,6 @@ namespace Database.DTOs.PricelistDTO
         public int valfrom { get; set; }
         public int valto { get; set; }
         public bool mgtype { get; set; }
-
+        public decimal fixprice { get; set; }
     }
 }

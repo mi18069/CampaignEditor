@@ -9,9 +9,9 @@ namespace CampaignEditor.Converters
     {
         public object Convert(object[] values, Type targetType, object parameter, CultureInfo culture)
         {
-            if (values.Length == 2 && values[0] is double firstValue && values[1] is string secondValue)
+            if (values.Length == 2 && values[0] is decimal firstValue && values[1] is string secondValue)
             {
-                var numericValue = double.TryParse(secondValue.TrimStart('/'), out var result) ? result : 0;
+                var numericValue = decimal.TryParse(secondValue.TrimStart('/'), out var result) ? result : 0;
                 if (numericValue == 0)
                     return Brushes.Black;
                 else if (firstValue > numericValue)

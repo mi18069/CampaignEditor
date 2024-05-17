@@ -33,23 +33,23 @@
             </DataGrid.RowHeaderTemplate>
             <DataGrid.Columns>
                 <DataGridTextColumn Width="100" Header="1+"
-                                    IsReadOnly="True" Binding="{Binding Rch1}" />
+                                    IsReadOnly="True" Binding="{Binding Rch1, StringFormat=N4}" />
                 <DataGridTextColumn Width="100" Header="2+"
-                                    IsReadOnly="True" Binding="{Binding Rch12}" />
+                                    IsReadOnly="True" Binding="{Binding Rch12, StringFormat=N4}" />
                 <DataGridTextColumn Width="100" Header="3+"
-                                    IsReadOnly="True" Binding="{Binding Rch13}" />
+                                    IsReadOnly="True" Binding="{Binding Rch13, StringFormat=N4}" />
                 <DataGridTextColumn Width="100" Header="4+"
-                                    IsReadOnly="True" Binding="{Binding Rch14}" />
+                                    IsReadOnly="True" Binding="{Binding Rch14, StringFormat=N4}" />
                 <DataGridTextColumn Width="100" Header="5+"
-                                    IsReadOnly="True" Binding="{Binding Rch15}" />
+                                    IsReadOnly="True" Binding="{Binding Rch15, StringFormat=N4}" />
                 <DataGridTextColumn Width="100" Header="6+"
-                                    IsReadOnly="True" Binding="{Binding Rch16}" />
+                                    IsReadOnly="True" Binding="{Binding Rch16, StringFormat=N4}" />
                 <DataGridTextColumn Width="100" Header="7+"
-                                    IsReadOnly="True" Binding="{Binding Rch17}" />
+                                    IsReadOnly="True" Binding="{Binding Rch17, StringFormat=N4}" />
                 <DataGridTextColumn Width="100" Header="8+"
-                                    IsReadOnly="True" Binding="{Binding Rch18}" />
+                                    IsReadOnly="True" Binding="{Binding Rch18, StringFormat=N4}" />
                 <DataGridTextColumn Width="100" Header="9+"
-                                    IsReadOnly="True" Binding="{Binding Rch19}" />
+                                    IsReadOnly="True" Binding="{Binding Rch19, StringFormat=N4}" />
             </DataGrid.Columns>
             <DataGrid.Resources>
                 <Style TargetType="{x:Type DataGridColumnHeader}">
@@ -98,23 +98,23 @@
             </DataGrid.RowHeaderTemplate>
             <DataGrid.Columns>
                 <DataGridTextColumn Width="100"
-                                    IsReadOnly="True" Binding="{Binding Rch2}"/>
+                                    IsReadOnly="True" Binding="{Binding Rch2, StringFormat=N4}"/>
                 <DataGridTextColumn Width="100"
-                                    IsReadOnly="True" Binding="{Binding Rch22}" />
+                                    IsReadOnly="True" Binding="{Binding Rch22, StringFormat=N4}" />
                 <DataGridTextColumn Width="100"
-                                    IsReadOnly="True" Binding="{Binding Rch23}" />
+                                    IsReadOnly="True" Binding="{Binding Rch23, StringFormat=N4}" />
                 <DataGridTextColumn Width="100"
-                                    IsReadOnly="True" Binding="{Binding Rch24}" />
+                                    IsReadOnly="True" Binding="{Binding Rch24, StringFormat=N4}" />
                 <DataGridTextColumn Width="100"
-                                    IsReadOnly="True" Binding="{Binding Rch25}" />
+                                    IsReadOnly="True" Binding="{Binding Rch25, StringFormat=N4}" />
                 <DataGridTextColumn Width="100"
-                                    IsReadOnly="True" Binding="{Binding Rch26}" />
+                                    IsReadOnly="True" Binding="{Binding Rch26, StringFormat=N4}" />
                 <DataGridTextColumn Width="100"
-                                    IsReadOnly="True" Binding="{Binding Rch27}" />
+                                    IsReadOnly="True" Binding="{Binding Rch27, StringFormat=N4}" />
                 <DataGridTextColumn Width="100"
-                                    IsReadOnly="True" Binding="{Binding Rch28}" />
+                                    IsReadOnly="True" Binding="{Binding Rch28, StringFormat=N4}" />
                 <DataGridTextColumn Width="100"
-                                    IsReadOnly="True" Binding="{Binding Rch29}" />
+                                    IsReadOnly="True" Binding="{Binding Rch29, StringFormat=N4}" />
             </DataGrid.Columns>
             <DataGrid.Resources>
                 <Style TargetType="{x:Type DataGridColumnHeader}">

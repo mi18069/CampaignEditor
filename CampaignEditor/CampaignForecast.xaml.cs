@@ -151,7 +151,15 @@ namespace CampaignEditor.UserControls
         {
             SetLoadingPage?.Invoke(this, null);
 
-            _forecastDataManipulation.Initialize(campaign, _forecastData, _mpConverter);
+            try
+            {
+                _forecastDataManipulation.Initialize(campaign, _forecastData, _mpConverter);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error while updating campaign\n{ex.Message}", "Error",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
             _campaign = campaign;
 
             SetContentPage?.Invoke(this, null);
@@ -159,7 +167,15 @@ namespace CampaignEditor.UserControls
         public async Task GoalsChanged()
         {
             SetLoadingPage?.Invoke(this, null);
-            await InitializeGoals();
+            try
+            {
+                await goalsTreeView.GoalsChanged();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error while updating goals\n{ex.Message}", "Error",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
             SetContentPage?.Invoke(this, null);
 
         }
@@ -172,7 +188,15 @@ namespace CampaignEditor.UserControls
             //await _forecastData.InitializeTargets();
             goalsTreeView._mpConverter = _mpConverter;
             _forecastDataManipulation.UpdateProgressBar += _forecastDataManipulation_UpdateProgressBar;
-            await _forecastDataManipulation.RecalculateMediaPlans(mpVer.version);
+            try
+            {
+                await _forecastDataManipulation.RecalculateMediaPlans(mpVer.version);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error while recalculating media plan values\n{ex.Message}", "Error",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
             _forecastDataManipulation.UpdateProgressBar -= _forecastDataManipulation_UpdateProgressBar;
             await LoadData(mpVer.version);
 
@@ -187,8 +211,17 @@ namespace CampaignEditor.UserControls
             //await _forecastData.InitializeSpots();
             //_mpConverter.Initialize(_forecastData);
             goalsTreeView._mpConverter = _mpConverter;
-            await CalculateMPValuesForCampaign(_campaign.cmpid, _maxVersion);
-            await LoadData(mpVer.version);
+            try
+            {
+                await CalculateMPValuesForCampaign(_campaign.cmpid, _maxVersion);
+                await LoadData(mpVer.version);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error while updating spots\n{ex.Message}", "Error",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+  
 
             SetContentPage?.Invoke(this, null);
         }
@@ -199,11 +232,20 @@ namespace CampaignEditor.UserControls
 
             //await _forecastData.InitializeDayParts();
             //_mpConverter.Initialize(_forecastData);
-            FillLvFilterDayParts();
-            foreach (var mediaPlan in _allMediaPlans.Select(mpt => mpt.MediaPlan))
+            try
             {
-                _mpConverter.SetDayPart(mediaPlan);
+                FillLvFilterDayParts();
+                foreach (var mediaPlan in _allMediaPlans.Select(mpt => mpt.MediaPlan))
+                {
+                    _mpConverter.SetDayPart(mediaPlan);
+                }
             }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error while updating day parts\n{ex.Message}", "Error",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+
 
             lvChannels.UnselectAll();
 
@@ -220,17 +262,26 @@ namespace CampaignEditor.UserControls
             //_mpConverter.Initialize(_forecastData);
             _forecastDataManipulation.Initialize(_campaign, _forecastData, _mpConverter);
 
-            foreach (var chid in channelsToDelete)
+            try
             {
-                SetLoadingPage?.Invoke(this, new LoadingPageEventArgs("DELETING CHANNELS...", 0));
-                await _forecastDataManipulation.DeleteChannelFromCampaign(_campaign.cmpid, chid);
+                foreach (var chid in channelsToDelete)
+                {
+                    SetLoadingPage?.Invoke(this, new LoadingPageEventArgs("DELETING CHANNELS...", 0));
+                    await _forecastDataManipulation.DeleteChannelFromCampaign(_campaign.cmpid, chid);
+                }
+                foreach (var chid in channelsToAdd)
+                {
+                    _forecastDataManipulation.UpdateProgressBar += _forecastDataManipulation_UpdateProgressBar;
+                    await _forecastDataManipulation.AddChannelInCampaign(_campaign.cmpid, chid, mpVer.version);
+                    _forecastDataManipulation.UpdateProgressBar -= _forecastDataManipulation_UpdateProgressBar;
+                }
             }
-            foreach (var chid in channelsToAdd)
+            catch (Exception ex)
             {
-                _forecastDataManipulation.UpdateProgressBar += _forecastDataManipulation_UpdateProgressBar;
-                await _forecastDataManipulation.AddChannelInCampaign(_campaign.cmpid, chid, mpVer.version);
-                _forecastDataManipulation.UpdateProgressBar -= _forecastDataManipulation_UpdateProgressBar;
+                MessageBox.Show($"Error while updating channels\n{ex.Message}", "Error",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
             }
+            
 
             SetLoadingPage?.Invoke(this, new LoadingPageEventArgs("LOADING...", 0));
 
@@ -246,24 +297,31 @@ namespace CampaignEditor.UserControls
 
             //await _forecastData.InitializePricelists();
             //_mpConverter.Initialize(_forecastData);
-            _forecastDataManipulation.Initialize(_campaign, _forecastData, _mpConverter);
-
-            var channelIds = new List<int>();
-            foreach (var keyValue in _forecastData.ChidPricelistDict)
+            try
             {
-                if (keyValue.Value.plid == pricelist.plid)
+                _forecastDataManipulation.Initialize(_campaign, _forecastData, _mpConverter);
+
+                var channelIds = new List<int>();
+                foreach (var keyValue in _forecastData.ChidPricelistDict)
                 {
-                    channelIds.Add(keyValue.Key);
+                    if (keyValue.Value.plid == pricelist.plid)
+                    {
+                        channelIds.Add(keyValue.Key);
+                    }
+                }
+                foreach (var channelId in channelIds)
+                {
+                    /*var mpTuples = _allMediaPlans.Where(mpt => mpt.MediaPlan.chid == channelId);
+                    await _forecastDataManipulation.RecalculatePricelistMediaPlans(mpTuples);*/
+                    await CalculateMPValuesForChannel(_campaign.cmpid, channelId, _maxVersion);
                 }
             }
-            foreach (var channelId in channelIds)
+            catch (Exception ex)
             {
-                /*var mpTuples = _allMediaPlans.Where(mpt => mpt.MediaPlan.chid == channelId);
-                await _forecastDataManipulation.RecalculatePricelistMediaPlans(mpTuples);*/
-                await CalculateMPValuesForChannel(_campaign.cmpid, channelId, _maxVersion);
+                MessageBox.Show($"Error while updating program values\n{ex.Message}", "Error",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
             }
-
-
+            
             SetLoadingPage?.Invoke(this, new LoadingPageEventArgs("LOADING...", 0));
 
             await LoadData(_maxVersion);

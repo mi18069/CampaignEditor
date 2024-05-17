@@ -22,5 +22,6 @@ namespace Database.Entities
         public int valto { get; set; }
         public bool mgtype { get; set; }
 
+        public decimal fixprice { get; set; }
     }
 }

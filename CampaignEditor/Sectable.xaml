@@ -107,7 +107,7 @@
                 <DataGrid.Columns>
                     <DataGridTextColumn Header="Length" Binding="{Binding Item1}" MinWidth="160"
                                         IsReadOnly="True"/>
-                    <DataGridTextColumn Header="Coefficient" Binding="{Binding Item2}" MinWidth="160"/>
+                    <DataGridTextColumn Header="Coefficient" Binding="{Binding Item2, StringFormat=0.0###}" MinWidth="160"/>
                 </DataGrid.Columns>
             </DataGrid>
 

@@ -290,14 +290,14 @@ namespace CampaignEditor
             tbSec2From.Text = _pricelist.sectb2st.ToString().PadLeft(6,'0').Substring(0,4);
             tbSec2To.Text = _pricelist.sectb2en.ToString().PadLeft(6,'0').Substring(0,4);
             cbSeasonality.SelectedItem = await _seasonalityController.GetSeasonalityById(_pricelist.seastbid);
-            tbCP.Text = _pricelist.price.ToString();
-            tbMinGRP.Text = _pricelist.minprice.ToString();
+            tbCP.Text = _pricelist.price.ToString("0.0###");
+            tbMinGRP.Text = _pricelist.minprice.ToString("0.0###");
             chbGRP.IsChecked = _pricelist.mgtype;
-            /*if (_pricelist.fixprice != 0)
+            if (_pricelist.fixprice != 0)
             {
                 chbFixed.IsChecked = true;
-                tbFixed.Text = _pricelist.fixprice.ToString();
-            }*/
+                tbFixed.Text = _pricelist.fixprice.ToString("0.0###");
+            }
             var target = await _targetController.GetTargetById(_pricelist.pltarg);
             for (int i=0; i<cbTarget.Items.Count; i++)
             {
@@ -334,7 +334,7 @@ namespace CampaignEditor
                     item.tbToH.Text = toList[0];
                     item.tbToM.Text = toList[1];
 
-                    item.tbCoef.Text = dp.price.ToString();
+                    item.tbCoef.Text = dp.price.ToString("0.0###");
                     item.cbIsPT.IsChecked = dp.ispt;
                     item.tbDays.Text = dp.days.ToString();
 
@@ -426,31 +426,27 @@ namespace CampaignEditor
             int valfrom = int.Parse(TimeFormat.DPToYMDString(dpValidityFrom));
             int valto = int.Parse(TimeFormat.DPToYMDString(dpValidityTo));
             bool mgtype = (bool)chbGRP.IsChecked;
-            /*decimal fixPrice = 0.0f;
+            decimal fixPrice = 0.0M;
             if ((bool)chbFixed.IsChecked && !decimal.TryParse(tbFixed.Text, out fixPrice))
             {
                 MessageBox.Show("Value for fixed price is invalid!", "Error",
                     MessageBoxButton.OK, MessageBoxImage.Error);
                 return;
-            }*/
+            }
 
             if (pricelist == null)
             {
-                /*_pricelist = await _pricelistController.CreatePricelist(new CreatePricelistDTO
-                    (clid, plname, pltype, sectbid, seasid, plactive, price, minprice,
-                    prgcoef, pltarg, use2, sectbid2, sectb2st, sectb2en,
-                    valfrom, valto, mgtype, fixPrice));*/
                 _pricelist = await _pricelistController.CreatePricelist(new CreatePricelistDTO
                     (clid, plname, pltype, sectbid, seasid, plactive, price, minprice,
                     prgcoef, pltarg, use2, sectbid2, sectb2st, sectb2en,
-                    valfrom, valto, mgtype));
+                    valfrom, valto, mgtype, fixPrice));
             }
             else
             {
                 await _pricelistController.UpdatePricelist(new UpdatePricelistDTO
                     (pricelist.plid, clid, plname, pltype, sectbid, seasid, plactive, price, minprice,
                     prgcoef, pltarg, use2, sectbid2, sectb2st, sectb2en,
-                    valfrom, valto, mgtype));
+                    valfrom, valto, mgtype, fixPrice));
                 _pricelist = await _pricelistController.GetPricelistById(pricelist.plid);
             }
         }
