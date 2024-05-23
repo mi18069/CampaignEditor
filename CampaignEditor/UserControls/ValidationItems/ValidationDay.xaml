@@ -1,0 +1,32 @@
+﻿<UserControl x:Class="CampaignEditor.UserControls.ValidationItems.ValidationDay"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:CampaignEditor.UserControls.ValidationItems"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800" d:Background="White">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        <Grid x:Name="gridHeader" Grid.Row="0" Background="LightGray" HorizontalAlignment="Stretch">
+            <Label x:Name="lblExCount" FontWeight="Bold" HorizontalAlignment="Left"/>
+            <Label x:Name="lblDate" FontWeight="Bold" HorizontalAlignment="Center"/>
+            <Label x:Name="lblRealCount" FontWeight="Bold" HorizontalAlignment="Right"/>
+        </Grid>
+        <Expander x:Name="expander" Grid.Row="1" HorizontalAlignment="Stretch"
+                  ExpandDirection="Down" Background="LightGray">
+            <Grid x:Name="gridItems">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <StackPanel x:Name="spExpected" Grid.Column="0"/>
+                <StackPanel x:Name="spRealized" Grid.Column="1"/>
+            </Grid>
+        </Expander>
+        
+    </Grid>
+</UserControl>

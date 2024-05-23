@@ -157,6 +157,34 @@ namespace CampaignEditor
             return hours.ToString().PadLeft(2, '0') + " : " + minutes.ToString().PadLeft(2, '0');
         }
 
+        public static string TimeStrToRepresentative(string timeStr)
+        {           
+            return timeStr.Substring(0, 2) + ":" + timeStr.Substring(2, 2);
+        }
+
+        public static int GetDayOfWeekInt(string dateString)
+        {
+            // Parse the date string to a DateTime object
+            DateTime date = DateTime.ParseExact(dateString, "yyyyMMdd", CultureInfo.InvariantCulture);
+
+            // Get the day of the week
+            DayOfWeek dayOfWeek = date.DayOfWeek;
+
+            // Map the DayOfWeek enum to the desired integer values (Monday = 1, ..., Sunday = 7)
+            int dayOfWeekInt = dayOfWeek switch
+            {
+                DayOfWeek.Monday => 1,
+                DayOfWeek.Tuesday => 2,
+                DayOfWeek.Wednesday => 3,
+                DayOfWeek.Thursday => 4,
+                DayOfWeek.Friday => 5,
+                DayOfWeek.Saturday => 6,
+                DayOfWeek.Sunday => 7,
+            };
+
+            return dayOfWeekInt;
+        }
+
         public static int CompareRepresentative(string time1, string time2)
         {
             int h1, h2, m1, m2; 

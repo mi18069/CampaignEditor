@@ -6,32 +6,88 @@
              xmlns:local="clr-namespace:CampaignEditor.UserControls.ValidationItems"
              mc:Ignorable="d" 
              d:DesignHeight="200" d:DesignWidth="800" Background="Beige" 
+             Height="150"
              BorderThickness="2" BorderBrush="Black">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
-        <TextBlock x:Name="tbName" Grid.Row="0"
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="auto"/>
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <TextBlock x:Name="tbSpotName" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="3"
                    HorizontalAlignment="Center" VerticalAlignment="Center" 
                    FontWeight="Bold" FontSize="14"/>
-        <UniformGrid Grid.Row="1" Rows="3">
-            <Label x:Name="lblTime"
-                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
-            <Label x:Name="lblDayPart"
+            <TextBlock x:Name="tbProgName" Grid.Row="1" Grid.Column="0" 
+                   HorizontalAlignment="Left" VerticalAlignment="Center" 
+                   FontWeight="Bold" FontSize="10"/>
+            <Label x:Name="lblPosition" Grid.Row="1" Grid.Column="1"
+                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                   FontSize="12"/>
+            <Label x:Name="lblTime" Grid.Row="1" Grid.Column="2"
+                   HorizontalAlignment="Right" VerticalAlignment="Center"
+                   FontWeight="Bold" FontSize="12"/>
+        </Grid>
+
+        <Grid Grid.Row="1">
+            <!-- <Label x:Name="lblDayPart"
                    HorizontalAlignment="Center" VerticalAlignment="Center" />
             <Label x:Name="lblPosition"
+                   HorizontalAlignment="Center" VerticalAlignment="Center" /> -->
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Grid x:Name="gridAmrs" Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="auto"/>
+                </Grid.ColumnDefinitions>
+                <Label x:Name="lblAMR1" Grid.Column="0"
                    HorizontalAlignment="Center" VerticalAlignment="Center" />
-            <Label x:Name="lblAMR1"
+                <Label x:Name="lblAMR2" Grid.Column="1"
                    HorizontalAlignment="Center" VerticalAlignment="Center" />
-            <Label x:Name="lblAMR2"
+                <Label x:Name="lblAMR3" Grid.Column="2"
                    HorizontalAlignment="Center" VerticalAlignment="Center" />
-            <Label x:Name="lblAMR3"
+                <Label x:Name="lblAMRSale" Grid.Column="3"
                    HorizontalAlignment="Center" VerticalAlignment="Center" />
-            <Label x:Name="lblPrice"
+            </Grid>
+            <Grid x:Name="gridCoefs" Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="auto"/>
+                </Grid.ColumnDefinitions>
+                <Label x:Name="lblDPCoef" Grid.Column="0"
                    HorizontalAlignment="Center" VerticalAlignment="Center" />
-        </UniformGrid>
-        
-        
+                <Label x:Name="lblProgCoef" Grid.Column="1"
+                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+                <Label x:Name="lblSeccoef" Grid.Column="2"
+                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+                <Label x:Name="lblSeascoef" Grid.Column="3"
+                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+                <Label x:Name="lblCpp" Grid.Column="4"
+                   HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Grid>
+        </Grid>
+        <Grid Grid.Row="2">
+            <Label x:Name="lblPrice" 
+                   HorizontalAlignment="Right" VerticalAlignment="Center" 
+                       FontSize="16" FontWeight="Black"/>
+        </Grid>
+
     </Grid>
 </UserControl>

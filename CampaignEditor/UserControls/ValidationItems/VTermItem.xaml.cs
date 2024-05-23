@@ -13,9 +13,16 @@ namespace CampaignEditor.UserControls.ValidationItems
             InitializeComponent();
         }
 
-        public void Initialize(TermTuple termTuple)
+        public void Initialize(TermTuple termTuple = null)
         {
-            tbName.Text = termTuple.Spot.spotname.Trim();
+            if (termTuple == null)
+            {
+                MakeItemEmpty();
+                return;
+            }
+
+            tbSpotName.Text = $"{termTuple.Spot.spotcode} : {termTuple.Spot.spotname.Trim()} ({termTuple.Spot.spotlength})";
+            tbProgName.Text = termTuple.MediaPlan.name.Trim();
             if (termTuple.MediaPlan.blocktime == null)
             {
                 lblTime.Content = termTuple.MediaPlan.stime.ToString();
@@ -24,19 +31,27 @@ namespace CampaignEditor.UserControls.ValidationItems
             {
                 lblTime.Content = "Block time: " + termTuple.MediaPlan.blocktime.ToString();
             }
-            if (termTuple.MediaPlan.DayPart == null)
-            {
-                lblDayPart.Content = "Day part: - ";
-            }
-            else
-            {
-                lblDayPart.Content = "Day part: " + termTuple.MediaPlan.DayPart.name.ToString();
-            }
-            lblPosition.Content = "Pos: " + termTuple.MediaPlan.position.ToString();
             lblAMR1.Content = "Amr%1: " + Math.Round(termTuple.MediaPlan.amrp1, 2).ToString();
             lblAMR2.Content = "Amr%2: " + Math.Round(termTuple.MediaPlan.amrp2, 2).ToString();
             lblAMR3.Content = "Amr%3: " + Math.Round(termTuple.MediaPlan.amrp3, 2).ToString();
+
+            if (termTuple.Cpp != null)
+            {
+                lblCpp.Content = "CPP: " + termTuple.Cpp.ToString();
+                lblAMRSale.Content = "Amr sale: " + termTuple.Amrpsale.ToString();
+            }
+
+            lblDPCoef.Content = "Dp coef: " + termTuple.MediaPlan.Dpcoef.ToString();
+            lblProgCoef.Content = "Prog coef: " + termTuple.MediaPlan.Progcoef.ToString();
+            lblSeccoef.Content = "Sec coef: " + termTuple.Seccoef.ToString();
+            lblSeascoef.Content = "Seas coef: " + termTuple.Seascoef.ToString();
+
             lblPrice.Content = "Price: " + Math.Round(termTuple.Price, 2).ToString();
+        }
+
+        private void MakeItemEmpty()
+        {
+            this.Visibility = System.Windows.Visibility.Hidden;
         }
     }
 }

@@ -77,9 +77,9 @@ namespace Database.Repositories
             using var connection = _context.GetConnection();
 
             var affected = await connection.ExecuteAsync(
-                @"INSERT INTO tblcmpbrnd (cmpid, brbrand)
-                  SELECT @NewCmpid, brbrand
-                  FROM tblcmpbrnd WHERE cmpid = @OldCmpid;",
+                @"INSERT INTO tblcmpbrnd (cmpid, brbrand) 
+                  SELECT @NewCmpid, brbrand 
+                  FROM tblcmpbrnd WHERE cmpid = @OldCmpid; ",
                 new { OldCmpid = oldCmpid, NewCmpid = newCmpid });
 
             return affected != 0;

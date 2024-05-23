@@ -1,4 +1,5 @@
 ﻿using Database.DTOs.MediaPlanRealizedDTO;
+using Database.Entities;
 using Database.Repositories;
 using System;
 using System.Collections.Generic;
@@ -24,6 +25,12 @@ namespace CampaignEditor.Controllers
             return await _repository.GetMediaPlanRealizedById(id);
         }
 
+        public async Task<IEnumerable<MediaPlanRealized>> GetAllMediaPlansRealizedByCmpid(int cmpid)
+        {
+            return await _repository.GetAllMediaPlansRealizedByCmpid(cmpid);
+
+        }
+
         public async Task<IEnumerable<MediaPlanRealizedDTO>> GetAllMediaPlansRealizedByChid(int chid)
         {
             return await _repository.GetAllMediaPlansRealizedByChid(chid);
@@ -43,6 +50,16 @@ namespace CampaignEditor.Controllers
         public async Task<bool> DeleteMediaPlanRealizedById(int id)
         {
             return await _repository.DeleteMediaPlanRealizedById(id);
+        }
+
+        public async Task<string> GetDedicatedSpotName(int spotid)
+        {
+            return await _repository.GetDedicatedSpotName(spotid);
+        }
+
+        public async Task<bool> SetStatusValue(int id, int statusValue)
+        {
+            return await _repository.SetStatusValue(id, statusValue);
         }
     }
 }

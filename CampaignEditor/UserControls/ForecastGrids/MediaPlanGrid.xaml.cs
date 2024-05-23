@@ -672,7 +672,9 @@ namespace CampaignEditor.UserControls
 
         private void dgMediaPlans_PreviewKeyDown(object sender, KeyEventArgs e)
         {
-            if (!_canUserEdit)
+            // Allow only navigation
+            if (!_canUserEdit && e.Key != Key.Down && e.Key != Key.Up && 
+                                 e.Key != Key.Left && e.Key != Key.Right)
             {
                 e.Handled = true;
                 return;
@@ -913,7 +915,7 @@ namespace CampaignEditor.UserControls
 
                         MenuItem trimAmr = new MenuItem();
                         trimAmr.Header = "Trim Program Amrs";
-                        trimAmr.Click += await TrimAmrs(mediaPlan);
+                        trimAmr.Click += await TrimAmrs(mediaPlanTuple);
                         menu.Items.Add(trimAmr);
 
 
@@ -954,26 +956,27 @@ namespace CampaignEditor.UserControls
                 return FindParent<T>(parent);
         }
         
-        private async Task<RoutedEventHandler> TrimAmrs(MediaPlan mediaPlan)
+        private async Task<RoutedEventHandler> TrimAmrs(MediaPlanTuple mediaPlanTuple)
         {
             async void handler(object sender, RoutedEventArgs e)
             {
                 var f = _factoryAmrTrim.Create();
-                f.Initialize("Trim Amrs for:\n" + mediaPlan.name, mediaPlan.Amr1trim);
+                f.Initialize("Trim Amrs for:\n" + mediaPlanTuple.MediaPlan.name, mediaPlanTuple.MediaPlan.Amr1trim);
                 f.ShowDialog();
                 if (f.changed)
                 {
                     if (f.attributesToTrim[0])
-                        mediaPlan.Amr1trim = f.newValue;
+                        mediaPlanTuple.MediaPlan.Amr1trim = f.newValue;
                     if (f.attributesToTrim[1])
-                        mediaPlan.Amr2trim = f.newValue;
+                        mediaPlanTuple.MediaPlan.Amr2trim = f.newValue;
                     if (f.attributesToTrim[2])
-                        mediaPlan.Amr3trim = f.newValue;
+                        mediaPlanTuple.MediaPlan.Amr3trim = f.newValue;
                     if (f.attributesToTrim[3])
-                        mediaPlan.Amrsaletrim = f.newValue;
+                        mediaPlanTuple.MediaPlan.Amrsaletrim = f.newValue;
 
-                    var mpDTO = _mpConverter.ConvertToDTO(mediaPlan);
-
+                    var termsDTO = _mpTermConverter.ConvertToEnumerableDTO(mediaPlanTuple.Terms);
+                    _mpConverter.ComputeExtraProperties(mediaPlanTuple.MediaPlan, termsDTO, true);
+                    var mpDTO = _mpConverter.ConvertToDTO(mediaPlanTuple.MediaPlan);
                     await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(mpDTO));
                 }
             }
@@ -1076,7 +1079,7 @@ namespace CampaignEditor.UserControls
             colors.Add("day", day);
         }
 
-        public void PopulateWorksheet(IEnumerable<MediaPlanTuple> mpTuples, bool[] visibleColumns, ExcelWorksheet worksheet, int rowOff = 1, int colOff = 1, bool hideSensitive = false)
+        public void PopulateWorksheet(IEnumerable<MediaPlanTuple> mpTuples, bool[] visibleColumns, ExcelWorksheet worksheet, int rowOff = 1, int colOff = 1, bool showAllDecimals = false)
         {
             var selectedChannels = _selectedChannels;
             var selectedChannelsChids = selectedChannels.Select(ch => ch.chid);
@@ -1096,7 +1099,7 @@ namespace CampaignEditor.UserControls
             int rowOffset = 1;
             foreach (var mpTuple in mpTuples)
             {
-                AddMpTuple(mpTuple, visibleColumns, worksheet, rowOff + rowOffset, colOff);
+                AddMpTuple(mpTuple, visibleColumns, worksheet, rowOff + rowOffset, colOff, showAllDecimals);
                 rowOffset += 1;
             }
 
@@ -1153,7 +1156,7 @@ namespace CampaignEditor.UserControls
             }
         }
 
-        private void AddMpTuple(MediaPlanTuple mpTuple, bool[] visibleColumns, ExcelWorksheet worksheet, int rowOff, int colOff)
+        private void AddMpTuple(MediaPlanTuple mpTuple, bool[] visibleColumns, ExcelWorksheet worksheet, int rowOff, int colOff, bool showAllDecimals = false)
         {
             int colOffset = 0;
             MediaPlan mediaPlan = mpTuple.MediaPlan;
@@ -1210,7 +1213,10 @@ namespace CampaignEditor.UserControls
             }
             if (visibleColumns[10])
             {
-                worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.Amrp1, 2);
+                if (showAllDecimals)
+                    worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Amrp1;
+                else
+                    worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.Amrp1, 2);
                 colOffset += 1;
             }
             if (visibleColumns[11])
@@ -1225,7 +1231,10 @@ namespace CampaignEditor.UserControls
             }
             if (visibleColumns[13])
             {
-                worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.Amrp2, 2);
+                if (showAllDecimals)
+                    worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Amrp2;
+                else
+                    worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.Amrp2, 2);
                 colOffset += 1;
             }
             if (visibleColumns[14])
@@ -1240,7 +1249,10 @@ namespace CampaignEditor.UserControls
             }
             if (visibleColumns[16])
             {
-                worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.Amrp3, 2);
+                if (showAllDecimals)
+                    worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Amrp3;
+                else
+                    worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.Amrp3, 2);
                 colOffset += 1;
             }
             if (visibleColumns[17])
@@ -1255,7 +1267,10 @@ namespace CampaignEditor.UserControls
             }
             if (visibleColumns[19])
             {
-                worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.Amrpsale, 2);
+                if (showAllDecimals)
+                    worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Amrpsale;
+                else
+                    worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.Amrpsale, 2);
                 colOffset += 1;
             }
             if (visibleColumns[20])
@@ -1265,32 +1280,47 @@ namespace CampaignEditor.UserControls
             }
             if (visibleColumns[21])
             {
-                worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.Affinity, 2);
+                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Affinity;
                 colOffset += 1;
             }
             if (visibleColumns[22])
             {
-                worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.Progcoef, 2);
+                if (showAllDecimals)
+                    worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Progcoef;
+                else
+                    worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.Progcoef, 2);
                 colOffset += 1;
             }
             if (visibleColumns[23])
             {
-                worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.Dpcoef, 2);
+                if (showAllDecimals)
+                    worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Dpcoef;
+                else
+                    worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.Dpcoef, 2);
                 colOffset += 1;
             }
             if (visibleColumns[24])
             {
-                worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.Seascoef, 2);
+                if (showAllDecimals)
+                    worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Seascoef;
+                else
+                    worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.Seascoef, 2);
                 colOffset += 1;
             }
             if (visibleColumns[25])
             {
-                worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.Seccoef, 2);
+                if (showAllDecimals)
+                    worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Seccoef;
+                else
+                    worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.Seccoef, 2);
                 colOffset += 1;
             }
             if (visibleColumns[26])
             {
-                worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.Cpp, 2);
+                if (showAllDecimals)
+                    worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Cpp;
+                else
+                    worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.Cpp, 2);
                 colOffset += 1;
             }
             if (visibleColumns[27])
@@ -1300,12 +1330,18 @@ namespace CampaignEditor.UserControls
             }
             if (visibleColumns[28])
             {
-                worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.PricePerSecond, 2);
+                if (showAllDecimals)
+                    worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.PricePerSecond;
+                else
+                    worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.PricePerSecond, 2);
                 colOffset += 1;
             }
             if (visibleColumns[29])
             {
-                worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.Price, 2);
+                if (showAllDecimals)
+                    worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Price;
+                else
+                    worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.Price, 2).ToString("#,##0.00");
                 colOffset += 1;
             }
 

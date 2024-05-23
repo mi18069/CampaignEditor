@@ -121,8 +121,18 @@ namespace CampaignEditor
             _forecast._allMediaPlans = _allMediaPlans;
 
             try
-            {
+            {               
+                if (!alreadyExists)
+                {
+                    // Unsubscribe from the SelectionChanged event
+                    _forecast.cbVersions.SelectionChanged -= _forecast.CbVersions_SelectionChanged;
+                }
                 await _forecast.Initialize(_campaign, isReadOnly);
+                if (alreadyExists)
+                {
+                    // Subscribe from the SelectionChanged event
+                    _forecast.cbVersions.SelectionChanged += _forecast.CbVersions_SelectionChanged;
+                }
             }
             catch (Exception ex)
             {
@@ -203,8 +213,8 @@ namespace CampaignEditor
             }
 
             if (_forecast == null)
-            {
-                await LoadForecast();
+            {            
+                await LoadForecast();          
             }
 
             if (!await CheckPrerequisites(_campaign))

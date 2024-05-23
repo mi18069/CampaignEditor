@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="Current" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
-    <_LastSelectedProfileId>C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\Properties\PublishProfiles\ClickOnceProfile3.pubxml</_LastSelectedProfileId>
+    <_LastSelectedProfileId>C:\Users\marko\Desktop\posao\CampaignEditor\CampaignEditor\Properties\PublishProfiles\ClickOnceProfile2.pubxml</_LastSelectedProfileId>
   </PropertyGroup>
   <ItemGroup>
     <ApplicationDefinition Update="App.xaml">
@@ -201,7 +201,13 @@
     <Compile Update="UserControls\ValidationItems\DateLabelItem.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="UserControls\ValidationItems\ValidationDay.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="UserControls\ValidationItems\ValidationStack.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="UserControls\ValidationItems\VRealizedItem.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
     <Compile Update="UserControls\ValidationItems\VTermEmptyItem.xaml.cs">
@@ -410,7 +416,13 @@
     <Page Update="UserControls\ValidationItems\DateLabelItem.xaml">
       <SubType>Designer</SubType>
     </Page>
+    <Page Update="UserControls\ValidationItems\ValidationDay.xaml">
+      <SubType>Designer</SubType>
+    </Page>
     <Page Update="UserControls\ValidationItems\ValidationStack.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UserControls\ValidationItems\VRealizedItem.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="UserControls\ValidationItems\VTermEmptyItem.xaml">

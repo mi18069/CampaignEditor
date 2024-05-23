@@ -16,12 +16,13 @@ namespace CampaignEditor
         private TargetCmpController _targetCmpController;
         private SpotController _spotController;
         private ChannelCmpController _channelCmpController;
+        private ClientProgCoefController _clientProgcoefController;
 
         public CampaignManipulations(ICampaignRepository campaignRepository,
             IMediaPlanRefRepository mediaPlanRefRepository,
             ICmpBrndRepository cmpBrndRepository, IGoalsRepository goalsRepository,
             ITargetCmpRepository targetCmpRepository, ISpotRepository spotRepository,
-            IChannelCmpRepository channelCmpRepository)
+            IChannelCmpRepository channelCmpRepository, IClientProgCoefRepository clientProgCoefRepository)
         {
             _campaignController = new CampaignController(campaignRepository);
             _mediaPlanRefController = new MediaPlanRefController(mediaPlanRefRepository);
@@ -30,6 +31,7 @@ namespace CampaignEditor
             _targetCmpController = new TargetCmpController(targetCmpRepository);
             _spotController = new SpotController(spotRepository);
             _channelCmpController = new ChannelCmpController(channelCmpRepository);
+            _clientProgcoefController = new ClientProgCoefController(clientProgCoefRepository);
         }
 
         public async Task<bool> DuplicateCampaign(CampaignDTO oldCampaign, CampaignDTO newCampaign)
@@ -41,7 +43,8 @@ namespace CampaignEditor
                 await _spotController.DuplicateSpot(oldCampaign.cmpid, newCampaign.cmpid);
                 await _targetCmpController.DuplicateTargetCmp(oldCampaign.cmpid, newCampaign.cmpid);
                 await _goalsController.DuplicateGoals(oldCampaign.cmpid, newCampaign.cmpid);
-                await _cmpBrndController.DuplicateCmpBrnd(oldCampaign.cmpid, newCampaign.cmpid);
+                // This shouldn't be done since it's done while saving campaign
+                //await _cmpBrndController.DuplicateCmpBrnd(oldCampaign.cmpid, newCampaign.cmpid);
 
                 return true;
 
@@ -83,14 +86,10 @@ namespace CampaignEditor
 
             // If campaign is inactive and doesn't have initialized mediaPlan, delete it
             var mediaPlanRef = await _mediaPlanRefController.GetMediaPlanRef(campaign.cmpid);
-            if (mediaPlanRef == null)
-            {
-                return await DeleteCampaignFromBase(campaign, false);
-            }
             // If campaign is inactive and have initialized MediaPlan, but hasn't started, delete it
-            else if (TimeFormat.YMDStringToDateTime(campaign.cmpsdate) >= DateTime.Now)
+            if (TimeFormat.YMDStringToDateTime(campaign.cmpsdate) >= DateTime.Now)
             {
-                return await DeleteCampaignFromBase(campaign, true);
+                return await DeleteCampaignFromBase(campaign);
             }
             // Else campaign can't be deleted
             else
@@ -102,27 +101,17 @@ namespace CampaignEditor
 
         }
 
-        private async Task<bool> DeleteCampaignFromBase(CampaignDTO campaign, bool isInitialized = false)
+        private async Task<bool> DeleteCampaignFromBase(CampaignDTO campaign)
         {
-
-            if (isInitialized)
-            {
-                try
-                {
-                    await _campaignController.DeleteCampaignInitialization(campaign.cmpid);
-                    await _mediaPlanRefController.DeleteMediaPlanRefById(campaign.cmpid);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Error while deleting MediaPlan!\n" + ex.Message, "Error",
-                        MessageBoxButton.OK, MessageBoxImage.Error);
-                    return false;
-                }
-            }
 
 
             try
             {
+                // Deleting Forecast
+                await _campaignController.DeleteCampaignInitialization(campaign.cmpid);
+                await _mediaPlanRefController.DeleteMediaPlanRefById(campaign.cmpid);
+                await _clientProgcoefController.DeleteClientProgCoefByClientId(campaign.clid);
+
                 // Deleting connections with campaign
                 await _channelCmpController.DeleteChannelCmpByCmpid(campaign.cmpid);
                 await _spotController.DeleteSpotsByCmpid(campaign.cmpid);

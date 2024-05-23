@@ -3,7 +3,6 @@ using CampaignEditor.DTOs.UserDTO;
 using CampaignEditor.Helpers;
 using Database.DTOs.CampaignDTO;
 using Database.DTOs.ClientDTO;
-using Database.DTOs.UserClients;
 using Database.Entities;
 using System;
 using System.Collections.Generic;
@@ -165,7 +164,7 @@ namespace CampaignEditor.UserControls
             if (clientSearchString.Length >= 3 && clientSearchString != Clients.instance.searchClientsString)
             {
                 string prefix = Clients.instance.tbSearchClients.Text.Trim().ToLower();
-                filteredData = filteredData.Where(cc => cc.Client.clname.ToLower().StartsWith(prefix)).ToList();
+                filteredData = filteredData.Where(cc => cc.Client.clname.ToLower().Contains(prefix)).ToList();
 
             }
             if (campaignSearchString.Length >= 3 && campaignSearchString != Clients.instance.searchCampaignsString)
@@ -175,7 +174,7 @@ namespace CampaignEditor.UserControls
                 {
                     var clientCampaigns = filteredData[i];
                     var newCampaigns = new List<ClientCampaignsList>();
-                    var campaigns = clientCampaigns.Campaigns.Where(cmp => cmp.cmpname.ToLower().StartsWith(prefix)).ToList();
+                    var campaigns = clientCampaigns.Campaigns.Where(cmp => cmp.cmpname.ToLower().Contains(prefix)).ToList();
                     if (campaigns.Count == 0)
                     {
                         filteredData.RemoveAt(i);

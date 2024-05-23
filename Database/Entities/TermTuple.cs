@@ -1,7 +1,4 @@
-﻿
-using Database.DTOs.MediaPlanDTO;
-using Database.DTOs.MediaPlanTermDTO;
-using Database.DTOs.SpotDTO;
+﻿using Database.DTOs.SpotDTO;
 
 namespace Database.Entities
 {
@@ -15,16 +12,20 @@ namespace Database.Entities
         public MediaPlan MediaPlan { get { return _mediaPlan; } }
         public MediaPlanTerm MediaPlanTerm { get { return _mediaPlanTerm; } }
         public SpotDTO Spot { get { return _spot; } }
-
-        public decimal Price { get { return _price; } }
+        private TermCoefs _termCoefs;
+        public decimal Price { get { return _termCoefs.Price; } }
+        public decimal Seccoef { get { return _termCoefs.Seccoef; } }
+        public decimal Seascoef { get { return _termCoefs.Seascoef; } }
+        public decimal? Cpp { get { return _termCoefs.Cpp; } }
+        public decimal? Amrpsale { get { return _termCoefs.Amrpsale; } }
 
         public TermTuple(MediaPlan mediaPlan, MediaPlanTerm mediaPlanTerm, SpotDTO spot,
-            decimal price)
+            TermCoefs termCoefs)
         {
             _mediaPlan = mediaPlan;
             _mediaPlanTerm = mediaPlanTerm;
             _spot = spot;
-            _price = price;
+            _termCoefs = termCoefs;
         }
     }
 }

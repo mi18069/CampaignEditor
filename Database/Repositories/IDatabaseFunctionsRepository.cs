@@ -12,6 +12,6 @@ namespace Database.Repositories
 
         Task<bool> CheckForecastPrerequisites(int cmpid);
         Task<bool> StartReachCalculation(int cmpid, int segins, int segbet, bool delete, bool expr, string path);
-
+        Task<bool> StartRealizationFunction(int cmpid, int brandid, string sdate, string edate);
     }
 }

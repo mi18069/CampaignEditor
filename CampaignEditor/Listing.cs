@@ -8,7 +8,6 @@ using System.Linq;
 using Database.DTOs.ChannelDTO;
 using Database.DTOs.CampaignDTO;
 using Database.DTOs.SpotDTO;
-using Database.DTOs.PricelistDTO;
 
 namespace CampaignEditor
 {
@@ -52,9 +51,9 @@ namespace CampaignEditor
 
         private bool[] TransformVisibleColumns(bool[] visibleGridColumns)
         {
-            bool[] visibleColumns = new bool[27];
+            bool[] visibleColumns = new bool[31];
             visibleColumns[0] = true;
-            for (int i = 0; i < 18; i++)
+            /*for (int i = 0; i < 18; i++)
             {
                 visibleColumns[i + 1] = visibleGridColumns[i];
             }
@@ -62,14 +61,22 @@ namespace CampaignEditor
             for (int i = 21; i < 26; i++)
             {
                 visibleColumns[i] = visibleGridColumns[i];
+            }*/
+            for (int i = 0; i < 25; i++)
+            {
+                visibleColumns[i + 1] = visibleGridColumns[i];
             }
             // Skipping CPP and Ins
             visibleColumns[26] = visibleGridColumns[28]; // CPSP
+            for (int i=27; i<31; i++)
+            {
+                visibleColumns[i] = true;
+            }
 
             return visibleColumns;
         }
 
-        public void PopulateWorksheet(List<MediaPlanTuple> mpTuples, bool[] visibleGridColumns, ExcelWorksheet worksheet, int rowOff = 1, int colOff = 1)
+        public void PopulateWorksheet(List<MediaPlanTuple> mpTuples, bool[] visibleGridColumns, ExcelWorksheet worksheet, int rowOff = 1, int colOff = 1, bool showAllDecimals = false)
         {
             mpTuples = mpTuples.OrderBy(mpt => mpt.MediaPlan.chid).ThenBy(mpt => mpt.MediaPlan.stime).ToList();
             DateTime startDate = TimeFormat.YMDStringToDateTime(_campaign.cmpsdate);
@@ -82,7 +89,7 @@ namespace CampaignEditor
 
             int rowOffset = 1;
             int dateIndex = 0;
-            for (DateTime date = startDate; date < endDate; date = date.AddDays(1))
+            for (DateTime date = startDate; date <= endDate; date = date.AddDays(1))
             {
                 bool first = true;
                 foreach (var mpTuple in mpTuples)
@@ -106,7 +113,7 @@ namespace CampaignEditor
 
                     foreach (char spotcode in term.Spotcode.Trim())
                     {
-                        AddSpotcode(worksheet, mediaPlan, term, spotcode, visibleColumns, rowOff + rowOffset, colOff);                          
+                        AddSpotcode(worksheet, mediaPlan, term, spotcode, visibleColumns, rowOff + rowOffset, colOff, showAllDecimals);                          
                         rowOffset += 1;
                     }                  
                 }
@@ -120,7 +127,7 @@ namespace CampaignEditor
         {
             List<string> columnHeaders = new List<string> { "Date", "Channel", "Program", "Day Part", "Position", "Start time",
             "End time", "Block time", "Type", "Special", "Amr1", "Amr% 1", "Amr1 Trim", "Amr2", "Amr% 2", "Amr2 Trim", "Amr3",
-            "Amr% 3","Amr3 Trim","Affinity","Prog coef", "Dp coef", "Seas coef", "Sec coef", "CPSP",  "Length", "Spot"};
+            "Amr% 3","Amr3 Trim", "Amr Sale", "Amr Sale%", "Amr Sale Trim", "Affinity","Prog coef", "Dp coef", "Seas coef", "Sec coef", "CPSP",  "Length", "Price", "Spot"};
 
             int numOfColumns = visibleColumns.Count();
 
@@ -137,7 +144,7 @@ namespace CampaignEditor
                 }
             }
         }
-        private void AddSpotcode(ExcelWorksheet worksheet, MediaPlan mediaPlan, MediaPlanTerm term, char spotcode, bool[] visibleColumns, int rowOff, int colOff)
+        private async void AddSpotcode(ExcelWorksheet worksheet, MediaPlan mediaPlan, MediaPlanTerm term, char spotcode, bool[] visibleColumns, int rowOff, int colOff, bool showAllDecimals = false)
         {
             int colOffset = 0;
             if (visibleColumns[0])
@@ -198,7 +205,10 @@ namespace CampaignEditor
             }
             if (visibleColumns[11])
             {
-                worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.Amrp1, 2);               
+                if (showAllDecimals)
+                    worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Amrp1;
+                else
+                    worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.Amrp1, 2);               
                 colOffset += 1;
             }
             if (visibleColumns[12])
@@ -213,7 +223,10 @@ namespace CampaignEditor
             }
             if (visibleColumns[14])
             {
-                worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.Amrp2, 2);               
+                if (showAllDecimals)
+                    worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Amrp2;
+                else
+                    worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.Amrp2, 2);               
                 colOffset += 1;
             }
             if (visibleColumns[15])
@@ -228,7 +241,10 @@ namespace CampaignEditor
             }
             if (visibleColumns[17])
             {
-                worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.Amrp3, 2);                
+                if (showAllDecimals)
+                    worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Amrp3;
+                else
+                    worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.Amrp3, 2);                
                 colOffset += 1;
             }
             if (visibleColumns[18])
@@ -238,41 +254,86 @@ namespace CampaignEditor
             }
             if (visibleColumns[19])
             {
-                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Affinity;
+                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Amrsale;
                 colOffset += 1;
             }
             if (visibleColumns[20])
             {
-                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Progcoef;
+                if (showAllDecimals)
+                    worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Amrpsale;
+                else
+                    worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.Amrpsale, 2);
                 colOffset += 1;
             }
             if (visibleColumns[21])
             {
-                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Dpcoef;
+                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Amrsaletrim;
                 colOffset += 1;
             }
-
             if (visibleColumns[22])
             {
-                worksheet.Cells[rowOff, colOff + colOffset].Value = _mpConverter.CalculateTermSeascoef(mediaPlan, _mpTermConverter.ConvertToDTO(term));
+                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Affinity;
                 colOffset += 1;
             }
             if (visibleColumns[23])
             {
-                worksheet.Cells[rowOff, colOff + colOffset].Value = _mpConverter.CalculateTermSeccoef(mediaPlan, _spotcodeSpotDictionary[spotcode]);
+                if (showAllDecimals)
+                    worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Progcoef;
+                else
+                    worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.Progcoef, 2);
                 colOffset += 1;
             }
             if (visibleColumns[24])
             {
-                worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.PricePerSecond;
+                if (showAllDecimals)
+                    worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Dpcoef;
+                else
+                    worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.Dpcoef, 2);
                 colOffset += 1;
             }
+
             if (visibleColumns[25])
+            {
+                decimal seascoef = _mpConverter.CalculateTermSeascoef(mediaPlan, _mpTermConverter.ConvertToDTO(term));
+                if (showAllDecimals)
+                    worksheet.Cells[rowOff, colOff + colOffset].Value = seascoef;
+                else
+                    worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(seascoef, 2);
+                colOffset += 1;
+            }
+            if (visibleColumns[26])
+            {
+                decimal seccoef = _mpConverter.CalculateTermSeccoef(mediaPlan, _spotcodeSpotDictionary[spotcode]);
+                if (showAllDecimals)
+                    worksheet.Cells[rowOff, colOff + colOffset].Value = seccoef;
+                else
+                    worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(seccoef, 2);
+                colOffset += 1;
+            }
+            if (visibleColumns[27])
+            {
+                if (showAllDecimals)
+                    worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.PricePerSecond;
+                else
+                    worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.PricePerSecond, 2);
+                colOffset += 1;
+            }
+            if (visibleColumns[28])
             {
                 worksheet.Cells[rowOff, colOff + colOffset].Value = (_spotcodeSpotDictionary[spotcode] as SpotDTO).spotlength;
                 colOffset += 1;
             }
-            if (visibleColumns[26])
+            if (true)
+            {
+                var termCoefs = new TermCoefs();
+                _mpConverter.GetProgramSpotPrice(mediaPlan, term, _spotcodeSpotDictionary[spotcode] as SpotDTO, termCoefs);
+                if (showAllDecimals)
+                    worksheet.Cells[rowOff, colOff + colOffset].Value = termCoefs.Price;
+                else
+                    worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(termCoefs.Price, 2).ToString("#,##0.00");
+                colOffset += 1;
+            }
+            if (visibleColumns[29])
             {
                 worksheet.Cells[rowOff, colOff + colOffset].Value = spotcode;
                 colOffset += 1;

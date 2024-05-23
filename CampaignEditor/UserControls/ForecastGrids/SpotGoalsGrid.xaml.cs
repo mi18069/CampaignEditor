@@ -709,7 +709,7 @@ namespace CampaignEditor.UserControls
         #endregion
 
         #region Export to Excel
-        public void PopulateWorksheet(ExcelWorksheet worksheet, int rowOff = 1, int colOff = 1)
+        public void PopulateWorksheet(ExcelWorksheet worksheet, int rowOff = 1, int colOff = 1, bool showAllDecimals = false)
         {
             if (_visibleChannels.Count == 0)
                 return;
@@ -730,7 +730,7 @@ namespace CampaignEditor.UserControls
                     currentWeek = currentWeek % (weeksInYear + 1) + 1; // so there are no week 0
                 }
 
-                AddWeeksHeaderInWorksheet(currentWeek, worksheet, rowOff, colOff + colOffset);
+                AddWeeksHeaderInWorksheet(currentWeek, worksheet, rowOff, colOff + colOffset, showAllDecimals);
                 colOffset += 3 * _visibleChannels.Count;
             }
 
@@ -740,10 +740,10 @@ namespace CampaignEditor.UserControls
         {
             AddSpotsHeaderInWorksheet(worksheet, rowOff, colOff);
         }
-        private void AddChannelInWorksheet(ChannelDTO channel, int weekNum, ExcelWorksheet worksheet, int rowOff = 1, int colOff = 1)
+        private void AddChannelInWorksheet(ChannelDTO channel, int weekNum, ExcelWorksheet worksheet, int rowOff = 1, int colOff = 1, bool showAllDecimals = false)
         {
             AddChannelHeadersInWorksheet(channel, worksheet, rowOff, colOff);
-            AddChannelDataInWorksheet(channel, weekNum, worksheet, rowOff + 2, colOff);
+            AddChannelDataInWorksheet(channel, weekNum, worksheet, rowOff + 2, colOff, showAllDecimals);
         }
         private void AddChannelHeadersInWorksheet(ChannelDTO channel, ExcelWorksheet worksheet, int rowOff = 1, int colOff = 1)
         {
@@ -751,7 +751,7 @@ namespace CampaignEditor.UserControls
             AddGoalsHeaderInWorksheet(worksheet, rowOff + 1, colOff);
         }
 
-        private void AddWeeksHeaderInWorksheet(int weekNum, ExcelWorksheet worksheet, int rowOff = 1, int colOff = 1)
+        private void AddWeeksHeaderInWorksheet(int weekNum, ExcelWorksheet worksheet, int rowOff = 1, int colOff = 1, bool showAllDecimals = false)
         {
             var drawingThickness = ExcelBorderStyle.Thick;
             var drawingColor = System.Drawing.Color.Black;
@@ -785,7 +785,7 @@ namespace CampaignEditor.UserControls
             int colOffset = 0;
             foreach (var channel in _visibleChannels)
             {
-                AddChannelInWorksheet(channel, weekNum, worksheet, rowOff + 1, colOff + colOffset);
+                AddChannelInWorksheet(channel, weekNum, worksheet, rowOff + 1, colOff + colOffset, showAllDecimals);
                 colOffset += 3;
             }
         }
@@ -867,7 +867,7 @@ namespace CampaignEditor.UserControls
             }
         }
 
-        private void AddChannelDataInWorksheet(ChannelDTO channel, int weekNum, ExcelWorksheet worksheet, int rowOff = 1, int colOff = 1)
+        private void AddChannelDataInWorksheet(ChannelDTO channel, int weekNum, ExcelWorksheet worksheet, int rowOff = 1, int colOff = 1, bool showAllDecimals = false)
         {
             var dataGrid = _channelWeekGrids[weekNum][channel];
 
@@ -878,8 +878,17 @@ namespace CampaignEditor.UserControls
             foreach (SpotGoals spotGoals in dataGrid.Items)
             {
                 worksheet.Cells[rowOffset, colOff].Value = spotGoals.Insertations;
-                worksheet.Cells[rowOffset, colOff + 1].Value = Math.Round(spotGoals.Grp, 2);
-                worksheet.Cells[rowOffset, colOff + 2].Value = Math.Round(spotGoals.Budget, 2);
+                if (showAllDecimals)
+                {
+                    worksheet.Cells[rowOffset, colOff + 1].Value = spotGoals.Grp;
+                    worksheet.Cells[rowOffset, colOff + 2].Value = spotGoals.Budget;
+                }
+                else
+                {
+                    worksheet.Cells[rowOffset, colOff + 1].Value = Math.Round(spotGoals.Grp);
+                    worksheet.Cells[rowOffset, colOff + 2].Value = Math.Round(spotGoals.Budget, 2).ToString("#,##0.00");
+                }
+                
 
                 rowOffset += 1;
             }

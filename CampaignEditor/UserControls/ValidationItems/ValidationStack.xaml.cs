@@ -23,7 +23,8 @@ namespace CampaignEditor.UserControls.ValidationItems
         public List<ChannelDTO> _channels = new List<ChannelDTO>();
         public List<DateOnly> _dates = new List<DateOnly>();
 
-        private List<Tuple<DateOnly, List<TermTuple>>> _dayTuples = new List<Tuple<DateOnly, List<TermTuple>>>();
+        public Dictionary<DateOnly, List<TermTuple>> _dayTermDict = new Dictionary<DateOnly, List<TermTuple>>();
+        public Dictionary<DateOnly, List<MediaPlanRealized>> _dayRealizedDict = new Dictionary<DateOnly, List<MediaPlanRealized>>();
 
         public ChannelCmpController _channelCmpController;
         public ChannelController _channelController;
@@ -31,10 +32,13 @@ namespace CampaignEditor.UserControls.ValidationItems
 
         public MediaPlanController _mediaPlanController;
         public MediaPlanTermController _mediaPlanTermController;
+        public MediaPlanRealizedController _mediaPlanRealizedController;
         public SpotController _spotController;
         public MediaPlanConverter _mpConverter;
         public MediaPlanForecastData _forecastData;
         public ObservableRangeCollection<MediaPlanTuple> _allMediaPlans;
+        public ObservableRangeCollection<MediaPlanRealized> _mediaPlanRealized;
+
 
         public ValidationStack()
         {
@@ -56,6 +60,32 @@ namespace CampaignEditor.UserControls.ValidationItems
 
         public async Task LoadData(int chid)
         {
+
+            await LoadExpected(chid);
+            await LoadRealized(chid);
+            LoadDays();
+        }
+
+        private void LoadDays()
+        {
+            spValidationDays.Children.Clear();
+
+            foreach (var day in _dates)
+            {
+                var dayTerms = _dayTermDict[day];
+                var dayRealizeds = _dayRealizedDict[day];
+
+                ValidationDay validationDay = new ValidationDay(day, dayTerms, dayRealizeds);
+                validationDay._mediaPlanRealizedController = _mediaPlanRealizedController;
+                validationDay.SetUserControl();
+
+                spValidationDays.Children.Add(validationDay);
+            }
+        }
+
+        private async Task LoadExpected(int chid)
+        {
+
             List<TermTuple> termTuples = new List<TermTuple>();
 
             //var mediaPlans = await _mediaPlanController.GetAllChannelCmpMediaPlans(chid, _campaign.cmpid, _campaignVersion);
@@ -71,34 +101,53 @@ namespace CampaignEditor.UserControls.ValidationItems
                         var spot = _forecastData.SpotcodeSpotDict[spotcode];
                         // It's better to have info from allMediaPlans
                         var mediaPlan = mediaPlanTuple.MediaPlan;
-                        var price = _mpConverter.GetProgramSpotPrice(mediaPlan, mediaPlanTerm, spot);
-                        TermTuple termTuple = new TermTuple(mediaPlan, mediaPlanTerm, spot, price);
+                        var termCoefs = new TermCoefs();
+                        var price = _mpConverter.GetProgramSpotPrice(mediaPlan, mediaPlanTerm, spot, termCoefs);
+                        TermTuple termTuple = new TermTuple(mediaPlan, mediaPlanTerm, spot, termCoefs);
                         termTuples.Add(termTuple);
                     }
-                   
+
                 }
             }
 
-            _dayTuples.Clear();
+            _dayTermDict.Clear();
 
-            termTuples = termTuples.OrderBy(tt=>tt.MediaPlanTerm.Date).ThenBy(tt => tt.MediaPlan.stime).ToList();
+            termTuples = termTuples.OrderBy(tt => tt.MediaPlanTerm.Date).ThenBy(tt => tt.MediaPlan.stime).ToList();
             foreach (DateOnly date in _dates)
             {
                 List<TermTuple> dayTuples = termTuples.Where(tt => tt.MediaPlanTerm.Date == date).ToList();
-                _dayTuples.Add(Tuple.Create(date, dayTuples));
+                _dayTermDict[date] = dayTuples;
             }
 
-            AddIntoExpected(_dayTuples);
+            //AddIntoExpected(_dayTuples);
+        }
+
+        private async Task LoadRealized(int chid)
+        {
+            if (_mediaPlanRealized == null)
+            {
+                return;
+            }
+            var chrdsid = _forecastData.ChrdsidChidDict.First(kv => kv.Value == chid).Key;
+            var realized = _mediaPlanRealized.Where(mpr => mpr.chid == chrdsid);
+            realized = realized.OrderBy(r => r.date).ThenBy(tt => tt.stime).ToList();
+
+            _dayRealizedDict.Clear();
+
+            foreach (DateOnly date in _dates)
+            {
+                List<MediaPlanRealized> dayTuples = realized.Where(tt => TimeFormat.YMDStringToDateOnly(tt.date) == date).ToList();
+                _dayRealizedDict[date] = dayTuples;
+            }
+            //AddIntoRealized(_dayRealizedTuples);
         }
 
         private void AddIntoExpected(List<Tuple<DateOnly, List<TermTuple>>> dayTuples)
         {
-            spExpected.Children.Clear();
+            /*spExpected.Children.Clear();
 
             foreach (var tuple in dayTuples)
             {
-                /*if (tuple.Item2.Count == 0)
-                    continue;*/
 
                 string date = tuple.Item1.ToString();
                 DateLabelItem dli = new DateLabelItem(date);
@@ -113,7 +162,32 @@ namespace CampaignEditor.UserControls.ValidationItems
                     spExpected.Children.Add(vTermItem);
                 }
 
-            }
+            }*/
         }
+
+        private void AddIntoRealized(List<Tuple<DateOnly, List<MediaPlanRealized>>> dayTuples)
+        {
+            /*spRealized.Children.Clear();
+
+            foreach (var tuple in dayTuples)
+            {
+
+                string date = tuple.Item1.ToString();
+                DateLabelItem dli = new DateLabelItem(date);
+                spRealized.Children.Add(dli);
+
+                foreach (var realized in tuple.Item2)
+                {
+                    VRealizedItem vRealizedItem = new VRealizedItem();
+                    vRealizedItem._mpRController = _mediaPlanRealizedController;
+                    vRealizedItem.Initialize(realized);
+
+                    spRealized.Children.Add(vRealizedItem);
+                }
+
+            }*/
+        }
+
+        
     }
 }

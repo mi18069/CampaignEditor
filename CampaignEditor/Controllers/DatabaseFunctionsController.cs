@@ -39,6 +39,10 @@ namespace CampaignEditor.Controllers
             return await _repository.StartReachCalculation(cmpid, segins, segbet, delete, expr, path);
         }
 
+        public async Task<bool> StartRealizationFunction(int cmpid, int brandid, string sdate, string edate)
+        {
+            return await _repository.StartRealizationFunction(cmpid, brandid, sdate, edate);
+        }
 
     }
 }

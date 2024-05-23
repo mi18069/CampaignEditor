@@ -14,7 +14,7 @@ namespace CampaignEditor.Converters
                 var numericValue = decimal.TryParse(secondValue.TrimStart('/'), out var result) ? result : 0;
                 if (numericValue == 0)
                     return Brushes.Black;
-                else if (firstValue > numericValue)
+                else if (firstValue >= numericValue)
                     return Brushes.Green;
                 else
                     return Brushes.Red;
@@ -24,7 +24,7 @@ namespace CampaignEditor.Converters
                 var numericValue = int.TryParse(secondIntValue.TrimStart('/'), out var result) ? result : 0;
                 if (numericValue == 0)
                     return Brushes.Black;
-                else if (firstIntValue > numericValue)
+                else if (firstIntValue >= numericValue)
                     return Brushes.Green;
                 else
                     return Brushes.Red;

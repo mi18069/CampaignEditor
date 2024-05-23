@@ -207,7 +207,7 @@ namespace CampaignEditor
             return spotCoefsTables;
         }
 
-        public decimal GetProgramSpotPrice(MediaPlan mediaPlan, MediaPlanTerm mpTerm,  SpotDTO spot)
+        public decimal GetProgramSpotPrice(MediaPlan mediaPlan, MediaPlanTerm mpTerm,  SpotDTO spot, TermCoefs termCoefs)
         {
             var chid = mediaPlan.chid;
             var pricelist = _forecastData.ChidPricelistDict[chid];
@@ -224,22 +224,40 @@ namespace CampaignEditor
                     var seascoef = dateRange.seascoef;
                     var seccoef = spotCoefs.seccoef;
                     decimal coefs = seascoef * seccoef * mediaPlan.Progcoef * mediaPlan.Dpcoef;
+                    
+                    termCoefs.Seascoef = seascoef;
+                    termCoefs.Seccoef = seccoef;
 
                     if (pricelist.pltype == 1)
                     {
-                        price = coefs * spot.spotlength;
+                        decimal standardPrice = coefs * 30;
+                        price = PriceWithGRPCheck(mediaPlan, pricelist, standardPrice);
+
+                        break;
                     }
                     // For cpp pricelists
                     else
                     {
-                        price = (pricelist.price / 30.0M) * spot.spotlength * mediaPlan.Amrpsale * coefs;
+                        termCoefs.Amrpsale = mediaPlan.Amrpsale;
+                        termCoefs.Cpp = pricelist.price;
+
+                        decimal amrpSale = mediaPlan.Amrpsale;
+                        if (pricelist.mgtype && amrpSale < pricelist.minprice && amrpSale != 0)
+                        {
+                            amrpSale = pricelist.minprice;
+                        }
+                        
+                        decimal standardPrice = pricelist.price * amrpSale * coefs;
+
+                        price = PriceWithGRPCheck(mediaPlan, pricelist, standardPrice);
+                        break;
                     }
                 }
                 
 
             }
-            
 
+            termCoefs.Price = price;
             return price;
         }
 
@@ -359,24 +377,162 @@ namespace CampaignEditor
 
         }
 
-        public static bool ContainsDayInDaysString(DateOnly date, string dayString)
+        public void CalculateRealizedDPCoef(MediaPlanRealized mpRealized)
         {
-            Dictionary<DayOfWeek, char> daysMap =  new Dictionary<DayOfWeek, char>
-                                                    {
-                                                        { DayOfWeek.Monday, '1' },
-                                                        { DayOfWeek.Tuesday, '2' },
-                                                        { DayOfWeek.Wednesday, '3' },
-                                                        { DayOfWeek.Thursday, '4' },
-                                                        { DayOfWeek.Friday, '5' },
-                                                        { DayOfWeek.Saturday, '6' },
-                                                        { DayOfWeek.Sunday, '7' },
-                                                    };
 
-            char dateChar = daysMap[date.DayOfWeek];
-            if (dayString.Contains(dateChar))
-                return true;
-            return false;
+            //var prices = await _pricesController.GetAllPricesByPlId(pricelist.plid);
+            var chid = _forecastData.ChrdsidChidDict[mpRealized.chid.Value];
+            var pricelist = _forecastData.ChidPricelistDict[chid];
+            var prices = _forecastData.PlidPricesDict[pricelist.plid];
+
+            string time = TimeFormat.TimeStrToRepresentative(mpRealized.stimestr);
+
+            foreach (var price in prices)
+            {
+                // No need to check for day because mediaPlan will be adjusted correctly
+                if ((TimeFormat.CompareRepresentative(price.dps, time) != 1) &&
+                    (TimeFormat.CompareRepresentative(price.dpe, time) != -1))
+                {
+                    int day = TimeFormat.GetDayOfWeekInt(mpRealized.date);
+                    // Checks if all days from mediaPlan is in pricelist    
+                    if (price.days.Contains(day.ToString()))
+                    {
+                        mpRealized.dpcoef = price.price;
+                        return;
+                    }
+                }
+            }
+
+            mpRealized.dpcoef = 1.0M;
+            return;
         }
+
+        public void CalculateRealizedCoefs(MediaPlanRealized mpRealized, PricelistDTO pricelist)
+        {
+            CalculateRealizedCPP(mpRealized, pricelist);
+            decimal seccoef = CalculateRealizedSeccoef(mpRealized, pricelist);
+            decimal seascoef = CalculateRealizedSeascoef(mpRealized, pricelist);
+            decimal progCoef = 1.0M;
+
+            decimal coefs = seccoef * seascoef * progCoef * mpRealized.dpcoef!.Value;
+
+            mpRealized.seccoef = seccoef;
+            mpRealized.seascoef = seascoef;
+            mpRealized.progcoef = progCoef;
+
+            CalculateRealizedPrice(mpRealized, pricelist, coefs);     
+            
+        }
+
+        public void CalculateRealizedPrice(MediaPlanRealized mpRealized, PricelistDTO pricelist, decimal coefs)
+        {
+            decimal price = 0.0M;
+
+            if (pricelist.pltype == 1)
+            {
+                decimal standardPrice = coefs * 30;
+
+                price = PriceWithGRPCheck(mpRealized, pricelist, standardPrice);
+
+            }
+            // For cpp pricelists
+            else
+            {
+                decimal amrpSale = mpRealized.amrpsale;
+                if (pricelist.mgtype && amrpSale < pricelist.minprice && amrpSale != 0)
+                {
+                    amrpSale = pricelist.minprice;
+                }
+
+                int realizedLength = mpRealized.etime.Value - mpRealized.stime.Value;
+                int spotLength = FindClosestSpotLength(realizedLength);
+                decimal standardPrice = (pricelist.price / 30) * spotLength * amrpSale * coefs;
+                price = PriceWithGRPCheck(mpRealized, pricelist, standardPrice);
+            }
+
+            mpRealized.price = price;
+        }
+
+        private decimal PriceWithGRPCheck(MediaPlanRealized mpRealized, PricelistDTO pricelist, decimal standardValue)
+        {
+            if (mpRealized.amrp1 < pricelist.minprice && pricelist.fixprice != 0)
+            {
+                return pricelist.fixprice;
+            }
+            return standardValue;
+        }
+
+        public decimal CalculateRealizedSeccoef(MediaPlanRealized mpRealized, PricelistDTO pricelist)
+        {
+          
+            var sectable = _forecastData.PlidSectableDict[pricelist.plid];
+            int realizedLength = mpRealized.etime.Value - mpRealized.stime.Value;
+            int spotLength = FindClosestSpotLength(realizedLength);
+
+            var sectables = _forecastData.SecidSectablesDict[sectable.sctid].FirstOrDefault(secs => secs.sec == spotLength, null);
+            var seccoef = 1.0M;
+           
+            seccoef = sectables == null ? (decimal)spotLength / 30 : sectables.coef;
+            return seccoef;
+        }
+
+        private int FindClosestSpotLength(int realizedLength)
+        {
+            // if realized length is +- 2 sec from some spot, return that value
+            // if not found, return realized length
+            foreach (var spot in _forecastData.Spots)
+            {
+                if (spot.spotlength - 2 <= realizedLength && realizedLength <= spot.spotlength + 2)
+                {
+                    return spot.spotlength;
+                }
+            }
+
+            return realizedLength;
+        }
+
+        public decimal CalculateRealizedSeascoef(MediaPlanRealized mpRealized, PricelistDTO pricelist)
+        {
+            var seasonality = _forecastData.PlidSeasonalityDict[pricelist.plid];
+            var seasonalities = _forecastData.SeasidSeasonalitiesDict[seasonality.seasid];
+            decimal seasCoef = 1.0M;
+
+            DateOnly date = TimeFormat.YMDStringToDateOnly(mpRealized.date);
+            foreach (var seas in seasonalities)
+            {
+                if (date >= DateOnly.FromDateTime(TimeFormat.YMDStringToDateTime(seas.stdt).Date) &&
+                    date <= DateOnly.FromDateTime(TimeFormat.YMDStringToDateTime(seas.endt).Date))
+                {
+                    seasCoef = seas.coef;
+                    break;
+                }
+            }
+
+            return seasCoef;
+        }
+
+        private void CalculateRealizedCPP(MediaPlanRealized mpRealized, PricelistDTO pricelist)
+        {
+            // For seconds pricelists
+            if (pricelist.pltype == 1)
+            {
+                if (mpRealized.amrp1 > 0)
+                {
+                    mpRealized.cpp = mpRealized.price / (mpRealized.amrp1);
+                }
+                else
+                {
+                    mpRealized.cpp = 0;
+                }
+            }
+            // For cpp pricelists
+            else
+            {
+                mpRealized.cpp = pricelist.price;
+            }
+        }
+
+
 
         private async Task CalculateFirst(MediaPlan mediaPlan)
         {
@@ -386,20 +542,10 @@ namespace CampaignEditor
             await CalculateAMRs(mediaPlan);
             //await CalculateDPCoef(mediaPlan, pricelist);
             CalculateDPCoef(mediaPlan);
-            await ComputeExtraProperties(mediaPlan, true);
-
-        }
-
-        public async Task ComputeExtraProperties(MediaPlan mediaPlan, bool calculatePrice = false)
-        {
-            /*var channelCmp = await _channelCmpController.GetChannelCmpByIds(mediaPlan.cmpid, mediaPlan.chid);
-            var pricelist = await _pricelistController.GetPricelistById(channelCmp.plid);*/
-
-            
             var terms = await _mediaPlanTermController.GetAllMediaPlanTermsByXmpid(mediaPlan.xmpid);
+            ComputeExtraProperties(mediaPlan, terms, true);
 
-            ComputeExtraProperties(mediaPlan, terms, calculatePrice);
-        }      
+        } 
 
         public void ComputeExtraProperties(MediaPlan mediaPlan, IEnumerable<MediaPlanTermDTO> terms, bool calculatePrice = false)
         {
@@ -569,9 +715,14 @@ namespace CampaignEditor
                         decimal seccoef = CalculateTermSeccoef(mediaPlan, spotDTO);
                         decimal seascoef = CalculateTermSeascoef(mediaPlan, mpTerm);
                         decimal coefs = seascoef * seccoef * mediaPlan.Progcoef * mediaPlan.Dpcoef;
-
+                        if (coefs == 0)
+                        {
+                            price = 0.0M;
+                            break;
+                        }
                         //price += coefs * spotDTO.spotlength;
-                        price += coefs * 30;
+                        decimal standardPrice = coefs * 30;
+                        price += PriceWithGRPCheck(mediaPlan, pricelist, standardPrice);
                     }
                 }
                
@@ -601,8 +752,16 @@ namespace CampaignEditor
                             price = 0.0M;
                             break;
                         }
-                            
-                        price += (pricelist.price / 30) * spotDTO.spotlength * mediaPlan.Amrpsale * coefs;
+                        decimal amrpSale = mediaPlan.Amrpsale;
+                        if (pricelist.mgtype && amrpSale < pricelist.minprice &&  amrpSale != 0)
+                        {
+                            amrpSale = pricelist.minprice;
+                        }
+                        //decimal standardPrice = (pricelist.price / 30) * spotDTO.spotlength * amrpSale * coefs;
+                        //decimal standardPrice = (pricelist.price / 30) * spotDTO.spotlength * mediaPlan.Amrpsale * coefs;
+                        decimal standardPrice = pricelist.price * amrpSale * coefs;
+
+                        price += PriceWithGRPCheck(mediaPlan, pricelist, standardPrice);
                     }
                 }
                 
@@ -610,7 +769,16 @@ namespace CampaignEditor
             }
             mediaPlan.Price = price;
 
-        }    
+        }
+
+        private decimal PriceWithGRPCheck(MediaPlan mediaPlan, PricelistDTO pricelist, decimal standardValue)
+        {
+            if (mediaPlan.Amrp1 < pricelist.minprice && pricelist.fixprice != 0)
+            {
+                return pricelist.fixprice;
+            }
+            return standardValue;
+        }
 
         public decimal CalculateTermSeccoef(MediaPlan mediaPlan, SpotDTO spotDTO)
         {

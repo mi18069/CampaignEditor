@@ -186,5 +186,20 @@ namespace Database.Repositories
                 return affected != 0;
             }
         }
+
+        public async Task<bool> StartRealizationFunction(int cmpid, int brandid, string sdate, string edate)
+        {
+            using var connection = _context.GetConnection();
+            var commandTimeout = 900; // Set the timeout value in seconds
+
+
+            var affected = await connection.ExecuteAsync(
+                "SELECT public.\"Obrada_realizacije\"(@Cmpid, @Brandid, @Sdate, @Edate); ",
+                new { Cmpid = cmpid, Brandid = brandid, Sdate = sdate, Edate = edate },
+                commandTimeout: commandTimeout);
+
+            return affected != 0;
+            
+        }
     }
 }

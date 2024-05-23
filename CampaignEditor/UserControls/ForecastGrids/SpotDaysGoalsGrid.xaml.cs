@@ -200,7 +200,10 @@ namespace CampaignEditor.UserControls.ForecastGrids
                         ins += 1;
                         grp += mediaPlan.Amrp1;
                         // Need to fix this
-                        budget += (mediaPlan.Price / mediaPlan.Length) * spot.spotlength;
+                        if (mediaPlan.Length == 0)
+                            budget += 0;
+                        else
+                            budget += (mediaPlan.Price / mediaPlan.Length) * spot.spotlength;
                     }
                 }
             }
@@ -906,7 +909,7 @@ namespace CampaignEditor.UserControls.ForecastGrids
         #endregion
 
         #region Export to Excel
-        public void PopulateWorksheet(ExcelWorksheet worksheet, int rowOff = 1, int colOff = 1)
+        public void PopulateWorksheet(ExcelWorksheet worksheet, int rowOff = 1, int colOff = 1, bool showAllDecimals = false)
         {
             if (_visibleChannels.Count == 0)
                 return;
@@ -916,7 +919,7 @@ namespace CampaignEditor.UserControls.ForecastGrids
             int colOffset = 2;
             foreach (var channel in _visibleChannels)
             {
-                AddChannelInWorksheet(channel, worksheet, rowOff, colOff + colOffset);
+                AddChannelInWorksheet(channel, worksheet, rowOff, colOff + colOffset, showAllDecimals);
                 colOffset += 3;
             }
 
@@ -927,10 +930,10 @@ namespace CampaignEditor.UserControls.ForecastGrids
             AddDaysHeaderInWorksheet(worksheet, rowOff, colOff);
             AddSpotsHeaderInWorksheet(worksheet, rowOff, colOff + 1);
         }
-        private void AddChannelInWorksheet(ChannelDTO channel, ExcelWorksheet worksheet, int rowOff = 1, int colOff = 1)
+        private void AddChannelInWorksheet(ChannelDTO channel, ExcelWorksheet worksheet, int rowOff = 1, int colOff = 1, bool showAllDecimals = false)
         {
             AddChannelHeadersInWorksheet(channel, worksheet, rowOff, colOff);
-            AddChannelDataInWorksheet(channel, worksheet, rowOff + 2, colOff);
+            AddChannelDataInWorksheet(channel, worksheet, rowOff + 2, colOff, showAllDecimals);
         }
         private void AddChannelHeadersInWorksheet(ChannelDTO channel, ExcelWorksheet worksheet, int rowOff = 1, int colOff = 1)
         {
@@ -1061,7 +1064,7 @@ namespace CampaignEditor.UserControls.ForecastGrids
             }
         }
 
-        private void AddChannelDataInWorksheet(ChannelDTO channel, ExcelWorksheet worksheet, int rowOff = 1, int colOff = 1)
+        private void AddChannelDataInWorksheet(ChannelDTO channel, ExcelWorksheet worksheet, int rowOff = 1, int colOff = 1, bool showAllDecimals = false)
         {
             var dataGrid = _channelGrids[channel];
 
@@ -1072,8 +1075,17 @@ namespace CampaignEditor.UserControls.ForecastGrids
             foreach (SpotGoals spotGoals in dataGrid.Items)
             {
                 worksheet.Cells[rowOffset, colOff].Value = spotGoals.Insertations;
-                worksheet.Cells[rowOffset, colOff + 1].Value = Math.Round(spotGoals.Grp, 2);
-                worksheet.Cells[rowOffset, colOff + 2].Value = Math.Round(spotGoals.Budget, 2);
+                if (showAllDecimals)
+                {
+                    worksheet.Cells[rowOffset, colOff + 1].Value = spotGoals.Grp;
+                    worksheet.Cells[rowOffset, colOff + 2].Value = spotGoals.Budget;
+                }
+                else
+                {
+                    worksheet.Cells[rowOffset, colOff + 1].Value = Math.Round(spotGoals.Grp);
+                    worksheet.Cells[rowOffset, colOff + 2].Value = Math.Round(spotGoals.Budget, 2).ToString("#,##0.00");
+                }
+                
 
                 rowOffset += 1;
             }         

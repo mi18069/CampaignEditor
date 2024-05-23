@@ -501,6 +501,8 @@ namespace CampaignEditor.UserControls
 
             var selectedChannels = lvChannels.SelectedItems.Cast<ChannelDTO>();
             _selectedChannels.ReplaceRange(selectedChannels);
+            ChangeGridDisplayData(_selectedChannels);
+
         }
 
         private void lvFilterDayParts_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -541,7 +543,9 @@ namespace CampaignEditor.UserControls
                 cbVersions.Items.Add(i + 1);
             }
 
+
             cbVersions.SelectedIndex = cbVersions.Items.Count - 1;
+
         }
 
 
@@ -761,7 +765,7 @@ namespace CampaignEditor.UserControls
         }
 
 
-        private async void CbVersions_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        public async void CbVersions_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             // Check if any items are selected
             int selectedIndex = cbVersions.SelectedIndex;
@@ -984,18 +988,21 @@ namespace CampaignEditor.UserControls
                     {
                         foreach (var channel in channels)
                         {
-                            var mediaPlans = _allMediaPlans.Where(mpTuple => mpTuple.MediaPlan.chid == channel.chid).Select(mpTuple => mpTuple.MediaPlan);
-                            foreach (MediaPlan mediaPlan in mediaPlans)
+                            var mediaPlanTuples = _allMediaPlans.Where(mpTuple => mpTuple.MediaPlan.chid == channel.chid);
+                            foreach (MediaPlanTuple mediaPlanTuple in mediaPlanTuples)
                             {
                                 if (f.attributesToTrim[0])
-                                    mediaPlan.Amr1trim = f.newValue;
+                                    mediaPlanTuple.MediaPlan.Amr1trim = f.newValue;
                                 if (f.attributesToTrim[1])
-                                    mediaPlan.Amr2trim = f.newValue;
+                                    mediaPlanTuple.MediaPlan.Amr2trim = f.newValue;
                                 if (f.attributesToTrim[2])
-                                    mediaPlan.Amr3trim = f.newValue;
+                                    mediaPlanTuple.MediaPlan.Amr3trim = f.newValue;
                                 if (f.attributesToTrim[3])
-                                    mediaPlan.Amrsaletrim = f.newValue;
-                                var mpDTO = _mpConverter.ConvertToDTO(mediaPlan);
+                                    mediaPlanTuple.MediaPlan.Amrsaletrim = f.newValue;
+
+                                var termsDTO = _mpTermConverter.ConvertToEnumerableDTO(mediaPlanTuple.Terms);
+                                _mpConverter.ComputeExtraProperties(mediaPlanTuple.MediaPlan, termsDTO, true);
+                                var mpDTO = _mpConverter.ConvertToDTO(mediaPlanTuple.MediaPlan);
                                 await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(mpDTO));
                             }
                         }
@@ -1446,7 +1453,8 @@ namespace CampaignEditor.UserControls
                     var mediaPlan = mediaPlanTuple.MediaPlan;
 
                     await _mpConverter.CalculateAMRs(mediaPlan);
-                    await _mpConverter.ComputeExtraProperties(mediaPlan, true);
+                    var termsDTO = _mpTermConverter.ConvertToEnumerableDTO(mediaPlanTuple.Terms);
+                    _mpConverter.ComputeExtraProperties(mediaPlan, termsDTO, true);
                     await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(_mpConverter.ConvertToDTO(mediaPlan)));
                 }
             }

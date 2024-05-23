@@ -133,7 +133,7 @@
                 <DataGridTextColumn Header="AMR Sale Trim" Binding="{Binding MediaPlan.Amrsaletrim, Mode=TwoWay}" 
                                              Visibility="Collapsed" IsReadOnly="True"/>
 
-                <DataGridTextColumn Header="Affinity" Binding="{Binding MediaPlan.Affinity, StringFormat=N2}"
+                <DataGridTextColumn Header="Affinity" Binding="{Binding MediaPlan.Affinity}"
                                             IsReadOnly="True"/>
                 <DataGridTextColumn Header="Prog Coef" Binding="{Binding MediaPlan.Progcoef, Mode=TwoWay, StringFormat=N2}" 
                                     />

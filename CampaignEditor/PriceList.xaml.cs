@@ -976,10 +976,11 @@ namespace CampaignEditor
             pricelistModified = true;
         }
 
-        private bool checkedFirst = true;
+        //private bool checkedFirst = true;
         private void chb_Checked(object sender, RoutedEventArgs e)
         {
-            if (checkedFirst)
+            // Mutual excluding
+            /*if (checkedFirst)
             {
                 checkedFirst = false;
                 return;
@@ -992,17 +993,26 @@ namespace CampaignEditor
             else if(((CheckBox)sender).Name == "chbFixed")
             {
                 chbGRP.IsChecked = false;
+            }*/
+            if (((CheckBox)sender).Name == "chbFixed")
+            {
+                tbFixed.IsEnabled = true;
             }
             pricelistModified = true;
         }
 
         private void chb_Unchecked(object sender, RoutedEventArgs e)
         {
-            if (((CheckBox)sender).Name == "chbGRP")
+            // Mutual excluding
+            /*if (((CheckBox)sender).Name == "chbGRP")
             {
                 tbFixed.IsEnabled = true;
             }
             else if (((CheckBox)sender).Name == "chbFixed")
+            {
+                tbFixed.IsEnabled = false;
+            }*/
+            if (((CheckBox)sender).Name == "chbFixed")
             {
                 tbFixed.IsEnabled = false;
             }

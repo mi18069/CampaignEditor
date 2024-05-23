@@ -3,7 +3,7 @@ namespace Database.DTOs.MediaPlanRealizedDTO
 {
     public class BaseMediaPlanRealizedDTO
     {
-        public BaseMediaPlanRealizedDTO(int cmpid, string name, int stime, int etime, string stimestr, string etimestr, int chid, int dure, int durf, string date, int emsnum, int posinbr, int totalspotnum, int breaktype, int spotnum, int brandnum, double amrp1, double amrp2, double amrp3, double amrpsale, double cpp, double dpcoef, double seascoef, double seccoef, double progcoef, double price, int status)
+        public BaseMediaPlanRealizedDTO(int cmpid, string name, int stime, int etime, string stimestr, string etimestr, int chid, int dure, int durf, string date, int emsnum, int posinbr, int totalspotnum, int breaktype, int spotnum, int brandnum, decimal amrp1, decimal amrp2, decimal amrp3, decimal amrpsale, decimal cpp, decimal dpcoef, decimal seascoef, decimal seccoef, decimal progcoef, decimal price, int status)
         {
             this.cmpid = cmpid;
             this.name = name;
@@ -50,16 +50,16 @@ namespace Database.DTOs.MediaPlanRealizedDTO
         public int breaktype { get; set; }
         public int spotnum { get; set; }
         public int brandnum { get; set; }
-        public double amrp1 { get; set; }
-        public double amrp2 { get; set; }
-        public double amrp3 { get; set; }
-        public double amrpsale { get; set; }
-        public double cpp { get; set; }
-        public double dpcoef { get; set; }
-        public double seascoef { get; set; }
-        public double seccoef { get; set; }
-        public double progcoef { get; set; }
-        public double price { get; set; }
+        public decimal amrp1 { get; set; }
+        public decimal amrp2 { get; set; }
+        public decimal amrp3 { get; set; }
+        public decimal amrpsale { get; set; }
+        public decimal cpp { get; set; }
+        public decimal dpcoef { get; set; }
+        public decimal seascoef { get; set; }
+        public decimal seccoef { get; set; }
+        public decimal progcoef { get; set; }
+        public decimal price { get; set; }
         public int status { get; set; }
 
     }

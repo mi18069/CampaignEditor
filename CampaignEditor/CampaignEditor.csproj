@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-	<Version>1.0.0.20</Version>
+	<Version>1.0.0.25</Version>
     <TargetFramework>net6.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
@@ -12,11 +12,13 @@
 
   <ItemGroup>
     <None Remove="images\ChangePassIcon.png" />
+    <None Remove="images\check.png" />
     <None Remove="images\ConfigIcon.png" />
     <None Remove="images\EditIcon.png" />
     <None Remove="images\Edit_Icon.png" />
     <None Remove="images\FetchDataIcon.png" />
     <None Remove="images\GreenPlus.png" />
+    <None Remove="images\info.png" />
     <None Remove="images\LeftArrow.png" />
     <None Remove="images\load_data_icon.png" />
     <None Remove="images\minus_shrink_icon.png" />
@@ -65,10 +67,12 @@
 
   <ItemGroup>
     <Resource Include="images\ChangePassIcon.png" />
+    <Resource Include="images\check.png" />
     <Resource Include="images\ConfigIcon.png" />
     <Resource Include="images\EditIcon.png" />
     <Resource Include="images\FetchDataIcon.png" />
     <Resource Include="images\GreenPlus.png" />
+    <Resource Include="images\info.png" />
     <Resource Include="images\LeftArrow.png" />
     <Resource Include="images\minus_shrink_icon.png" />
     <Resource Include="images\PassPeekImg.png" />

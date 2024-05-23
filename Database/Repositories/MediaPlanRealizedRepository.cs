@@ -77,9 +77,12 @@ namespace Database.Repositories
             mediaPlanRealized = mediaPlanRealized.Select(item => new MediaPlanRealized()
             {
                 id = item.id,
+                cmpid = item.cmpid,
                 name = item.naziv.Trim(),
                 stime = item.vremeod,
                 etime = item.vremedo,
+                stimestr = item.vremeodv,
+                etimestr = item.vremedov,
                 chid = item.chid,
                 dure = item.dure,
                 durf = item.durf,
@@ -106,6 +109,48 @@ namespace Database.Repositories
             return _mapper.Map<MediaPlanRealizedDTO>(mediaPlanRealized.FirstOrDefault());
         }
 
+        public async Task<IEnumerable<MediaPlanRealized>> GetAllMediaPlansRealizedByCmpid(int id)
+        {
+            using var connection = _context.GetConnection();
+
+            var mediaPlanRealized = await connection.QueryAsync<dynamic>(
+                "SELECT * FROM xmpre WHERE cmpid = @Id", new { Id = id });
+
+            mediaPlanRealized = mediaPlanRealized.Select(item => new MediaPlanRealized()
+            {
+                id = item.id,
+                cmpid = Convert.ToInt32(item.cmpid),
+                name = item.naziv.Trim(),
+                stime = item.vremeod,
+                etime = item.vremedo,
+                stimestr = item.vremeodv,
+                etimestr = item.vremedov,
+                chid = Convert.ToInt32(item.chid),
+                dure = Convert.ToInt32(item.dure),
+                durf = Convert.ToInt32(item.durf),
+                date = item.datum,
+                emsnum = Convert.ToInt32(item.bremisije),
+                posinbr = item.pozinbr,
+                totalspotnum = item.totalspotbr,
+                breaktype = item.breaktype,
+                spotnum = Convert.ToInt32(item.brspot),
+                brandnum = Convert.ToInt32(item.brbrand),
+                amrp1 = item.amrp1,
+                amrp2 = item.amrp2,
+                amrp3 = item.amrp3,
+                amrpsale = item.amrpsale,
+                cpp = item.cpp ?? null,
+                dpcoef = item.dpcoef ?? null,
+                seascoef = item.seascoef ?? null,
+                seccoef = item.seccoef ?? null,
+                progcoef = item.progcoef ?? null,
+                price = item.cena ?? null,
+                status = item.status ?? null
+            }); ;
+
+            return (IEnumerable<MediaPlanRealized>)mediaPlanRealized;
+        }
+
         public async Task<IEnumerable<MediaPlanRealizedDTO>> GetAllMediaPlansRealizedByChid(int chid)
         {
             using var connection = _context.GetConnection();
@@ -117,9 +162,12 @@ namespace Database.Repositories
             mediaPlansRealized = mediaPlansRealized.Select(item => new MediaPlanRealized()
             {
                 id = item.id,
+                cmpid = item.cmpid,
                 name = item.naziv.Trim(),
                 stime = item.vremeod,
                 etime = item.vremedo,
+                stimestr = item.vremeodv,
+                etimestr = item.vremedov,
                 chid = item.chid,
                 dure = item.dure,
                 durf = item.durf,
@@ -158,9 +206,12 @@ namespace Database.Repositories
             mediaPlansRealized = mediaPlansRealized.Select(item => new MediaPlanRealized()
             {
                 id = item.id,
+                cmpid = item.cmpid,
                 name = item.naziv.Trim(),
                 stime = item.vremeod,
                 etime = item.vremedo,
+                stimestr = item.vremeodv,
+                etimestr = item.vremedov,
                 chid = item.chid,
                 dure = item.dure,
                 durf = item.durf,
@@ -243,6 +294,27 @@ namespace Database.Repositories
 
             var affected = await connection.ExecuteAsync(
                 "DELETE FROM xmpre WHERE id = @Id", new { Id = id });
+
+            return affected != 0;
+        }
+
+        public async Task<string> GetDedicatedSpotName(int spotid)
+        {
+            using var connection = _context.GetConnection();
+
+            string nazreklame = await connection.QueryFirstOrDefaultAsync<string>(
+                "SELECT nazreklame FROM spotovi WHERE brreklame = @Id", new { Id = spotid });
+
+            return nazreklame;
+        }
+
+        public async Task<bool> SetStatusValue(int id, int statusValue)
+        {
+            using var connection = _context.GetConnection();
+
+            var affected = await connection.ExecuteAsync(
+                "UPDATE xmpre SET status = @StatusValue WHERE id = @Id", 
+                new { Id = id, StatusValue = statusValue });
 
             return affected != 0;
         }

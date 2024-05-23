@@ -22,6 +22,8 @@
             <BitmapImage x:Key="user_icon" UriSource="\images\UserIcon.png"></BitmapImage>
             <BitmapImage x:Key="minus_shrink_icon" UriSource="\images\minus_shrink_icon.png"></BitmapImage>
             <BitmapImage x:Key="plus_extend_icon" UriSource="\images\plus_extend_icon.png"></BitmapImage>
+            <BitmapImage x:Key="check_icon" UriSource="\images\check.png"></BitmapImage>
+            <BitmapImage x:Key="info_icon" UriSource="\images\info.png"></BitmapImage>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

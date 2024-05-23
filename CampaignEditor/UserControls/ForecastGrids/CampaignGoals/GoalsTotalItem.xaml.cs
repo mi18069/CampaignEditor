@@ -25,6 +25,8 @@ namespace CampaignEditor.UserControls.ForecastGrids
 
         public void InitializeFields(GoalsDTO goals)
         {
+            if (goals == null)
+                return;
             if (goals.budget == 0)
             {
                 lblBudget.FontWeight = FontWeights.Light;
@@ -92,6 +94,10 @@ namespace CampaignEditor.UserControls.ForecastGrids
             }
             lblReachTarget.Content = "/" + (goals.rch != 0 ? goals.rch.ToString() + "%" : " - ");
             reachTarget = goals.rch;
+            decimal reach = 0;
+            if (lblReachValue.Content != null && Decimal.TryParse(lblReachValue.Content.ToString(), out reach))
+                UpdateReachColor(reach);
+
         }
 
         public void FillGoals(IEnumerable<MediaPlanTuple> allMediaPlans)

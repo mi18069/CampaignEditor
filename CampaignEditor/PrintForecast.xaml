@@ -50,8 +50,14 @@
         </Grid>
 
         <Grid Grid.Row="2" Grid.Column="1">
-            <CheckBox x:Name="chbHideSensitiveData" Content="Hide sensitive data"
-                      HorizontalAlignment="Right" VerticalContentAlignment="Center"/>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <CheckBox x:Name="chbShowAllDecimals" Grid.Column="0" Content="Show all decimals"
+                      HorizontalAlignment="Center" VerticalContentAlignment="Center"/>
+            <CheckBox x:Name="chbHideSensitiveData" Grid.Column="1" Content="Hide sensitive data"
+                      HorizontalAlignment="Center" VerticalContentAlignment="Center"/>
         </Grid>
         <Button Grid.Row="3" Grid.Column="1" x:Name="btnPrint"
                 Content="Print" Width="100" Margin="10, 10" HorizontalAlignment="Right"

@@ -175,7 +175,7 @@ namespace CampaignEditor.UserControls
             }
         }
 
-        private void AddChannel(ChannelDTO channel, ExcelWorksheet worksheet, int rowOff = 1, int colOff = 1)
+        private void AddChannel(ChannelDTO channel, ExcelWorksheet worksheet, int rowOff = 1, int colOff = 1, bool showAllDecimals = false)
         {
             var programGoals = _dictionary[channel.chid];
 
@@ -184,20 +184,37 @@ namespace CampaignEditor.UserControls
 
             var cellIns = worksheet.Cells[rowOff, colOff + 1];
             cellIns.Value = programGoals.Insertations;
+            if (showAllDecimals)
+            {
+                var cellGrp1 = worksheet.Cells[rowOff, colOff + 2];
+                cellGrp1.Value = programGoals.Grp1;
 
-            var cellGrp1 = worksheet.Cells[rowOff, colOff + 2];
-            cellGrp1.Value = programGoals.Grp1;
+                var cellGrp2 = worksheet.Cells[rowOff, colOff + 3];
+                cellGrp2.Value = programGoals.Grp2;
 
-            var cellGrp2 = worksheet.Cells[rowOff, colOff + 3];
-            cellGrp2.Value = programGoals.Grp2;
+                var cellGrp3 = worksheet.Cells[rowOff, colOff + 4];
+                cellGrp3.Value = programGoals.Grp3;
 
-            var cellGrp3 = worksheet.Cells[rowOff, colOff + 4];
-            cellGrp3.Value = programGoals.Grp3;
+                var cellBud = worksheet.Cells[rowOff, colOff + 5];
+                cellBud.Value = programGoals.Budget;
+            }
+            else
+            {
+                var cellGrp1 = worksheet.Cells[rowOff, colOff + 2];
+                cellGrp1.Value = Math.Round(programGoals.Grp1);
 
-            var cellBud = worksheet.Cells[rowOff, colOff + 5];
-            cellBud.Value = programGoals.Budget;
+                var cellGrp2 = worksheet.Cells[rowOff, colOff + 3];
+                cellGrp2.Value = Math.Round(programGoals.Grp2);
+
+                var cellGrp3 = worksheet.Cells[rowOff, colOff + 4];
+                cellGrp3.Value = Math.Round(programGoals.Grp3);
+
+                var cellBud = worksheet.Cells[rowOff, colOff + 5];
+                cellBud.Value = Math.Round(programGoals.Budget, 2).ToString("#,##0.00");
+            }
+            
         }
-        public void PopulateWorksheet(IEnumerable<ChannelDTO> selectedChannels, ExcelWorksheet worksheet, int rowOff = 1, int colOff = 1)
+        public void PopulateWorksheet(IEnumerable<ChannelDTO> selectedChannels, ExcelWorksheet worksheet, int rowOff = 1, int colOff = 1, bool showAllDecimals = false)
         {
 
             if (selectedChannels.Count() == 0)
@@ -208,7 +225,7 @@ namespace CampaignEditor.UserControls
             int i = 1;
             foreach (var channel in selectedChannels)
             {
-                AddChannel(channel, worksheet, rowOff + i, colOff);
+                AddChannel(channel, worksheet, rowOff + i, colOff, showAllDecimals);
                 i++;
             }
 

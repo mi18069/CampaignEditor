@@ -78,9 +78,9 @@ namespace CampaignEditor
             if (headerName == null)
                 return true;
 
-            if (headerName == "Channel" || headerName == "Program" || headerName == "DayPart"
-                || headerName == "Position" || headerName == "Start time" || headerName == "End time"
-                || headerName == "Block time" || headerName == "Type" || headerName == "Special" || headerName == "Ins")
+            if (headerName == "Channel" || headerName == "Program" 
+                || headerName == "Position" || headerName == "Start time" || headerName == "End time" 
+                || headerName == "Block time" || headerName == "Type" || headerName == "Special")
                 return false;
 
             return true;
@@ -101,6 +101,7 @@ namespace CampaignEditor
             {
                 selectedChannels.Add(channel);
             }
+            bool showAllDecimals = chbShowAllDecimals.IsChecked == true;
 
             using (var memoryStream = new MemoryStream())
             {
@@ -114,33 +115,33 @@ namespace CampaignEditor
                     if (chbMpGrid.IsChecked == true)
                     {
                         var worksheet1 = excelPackage.Workbook.Worksheets.Add("Program Schema");
-                        mpGrid.PopulateWorksheet(visibleTuples, visibleColumns, worksheet1, 1, 1);
+                        mpGrid.PopulateWorksheet(visibleTuples, visibleColumns, worksheet1, 1, 1, showAllDecimals);
                     }
                     if (chbWeeks1.IsChecked == true)
                     {
                         var worksheet2 = excelPackage.Workbook.Worksheets.Add("By Weeks 1");
-                        sgGrid.PopulateWorksheet(worksheet2, 1, 1);
+                        sgGrid.PopulateWorksheet(worksheet2, 1, 1, showAllDecimals);
                     }
                     if (chbWeeks2.IsChecked == true)
                     {
                         var worksheet3 = excelPackage.Workbook.Worksheets.Add("By Weeks 2");
-                        swgGrid.PopulateWorksheet(worksheet3, 1, 1);
+                        swgGrid.PopulateWorksheet(worksheet3, 1, 1, showAllDecimals);
                     }
                     if (chbDays.IsChecked == true)
                     {
                         var worksheet4 = excelPackage.Workbook.Worksheets.Add("By Days");
-                        sdgGrid.PopulateWorksheet(worksheet4, 1, 1);
+                        sdgGrid.PopulateWorksheet(worksheet4, 1, 1, showAllDecimals);
                     }
                     if (chbChannels.IsChecked == true)
                     {
                         var worksheet5 = excelPackage.Workbook.Worksheets.Add("Channel Goals");
-                        cgGrid.PopulateWorksheet(selectedChannels, worksheet5, 1, 1);
+                        cgGrid.PopulateWorksheet(selectedChannels, worksheet5, 1, 1, showAllDecimals);
                     }
                     if (chbListing.IsChecked == true)
                     {
                         var worksheet6 = excelPackage.Workbook.Worksheets.Add("Spot listing");
                         //var list = _allMediaPlans.Where(mpTuple => mpTuple.MediaPlan.Insertations > 0 && selectedChannels.Any(ch => ch.chid == mpTuple.MediaPlan.chid)).ToList();
-                        factoryListing.PopulateWorksheet(visibleTuples, visibleColumns, worksheet6, 1, 1);
+                        factoryListing.PopulateWorksheet(visibleTuples, visibleColumns, worksheet6, 1, 1, showAllDecimals);
                     }
 
                     // Save the Excel package to a memory stream

@@ -55,9 +55,9 @@ namespace Database.Entities
 
         private DayPartDTO _dayPart;
 
-        public decimal Affinity
+        public int Affinity
         {
-            get { return Amrpsale != 0 ? (Amrp1 / Amrpsale) * 100 : 0; }
+            get { return (int)Math.Round(Amrpsale != 0 ? (Amrp1 / Amrpsale) * 100 : 0); }
         }
 
         public string Name
