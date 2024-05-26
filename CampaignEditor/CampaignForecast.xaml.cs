@@ -38,7 +38,7 @@ namespace CampaignEditor.UserControls
         private GoalsController _goalsController;
         private MediaPlanVersionController _mediaPlanVersionController;
         private ReachController _reachController;
-        private ClientProgCoefController _clientProgCoefController;
+        private ClientCoefsController _clientCoefsController;
 
         private DatabaseFunctionsController _databaseFunctionsController;
 
@@ -111,7 +111,7 @@ namespace CampaignEditor.UserControls
             //IAbstractFactory<MediaPlanForecastData> factoryForecastData,
             IReachRepository reachRepository,
             IAbstractFactory<ForecastDataManipulation> factoryForecastDataManipulation,
-            IClientProgCoefRepository clientProgCoefRepository)
+            IClientCoefsRepository clientCoefsRepository)
         {
             this.DataContext = this;
 
@@ -124,7 +124,7 @@ namespace CampaignEditor.UserControls
             _goalsController = new GoalsController(goalsRepository);
             _mediaPlanVersionController = new MediaPlanVersionController(mediaPlanVersionRepository);
             _reachController = new ReachController(reachRepository);
-            _clientProgCoefController = new ClientProgCoefController(clientProgCoefRepository);
+            _clientCoefsController = new ClientCoefsController(clientCoefsRepository);
 
             _databaseFunctionsController = new DatabaseFunctionsController(databaseFunctionsRepository);
 
@@ -402,7 +402,7 @@ namespace CampaignEditor.UserControls
             dgMediaPlans._databaseFunctionsController = _databaseFunctionsController;
             dgMediaPlans._mpConverter = _mpConverter;
             dgMediaPlans._mpTermConverter = _mpTermConverter;
-            dgMediaPlans._clientProgCoefController = _clientProgCoefController;
+            dgMediaPlans._clientCoefsController = _clientCoefsController;
             dgMediaPlans.AddMediaPlanClicked += dgMediaPlans_AddMediaPlanClicked;
             dgMediaPlans.ImportMediaPlanClicked += dgMediaPlans_ImportMediaPlanClicked;
             dgMediaPlans.CopyNameClicked += dgMediaPlans_CopyNameClicked;

@@ -16,6 +16,9 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
+using CampaignEditor.UserControls;
+using Database.Entities;
+using System.ComponentModel;
 
 namespace CampaignEditor
 {
@@ -44,6 +47,7 @@ namespace CampaignEditor
         public bool seasonalityModified = false;
 
         public bool pricelistChanged = false;
+        IEnumerable<ChannelDTO> _allChannels;
         public PriceList(IAbstractFactory<Sectable> factorySectable, IAbstractFactory<Seasonality> factorySeasonality,
             IAbstractFactory<NewTarget> factoryNewTarget, IAbstractFactory<DuplicatePricelist> factoryDuplicatePricelist,
             IChannelRepository channelRepository, IPricesRepository pricesRepository,
@@ -125,9 +129,38 @@ namespace CampaignEditor
 
         private async Task FillFields()
         {
-            await FillChannels();
+            //await FillChannels();
+            _allChannels = new List<ChannelDTO>(await _channelController.GetAllChannels()).Where(ch => ch.chactive);
+            _allChannels = _allChannels.OrderBy(ch => ch.chname);
+            var chplItem = new ChannelPlItem();
+            chplItem.Initialize(_allChannels);
+            chplItem.DeleteClicked += ChplItem_DeleteClicked;
+            lbChannels.Initialize(chplItem);
+            lbChannels.BtnAddClicked += LbChannels_BtnAddClicked;
             FillDefaultWpDayParts();
             await FillComboBoxes();
+        }
+
+        private void LbChannels_BtnAddClicked(object? sender, EventArgs e)
+        {
+            var chplItem = lbChannels.Items[lbChannels.Items.Count-2] as ChannelPlItem;
+            if (chplItem != null)
+            {
+                chplItem.Initialize(_allChannels);
+                chplItem.DeleteClicked += ChplItem_DeleteClicked;
+            }
+
+        }
+
+        private void ChplItem_DeleteClicked(object? sender, EventArgs e)
+        {
+            var chplItem = sender as ChannelPlItem;
+            if (chplItem != null)
+            {
+                chplItem.DeleteClicked -= ChplItem_DeleteClicked;
+                lbChannels.Items.Remove(chplItem);
+            }
+            pricelistChannelsModified = true;
         }
 
         private void FillDefaultWpDayParts()
@@ -136,22 +169,6 @@ namespace CampaignEditor
             wpDayParts.Children.Add(item);
             Button addButton = MakeAddButton();
             wpDayParts.Children.Add(addButton);
-        }
-        private async Task FillChannels()
-        {
-            var channels = await _channelController.GetAllChannels();
-
-            channels = channels.OrderBy(c => c.chname);
-
-            foreach (var channel in channels)
-            {
-                CheckBox cb = new CheckBox();
-                cb.Content = channel.chname.Trim();
-                cb.Tag = channel;
-                cb.Checked += chbChannels_Checked;
-                cb.Unchecked += chbChannels_Unchecked;
-                wpChannels.Children.Add(cb);
-            }
         }
 
         // Adding Add Button and New TargetDPItem
@@ -350,23 +367,25 @@ namespace CampaignEditor
         }
         private async Task AssignChannelsValues()
         {
-            var checkedPricelistChannels = await _pricelistChannelsController.GetAllPricelistChannelsByPlid(_pricelist.plid);
-            List<ChannelDTO> checkedChannels = new List<ChannelDTO>();
 
-            foreach (PricelistChannelsDTO checkedPricelistChannel in checkedPricelistChannels)
+            var pricelistChannels = await _pricelistChannelsController.GetAllPricelistChannelsByPlid(_pricelist.plid);
+            if (pricelistChannels.Count() > 0)
             {
-                checkedChannels.Add(await _channelController.GetChannelById(checkedPricelistChannel.chid));
-            }
-
-            foreach (CheckBox channel in wpChannels.Children)
-            {
-                foreach (ChannelDTO checkedChannel in checkedChannels)
+                ChannelPlItem channelItem = lbChannels.Items[0] as ChannelPlItem;
+                if (channelItem != null)
                 {
-                    if (string.Compare(channel.Content.ToString().Trim(),checkedChannel.chname.Trim()) == 0)
-                    {
-                        channel.IsChecked = true;
-                    }
+                    channelItem.DeleteClicked -= ChplItem_DeleteClicked;
+                    lbChannels.Items.Remove(channelItem);
                 }
+
+            }
+            foreach (var plchn in pricelistChannels)
+            {
+                var channel = await _channelController.GetChannelById(plchn.chid);
+                ChannelPlItem channelItem = new ChannelPlItem();
+                channelItem.Initialize(_allChannels, channel, plchn.chcoef);
+                channelItem.DeleteClicked += ChplItem_DeleteClicked;
+                lbChannels.Items.Insert(lbChannels.Items.Count - 1, channelItem);
             }
         }
 
@@ -453,20 +472,25 @@ namespace CampaignEditor
 
         private async Task CreateOrUpdatePricelistChannels(PricelistDTO pricelist)
         {
-            List<ChannelDTO> channels = new List<ChannelDTO>();
-            foreach (CheckBox channelBox in wpChannels.Children)
-            {
-                if ((bool)channelBox.IsChecked)
-                {
-                    channels.Add(await _channelController.GetChannelByName(channelBox.Content.ToString().Trim()));
-                }
-            }
 
+            List<Tuple<int, decimal>> chIdCoefs = new List<Tuple<int, decimal>>();
+            for (int i=0; i<lbChannels.Items.Count-1; i++)
+            {
+                ChannelPlItem chplItem = lbChannels.Items[i] as ChannelPlItem;
+                var channel = chplItem.GetChannel();
+                var chcoef = chplItem.GetCoef();
+                // skip empty channels and already inserted channels
+                if (channel == null || chcoef == null || chIdCoefs.Any(chidc => chidc.Item1 == channel.chid))
+                {
+                    continue;
+                }
+                chIdCoefs.Add(Tuple.Create(channel.chid, chcoef.Value));                              
+            }
             await _pricelistChannelsController.DeleteAllPricelistChannelsByPlid(pricelist.plid);
-            foreach (var channel in channels)
+            foreach (var chidCoef in chIdCoefs)
             {
                 await _pricelistChannelsController.CreatePricelistChannels(
-                    new CreatePricelistChannelsDTO(pricelist.plid, channel.chid));
+                    new CreatePricelistChannelsDTO(pricelist.plid, chidCoef.Item1, chidCoef.Item2));
             }
         }
 
@@ -513,8 +537,7 @@ namespace CampaignEditor
                 return false; 
 
             if (CheckCP() && CheckMinGRP() && 
-                CheckValidity() && CheckComboBoxes() && CheckDPs() &&
-                CheckNonEmptyChannelsSelected())
+                CheckValidity() && CheckComboBoxes() && CheckDPs())
             {
                 if ((bool)chbSectable2.IsChecked)
                 {
@@ -525,26 +548,9 @@ namespace CampaignEditor
             }
             else
                 return false;
-        }
+        }     
 
-        private bool CheckNonEmptyChannelsSelected()
-        {
-            bool checkedChannel = false;
-            foreach (CheckBox channelBox in wpChannels.Children)
-            {
-                if ((bool)channelBox.IsChecked)
-                {
-                    checkedChannel = true;
-                    break;
-                }
-            }
-            if (!checkedChannel)
-            {
-                MessageBox.Show("Select at least one channel", "Result", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-
-            return checkedChannel;
-        }
+       
 
         // Values in tbSectable2 needs to be 4 chars long integers
         private bool CheckTbSectable2()
@@ -879,7 +885,7 @@ namespace CampaignEditor
             {
                 if (pricelistModified)
                     await CreateOrUpdatePricelist(_pricelist);
-                if (pricelistChannelsModified)
+                if (isPricelistChannelsModified())
                     await CreateOrUpdatePricelistChannels(_pricelist);
                 if (CheckDayPartsModified())
                     await CreateOrUpdateDayparts(_pricelist);
@@ -1034,18 +1040,43 @@ namespace CampaignEditor
             pricelistModified = true;
         }
 
-        private void chbChannels_Checked(object sender, RoutedEventArgs e)
+        private bool isPricelistChannelsModified()
         {
-            pricelistChannelsModified = true;
-        }
-        private void chbChannels_Unchecked(object sender, RoutedEventArgs e)
-        {
-            pricelistChannelsModified = true;
+            if (pricelistChannelsModified)
+            {
+                return true;
+            }
+
+            for (int i=0; i < lbChannels.Items.Count - 1; i++)
+            {
+                ChannelPlItem chplItem = lbChannels.Items[i] as ChannelPlItem;
+                if (chplItem.GetIsModified())
+                {
+                    pricelistChannelsModified = true;
+                    return true;
+                }
+
+            }
+            
+            pricelistChannelsModified = false;
+            return false;
         }
 
 
         #endregion
 
+        protected override void OnClosing(CancelEventArgs e)
+        {
+            for (int i = 0; i < lbChannels.Items.Count - 1; i++)
+            {
+                ChannelPlItem chplItem = lbChannels.Items[i] as ChannelPlItem;
+                if (chplItem.GetIsModified())
+                {
+                    chplItem.DeleteClicked -= ChplItem_DeleteClicked;
+                }
 
+            }
+            lbChannels.BtnAddClicked -= LbChannels_BtnAddClicked;
+        }
     }
 }

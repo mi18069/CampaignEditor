@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CampaignEditor"
+        xmlns:userControls="clr-namespace:CampaignEditor.UserControls"
         mc:Ignorable="d" 
         Title="Pricelist" Height="700" Width="1200">
     <Grid>
@@ -180,10 +181,8 @@
                     Width="110" Grid.ColumnSpan="1" SelectedDateChanged="dpValidityTo_SelectedDateChanged"/>
 
         <Border Grid.Row="1" Grid.Column="9" Grid.RowSpan="11" Grid.ColumnSpan="2"
-                BorderBrush="LightGray" BorderThickness="1">
-            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
-                <WrapPanel x:Name="wpChannels" Orientation="Vertical" />
-            </ScrollViewer>
+                BorderBrush="LightGray" BorderThickness="1" >
+            <userControls:ListBoxAddButton x:Name="lbChannels"/>
         </Border>
 
         <Border Grid.Row="11" Grid.Column="1" Grid.RowSpan="2" Grid.ColumnSpan="6"

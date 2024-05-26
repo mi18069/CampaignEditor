@@ -30,6 +30,7 @@ namespace CampaignEditor
 
         private Dictionary<char, SpotDTO> _spotcodeSpotDict = new Dictionary<char, SpotDTO>();
         private Dictionary<int, PricelistDTO> _chidPricelistDict = new Dictionary<int, PricelistDTO>();
+        private Dictionary<int, decimal> _chidChcoefDict = new Dictionary<int, decimal>();
         private Dictionary<int, int> _chrdsChidDict = new Dictionary<int, int>();
         private Dictionary<int, List<PricesDTO>> _plidPricesDict = new Dictionary<int, List<PricesDTO>>();
         private Dictionary<int, SectableDTO> _plidSectableDict = new Dictionary<int, SectableDTO>();
@@ -51,6 +52,7 @@ namespace CampaignEditor
         private TargetController _targetController;
         private DayPartController _dayPartController;
         private DPTimeController _dpTimeController;
+        private PricelistChannelsController _pricelistChannelsController;
 
         public CampaignDTO Campaign { get {return _campaign; }
             set { _campaign = value; } }
@@ -68,7 +70,7 @@ namespace CampaignEditor
         public Dictionary<int, SeasonalityDTO> PlidSeasonalityDict { get { return _plidSeasonalityDict; } }
         public Dictionary<int, List<SeasonalitiesDTO>> SeasidSeasonalitiesDict { get { return _seasidSeasonalitiesDict; } }
         public Dictionary<DayPartDTO, List<DPTimeDTO>> DayPartsDict { get { return _dayPartsDict; } }
-
+        public Dictionary<int, decimal> ChidChcoefDict { get { return _chidChcoefDict; } }
 
         public MediaPlanForecastData(IChannelRepository channelRepository, ISpotRepository spotRepository,
             IChannelCmpRepository channelCmpRepository, IPricelistRepository pricelistRepository,
@@ -76,7 +78,8 @@ namespace CampaignEditor
             ISeasonalitiesRepository seasonalitiesRepository, ISectablesRepository sectablesRepository,
             IPricesRepository pricesRepository, ITargetCmpRepository targetCmpRepository, 
             ITargetRepository targetRepository,
-            IDayPartRepository dayPartRepository, IDPTimeRepository dPTimeRepository)
+            IDayPartRepository dayPartRepository, IDPTimeRepository dPTimeRepository,
+            IPricelistChannelsRepository pricelistChannelsRepository)
         {
             _channelController = new ChannelController(channelRepository);
             _spotController = new SpotController(spotRepository);
@@ -91,6 +94,7 @@ namespace CampaignEditor
             _targetController = new TargetController(targetRepository);
             _dayPartController = new DayPartController(dayPartRepository);
             _dpTimeController = new DPTimeController(dPTimeRepository);
+            _pricelistChannelsController = new PricelistChannelsController(pricelistChannelsRepository);
         }
 
         public async Task Initialize(CampaignDTO campaign)
@@ -147,7 +151,7 @@ namespace CampaignEditor
             foreach (var channelCmp in channelCmps)
             {
                 var channel = await _channelController.GetChannelById(channelCmp.chid);
-
+                
                 if (channel != null)
                 {
                     _channels.Add(channel);
@@ -204,6 +208,7 @@ namespace CampaignEditor
             await AddPricesInDict(pricelist);
             await AddSectableInDict(pricelist);
             await AddSeasonalityInDict(pricelist);
+            await AddChcoefInDict(pricelist);
         }
 
         private async Task AddPricesInDict(PricelistDTO pricelist)
@@ -235,7 +240,15 @@ namespace CampaignEditor
                 _seasidSeasonalitiesDict[seasonality.seasid] = seasonalities.ToList();
             }
         }
+        private async Task AddChcoefInDict(PricelistDTO pricelist)
+        {
+            var plchns = await _pricelistChannelsController.GetAllPricelistChannelsByPlid(pricelist.plid);
 
+            foreach (var plchn in plchns)
+            {
+                _chidChcoefDict[plchn.chid] = plchn.chcoef;
+            }
+        }
         public async Task InitializeDayParts()
         {
             _dayPartsDict.Clear();

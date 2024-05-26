@@ -16,13 +16,13 @@ namespace CampaignEditor
         private TargetCmpController _targetCmpController;
         private SpotController _spotController;
         private ChannelCmpController _channelCmpController;
-        private ClientProgCoefController _clientProgcoefController;
+        private ClientCoefsController _clientProgcoefController;
 
         public CampaignManipulations(ICampaignRepository campaignRepository,
             IMediaPlanRefRepository mediaPlanRefRepository,
             ICmpBrndRepository cmpBrndRepository, IGoalsRepository goalsRepository,
             ITargetCmpRepository targetCmpRepository, ISpotRepository spotRepository,
-            IChannelCmpRepository channelCmpRepository, IClientProgCoefRepository clientProgCoefRepository)
+            IChannelCmpRepository channelCmpRepository, IClientCoefsRepository clientProgCoefRepository)
         {
             _campaignController = new CampaignController(campaignRepository);
             _mediaPlanRefController = new MediaPlanRefController(mediaPlanRefRepository);
@@ -31,7 +31,7 @@ namespace CampaignEditor
             _targetCmpController = new TargetCmpController(targetCmpRepository);
             _spotController = new SpotController(spotRepository);
             _channelCmpController = new ChannelCmpController(channelCmpRepository);
-            _clientProgcoefController = new ClientProgCoefController(clientProgCoefRepository);
+            _clientProgcoefController = new ClientCoefsController(clientProgCoefRepository);
         }
 
         public async Task<bool> DuplicateCampaign(CampaignDTO oldCampaign, CampaignDTO newCampaign)
@@ -110,7 +110,7 @@ namespace CampaignEditor
                 // Deleting Forecast
                 await _campaignController.DeleteCampaignInitialization(campaign.cmpid);
                 await _mediaPlanRefController.DeleteMediaPlanRefById(campaign.cmpid);
-                await _clientProgcoefController.DeleteClientProgCoefByClientId(campaign.clid);
+                await _clientProgcoefController.DeleteClientCoefsByClientId(campaign.clid);
 
                 // Deleting connections with campaign
                 await _channelCmpController.DeleteChannelCmpByCmpid(campaign.cmpid);

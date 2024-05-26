@@ -2,7 +2,6 @@
 using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
-using System.Windows.Markup;
 
 namespace Database.Entities
 {
@@ -46,6 +45,8 @@ namespace Database.Entities
         public bool active { get; set; }
 
         public decimal pps { get; set; }
+        public decimal coefA { get; set; }
+        public decimal coefB { get; set; }
 
         private decimal cpp;
 
@@ -54,6 +55,7 @@ namespace Database.Entities
         private int _insertations;
 
         private DayPartDTO _dayPart;
+        public decimal chcoef = 1.0M;
 
         public int Affinity
         {
@@ -330,6 +332,26 @@ namespace Database.Entities
             }
         }
 
+        public decimal CoefA
+        {
+            get { return coefA; }
+            set
+            {
+                coefA = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public decimal CoefB
+        {
+            get { return coefB; }
+            set
+            {
+                coefB = value;
+                OnPropertyChanged();
+            }
+        }
+
         public int Length
         {
             get { return _length; }
@@ -388,6 +410,16 @@ namespace Database.Entities
         {
             get { return _dayPart; }
             set { _dayPart = value; }
+        }
+
+        public decimal Chcoef
+        {
+            get { return chcoef; }
+            set
+            {
+                chcoef = value;
+                OnPropertyChanged();
+            }
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;

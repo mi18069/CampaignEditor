@@ -30,8 +30,8 @@ using CampaignEditor.Helpers;
 using OfficeOpenXml.Style;
 using Database.DTOs.SpotDTO;
 using Database.DTOs.DayPartDTO;
-using Database.DTOs.ClientProgCoefDTO;
 using System.Data;
+using Database.DTOs.ClientCoefsDTO;
 
 namespace CampaignEditor.UserControls
 {
@@ -47,7 +47,7 @@ namespace CampaignEditor.UserControls
         public MediaPlanTermController _mediaPlanTermController { get; set; }
         public MediaPlanConverter _mpConverter { get; set; }
         public MediaPlanTermConverter _mpTermConverter { get; set; }
-        public ClientProgCoefController _clientProgCoefController { get; set; }
+        public ClientCoefsController _clientCoefsController { get; set; }
         public DatabaseFunctionsController _databaseFunctionsController { get; set; }
         private Dictionary<int, string> chidChannelDictionary = new Dictionary<int, string>();
 
@@ -60,14 +60,14 @@ namespace CampaignEditor.UserControls
         string lastSpotCell = "";
 
         // number of frozen columns
-        public int mediaPlanColumns = 30;
+        public int mediaPlanColumns = 33;
 
         double dataColumnWidth = 51;
 
 
         // for saving old values of MediaPlan when I want to change it
         private MediaPlan _mediaPlanOldValues;
-        private MediaPlan _mediaPlanToUpdate;
+        private MediaPlanTuple _mediaPlanToUpdate;
         bool isEditingEnded = false;
 
         public bool filterByIns = false;
@@ -544,8 +544,20 @@ namespace CampaignEditor.UserControls
 
             lastSpotCell = spotcode.ToString();
 
-            await AddSpotcodeToMpTerm(mpTerm, spotcode);
-            await UpdateMediaPlan(mediaPlanTuple);          
+            try
+            {
+                await AddSpotcodeToMpTerm(mpTerm, spotcode);
+                await UpdateMediaPlan(mediaPlanTuple);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error while updating program!\n" + ex.Message, "Error",
+                MessageBoxButton.OK, MessageBoxImage.Error);
+                await DeleteSpotcodeFromMpTerm(mpTerm);
+                var termsDTO = _mpTermConverter.ConvertToEnumerableDTO(mediaPlanTuple.Terms);
+                _mpConverter.ComputeExtraProperties(mediaPlanTuple.MediaPlan, termsDTO, true);
+                return;
+            }
             TermUpdated(mpTerm, spotcode);
 
                        
@@ -607,7 +619,19 @@ namespace CampaignEditor.UserControls
             char? spotcode = await DeleteSpotcodeFromMpTerm(mpTerm);
             if (spotcode.HasValue)
             {
-                await UpdateMediaPlan(mediaPlanTuple);
+                try
+                {
+                    await UpdateMediaPlan(mediaPlanTuple);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error while updating program!\n" + ex.Message, "Error",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+                    await DeleteSpotcodeFromMpTerm(mpTerm);
+                    var termsDTO = _mpTermConverter.ConvertToEnumerableDTO(mediaPlanTuple.Terms);
+                    _mpConverter.ComputeExtraProperties(mediaPlanTuple.MediaPlan, termsDTO, true);
+                    return;
+                }
                 TermUpdated(mpTerm, spotcode);
             }     
         }
@@ -657,6 +681,7 @@ namespace CampaignEditor.UserControls
             var termsDTO = _mpTermConverter.ConvertToEnumerableDTO(mediaPlanTuple.Terms);
             _mpConverter.ComputeExtraProperties(mediaPlan, termsDTO, true);
             await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(_mpConverter.ConvertToDTO(mediaPlan)));
+
         }
 
         #endregion
@@ -696,8 +721,8 @@ namespace CampaignEditor.UserControls
             // Get values before editing
             if (mediaPlanTuple != null)
             {
-                _mediaPlanToUpdate = mediaPlanTuple.MediaPlan;
-                _mediaPlanOldValues = _mpConverter.CopyMP(_mediaPlanToUpdate);
+                _mediaPlanToUpdate = mediaPlanTuple;
+                _mediaPlanOldValues = _mpConverter.CopyMP(_mediaPlanToUpdate.MediaPlan);
 
             }
 
@@ -712,40 +737,54 @@ namespace CampaignEditor.UserControls
         {
             if (isEditingEnded)
             {
-                bool progCoefEdited = false;
+                string coefsEdited = "";
                 // Compare with the original value and revert if needed
-                if (_mediaPlanToUpdate != null && !_mpConverter.SameMPValues(_mediaPlanToUpdate, _mediaPlanOldValues))
+                if (_mediaPlanToUpdate != null && !_mpConverter.SameMPValues(_mediaPlanToUpdate.MediaPlan, _mediaPlanOldValues))
                 {
                     // If coefs are changed, we need to recalculate price
                     decimal eps = 0.0001M;
-                    if (Math.Abs(_mediaPlanToUpdate.Progcoef - _mediaPlanOldValues.Progcoef) > eps)
+                    if (Math.Abs(_mediaPlanToUpdate.MediaPlan.Progcoef - _mediaPlanOldValues.Progcoef) > eps)
                     {
-                        progCoefEdited = true;
-                        _mpConverter.CoefsChanged(_mediaPlanToUpdate);
+                        coefsEdited = "progCoef";
+                        var terms = _mpTermConverter.ConvertToEnumerableDTO(_mediaPlanToUpdate.Terms);
+                        _mpConverter.CoefsChanged(_mediaPlanToUpdate.MediaPlan, terms);
                     }
-                    else if (Math.Abs(_mediaPlanToUpdate.Dpcoef - _mediaPlanOldValues.Dpcoef) > eps ||
-                        Math.Abs(_mediaPlanToUpdate.Seccoef - _mediaPlanOldValues.Seccoef) > eps ||
-                        Math.Abs(_mediaPlanToUpdate.Seascoef - _mediaPlanOldValues.Seascoef) > eps)
+                    else if (Math.Abs(_mediaPlanToUpdate.MediaPlan.CoefA - _mediaPlanOldValues.CoefA) > eps)
                     {
-                        _mpConverter.CoefsChanged(_mediaPlanToUpdate);
+                        coefsEdited = "coefA";
+                        var terms = _mpTermConverter.ConvertToEnumerableDTO(_mediaPlanToUpdate.Terms);
+                        _mpConverter.CoefsChanged(_mediaPlanToUpdate.MediaPlan, terms);
                     }
-                    else if (_mediaPlanToUpdate.Stime != _mediaPlanOldValues.Stime ||
-                            _mediaPlanToUpdate.Etime != _mediaPlanOldValues.Etime ||
-                            _mediaPlanToUpdate.Blocktime != _mediaPlanOldValues.Blocktime)
+                    else if (Math.Abs(_mediaPlanToUpdate.MediaPlan.CoefB - _mediaPlanOldValues.CoefB) > eps)
+                    {
+                        coefsEdited = "coefB";
+                        var terms = _mpTermConverter.ConvertToEnumerableDTO(_mediaPlanToUpdate.Terms);
+                        _mpConverter.CoefsChanged(_mediaPlanToUpdate.MediaPlan, terms);
+                    }
+                    else if (Math.Abs(_mediaPlanToUpdate.MediaPlan.Dpcoef - _mediaPlanOldValues.Dpcoef) > eps ||
+                        Math.Abs(_mediaPlanToUpdate.MediaPlan.Seccoef - _mediaPlanOldValues.Seccoef) > eps ||
+                        Math.Abs(_mediaPlanToUpdate.MediaPlan.Seascoef - _mediaPlanOldValues.Seascoef) > eps)
+                    {
+                        var terms = _mpTermConverter.ConvertToEnumerableDTO(_mediaPlanToUpdate.Terms);
+                        _mpConverter.CoefsChanged(_mediaPlanToUpdate.MediaPlan, terms);
+                    }
+                    else if (_mediaPlanToUpdate.MediaPlan.Stime != _mediaPlanOldValues.Stime ||
+                            _mediaPlanToUpdate.MediaPlan.Etime != _mediaPlanOldValues.Etime ||
+                            _mediaPlanToUpdate.MediaPlan.Blocktime != _mediaPlanOldValues.Blocktime)
                     {
                         try
                         {
-                            _mediaPlanToUpdate.Stime = TimeFormat.ReturnGoodTimeFormat(_mediaPlanToUpdate.Stime.Trim());
-                            _mediaPlanToUpdate.Etime = TimeFormat.ReturnGoodTimeFormat(_mediaPlanToUpdate.Etime.Trim());
-                            if (_mediaPlanToUpdate.Blocktime != null)
+                            _mediaPlanToUpdate.MediaPlan.Stime = TimeFormat.ReturnGoodTimeFormat(_mediaPlanToUpdate.MediaPlan.Stime.Trim());
+                            _mediaPlanToUpdate.MediaPlan.Etime = TimeFormat.ReturnGoodTimeFormat(_mediaPlanToUpdate.MediaPlan.Etime.Trim());
+                            if (_mediaPlanToUpdate.MediaPlan.Blocktime != null)
                             {
-                                if (_mediaPlanToUpdate.Blocktime != _mediaPlanOldValues.Blocktime)
+                                if (_mediaPlanToUpdate.MediaPlan.Blocktime != _mediaPlanOldValues.Blocktime)
                                 {
-                                    var timeFormat = TimeFormat.ReturnGoodTimeFormat(_mediaPlanToUpdate.Blocktime.Trim());
-                                    _mediaPlanToUpdate.Blocktime = timeFormat == "" ? null : timeFormat;
-                                    await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(_mpConverter.ConvertToDTO(_mediaPlanToUpdate)));
+                                    var timeFormat = TimeFormat.ReturnGoodTimeFormat(_mediaPlanToUpdate.MediaPlan.Blocktime.Trim());
+                                    _mediaPlanToUpdate.MediaPlan.Blocktime = timeFormat == "" ? null : timeFormat;
+                                    await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(_mpConverter.ConvertToDTO(_mediaPlanToUpdate.MediaPlan)));
 
-                                    OnUpdatedMediaPlan(_mediaPlanToUpdate);
+                                    OnUpdatedMediaPlan(_mediaPlanToUpdate.MediaPlan);
                                 }
 
                             }
@@ -754,27 +793,30 @@ namespace CampaignEditor.UserControls
                         {
                             MessageBox.Show("Wrong Time Format", "Information", MessageBoxButton.OK, MessageBoxImage.Error);
                             isEditingEnded = false;
-                            _mediaPlanToUpdate.Stime = _mediaPlanOldValues.Stime;
-                            _mediaPlanToUpdate.Etime = _mediaPlanOldValues.Etime;
-                            _mediaPlanToUpdate.Blocktime = _mediaPlanOldValues.Blocktime;
+                            _mediaPlanToUpdate.MediaPlan.Stime = _mediaPlanOldValues.Stime;
+                            _mediaPlanToUpdate.MediaPlan.Etime = _mediaPlanOldValues.Etime;
+                            _mediaPlanToUpdate.MediaPlan.Blocktime = _mediaPlanOldValues.Blocktime;
                             return;
                         }
                     }
                     try
                     {
-                        var mpDTO = _mpConverter.ConvertToDTO(_mediaPlanToUpdate);
+                        var mpDTO = _mpConverter.ConvertToDTO(_mediaPlanToUpdate.MediaPlan);
                         await _mediaPlanController.UpdateMediaPlan(new UpdateMediaPlanDTO(mpDTO));
-                        _mpConverter.CopyValues(_mediaPlanToUpdate, _mediaPlanToUpdate);
+                        _mpConverter.CopyValues(_mediaPlanToUpdate.MediaPlan, _mediaPlanToUpdate.MediaPlan);
 
-                        if (progCoefEdited)
+                        if (coefsEdited != "")
                         {
-                            var clprogcoef = await _clientProgCoefController.GetClientProgCoef(_campaign.clid, mpDTO.schid);
-                            if (clprogcoef == null)
+                            var clcoefs = await _clientCoefsController.GetClientCoefs(_campaign.clid, mpDTO.schid);
+                            if (clcoefs == null)
                             {
-                                var newClientProgCoef = new ClientProgCoefDTO(_campaign.clid, mpDTO.schid, mpDTO.progcoef);
+                                decimal? progcoef = mpDTO.progcoef == 1.0M ? null : mpDTO.progcoef;
+                                decimal? coefA = mpDTO.coefA == 1.0M ? null : mpDTO.coefA;
+                                decimal? coefB = mpDTO.coefB == 1.0M ? null : mpDTO.coefB;
+                                var newClientCoefs = new ClientCoefsDTO(_campaign.clid, mpDTO.schid, progcoef, coefA, coefB);
                                 try
                                 {
-                                    await _clientProgCoefController.CreateClientProgCoef(newClientProgCoef);
+                                    await _clientCoefsController.CreateClientCoefs(newClientCoefs);
                                 }
                                 catch (Exception ex)
                                 {
@@ -784,23 +826,30 @@ namespace CampaignEditor.UserControls
                             }
                             else
                             {
-                                clprogcoef.progcoef = mpDTO.progcoef;
+                                switch (coefsEdited)
+                                {
+                                    case "progCoef": clcoefs.progcoef = mpDTO.progcoef; break;
+                                    case "coefA": clcoefs.coefA = mpDTO.coefA; break;
+                                    case "coefB": clcoefs.coefB = mpDTO.coefA; break;
+                                }
                                 try
                                 {
-                                    await _clientProgCoefController.UpdateClientProgCoef(clprogcoef);
+                                    await _clientCoefsController.UpdateClientCoefs(clcoefs);
                                 }
                                 catch (Exception ex)
                                 {
-                                    MessageBox.Show("Unable to change prog coef! \n" + ex.Message, "Error",
+                                    MessageBox.Show("Unable to change coefficient! \n" + ex.Message, "Error",
                                         MessageBoxButton.OK, MessageBoxImage.Error);
                                 }
 
                             }
                         }
                     }
-                    catch
+                    catch (Exception ex)
                     {
-                        _mpConverter.CopyValues(_mediaPlanToUpdate, _mediaPlanOldValues);
+                        MessageBox.Show("Unable to change coefficient! \n" + ex.Message, "Error",
+                                        MessageBoxButton.OK, MessageBoxImage.Error);
+                        _mpConverter.CopyValues(_mediaPlanToUpdate.MediaPlan, _mediaPlanOldValues);
                     }
                 }
                 isEditingEnded = false;
@@ -1125,7 +1174,7 @@ namespace CampaignEditor.UserControls
             string[] columnHeaders = new string[]{"Channel", "Program", "Day Part", "Position", "Start time",
             "End time", "Block time", "Type", "Special", "Amr1", "Amr% 1", "Amr1 Trim", "Amr2", "Amr% 2", "Amr2 Trim",
             "Amr3", "Amr% 3","Amr3 Trim", "Amr sale", "Amr% sale", "Amr sale Trim",
-            "Affinity","Prog coef", "Dp coef", "Seas coef", "Sec coef", "CPP", "Ins", "CPSP", "Price"};
+            "Affinity", "Ch coef", "Prog coef", "Dp coef", "Seas coef", "Sec coef", "Coef A", "Coef B", "CPP", "Ins", "CPSP", "Price"};
 
             int colOffset = 0;
 
@@ -1286,12 +1335,20 @@ namespace CampaignEditor.UserControls
             if (visibleColumns[22])
             {
                 if (showAllDecimals)
+                    worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Chcoef;
+                else
+                    worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.Chcoef, 2);
+                colOffset += 1;
+            }
+            if (visibleColumns[23])
+            {
+                if (showAllDecimals)
                     worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Progcoef;
                 else
                     worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.Progcoef, 2);
                 colOffset += 1;
             }
-            if (visibleColumns[23])
+            if (visibleColumns[24])
             {
                 if (showAllDecimals)
                     worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Dpcoef;
@@ -1299,7 +1356,7 @@ namespace CampaignEditor.UserControls
                     worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.Dpcoef, 2);
                 colOffset += 1;
             }
-            if (visibleColumns[24])
+            if (visibleColumns[25])
             {
                 if (showAllDecimals)
                     worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Seascoef;
@@ -1307,7 +1364,7 @@ namespace CampaignEditor.UserControls
                     worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.Seascoef, 2);
                 colOffset += 1;
             }
-            if (visibleColumns[25])
+            if (visibleColumns[26])
             {
                 if (showAllDecimals)
                     worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Seccoef;
@@ -1315,7 +1372,23 @@ namespace CampaignEditor.UserControls
                     worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.Seccoef, 2);
                 colOffset += 1;
             }
-            if (visibleColumns[26])
+            if (visibleColumns[27])
+            {
+                if (showAllDecimals)
+                    worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.CoefA;
+                else
+                    worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.CoefA, 2);
+                colOffset += 1;
+            }
+            if (visibleColumns[28])
+            {
+                if (showAllDecimals)
+                    worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.CoefB;
+                else
+                    worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.CoefB, 2);
+                colOffset += 1;
+            }
+            if (visibleColumns[29])
             {
                 if (showAllDecimals)
                     worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Cpp;
@@ -1323,12 +1396,12 @@ namespace CampaignEditor.UserControls
                     worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.Cpp, 2);
                 colOffset += 1;
             }
-            if (visibleColumns[27])
+            if (visibleColumns[30])
             {
                 worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Insertations;
                 colOffset += 1;
             }
-            if (visibleColumns[28])
+            if (visibleColumns[31])
             {
                 if (showAllDecimals)
                     worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.PricePerSecond;
@@ -1336,7 +1409,7 @@ namespace CampaignEditor.UserControls
                     worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.PricePerSecond, 2);
                 colOffset += 1;
             }
-            if (visibleColumns[29])
+            if (visibleColumns[32])
             {
                 if (showAllDecimals)
                     worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Price;

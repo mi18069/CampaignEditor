@@ -12,7 +12,6 @@ namespace Database.Entities
 
         public string Spotcode { get { return spot.spotcode.Trim(); } }
         public string Seconds { get { return spot.spotlength.ToString();  } }
-        public string Spot { get { return spot.spotname.Trim(); } }
         public string Date { get { return dateRange.ToString(); } }
         public decimal Seas { get { return Math.Round(dateRange.seascoef, 2); } }
         public decimal Sec { get { return Math.Round(secCoef, 2); } }

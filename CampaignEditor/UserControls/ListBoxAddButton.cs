@@ -64,6 +64,7 @@ namespace CampaignEditor.UserControls
             return btnAddDP;
         }
 
+        public event EventHandler BtnAddClicked;
         virtual protected void btnAddDP_Click(object sender, RoutedEventArgs e)
         {
             Type objectType = objectToAdd.GetType();
@@ -71,6 +72,7 @@ namespace CampaignEditor.UserControls
             object newObject = constructor.Invoke(new object[] { });
             this.Items.Insert(this.Items.Count - 1, newObject);
             ResizeItems(this.Items);
+            BtnAddClicked?.Invoke(this, null);
         }
 
 

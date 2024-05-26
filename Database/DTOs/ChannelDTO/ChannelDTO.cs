@@ -8,5 +8,22 @@ namespace Database.DTOs.ChannelDTO
         {
         }
 
+        // Override Equals to ensure correct comparison when setting SelectedItem
+        public override bool Equals(object obj)
+        {
+            if (obj == null || GetType() != obj.GetType())
+            {
+                return false;
+            }
+
+            ChannelDTO other = (ChannelDTO)obj;
+            return chid == other.chid;
+        }
+
+        public override int GetHashCode()
+        {
+            return chid.GetHashCode();
+        }
+
     }
 }

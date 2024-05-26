@@ -11,6 +11,7 @@ using Database.Entities;
 using Database.Repositories;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -185,20 +186,39 @@ namespace CampaignEditor
                     decimal price = 0.0M;
                     var seascoef = dateRange.seascoef;
                     var seccoef = spotCoefs.seccoef;
-                    decimal coefs = seascoef * seccoef * mediaPlan.Progcoef * mediaPlan.Dpcoef;
-
-                    if (pricelist.pltype == 1)
+        
+                    decimal coefs = seascoef * seccoef * mediaPlan.Progcoef * mediaPlan.Dpcoef * mediaPlan.CoefA * mediaPlan.CoefB * mediaPlan.Chcoef;
+                    if (coefs == 0)
                     {
-                        price = coefs * 30;
+                        price = 0.0M;
                     }
-                    // For cpp pricelists
                     else
                     {
-                        price = (pricelist.price / 30) * spot.spotlength * mediaPlan.Amrpsale * coefs;
-                    }
+                        if (pricelist.pltype == 1)
+                        {
 
-                    SpotCoefsTable spotCoefsTable = new SpotCoefsTable(spot, dateRange,
-                                                    seccoef, price);
+                            //price += coefs * spotDTO.spotlength;
+                            decimal standardPrice = coefs * 30;
+                            price += PriceWithGRPCheck(mediaPlan, pricelist, standardPrice);
+                        }
+                        // For cpp pricelists
+                        else
+                        {
+
+                            decimal amrpSale = mediaPlan.Amrpsale;
+                            if (pricelist.mgtype && amrpSale < pricelist.minprice && amrpSale != 0)
+                            {
+                                amrpSale = pricelist.minprice;
+                            }
+                            //decimal standardPrice = (pricelist.price / 30) * spotDTO.spotlength * amrpSale * coefs;
+                            //decimal standardPrice = (pricelist.price / 30) * spotDTO.spotlength * mediaPlan.Amrpsale * coefs;
+                            decimal standardPrice = pricelist.price * amrpSale * coefs;
+                            price = PriceWithGRPCheck(mediaPlan, pricelist, standardPrice);
+                            //price = (pricelist.price / 30) * spot.spotlength * mediaPlan.Amrpsale * coefs;
+                        }
+                    }                  
+
+                    SpotCoefsTable spotCoefsTable = new SpotCoefsTable(spot, dateRange, seccoef, price);
 
                     spotCoefsTables.Add(spotCoefsTable);
                 }
@@ -223,7 +243,8 @@ namespace CampaignEditor
                 {
                     var seascoef = dateRange.seascoef;
                     var seccoef = spotCoefs.seccoef;
-                    decimal coefs = seascoef * seccoef * mediaPlan.Progcoef * mediaPlan.Dpcoef;
+                    var chcoef = mediaPlan.Chcoef;
+                    decimal coefs = chcoef * seascoef * seccoef * mediaPlan.Progcoef * mediaPlan.Dpcoef * mediaPlan.CoefA * mediaPlan.CoefB;
                     
                     termCoefs.Seascoef = seascoef;
                     termCoefs.Seccoef = seccoef;
@@ -303,6 +324,11 @@ namespace CampaignEditor
                     }
                 }
             }
+        }
+
+        public void SetChCoef(MediaPlan mediaPlan)
+        {
+            mediaPlan.chcoef = _forecastData.ChidChcoefDict[mediaPlan.chid];           
         }
 
         public async Task CalculateAMRs(MediaPlan mediaPlan)
@@ -550,7 +576,7 @@ namespace CampaignEditor
         public void ComputeExtraProperties(MediaPlan mediaPlan, IEnumerable<MediaPlanTermDTO> terms, bool calculatePrice = false)
         {
             SetDayPart(mediaPlan);
-
+            SetChCoef(mediaPlan);
             var pricelist = _forecastData.ChidPricelistDict[mediaPlan.chid];
             CalculateLengthAndInsertations(mediaPlan, terms);
             
@@ -565,39 +591,14 @@ namespace CampaignEditor
 
         }
 
-        public void CoefsChanged(MediaPlan mediaPlan)
+        public void CoefsChanged(MediaPlan mediaPlan, IEnumerable<MediaPlanTermDTO> terms)
         {
             /*var channelCmp = await _channelCmpController.GetChannelCmpByIds(mediaPlan.cmpid, mediaPlan.chid);
             var pricelist = await _pricelistController.GetPricelistById(channelCmp.plid);*/
 
             var pricelist = _forecastData.ChidPricelistDict[mediaPlan.chid];
-
-            decimal coefs = mediaPlan.Progcoef * mediaPlan.Dpcoef * mediaPlan.Seascoef * mediaPlan.Seccoef;
-
-
-            // For seconds type pricelists
-            if (pricelist.pltype == 1)
-            {
-
-                mediaPlan.Price = coefs * mediaPlan.Length;
-                if (mediaPlan.Amrp1 > 0)
-                {
-                    mediaPlan.PricePerSecond = coefs / mediaPlan.Amrp1;
-                }
-                else
-                {
-                    mediaPlan.PricePerSecond = 0;
-                }
-            }
-            // For cpp pricelists
-            else
-            {
-                mediaPlan.Price = (pricelist.price / 30) * mediaPlan.Length * mediaPlan.Amrpsale * coefs;
-                if (mediaPlan.Length > 0)
-                    mediaPlan.PricePerSecond = mediaPlan.Price / mediaPlan.Length;
-                else
-                    mediaPlan.PricePerSecond = 0;
-            }
+            CalculatePrice(mediaPlan, pricelist, terms);
+            
         }
 
         private void CalculatePrice(MediaPlan mediaPlan, PricelistDTO pricelist, IEnumerable<MediaPlanTermDTO> terms)
@@ -615,13 +616,83 @@ namespace CampaignEditor
             }
         }
 
+        private void CalculatePriceSecondsPricelist(MediaPlan mediaPlan, PricelistDTO pricelist, IEnumerable<MediaPlanTermDTO> terms)
+        {
+            decimal price = 0;
+            foreach (MediaPlanTermDTO mpTerm in terms)
+            {
+                if (mpTerm != null && mpTerm.spotcode != null)
+                {
+                    foreach (char spotcode in mpTerm.spotcode.Trim())
+                    {
+                        SpotDTO spotDTO = _forecastData.SpotcodeSpotDict[spotcode];
+
+                        decimal seccoef = CalculateTermSeccoef(mediaPlan, spotDTO);
+                        decimal seascoef = CalculateTermSeascoef(mediaPlan, mpTerm);
+                        decimal coefs = mediaPlan.CoefA * mediaPlan.CoefB * mediaPlan.Chcoef * seascoef * seccoef * mediaPlan.Progcoef * mediaPlan.Dpcoef;
+                        if (coefs == 0)
+                        {
+                            price = 0.0M;
+                            break;
+                        }
+                        //price += coefs * spotDTO.spotlength;
+                        decimal standardPrice = coefs * 30;
+                        price += PriceWithGRPCheck(mediaPlan, pricelist, standardPrice);
+                    }
+                }
+
+
+            }
+
+            mediaPlan.Price = price;
+        }
+
+        private void CalculatePriceCPPPricelist(MediaPlan mediaPlan, PricelistDTO pricelist, IEnumerable<MediaPlanTermDTO> terms)
+        {
+            decimal price = 0;
+            foreach (MediaPlanTermDTO mpTerm in terms)
+            {
+                if (mpTerm != null && mpTerm.spotcode != null)
+                {
+                    foreach (char spotcode in mpTerm.spotcode.Trim())
+                    {
+                        SpotDTO spotDTO = _forecastData.SpotcodeSpotDict[spotcode];
+
+                        decimal seccoef = CalculateTermSeccoef(mediaPlan, spotDTO);
+                        decimal seascoef = CalculateTermSeascoef(mediaPlan, mpTerm);
+                        decimal coefs = mediaPlan.CoefA * mediaPlan.CoefB * mediaPlan.Chcoef * seascoef * seccoef * mediaPlan.Progcoef * mediaPlan.Dpcoef;
+
+                        if (coefs == 0)
+                        {
+                            price = 0.0M;
+                            break;
+                        }
+                        decimal amrpSale = mediaPlan.Amrpsale;
+                        if (pricelist.mgtype && amrpSale < pricelist.minprice && amrpSale != 0)
+                        {
+                            amrpSale = pricelist.minprice;
+                        }
+                        //decimal standardPrice = (pricelist.price / 30) * spotDTO.spotlength * amrpSale * coefs;
+                        //decimal standardPrice = (pricelist.price / 30) * spotDTO.spotlength * mediaPlan.Amrpsale * coefs;
+                        decimal standardPrice = pricelist.price * amrpSale * coefs;
+
+                        price += PriceWithGRPCheck(mediaPlan, pricelist, standardPrice);
+                    }
+                }
+
+
+            }
+            mediaPlan.Price = price;
+
+        }
+
         private void CalculatePricePerSeconds(MediaPlan mediaPlan, PricelistDTO pricelist)
         {
 
             // For seconds type pricelists
             if (pricelist.pltype == 1)
             {
-                decimal coefs = mediaPlan.Progcoef * mediaPlan.Dpcoef * mediaPlan.Seascoef;
+                decimal coefs = mediaPlan.CoefB * mediaPlan.CoefB * mediaPlan.Chcoef * mediaPlan.Progcoef * mediaPlan.Dpcoef * mediaPlan.Seascoef;
 
                 if (mediaPlan.Amrp1 > 0)
                 {
@@ -701,75 +772,7 @@ namespace CampaignEditor
             
         }
 
-        private void CalculatePriceSecondsPricelist(MediaPlan mediaPlan, PricelistDTO pricelist, IEnumerable<MediaPlanTermDTO> terms)
-        {
-            decimal price = 0;
-            foreach (MediaPlanTermDTO mpTerm in terms)
-            {
-                if (mpTerm != null && mpTerm.spotcode != null)
-                {
-                    foreach (char spotcode in mpTerm.spotcode.Trim())
-                    {
-                        SpotDTO spotDTO = _forecastData.SpotcodeSpotDict[spotcode];
-
-                        decimal seccoef = CalculateTermSeccoef(mediaPlan, spotDTO);
-                        decimal seascoef = CalculateTermSeascoef(mediaPlan, mpTerm);
-                        decimal coefs = seascoef * seccoef * mediaPlan.Progcoef * mediaPlan.Dpcoef;
-                        if (coefs == 0)
-                        {
-                            price = 0.0M;
-                            break;
-                        }
-                        //price += coefs * spotDTO.spotlength;
-                        decimal standardPrice = coefs * 30;
-                        price += PriceWithGRPCheck(mediaPlan, pricelist, standardPrice);
-                    }
-                }
-               
-
-            }
-
-            mediaPlan.Price = price;
-        }
-
-        private void CalculatePriceCPPPricelist(MediaPlan mediaPlan, PricelistDTO pricelist, IEnumerable<MediaPlanTermDTO> terms)
-        {
-            decimal price = 0;
-            foreach (MediaPlanTermDTO mpTerm in terms)
-            {
-                if (mpTerm != null && mpTerm.spotcode != null)
-                {
-                    foreach (char spotcode in mpTerm.spotcode.Trim())
-                    {
-                        SpotDTO spotDTO = _forecastData.SpotcodeSpotDict[spotcode];
-
-                        decimal seccoef = CalculateTermSeccoef(mediaPlan, spotDTO);
-                        decimal seascoef = CalculateTermSeascoef(mediaPlan, mpTerm);
-                        decimal coefs = seascoef * seccoef * mediaPlan.Progcoef * mediaPlan.Dpcoef;
-
-                        if (coefs == 0)
-                        {
-                            price = 0.0M;
-                            break;
-                        }
-                        decimal amrpSale = mediaPlan.Amrpsale;
-                        if (pricelist.mgtype && amrpSale < pricelist.minprice &&  amrpSale != 0)
-                        {
-                            amrpSale = pricelist.minprice;
-                        }
-                        //decimal standardPrice = (pricelist.price / 30) * spotDTO.spotlength * amrpSale * coefs;
-                        //decimal standardPrice = (pricelist.price / 30) * spotDTO.spotlength * mediaPlan.Amrpsale * coefs;
-                        decimal standardPrice = pricelist.price * amrpSale * coefs;
-
-                        price += PriceWithGRPCheck(mediaPlan, pricelist, standardPrice);
-                    }
-                }
-                
-
-            }
-            mediaPlan.Price = price;
-
-        }
+        
 
         private decimal PriceWithGRPCheck(MediaPlan mediaPlan, PricelistDTO pricelist, decimal standardValue)
         {
@@ -927,7 +930,7 @@ namespace CampaignEditor
                 mediaPlan.Amr1, mediaPlan.Amr1trim, mediaPlan.Amr2, mediaPlan.Amr2trim, mediaPlan.Amr3, 
                 mediaPlan.Amr3trim, mediaPlan.Amrsale, mediaPlan.Amrsaletrim, mediaPlan.Amrp1, mediaPlan.Amrp2,
                 mediaPlan.Amrp3, mediaPlan.Amrpsale, mediaPlan.Dpcoef, mediaPlan.Seascoef, mediaPlan.Seccoef,
-                mediaPlan.Price, mediaPlan.active, mediaPlan.PricePerSecond);
+                mediaPlan.coefA, mediaPlan.coefB, mediaPlan.Price, mediaPlan.active, mediaPlan.PricePerSecond);
 
             return mediaPlanDTO;
         }
@@ -1028,9 +1031,12 @@ namespace CampaignEditor
             originalMP.Amrp2 = copyMP.Amrp2;
             originalMP.Amrp3 = copyMP.Amrp3;
             originalMP.Amrpsale = copyMP.Amrpsale;
+            originalMP.Chcoef = copyMP.Chcoef;
             originalMP.Dpcoef = copyMP.Dpcoef;
             originalMP.Seascoef = copyMP.Seascoef;
             originalMP.Seccoef = copyMP.Seccoef;
+            originalMP.CoefA = copyMP.CoefA;
+            originalMP.CoefB = copyMP.CoefB;
             originalMP.Price = copyMP.Price;
             originalMP.active = copyMP.active;
             originalMP.PricePerSecond = copyMP.PricePerSecond;
@@ -1084,9 +1090,12 @@ namespace CampaignEditor
             (mediaPlan1.amrp2 - mediaPlan2.amrp2 < eps) &&
             (mediaPlan1.amrp3 - mediaPlan2.amrp3 < eps) &&
             (mediaPlan1.amrpsale - mediaPlan2.amrpsale < eps) &&
+            mediaPlan1.chcoef == mediaPlan2.chcoef &&
             mediaPlan1.dpcoef == mediaPlan2.dpcoef &&
             mediaPlan1.seascoef == mediaPlan2.seascoef &&
             mediaPlan1.seccoef == mediaPlan2.seccoef &&
+            mediaPlan1.coefA == mediaPlan2.coefA &&
+            mediaPlan1.coefB == mediaPlan2.coefB &&
             mediaPlan1.price == mediaPlan2.price &&
             mediaPlan1.active == mediaPlan2.active &&
             mediaPlan1.pps == mediaPlan2.pps &&

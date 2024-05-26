@@ -28,7 +28,7 @@ namespace CampaignEditor
         private GoalsController _goalsController;
         private MediaPlanVersionController _mediaPlanVersionController;
         private DatabaseFunctionsController _databaseFunctionsController;
-        private ClientProgCoefController _clientProgCoefController;
+        private ClientCoefsController _clientProgCoefController;
 
         private MediaPlanTermConverter _mpTermConverter;
 
@@ -53,7 +53,7 @@ namespace CampaignEditor
             IMediaPlanVersionRepository mediaPlanVersionRepository,
             IDatabaseFunctionsRepository databaseFunctionsRepository,
             MediaPlanTermConverter mpTermConverter,
-            IClientProgCoefRepository clientProgCoefRepository)
+            IClientCoefsRepository clientProgCoefRepository)
         {
             _schemaController = new SchemaController(schemaRepository);
             _channelController = new ChannelController(channelRepository);
@@ -63,7 +63,7 @@ namespace CampaignEditor
             _mediaPlanRefController = new MediaPlanRefController(mediaPlanRefRepository);
             _goalsController = new GoalsController(goalsRepository);
             _mediaPlanVersionController = new MediaPlanVersionController(mediaPlanVersionRepository);
-            _clientProgCoefController = new ClientProgCoefController(clientProgCoefRepository);
+            _clientProgCoefController = new ClientCoefsController(clientProgCoefRepository);
 
             _databaseFunctionsController = new DatabaseFunctionsController(databaseFunctionsRepository);
             _mpTermConverter = mpTermConverter;
@@ -303,7 +303,7 @@ namespace CampaignEditor
             }
 
             decimal progcoef = schema.progcoef;
-            var clientProgCoef = await _clientProgCoefController.GetClientProgCoef(_campaign.clid, schema.id);
+            var clientProgCoef = await _clientProgCoefController.GetClientCoefs(_campaign.clid, schema.id);
             if (clientProgCoef != null)
             {
                 progcoef = (decimal)clientProgCoef.progcoef;
@@ -312,7 +312,7 @@ namespace CampaignEditor
             CreateMediaPlanDTO createMediaPlan = new CreateMediaPlanDTO(schema.id, _campaign.cmpid, schema.chid,
             schema.name.Trim(), version, schema.position, schema.stime, schema.etime, schema.blocktime,
             schema.days, schema.type, schema.special, schema.sdate, schema.edate, progcoef,
-            schema.created, schema.modified, 0, 100, 0, 100, 0, 100, 0, 100, 0, 0, 0, 0, 1, 1, 1, 0, true, 0);
+            schema.created, schema.modified, 0, 100, 0, 100, 0, 100, 0, 100, 0, 0, 0, 0, 1, 1, 1, 1.0M, 1.0M, 0, true, 0);
 
             return await _mediaPlanController.CreateMediaPlan(createMediaPlan);
 

@@ -116,7 +116,7 @@ namespace CampaignEditor
             foreach (var channel in channels)
             {
                 await _pricelistChannelsController.CreatePricelistChannels(
-                    new CreatePricelistChannelsDTO(newPricelist.plid, channel.chid));
+                    new CreatePricelistChannelsDTO(newPricelist.plid, channel.chid, channel.chcoef));
             }
         }
 

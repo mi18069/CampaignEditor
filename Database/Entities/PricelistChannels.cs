@@ -5,5 +5,6 @@ namespace Database.Entities
     {
         public int plid { get; set; }
         public int chid { get; set; }
+        public decimal chcoef { get; set; }
     }
 }

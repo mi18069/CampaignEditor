@@ -23,9 +23,10 @@ namespace CampaignEditor.UserControls.ForecastGrids
         public GoalsController _goalsController;
 
         private ObservableRangeCollection<MediaPlanTuple> _allMediaPlans;
-        private ObservableRangeCollection<SpotCoefsTable> _spotCoefsTable =  new ObservableRangeCollection<SpotCoefsTable>();
+        private ObservableRangeCollection<SpotCoefsTable> _spotCoefsTable = new ObservableRangeCollection<SpotCoefsTable>();
         private GoalsDTO _goals;
         public MediaPlanConverter _mpConverter;
+
         public GoalsTreeView()
         {
             InitializeComponent();

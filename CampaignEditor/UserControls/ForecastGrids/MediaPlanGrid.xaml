@@ -135,14 +135,19 @@
 
                 <DataGridTextColumn Header="Affinity" Binding="{Binding MediaPlan.Affinity}"
                                             IsReadOnly="True"/>
-                <DataGridTextColumn Header="Prog Coef" Binding="{Binding MediaPlan.Progcoef, Mode=TwoWay, StringFormat=N2}" 
-                                    />
+                <DataGridTextColumn Header="Ch Coef" Binding="{Binding MediaPlan.Chcoef, StringFormat=N2}"
+                                    IsReadOnly="True"/>
+                <DataGridTextColumn Header="Prog Coef" Binding="{Binding MediaPlan.Progcoef, Mode=TwoWay, StringFormat=N2}"/>
                 <DataGridTextColumn Header="DP Coef" Binding="{Binding MediaPlan.Dpcoef, StringFormat=N2}"
                                     IsReadOnly="True"/>
                 <DataGridTextColumn Header="Seas Coef" Binding="{Binding MediaPlan.Seascoef, StringFormat=N2}"
                                     Visibility="Collapsed" IsReadOnly="True"/>
                 <DataGridTextColumn Header="Sec Coef" Binding="{Binding MediaPlan.Seccoef, StringFormat=N2}"
                                     Visibility="Collapsed" IsReadOnly="True"/>
+                <DataGridTextColumn Header="Coef A" Binding="{Binding MediaPlan.CoefA,  Mode=TwoWay,StringFormat=N2}"
+                                    Visibility="Collapsed"/>
+                <DataGridTextColumn Header="Coef B" Binding="{Binding MediaPlan.CoefB, Mode=TwoWay, StringFormat=N2}"
+                                    Visibility="Collapsed"/>
                 <DataGridTextColumn Header="CPP" Binding="{Binding MediaPlan.Cpp, StringFormat=N2}"
                                     IsReadOnly="True"/>
                 <DataGridTextColumn Header="Ins" Binding="{Binding MediaPlan.Insertations}"

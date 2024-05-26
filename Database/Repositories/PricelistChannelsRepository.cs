@@ -27,12 +27,13 @@ namespace Database.Repositories
             using var connection = _context.GetConnection();
 
             var affected = await connection.ExecuteAsync(
-                "INSERT INTO tblpricelistchn (plid, chid)" +
-                    "VALUES (@Plid, @Chid)",
+                "INSERT INTO tblpricelistchn (plid, chid, chcoef)" +
+                    "VALUES (@Plid, @Chid, @Chcoef)",
                 new
                 {
                     Plid = pricelistChannelsDTO.plid,
                     Chid = pricelistChannelsDTO.chid,
+                    Chcoef = pricelistChannelsDTO.chcoef
                 });
 
             return affected != 0;
@@ -43,7 +44,7 @@ namespace Database.Repositories
             using var connection = _context.GetConnection();
 
             var pricelistChannels = await connection.QueryFirstOrDefaultAsync<PricelistChannels>(
-                "SELECT * FROM tblpricelistchn WHERE plid = @Plid AND chid = @Chid", 
+                "SELECT * FROM tblpricelistchn WHERE plid = @Plid AND chid = @Chid ", 
                 new { 
                     PlId = plid,
                     Chid = chid
@@ -127,12 +128,13 @@ namespace Database.Repositories
             using var connection = _context.GetConnection();
 
             var affected = await connection.ExecuteAsync(
-                "UPDATE tblpricelistchn SET plid = @Plid, chid = @Chid" +
+                "UPDATE tblpricelistchn SET plid = @Plid, chid = @Chid, chcoef = @Chcoef " +
                 "WHERE plid = @Plid AND chid = @Chid",
                 new
                 {
                     Plid = pricelistChannelsDTO.plid,
-                    Chid = pricelistChannelsDTO.chid
+                    Chid = pricelistChannelsDTO.chid,
+                    Chcoef = pricelistChannelsDTO.chcoef
                 });
 
             return affected != 0;
