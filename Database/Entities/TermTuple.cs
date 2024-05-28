@@ -1,4 +1,5 @@
-﻿using Database.DTOs.SpotDTO;
+﻿using Database.DTOs.ChannelDTO;
+using Database.DTOs.SpotDTO;
 
 namespace Database.Entities
 {
@@ -8,6 +9,14 @@ namespace Database.Entities
         private MediaPlanTerm _mediaPlanTerm;
         private SpotDTO _spot;
         private decimal _price;
+        private int _status = 1;
+        public string ChannelName { get; set; }
+
+        public int Status
+        {
+            get { return _status; }
+            set { _status = value; }
+        }
 
         public MediaPlan MediaPlan { get { return _mediaPlan; } }
         public MediaPlanTerm MediaPlanTerm { get { return _mediaPlanTerm; } }
@@ -19,13 +28,18 @@ namespace Database.Entities
         public decimal? Cpp { get { return _termCoefs.Cpp; } }
         public decimal? Amrpsale { get { return _termCoefs.Amrpsale; } }
 
-        public TermTuple(MediaPlan mediaPlan, MediaPlanTerm mediaPlanTerm, SpotDTO spot,
-            TermCoefs termCoefs)
+        public TermTuple(MediaPlan mediaPlan, MediaPlanTerm mediaPlanTerm, 
+            SpotDTO spot, TermCoefs termCoefs, string channelname)
         {
             _mediaPlan = mediaPlan;
             _mediaPlanTerm = mediaPlanTerm;
             _spot = spot;
             _termCoefs = termCoefs;
+            this.ChannelName = channelname;
+            if (mediaPlan.xmpid == null || mediaPlan.xmpid == 0)
+            {
+                this.Status = -1;
+            }
         }
     }
 }

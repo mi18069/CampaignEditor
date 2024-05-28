@@ -13,6 +13,7 @@ namespace Database.Repositories
         Task<IEnumerable<MediaPlanRealizedDTO>> GetAllMediaPlansRealizedByChid(int chid);
         Task<IEnumerable<MediaPlanRealizedDTO>> GetAllMediaPlansRealizedByChidAndDate(int chid, string date);
         Task<bool> UpdateMediaPlanRealized(UpdateMediaPlanRealizedDTO mediaPlanRealizedDTO);
+        Task<bool> UpdateMediaPlanRealized(MediaPlanRealized mediaPlanRealized);
         Task<bool> DeleteMediaPlanRealizedById(int id);
         Task<string> GetDedicatedSpotName(int spotid);
         Task<bool> SetStatusValue(int id, int statusValue);

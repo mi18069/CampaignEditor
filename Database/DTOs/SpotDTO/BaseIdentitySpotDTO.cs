@@ -29,6 +29,9 @@ namespace Database.DTOs.SpotDTO
 
             BaseIdentitySpotDTO other = (BaseIdentitySpotDTO)obj;
 
+            if (spotcode.Trim().Length == 0 || other.spotcode.Trim().Length == 0)
+                return false;
+
             return cmpid == other.cmpid &&
                    spotcode.Trim()[0] == other.spotcode.Trim()[0];
         }

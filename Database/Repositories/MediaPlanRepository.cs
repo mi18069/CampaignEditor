@@ -5,6 +5,7 @@ using Database.DTOs.MediaPlanDTO;
 using Database.Entities;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -522,11 +523,12 @@ namespace Database.Repositories
         {
             using var connection = _context.GetConnection();
 
-            var mediaPlans = await connection.QueryAsync<dynamic>(
+            var mediaPlanList= await connection.QueryAsync<MediaPlanDBEntity>(
                 "SELECT * FROM xmp WHERE cmpid = @Cmpid AND chid = @Chid AND verzija = @Version",
                 new { Cmpid = cmpid, Chid = chid, Version = version });
 
-            mediaPlans = mediaPlans.Select(item => new MediaPlan()
+            /*
+            var mediaPlans = mediaPlanList.Select(item => new MediaPlan()
             {
                 xmpid = item.xmpid,
                 schid = item.schid,
@@ -542,10 +544,10 @@ namespace Database.Repositories
                 type = item.tipologija,
                 special = item.specijal,
                 sdate = DateOnly.FromDateTime(item.datumod),
-                edate = item.datumdo == null ? null : DateOnly.FromDateTime(item.datumdo),
+                edate = item.datumdo.HasValue ? DateOnly.FromDateTime(item.datumdo.Value) : (DateOnly?)null,
                 progcoef = (decimal)item.progkoef,
                 created = DateOnly.FromDateTime(item.datumkreiranja),
-                modified = item.datumizmene == null ? null : DateOnly.FromDateTime(item.datumizmene),
+                modified = item.datumizmene.HasValue ? DateOnly.FromDateTime(item.datumizmene.Value) : (DateOnly?)null,
                 amr1 = (decimal)item.amr1,
                 amr1trim = item.amr1trim,
                 amr2 = (decimal)item.amr2,
@@ -563,10 +565,52 @@ namespace Database.Repositories
                 seccoef = (decimal)item.seckoef,
                 price = (decimal)item.price,
                 active = item.active,
-                pps = item.pps != null ? (decimal)item.pps : 0.0M,
+                pps = item.pricepersec != null ? (decimal)item.pricepersec : 0.0M,
                 coefA = (decimal)item.koefa,
                 coefB = (decimal)item.koefb
             });
+
+            return _mapper.Map<IEnumerable<MediaPlanDTO>>(mediaPlans);*/
+            var mediaPlans = mediaPlanList.Select(item => new MediaPlanDTO(
+                item.xmpid,
+                item.schid,
+                item.cmpid,
+                item.chid,
+                (string)item.naziv.Trim(),
+                item.verzija,
+                item.pozicija,
+                item.vremeod,
+                item.vremedo == null ? null : item.vremedo,
+                item.vremerbl == null ? null : item.vremerbl,
+                item.dani,
+                item.tipologija,
+                item.specijal,
+                DateOnly.FromDateTime(item.datumod),
+                item.datumdo.HasValue ? DateOnly.FromDateTime(item.datumdo.Value) : (DateOnly?)null,
+                (decimal)item.progkoef,
+                DateOnly.FromDateTime(item.datumkreiranja),
+                item.datumizmene.HasValue ? DateOnly.FromDateTime(item.datumizmene.Value) : (DateOnly?)null,
+                (decimal)item.amr1,
+                item.amr1trim,
+                (decimal)item.amr2,
+                item.amr2trim,
+                (decimal)item.amr3,
+                item.amr3trim,
+                (decimal)item.amrsale,
+                item.amrsaletrim,
+                (decimal)item.amrp1,
+                (decimal)item.amrp2,
+                (decimal)item.amrp3,
+                (decimal)item.amrpsale,
+                (decimal)item.dpkoef,
+                (decimal)item.seaskoef,
+                (decimal)item.seckoef,
+                (decimal)item.koefa,
+                (decimal)item.koefb,
+                (decimal)item.price,
+                item.active,
+                item.pricepersec != null ? (decimal)item.pricepersec : 0.0M
+                ));
 
             return _mapper.Map<IEnumerable<MediaPlanDTO>>(mediaPlans);
         }

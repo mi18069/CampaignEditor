@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System;
 using System.Windows.Controls;
 using CampaignEditor.Controllers;
+using System.Linq;
 
 namespace CampaignEditor.UserControls.ValidationItems
 {
@@ -11,8 +12,8 @@ namespace CampaignEditor.UserControls.ValidationItems
     /// </summary>
     public partial class ValidationDay : UserControl
     {
-        private List<TermTuple> _termTuples = new List<TermTuple>();
-        private List<MediaPlanRealized> _mpRealizedTuples = new List<MediaPlanRealized>();
+        public List<TermTuple?> _termTuples;
+        public List<MediaPlanRealized?> _mpRealizedTuples;
         private DateOnly date;
 
         public MediaPlanRealizedController _mediaPlanRealizedController;
@@ -23,37 +24,25 @@ namespace CampaignEditor.UserControls.ValidationItems
         {
             InitializeComponent();
 
-            spExpected.Children.Clear();
-            spRealized.Children.Clear();
+            dgExpected.ItemsSource = null;
+            dgRealized.ItemsSource = null;
 
-            _termTuples.Clear();
-            _mpRealizedTuples.Clear();
-
-            this.date = date;
             _termTuples = termTuples;
             _mpRealizedTuples = mpRealizedTuples;
 
-        }
-
-        public void Initialize(DateOnly date,
-            List<TermTuple> termTuples,
-            List<MediaPlanRealized> mpRealizedTuples)
-        {
-            spExpected.Children.Clear();
-            spRealized.Children.Clear();
-
-            _termTuples.Clear();
-            _mpRealizedTuples.Clear();
-
             this.date = date;
-            _termTuples = termTuples;
-            _mpRealizedTuples = mpRealizedTuples;
+            if (_termTuples.Count > 0)
+                dgExpected.ItemsSource = _termTuples;
+            if (_mpRealizedTuples.Count > 0)
+                dgRealized.ItemsSource = _mpRealizedTuples;
+            SetUserControl();
         }
+      
 
-        public void SetUserControl()
+        private void SetUserControl()
         {
-            int exCount = _termTuples.Count;
-            int realCount = _mpRealizedTuples.Count;
+            int exCount = _termTuples.Where(tt => tt != null && tt.Status != -1).Count();
+            int realCount = _mpRealizedTuples.Where(rt => rt != null && rt.status != -1).Count();
 
             lblExCount.Content = exCount;
             lblRealCount.Content = realCount;
@@ -64,7 +53,7 @@ namespace CampaignEditor.UserControls.ValidationItems
                 expander.Visibility = System.Windows.Visibility.Collapsed;
             }
 
-            foreach (var termTuple in _termTuples)
+            /*foreach (var termTuple in _termTuples)
             {
                 VTermItem vTermItem = new VTermItem();
                 vTermItem.Initialize(termTuple);
@@ -78,12 +67,15 @@ namespace CampaignEditor.UserControls.ValidationItems
                 vRealizedItem.Initialize(mpRealized);
 
                 spRealized.Children.Add(vRealizedItem);
-            }
+            }*/
 
-            while (exCount < realCount)
+            /*dgExpected.ItemsSource = _termTuples;
+            dgRealized.ItemsSource = _mpRealizedTuples;*/
+
+            /*while (exCount < realCount)
             {
                 VTermEmptyItem vTermEmptyItem = new VTermEmptyItem();
-                spExpected.Children.Add(vTermEmptyItem);
+                dgExpected.Items.Add(vTermEmptyItem);
                 exCount += 1;
             }
 
@@ -92,7 +84,7 @@ namespace CampaignEditor.UserControls.ValidationItems
                 VTermEmptyItem vTermEmptyItem = new VTermEmptyItem();
                 spRealized.Children.Add(vTermEmptyItem);
                 realCount += 1;
-            }
+            }*/
         }
 
     }

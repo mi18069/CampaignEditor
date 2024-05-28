@@ -7,5 +7,7 @@ namespace Database.DTOs.SpotDTO
             : base(cmpid, spotcode, spotname, spotlength, ignore)
         {
         }
+
+        public string SpotName { get { return spotname.Trim(); } }
     }
 }

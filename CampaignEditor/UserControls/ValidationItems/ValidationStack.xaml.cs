@@ -23,8 +23,8 @@ namespace CampaignEditor.UserControls.ValidationItems
         public List<ChannelDTO> _channels = new List<ChannelDTO>();
         public List<DateOnly> _dates = new List<DateOnly>();
 
-        public Dictionary<DateOnly, List<TermTuple>> _dayTermDict = new Dictionary<DateOnly, List<TermTuple>>();
-        public Dictionary<DateOnly, List<MediaPlanRealized>> _dayRealizedDict = new Dictionary<DateOnly, List<MediaPlanRealized>>();
+        public Dictionary<DateOnly, List<TermTuple?>> _dateExpectedDict;
+        public Dictionary<DateOnly, List<MediaPlanRealized?>> _dateRealizedDict;
 
         public ChannelCmpController _channelCmpController;
         public ChannelController _channelController;
@@ -55,35 +55,35 @@ namespace CampaignEditor.UserControls.ValidationItems
                 _campaignVersion = version;
 
             }
-
+            LoadDates();
         }
 
         public async Task LoadData(int chid)
         {
 
-            await LoadExpected(chid);
+            /*await LoadExpected(chid);
             await LoadRealized(chid);
-            LoadDays();
+            LoadDays();*/
         }
 
-        private void LoadDays()
+        private void LoadDates()
         {
             spValidationDays.Children.Clear();
 
             foreach (var day in _dates)
             {
-                var dayTerms = _dayTermDict[day];
-                var dayRealizeds = _dayRealizedDict[day];
+                var dateExpected = _dateExpectedDict[day];
+                var dateRealized = _dateRealizedDict[day];
 
-                ValidationDay validationDay = new ValidationDay(day, dayTerms, dayRealizeds);
-                validationDay._mediaPlanRealizedController = _mediaPlanRealizedController;
-                validationDay.SetUserControl();
+                ValidationDay validationDay = new ValidationDay(day, dateExpected, dateRealized);
+                //validationDay._mediaPlanRealizedController = _mediaPlanRealizedController;
+                //validationDay.SetUserControl();
 
                 spValidationDays.Children.Add(validationDay);
             }
         }
 
-        private async Task LoadExpected(int chid)
+        /*private async Task LoadExpected(int chid)
         {
 
             List<TermTuple> termTuples = new List<TermTuple>();
@@ -120,9 +120,9 @@ namespace CampaignEditor.UserControls.ValidationItems
             }
 
             //AddIntoExpected(_dayTuples);
-        }
+        }*/
 
-        private async Task LoadRealized(int chid)
+        /*private async Task LoadRealized(int chid)
         {
             if (_mediaPlanRealized == null)
             {
@@ -140,7 +140,7 @@ namespace CampaignEditor.UserControls.ValidationItems
                 _dayRealizedDict[date] = dayTuples;
             }
             //AddIntoRealized(_dayRealizedTuples);
-        }
+        }*/
 
         private void AddIntoExpected(List<Tuple<DateOnly, List<TermTuple>>> dayTuples)
         {

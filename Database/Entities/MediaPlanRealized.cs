@@ -1,4 +1,5 @@
-﻿using System.ComponentModel;
+﻿using Database.DTOs.ChannelDTO;
+using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
 namespace Database.Entities
@@ -7,6 +8,8 @@ namespace Database.Entities
     {
         private decimal? _price;
         private int? _status;
+        public MediaPlan? MediaPlan { get; set; }
+        public ChannelDTO Channel { get; set; } 
 
         public int? id { get; set; }
         public int? cmpid { get; set; }
@@ -34,7 +37,9 @@ namespace Database.Entities
         public decimal? seascoef { get; set; }
         public decimal? seccoef { get; set; }
         public decimal? progcoef { get; set; }
-
+        public decimal? chcoef { get; set; }
+        public decimal? coefA { get; set; }
+        public decimal? coefB { get; set; }
 
         public decimal? price {
             get { return _price; }

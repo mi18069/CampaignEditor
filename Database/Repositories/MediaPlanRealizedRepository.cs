@@ -28,10 +28,10 @@ namespace Database.Repositories
             var affected = await connection.ExecuteAsync(
                 "INSERT INTO xmpre (naziv, cmpid, vremeod, vremedo, vremeodv, vremedov, chid, dure, durf, datum, bremisije  " +
                 " pozinbr, totalspotbr, breaktype, brspot, brbrand, amrp1, amrp2, amrp3, amrpsale " +
-                " cpp, dpcoef, seascoef, progcoef, cena, status " + 
+                " cpp, dpcoef, seascoef, progcoef, cena, status, chcoef, koefa, koefb " + 
                 "VALUES (@Name, @Cmpid, @Stime, @Etime, @Stimestr, @Etimestr, @Chid, @Dure, @Durf, @Date, @Emsnum, " +
                 " @Posinbr, @Totalspotnum, @Breaktype, @Spotnum, @Brandnum, @Amrp1, @Amrp2, @Amrp3, @Amrpsale " +
-                "@Cpp, @Dpcoef, @Seascoef, @Progcoef, @Price, @Status ) ",
+                "@Cpp, @Dpcoef, @Seascoef, @Progcoef, @Price, @Status, @Chcoef, @CoefA, @CoefB ) ",
             new
             {
                 Name = mediaPlanRealizedDTO.name.Trim(),
@@ -60,7 +60,10 @@ namespace Database.Repositories
                 Seccoef = mediaPlanRealizedDTO.seccoef,
                 Progcoef = mediaPlanRealizedDTO.progcoef,
                 Price = mediaPlanRealizedDTO.price,
-                Status = mediaPlanRealizedDTO.status
+                Status = mediaPlanRealizedDTO.status,
+                Chcoef = mediaPlanRealizedDTO.chcoef,
+                CoefA = mediaPlanRealizedDTO.coefA,
+                CoefB = mediaPlanRealizedDTO.coefB
             });
 
 
@@ -97,13 +100,16 @@ namespace Database.Repositories
                 amrp2 = item.amrp2,
                 amrp3 = item.amrp3,
                 amrpsale = item.amrpsale,
-                cpp = item.cpp,
-                dpcoef = item.dpcoef,
-                seascoef = item.seascoef,
-                seccoef = item.seccoef,
-                progcoef = item.progcoef,
-                price = item.cena,
-                status = item.status
+                cpp = item.cpp ?? null,
+                dpcoef = item.dpcoef ?? null,
+                seascoef = item.seascoef ?? null,
+                seccoef = item.seccoef ?? null,
+                progcoef = item.progcoef ?? null,
+                price = item.cena ?? null,
+                status = item.status ?? null,
+                chcoef = item.chcoef ?? null,
+                coefA = item.koefa ?? null,
+                coefB = item.koefb ?? null
             });
 
             return _mapper.Map<MediaPlanRealizedDTO>(mediaPlanRealized.FirstOrDefault());
@@ -145,8 +151,11 @@ namespace Database.Repositories
                 seccoef = item.seccoef ?? null,
                 progcoef = item.progcoef ?? null,
                 price = item.cena ?? null,
-                status = item.status ?? null
-            }); ;
+                status = item.status ?? null,
+                chcoef = item.chcoef ?? null,
+                coefA = item.koefa ?? null,
+                coefB = item.koefb ?? null
+            });
 
             return (IEnumerable<MediaPlanRealized>)mediaPlanRealized;
         }
@@ -182,13 +191,16 @@ namespace Database.Repositories
                 amrp2 = item.amrp2,
                 amrp3 = item.amrp3,
                 amrpsale = item.amrpsale,
-                cpp = item.cpp,
-                dpcoef = item.dpcoef,
-                seascoef = item.seascoef,
-                seccoef = item.seccoef,
-                progcoef = item.progcoef,
-                price = item.cena,
-                status = item.status
+                cpp = item.cpp ?? null,
+                dpcoef = item.dpcoef ?? null,
+                seascoef = item.seascoef ?? null,
+                seccoef = item.seccoef ?? null,
+                progcoef = item.progcoef ?? null,
+                price = item.cena ?? null,
+                status = item.status ?? null,
+                chcoef = item.chcoef ?? null,
+                coefA = item.koefa ?? null,
+                coefB = item.koefb ?? null
             });
 
             return _mapper.Map<IEnumerable<MediaPlanRealizedDTO>>(mediaPlansRealized);
@@ -226,13 +238,16 @@ namespace Database.Repositories
                 amrp2 = item.amrp2,
                 amrp3 = item.amrp3,
                 amrpsale = item.amrpsale,
-                cpp = item.cpp,
-                dpcoef = item.dpcoef,
-                seascoef = item.seascoef,
-                seccoef = item.seccoef,
-                progcoef = item.progcoef,
-                price = item.cena,
-                status = item.status
+                cpp = item.cpp ?? null,
+                dpcoef = item.dpcoef ?? null,
+                seascoef = item.seascoef ?? null,
+                seccoef = item.seccoef ?? null,
+                progcoef = item.progcoef ?? null,
+                price = item.cena ?? null,
+                status = item.status ?? null,
+                chcoef = item.chcoef ?? null,
+                coefA = item.koefa ?? null,
+                coefB = item.koefb ?? null
             });
 
             return _mapper.Map<IEnumerable<MediaPlanRealizedDTO>>(mediaPlansRealized);
@@ -245,11 +260,11 @@ namespace Database.Repositories
 
             var affected = await connection.ExecuteAsync(
                 "UPDATE xmpre SET id = @Id, cmpid = @Cmpid, naziv = @Name, vremeod = @Stime, vremedo = @Etime, " +
-                " vremeodv = @Stimestr, vremedov = @Etimestr, chid = @Chid, dure = @Dure, durf = @Durf, datum = @Date, bremisije = @Emsnum  " +
+                " vremeodv = @Stimestr, vremedov = @Etimestr, chid = @Chid, dure = @Dure, durf = @Durf, datum = @Date, bremisije = @Emsnum, " +
                 " pozinbr = @Posinbr, totalspotbr = @Totalspotnum, breaktype = @Breaktype, " +
                 " brspot = @Spotnum, brbrand = @Brandnum, amrp1 = @Amrp1, amrp2 = @Amrp2, amrp3 = @Amrp3, " +
                 " amrpsale = @Amrpsale, cpp = @Cpp, dpcoef = @Dpcoef, seascoef = @Seascoef, " +
-                " progcoef = @Progcoef, cena = @Price, status = @Status " +
+                " progcoef = @Progcoef, cena = @Price, status = @Status, chcoef = @Chcoef, koefa = @CoefA, koefb = @CoefB " +
                 " WHERE id = @Id",
                 new
                 {
@@ -280,7 +295,63 @@ namespace Database.Repositories
                     Seccoef = mediaPlanRealizedDTO.seccoef,
                     Progcoef = mediaPlanRealizedDTO.progcoef,
                     Price = mediaPlanRealizedDTO.price,
-                    Status = mediaPlanRealizedDTO.status
+                    Status = mediaPlanRealizedDTO.status,
+                    Chcoef = mediaPlanRealizedDTO.chcoef,
+                    CoefA = mediaPlanRealizedDTO.coefA,
+                    CoefB = mediaPlanRealizedDTO.coefB
+                });
+
+
+
+            return affected != 0;
+        }
+
+        public async Task<bool> UpdateMediaPlanRealized(MediaPlanRealized mediaPlanRealized)
+        {
+            using var connection = _context.GetConnection();
+
+
+            var affected = await connection.ExecuteAsync(
+                "UPDATE xmpre SET id = @Id, cmpid = @Cmpid, naziv = @Name, vremeod = @Stime, vremedo = @Etime, " +
+                " vremeodv = @Stimestr, vremedov = @Etimestr, chid = @Chid, dure = @Dure, durf = @Durf, datum = @Date, bremisije = @Emsnum,  " +
+                " pozinbr = @Posinbr, totalspotbr = @Totalspotnum, breaktype = @Breaktype, " +
+                " brspot = @Spotnum, brbrand = @Brandnum, amrp1 = @Amrp1, amrp2 = @Amrp2, amrp3 = @Amrp3, " +
+                " amrpsale = @Amrpsale, cpp = @Cpp, dpcoef = @Dpcoef, seascoef = @Seascoef, " +
+                " progcoef = @Progcoef, cena = @Price, status = @Status, chcoef = @Chcoef, koefa = @CoefA, koefb = @CoefB " +
+                " WHERE id = @Id",
+                new
+                {
+                    Id = mediaPlanRealized.id,
+                    Name = mediaPlanRealized.name.Trim(),
+                    Cmpid = mediaPlanRealized.cmpid,
+                    Stime = mediaPlanRealized.stime,
+                    Etime = mediaPlanRealized.etime,
+                    Stimestr = mediaPlanRealized.stimestr,
+                    Etimestr = mediaPlanRealized.etimestr,
+                    Chid = mediaPlanRealized.chid,
+                    Dure = mediaPlanRealized.dure,
+                    Durf = mediaPlanRealized.durf,
+                    Date = mediaPlanRealized.date,
+                    Emsnum = mediaPlanRealized.emsnum,
+                    Posinbr = mediaPlanRealized.posinbr,
+                    Totalspotnum = mediaPlanRealized.totalspotnum,
+                    Breaktype = mediaPlanRealized.breaktype,
+                    Spotnum = mediaPlanRealized.spotnum,
+                    Brandnum = mediaPlanRealized.brandnum,
+                    Amrp1 = mediaPlanRealized.amrp1,
+                    Amrp2 = mediaPlanRealized.amrp2,
+                    Amrp3 = mediaPlanRealized.amrp3,
+                    Amrpsale = mediaPlanRealized.amrpsale,
+                    Cpp = mediaPlanRealized.cpp,
+                    Dpcoef = mediaPlanRealized.dpcoef,
+                    Seascoef = mediaPlanRealized.seascoef,
+                    Seccoef = mediaPlanRealized.seccoef,
+                    Progcoef = mediaPlanRealized.progcoef,
+                    Price = mediaPlanRealized.price,
+                    Status = mediaPlanRealized.status,
+                    Chcoef = mediaPlanRealized.chcoef,
+                    CoefA = mediaPlanRealized.coefA,
+                    CoefB = mediaPlanRealized.coefB
                 });
 
 

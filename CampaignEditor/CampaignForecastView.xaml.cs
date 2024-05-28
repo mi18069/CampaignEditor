@@ -32,6 +32,7 @@ namespace CampaignEditor
 
         LoadingPage loadingPage = new LoadingPage();
         public bool alreadyExists = false;
+        public bool lockThis = false;
 
         private CampaignDTO _campaign;
         public TabItem tabForecast;
@@ -122,13 +123,20 @@ namespace CampaignEditor
 
             try
             {               
-                if (!alreadyExists)
+                if (_forecast != null)
                 {
                     // Unsubscribe from the SelectionChanged event
                     _forecast.cbVersions.SelectionChanged -= _forecast.CbVersions_SelectionChanged;
                 }
+                var mpVer = await _mediaPlanVersionController.GetLatestMediaPlanVersion(_campaign.cmpid);
+                if (mpVer == null)
+                {
+                    mpVer = new MediaPlanVersionDTO(_campaign.cmpid, 0);
+                    await _mediaPlanVersionController.CreateMediaPlanVersion(mpVer);
+                }
                 await _forecast.Initialize(_campaign, isReadOnly);
-                if (alreadyExists)
+                await _forecast.LoadData(mpVer.version);
+                if (_forecast != null)
                 {
                     // Subscribe from the SelectionChanged event
                     _forecast.cbVersions.SelectionChanged += _forecast.CbVersions_SelectionChanged;

@@ -46,6 +46,10 @@ namespace CampaignEditor.Controllers
         {
             return await _repository.UpdateMediaPlanRealized(mediaPlanRealizedDTO);
         }
+        public async Task<bool> UpdateMediaPlanRealized(MediaPlanRealized mediaPlanRealized)
+        {
+            return await _repository.UpdateMediaPlanRealized(mediaPlanRealized);
+        }
 
         public async Task<bool> DeleteMediaPlanRealizedById(int id)
         {

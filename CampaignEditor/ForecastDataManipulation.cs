@@ -574,7 +574,7 @@ namespace CampaignEditor
         public async Task<IEnumerable<MediaPlanTuple>> MakeMediaPlanTuples(int version)
         {
             int daysNum = (int)(endDate - startDate).TotalDays;
-
+            
             // Create tasks for each channel so every thread works with that channel mediaPlans
             List<Task<List<MediaPlanTuple>>> tasks = _forecastData.Channels.Select(async channel =>
             {
@@ -584,7 +584,17 @@ namespace CampaignEditor
 
             // Wait for all tasks to complete
             await Task.WhenAll(tasks);
+            /*List<MediaPlanTuple> allMediaPlans = new List<MediaPlanTuple>();
+            foreach (var channel in _forecastData.Channels)
+            {
+                var mediaPlans = await FillMPListByChannel(daysNum, channel.chid, version);
+                foreach (var mp in mediaPlans)
+                {
+                    allMediaPlans.Add(mp);
+                }
+            }*/
 
+            
             // Extract results from completed tasks
             List<MediaPlanTuple> allMediaPlans = tasks.SelectMany(task => task.Result).ToList();
             return allMediaPlans;

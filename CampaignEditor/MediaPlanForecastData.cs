@@ -32,6 +32,7 @@ namespace CampaignEditor
         private Dictionary<int, PricelistDTO> _chidPricelistDict = new Dictionary<int, PricelistDTO>();
         private Dictionary<int, decimal> _chidChcoefDict = new Dictionary<int, decimal>();
         private Dictionary<int, int> _chrdsChidDict = new Dictionary<int, int>();
+        private Dictionary<int, ChannelDTO> _chrdsChannelDict = new Dictionary<int, ChannelDTO>();
         private Dictionary<int, List<PricesDTO>> _plidPricesDict = new Dictionary<int, List<PricesDTO>>();
         private Dictionary<int, SectableDTO> _plidSectableDict = new Dictionary<int, SectableDTO>();
         private Dictionary<int, List<SectablesDTO>> _secidSectablesDict = new Dictionary<int, List<SectablesDTO>>();
@@ -64,6 +65,7 @@ namespace CampaignEditor
         public Dictionary<char, SpotDTO> SpotcodeSpotDict { get { return _spotcodeSpotDict; } }
         public Dictionary<int, PricelistDTO> ChidPricelistDict { get { return _chidPricelistDict; } }
         public Dictionary<int, int> ChrdsidChidDict { get { return _chrdsChidDict; } }
+        public Dictionary<int, ChannelDTO> ChrdsChannelDict { get { return _chrdsChannelDict; } }
         public Dictionary<int, List<PricesDTO>> PlidPricesDict { get { return _plidPricesDict; } }
         public Dictionary<int, SectableDTO> PlidSectableDict { get { return _plidSectableDict; } }
         public Dictionary<int, List<SectablesDTO>> SecidSectablesDict { get { return _secidSectablesDict; } }
@@ -163,6 +165,7 @@ namespace CampaignEditor
                         var pricelist = await _pricelistController.GetPricelistById(channelCmp.plid);
                         _chidPricelistDict[channel.chid] = pricelist;
                         _chrdsChidDict[channel.chrdsid] = channel.chid;
+                        _chrdsChannelDict[channel.chrdsid] = channel;
 
                         if (!_pricelists.Any(p => p.plid == pricelist.plid))
                         {
@@ -181,6 +184,7 @@ namespace CampaignEditor
             _pricelists.Clear();
             _chidPricelistDict.Clear();
             _chrdsChidDict.Clear();
+            _chrdsChannelDict.Clear();
 
             _plidPricesDict.Clear();
             _plidSectableDict.Clear();
@@ -194,6 +198,7 @@ namespace CampaignEditor
                 var pricelist = await _pricelistController.GetPricelistById(channelCmp.plid);
                 _chidPricelistDict[channelCmp.chid] = pricelist;
                 _chrdsChidDict[channel.chrdsid] = channel.chid;
+                _chrdsChannelDict[channel.chrdsid] = channel;
                 if (!_pricelists.Any(p => p.plid == pricelist.plid))
                 {
                     _pricelists.Add(pricelist);

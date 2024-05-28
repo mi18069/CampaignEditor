@@ -4,8 +4,12 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:CampaignEditor.UserControls.ValidationItems"
+             xmlns:converters="clr-namespace:CampaignEditor.Converters"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800" d:Background="White">
+    <UserControl.Resources>
+        <converters:TimeStrToRepresentativeConverter x:Key="TimeStrToRepresentativeConverter"/>
+    </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"/>
@@ -23,8 +27,54 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-                <StackPanel x:Name="spExpected" Grid.Column="0"/>
-                <StackPanel x:Name="spRealized" Grid.Column="1"/>
+                <!-- <StackPanel x:Name="spExpected" Grid.Column="0"/>
+                <StackPanel x:Name="spRealized" Grid.Column="1"/> -->
+                <DataGrid x:Name="dgExpected" Grid.Column="0" 
+                          AutoGenerateColumns="False" CanUserAddRows="False"
+                          CanUserDeleteRows="False" CanUserReorderColumns="False"
+                          CanUserSortColumns="False" IsReadOnly="True">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn x:Name="tcEChannel" Header="Channel" Binding="{Binding Path=ChannelName}" MaxWidth="200"/>
+                        <DataGridTextColumn x:Name="tcEProgram" Header="Program" Binding="{Binding Path=MediaPlan.name}" MaxWidth="200"/>
+                        <DataGridTextColumn x:Name="tcEDayPart" Header="Day part" Binding="{Binding Path=MediaPlan.DayPart.name}" MaxWidth="200"/>
+                        <DataGridTextColumn x:Name="tcEBlocktime" Header="Block time" Binding="{Binding Path=MediaPlan.blocktime}"/>
+                        <DataGridTextColumn x:Name="tcEPosition" Header="Position" Binding="{Binding Path=MediaPlan.position}"/>
+                        <DataGridTextColumn x:Name="tcESpotcode" Header="Spotcode" Binding="{Binding Path=Spot.spotcode}"/>
+                        <DataGridTextColumn x:Name="tcESpotlength" Header="Spot len" Binding="{Binding Path=Spot.spotlength}"/>
+                        <DataGridTextColumn x:Name="tcESpot" Header="Spot" Binding="{Binding Path=Spot.SpotName}" Visibility="Collapsed" MaxWidth="200"/>
+                        <DataGridTextColumn x:Name="tcEChcoef" Header="Ch coef" Binding="{Binding Path=MediaPlan.Chcoef}" Visibility="Collapsed"/>
+                        <DataGridTextColumn x:Name="tcEProgcoef" Header="Prog coef" Binding="{Binding Path=MediaPlan.Progcoef}"/>
+                        <DataGridTextColumn x:Name="tcESeascoef" Header="Seas coef" Binding="{Binding Path=Seascoef}" Visibility="Collapsed"/>
+                        <DataGridTextColumn x:Name="tcESeccoef" Header="Sec coef" Binding="{Binding Path=Seccoef}"/>
+                        <DataGridTextColumn x:Name="tcECoefA" Header="Coef A" Binding="{Binding Path=MediaPlan.CoefA}" Visibility="Collapsed"/>
+                        <DataGridTextColumn x:Name="tcECoefB" Header="Coef B" Binding="{Binding Path=MediaPlan.CoefB}" Visibility="Collapsed"/>
+                        <DataGridTextColumn x:Name="tcEAmrpsale" Header="Amr% Sale" Binding="{Binding Path=Amrpsale}" Visibility="Collapsed"/>
+                        <DataGridTextColumn x:Name="tcECpp" Header="Sec coef" Binding="{Binding Path=Cpp}" Visibility="Collapsed"/>
+                        <DataGridTextColumn x:Name="tcEPrice" Header="Price" Binding="{Binding Path=Price}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+                <DataGrid x:Name="dgRealized" Grid.Column="1"
+                          AutoGenerateColumns="False" CanUserAddRows="False"
+                          CanUserDeleteRows="False" CanUserReorderColumns="False"
+                          CanUserSortColumns="False" IsReadOnly="True">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn x:Name="tcRChannel" Header="Channel" Binding="{Binding Path=Channel.chname}" MaxWidth="200"/>
+                        <DataGridTextColumn x:Name="tcRProgram" Header="Program" Binding="{Binding Path=name}" MaxWidth="200"/>
+                        <DataGridTextColumn x:Name="tcRStarttime" Header="Start time" 
+                                            Binding="{Binding Path=stimestr, Converter={StaticResource TimeStrToRepresentativeConverter}}"/>
+                        <DataGridTextColumn x:Name="tcRFormattetime" Header="Formatted time" Binding="{Binding Path=durf}"/>
+                        <DataGridTextColumn x:Name="tcRSpot" Header="Spot" Binding="{Binding Path=spotname}" MaxWidth="200"/>
+                        <DataGridTextColumn x:Name="tcRChcoef" Header="Ch coef" Binding="{Binding Path=chcoef}" Visibility="Collapsed"/>
+                        <DataGridTextColumn x:Name="tcRProgcoef" Header="Prog coef" Binding="{Binding Path=progcoef}"/>
+                        <DataGridTextColumn x:Name="tcRSeascoef" Header="Seas coef" Binding="{Binding Path=seascoef}" Visibility="Collapsed"/>
+                        <DataGridTextColumn x:Name="tcRSeccoef" Header="Sec coef" Binding="{Binding Path=seccoef}"/>
+                        <DataGridTextColumn x:Name="tcRCoefA" Header="Coef A" Binding="{Binding Path=coefA}" Visibility="Collapsed"/>
+                        <DataGridTextColumn x:Name="tcRCoefB" Header="Coef B" Binding="{Binding Path=coefB}" Visibility="Collapsed"/>
+                        <DataGridTextColumn x:Name="tcRAmrpsale" Header="Amr% Sale" Binding="{Binding Path=amrpsale}" Visibility="Collapsed"/>
+                        <DataGridTextColumn x:Name="tcRCpp" Header="Sec coef" Binding="{Binding Path=cpp}" Visibility="Collapsed"/>
+                        <DataGridTextColumn x:Name="tcRPrice" Header="Price" Binding="{Binding Path=price}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
             </Grid>
         </Expander>
         

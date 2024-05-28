@@ -436,15 +436,23 @@ namespace CampaignEditor
         public void CalculateRealizedCoefs(MediaPlanRealized mpRealized, PricelistDTO pricelist)
         {
             CalculateRealizedCPP(mpRealized, pricelist);
-            decimal seccoef = CalculateRealizedSeccoef(mpRealized, pricelist);
-            decimal seascoef = CalculateRealizedSeascoef(mpRealized, pricelist);
-            decimal progCoef = 1.0M;
+            mpRealized.seccoef = CalculateRealizedSeccoef(mpRealized, pricelist);
+            mpRealized.seascoef = CalculateRealizedSeascoef(mpRealized, pricelist);
+            decimal progcoef = 1.0M;
+            decimal coefA = 1.0M;
+            decimal coefB = 1.0M;
+            if (mpRealized.MediaPlan != null)
+            {
+                progcoef = mpRealized.MediaPlan.progcoef;
+                coefA = mpRealized.MediaPlan.coefA;
+                coefB = mpRealized.MediaPlan.coefB;
+            }
 
-            decimal coefs = seccoef * seascoef * progCoef * mpRealized.dpcoef!.Value;
+            mpRealized.progcoef = progcoef;
+            mpRealized.coefA = coefA;
+            mpRealized.coefB = coefB;
 
-            mpRealized.seccoef = seccoef;
-            mpRealized.seascoef = seascoef;
-            mpRealized.progcoef = progCoef;
+            decimal coefs = mpRealized.chcoef.Value * mpRealized.coefA.Value * mpRealized.coefB.Value * mpRealized.seccoef.Value * mpRealized.seascoef.Value * mpRealized.progcoef.Value * mpRealized.dpcoef!.Value;
 
             CalculateRealizedPrice(mpRealized, pricelist, coefs);     
             
