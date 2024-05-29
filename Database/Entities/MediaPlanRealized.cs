@@ -56,6 +56,16 @@ namespace Database.Entities
             } 
         }
 
+        public decimal? Cpp
+        {
+            get {  return MediaPlan == null ? null : MediaPlan.Cpp; }
+        }
+
+        public decimal? Amrpsale
+        {
+            get { return amrpsale == 0 ? null : amrpsale; }
+        }
+
         public string? spotname { get; set; }
 
         public event PropertyChangedEventHandler PropertyChanged;

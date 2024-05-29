@@ -6,7 +6,7 @@
       xmlns:local="clr-namespace:CampaignEditor.UserControls.ValidationItems"
       mc:Ignorable="d" 
       d:DesignHeight="450" d:DesignWidth="800" d:Background="White"
-      Title="CampaignValidation">
+      Title="CampaignValidation" >
     <Page.Resources>
         <local:ValidationStack x:Key="ValidationStack"/>
     </Page.Resources>
@@ -40,7 +40,7 @@
                 </Grid.ColumnDefinitions>
                 <ComboBox x:Name="cbChannels" Grid.Column="0" 
                       HorizontalAlignment="Stretch" MaxWidth="300" HorizontalContentAlignment="Center"
-                      SelectionChanged="cbChannels_SelectionChanged"/>
+                      SelectionChanged="cbChannels_SelectionChanged" Visibility="Collapsed"/>
                 <Button x:Name="btnCheckRealized" Grid.Column="1"
                         Width="100" Content="Check new data" Click="btnCheckRealized_Click"/>
                 <Button x:Name="btnPrint" Grid.Column="2" Content="Export"

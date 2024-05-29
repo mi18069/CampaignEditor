@@ -46,7 +46,7 @@ namespace CampaignEditor.UserControls.ValidationItems
             lblSeccoef.Content = "Sec coef: " + termTuple.Seccoef.ToString();
             lblSeascoef.Content = "Seas coef: " + termTuple.Seascoef.ToString();
 
-            lblPrice.Content = "Price: " + Math.Round(termTuple.Price, 2).ToString();
+            lblPrice.Content = "Price: " + Math.Round(termTuple.Price.Value, 2).ToString();
         }
 
         private void MakeItemEmpty()

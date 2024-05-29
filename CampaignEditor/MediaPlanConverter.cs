@@ -446,6 +446,7 @@ namespace CampaignEditor
                 progcoef = mpRealized.MediaPlan.progcoef;
                 coefA = mpRealized.MediaPlan.coefA;
                 coefB = mpRealized.MediaPlan.coefB;
+                mpRealized.cpp = mpRealized.MediaPlan.Cpp;
             }
 
             mpRealized.progcoef = progcoef;
@@ -453,7 +454,6 @@ namespace CampaignEditor
             mpRealized.coefB = coefB;
 
             decimal coefs = mpRealized.chcoef.Value * mpRealized.coefA.Value * mpRealized.coefB.Value * mpRealized.seccoef.Value * mpRealized.seascoef.Value * mpRealized.progcoef.Value * mpRealized.dpcoef!.Value;
-
             CalculateRealizedPrice(mpRealized, pricelist, coefs);     
             
         }

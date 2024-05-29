@@ -9,6 +9,8 @@
              d:DesignHeight="450" d:DesignWidth="800" d:Background="White">
     <UserControl.Resources>
         <converters:TimeStrToRepresentativeConverter x:Key="TimeStrToRepresentativeConverter"/>
+        <converters:RoundValueConverter x:Key="RoundValueConverter"/>
+        <converters:StatusToColorConverter x:Key="StatusToColorConverter" />
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -27,52 +29,141 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-                <!-- <StackPanel x:Name="spExpected" Grid.Column="0"/>
-                <StackPanel x:Name="spRealized" Grid.Column="1"/> -->
                 <DataGrid x:Name="dgExpected" Grid.Column="0" 
                           AutoGenerateColumns="False" CanUserAddRows="False"
                           CanUserDeleteRows="False" CanUserReorderColumns="False"
-                          CanUserSortColumns="False" IsReadOnly="True">
+                          CanUserSortColumns="False" IsReadOnly="True"
+                          HeadersVisibility="Column" 
+                          PreviewMouseRightButtonDown="dgExpected_PreviewMouseRightButtonDown"
+                          SelectionChanged="DgExpected_SelectionChanged">
+                    <DataGrid.RowStyle>
+                        <Style TargetType="DataGridRow">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Status}" Value="-1">
+                                    <Setter Property="Background" Value="Transparent"></Setter>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Status}" Value="0">
+                                    <Setter Property="Background" Value="LightGray"></Setter>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Status}" Value="1">
+                                    <Setter Property="Background" Value="LightGreen"></Setter>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Status}" Value="2">
+                                    <Setter Property="Background" Value="OrangeRed"></Setter>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Status}" Value="3">
+                                    <Setter Property="Background" Value="Green"></Setter>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Status}" Value="4">
+                                    <Setter Property="Background" Value="Orange"></Setter>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Status}" Value="5">
+                                    <Setter Property="Background" Value="PaleVioletRed"></Setter>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGrid.RowStyle>
+                    <DataGrid.Resources>
+                        <!-- Style for selected cells -->
+                        <Style TargetType="DataGridCell">
+                            <Style.Triggers>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter Property="Background" Value="LightBlue" />
+                                    <Setter Property="Foreground" Value="Black" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGrid.Resources>
                     <DataGrid.Columns>
+                        <DataGridTextColumn x:Name="tcEStatus" Header="Status" Binding="{Binding Path=Status}" MaxWidth="200"/>
                         <DataGridTextColumn x:Name="tcEChannel" Header="Channel" Binding="{Binding Path=ChannelName}" MaxWidth="200"/>
                         <DataGridTextColumn x:Name="tcEProgram" Header="Program" Binding="{Binding Path=MediaPlan.name}" MaxWidth="200"/>
                         <DataGridTextColumn x:Name="tcEDayPart" Header="Day part" Binding="{Binding Path=MediaPlan.DayPart.name}" MaxWidth="200"/>
                         <DataGridTextColumn x:Name="tcEBlocktime" Header="Block time" Binding="{Binding Path=MediaPlan.blocktime}"/>
                         <DataGridTextColumn x:Name="tcEPosition" Header="Position" Binding="{Binding Path=MediaPlan.position}"/>
                         <DataGridTextColumn x:Name="tcESpotcode" Header="Spotcode" Binding="{Binding Path=Spot.spotcode}"/>
-                        <DataGridTextColumn x:Name="tcESpotlength" Header="Spot len" Binding="{Binding Path=Spot.spotlength}"/>
+                        <DataGridTextColumn x:Name="tcESpotlength" Header="Spot len" Binding="{Binding Path=Spotlength}"/>
                         <DataGridTextColumn x:Name="tcESpot" Header="Spot" Binding="{Binding Path=Spot.SpotName}" Visibility="Collapsed" MaxWidth="200"/>
-                        <DataGridTextColumn x:Name="tcEChcoef" Header="Ch coef" Binding="{Binding Path=MediaPlan.Chcoef}" Visibility="Collapsed"/>
-                        <DataGridTextColumn x:Name="tcEProgcoef" Header="Prog coef" Binding="{Binding Path=MediaPlan.Progcoef}"/>
-                        <DataGridTextColumn x:Name="tcESeascoef" Header="Seas coef" Binding="{Binding Path=Seascoef}" Visibility="Collapsed"/>
-                        <DataGridTextColumn x:Name="tcESeccoef" Header="Sec coef" Binding="{Binding Path=Seccoef}"/>
-                        <DataGridTextColumn x:Name="tcECoefA" Header="Coef A" Binding="{Binding Path=MediaPlan.CoefA}" Visibility="Collapsed"/>
-                        <DataGridTextColumn x:Name="tcECoefB" Header="Coef B" Binding="{Binding Path=MediaPlan.CoefB}" Visibility="Collapsed"/>
-                        <DataGridTextColumn x:Name="tcEAmrpsale" Header="Amr% Sale" Binding="{Binding Path=Amrpsale}" Visibility="Collapsed"/>
-                        <DataGridTextColumn x:Name="tcECpp" Header="Sec coef" Binding="{Binding Path=Cpp}" Visibility="Collapsed"/>
-                        <DataGridTextColumn x:Name="tcEPrice" Header="Price" Binding="{Binding Path=Price}"/>
+                        <DataGridTextColumn x:Name="tcEChcoef" Header="Ch coef" Binding="{Binding Path=Chcoef, Converter={StaticResource RoundValueConverter}}"/>
+                        <DataGridTextColumn x:Name="tcEProgcoef" Header="Prog coef" Binding="{Binding Path=Progcoef, Converter={StaticResource RoundValueConverter}}"/>
+                        <DataGridTextColumn x:Name="tcESeascoef" Header="Seas coef" Binding="{Binding Path=Seascoef, Converter={StaticResource RoundValueConverter}}"/>
+                        <DataGridTextColumn x:Name="tcESeccoef" Header="Sec coef" Binding="{Binding Path=Seccoef, Converter={StaticResource RoundValueConverter}}"/>
+                        <DataGridTextColumn x:Name="tcECoefA" Header="Coef A" Binding="{Binding Path=CoefA, Converter={StaticResource RoundValueConverter}}"/>
+                        <DataGridTextColumn x:Name="tcECoefB" Header="Coef B" Binding="{Binding Path=CoefB, Converter={StaticResource RoundValueConverter}}"/>
+                        <DataGridTextColumn x:Name="tcEAmrpsale" Header="Amr% Sale" Binding="{Binding Path=Amrpsale, Converter={StaticResource RoundValueConverter}}"/>
+                        <DataGridTextColumn x:Name="tcECpp" Header="Cpp" Binding="{Binding Path=Cpp, Converter={StaticResource RoundValueConverter}}"/>
+                        <DataGridTextColumn x:Name="tcEPrice" Header="Price" Binding="{Binding Path=Price, Converter={StaticResource RoundValueConverter}}"/>
                     </DataGrid.Columns>
                 </DataGrid>
                 <DataGrid x:Name="dgRealized" Grid.Column="1"
                           AutoGenerateColumns="False" CanUserAddRows="False"
                           CanUserDeleteRows="False" CanUserReorderColumns="False"
-                          CanUserSortColumns="False" IsReadOnly="True">
+                          CanUserSortColumns="False" IsReadOnly="True" 
+                          HeadersVisibility="Column"
+                          PreviewMouseRightButtonDown="dgRealized_PreviewMouseRightButtonDown"
+                          SelectionChanged="DgRealized_SelectionChanged">
+                    <DataGrid.RowStyle>
+                        <Style TargetType="DataGridRow">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding status}" Value="-1">
+                                    <Setter Property="Background" Value="Transparent"></Setter>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding status}" Value="0">
+                                    <Setter Property="Background" Value="LightGray"></Setter>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding status}" Value="1">
+                                    <Setter Property="Background" Value="LightGreen"></Setter>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding status}" Value="2">
+                                    <Setter Property="Background" Value="OrangeRed"></Setter>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding status}" Value="3">
+                                    <Setter Property="Background" Value="Green"></Setter>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding status}" Value="4">
+                                    <Setter Property="Background" Value="Orange"></Setter>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding status}" Value="5">
+                                    <Setter Property="Background" Value="PaleVioletRed"></Setter>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding status}" Value="6">
+                                    <Setter Property="Background" Value="Violet"></Setter>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding status}" Value="7">
+                                    <Setter Property="Background" Value="Cyan"></Setter>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGrid.RowStyle>
+                    <DataGrid.Resources>
+                        <!-- Style for selected cells -->
+                        <Style TargetType="DataGridCell">
+                            <Style.Triggers>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter Property="Background" Value="LightBlue" />
+                                    <Setter Property="Foreground" Value="Black" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGrid.Resources>
                     <DataGrid.Columns>
+                        <DataGridTextColumn x:Name="tcRStatus" Header="Status" Binding="{Binding Path=status}" MaxWidth="200"/>
                         <DataGridTextColumn x:Name="tcRChannel" Header="Channel" Binding="{Binding Path=Channel.chname}" MaxWidth="200"/>
                         <DataGridTextColumn x:Name="tcRProgram" Header="Program" Binding="{Binding Path=name}" MaxWidth="200"/>
                         <DataGridTextColumn x:Name="tcRStarttime" Header="Start time" 
                                             Binding="{Binding Path=stimestr, Converter={StaticResource TimeStrToRepresentativeConverter}}"/>
                         <DataGridTextColumn x:Name="tcRFormattetime" Header="Formatted time" Binding="{Binding Path=durf}"/>
+                        <DataGridTextColumn x:Name="tcREffectivetime" Header="Effective time" Binding="{Binding Path=dure}"/>
                         <DataGridTextColumn x:Name="tcRSpot" Header="Spot" Binding="{Binding Path=spotname}" MaxWidth="200"/>
-                        <DataGridTextColumn x:Name="tcRChcoef" Header="Ch coef" Binding="{Binding Path=chcoef}" Visibility="Collapsed"/>
-                        <DataGridTextColumn x:Name="tcRProgcoef" Header="Prog coef" Binding="{Binding Path=progcoef}"/>
-                        <DataGridTextColumn x:Name="tcRSeascoef" Header="Seas coef" Binding="{Binding Path=seascoef}" Visibility="Collapsed"/>
-                        <DataGridTextColumn x:Name="tcRSeccoef" Header="Sec coef" Binding="{Binding Path=seccoef}"/>
-                        <DataGridTextColumn x:Name="tcRCoefA" Header="Coef A" Binding="{Binding Path=coefA}" Visibility="Collapsed"/>
-                        <DataGridTextColumn x:Name="tcRCoefB" Header="Coef B" Binding="{Binding Path=coefB}" Visibility="Collapsed"/>
-                        <DataGridTextColumn x:Name="tcRAmrpsale" Header="Amr% Sale" Binding="{Binding Path=amrpsale}" Visibility="Collapsed"/>
-                        <DataGridTextColumn x:Name="tcRCpp" Header="Sec coef" Binding="{Binding Path=cpp}" Visibility="Collapsed"/>
-                        <DataGridTextColumn x:Name="tcRPrice" Header="Price" Binding="{Binding Path=price}"/>
+                        <DataGridTextColumn x:Name="tcRChcoef" Header="Ch coef" Binding="{Binding Path=chcoef, Converter={StaticResource RoundValueConverter}}" />
+                        <DataGridTextColumn x:Name="tcRProgcoef" Header="Prog coef" Binding="{Binding Path=progcoef, Converter={StaticResource RoundValueConverter}}"/>
+                        <DataGridTextColumn x:Name="tcRSeascoef" Header="Seas coef" Binding="{Binding Path=seascoef, Converter={StaticResource RoundValueConverter}}"/>
+                        <DataGridTextColumn x:Name="tcRSeccoef" Header="Sec coef" Binding="{Binding Path=seccoef, Converter={StaticResource RoundValueConverter}}"/>
+                        <DataGridTextColumn x:Name="tcRCoefA" Header="Coef A" Binding="{Binding Path=coefA, Converter={StaticResource RoundValueConverter}}"/>
+                        <DataGridTextColumn x:Name="tcRCoefB" Header="Coef B" Binding="{Binding Path=coefB, Converter={StaticResource RoundValueConverter}}"/>
+                        <DataGridTextColumn x:Name="tcRAmrpsale" Header="Amr% Sale" Binding="{Binding Path=Amrpsale, Converter={StaticResource RoundValueConverter}}" />
+                        <DataGridTextColumn x:Name="tcRCpp" Header="Cpp" Binding="{Binding Path=Cpp, Converter={StaticResource RoundValueConverter}}" Visibility="Collapsed"/>
+                        <DataGridTextColumn x:Name="tcRPrice" Header="Price" Binding="{Binding Path=price, Converter={StaticResource RoundValueConverter}}"/>
                     </DataGrid.Columns>
                 </DataGrid>
             </Grid>

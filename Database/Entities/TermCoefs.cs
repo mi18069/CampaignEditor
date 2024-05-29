@@ -13,5 +13,11 @@
             Cpp = null;
             Amrpsale = null;
         }
+
+        public TermCoefs(decimal amrpsale, decimal cpp)
+        {
+            Amrpsale = amrpsale;
+            Cpp = cpp;
+        }
     }
 }

@@ -7,7 +7,8 @@
              mc:Ignorable="d" 
              d:DesignHeight="800" d:DesignWidth="800" Background="White">
     <Grid>
-        <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+        <ScrollViewer x:Name="svGrid" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
+                      PreviewMouseWheel="svGrid_PreviewMouseWheel">
             <!-- <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />

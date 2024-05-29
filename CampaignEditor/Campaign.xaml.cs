@@ -250,6 +250,7 @@ namespace CampaignEditor
             factoryCampaignForecastView.CloseForecast();
             factoryCampaignForecastView.UpdateValidation -= ForecastView_UpdateValidation;
             UnbindOverviewForecastEvents();
+            factoryCampaignValidation.CloseValidation();
 
             CampaignEventLinker.RemoveCampaign(_campaign.cmpid);
         }
