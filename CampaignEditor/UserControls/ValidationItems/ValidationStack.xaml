@@ -7,18 +7,7 @@
              mc:Ignorable="d" 
              d:DesignHeight="800" d:DesignWidth="800" Background="White">
     <Grid>
-        <ScrollViewer x:Name="svGrid" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
-                      PreviewMouseWheel="svGrid_PreviewMouseWheel">
-            <!-- <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <StackPanel x:Name="spExpected" Grid.Column="0">
-                </StackPanel>
-                <StackPanel x:Name="spRealized" Grid.Column="1">
-                </StackPanel>
-            </Grid> -->
+        <ScrollViewer x:Name="svGrid" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
             <StackPanel x:Name="spValidationDays"/>
         </ScrollViewer>
     </Grid>

@@ -12,8 +12,9 @@ namespace CampaignEditor
 {
     public static class PrintValidation
     {
-        public static void Print(Dictionary<DateOnly, List<TermTuple>> dayTermDict,
-                                 Dictionary<DateOnly, List<MediaPlanRealized>> dayRealizedDict) 
+        public static void Print(Dictionary<DateOnly, List<TermTuple>> dateExpectedDict,
+                                 Dictionary<DateOnly, List<MediaPlanRealized>> dateRealizedDict,
+                                 List<DateOnly> dates, bool[] expectedMask, bool[] realizedMask) 
         {
 
             using (var memoryStream = new MemoryStream())
@@ -25,10 +26,10 @@ namespace CampaignEditor
                     var worksheet = excelPackage.Workbook.Worksheets.Add("Campaign Info");
 
                     AddHeaders(worksheet, 1, 1);
-                    AddTerms(worksheet, dayTermDict, 2, 1);
+                    AddExpected(worksheet, dateExpectedDict, 2, 1);
                     //17
                     AddHeaders(worksheet, 1, 20, true);
-                    AddRealized(worksheet, dayRealizedDict, 2, 20);
+                    AddRealized(worksheet, dateRealizedDict, 2, 20);
                     // Save the Excel package to a memory stream
                     excelPackage.SaveAs(memoryStream);
                     // Set the position of the memory stream back to the beginning
@@ -53,13 +54,13 @@ namespace CampaignEditor
 
             if (!realized)
             {
-                columnHeaders = new List<string>() { "Program", "Day Part", "Position",
-                "Block time", "Amr% 1", "Amr% 2", "Amr% 3", "Amr Sale%", "CPP",
+                columnHeaders = new List<string>() { "Date", "Channel", "Program", "Day Part",
+                "Block time", "Position", "Spotcode", "Spot len",  "Amr% 1", "Amr% 2", "Amr% 3", "Amr Sale%", "CPP",
                 "Prog coef", "Dp coef", "Seas coef", "Sec coef", "Length", "Price", "Spot"};
             }
             else
             {
-                columnHeaders = new List<string>() { "Program", 
+                columnHeaders = new List<string>() { "Date", "Program", 
                 "Time", "Amr% 1", "Amr% 2", "Amr% 3", "Amr Sale%", "CPP",
                 "Prog coef", "Dp coef", "Seas coef", "Sec coef", "Effective", "Formatted", "Price", "Spot", "Status"};
             }
@@ -77,7 +78,7 @@ namespace CampaignEditor
             }
         }
 
-        private static void AddTerms(ExcelWorksheet worksheet, Dictionary<DateOnly, List<TermTuple>> dayTermDict, int rowOff, int colOff)
+        private static void AddExpected(ExcelWorksheet worksheet, Dictionary<DateOnly, List<TermTuple>> dayTermDict, int rowOff, int colOff)
         {
 
             List<DateOnly> dates = dayTermDict.Keys.OrderBy(k => k).ToList();
@@ -92,25 +93,28 @@ namespace CampaignEditor
                 {
                     continue;
                 }
-                worksheet.Cells[rowOff++, colOff].Value = date.ToShortDateString();
-                foreach(var termTuple in termTuples)
+                var dateString = date.ToShortDateString();
+                rowOff++;
+                foreach (var termTuple in termTuples)
                 {
-                    worksheet.Cells[rowOff, colOff].Value = termTuple.MediaPlan.name.Trim();
-                    worksheet.Cells[rowOff, colOff + 1].Value = termTuple.MediaPlan.DayPart.name.Trim();
-                    worksheet.Cells[rowOff, colOff + 2].Value = termTuple.MediaPlan.Position;
-                    worksheet.Cells[rowOff, colOff + 3].Value = termTuple.MediaPlan.Blocktime;
-                    worksheet.Cells[rowOff, colOff + 4].Value = termTuple.MediaPlan.Amrp1;
-                    worksheet.Cells[rowOff, colOff + 5].Value = termTuple.MediaPlan.Amrp2;
-                    worksheet.Cells[rowOff, colOff + 6].Value = termTuple.MediaPlan.Amrp3;
-                    worksheet.Cells[rowOff, colOff + 7].Value = termTuple.MediaPlan.Amrpsale;
-                    worksheet.Cells[rowOff, colOff + 8].Value = termTuple.Cpp;
-                    worksheet.Cells[rowOff, colOff + 9].Value = termTuple.MediaPlan.Progcoef;
-                    worksheet.Cells[rowOff, colOff + 10].Value = termTuple.MediaPlan.Dpcoef;
-                    worksheet.Cells[rowOff, colOff + 11].Value = termTuple.Seascoef;
-                    worksheet.Cells[rowOff, colOff + 12].Value = termTuple.Seccoef;
-                    worksheet.Cells[rowOff, colOff + 13].Value = termTuple.Spot.spotlength;
-                    worksheet.Cells[rowOff, colOff + 14].Value = termTuple.Price;
-                    worksheet.Cells[rowOff, colOff + 15].Value = termTuple.Spot.spotcode;
+                    var colOffset = colOff;
+                    worksheet.Cells[rowOff, colOffset++].Value = dateString;
+                    worksheet.Cells[rowOff, colOffset++].Value = termTuple.MediaPlan.name.Trim();
+                    worksheet.Cells[rowOff, colOffset++].Value = termTuple.MediaPlan.DayPart.name.Trim();
+                    worksheet.Cells[rowOff, colOffset++].Value = termTuple.MediaPlan.Position;
+                    worksheet.Cells[rowOff, colOffset++].Value = termTuple.MediaPlan.Blocktime;
+                    worksheet.Cells[rowOff, colOffset++].Value = termTuple.MediaPlan.Amrp1;
+                    worksheet.Cells[rowOff, colOffset++].Value = termTuple.MediaPlan.Amrp2;
+                    worksheet.Cells[rowOff, colOffset++].Value = termTuple.MediaPlan.Amrp3;
+                    worksheet.Cells[rowOff, colOffset++].Value = termTuple.MediaPlan.Amrpsale;
+                    worksheet.Cells[rowOff, colOffset++].Value = termTuple.Cpp;
+                    worksheet.Cells[rowOff, colOffset++].Value = termTuple.MediaPlan.Progcoef;
+                    worksheet.Cells[rowOff, colOffset++].Value = termTuple.MediaPlan.Dpcoef;
+                    worksheet.Cells[rowOff, colOffset++].Value = termTuple.Seascoef;
+                    worksheet.Cells[rowOff, colOffset++].Value = termTuple.Seccoef;
+                    worksheet.Cells[rowOff, colOffset++].Value = termTuple.Spot.spotlength;
+                    worksheet.Cells[rowOff, colOffset++].Value = termTuple.Price;
+                    worksheet.Cells[rowOff, colOffset++].Value = termTuple.Spot.spotcode;
                     rowOff++;
 
                 }
@@ -134,25 +138,28 @@ namespace CampaignEditor
                 {
                     continue;
                 }
-                worksheet.Cells[rowOff++, colOff].Value = date.ToShortDateString();
+                var dateString = date.ToShortDateString();
+                rowOff++;
                 foreach (var mediaPlanRealized in realizedTuples)
                 {
-                    worksheet.Cells[rowOff, colOff].Value = mediaPlanRealized.name;
-                    worksheet.Cells[rowOff, colOff + 1].Value = TimeFormat.TimeStrToRepresentative(mediaPlanRealized.stimestr);
-                    worksheet.Cells[rowOff, colOff + 2].Value = mediaPlanRealized.amrp1;
-                    worksheet.Cells[rowOff, colOff + 3].Value = mediaPlanRealized.amrp2;
-                    worksheet.Cells[rowOff, colOff + 4].Value = mediaPlanRealized.amrp3;
-                    worksheet.Cells[rowOff, colOff + 5].Value = mediaPlanRealized.amrpsale;
-                    worksheet.Cells[rowOff, colOff + 6].Value = mediaPlanRealized.cpp;
-                    worksheet.Cells[rowOff, colOff + 7].Value = mediaPlanRealized.progcoef;
-                    worksheet.Cells[rowOff, colOff + 8].Value = mediaPlanRealized.dpcoef;
-                    worksheet.Cells[rowOff, colOff + 9].Value = mediaPlanRealized.seascoef;
-                    worksheet.Cells[rowOff, colOff + 10].Value = mediaPlanRealized.seccoef;
-                    worksheet.Cells[rowOff, colOff + 11].Value = mediaPlanRealized.dure;
-                    worksheet.Cells[rowOff, colOff + 12].Value = mediaPlanRealized.durf;
-                    worksheet.Cells[rowOff, colOff + 13].Value = mediaPlanRealized.price;
-                    worksheet.Cells[rowOff, colOff + 14].Value = mediaPlanRealized.spotname;
-                    worksheet.Cells[rowOff, colOff + 15].Value = SetStatus(mediaPlanRealized.status);
+                    var colOffset = colOff;
+                    worksheet.Cells[rowOff, colOffset++].Value = dateString;
+                    worksheet.Cells[rowOff, colOffset++].Value = mediaPlanRealized.name;
+                    worksheet.Cells[rowOff, colOffset++].Value = TimeFormat.TimeStrToRepresentative(mediaPlanRealized.stimestr);
+                    worksheet.Cells[rowOff, colOffset++].Value = mediaPlanRealized.amrp1;
+                    worksheet.Cells[rowOff, colOffset++].Value = mediaPlanRealized.amrp2;
+                    worksheet.Cells[rowOff, colOffset++].Value = mediaPlanRealized.amrp3;
+                    worksheet.Cells[rowOff, colOffset++].Value = mediaPlanRealized.amrpsale;
+                    worksheet.Cells[rowOff, colOffset++].Value = mediaPlanRealized.cpp;
+                    worksheet.Cells[rowOff, colOffset++].Value = mediaPlanRealized.progcoef;
+                    worksheet.Cells[rowOff, colOffset++].Value = mediaPlanRealized.dpcoef;
+                    worksheet.Cells[rowOff, colOffset++].Value = mediaPlanRealized.seascoef;
+                    worksheet.Cells[rowOff, colOffset++].Value = mediaPlanRealized.seccoef;
+                    worksheet.Cells[rowOff, colOffset++].Value = mediaPlanRealized.dure;
+                    worksheet.Cells[rowOff, colOffset++].Value = mediaPlanRealized.durf;
+                    worksheet.Cells[rowOff, colOffset++].Value = mediaPlanRealized.price;
+                    worksheet.Cells[rowOff, colOffset++].Value = mediaPlanRealized.spotname;
+                    worksheet.Cells[rowOff, colOffset++].Value = SetStatus(mediaPlanRealized.status);
                     rowOff++;
 
                 }

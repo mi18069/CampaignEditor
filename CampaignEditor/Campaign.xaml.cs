@@ -115,8 +115,23 @@ namespace CampaignEditor
             factoryCampaignValidation._allMediaPlans = _allMediaPlans;
             await factoryCampaignValidation.Initialize(_campaign);
             tabValidation.Content = factoryCampaignValidation.Content;
-
+            factoryCampaignValidation.SetLoadingPage += FactoryCampaignValidation_SetLoadingPage;
+            factoryCampaignValidation.SetContentPage += FactoryCampaignValidation_SetContentPage;
+            
             factoryCampaignForecastView.UpdateValidation += ForecastView_UpdateValidation;
+        }
+
+        private void FactoryCampaignValidation_SetContentPage(object? sender, EventArgs e)
+        {
+            TabItem tabValidation = (TabItem)tcTabs.FindName("tiValidation");
+            tabValidation.Content = factoryCampaignValidation.Content;
+        }
+
+        private void FactoryCampaignValidation_SetLoadingPage(object? sender, EventArgs e)
+        {
+            var loadingPage = new LoadingPage();
+            TabItem tabValidation = (TabItem)tcTabs.FindName("tiValidation");
+            tabValidation.Content = loadingPage.Content;
         }
 
         private void BindOverviewForecastEvents()

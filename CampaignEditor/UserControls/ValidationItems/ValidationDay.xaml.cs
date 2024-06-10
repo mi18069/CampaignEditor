@@ -8,6 +8,8 @@ using System.Windows.Media;
 using System.Windows.Threading;
 using System.Windows;
 using CampaignEditor.Helpers;
+using System.Windows.Input;
+using System.Reflection;
 
 namespace CampaignEditor.UserControls.ValidationItems
 {
@@ -50,7 +52,12 @@ namespace CampaignEditor.UserControls.ValidationItems
         }
 
 
-
+        private void ValidationDay_Loaded(object sender, RoutedEventArgs e)
+        {
+            /*dgExpected.MaxHeight = SystemParameters.PrimaryScreenHeight * 0.6;
+            dgRealized.MaxHeight = SystemParameters.PrimaryScreenHeight * 0.6;*/
+            gridItems.MaxHeight = SystemParameters.PrimaryScreenHeight * 0.6;
+        }
 
         private void SetUserControl()
         {
@@ -60,11 +67,6 @@ namespace CampaignEditor.UserControls.ValidationItems
             lblExCount.Content = exCount;
             lblRealCount.Content = realCount;
             lblDate.Content = date.ToShortDateString();
-
-            if (exCount == 0 && realCount == 0)
-            {
-                expander.Visibility = System.Windows.Visibility.Collapsed;
-            }
             
         }
 
@@ -167,6 +169,146 @@ namespace CampaignEditor.UserControls.ValidationItems
             return header != null;
         }
 
+        #region Change dataGrid focus
 
+        private void DataGrid_PreviewKeyDown(object sender, KeyEventArgs e)
+        {
+            var dataGrid = sender as DataGrid;
+            if (e.Key == Key.Right && dataGrid == dgExpected && IsLastVisibleColumn(dataGrid))
+            {
+                dgRealized.Focus();
+                MoveFocusToFirstCell(dgRealized);
+                e.Handled = true;
+            }
+            else if (e.Key == Key.Left && dataGrid == dgRealized && IsFirstVisibleColumn(dataGrid))
+            {
+                dgExpected.Focus();
+                MoveFocusToLastCell(dgExpected);
+                e.Handled = true;
+            }
+        }
+
+
+        private bool IsLastVisibleColumn(DataGrid dataGrid)
+        {
+            if (dataGrid.CurrentCell != null)
+            {
+                DataGridColumn focusedColumn = dataGrid.CurrentCell.Column;
+
+                if (focusedColumn != null)
+                {
+                    // Get the index of the focused column
+                    int columnIndex = dataGrid.Columns.IndexOf(focusedColumn);
+                    for (int i=columnIndex+1; i<dataGrid.Columns.Count; i++)
+                    {
+                        if (dataGrid.Columns[i].Visibility == Visibility.Visible)
+                            return false;
+                    }
+                }
+            }
+
+            return true; // There are no more visible columns
+        }
+
+        private bool IsFirstVisibleColumn(DataGrid dataGrid)
+        {
+            if (dataGrid.CurrentCell != null)
+            {
+                DataGridColumn focusedColumn = dataGrid.CurrentCell.Column;
+
+                if (focusedColumn != null)
+                {
+                    // Get the index of the focused column
+                    int columnIndex = dataGrid.Columns.IndexOf(focusedColumn);
+                    for (int i = 0; i < columnIndex; i++)
+                    {
+                        if (dataGrid.Columns[i].Visibility == Visibility.Visible)
+                            return false;
+                    }
+                }
+            }
+
+            return true; // There are no visible columns before current
+        }       
+
+        private void MoveFocusToFirstCell(DataGrid dataGrid)
+        {
+            if (dataGrid != null && dataGrid.SelectedItem != null)
+            {
+                // Move to the most left cell in the same row
+                dataGrid.CurrentCell = new DataGridCellInfo(dataGrid.SelectedItem, dataGrid.Columns[0]);
+                int firstVisible = dataGrid.Columns.First(c => c.Visibility == Visibility.Visible).DisplayIndex;
+                dataGrid.ScrollIntoView(dataGrid.SelectedItem, dataGrid.Columns[firstVisible]);
+            }
+        }
+
+        private void MoveFocusToLastCell(DataGrid dataGrid)
+        {
+            if (dataGrid != null && dataGrid.SelectedItem != null)
+            {
+                // Move to the most right cell in the same row
+                dataGrid.CurrentCell = new DataGridCellInfo(dataGrid.SelectedItem, dataGrid.Columns[dataGrid.Columns.Count - 1]);
+                int lastVisible = dataGrid.Columns.Last(c => c.Visibility == Visibility.Visible).DisplayIndex;
+                dataGrid.ScrollIntoView(dataGrid.SelectedItem, dataGrid.Columns[lastVisible]);
+            }
+        }
+
+        #endregion
+
+        private void tglButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (tglButton.IsChecked == false)
+            {
+                gridItems.Visibility = Visibility.Collapsed;
+                tglButton.Content = "Show";
+            }
+            else
+            {
+                gridItems.Visibility = Visibility.Visible;
+                tglButton.Content = "Hide";
+
+            }
+        }
+
+        private void dgExpected_ScrollChanged(object sender, ScrollChangedEventArgs e)
+        {
+            if (e.VerticalChange != 0.0f)
+            {
+                ScrollViewer sv = null;
+                Type t = dgExpected.GetType();
+                try
+                {
+                    sv = t.InvokeMember("InternalScrollHost", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.GetProperty, null, dgRealized, null) as ScrollViewer;
+                    sv.ScrollToVerticalOffset(e.VerticalOffset);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                }
+            }
+        }
+
+        private void dgRealized_ScrollChanged(object sender, ScrollChangedEventArgs e)
+        {
+            if (e.VerticalChange != 0.0f)
+            {
+                ScrollViewer sv = null;
+                Type t = dgRealized.GetType();
+                try
+                {
+                    sv = t.InvokeMember("InternalScrollHost", BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.GetProperty, null, dgExpected, null) as ScrollViewer;
+                    sv.ScrollToVerticalOffset(e.VerticalOffset);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                }
+            }
+        }
+
+        private void dg_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            e.Handled = true;
+        }
     }
 }

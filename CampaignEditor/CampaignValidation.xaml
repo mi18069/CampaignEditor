@@ -37,6 +37,7 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="auto"/>
                 </Grid.ColumnDefinitions>
                 <ComboBox x:Name="cbChannels" Grid.Column="0" 
                       HorizontalAlignment="Stretch" MaxWidth="300" HorizontalContentAlignment="Center"
@@ -45,6 +46,8 @@
                         Width="100" Content="Check new data" Click="btnCheckRealized_Click"/>
                 <Button x:Name="btnPrint" Grid.Column="2" Content="Export"
                         Width="70" Click="btnPrint_Click"/>
+                <CheckBox x:Name="chbAllDecimals" Grid.Column="3"
+                          Content="All decimals" VerticalAlignment="Center"/>
             </Grid>
             
             <local:ValidationStack x:Name="validationStack" Grid.Row="2" Grid.Column="1"/>

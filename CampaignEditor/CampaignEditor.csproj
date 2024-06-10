@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-	<Version>1.0.0.26</Version>
+	<Version>1.0.0.27</Version>
     <TargetFramework>net6.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
@@ -11,6 +11,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="images\arrows_down.png" />
+    <None Remove="images\arrows_up.png" />
     <None Remove="images\ChangePassIcon.png" />
     <None Remove="images\check.png" />
     <None Remove="images\ConfigIcon.png" />
@@ -66,6 +68,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="images\arrows_down.png" />
+    <Resource Include="images\arrows_up.png" />
     <Resource Include="images\ChangePassIcon.png" />
     <Resource Include="images\check.png" />
     <Resource Include="images\ConfigIcon.png" />

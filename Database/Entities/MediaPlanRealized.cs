@@ -1,4 +1,5 @@
 ﻿using Database.DTOs.ChannelDTO;
+using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
@@ -41,6 +42,7 @@ namespace Database.Entities
         public decimal? coefA { get; set; }
         public decimal? coefB { get; set; }
 
+        public string Date { get { return date; } }
         public decimal? price {
             get { return _price; }
             set { 
@@ -58,12 +60,23 @@ namespace Database.Entities
 
         public decimal? Cpp
         {
-            get {  return MediaPlan == null ? null : MediaPlan.Cpp; }
+            get {  return status == -1 ? null : cpp; }
         }
-
+        public decimal? Amrp1
+        {
+            get { return status == -1 ? null : amrp1; }
+        }
+        public decimal? Amrp2
+        {
+            get { return status == -1 ? null : amrp2; }
+        }
+        public decimal? Amrp3
+        {
+            get { return status == -1 ? null : amrp3; }
+        }
         public decimal? Amrpsale
         {
-            get { return amrpsale == 0 ? null : amrpsale; }
+            get { return status == -1 ? null : amrpsale; }
         }
 
         public string? spotname { get; set; }

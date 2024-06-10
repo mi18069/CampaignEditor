@@ -500,7 +500,7 @@ namespace CampaignEditor
         {
           
             var sectable = _forecastData.PlidSectableDict[pricelist.plid];
-            int realizedLength = mpRealized.etime.Value - mpRealized.stime.Value;
+            int realizedLength = mpRealized.dure.Value;
             int spotLength = FindClosestSpotLength(realizedLength);
 
             var sectables = _forecastData.SecidSectablesDict[sectable.sctid].FirstOrDefault(secs => secs.sec == spotLength, null);
@@ -512,11 +512,18 @@ namespace CampaignEditor
 
         private int FindClosestSpotLength(int realizedLength)
         {
-            // if realized length is +- 2 sec from some spot, return that value
+            foreach (var spot in _forecastData.Spots)
+            {
+                if (spot.spotlength <= realizedLength && realizedLength <= spot.spotlength)
+                {
+                    return spot.spotlength;
+                }
+            }
+            // if realized length is +- 1 sec from some spot, return that value
             // if not found, return realized length
             foreach (var spot in _forecastData.Spots)
             {
-                if (spot.spotlength - 2 <= realizedLength && realizedLength <= spot.spotlength + 2)
+                if (spot.spotlength - 1 <= realizedLength && realizedLength <= spot.spotlength + 1)
                 {
                     return spot.spotlength;
                 }
