@@ -1,0 +1,40 @@
+﻿<Window x:Class="CampaignEditor.ClientBrands"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CampaignEditor"
+        xmlns:userControls="clr-namespace:CampaignEditor.UserControls"
+        mc:Ignorable="d"
+        Title="ClientBrands" Height="550" Width="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="10"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="0.4*"/>
+            <RowDefinition Height="60"/>
+            <RowDefinition Height="10"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="10"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="10"/>
+        </Grid.ColumnDefinitions>
+
+        <Label Grid.Row="1" Grid.Column="1" Content="Set Brands for Campaign"
+               HorizontalAlignment="Center"/>
+
+        <userControls:ListBoxAddButton x:Name="lbBrands" Grid.Row="2" Grid.Column="1"/>
+
+        <ListBox x:Name="lbBrandSuggestions" Grid.Row="3" Grid.Column="1"
+                 VerticalAlignment="Stretch" IsTextSearchEnabled="False" MinHeight="50"
+                 DisplayMemberPath="brand" FontSize="14"
+                 SelectionChanged="lbBrandSuggestions_SelectionChanged"/>
+
+        <Button x:Name="btnSave" Grid.Row="4" Grid.Column="1" Width="100" Margin="10" 
+                Content="Save" HorizontalAlignment="Right" Click="btnSave_Click"/>
+        <Button x:Name="btnCancel" Grid.Row="4" Grid.Column="1" Width="100" Margin="10, 10, 120, 10" 
+                Content="Cancel" HorizontalAlignment="Right" Click="btnCancel_Click"/>
+    </Grid>
+</Window>

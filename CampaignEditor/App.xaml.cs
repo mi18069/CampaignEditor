@@ -67,6 +67,7 @@ namespace CampaignEditor
                     services.AddFormFactory<ForecastDataManipulation>();
                     services.AddFormFactory<ClientDayParts>();
                     services.AddFormFactory<DuplicatePricelist>();
+                    services.AddFormFactory<ClientBrands>();
                     services.AddScoped<IDataContext, DataContext>();
                     // Add services
                     Extensions.UserExtensions.AddUserExtensions(services);

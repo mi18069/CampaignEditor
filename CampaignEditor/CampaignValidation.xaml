@@ -15,10 +15,13 @@
             <Grid.RowDefinitions>
                 <RowDefinition Height="10"/>
                 <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
                 <RowDefinition Height="10"/>
             </Grid.RowDefinitions>
-            <Label Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center" 
-                   Content="Forecast not initialized" FontSize="40" Foreground="Black"/>
+            <Label x:Name="lblMessage" Grid.Row="1" VerticalAlignment="Center" HorizontalAlignment="Center" 
+                   Content="Channels not initialized" FontSize="40" Foreground="Black"/>
+            <Button x:Name="btnReload" Grid.Row="2" VerticalAlignment="Center" HorizontalAlignment="Center" 
+                    Width="200" Height="50" Content="Reload" Click="btnReload_Click"/>
         </Grid>
         <Grid x:Name="gridValidation" Visibility="Visible">
             <Grid.ColumnDefinitions>

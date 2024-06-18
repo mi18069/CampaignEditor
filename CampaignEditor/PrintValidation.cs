@@ -150,11 +150,11 @@ namespace CampaignEditor
                     worksheet.Cells[rowOff, colOffset++].Value = mediaPlanRealized.amrp2;
                     worksheet.Cells[rowOff, colOffset++].Value = mediaPlanRealized.amrp3;
                     worksheet.Cells[rowOff, colOffset++].Value = mediaPlanRealized.amrpsale;
-                    worksheet.Cells[rowOff, colOffset++].Value = mediaPlanRealized.cpp;
-                    worksheet.Cells[rowOff, colOffset++].Value = mediaPlanRealized.progcoef;
-                    worksheet.Cells[rowOff, colOffset++].Value = mediaPlanRealized.dpcoef;
-                    worksheet.Cells[rowOff, colOffset++].Value = mediaPlanRealized.seascoef;
-                    worksheet.Cells[rowOff, colOffset++].Value = mediaPlanRealized.seccoef;
+                    worksheet.Cells[rowOff, colOffset++].Value = mediaPlanRealized.Cpp;
+                    worksheet.Cells[rowOff, colOffset++].Value = mediaPlanRealized.Progcoef;
+                    worksheet.Cells[rowOff, colOffset++].Value = mediaPlanRealized.Dpcoef;
+                    worksheet.Cells[rowOff, colOffset++].Value = mediaPlanRealized.Seascoef;
+                    worksheet.Cells[rowOff, colOffset++].Value = mediaPlanRealized.Seccoef;
                     worksheet.Cells[rowOff, colOffset++].Value = mediaPlanRealized.dure;
                     worksheet.Cells[rowOff, colOffset++].Value = mediaPlanRealized.durf;
                     worksheet.Cells[rowOff, colOffset++].Value = mediaPlanRealized.price;

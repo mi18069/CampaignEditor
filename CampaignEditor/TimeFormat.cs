@@ -126,7 +126,7 @@ namespace CampaignEditor
 
         public static bool IsGoodRepresentativeTimeFormat(string timeString)
         {
-            if (timeString.Length != 5)
+            if (timeString == null || timeString.Length != 5)
             {
                 return false;
             }

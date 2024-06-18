@@ -33,18 +33,18 @@ namespace Database.Entities
         public decimal amrp2 { get; set; }
         public decimal amrp3 { get; set; }
         public decimal amrpsale { get; set; }
-        public decimal? cpp { get; set; }
-        public decimal? dpcoef { get; set; }
-        public decimal? seascoef { get; set; }
-        public decimal? seccoef { get; set; }
-        public decimal? progcoef { get; set; }
-        public decimal? chcoef { get; set; }
-        public decimal? coefA { get; set; }
-        public decimal? coefB { get; set; }
+        private decimal? cpp  = 1.0M;
+        private decimal? dpcoef = 1.0M;
+        private decimal? seascoef  = 1.0M;
+        private decimal? seccoef  = 1.0M;
+        private decimal? progcoef  = 1.0M;
+        private decimal? chcoef  = 1.0M;
+        private decimal? coefA  = 1.0M;
+        private decimal? coefB  = 1.0M;
 
         public string Date { get { return date; } }
         public decimal? price {
-            get { return _price; }
+            get { return status == -1 ? null : _price; }
             set { 
                 _price = value;
                 OnPropertyChanged();
@@ -61,6 +61,11 @@ namespace Database.Entities
         public decimal? Cpp
         {
             get {  return status == -1 ? null : cpp; }
+            set
+            {
+                cpp = value;
+                OnPropertyChanged();
+            }
         }
         public decimal? Amrp1
         {
@@ -77,6 +82,63 @@ namespace Database.Entities
         public decimal? Amrpsale
         {
             get { return status == -1 ? null : amrpsale; }
+        }
+
+        public decimal? Dpcoef { 
+            get { return status == -1 ? null : dpcoef; }
+            set
+            {
+                dpcoef = value;
+                OnPropertyChanged();
+            }
+        }
+        public decimal? Seascoef { 
+            get { return status == -1 ? null : seascoef; }
+            set
+            {
+                seascoef = value;
+                OnPropertyChanged();
+            }
+        }
+        public decimal? Seccoef { 
+            get { return status == -1 ? null : seccoef; }
+            set
+            {
+                seccoef = value;
+                OnPropertyChanged();
+            }
+        }
+        public decimal? Progcoef { 
+            get { return status == -1 ? null : progcoef; }
+            set
+            {
+                progcoef = value;
+                OnPropertyChanged();
+            }
+        }
+        public decimal? Chcoef { 
+            get { return status == -1 ? null : chcoef; }
+            set
+            {
+                chcoef = value;
+                OnPropertyChanged();
+            }
+        }
+        public decimal? CoefA { 
+            get { return status == -1 ? null : coefA; }
+            set
+            {
+                coefA = value;
+                OnPropertyChanged();
+            }
+        }
+        public decimal? CoefB { 
+            get { return status == -1 ? null : coefB; }
+            set
+            {
+                coefB = value;
+                OnPropertyChanged();
+            }
         }
 
         public string? spotname { get; set; }

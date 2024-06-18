@@ -12,6 +12,7 @@
         <converters:RoundValueConverter x:Key="RoundValueConverter"/>
         <converters:StatusToColorConverter x:Key="StatusToColorConverter" />
         <converters:DateStrToDateOnlyConverter x:Key="DateStrToDateOnlyConverter" />
+        <converters:StatusMinusOneToNullConverter x:Key="StatusMinusOneToNullConverter" />
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -90,6 +91,8 @@
                             <Trigger Property="IsSelected" Value="True">
                                 <Setter Property="Background" Value="Transparent" />
                                 <Setter Property="Foreground" Value="Black" />
+                                <Setter Property="FontStyle" Value="Italic" />
+                                <Setter Property="FontWeight" Value="Black" />
                             </Trigger>
                         </Style.Triggers>
                     </Style>
@@ -117,7 +120,7 @@
                     <DataGridTextColumn x:Name="tcESpotlength" Header="Spot len" Binding="{Binding Path=Spotlength}"/>
                     <DataGridTextColumn x:Name="tcESpotcode" Header="Spotcode" Binding="{Binding Path=Spot.spotcode}"/>
                     <DataGridTextColumn x:Name="tcEPrice" Header="Price" Binding="{Binding Path=Price, Converter={StaticResource RoundValueConverter}}"/>
-                    <DataGridTextColumn x:Name="tcEStatus" Header="Status" Binding="{Binding Path=Status}" MaxWidth="200"/>
+                    <!-- <DataGridTextColumn x:Name="tcEStatus" Header="Status" Binding="{Binding Path=Status}" MaxWidth="200"/> -->
                 </DataGrid.Columns>
             </DataGrid>
             <DataGrid x:Name="dgRealized" Grid.Column="1"
@@ -173,6 +176,8 @@
                             <Trigger Property="IsSelected" Value="True">
                                 <Setter Property="Background" Value="Transparent" />
                                 <Setter Property="Foreground" Value="Black" />
+                                <Setter Property="FontStyle" Value="Italic" />
+                                <Setter Property="FontWeight" Value="Black" />
                             </Trigger>
                         </Style.Triggers>
                     </Style>
@@ -191,15 +196,15 @@
                     <DataGridTextColumn x:Name="tcRAmrp3" Header="Amr% 3" Binding="{Binding Path=Amrp3, Converter={StaticResource RoundValueConverter}}" />
                     <DataGridTextColumn x:Name="tcRAmrpsale" Header="Amr% Sale" Binding="{Binding Path=Amrpsale, Converter={StaticResource RoundValueConverter}}" />
                     <DataGridTextColumn x:Name="tcRCpp" Header="Cpp" Binding="{Binding Path=Cpp, Converter={StaticResource RoundValueConverter}}" />
-                    <DataGridTextColumn x:Name="tcRChcoef" Header="Ch coef" Binding="{Binding Path=chcoef, Converter={StaticResource RoundValueConverter}}" />
-                    <DataGridTextColumn x:Name="tcRDpcoef" Header="Dp coef" Binding="{Binding Path=dpcoef, Converter={StaticResource RoundValueConverter}}"/>
-                    <DataGridTextColumn x:Name="tcRProgcoef" Header="Prog coef" Binding="{Binding Path=progcoef, Converter={StaticResource RoundValueConverter}}"/>
-                    <DataGridTextColumn x:Name="tcRSeascoef" Header="Seas coef" Binding="{Binding Path=seascoef, Converter={StaticResource RoundValueConverter}}"/>
-                    <DataGridTextColumn x:Name="tcRSeccoef" Header="Sec coef" Binding="{Binding Path=seccoef, Converter={StaticResource RoundValueConverter}}"/>
-                    <DataGridTextColumn x:Name="tcRCoefA" Header="Coef A" Binding="{Binding Path=coefA, Converter={StaticResource RoundValueConverter}}"/>
-                    <DataGridTextColumn x:Name="tcRCoefB" Header="Coef B" Binding="{Binding Path=coefB, Converter={StaticResource RoundValueConverter}}"/>
+                    <DataGridTextColumn x:Name="tcRChcoef" Header="Ch coef" Binding="{Binding Path=Chcoef, Converter={StaticResource RoundValueConverter}}" />
+                    <DataGridTextColumn x:Name="tcRDpcoef" Header="Dp coef" Binding="{Binding Path=Dpcoef, Converter={StaticResource RoundValueConverter}}"/>
+                    <DataGridTextColumn x:Name="tcRProgcoef" Header="Prog coef" Binding="{Binding Path=Progcoef, Converter={StaticResource RoundValueConverter}}"/>
+                    <DataGridTextColumn x:Name="tcRSeascoef" Header="Seas coef" Binding="{Binding Path=Seascoef, Converter={StaticResource RoundValueConverter}}"/>
+                    <DataGridTextColumn x:Name="tcRSeccoef" Header="Sec coef" Binding="{Binding Path=Seccoef, Converter={StaticResource RoundValueConverter}}"/>
+                    <DataGridTextColumn x:Name="tcRCoefA" Header="Coef A" Binding="{Binding Path=CoefA, Converter={StaticResource RoundValueConverter}}"/>
+                    <DataGridTextColumn x:Name="tcRCoefB" Header="Coef B" Binding="{Binding Path=CoefB, Converter={StaticResource RoundValueConverter}}"/>
                     <DataGridTextColumn x:Name="tcRPrice" Header="Price" Binding="{Binding Path=price, Converter={StaticResource RoundValueConverter}}"/>
-                    <DataGridTextColumn x:Name="tcRStatus" Header="Status" Binding="{Binding Path=status}" MaxWidth="200"/>
+                    <DataGridTextColumn x:Name="tcRStatus" Header="Status" Binding="{Binding Path=status, Converter={StaticResource StatusMinusOneToNullConverter}}" MaxWidth="200"/>
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>

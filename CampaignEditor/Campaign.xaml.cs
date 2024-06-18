@@ -112,8 +112,7 @@ namespace CampaignEditor
 
             factoryCampaignValidation._forecastData = _forecastData;
             factoryCampaignValidation._mpConverter = _mpConverter;
-            factoryCampaignValidation._allMediaPlans = _allMediaPlans;
-            await factoryCampaignValidation.Initialize(_campaign);
+            await factoryCampaignValidation.Initialize(_campaign, _allMediaPlans);
             tabValidation.Content = factoryCampaignValidation.Content;
             factoryCampaignValidation.SetLoadingPage += FactoryCampaignValidation_SetLoadingPage;
             factoryCampaignValidation.SetContentPage += FactoryCampaignValidation_SetContentPage;
@@ -248,7 +247,7 @@ namespace CampaignEditor
 
         private async void ForecastView_UpdateValidation(object? sender, EventArgs e)
         {
-            await factoryCampaignValidation.Initialize(_campaign);
+            await factoryCampaignValidation.Initialize(_campaign, _allMediaPlans);
             if (!isCampaignInitialized)
                 isCampaignInitialized = true;
         }

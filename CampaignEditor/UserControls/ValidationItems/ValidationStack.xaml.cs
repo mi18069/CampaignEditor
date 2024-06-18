@@ -50,9 +50,11 @@ namespace CampaignEditor.UserControls.ValidationItems
         public ObservableRangeCollection<MediaPlanTuple> _allMediaPlans;
         public ObservableRangeCollection<MediaPlanRealized> _mediaPlanRealized;
 
-        private bool[] dgExpectedMask = new bool[23]
+        private bool hideExpected = false;
+
+        private bool[] dgExpectedMask = new bool[22]
         { true, true, true, false, true, true, true, false, false, true, true, true,
-            true, true, true, true, false, false, false, true, true, true, true};
+            true, true, true, true, false, false, false, true, true, true};
 
         private bool[] dgRealizedMask = new bool[21]
         { true, true, true, true, true, true, true, true, false, false, true,
@@ -64,7 +66,7 @@ namespace CampaignEditor.UserControls.ValidationItems
             InitializeComponent();
         }
 
-        public async Task Initialize(CampaignDTO campaign)
+        public async Task Initialize(CampaignDTO campaign, bool hideExpected = false)
         {
             _campaign = campaign;
             var mpVersion = await _mediaPlanVersionController.GetLatestMediaPlanVersion(campaign.cmpid);
@@ -74,7 +76,14 @@ namespace CampaignEditor.UserControls.ValidationItems
                 _campaignVersion = version;
 
             }
+
             LoadDates();
+            // When reinitializing
+            if (hideExpected)
+            {
+                this.hideExpected = hideExpected;
+                HideExpectedStack();
+            }
         }
 
         public async Task LoadData(int chid)
@@ -140,6 +149,15 @@ namespace CampaignEditor.UserControls.ValidationItems
 
         }
 
+        private void HideExpectedStack()
+        {
+            foreach (ValidationDay validationDay in spValidationDays.Children)
+            {
+                validationDay.HideExpected();
+                
+            }
+        }
+
         #region Print
 
         public void Print(bool allDecimals = false)
@@ -151,25 +169,31 @@ namespace CampaignEditor.UserControls.ValidationItems
                 using (var excelPackage = new ExcelPackage(memoryStream))
                 {
                     // Create a new worksheet
-                    var worksheet = excelPackage.Workbook.Worksheets.Add("Campaign Info");
+                    var worksheet = excelPackage.Workbook.Worksheets.Add("Validation");
                     ValidationDay validationDay = spValidationDays.Children[0] as ValidationDay;
                     if (validationDay == null)
                     {
                         return;
                     }
-                    var headerNamesExpected = validationDay.ExpectedGrid.Columns
-                        .Select(column => column.Header.ToString())
-                        .ToList();
+
+                    if (!hideExpected)
+                    {
+                        var headerNamesExpected = validationDay.ExpectedGrid.Columns
+                                .Select(column => column.Header.ToString())
+                                .ToList();
+                        AddHeaders(worksheet, 1, 1, headerNamesExpected, dgExpectedMask);
+                        AddExpected(worksheet, 2, 1, _dateExpectedDict, dgExpectedMask, allDecimals);
+                    }
+                    // if expected stack is hidden, don't place one extra column between them,
+                    // else separate by width of 1 column
+                    int separationWidth = hideExpected ? 0 : 1 + dgExpectedMask.Count(e => e == true);
 
                     var headerNamesRealized = validationDay.RealizedGrid.Columns
-                        .Select(column => column.Header.ToString())
-                        .ToList();
+                                .Select(column => column.Header.ToString())
+                                .ToList();
 
-                    AddHeaders(worksheet, 1, 1, headerNamesExpected, dgExpectedMask);
-                    AddExpected(worksheet, 2, 1, _dateExpectedDict, dgExpectedMask, allDecimals);
-                    
-                    AddHeaders(worksheet, 1, 1 + 1 + dgExpectedMask.Count(e => e), headerNamesRealized, dgRealizedMask);
-                    AddRealized(worksheet, 2, 1 + 1 + dgExpectedMask.Count(e => e), _dateRealizedDict, dgRealizedMask, allDecimals);
+                    AddHeaders(worksheet, 1, 1 + separationWidth, headerNamesRealized, dgRealizedMask);
+                    AddRealized(worksheet, 2, 1 + separationWidth, _dateRealizedDict, dgRealizedMask, allDecimals);
                     // Save the Excel package to a memory stream
                     excelPackage.SaveAs(memoryStream);
                     // Set the position of the memory stream back to the beginning
@@ -430,10 +454,6 @@ namespace CampaignEditor.UserControls.ValidationItems
                         }
 
                     }
-                    if (mask[22])
-                    {
-                        worksheet.Cells[rowOff, colOffset++].Value = termTuple.Status;
-                    }
                     worksheet.Cells[rowOff, colOff, rowOff, colOff + colNum - 1].Style.Fill.PatternType = ExcelFillStyle.Solid;
                     worksheet.Cells[rowOff, colOff, rowOff, colOff + colNum - 1].Style.Fill.BackgroundColor.SetColor(SetColorByStatus(termTuple.Status));
                     rowOff++;
@@ -481,7 +501,7 @@ namespace CampaignEditor.UserControls.ValidationItems
                     }
                     if (mask[2])
                     {
-                        var name = mediaPlanRealized.MediaPlan.name.Trim() ?? "";
+                        var name = mediaPlanRealized.name.Trim() ?? "";
                         worksheet.Cells[rowOff, colOffset++].Value = name;
                     }
                     if (mask[3])
@@ -568,11 +588,11 @@ namespace CampaignEditor.UserControls.ValidationItems
                     {
                         if (allDecimals)
                         {
-                            worksheet.Cells[rowOff, colOffset++].Value = mediaPlanRealized.chcoef;
+                            worksheet.Cells[rowOff, colOffset++].Value = mediaPlanRealized.Chcoef;
                         }
                         else
                         {
-                            worksheet.Cells[rowOff, colOffset++].Value = Math.Round(mediaPlanRealized.chcoef.Value, 2);
+                            worksheet.Cells[rowOff, colOffset++].Value = Math.Round(mediaPlanRealized.Chcoef.Value, 2);
                         }
 
                     }
@@ -580,11 +600,11 @@ namespace CampaignEditor.UserControls.ValidationItems
                     {
                         if (allDecimals)
                         {
-                            worksheet.Cells[rowOff, colOffset++].Value = mediaPlanRealized.progcoef;
+                            worksheet.Cells[rowOff, colOffset++].Value = mediaPlanRealized.Progcoef;
                         }
                         else
                         {
-                            worksheet.Cells[rowOff, colOffset++].Value = Math.Round(mediaPlanRealized.progcoef.Value, 2);
+                            worksheet.Cells[rowOff, colOffset++].Value = Math.Round(mediaPlanRealized.Progcoef.Value, 2);
                         }
 
                     }
@@ -592,11 +612,11 @@ namespace CampaignEditor.UserControls.ValidationItems
                     {
                         if (allDecimals)
                         {
-                            worksheet.Cells[rowOff, colOffset++].Value = mediaPlanRealized.dpcoef;
+                            worksheet.Cells[rowOff, colOffset++].Value = mediaPlanRealized.Dpcoef;
                         }
                         else
                         {
-                            worksheet.Cells[rowOff, colOffset++].Value = Math.Round(mediaPlanRealized.dpcoef.Value, 2);
+                            worksheet.Cells[rowOff, colOffset++].Value = Math.Round(mediaPlanRealized.Dpcoef.Value, 2);
                         }
 
                     }
@@ -604,11 +624,11 @@ namespace CampaignEditor.UserControls.ValidationItems
                     {
                         if (allDecimals)
                         {
-                            worksheet.Cells[rowOff, colOffset++].Value = mediaPlanRealized.seascoef;
+                            worksheet.Cells[rowOff, colOffset++].Value = mediaPlanRealized.Seascoef;
                         }
                         else
                         {
-                            worksheet.Cells[rowOff, colOffset++].Value = Math.Round(mediaPlanRealized.seascoef.Value, 2);
+                            worksheet.Cells[rowOff, colOffset++].Value = Math.Round(mediaPlanRealized.Seascoef.Value, 2);
                         }
 
                     }
@@ -616,11 +636,11 @@ namespace CampaignEditor.UserControls.ValidationItems
                     {
                         if (allDecimals)
                         {
-                            worksheet.Cells[rowOff, colOffset++].Value = mediaPlanRealized.seccoef;
+                            worksheet.Cells[rowOff, colOffset++].Value = mediaPlanRealized.Seccoef;
                         }
                         else
                         {
-                            worksheet.Cells[rowOff, colOffset++].Value = Math.Round(mediaPlanRealized.seccoef.Value, 2);
+                            worksheet.Cells[rowOff, colOffset++].Value = Math.Round(mediaPlanRealized.Seccoef.Value, 2);
                         }
 
                     }
@@ -628,11 +648,11 @@ namespace CampaignEditor.UserControls.ValidationItems
                     {
                         if (allDecimals)
                         {
-                            worksheet.Cells[rowOff, colOffset++].Value = mediaPlanRealized.coefA;
+                            worksheet.Cells[rowOff, colOffset++].Value = mediaPlanRealized.CoefA;
                         }
                         else
                         {
-                            worksheet.Cells[rowOff, colOffset++].Value = Math.Round(mediaPlanRealized.coefA.Value, 2);
+                            worksheet.Cells[rowOff, colOffset++].Value = Math.Round(mediaPlanRealized.CoefA.Value, 2);
                         }
 
                     }
@@ -640,11 +660,11 @@ namespace CampaignEditor.UserControls.ValidationItems
                     {
                         if (allDecimals)
                         {
-                            worksheet.Cells[rowOff, colOffset++].Value = mediaPlanRealized.coefB;
+                            worksheet.Cells[rowOff, colOffset++].Value = mediaPlanRealized.CoefB;
                         }
                         else
                         {
-                            worksheet.Cells[rowOff, colOffset++].Value = Math.Round(mediaPlanRealized.coefB.Value, 2);
+                            worksheet.Cells[rowOff, colOffset++].Value = Math.Round(mediaPlanRealized.CoefB.Value, 2);
                         }
 
                     }          

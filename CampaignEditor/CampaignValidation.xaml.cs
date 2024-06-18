@@ -34,6 +34,7 @@ namespace CampaignEditor
         private BrandController _brandController;
         private CmpBrndController _cmpBrndController;
 
+        private CampaignDTO _campaign;
         private List<ChannelDTO> _channels = new List<ChannelDTO>();
         private List<DateOnly> _dates = new List<DateOnly>();
         // for sorting inside dictionaries
@@ -50,6 +51,8 @@ namespace CampaignEditor
 
         public event EventHandler SetLoadingPage;
         public event EventHandler SetContentPage;
+
+        bool hideExpected = false;
         public CampaignValidation(
             IChannelCmpRepository channelCmpRepository,
             IChannelRepository channelRepository,
@@ -77,45 +80,57 @@ namespace CampaignEditor
             InitializeComponent();
         }
 
-        public async Task Initialize(CampaignDTO campaign)
+        private bool CheckPrerequisites()
         {
-            //await CheckNewData();
-
-            var mpVersion = await _mediaPlanVersionController.GetLatestMediaPlanVersion(campaign.cmpid);
-            if (mpVersion != null)
-            {
-                gridNotInitialized.Visibility = System.Windows.Visibility.Collapsed;
-                gridValidation.Visibility = System.Windows.Visibility.Visible;
-
-                await FillChannels(campaign);
-                await FillDates(campaign);
-                await GetMediaPlanRealized(campaign);
-                InitializeDicts();
-                await AlignExpectedRealized();
-
-                validationStack._channelCmpController = _channelCmpController;
-                validationStack._channelController = _channelController;
-                validationStack._mediaPlanVersionController = _mediaPlanVersionController;
-                validationStack._mediaPlanController = _mediaPlanController;
-                validationStack._mediaPlanTermController = _mediaPlanTermController;
-                validationStack._spotController = _spotController;
-                validationStack._channels = _channels;
-                validationStack._dates = _dates;
-                validationStack._dateExpectedDict = _dateExpectedDict;
-                validationStack._dateRealizedDict = _dateRealizedDict;
-                validationStack._mpConverter = _mpConverter;
-                validationStack._forecastData = _forecastData;
-                validationStack._allMediaPlans = _allMediaPlans;
-                validationStack._mediaPlanRealized = _mediaPlanRealized;
-                validationStack._mediaPlanRealizedController = _mediaPlanRealizedController;
-                
-                await validationStack.Initialize(campaign);
-            }
-            else
+            if (_forecastData.Channels.Count == 0)
             {
                 gridValidation.Visibility = System.Windows.Visibility.Collapsed;
-                gridNotInitialized.Visibility = System.Windows.Visibility.Visible;               
+                gridNotInitialized.Visibility = System.Windows.Visibility.Visible;
+                return false;
             }
+            return true;
+        }
+
+        public async Task Initialize(CampaignDTO campaign, ObservableRangeCollection<MediaPlanTuple> allMediaPlans)
+        {
+            _campaign = campaign;
+
+            if (!CheckPrerequisites())
+            {
+                return;
+            }
+
+            //await CheckNewData();
+
+            _allMediaPlans = allMediaPlans;
+
+            gridNotInitialized.Visibility = System.Windows.Visibility.Collapsed;
+            gridValidation.Visibility = System.Windows.Visibility.Visible;
+
+            await FillChannels(campaign);
+            await FillDates(campaign);
+            await GetMediaPlanRealized(campaign);
+            InitializeDicts();
+            await AlignExpectedRealized();
+
+            validationStack._channelCmpController = _channelCmpController;
+            validationStack._channelController = _channelController;
+            validationStack._mediaPlanVersionController = _mediaPlanVersionController;
+            validationStack._mediaPlanController = _mediaPlanController;
+            validationStack._mediaPlanTermController = _mediaPlanTermController;
+            validationStack._spotController = _spotController;
+            validationStack._channels = _channels;
+            validationStack._dates = _dates;
+            validationStack._dateExpectedDict = _dateExpectedDict;
+            validationStack._dateRealizedDict = _dateRealizedDict;
+            validationStack._mpConverter = _mpConverter;
+            validationStack._forecastData = _forecastData;
+            validationStack._allMediaPlans = _allMediaPlans;
+            validationStack._mediaPlanRealized = _mediaPlanRealized;
+            validationStack._mediaPlanRealizedController = _mediaPlanRealizedController;
+
+            hideExpected = _allMediaPlans.Count == 0;
+            await validationStack.Initialize(campaign, hideExpected);
         }
 
         private void InitializeDicts()
@@ -137,8 +152,9 @@ namespace CampaignEditor
                         _dateExpectedDict[date] = new List<TermTuple?>();
                     }
                     _dateExpectedDict[date].AddRange(GetExpectedByDateAndChannel(date, channel));
-                   
-                }
+
+                }             
+
             }
         }
 
@@ -180,6 +196,51 @@ namespace CampaignEditor
             }
         }
 
+        private async Task PairMediaPlans(MediaPlanRealized mpR, TermTuple tt = null)
+        {
+            if (mpR.status == null || mpR.status == 5 || (tt != null && mpR.status == 1))
+            {
+                //Calculating all coefs
+
+                //await _mediaPlanRealizedController.UpdateMediaPlanRealized(realized[k]);
+
+            }
+
+            await SetRealizedName(mpR);
+            var mediaPlan = tt == null ? null : tt.MediaPlan;
+            mpR.MediaPlan = mediaPlan;
+            CalculateCoefs(mpR);
+
+        }
+
+        private void SetStatus(MediaPlanRealized mpR, TermTuple tt)
+        {
+            if (Math.Abs(mpR.dure.Value - mpR.durf.Value) > 1)
+            {
+                mpR.status = 7;
+            }
+            else if(tt.Price.HasValue && mpR.price.HasValue && Math.Abs(tt.Price.Value - mpR.price.Value) > 0.1M)
+            {
+                mpR.status = 6;
+            }
+            else
+            {
+                mpR.status = 1;
+            }
+
+            tt.Status = 1;
+        }
+
+        private void AddEmptyRealized(List<MediaPlanRealized?> realized, int index)
+        {
+            realized.Insert(index, new MediaPlanRealizedEmpty());
+        }
+
+        private void AddEmptyExpected(List<TermTuple?> expected, int index)
+        {
+            expected.Insert(index, new TermTuple(new MediaPlan(), new MediaPlanTerm(), new SpotDTO(0, "", "", 0, true), new TermCoefs(), ""));
+        }
+
         private async Task AlignExpectedRealizedByDate(List<TermTuple?> expected, List<MediaPlanRealized?> realized)
         {
             int n = expected.Count();
@@ -188,172 +249,142 @@ namespace CampaignEditor
             bool checkSameHour = true;
 
             int k = 0;
-            while(k < n && k < m)
+            while (k < n && k < m)
             {
+
                 int expectedTime = TimeFormat.RepresentativeToMins(expected[k].MediaPlan.Blocktime);
-                int realizedTime = (int)realized[k].stime/(int)60;
-                if (expected[k].MediaPlan.chid == _forecastData.ChrdsidChidDict[realized[k].chid.Value])
+                int realizedTime = (int)realized[k].stime / (int)60;
+
+                int expectedChid = expected[k].MediaPlan.chid;
+                int realizedChid = _forecastData.ChrdsidChidDict[realized[k].chid.Value];
+
+                if (expectedChid == 0)
                 {
-                    // Match
+                    k++;
+                    continue;
+                }
+                if (expectedChid == realizedChid)
+                {
+                    // Match within minPeriod
                     if (Math.Abs(expectedTime - realizedTime) <= minPeriod)
                     {
-                        realized[k].MediaPlan = expected[k].MediaPlan;
-                        // First time paired
-                        if (realized[k].status == null || realized[k].status == 5)
+                        await PairMediaPlans(realized[k], expected[k]);
+                        SetStatus(realized[k], expected[k]);
+                    }
+                    // Check if it's in the same hour
+                    else if (checkSameHour && IsSameHour(expectedTime, realizedTime))
+                    {
+                        bool betterPairFound = false;
+
+                        if (expectedTime > realizedTime)
                         {
-                            //Calculating all coefs
-                            /*await CalculateCoefs(realized[k], expected[k].MediaPlan);
-                            realized[k].status = 1;*/
-                            //await _mediaPlanRealizedController.UpdateMediaPlanRealized(realized[k]);
-                        }
-                        await CalculateCoefs(realized[k], expected[k].MediaPlan);
-                        if (Math.Abs(realized[k].price.Value - expected[k].Price.Value) > 0.1M)
-                        {
-                            realized[k].status = 6;
+                            // Check next realized
+                            if (k + 1 < m)
+                            {
+                                var nextRealized = realized[k + 1];
+                                int nextRealizedTime = (int)realized[k + 1].stime / (int)60;
+
+                                // When next realization is better, pair with mediaPlan anyway 
+                                // but set status to 2 and add empty expected
+                                if (nextRealized.chid == realized[k].chid &&
+                                    Math.Abs(expectedTime - nextRealizedTime) <= minPeriod)
+                                {
+                                    await PairMediaPlans(realized[k], expected[k]);
+                                    realized[k].status = 2;
+                                    AddEmptyExpected(expected, k);
+                                    n++;
+                                    betterPairFound = true;
+                                }
+                            }
+
                         }
                         else
                         {
-                            if (Math.Abs(realized[k].dure.Value - realized[k].durf.Value) > 1)
+                            // Check next expected
+                            if (k + 1 < n)
                             {
-                                realized[k].status = 7;
-                            }
-                            else
-                            {
-                                realized[k].status = 1;
+                                var nextExpected = expected[k + 1];
+                                int nextExpectedTime = TimeFormat.RepresentativeToMins(nextExpected.MediaPlan.Blocktime);
+
+                                // When next expected is better, mark it as unrealized
+                                if (nextExpected.MediaPlan.chid == expected[k].MediaPlan.chid &&
+                                    Math.Abs(expectedTime - nextExpectedTime) <= minPeriod)
+                                {
+                                    expected[k].Status = 2;
+                                    AddEmptyRealized(realized, k);
+                                    m++;
+                                    betterPairFound = true;
+                                }
                             }
                         }
-                        expected[k].Status = 1;
+
+                        // No better pair, pair current
+                        if (!betterPairFound)
+                        {
+                            await PairMediaPlans(realized[k], expected[k]);
+                            SetStatus(realized[k], expected[k]);
+                        }
                     }
-                    else if (checkSameHour && IsSameHour(expected[k].MediaPlan.Blocktime, realized[k].stimestr))
+                    // No match, add empty rows
+                    else
                     {
-                        // Check if next is in the minRange
-                        if (k + 1 < m && realized[k+1].chid == realized[k].chid)
+                        // Add empty expected row
+                        if (expectedTime > realizedTime)
                         {
-                            int realizedNextTime = (int)realized[k+1].stime / (int)60;
-                            // If next is better match, mark this as not ok, and the next will be match
-                            if (Math.Abs(expectedTime - realizedNextTime) <= minPeriod)
-                            {
-                                // Fill current row with empty expected
-                                realized[k].MediaPlan = expected[k].MediaPlan;
-                                await CalculateCoefs(realized[k], expected[k].MediaPlan);
-                                realized[k].status = 2;
-                                expected.Insert(k, new TermTuple(new MediaPlan(), new MediaPlanTerm(), new SpotDTO(0, "", "", 0, true), new TermCoefs(), ""));
-                                n++;   
-                            }
-                            else
-                            {
-                                realized[k].MediaPlan = expected[k].MediaPlan;
-                                await CalculateCoefs(realized[k], expected[k].MediaPlan);
-                                realized[k].status = 3;
-                                expected[k].Status = 1;
-                            }
-                        }
-                        else
-                        {
-                            // First time paired
-                            if (realized[k].status == null || realized[k].status == 5)
-                            {
-                                //Calculating all coefs
-                                /*await CalculateCoefs(realized[k], expected[k].MediaPlan);
-                                realized[k].status = 1;*/
-                                //await _mediaPlanRealizedController.UpdateMediaPlanRealized(realized[k]);
-                            }
-                            realized[k].MediaPlan = expected[k].MediaPlan;
-                            await CalculateCoefs(realized[k], expected[k].MediaPlan);
-                            realized[k].status = 3;
-                            expected[k].Status = 1;
-
-                        }
-
-                    }
-
-                    // Spot planned but not realized
-                    else if (expectedTime < realizedTime)
-                    {
-                        // When last values are unpaired, and realization is last for channel
-                        if ((k+1 < n && k+1 < m && realized[k].chid != realized[k+1].chid && 
-                            expected[k].MediaPlan.chid != expected[k+1].MediaPlan.chid))
-                        {
-                            var closestMediaPlan = FindClosestMediaPlan(realized[k]);
-                            realized[k].MediaPlan = closestMediaPlan;
-                            await CalculateCoefs(realized[k], closestMediaPlan);
-
+                            await PairMediaPlans(realized[k], null);
                             realized[k].status = 2;
+                            AddEmptyExpected(expected, k);
+                            n++;
                         }
+                        // Add empty realized row
                         else
                         {
                             expected[k].Status = 2;
-                            realized.Insert(k, new MediaPlanRealizedEmpty());
+                            AddEmptyRealized(realized, k);
                             m++;
                         }
-                        /*expected[k].Status = 2;
-                        realized.Insert(k, new MediaPlanRealizedEmpty());
-                        m++;*/
                     }
-                    // Realization that is not planned
+                }
+                // Different chids
+                else
+                {
+                    // Add empty realized row
+                    if (_chidOrder[expectedChid] < _chidOrder[realizedChid])
+                    {
+                        expected[k].Status = 2;
+                        AddEmptyRealized(realized, k);
+                        m++;
+                    }
+                    // Add empty expected row
                     else
                     {
-   
-                        var closestMediaPlan = FindClosestMediaPlan(realized[k]);                      
-                        realized[k].MediaPlan = closestMediaPlan;
-                        await CalculateCoefs(realized[k], closestMediaPlan);
-                                                                                                
+                        await PairMediaPlans(realized[k], null);
                         realized[k].status = 2;
-
-                        if (realized[k].status == null)
-                        {
-                            realized[k].status = 2;
-                            //await _mediaPlanRealizedController.UpdateMediaPlanRealized(realized[j]);
-                        }
-                        expected.Insert(k, new TermTuple(new MediaPlan(), new MediaPlanTerm(), new SpotDTO(0, "", "", 0, true), new TermCoefs(), ""));
+                        AddEmptyExpected(expected, k);
                         n++;
                     }
                 }
-                // Fill with empty fields when one channel in finished and other is not
-                else if (_chidOrder[expected[k].MediaPlan.chid] < _chidOrder[_forecastData.ChrdsidChidDict[realized[k].chid.Value]])
-                {
-                    /*var minChid = expected[k].MediaPlan.chid;
-                    int k1 = expected.Where(ex => ex != null && ex.Status != -1).Count(ex => ex.MediaPlan.chid == minChid);
-                    int k2 = realized.Where(re => re != null && re.status != -1).Count(re => _forecastData.ChrdsidChidDict[re.chid.Value] == minChid);*/
-                    expected[k].Status = 2;
-                    realized.Insert(k, new MediaPlanRealizedEmpty());
-                    m++;
-                }
-                else
-                {
-                    var closestMediaPlan = FindClosestMediaPlan(realized[k]);
-                    realized[k].MediaPlan = closestMediaPlan;
-                    await CalculateCoefs(realized[k], closestMediaPlan);
-                    realized[k].status = 2;
-                    if (realized[k].status == null)
-                    {
-                        realized[k].status = 2;
-                        //await _mediaPlanRealizedController.UpdateMediaPlanRealized(realized[j]);
-                    }
-                    expected.Insert(k, new TermTuple(new MediaPlan(), new MediaPlanTerm(), new SpotDTO(0, "", "", 0, true), new TermCoefs(), ""));
-                    n++;
-                }
+
                 k++;
-            }       
+            }
+            // All realized used, fill the rest of expected
             while (k < n)
             {
-                expected[k].Status = 0;
-                realized.Insert(k, new MediaPlanRealizedEmpty());
-                k++;               
-            }
-            while (k < m)
-            {
-                if (realized[k].status == null)
-                {
-                    realized[k].status = 2;
-                    //await _mediaPlanRealizedController.UpdateMediaPlanRealized(realized[j]);
-                }
-                else if (realized[k].status == 1)
-                    realized[k].status = 0;
-                expected.Insert(k, new TermTuple(new MediaPlan(), new MediaPlanTerm(), new SpotDTO(0, "", "", 0, true), new TermCoefs(), ""));
+                expected[k].Status = -1;
+                AddEmptyRealized(realized, k);
                 k++;
             }
-
+            // All expected used, fill the rest of realizations
+            while (k < m)
+            {
+                await PairMediaPlans(realized[k], null);
+                realized[k].status = 2;
+                // If nothing is initialized , no need to add empty expected one by one
+                if (_allMediaPlans.Count != 0)
+                    AddEmptyExpected(expected, k);
+                k++;
+            }
+          
         }
 
         private MediaPlan FindClosestMediaPlan(MediaPlanRealized mpRealized)
@@ -382,15 +413,14 @@ namespace CampaignEditor
             }
             return new MediaPlan();
         }
-
-        private bool IsSameHour(string timestr1, string timestr2)
+        private bool IsSameHour(int mins1, int mins2)
         {
-            return String.Compare(timestr1.Substring(0, 2), timestr2.Substring(0, 2)) == 0;
+            return mins1/60 == mins2/60; // dividing int/int to get hour then compare them
         }
 
         private List<TermTuple?> GetExpectedByDateAndChannel(DateOnly date, ChannelDTO channel)
         {
-            List<TermTuple> termTuples = new List<TermTuple>();
+            List<TermTuple?> termTuples = new List<TermTuple?>();
 
             foreach (var mediaPlanTuple in _allMediaPlans.Where(mpt => mpt.MediaPlan.chid == channel.chid))
             {
@@ -479,24 +509,22 @@ namespace CampaignEditor
             {
                 if (mediaPlanRealized.price == null || mediaPlanRealized.status == 5)
                 {
-                    await CalculateCoefs(mediaPlanRealized);
+                    CalculateCoefs(mediaPlanRealized);
                 }
             }
         }
 
-        private async Task CalculateCoefs(MediaPlanRealized mediaPlanRealized, MediaPlan mediaPlan)
+        private void CalculateCoefs(MediaPlanRealized mediaPlanRealized)
         {
             var chid = _forecastData.ChrdsidChidDict[mediaPlanRealized.chid.Value];
             var pricelist = _forecastData.ChidPricelistDict[chid];
-            mediaPlanRealized.chcoef = mediaPlan.chcoef;
-            mediaPlanRealized.progcoef = mediaPlan.progcoef;
-            mediaPlanRealized.coefA = mediaPlan.coefA;
-            mediaPlanRealized.coefB = mediaPlan.coefB;
-
-            // For calculating
-            _mpConverter.CalculateRealizedDPCoef(mediaPlanRealized);
+ 
             _mpConverter.CalculateRealizedCoefs(mediaPlanRealized, pricelist);
+         
+        }
 
+        private async Task SetRealizedName(MediaPlanRealized mediaPlanRealized)
+        {
             // Getting name of spot from nazreklame 
             int spotnum = mediaPlanRealized.spotnum.Value;
             if (_spotnumNameDict.ContainsKey(spotnum))
@@ -512,36 +540,6 @@ namespace CampaignEditor
                     mediaPlanRealized.spotname = progName.Trim();
                 }
             }
-
-
-
-        }
-
-        private async Task CalculateCoefs(MediaPlanRealized mediaPlanRealized)
-        {
-            var chid = _forecastData.ChrdsidChidDict[mediaPlanRealized.chid.Value];
-            var pricelist = _forecastData.ChidPricelistDict[chid];
-            _mpConverter.CalculateRealizedDPCoef(mediaPlanRealized);
-            _mpConverter.CalculateRealizedCoefs(mediaPlanRealized, pricelist);
-
-
-            int spotnum = mediaPlanRealized.spotnum.Value;
-            if (_spotnumNameDict.ContainsKey(spotnum))
-            {
-                mediaPlanRealized.spotname = _spotnumNameDict[spotnum];
-            }
-            else
-            {
-                var progName = await _mediaPlanRealizedController.GetDedicatedSpotName(spotnum);
-                if (progName != null)
-                {
-                    _spotnumNameDict[spotnum] = progName.Trim();
-                    mediaPlanRealized.spotname = progName.Trim();
-                }
-            }
-            
-            
-            
         }
 
         private async void cbChannels_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -593,7 +591,7 @@ namespace CampaignEditor
                 await GetMediaPlanRealized(_forecastData.Campaign);
                 InitializeRealizedDict();
                 await AlignExpectedRealized();
-                await validationStack.Initialize(_forecastData.Campaign);
+                await validationStack.Initialize(_forecastData.Campaign, hideExpected);
             }
             SetContentPage?.Invoke(this, null);
         }
@@ -607,6 +605,11 @@ namespace CampaignEditor
         public void CloseValidation()
         {
             validationStack.ClearStackPanel();
+        }
+
+        private async void btnReload_Click(object sender, RoutedEventArgs e)
+        {
+            await Initialize(_campaign, _allMediaPlans);
         }
     }
 }

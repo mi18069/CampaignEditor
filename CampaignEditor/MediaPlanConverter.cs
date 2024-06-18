@@ -403,7 +403,7 @@ namespace CampaignEditor
 
         }
 
-        public void CalculateRealizedDPCoef(MediaPlanRealized mpRealized)
+        private void CalculateRealizedDPCoef(MediaPlanRealized mpRealized)
         {
 
             //var prices = await _pricesController.GetAllPricesByPlId(pricelist.plid);
@@ -423,39 +423,43 @@ namespace CampaignEditor
                     // Checks if all days from mediaPlan is in pricelist    
                     if (price.days.Contains(day.ToString()))
                     {
-                        mpRealized.dpcoef = price.price;
+                        mpRealized.Dpcoef = price.price;
                         return;
                     }
                 }
             }
 
-            mpRealized.dpcoef = 1.0M;
+            mpRealized.Dpcoef = 1.0M;
             return;
         }
 
         public void CalculateRealizedCoefs(MediaPlanRealized mpRealized, PricelistDTO pricelist)
         {
-            CalculateRealizedCPP(mpRealized, pricelist);
-            mpRealized.seccoef = CalculateRealizedSeccoef(mpRealized, pricelist);
-            mpRealized.seascoef = CalculateRealizedSeascoef(mpRealized, pricelist);
+            CalculateRealizedDPCoef(mpRealized);
+            mpRealized.Seccoef = CalculateRealizedSeccoef(mpRealized, pricelist);
+            mpRealized.Seascoef = CalculateRealizedSeascoef(mpRealized, pricelist);
+
             decimal progcoef = 1.0M;
             decimal coefA = 1.0M;
             decimal coefB = 1.0M;
+            decimal chcoef = 1.0M;
+
             if (mpRealized.MediaPlan != null)
             {
+                chcoef = mpRealized.MediaPlan.chcoef;
                 progcoef = mpRealized.MediaPlan.progcoef;
                 coefA = mpRealized.MediaPlan.coefA;
                 coefB = mpRealized.MediaPlan.coefB;
-                mpRealized.cpp = mpRealized.MediaPlan.Cpp;
             }
 
-            mpRealized.progcoef = progcoef;
-            mpRealized.coefA = coefA;
-            mpRealized.coefB = coefB;
+            mpRealized.Chcoef = chcoef;
+            mpRealized.Progcoef = progcoef;
+            mpRealized.CoefA = coefA;
+            mpRealized.CoefB = coefB;
 
-            decimal coefs = mpRealized.chcoef.Value * mpRealized.coefA.Value * mpRealized.coefB.Value * mpRealized.seccoef.Value * mpRealized.seascoef.Value * mpRealized.progcoef.Value * mpRealized.dpcoef!.Value;
-            CalculateRealizedPrice(mpRealized, pricelist, coefs);     
-            
+            decimal coefs = mpRealized.Chcoef.Value * mpRealized.CoefA.Value * mpRealized.CoefB.Value * mpRealized.Seccoef.Value * mpRealized.Seascoef.Value * mpRealized.Progcoef.Value * mpRealized.Dpcoef!.Value;
+            CalculateRealizedPrice(mpRealized, pricelist, coefs);
+            CalculateRealizedCPP(mpRealized, pricelist);
         }
 
         public void CalculateRealizedPrice(MediaPlanRealized mpRealized, PricelistDTO pricelist, decimal coefs)
@@ -472,7 +476,7 @@ namespace CampaignEditor
             // For cpp pricelists
             else
             {
-                decimal amrpSale = mpRealized.amrpsale;
+                decimal amrpSale = mpRealized.Amrpsale.Value;
                 if (pricelist.mgtype && amrpSale < pricelist.minprice && amrpSale != 0)
                 {
                     amrpSale = pricelist.minprice;
@@ -489,7 +493,7 @@ namespace CampaignEditor
 
         private decimal PriceWithGRPCheck(MediaPlanRealized mpRealized, PricelistDTO pricelist, decimal standardValue)
         {
-            if (mpRealized.amrp1 < pricelist.minprice && pricelist.fixprice != 0)
+            if (mpRealized.Amrp1 < pricelist.minprice && pricelist.fixprice != 0)
             {
                 return pricelist.fixprice;
             }
@@ -559,17 +563,17 @@ namespace CampaignEditor
             {
                 if (mpRealized.amrp1 > 0)
                 {
-                    mpRealized.cpp = mpRealized.price / (mpRealized.amrp1);
+                    mpRealized.Cpp = mpRealized.price / (mpRealized.amrp1);
                 }
                 else
                 {
-                    mpRealized.cpp = 0;
+                    mpRealized.Cpp = 0;
                 }
             }
             // For cpp pricelists
             else
             {
-                mpRealized.cpp = pricelist.price;
+                mpRealized.Cpp = pricelist.price;
             }
         }
 

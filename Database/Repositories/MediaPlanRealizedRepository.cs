@@ -100,16 +100,16 @@ namespace Database.Repositories
                 amrp2 = item.amrp2,
                 amrp3 = item.amrp3,
                 amrpsale = item.amrpsale,
-                cpp = item.cpp ?? null,
-                dpcoef = item.dpcoef ?? null,
-                seascoef = item.seascoef ?? null,
-                seccoef = item.seccoef ?? null,
-                progcoef = item.progcoef ?? null,
+                Cpp = item.cpp ?? null,
+                Dpcoef = item.dpcoef ?? null,
+                Seascoef = item.seascoef ?? null,
+                Seccoef = item.seccoef ?? null,
+                Progcoef = item.progcoef ?? null,
                 price = item.cena ?? null,
                 status = item.status ?? null,
-                chcoef = item.chcoef ?? null,
-                coefA = item.koefa ?? null,
-                coefB = item.koefb ?? null
+                Chcoef = item.chcoef ?? null,
+                CoefA = item.koefa ?? null,
+                CoefB = item.koefb ?? null
             });
 
             return _mapper.Map<MediaPlanRealizedDTO>(mediaPlanRealized.FirstOrDefault());
@@ -145,16 +145,16 @@ namespace Database.Repositories
                 amrp2 = item.amrp2,
                 amrp3 = item.amrp3,
                 amrpsale = item.amrpsale,
-                cpp = item.cpp ?? null,
-                dpcoef = item.dpcoef ?? null,
-                seascoef = item.seascoef ?? null,
-                seccoef = item.seccoef ?? null,
-                progcoef = item.progcoef ?? null,
+                Cpp = item.cpp ?? null,
+                Dpcoef = item.dpcoef ?? null,
+                Seascoef = item.seascoef ?? null,
+                Seccoef = item.seccoef ?? null,
+                Progcoef = item.progcoef ?? null,
                 price = item.cena ?? null,
                 status = item.status ?? null,
-                chcoef = item.chcoef ?? null,
-                coefA = item.koefa ?? null,
-                coefB = item.koefb ?? null
+                Chcoef = item.chcoef ?? null,
+                CoefA = item.koefa ?? null,
+                CoefB = item.koefb ?? null
             });
 
             return (IEnumerable<MediaPlanRealized>)mediaPlanRealized;
@@ -191,16 +191,16 @@ namespace Database.Repositories
                 amrp2 = item.amrp2,
                 amrp3 = item.amrp3,
                 amrpsale = item.amrpsale,
-                cpp = item.cpp ?? null,
-                dpcoef = item.dpcoef ?? null,
-                seascoef = item.seascoef ?? null,
-                seccoef = item.seccoef ?? null,
-                progcoef = item.progcoef ?? null,
+                Cpp = item.cpp ?? null,
+                Dpcoef = item.dpcoef ?? null,
+                Seascoef = item.seascoef ?? null,
+                Seccoef = item.seccoef ?? null,
+                Progcoef = item.progcoef ?? null,
                 price = item.cena ?? null,
                 status = item.status ?? null,
-                chcoef = item.chcoef ?? null,
-                coefA = item.koefa ?? null,
-                coefB = item.koefb ?? null
+                Chcoef = item.chcoef ?? null,
+                CoefA = item.koefa ?? null,
+                CoefB = item.koefb ?? null
             });
 
             return _mapper.Map<IEnumerable<MediaPlanRealizedDTO>>(mediaPlansRealized);
@@ -238,16 +238,16 @@ namespace Database.Repositories
                 amrp2 = item.amrp2,
                 amrp3 = item.amrp3,
                 amrpsale = item.amrpsale,
-                cpp = item.cpp ?? null,
-                dpcoef = item.dpcoef ?? null,
-                seascoef = item.seascoef ?? null,
-                seccoef = item.seccoef ?? null,
-                progcoef = item.progcoef ?? null,
+                Cpp = item.cpp ?? null,
+                Dpcoef = item.dpcoef ?? null,
+                Seascoef = item.seascoef ?? null,
+                Seccoef = item.seccoef ?? null,
+                Progcoef = item.progcoef ?? null,
                 price = item.cena ?? null,
                 status = item.status ?? null,
-                chcoef = item.chcoef ?? null,
-                coefA = item.koefa ?? null,
-                coefB = item.koefb ?? null
+                Chcoef = item.chcoef ?? null,
+                CoefA = item.koefa ?? null,
+                CoefB = item.koefb ?? null
             });
 
             return _mapper.Map<IEnumerable<MediaPlanRealizedDTO>>(mediaPlansRealized);
@@ -342,16 +342,16 @@ namespace Database.Repositories
                     Amrp2 = mediaPlanRealized.amrp2,
                     Amrp3 = mediaPlanRealized.amrp3,
                     Amrpsale = mediaPlanRealized.amrpsale,
-                    Cpp = mediaPlanRealized.cpp,
-                    Dpcoef = mediaPlanRealized.dpcoef,
-                    Seascoef = mediaPlanRealized.seascoef,
-                    Seccoef = mediaPlanRealized.seccoef,
-                    Progcoef = mediaPlanRealized.progcoef,
+                    Cpp = mediaPlanRealized.Cpp,
+                    Dpcoef = mediaPlanRealized.Dpcoef,
+                    Seascoef = mediaPlanRealized.Seascoef,
+                    Seccoef = mediaPlanRealized.Seccoef,
+                    Progcoef = mediaPlanRealized.Progcoef,
                     Price = mediaPlanRealized.price,
                     Status = mediaPlanRealized.status,
-                    Chcoef = mediaPlanRealized.chcoef,
-                    CoefA = mediaPlanRealized.coefA,
-                    CoefB = mediaPlanRealized.coefB
+                    Chcoef = mediaPlanRealized.Chcoef,
+                    CoefA = mediaPlanRealized.CoefA,
+                    CoefB = mediaPlanRealized.CoefB
                 });
 
 

@@ -36,16 +36,16 @@ namespace CampaignEditor.UserControls.ValidationItems
             lblAMR2.Content = "Amr%2: " + Math.Round(mpRealized.amrp2, 2).ToString();
             lblAMR3.Content = "Amr%3: " + Math.Round(mpRealized.amrp3, 2).ToString();
 
-            if (mpRealized.cpp != null)
+            if (mpRealized.Cpp != null)
             {
-                lblCpp.Content = "CPP: " + mpRealized.cpp.ToString();
+                lblCpp.Content = "CPP: " + mpRealized.Cpp.ToString();
                 lblAMRSale.Content = "Amr sale: " + mpRealized.amrpsale.ToString();
             }
 
-            lblDPCoef.Content = "Dp coef: " + mpRealized.dpcoef.ToString();
-            lblProgCoef.Content = "Prog coef: " + mpRealized.progcoef.ToString();
-            lblSeccoef.Content = "Sec coef: " + mpRealized.seccoef.ToString();
-            lblSeascoef.Content = "Seas coef: " + mpRealized.seascoef.ToString();
+            lblDPCoef.Content = "Dp coef: " + mpRealized.Dpcoef.ToString();
+            lblProgCoef.Content = "Prog coef: " + mpRealized.Progcoef.ToString();
+            lblSeccoef.Content = "Sec coef: " + mpRealized.Seccoef.ToString();
+            lblSeascoef.Content = "Seas coef: " + mpRealized.Seascoef.ToString();
 
             lblPrice.Content = "Price: " + Math.Round(mpRealized.price.Value, 2).ToString();
 

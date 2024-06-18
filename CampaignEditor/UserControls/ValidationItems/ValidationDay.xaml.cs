@@ -5,7 +5,6 @@ using System.Windows.Controls;
 using CampaignEditor.Controllers;
 using System.Linq;
 using System.Windows.Media;
-using System.Windows.Threading;
 using System.Windows;
 using CampaignEditor.Helpers;
 using System.Windows.Input;
@@ -29,6 +28,7 @@ namespace CampaignEditor.UserControls.ValidationItems
         public event EventHandler<IndexEventArgs> InvertedExpectedColumnVisibility;
         public event EventHandler<IndexEventArgs> InvertedRealizedColumnVisibility;
 
+        private bool hideExpected = false;
         public ValidationDay(DateOnly date,
             List<TermTuple> termTuples,
             List<MediaPlanRealized> mpRealizedTuples,
@@ -94,13 +94,15 @@ namespace CampaignEditor.UserControls.ValidationItems
 
         private void DgExpected_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            int index = dgExpected.SelectedIndex;
-            dgRealized.SelectedIndex = index;
+            // for selecting both grids
+            //int index = dgExpected.SelectedIndex;
+            //dgRealized.SelectedIndex = index;
         }
         private void DgRealized_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            int index = dgRealized.SelectedIndex;
-            dgExpected.SelectedIndex = index;
+            // for selecting both grids
+            //int index = dgRealized.SelectedIndex;
+            //dgExpected.SelectedIndex = index;
         }
 
         private void dgExpected_PreviewMouseRightButtonDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
@@ -171,8 +173,9 @@ namespace CampaignEditor.UserControls.ValidationItems
 
         #region Change dataGrid focus
 
-        private void DataGrid_PreviewKeyDown(object sender, KeyEventArgs e)
+        private async void DataGrid_PreviewKeyDown(object sender, KeyEventArgs e)
         {
+            // Handle changing between grids
             var dataGrid = sender as DataGrid;
             if (e.Key == Key.Right && dataGrid == dgExpected && IsLastVisibleColumn(dataGrid))
             {
@@ -185,6 +188,33 @@ namespace CampaignEditor.UserControls.ValidationItems
                 dgExpected.Focus();
                 MoveFocusToLastCell(dgExpected);
                 e.Handled = true;
+            }
+
+            // Handle changing status
+            if (dgRealized.SelectedItems.Count > 0 &&
+                (e.Key == Key.F1 || e.Key == Key.F2 || e.Key == Key.F3 || e.Key == Key.F4 ||
+                e.Key == Key.F5 || e.Key == Key.F6 || e.Key == Key.F7 || e.Key == Key.F8))
+            {
+                int status = 2;
+                switch (e.Key)
+                {
+                    case Key.F1: status = 1; break;
+                    case Key.F2: status = 2; break;
+                    case Key.F3: status = 3; break;
+                    case Key.F4: status = 4; break;
+                    case Key.F5: status = 5; break;
+                    case Key.F6: status = 6; break;
+                    case Key.F7: status = 7; break;
+                    case Key.F8: status = 8; break;
+                }
+
+                foreach (MediaPlanRealized mpRealized in dgRealized.SelectedItems)
+                {
+                    if (mpRealized.status == -1)
+                        continue;
+                    mpRealized.status = status;
+                    //await _mediaPlanRealizedController.SetStatusValue(mpRealized.id!.Value, status);
+                }
             }
         }
 
@@ -253,6 +283,37 @@ namespace CampaignEditor.UserControls.ValidationItems
             }
         }
 
+        public void HideExpected()
+        {
+            hideExpected = true;
+            dgExpected.Visibility = Visibility.Collapsed;
+            lblExCount.Visibility = Visibility.Collapsed;
+            lblDate.HorizontalAlignment = HorizontalAlignment.Left;
+            lblRealCount.HorizontalAlignment = HorizontalAlignment.Center;
+            dgRealized.HorizontalAlignment = HorizontalAlignment.Stretch;
+            var scrollViewer = GetScrollViewer(dgExpected);
+            if (scrollViewer != null)
+            {
+                scrollViewer.ScrollChanged -= dgRealized_ScrollChanged;
+            }
+        }
+
+        private ScrollViewer GetScrollViewer(DependencyObject depObj)
+        {
+            if (depObj is ScrollViewer)
+                return depObj as ScrollViewer;
+
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(depObj); i++)
+            {
+                var child = VisualTreeHelper.GetChild(depObj, i);
+
+                var result = GetScrollViewer(child);
+                if (result != null)
+                    return result;
+            }
+            return null;
+        }
+
         #endregion
 
         private void tglButton_Click(object sender, RoutedEventArgs e)
@@ -272,7 +333,7 @@ namespace CampaignEditor.UserControls.ValidationItems
 
         private void dgExpected_ScrollChanged(object sender, ScrollChangedEventArgs e)
         {
-            if (e.VerticalChange != 0.0f)
+            if (e.VerticalChange != 0.0f && !hideExpected)
             {
                 ScrollViewer sv = null;
                 Type t = dgExpected.GetType();
@@ -290,7 +351,7 @@ namespace CampaignEditor.UserControls.ValidationItems
 
         private void dgRealized_ScrollChanged(object sender, ScrollChangedEventArgs e)
         {
-            if (e.VerticalChange != 0.0f)
+            if (e.VerticalChange != 0.0f && !hideExpected)
             {
                 ScrollViewer sv = null;
                 Type t = dgRealized.GetType();

@@ -157,15 +157,14 @@ namespace CampaignEditor
                 if (channel != null)
                 {
                     _channels.Add(channel);
-
+                    _chrdsChidDict[channel.chrdsid] = channel.chid;
+                    _chrdsChannelDict[channel.chrdsid] = channel;
                     // When adding new Channel, there is no need to reinitialize old pricelists
                     // just add new pricelist in dictionary if it's not already in it
                     if (addNewPricelist && !_chidPricelistDict.ContainsKey(channel.chid))
                     {
                         var pricelist = await _pricelistController.GetPricelistById(channelCmp.plid);
                         _chidPricelistDict[channel.chid] = pricelist;
-                        _chrdsChidDict[channel.chrdsid] = channel.chid;
-                        _chrdsChannelDict[channel.chrdsid] = channel;
 
                         if (!_pricelists.Any(p => p.plid == pricelist.plid))
                         {

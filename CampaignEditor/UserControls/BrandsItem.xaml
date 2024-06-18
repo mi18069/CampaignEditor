@@ -1,0 +1,39 @@
+﻿<UserControl x:Class="CampaignEditor.UserControls.BrandsItem"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:CampaignEditor.UserControls"
+             mc:Ignorable="d" 
+             d:DesignHeight="70" d:DesignWidth="800" d:Background="White">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="10"/>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="auto"/>
+            <ColumnDefinition Width="35"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="10"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="10"/>
+        </Grid.RowDefinitions>
+        <Label Content="Brand " Grid.Row="1" Grid.Column="1" 
+               VerticalAlignment="Center" HorizontalAlignment="Left" FontWeight="Bold"/>
+        <Label x:Name="lblBrandNum" Content="0" FontWeight="Bold"
+               Grid.Row="1" Grid.Column="2"
+               HorizontalAlignment="Left" VerticalAlignment="Center"/>
+        <TextBox x:Name="tbBrand" Grid.Row="1" Grid.Column="3"
+                 TextChanged="tbBrand_TextChanged"  VerticalAlignment="Center" Margin="10"
+                 HorizontalAlignment="Stretch"
+                 HorizontalScrollBarVisibility="Auto" MinHeight="30" VerticalContentAlignment="Center"/>
+        <Button x:Name="btnDelete" Background="Transparent" BorderThickness="0"
+                Grid.Row="1" Grid.Column="4"
+                HorizontalAlignment="Center" VerticalAlignment="Center"
+                Click="btnDelete_Click">
+            <Image Source="{StaticResource x_icon}" Width="25" Height="25"></Image>
+        </Button>
+    </Grid>
+</UserControl>

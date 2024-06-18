@@ -28,6 +28,7 @@ namespace CampaignEditor
         private readonly IAbstractFactory<Goals> _factoryGoals;
         private readonly IAbstractFactory<CmpInfo> _factoryInfo;
         private readonly IAbstractFactory<ClientDayParts> _factoryClientDayParts;
+        private readonly IAbstractFactory<ClientBrands> _factoryClientBrands;
 
         private CampaignOverviewData _campaignOverviewData;
 
@@ -46,7 +47,7 @@ namespace CampaignEditor
         private List<Tuple<ChannelDTO, PricelistDTO, ActivityDTO>> _channels = null;
 
         private CampaignDTO _campaignInfo = null;
-        private BrandDTO[] _brands = null;
+        private List<BrandDTO> _brands = null;
 
         private Dictionary<DayPartDTO, List<DPTimeDTO>> _dayPartsDict = null;
 
@@ -61,9 +62,12 @@ namespace CampaignEditor
         public CampaignOverview(IAbstractFactory<AssignTargets> factoryAssignTargets,
             IAbstractFactory<Channels> factoryChannels, IAbstractFactory<Spots> factorySpots,
             IAbstractFactory<Goals> factoryGoals, IAbstractFactory<CmpInfo> factoryInfo,
-            IAbstractFactory<CampaignOverviewData> campaignOverviewData, IAbstractFactory<ClientDayParts> factoryClientDayParts)
+            IAbstractFactory<CampaignOverviewData> campaignOverviewData, 
+            IAbstractFactory<ClientDayParts> factoryClientDayParts,
+            IAbstractFactory<ClientBrands> factoryClientBrands)
         {
             this.DataContext = this;
+            InitializeComponent();
 
             _factoryAssignTargets = factoryAssignTargets;
             _factoryChannels = factoryChannels;
@@ -71,10 +75,10 @@ namespace CampaignEditor
             _factoryGoals = factoryGoals;
             _factoryInfo = factoryInfo;
             _factoryClientDayParts = factoryClientDayParts;
+            _factoryClientBrands = factoryClientBrands;
 
             _campaignOverviewData = campaignOverviewData.Create();
 
-            InitializeComponent();
         }
 
         #region Initialization
@@ -91,6 +95,7 @@ namespace CampaignEditor
                 btnGoals.IsEnabled = false;
                 btnChannels.IsEnabled = false;
                 btnDayParts.IsEnabled = false;
+                //btnBrands.IsEnabled = false;
             }
 
             try
@@ -103,6 +108,7 @@ namespace CampaignEditor
                 Task goalsTask = Task.Run(() => InitializeGoals());
                 Task channelsTask = Task.Run(() => InitializeChannels());
                 Task dayPartsTask = Task.Run(() => InitializeDayParts());
+                Task brandsTask = Task.Run(() => InitializeBrands());
 
                 // Wait for all tasks to complete
                 await Task.WhenAll(infoTask, targetsTask, spotsTask, goalsTask, channelsTask, dayPartsTask);
@@ -125,7 +131,7 @@ namespace CampaignEditor
         private async Task FillFields()
         {
             FillDGTargets(_targetlist);
-            await FillInfo(_campaign, _brands);
+            await FillInfo(_campaign);
             FillGoals(_goals);
             dgSpots.ItemsSource = _spotlist;
             dgChannels.ItemsSource = _channels;
@@ -143,8 +149,6 @@ namespace CampaignEditor
         private async Task InitializeInfo()
         {
 
-            _brands = await _campaignOverviewData.GetBrands(_campaign.cmpid);
-
         }
 
         private async Task InitializeGoals()
@@ -158,7 +162,10 @@ namespace CampaignEditor
             _channels = await _campaignOverviewData.GetChannelTuples(_campaign.cmpid);
 
         }
-
+        private async Task InitializeBrands()
+        {
+            _brands = (await _campaignOverviewData.GetBrands(_campaign.cmpid)).ToList();
+        }
         private async Task InitializeDayParts()
         {
             _dayPartsDict = await _campaignOverviewData.GetClientDayParts(_client.clid);
@@ -176,7 +183,7 @@ namespace CampaignEditor
             try
             {
                 fInfo = _factoryInfo.Create();
-                await fInfo.Initialize(_client, _campaign, _brands);
+                await fInfo.Initialize(_client, _campaign);
                 fInfo.ShowDialog();
             }
             catch
@@ -190,14 +197,13 @@ namespace CampaignEditor
                 _campaign = fInfo.Campaign;
                 CampaignUpdatedEvent?.Invoke(this, new UpdateCampaignEventArgs(fInfo.Campaign));
                 _campaignInfo = fInfo.Campaign;
-                _brands = fInfo.SelectedBrands;
-                await FillInfo(_campaignInfo, _brands);
+                await FillInfo(_campaignInfo);
 
             }
             btnCmpInfo.IsEnabled = true;
 
         }
-        private async Task FillInfo(CampaignDTO campaign = null, BrandDTO[] brands = null)
+        private async Task FillInfo(CampaignDTO campaign = null)
         {
             if (campaign != null)
             {
@@ -218,31 +224,7 @@ namespace CampaignEditor
                 lblDPEndValue.Content = campaign.cmpetime.ToString().Trim();
                 lblActiveValue.Content = campaign.active;
                 var activity = await _campaignOverviewData.GetActivity(_campaign);
-                lblActivityValue.Content = activity.act.Trim();
-                if (brands[0] != null)
-                {
-                    lblBrand1Value.Content = brands[0].brand;
-                    if (lblBrand1Value.Content.ToString().Length > 15)
-                    {
-                        lblBrand1Value.Content = lblBrand1Value.Content.ToString().Substring(0, 14) + "...";
-                    }
-                }
-                else
-                {
-                    lblBrand1Value.Content = "-";
-                }
-                if (brands[1] != null)
-                {
-                    lblBrand2Value.Content = brands[1].brand;
-                    if (lblBrand2Value.Content.ToString().Length > 15)
-                    {
-                        lblBrand2Value.Content = lblBrand2Value.Content.ToString().Substring(0, 14) + "...";
-                    }
-                }
-                else
-                {
-                    lblBrand2Value.Content = "-";
-                }
+                lblActivityValue.Content = activity.act.Trim();                
             }
         }
 
@@ -475,6 +457,38 @@ namespace CampaignEditor
 
         #endregion
 
+        #region Brands
+
+        private async void btnBrands_Click(object sender, RoutedEventArgs e)
+        {
+            btnBrands.IsEnabled = false;
+            ClientBrands fClientBrands = null;
+
+            try
+            {
+                fClientBrands = _factoryClientBrands.Create();
+                await fClientBrands.Initialize(_campaign, _brands);
+                fClientBrands.ShowDialog();
+            }
+            catch
+            {
+                btnBrands.IsEnabled = true;
+                return;
+            }
+
+            if (fClientBrands.isModified)
+            {
+                _brands = fClientBrands.SelectedBrands;
+                //FillGoals(_goals);
+                // For updating goals in forecast
+                //DayPartsUpdatedEvent?.Invoke(this, null);
+            }
+
+            btnBrands.IsEnabled = true;
+        }
+
+        #endregion
+
 
         private void btnCancel_Click(object sender, RoutedEventArgs e)
         {
@@ -505,5 +519,6 @@ namespace CampaignEditor
             // Set the new vertical offset
             scrollViewer.ScrollToVerticalOffset(newVerticalOffset);
         }
+
     }
 }

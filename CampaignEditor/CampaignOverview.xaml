@@ -31,164 +31,146 @@
             <RowDefinition Height="50" />
             <RowDefinition Height="10" />
         </Grid.RowDefinitions>
-        <ScrollViewer Grid.Row="3" Grid.Column="2" Grid.RowSpan="2" Margin="0,10,0,0"
-                      VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Auto"
-                      MaxWidth="300">
-            <Border BorderBrush="LightGray" BorderThickness="1">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="10" />
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="10" />
-                    </Grid.ColumnDefinitions>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="10" />
-                        <RowDefinition Height="auto" />
-                        <RowDefinition Height="auto" />
-                        <RowDefinition Height="auto" />
-                        <RowDefinition Height="auto" />
-                        <RowDefinition Height="auto" />
-                        <RowDefinition Height="auto" />
-                        <RowDefinition Height="auto" />
-                        <RowDefinition Height="auto" />
-                        <RowDefinition Height="auto" />
-                        <RowDefinition Height="auto" />
-                        <RowDefinition Height="auto" />
-                        <RowDefinition Height="auto" />
-                        <RowDefinition Height="*" />
-                        <RowDefinition Height="10" />
-                    </Grid.RowDefinitions>
-                    <Button x:Name="btnCmpInfo" Content="Info" Grid.Row="1" Grid.Column="1"
-                        Width="200" Height="40" Margin="10"
-                        Click="btnCmpInfo_Click"/>
-                    <Border x:Name="bClient" Grid.Row="2" Grid.Column="1" Grid.ColumnSpan="2" 
-                        BorderThickness="0, 0, 0, 1" BorderBrush="Black">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <Label x:Name="lblClient" Content="Client: " Grid.Column="0"/>
-                            <Label x:Name="lblClientValue" Grid.Column="1" 
-                           HorizontalContentAlignment="Right" FontWeight="DemiBold"/>
-                        </Grid>
-                    </Border>
-                    <Border x:Name="bCampaign" Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2" 
-                        BorderThickness="0, 0, 0, 1" BorderBrush="Black">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <Label x:Name="lblCampaign" Content="Campaign: " Grid.Column="0"/>
-                            <Label x:Name="lblCampaignValue" Grid.Column="1" 
-                       HorizontalContentAlignment="Right" FontWeight="DemiBold"/>
-                        </Grid>
-                    </Border>
-                    <Border x:Name="bStartDate" Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" 
-                        BorderThickness="0, 0, 0, 1" BorderBrush="Black">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <Label x:Name="lblStartDate" Content="Start Date: " Grid.Column="0"/>
-                            <Label x:Name="lblStartDateValue" Grid.Column="1" 
-                       HorizontalContentAlignment="Right" FontWeight="DemiBold"/>
-                        </Grid>
-                    </Border>
-                    <Border x:Name="bEndDate" Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="2" 
-                        BorderThickness="0, 0, 0, 1" BorderBrush="Black">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <Label x:Name="lblEndDate" Content="End Date: " Grid.Column="0"/>
-                            <Label x:Name="lblEndDateValue" Grid.Column="1" 
-                       HorizontalContentAlignment="Right" FontWeight="DemiBold"/>
-                        </Grid>
-                    </Border>
-                    <Border x:Name="bDPStart" Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="2" 
-                        BorderThickness="0, 0, 0, 1" BorderBrush="Black">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <Label x:Name="lblDPStart" Content="DP Start: " Grid.Column="0"/>
-                            <Label x:Name="lblDPStartValue" Grid.Column="1" 
-                       HorizontalContentAlignment="Right" FontWeight="DemiBold"/>
-                        </Grid>
-                    </Border>
-                    <Border x:Name="bDPEnd" Grid.Row="7" Grid.Column="1" Grid.ColumnSpan="2" 
-                        BorderThickness="0, 0, 0, 1" BorderBrush="Black">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <Label x:Name="lblDPEnd" Content="DP End: " Grid.Column="0"/>
-                            <Label x:Name="lblDPEndValue" Grid.Column="1" 
-                       HorizontalContentAlignment="Right" FontWeight="DemiBold"/>
-                        </Grid>
-                    </Border>
-                    <Border x:Name="bActive" Grid.Row="8" Grid.Column="1" Grid.ColumnSpan="2" 
-                        BorderThickness="0, 0, 0, 1" BorderBrush="Black">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <Label x:Name="lblActive" Content="Active: " Grid.Column="0"/>
-                            <Label x:Name="lblActiveValue" Grid.Column="1" 
-                       HorizontalContentAlignment="Right" FontWeight="DemiBold"/>
-                        </Grid>
-                    </Border>
-                    <Border x:Name="bActivity" Grid.Row="9" Grid.Column="1" Grid.ColumnSpan="2" 
-                        BorderThickness="0, 0, 0, 1" BorderBrush="Black">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <Label x:Name="lblActivity" Content="Activity: " Grid.Column="0"/>
-                            <Label x:Name="lblActivityValue" Grid.Column="1" 
-                       HorizontalContentAlignment="Right" FontWeight="DemiBold"/>
-                        </Grid>
-                    </Border>
-                    <Border x:Name="bBrand1" Grid.Row="10" Grid.Column="1" Grid.ColumnSpan="2" 
-                        BorderThickness="0, 0, 0, 1" BorderBrush="Black">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <Label x:Name="lblBrand1" Content="Brand 1: " Grid.Column="0"/>
-                            <Label x:Name="lblBrand1Value" Grid.Column="1" 
-                       HorizontalContentAlignment="Right" FontWeight="DemiBold"/>
-                        </Grid>
-                    </Border>
-                    <Border x:Name="bBrand2" Grid.Row="11" Grid.Column="1" Grid.ColumnSpan="2" 
-                        BorderThickness="0, 0, 0, 1" BorderBrush="Black">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <Label x:Name="lblBrand2" Content="Brand 2: " Grid.Column="0"/>
-                            <Label x:Name="lblBrand2Value" Grid.Column="1" 
-                       HorizontalContentAlignment="Right" FontWeight="DemiBold"/>
-                        </Grid>
-                    </Border>
-                    <Button x:Name="btnDayParts" Content="Client Day parts" 
-                            Grid.Row="12" Grid.Column="1" Width="200" Height="40" Margin="10"
-                            Click="btnDayParts_Click">
-                        
-                    </Button>
-                </Grid>
-            </Border>
-        </ScrollViewer>
+        <Border BorderBrush="LightGray" BorderThickness="1"
+                    Grid.Row="3" Grid.Column="2" Grid.RowSpan="2" Margin="0,10,0,0" MaxWidth="300">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="10" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="10" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="10" />
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="10" />
+                </Grid.RowDefinitions>
+                <Button x:Name="btnCmpInfo" Content="Info" Grid.Row="1" Grid.Column="1"
+                    Width="200" Height="40" Margin="10"
+                    Click="btnCmpInfo_Click"/>
+                <ScrollViewer Grid.Row="2" Grid.Column="1">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                        </Grid.RowDefinitions>
+                        <Border x:Name="bClient" Grid.Row="0" 
+                    BorderThickness="0, 0, 0, 1" BorderBrush="Black">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Label x:Name="lblClient" Content="Client: " Grid.Column="0"/>
+                                <Label x:Name="lblClientValue" Grid.Column="1" 
+                        HorizontalContentAlignment="Right" FontWeight="DemiBold"/>
+                            </Grid>
+                        </Border>
+                        <Border x:Name="bCampaign" Grid.Row="1" 
+                    BorderThickness="0, 0, 0, 1" BorderBrush="Black">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Label x:Name="lblCampaign" Content="Campaign: " Grid.Column="0"/>
+                                <Label x:Name="lblCampaignValue" Grid.Column="1" 
+                    HorizontalContentAlignment="Right" FontWeight="DemiBold"/>
+                            </Grid>
+                        </Border>
+                        <Border x:Name="bStartDate" Grid.Row="2" 
+                    BorderThickness="0, 0, 0, 1" BorderBrush="Black">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Label x:Name="lblStartDate" Content="Start Date: " Grid.Column="0"/>
+                                <Label x:Name="lblStartDateValue" Grid.Column="1" 
+                    HorizontalContentAlignment="Right" FontWeight="DemiBold"/>
+                            </Grid>
+                        </Border>
+                        <Border x:Name="bEndDate" Grid.Row="3" 
+                    BorderThickness="0, 0, 0, 1" BorderBrush="Black">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Label x:Name="lblEndDate" Content="End Date: " Grid.Column="0"/>
+                                <Label x:Name="lblEndDateValue" Grid.Column="1" 
+                    HorizontalContentAlignment="Right" FontWeight="DemiBold"/>
+                            </Grid>
+                        </Border>
+                        <Border x:Name="bDPStart" Grid.Row="4" 
+                    BorderThickness="0, 0, 0, 1" BorderBrush="Black">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Label x:Name="lblDPStart" Content="DP Start: " Grid.Column="0"/>
+                                <Label x:Name="lblDPStartValue" Grid.Column="1" 
+                    HorizontalContentAlignment="Right" FontWeight="DemiBold"/>
+                            </Grid>
+                        </Border>
+                        <Border x:Name="bDPEnd" Grid.Row="5" 
+                    BorderThickness="0, 0, 0, 1" BorderBrush="Black">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Label x:Name="lblDPEnd" Content="DP End: " Grid.Column="0"/>
+                                <Label x:Name="lblDPEndValue" Grid.Column="1" 
+                    HorizontalContentAlignment="Right" FontWeight="DemiBold"/>
+                            </Grid>
+                        </Border>
+                        <Border x:Name="bActive" Grid.Row="6" 
+                    BorderThickness="0, 0, 0, 1" BorderBrush="Black">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Label x:Name="lblActive" Content="Active: " Grid.Column="0"/>
+                                <Label x:Name="lblActiveValue" Grid.Column="1" 
+                    HorizontalContentAlignment="Right" FontWeight="DemiBold"/>
+                            </Grid>
+                        </Border>
+                        <Border x:Name="bActivity" Grid.Row="7" 
+                    BorderThickness="0, 0, 0, 1" BorderBrush="Black">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+                                <Label x:Name="lblActivity" Content="Activity: " Grid.Column="0"/>
+                                <Label x:Name="lblActivityValue" Grid.Column="1" 
+                    HorizontalContentAlignment="Right" FontWeight="DemiBold"/>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </ScrollViewer>
+                
+                
+                <Button x:Name="btnDayParts" Content="Day parts" 
+                        Grid.Row="3" Grid.Column="1" Width="200" Height="40" Margin="10"
+                        Click="btnDayParts_Click"/>
+
+                <Button x:Name="btnBrands" Content="Brands" 
+                        Grid.Row="4" Grid.Column="1" Width="200" Height="40" Margin="10"
+                        Click="btnBrands_Click"/>
+            </Grid>
+        </Border>
         <Border Grid.Row="1" Grid.Column="4"
                 BorderBrush="LightGray" BorderThickness="1" 
                 MinWidth="300" >

@@ -61,32 +61,6 @@ namespace CampaignEditor
             _dpTimeController = new DPTimeController(dPTimeRepository);
         }
 
-        public async Task<BrandDTO[]> GetBrands(int cmpid)
-        {
-            BrandDTO[] brands = new BrandDTO[2];
-            List<CmpBrndDTO> cmpBrnds = new List<CmpBrndDTO>();
-            try
-            {
-                cmpBrnds = (List<CmpBrndDTO>)await _cmpBrndController.GetCmpBrndsByCmpId(cmpid);
-                if (cmpBrnds.Count() > 0)
-                {
-                    var brand = await _brandController.GetBrandById((cmpBrnds[0] as CmpBrndDTO).brbrand);
-                    brands[0] = brand;
-                }
-                if (cmpBrnds.Count() > 1)
-                {
-                    var brand = await _brandController.GetBrandById((cmpBrnds[1] as CmpBrndDTO).brbrand);
-                    brands[1] = brand;
-                }
-            }
-            catch (Exception ex)
-            {
-                throw new Exception($"Cannot retrieve data for brands\n {ex.Message}");
-            }
-
-            return brands;
-        }
-
         public async Task<List<TargetDTO>> GetTargets(int cmpid)
         {
             List<TargetDTO> targets = new List<TargetDTO>();
@@ -182,6 +156,28 @@ namespace CampaignEditor
             return tuples;
         }
 
+        public async Task<IEnumerable<BrandDTO>> GetBrands(int cmpid)
+        {
+
+            List<BrandDTO> selectedBrands = new List<BrandDTO>();
+            try
+            {
+                var selectedCmpBrnds = await _cmpBrndController.GetCmpBrndsByCmpId(cmpid);
+
+                foreach (var cmpBrnd in selectedCmpBrnds)
+                {
+                    var brand = await _brandController.GetBrandById(cmpBrnd.brbrand);
+                    selectedBrands.Add(brand);
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Cannot retrieve data for channels\n {ex.Message}");
+            }
+
+            return selectedBrands;
+        }
+
         public async Task<Dictionary<DayPartDTO, List<DPTimeDTO>>> GetClientDayParts(int clid)
         {
             Dictionary<DayPartDTO, List<DPTimeDTO>> dictionary = new Dictionary<DayPartDTO, List<DPTimeDTO>>();
@@ -200,7 +196,7 @@ namespace CampaignEditor
             }
 
             return dictionary;
-        }
+        }      
 
     }
 }
