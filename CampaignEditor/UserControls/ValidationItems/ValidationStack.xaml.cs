@@ -56,9 +56,9 @@ namespace CampaignEditor.UserControls.ValidationItems
         { true, true, true, false, true, true, true, false, false, true, true, true,
             true, true, true, true, false, false, false, true, true, true};
 
-        private bool[] dgRealizedMask = new bool[21]
+        private bool[] dgRealizedMask = new bool[22]
         { true, true, true, true, true, true, true, true, false, false, true,
-            true, true, true, true, true, true, false, false, true, true};
+            true, true, true, true, true, true, false, false, true, true, true};
 
 
         public ValidationStack()
@@ -683,6 +683,10 @@ namespace CampaignEditor.UserControls.ValidationItems
                     if (mask[20])
                     {
                         worksheet.Cells[rowOff, colOffset++].Value = mediaPlanRealized.status;
+                    }
+                    if (mask[21])
+                    {
+                        worksheet.Cells[rowOff, colOffset++].Value = mediaPlanRealized.Accept;
                     }
                     worksheet.Cells[rowOff, colOff, rowOff, colOff + colNum - 1].Style.Fill.PatternType = ExcelFillStyle.Solid;
                     worksheet.Cells[rowOff, colOff, rowOff, colOff + colNum - 1].Style.Fill.BackgroundColor.SetColor(SetColorByStatus(mediaPlanRealized.status.Value));

@@ -9,6 +9,7 @@ using System.Windows;
 using CampaignEditor.Helpers;
 using System.Windows.Input;
 using System.Reflection;
+using System.Diagnostics;
 
 namespace CampaignEditor.UserControls.ValidationItems
 {
@@ -28,7 +29,12 @@ namespace CampaignEditor.UserControls.ValidationItems
         public event EventHandler<IndexEventArgs> InvertedExpectedColumnVisibility;
         public event EventHandler<IndexEventArgs> InvertedRealizedColumnVisibility;
 
-        private bool hideExpected = false;
+        bool hideExpected = false;
+
+        string columnToEdit = string.Empty;
+        decimal oldCellValue;
+        bool skipCellUpdate = true;
+
         public ValidationDay(DateOnly date,
             List<TermTuple> termTuples,
             List<MediaPlanRealized> mpRealizedTuples,
@@ -69,6 +75,7 @@ namespace CampaignEditor.UserControls.ValidationItems
             lblDate.Content = date.ToShortDateString();
             
         }
+
 
         private void SetGridMasks(bool[] expectedGridMask, bool[] realizedGridMask)
         {
@@ -190,12 +197,15 @@ namespace CampaignEditor.UserControls.ValidationItems
                 e.Handled = true;
             }
 
-            // Handle changing status
+            // Handle changing status or accepted
             if (dgRealized.SelectedItems.Count > 0 &&
                 (e.Key == Key.F1 || e.Key == Key.F2 || e.Key == Key.F3 || e.Key == Key.F4 ||
-                e.Key == Key.F5 || e.Key == Key.F6 || e.Key == Key.F7 || e.Key == Key.F8))
+                e.Key == Key.F5 || e.Key == Key.F6 || e.Key == Key.F7 || e.Key == Key.F8 ||
+                e.Key == Key.Z || e.Key == Key.Y || e.Key == Key.X))
             {
                 int status = 2;
+                bool changeAccept = false;
+                bool acceptValue = false;
                 switch (e.Key)
                 {
                     case Key.F1: status = 1; break;
@@ -206,13 +216,20 @@ namespace CampaignEditor.UserControls.ValidationItems
                     case Key.F6: status = 6; break;
                     case Key.F7: status = 7; break;
                     case Key.F8: status = 8; break;
+                    case Key.X: changeAccept = true; acceptValue = false; break;
+                    case Key.Z:
+                    case Key.Y:    
+                        changeAccept = true; acceptValue = true; break;
                 }
 
                 foreach (MediaPlanRealized mpRealized in dgRealized.SelectedItems)
                 {
                     if (mpRealized.status == -1)
                         continue;
-                    mpRealized.status = status;
+                    if (changeAccept)
+                        mpRealized.Accept = acceptValue;
+                    else 
+                        mpRealized.status = status;
                     //await _mediaPlanRealizedController.SetStatusValue(mpRealized.id!.Value, status);
                 }
             }
@@ -370,6 +387,145 @@ namespace CampaignEditor.UserControls.ValidationItems
         private void dg_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
             e.Handled = true;
+        }
+
+        #region Edit cells
+        // for getting name of column that will be edited
+        private void dgRealized_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            // Get the DataGrid
+            DataGrid dataGrid = dgRealized;
+
+            // Get the clicked cell
+            DependencyObject dep = (DependencyObject)e.OriginalSource;
+
+            // Traverse the visual tree to find the DataGridCell
+            while (dep != null && !(dep is DataGridCell))
+            {
+                dep = VisualTreeHelper.GetParent(dep);
+            }
+
+            if (dep == null)
+                return;
+
+            DataGridCell cell = dep as DataGridCell;
+
+            // Get the column of the cell
+            DataGridColumn column = cell.Column;
+
+
+            // For editing row on click
+            var originalSource = e.OriginalSource as DependencyObject;
+
+            // Find the DataGridRow that was clicked
+            var row = FindParent<DataGridRow>(originalSource);
+
+            if (row != null)
+            {
+                // Check if the clicked row is already selected
+                if (dataGrid.SelectedItems.Contains(row.Item))
+                {
+                    // Prevent the default behavior
+                    e.Handled = true;
+
+                    // Set the cell to edit mode
+                    dataGrid.CurrentCell = new DataGridCellInfo(row.Item, column);
+
+                    dataGrid.BeginEdit();
+                }
+            }
+
+            if (column is DataGridTextColumn textColumn)
+            {
+                // Get the column header
+                string columnHeader = textColumn.Header.ToString();
+                this.columnToEdit = columnHeader;
+            }
+
+        }
+
+        private T FindParent<T>(DependencyObject child) where T : DependencyObject
+        {
+            var parentObject = VisualTreeHelper.GetParent(child);
+
+            if (parentObject == null)
+                return null;
+
+            var parent = parentObject as T;
+            if (parent != null)
+                return parent;
+            else
+                return FindParent<T>(parentObject);
+        }
+
+
+
+        #endregion
+
+        private void dgRealized_BeginningEdit(object sender, DataGridBeginningEditEventArgs e)
+        {
+            // Get cell value before editing
+            var dataGrid = sender as DataGrid;
+            var row = e.Row.Item;
+            var column = e.Column;
+            oldCellValue = -1.0M;
+
+            var cellInfo = new DataGridCellInfo(row, column);
+            var cellContent = column.GetCellContent(row) as TextBlock;
+
+            if (cellContent != null)
+            {
+                var originalValue = cellContent.Text;
+                if (!decimal.TryParse(originalValue, out oldCellValue))
+                {
+                    return;
+                }
+            }
+        }
+
+        private void dgRealized_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
+        {
+
+            var dataGrid = sender as DataGrid;
+            var row = e.Row.Item;
+            var column = e.Column;
+
+            var cellInfo = new DataGridCellInfo(row, column);
+            var editingElement = e.EditingElement as TextBox;
+
+            if (editingElement != null)
+            {
+                var newValue = editingElement.Text;
+                if (!decimal.TryParse(newValue, out decimal result))
+                {
+                    // Returning old value to cell
+                    editingElement.Text = oldCellValue.ToString();
+                    
+                }
+                else
+                {
+                    UpdateSelectedCells(result);
+                }
+            }
+        }
+
+        private void UpdateSelectedCells(decimal newValue)
+        {
+
+            foreach (MediaPlanRealized mpR in dgRealized.SelectedItems)
+            {
+                switch (columnToEdit)
+                {
+                    case "Ch coef": mpR.Chcoef = newValue; break;
+                    case "Dp coef": mpR.Dpcoef = newValue; break;
+                    case "Prog coef": mpR.Progcoef = newValue; break;
+                    case "Seas coef": mpR.Seascoef = newValue; break;
+                    case "Sec coef": mpR.Seccoef = newValue; break;
+                    case "Coef A": mpR.CoefA = newValue; break;
+                    case "Coef B": mpR.CoefB = newValue; break;
+                }
+            }
+
         }
     }
 }

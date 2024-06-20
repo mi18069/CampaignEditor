@@ -17,7 +17,11 @@ namespace CampaignEditor.Converters
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            throw new NotImplementedException();
+            if (value is string stringValue && decimal.TryParse(stringValue, out decimal decimalValue))
+            {
+                return decimalValue;
+            }
+            return null;
         }
     }
 }

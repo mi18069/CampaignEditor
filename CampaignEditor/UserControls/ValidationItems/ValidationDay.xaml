@@ -12,7 +12,6 @@
         <converters:RoundValueConverter x:Key="RoundValueConverter"/>
         <converters:StatusToColorConverter x:Key="StatusToColorConverter" />
         <converters:DateStrToDateOnlyConverter x:Key="DateStrToDateOnlyConverter" />
-        <converters:StatusMinusOneToNullConverter x:Key="StatusMinusOneToNullConverter" />
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -126,7 +125,7 @@
             <DataGrid x:Name="dgRealized" Grid.Column="1"
                         AutoGenerateColumns="False" CanUserAddRows="False"
                         CanUserDeleteRows="False" CanUserReorderColumns="False"
-                        CanUserSortColumns="False" IsReadOnly="True" 
+                        CanUserSortColumns="False" 
                         HeadersVisibility="Column" 
                         EnableRowVirtualization="True" EnableColumnVirtualization="True"
                         VirtualizingStackPanel.IsVirtualizing="True"
@@ -135,7 +134,11 @@
                         SelectionChanged="DgRealized_SelectionChanged"
                         PreviewKeyDown="DataGrid_PreviewKeyDown"
                       ScrollViewer.ScrollChanged="dgRealized_ScrollChanged"
-                      VerticalScrollBarVisibility="Hidden">
+                      VerticalScrollBarVisibility="Hidden"
+                      SelectionMode="Extended"
+                      PreviewMouseLeftButtonDown="dgRealized_PreviewMouseLeftButtonDown"
+                      BeginningEdit="dgRealized_BeginningEdit"
+                      CellEditEnding="dgRealized_CellEditEnding">
                 <DataGrid.RowStyle>
                     <Style TargetType="DataGridRow">
                         <Style.Triggers>
@@ -183,28 +186,53 @@
                     </Style>
                 </DataGrid.Resources>
                 <DataGrid.Columns>
-                    <DataGridTextColumn x:Name="tcRDate" Header="Date" Binding="{Binding Path=Date, Converter={StaticResource DateStrToDateOnlyConverter}}" MaxWidth="200"/>
-                    <DataGridTextColumn x:Name="tcRChannel" Header="Channel" Binding="{Binding Path=Channel.chname}" MaxWidth="200"/>
-                    <DataGridTextColumn x:Name="tcRProgram" Header="Program" Binding="{Binding Path=name}" MaxWidth="200"/>
+                    <DataGridTextColumn x:Name="tcRDate" Header="Date" Binding="{Binding Path=Date, Converter={StaticResource DateStrToDateOnlyConverter}}" 
+                                        MaxWidth="200" IsReadOnly="True" />
+                    <DataGridTextColumn x:Name="tcRChannel" Header="Channel" Binding="{Binding Path=Channel.chname}" 
+                                        MaxWidth="200" IsReadOnly="True" />
+                    <DataGridTextColumn x:Name="tcRProgram" Header="Program" Binding="{Binding Path=name}" 
+                                        MaxWidth="200" IsReadOnly="True" />
                     <DataGridTextColumn x:Name="tcRStarttime" Header="Start time" 
-                                        Binding="{Binding Path=stimestr, Converter={StaticResource TimeStrToRepresentativeConverter}}"/>
-                    <DataGridTextColumn x:Name="tcRFormattetime" Header="For dur" Binding="{Binding Path=durf}"/>
-                    <DataGridTextColumn x:Name="tcREffectivetime" Header="Eff dur" Binding="{Binding Path=dure}"/>
-                    <DataGridTextColumn x:Name="tcRSpot" Header="Spot" Binding="{Binding Path=spotname}" MaxWidth="200"/>
-                    <DataGridTextColumn x:Name="tcRAmrp1" Header="Amr% 1" Binding="{Binding Path=Amrp1, Converter={StaticResource RoundValueConverter}}" />
-                    <DataGridTextColumn x:Name="tcRAmrp2" Header="Amr% 2" Binding="{Binding Path=Amrp2, Converter={StaticResource RoundValueConverter}}" />
-                    <DataGridTextColumn x:Name="tcRAmrp3" Header="Amr% 3" Binding="{Binding Path=Amrp3, Converter={StaticResource RoundValueConverter}}" />
-                    <DataGridTextColumn x:Name="tcRAmrpsale" Header="Amr% Sale" Binding="{Binding Path=Amrpsale, Converter={StaticResource RoundValueConverter}}" />
-                    <DataGridTextColumn x:Name="tcRCpp" Header="Cpp" Binding="{Binding Path=Cpp, Converter={StaticResource RoundValueConverter}}" />
-                    <DataGridTextColumn x:Name="tcRChcoef" Header="Ch coef" Binding="{Binding Path=Chcoef, Converter={StaticResource RoundValueConverter}}" />
+                                        Binding="{Binding Path=stimestr, Converter={StaticResource TimeStrToRepresentativeConverter}}"
+                                        IsReadOnly="True" />
+                    <DataGridTextColumn x:Name="tcRFormattetime" Header="For dur" Binding="{Binding Path=durf}"
+                                        IsReadOnly="True" />
+                    <DataGridTextColumn x:Name="tcREffectivetime" Header="Eff dur" Binding="{Binding Path=dure}"
+                                        IsReadOnly="True" />
+                    <DataGridTextColumn x:Name="tcRSpot" Header="Spot" Binding="{Binding Path=spotname}" 
+                                        MaxWidth="200" IsReadOnly="True" />
+                    <DataGridTextColumn x:Name="tcRAmrp1" Header="Amr% 1" Binding="{Binding Path=Amrp1, Converter={StaticResource RoundValueConverter}}" 
+                                        IsReadOnly="True" />
+                    <DataGridTextColumn x:Name="tcRAmrp2" Header="Amr% 2" Binding="{Binding Path=Amrp2, Converter={StaticResource RoundValueConverter}}" 
+                                        IsReadOnly="True" />
+                    <DataGridTextColumn x:Name="tcRAmrp3" Header="Amr% 3" Binding="{Binding Path=Amrp3, Converter={StaticResource RoundValueConverter}}" 
+                                        IsReadOnly="True" />
+                    <DataGridTextColumn x:Name="tcRAmrpsale" Header="Amr% Sale" Binding="{Binding Path=Amrpsale, Converter={StaticResource RoundValueConverter}}" 
+                                        IsReadOnly="True" />
+                    <DataGridTextColumn x:Name="tcRCpp" Header="Cpp" Binding="{Binding Path=Cpp, Converter={StaticResource RoundValueConverter}}" 
+                                        IsReadOnly="True" />
+                    <DataGridTextColumn x:Name="tcRChcoef" Header="Ch coef" Binding="{Binding Path=Chcoef, Converter={StaticResource RoundValueConverter}}"/>
                     <DataGridTextColumn x:Name="tcRDpcoef" Header="Dp coef" Binding="{Binding Path=Dpcoef, Converter={StaticResource RoundValueConverter}}"/>
                     <DataGridTextColumn x:Name="tcRProgcoef" Header="Prog coef" Binding="{Binding Path=Progcoef, Converter={StaticResource RoundValueConverter}}"/>
                     <DataGridTextColumn x:Name="tcRSeascoef" Header="Seas coef" Binding="{Binding Path=Seascoef, Converter={StaticResource RoundValueConverter}}"/>
                     <DataGridTextColumn x:Name="tcRSeccoef" Header="Sec coef" Binding="{Binding Path=Seccoef, Converter={StaticResource RoundValueConverter}}"/>
                     <DataGridTextColumn x:Name="tcRCoefA" Header="Coef A" Binding="{Binding Path=CoefA, Converter={StaticResource RoundValueConverter}}"/>
                     <DataGridTextColumn x:Name="tcRCoefB" Header="Coef B" Binding="{Binding Path=CoefB, Converter={StaticResource RoundValueConverter}}"/>
-                    <DataGridTextColumn x:Name="tcRPrice" Header="Price" Binding="{Binding Path=price, Converter={StaticResource RoundValueConverter}}"/>
-                    <DataGridTextColumn x:Name="tcRStatus" Header="Status" Binding="{Binding Path=status, Converter={StaticResource StatusMinusOneToNullConverter}}" MaxWidth="200"/>
+                    <DataGridTextColumn x:Name="tcRPrice" Header="Price" Binding="{Binding Path=price, Converter={StaticResource RoundValueConverter}}"
+                                        IsReadOnly="True"/>
+                    <DataGridTextColumn x:Name="tcRStatus" Header="Status" Binding="{Binding Path=Status}" 
+                                        MaxWidth="200" IsReadOnly="True"/>
+                    <DataGridCheckBoxColumn Binding="{Binding Accept}" IsThreeState="True">
+                        <DataGridCheckBoxColumn.ElementStyle>
+                            <Style TargetType="CheckBox">
+                                <Style.Triggers>
+                                    <Trigger Property="IsChecked" Value="{x:Null}">
+                                        <Setter Property="Visibility" Value="Hidden"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGridCheckBoxColumn.ElementStyle>
+                    </DataGridCheckBoxColumn>
                 </DataGrid.Columns>
             </DataGrid>
         </Grid>

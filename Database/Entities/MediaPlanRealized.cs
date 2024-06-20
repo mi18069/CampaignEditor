@@ -41,6 +41,17 @@ namespace Database.Entities
         private decimal? chcoef  = 1.0M;
         private decimal? coefA  = 1.0M;
         private decimal? coefB  = 1.0M;
+        private bool? accept = false;
+
+        public bool? Accept
+        {
+            get { return status == -1 ? null : accept; }
+            set 
+            { 
+                accept = value;
+                OnPropertyChanged();
+            }
+        }
 
         public string Date { get { return date; } }
         public decimal? price {
@@ -49,6 +60,14 @@ namespace Database.Entities
                 _price = value;
                 OnPropertyChanged();
             } 
+        }
+        public int? Status { 
+            get { return status == -1 ? null : status; }
+            set
+            {
+                status = value;
+                OnPropertyChanged();
+            }
         }
         public int? status { 
             get { return _status; } 
