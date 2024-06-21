@@ -60,6 +60,7 @@ namespace CampaignEditor.UserControls.ValidationItems
         { true, true, true, true, true, true, true, true, false, false, true,
             true, true, true, true, true, true, false, false, true, true, true};
 
+        public event EventHandler<UpdateMediaPlanRealizedEventArgs> UpdatedMediaPlanRealized;
 
         public ValidationStack()
         {
@@ -106,10 +107,12 @@ namespace CampaignEditor.UserControls.ValidationItems
                 ValidationDay validationDay = new ValidationDay(day, dateExpected, dateRealized, dgExpectedMask, dgRealizedMask);
                 validationDay.InvertedExpectedColumnVisibility += ValidationDay_InvertedExpectedColumnVisibility;
                 validationDay.InvertedRealizedColumnVisibility += ValidationDay_InvertedRealizedColumnVisibility;
+                validationDay.UpdatedMediaPlanRealized += ValidationDay_UpdatedMediaPlanRealized;
                 spValidationDays.Children.Add(validationDay);
             }
         }
-        
+
+
 
         private void ValidationDay_InvertedExpectedColumnVisibility(object? sender, IndexEventArgs e)
         {
@@ -118,6 +121,10 @@ namespace CampaignEditor.UserControls.ValidationItems
         private void ValidationDay_InvertedRealizedColumnVisibility(object? sender, IndexEventArgs e)
         {
             InvertRealizedGridHeader(e.Index);
+        }
+        private void ValidationDay_UpdatedMediaPlanRealized(object? sender, UpdateMediaPlanRealizedEventArgs e)
+        {
+            UpdatedMediaPlanRealized?.Invoke(this, e);
         }
 
         private void InvertExpectedGridHeader(int index)
@@ -144,6 +151,7 @@ namespace CampaignEditor.UserControls.ValidationItems
             {
                 validationDay.InvertedExpectedColumnVisibility -= ValidationDay_InvertedExpectedColumnVisibility;
                 validationDay.InvertedRealizedColumnVisibility -= ValidationDay_InvertedRealizedColumnVisibility;
+                validationDay.UpdatedMediaPlanRealized -= ValidationDay_UpdatedMediaPlanRealized;
             }
             spValidationDays.Children.Clear();
 

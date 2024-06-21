@@ -29,6 +29,8 @@ namespace CampaignEditor.UserControls.ValidationItems
         public event EventHandler<IndexEventArgs> InvertedExpectedColumnVisibility;
         public event EventHandler<IndexEventArgs> InvertedRealizedColumnVisibility;
 
+        public event EventHandler<UpdateMediaPlanRealizedEventArgs> UpdatedMediaPlanRealized;
+
         bool hideExpected = false;
 
         string columnToEdit = string.Empty;
@@ -227,10 +229,14 @@ namespace CampaignEditor.UserControls.ValidationItems
                     if (mpRealized.status == -1)
                         continue;
                     if (changeAccept)
+                    {
                         mpRealized.Accept = acceptValue;
-                    else 
+                    }
+                    else
+                    {
                         mpRealized.status = status;
-                    //await _mediaPlanRealizedController.SetStatusValue(mpRealized.id!.Value, status);
+                    }
+                    UpdatedMediaPlanRealized?.Invoke(this, new UpdateMediaPlanRealizedEventArgs(mpRealized, false));
                 }
             }
         }
@@ -514,6 +520,10 @@ namespace CampaignEditor.UserControls.ValidationItems
 
             foreach (MediaPlanRealized mpR in dgRealized.SelectedItems)
             {
+                if (mpR.status == -1)
+                    continue;
+
+                bool isChangedCoef = true;
                 switch (columnToEdit)
                 {
                     case "Ch coef": mpR.Chcoef = newValue; break;
@@ -523,7 +533,11 @@ namespace CampaignEditor.UserControls.ValidationItems
                     case "Sec coef": mpR.Seccoef = newValue; break;
                     case "Coef A": mpR.CoefA = newValue; break;
                     case "Coef B": mpR.CoefB = newValue; break;
+                    default: isChangedCoef = false; break;
                 }
+
+                if (isChangedCoef)
+                    UpdatedMediaPlanRealized?.Invoke(this, new UpdateMediaPlanRealizedEventArgs(mpR, true));
             }
 
         }

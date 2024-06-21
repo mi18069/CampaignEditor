@@ -131,6 +131,7 @@ namespace CampaignEditor
 
             hideExpected = _allMediaPlans.Count == 0;
             await validationStack.Initialize(campaign, hideExpected);
+            validationStack.UpdatedMediaPlanRealized += ValidationStack_UpdatedMediaPlanRealized;
         }
 
         private void InitializeDicts()
@@ -198,24 +199,29 @@ namespace CampaignEditor
 
         private async Task PairMediaPlans(MediaPlanRealized mpR, TermTuple tt = null)
         {
-            if (mpR.status == null || mpR.status == 5 || (tt != null && mpR.status == 1))
+            if (mpR.status == -1)
+                return;
+
+            // Calculate and add values
+            if (mpR.status == null || mpR.status == 5 || (mpR.price == null))
             {
-                //Calculating all coefs
-
-                //await _mediaPlanRealizedController.UpdateMediaPlanRealized(realized[k]);
-
+                await SetRealizedName(mpR);
+                var mediaPlan = tt == null ? null : tt.MediaPlan;
+                mpR.MediaPlan = mediaPlan;
+                CalculateCoefs(mpR);
+                SetStatus(mpR, tt);
+                await _mediaPlanRealizedController.UpdateMediaPlanRealized(mpR);
             }
-
-            await SetRealizedName(mpR);
-            var mediaPlan = tt == null ? null : tt.MediaPlan;
-            mpR.MediaPlan = mediaPlan;
-            CalculateCoefs(mpR);
 
         }
 
-        private void SetStatus(MediaPlanRealized mpR, TermTuple tt)
+        private void SetStatus(MediaPlanRealized mpR, TermTuple tt = null)
         {
-            if (Math.Abs(mpR.dure.Value - mpR.durf.Value) > 1)
+            if (tt == null)
+            {
+                mpR.status = 2;
+            }
+            else if (Math.Abs(mpR.dure.Value - mpR.durf.Value) > 1)
             {
                 mpR.status = 7;
             }
@@ -228,7 +234,8 @@ namespace CampaignEditor
                 mpR.status = 1;
             }
 
-            tt.Status = 1;
+            if (tt != null)
+                tt.Status = 1;
         }
 
         private void AddEmptyRealized(List<MediaPlanRealized?> realized, int index)
@@ -269,7 +276,6 @@ namespace CampaignEditor
                     if (Math.Abs(expectedTime - realizedTime) <= minPeriod)
                     {
                         await PairMediaPlans(realized[k], expected[k]);
-                        SetStatus(realized[k], expected[k]);
                     }
                     // Check if it's in the same hour
                     else if (checkSameHour && IsSameHour(expectedTime, realizedTime))
@@ -322,7 +328,6 @@ namespace CampaignEditor
                         if (!betterPairFound)
                         {
                             await PairMediaPlans(realized[k], expected[k]);
-                            SetStatus(realized[k], expected[k]);
                         }
                     }
                     // No match, add empty rows
@@ -332,7 +337,6 @@ namespace CampaignEditor
                         if (expectedTime > realizedTime)
                         {
                             await PairMediaPlans(realized[k], null);
-                            realized[k].status = 2;
                             AddEmptyExpected(expected, k);
                             n++;
                         }
@@ -359,7 +363,6 @@ namespace CampaignEditor
                     else
                     {
                         await PairMediaPlans(realized[k], null);
-                        realized[k].status = 2;
                         AddEmptyExpected(expected, k);
                         n++;
                     }
@@ -378,13 +381,21 @@ namespace CampaignEditor
             while (k < m)
             {
                 await PairMediaPlans(realized[k], null);
-                realized[k].status = 2;
                 // If nothing is initialized , no need to add empty expected one by one
                 if (_allMediaPlans.Count != 0)
                     AddEmptyExpected(expected, k);
                 k++;
             }
           
+        }
+
+        private async void ValidationStack_UpdatedMediaPlanRealized(object? sender, UpdateMediaPlanRealizedEventArgs e)
+        {
+            var mpRealized = e.MediaPlanRealized;
+            if (e.CoefsUpdated)
+                CoefsUpdated(mpRealized);
+
+            await _mediaPlanRealizedController.UpdateMediaPlanRealized(mpRealized);
         }
 
         private MediaPlan FindClosestMediaPlan(MediaPlanRealized mpRealized)
@@ -523,6 +534,14 @@ namespace CampaignEditor
          
         }
 
+        private void CoefsUpdated(MediaPlanRealized mediaPlanRealized)
+        {
+            var chid = _forecastData.ChrdsidChidDict[mediaPlanRealized.chid.Value];
+            var pricelist = _forecastData.ChidPricelistDict[chid];
+
+            _mpConverter.CoefsUpdated(mediaPlanRealized, pricelist);
+        }
+
         private async Task SetRealizedName(MediaPlanRealized mediaPlanRealized)
         {
             // Getting name of spot from nazreklame 
@@ -605,6 +624,7 @@ namespace CampaignEditor
         public void CloseValidation()
         {
             validationStack.ClearStackPanel();
+            validationStack.UpdatedMediaPlanRealized -= ValidationStack_UpdatedMediaPlanRealized;
         }
 
         private async void btnReload_Click(object sender, RoutedEventArgs e)
