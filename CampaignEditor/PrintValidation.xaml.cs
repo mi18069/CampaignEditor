@@ -1,208 +1,114 @@
-﻿using CampaignEditor.Controllers;
-using CampaignEditor.Helpers;
+﻿using CampaignEditor.UserControls.ValidationItems;
 using Database.DTOs.CampaignDTO;
-using Database.DTOs.ChannelDTO;
 using Database.Entities;
-using Database.Repositories;
 using Microsoft.Win32;
-using OfficeOpenXml;
-using OfficeOpenXml.DataValidation;
 using OfficeOpenXml.Style;
-using System;
+using OfficeOpenXml;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
+using System;
 using System.Windows;
+using System.ComponentModel.Design;
 using System.Windows.Controls;
-using System.Windows.Input;
-using System.Windows.Media;
-using static Npgsql.Replication.PgOutput.Messages.RelationMessage;
 
-namespace CampaignEditor.UserControls.ValidationItems
+namespace CampaignEditor
 {
     /// <summary>
-    /// Two stacks within the same ScrollViewer
+    /// Interaction logic for PrintValidation.xaml
     /// </summary>
-    public partial class ValidationStack : UserControl
+    public partial class PrintValidation : Window
     {
 
-        private CampaignDTO _campaign;
-        private int _campaignVersion;
+        CampaignDTO _campaign;
+        public bool[] DgExpectedMask { get; set; }
+        public bool[] DgRealizedMask { get; set; }
 
-        public List<ChannelDTO> _channels = new List<ChannelDTO>();
         public List<DateOnly> _dates = new List<DateOnly>();
-
+        public List<DateOnly> datesToPrint = new List<DateOnly>();
+        public UIElementCollection ValidationDays { get; set; }
         public Dictionary<DateOnly, List<TermTuple?>> _dateExpectedDict;
         public Dictionary<DateOnly, List<MediaPlanRealized?>> _dateRealizedDict;
-
-        public ChannelCmpController _channelCmpController;
-        public ChannelController _channelController;
-        public MediaPlanVersionController _mediaPlanVersionController;
-        public CompletedValidationController _completedValidationController;
-
-        public MediaPlanController _mediaPlanController;
-        public MediaPlanTermController _mediaPlanTermController;
-        public MediaPlanRealizedController _mediaPlanRealizedController;
-        public SpotController _spotController;
-        public MediaPlanConverter _mpConverter;
-        public MediaPlanForecastData _forecastData;
-        public ObservableRangeCollection<MediaPlanTuple> _allMediaPlans;
-        public ObservableRangeCollection<MediaPlanRealized> _mediaPlanRealized;
-
-        private bool hideExpected = false;
-
-        private bool[] dgExpectedMask = new bool[22]
-        { true, true, true, false, true, true, true, false, false, true, true, true,
-            true, true, true, true, false, false, false, true, true, true};
-
-        private bool[] dgRealizedMask = new bool[22]
-        { true, true, true, true, true, true, true, true, false, false, true,
-            true, true, true, true, true, true, false, false, true, true, true};
-
-        public event EventHandler<UpdateMediaPlanRealizedEventArgs> UpdatedMediaPlanRealized;
-        public bool[] DgExpectedMask { get { return dgExpectedMask; } }
-        public bool[] DgRealizedMask { get { return dgRealizedMask; } }
-        public UIElementCollection ValidationDays{ get {return spValidationDays.Children; } } 
-        public ValidationStack()
+        public PrintValidation()
         {
             InitializeComponent();
-
         }
 
-        public async Task Initialize(CampaignDTO campaign, bool hideExpected = false)
+        public void Initialize(CampaignDTO campaign)
         {
             _campaign = campaign;
-            var mpVersion = await _mediaPlanVersionController.GetLatestMediaPlanVersion(campaign.cmpid);
-            if (mpVersion != null)
-            {
-                int version = mpVersion.version;
-                _campaignVersion = version;
-
-            }
-
-            await LoadDates();
-            // When reinitializing
-            if (hideExpected)
-            {
-                this.hideExpected = hideExpected;
-                HideExpectedStack();
-            }
+            SetDates(campaign);
         }
 
-        public async Task LoadData(int chid)
+        private void SetDates(CampaignDTO campaign)
         {
+            dpFrom.DisplayDateStart = TimeFormat.YMDStringToDateTime(campaign.cmpsdate);
+            dpFrom.DisplayDateEnd = TimeFormat.YMDStringToDateTime(campaign.cmpedate);
 
-            /*await LoadExpected(chid);
-            await LoadRealized(chid);
-            LoadDays();*/
+            dpTo.DisplayDateStart = TimeFormat.YMDStringToDateTime(campaign.cmpsdate);
+            dpTo.DisplayDateEnd = TimeFormat.YMDStringToDateTime(campaign.cmpedate);
+
+            dpOneDay.DisplayDateStart = TimeFormat.YMDStringToDateTime(campaign.cmpsdate);
+            dpOneDay.DisplayDateEnd = TimeFormat.YMDStringToDateTime(campaign.cmpedate);
         }
 
-        private async Task LoadDates()
+        private void btnPrint_Click(object sender, RoutedEventArgs e)
         {
-            ClearStackPanel();
+            bool allDecimals = (bool)chbAllDecimals.IsChecked;
+            bool printExpected = (bool)chbPrintExpected.IsChecked;
+            bool printRealized = (bool)chbPrintRealized.IsChecked;
+            SetDatesToPrint();
+            Print(allDecimals, printExpected, printRealized);
+        }
 
-            foreach (var day in _dates)
+        private void SetDatesToPrint()
+        {
+            datesToPrint.Clear();
+            if ((bool)rbAllDays.IsChecked)
             {
-                var dateExpected = _dateExpectedDict[day];
-                var dateRealized = _dateRealizedDict[day];
-                bool isCompleted = false;
-                var compValidation = await _completedValidationController.GetCompValidation(_campaign.cmpid, TimeFormat.DateOnlyToYMDString(day));
-                if (compValidation == null)
+               foreach (var date in _dates)
+               {
+                    datesToPrint.Add(date);
+               }
+            }
+            else if ((bool)rbOneDay.IsChecked)
+            {
+                if (!dpOneDay.SelectedDate.HasValue)
                 {
-                    await _completedValidationController.CreateCompValidation(new CompletedValidation(_campaign.cmpid, TimeFormat.DateOnlyToYMDString(day), false));
-                    isCompleted = false;
+                    MessageBox.Show("Select one date!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
                 }
-                else
+                datesToPrint.Add(DateOnly.FromDateTime(dpOneDay.SelectedDate.Value));
+            }
+            else
+            {
+                if (!dpFrom.SelectedDate.HasValue)
                 {
-                    isCompleted = compValidation.completed;
+                    MessageBox.Show("Select starting date!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
                 }
-                ValidationDay validationDay = new ValidationDay(day, dateExpected, dateRealized, dgExpectedMask, dgRealizedMask, isCompleted);
-                validationDay.InvertedExpectedColumnVisibility += ValidationDay_InvertedExpectedColumnVisibility;
-                validationDay.InvertedRealizedColumnVisibility += ValidationDay_InvertedRealizedColumnVisibility;
-                validationDay.UpdatedMediaPlanRealized += ValidationDay_UpdatedMediaPlanRealized;
-                validationDay.CompletedValidationChanged += ValidationDay_CompletedValidationChanged;
-                spValidationDays.Children.Add(validationDay);
-            }
-        }
+                if (!dpTo.SelectedDate.HasValue)
+                {
+                    MessageBox.Show("Select ending date!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+                if (dpFrom.SelectedDate > dpTo.SelectedDate)
+                {
+                    MessageBox.Show("Starting date needs to be before ending date!", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
 
-
-        private void ValidationDay_InvertedExpectedColumnVisibility(object? sender, IndexEventArgs e)
-        {
-            InvertExpectedGridHeader(e.Index);
-        }
-        private void ValidationDay_InvertedRealizedColumnVisibility(object? sender, IndexEventArgs e)
-        {
-            InvertRealizedGridHeader(e.Index);
-        }
-        private void ValidationDay_UpdatedMediaPlanRealized(object? sender, UpdateMediaPlanRealizedEventArgs e)
-        {
-            UpdatedMediaPlanRealized?.Invoke(this, e);
-        }
-
-        private async void ValidationDay_CompletedValidationChanged(object? sender, CompletedValidationEventArgs e)
-        {
-            await _completedValidationController.UpdateCompValidation(new CompletedValidation(_campaign.cmpid, e.Date, e.IsCompleted));
-        }
-
-        private void InvertExpectedGridHeader(int index)
-        {
-            dgExpectedMask[index] = !dgExpectedMask[index];
-            foreach (ValidationDay validationDay in spValidationDays.Children)
-            {
-                validationDay.InvertExpectedColumnVisibility(index);
-            }
-        }
-
-        private void InvertRealizedGridHeader(int index)
-        {
-            dgRealizedMask[index] = !dgRealizedMask[index];
-            foreach (ValidationDay validationDay in spValidationDays.Children)
-            {
-                validationDay.InvertRealizedColumnVisibility(index);
-            }
-        }
-
-        public void ClearStackPanel()
-        {
-            foreach (ValidationDay validationDay in spValidationDays.Children)
-            {
-                validationDay.InvertedExpectedColumnVisibility -= ValidationDay_InvertedExpectedColumnVisibility;
-                validationDay.InvertedRealizedColumnVisibility -= ValidationDay_InvertedRealizedColumnVisibility;
-                validationDay.UpdatedMediaPlanRealized -= ValidationDay_UpdatedMediaPlanRealized;
-            }
-            spValidationDays.Children.Clear();
-
-        }
-
-        private void HideExpectedStack()
-        {
-            foreach (ValidationDay validationDay in spValidationDays.Children)
-            {
-                validationDay.HideExpected();
-                
-            }
-        }
-
-        public void SelectedChannelsChanged(IEnumerable<ChannelDTO> selectedChannels)
-        {
-            var chids = new List<int>();
-            var chrdsids = new List<int>();
-
-            chids = selectedChannels.Select(ch => ch.chid).ToList();
-            chrdsids = selectedChannels.Select(ch => _forecastData.ChrdsidChidDict.FirstOrDefault(dict => dict.Value == ch.chid).Key).ToList();
-
-            foreach (ValidationDay validationDay in spValidationDays.Children)
-            {
-                validationDay.ChannelsChanged(chids, chrdsids);
+                for (var date = dpFrom.SelectedDate.Value; date <= dpTo.SelectedDate.Value; date = date.AddDays(1))
+                {
+                    datesToPrint.Add(DateOnly.FromDateTime(date));
+                }
             }
         }
 
         #region Print
 
-        public void Print(bool allDecimals = false)
+        public void Print(bool allDecimals, bool printExpected, bool printRealized)
         {
 
             using (var memoryStream = new MemoryStream())
@@ -212,30 +118,35 @@ namespace CampaignEditor.UserControls.ValidationItems
                 {
                     // Create a new worksheet
                     var worksheet = excelPackage.Workbook.Worksheets.Add("Validation");
-                    ValidationDay validationDay = spValidationDays.Children[0] as ValidationDay;
+                    ValidationDay validationDay = ValidationDays[0] as ValidationDay;
                     if (validationDay == null)
                     {
                         return;
                     }
 
-                    if (!hideExpected)
+                    if (printExpected)
                     {
                         var headerNamesExpected = validationDay.ExpectedGrid.Columns
                                 .Select(column => column.Header.ToString())
                                 .ToList();
-                        AddHeaders(worksheet, 1, 1, headerNamesExpected, dgExpectedMask);
-                        AddExpected(worksheet, 2, 1, _dateExpectedDict, dgExpectedMask, allDecimals);
+                        AddHeaders(worksheet, 1, 1, headerNamesExpected, DgExpectedMask);
+                        AddExpected(worksheet, 2, 1, _dateExpectedDict, DgExpectedMask, allDecimals);
                     }
                     // if expected stack is hidden, don't place one extra column between them,
                     // else separate by width of 1 column
-                    int separationWidth = hideExpected ? 0 : 1 + dgExpectedMask.Count(e => e == true);
 
-                    var headerNamesRealized = validationDay.RealizedGrid.Columns
-                                .Select(column => column.Header.ToString())
-                                .ToList();
+                    if (printRealized)
+                    {
+                        int separationWidth = !printExpected ? 0 : 1 + DgExpectedMask.Count(e => e == true);
 
-                    AddHeaders(worksheet, 1, 1 + separationWidth, headerNamesRealized, dgRealizedMask);
-                    AddRealized(worksheet, 2, 1 + separationWidth, _dateRealizedDict, dgRealizedMask, allDecimals);
+                        var headerNamesRealized = validationDay.RealizedGrid.Columns
+                                    .Select(column => column.Header.ToString())
+                                    .ToList();
+
+                        AddHeaders(worksheet, 1, 1 + separationWidth, headerNamesRealized, DgRealizedMask);
+                        AddRealized(worksheet, 2, 1 + separationWidth, _dateRealizedDict, DgRealizedMask, allDecimals);
+                    }
+                   
                     // Save the Excel package to a memory stream
                     excelPackage.SaveAs(memoryStream);
                     // Set the position of the memory stream back to the beginning
@@ -255,7 +166,7 @@ namespace CampaignEditor.UserControls.ValidationItems
         }
 
         private void AddHeaders(ExcelWorksheet worksheet, int rowOff, int colOff, List<string> headerNames, bool[] headerMask)
-        {           
+        {
 
             int numOfColumns = headerMask.Count();
 
@@ -277,7 +188,7 @@ namespace CampaignEditor.UserControls.ValidationItems
         private void AddExpected(ExcelWorksheet worksheet, int rowOff, int colOff, Dictionary<DateOnly, List<TermTuple>> dateExpectedDict, bool[] mask, bool allDecimals = false)
         {
             int colNum = mask.Count(c => c);
-            foreach (var date in _dates)
+            foreach (var date in datesToPrint)
             {
                 List<TermTuple> termTuples = null;
                 try
@@ -349,7 +260,7 @@ namespace CampaignEditor.UserControls.ValidationItems
                         {
                             worksheet.Cells[rowOff, colOffset++].Value = Math.Round(termTuple.Amrp2.Value, 2);
                         }
-                        
+
                     }
                     if (mask[8])
                     {
@@ -511,7 +422,7 @@ namespace CampaignEditor.UserControls.ValidationItems
         private void AddRealized(ExcelWorksheet worksheet, int rowOff, int colOff, Dictionary<DateOnly, List<MediaPlanRealized>> dateRealizedDict, bool[] mask, bool allDecimals = false)
         {
             int colNum = mask.Count(c => c);
-            foreach (var date in _dates)
+            foreach (var date in datesToPrint)
             {
                 List<MediaPlanRealized> realizedTuples = null;
                 try
@@ -564,7 +475,7 @@ namespace CampaignEditor.UserControls.ValidationItems
                     }
                     if (mask[6])
                     {
-                        worksheet.Cells[rowOff, colOffset++].Value = mediaPlanRealized.spotname.Trim();   
+                        worksheet.Cells[rowOff, colOffset++].Value = mediaPlanRealized.spotname.Trim();
                     }
                     if (mask[7])
                     {
@@ -713,7 +624,7 @@ namespace CampaignEditor.UserControls.ValidationItems
                             worksheet.Cells[rowOff, colOffset++].Value = Math.Round(mediaPlanRealized.CoefB.Value, 2);
                         }
 
-                    }          
+                    }
                     if (mask[19])
                     {
                         if (allDecimals)
@@ -805,7 +716,17 @@ namespace CampaignEditor.UserControls.ValidationItems
 
         #endregion
 
+        public bool shouldClose = false;
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (!shouldClose)
+            {
+                // Cancel the closing
+                e.Cancel = true;
 
+                // Hide the window instead of closing it
+                this.Hide();
+            }
+        }
     }
 }
-

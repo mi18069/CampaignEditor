@@ -1,0 +1,105 @@
+﻿<Window x:Class="CampaignEditor.PrintValidation"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CampaignEditor"
+        xmlns:items="clr-namespace:CampaignEditor.UserControls"
+        mc:Ignorable="d"
+        Title="PrintValidation" Height="250" Width="400" Closing="Window_Closing">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="10"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="10"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="10"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="10"/>
+        </Grid.RowDefinitions>
+        <Grid Grid.Row="1" Grid.Column="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <CheckBox x:Name="chbPrintExpected" Grid.Column="0" Content="Print Expected"
+                      IsChecked="True"/>
+            <CheckBox x:Name="chbPrintRealized" Grid.Column="1" Content="Print Realized"
+                      IsChecked="True" Margin="20, 0, 0, 0"/>
+        </Grid>
+        <Grid Grid.Row="2" Grid.Column="1" Margin="0, 20, 0, 20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <RadioButton x:Name="rbAllDays" GroupName="rbDays" Grid.Column="0" 
+                         Content="All days" IsChecked="True"/>
+            <RadioButton x:Name="rbOneDay" GroupName="rbDays" Grid.Column="1" 
+                         Content="Selected day" IsChecked="False" Margin="20, 0, 0, 0"/>
+            <RadioButton x:Name="rbRangeDays" GroupName="rbDays" Grid.Column="2" 
+                         Content="Range" IsChecked="False" Margin="20, 0, 0, 0"/>
+        </Grid>
+        <Grid x:Name="gridDays" Grid.Row="3" Grid.Column="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="20"/>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Label Grid.Column="0" Content="From:"
+               VerticalAlignment="Center"/>
+            <DatePicker Grid.Column="1" x:Name="dpFrom" 
+                    FirstDayOfWeek="Monday" VerticalAlignment="Center"/>
+            <Label Grid.Column="3" Content="To:" VerticalAlignment="Center" />
+            <DatePicker Grid.Column="4" x:Name="dpTo" 
+                    FirstDayOfWeek="Monday" VerticalAlignment="Center"/>
+
+            <Grid.Style>
+                <Style TargetType="Grid">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsChecked, ElementName=rbRangeDays}" Value="True">
+                            <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Style>
+        </Grid>
+        <Grid x:Name="gridOneDay" Grid.Row="3" Grid.Column="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Label Grid.Column="0" Content="Select day:"
+               VerticalAlignment="Center"/>
+            <DatePicker Grid.Column="1" x:Name="dpOneDay" 
+                    FirstDayOfWeek="Monday" VerticalAlignment="Center"/>
+            <Grid.Style>
+                <Style TargetType="Grid">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsChecked, ElementName=rbOneDay}" Value="True">
+                            <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Style>
+        </Grid>
+        <CheckBox x:Name="chbAllDecimals" Grid.Row="4" Grid.Column="1" 
+                  Content="All decimals" Margin="0, 20, 0, 20"/>
+        <Button x:Name="btnPrint" Grid.Row="5" Grid.Column="1" Content="Export"
+                Width="70" Height="40" HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                Click="btnPrint_Click"/>
+    </Grid>
+</Window>

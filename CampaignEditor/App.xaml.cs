@@ -68,6 +68,7 @@ namespace CampaignEditor
                     services.AddFormFactory<ClientDayParts>();
                     services.AddFormFactory<DuplicatePricelist>();
                     services.AddFormFactory<ClientBrands>();
+                    services.AddFormFactory<PrintValidation>();
                     services.AddScoped<IDataContext, DataContext>();
                     // Add services
                     Extensions.UserExtensions.AddUserExtensions(services);
@@ -109,6 +110,7 @@ namespace CampaignEditor
                     Database.Extensions.DPTimeExtensions.AddDPTimeExtensions(services);
                     Database.Extensions.ClientCoefsExtensions.AddClientCoefsExtensions(services);
                     Database.Extensions.MediaPlanRealizedExtensions.AddMediaPlanRealizedExtensions(services);
+                    Database.Extensions.CompletedValidationExtensions.AddCompletedValidationExtensions(services);
 
                 }).Build();
 

@@ -61,6 +61,11 @@ namespace CampaignEditor.Controllers
             return await _repository.GetDedicatedSpotName(spotid);
         }
 
+        public async Task<List<Tuple<int, string>>> GetAllSpotNumSpotNamePairs(int spotid)
+        {
+            return await _repository.GetAllSpotNumSpotNamePairs(spotid);
+        }
+
         public async Task<bool> SetStatusValue(int id, int statusValue)
         {
             return await _repository.SetStatusValue(id, statusValue);

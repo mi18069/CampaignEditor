@@ -6,7 +6,8 @@
              xmlns:local="clr-namespace:CampaignEditor.UserControls.ValidationItems"
              xmlns:converters="clr-namespace:CampaignEditor.Converters"
              mc:Ignorable="d" 
-             d:DesignHeight="450" d:DesignWidth="800" d:Background="White" Loaded="ValidationDay_Loaded">
+             d:DesignHeight="450" d:DesignWidth="800" d:Background="White" Loaded="ValidationDay_Loaded"
+             CommandManager.PreviewCanExecute="HandleCanExecute">
     <UserControl.Resources>
         <converters:TimeStrToRepresentativeConverter x:Key="TimeStrToRepresentativeConverter"/>
         <converters:RoundValueConverter x:Key="RoundValueConverter"/>
@@ -28,14 +29,18 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-                <ToggleButton x:Name="tglButton" Grid.Row="1" Grid.ColumnSpan="3" Content="Show" 
-                        HorizontalAlignment="Stretch" IsChecked="False"
-                        Click="tglButton_Click"  Background="LightGoldenrodYellow"
-                      Height="30" VerticalAlignment="Top"/>
+
                 <Label x:Name="lblExCount" Grid.Row="0" Grid.Column="0" FontWeight="Bold" HorizontalAlignment="Right"/>
                 <Label x:Name="lblDate" Grid.Row="0" Grid.Column="1" FontWeight="Bold" HorizontalAlignment="Center"/>
                 <Label x:Name="lblRealCount" Grid.Row="0" Grid.Column="2" FontWeight="Bold" HorizontalAlignment="Left"/>
+                <CheckBox x:Name="chbCompleted" Grid.Row="0" Grid.Column="3" Content="Completed" VerticalAlignment="Center"
+                          IsChecked="False" HorizontalAlignment="Center" Checked="chbCompleted_Checked" Unchecked="chbCompleted_Unchecked"/>
+                <ToggleButton x:Name="tglButton" Grid.Row="1" Grid.ColumnSpan="4" Content="Show" 
+                        HorizontalAlignment="Stretch" IsChecked="False"
+                        Click="tglButton_Click"  Background="LightGoldenrodYellow"
+                      Height="30" VerticalAlignment="Top"/>
             </Grid>
         </Grid>
 
@@ -211,11 +216,15 @@
                                         IsReadOnly="True" />
                     <DataGridTextColumn x:Name="tcRCpp" Header="Cpp" Binding="{Binding Path=Cpp, Converter={StaticResource RoundValueConverter}}" 
                                         IsReadOnly="True" />
-                    <DataGridTextColumn x:Name="tcRChcoef" Header="Ch coef" Binding="{Binding Path=Chcoef, Converter={StaticResource RoundValueConverter}}"/>
-                    <DataGridTextColumn x:Name="tcRDpcoef" Header="Dp coef" Binding="{Binding Path=Dpcoef, Converter={StaticResource RoundValueConverter}}"/>
+                    <DataGridTextColumn x:Name="tcRChcoef" Header="Ch coef" Binding="{Binding Path=Chcoef, Converter={StaticResource RoundValueConverter}}"
+                                        IsReadOnly="True"/>
+                    <DataGridTextColumn x:Name="tcRDpcoef" Header="Dp coef" Binding="{Binding Path=Dpcoef, Converter={StaticResource RoundValueConverter}}"
+                                        IsReadOnly="True"/>
                     <DataGridTextColumn x:Name="tcRProgcoef" Header="Prog coef" Binding="{Binding Path=Progcoef, Converter={StaticResource RoundValueConverter}}"/>
-                    <DataGridTextColumn x:Name="tcRSeascoef" Header="Seas coef" Binding="{Binding Path=Seascoef, Converter={StaticResource RoundValueConverter}}"/>
-                    <DataGridTextColumn x:Name="tcRSeccoef" Header="Sec coef" Binding="{Binding Path=Seccoef, Converter={StaticResource RoundValueConverter}}"/>
+                    <DataGridTextColumn x:Name="tcRSeascoef" Header="Seas coef" Binding="{Binding Path=Seascoef, Converter={StaticResource RoundValueConverter}}"
+                                        IsReadOnly="True"/>
+                    <DataGridTextColumn x:Name="tcRSeccoef" Header="Sec coef" Binding="{Binding Path=Seccoef, Converter={StaticResource RoundValueConverter}}"
+                                        IsReadOnly="True"/>
                     <DataGridTextColumn x:Name="tcRCoefA" Header="Coef A" Binding="{Binding Path=CoefA, Converter={StaticResource RoundValueConverter}}"/>
                     <DataGridTextColumn x:Name="tcRCoefB" Header="Coef B" Binding="{Binding Path=CoefB, Converter={StaticResource RoundValueConverter}}"/>
                     <DataGridTextColumn x:Name="tcRPrice" Header="Price" Binding="{Binding Path=price, Converter={StaticResource RoundValueConverter}}"
@@ -227,6 +236,7 @@
                         <DataGridCheckBoxColumn.ElementStyle>
                             <Style TargetType="CheckBox">
                                 <Setter Property="HorizontalAlignment" Value="Center"/>
+                                <Setter Property="IsHitTestVisible" Value="False"/>
                                 <Style.Triggers>
                                     <Trigger Property="IsChecked" Value="{x:Null}">
                                         <Setter Property="Visibility" Value="Hidden"/>

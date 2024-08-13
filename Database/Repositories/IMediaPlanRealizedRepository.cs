@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using Database.DTOs.MediaPlanRealizedDTO;
 using Database.Entities;
@@ -16,6 +17,8 @@ namespace Database.Repositories
         Task<bool> UpdateMediaPlanRealized(MediaPlanRealized mediaPlanRealized);
         Task<bool> DeleteMediaPlanRealizedById(int id);
         Task<string> GetDedicatedSpotName(int spotid);
+        Task<List<Tuple<int, string>>> GetAllSpotNumSpotNamePairs(int cmpid);
+
         Task<bool> SetStatusValue(int id, int statusValue);
     }
 }

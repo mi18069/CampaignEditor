@@ -29,6 +29,7 @@ namespace Database.Entities
         private TermCoefs _termCoefs;
 
         public string? Date { get { return Status == -1 ? null : MediaPlanTerm.Date.ToShortDateString(); } }
+        public DateOnly? DateOnly { get { return Status == -1 ? null : MediaPlanTerm.Date; } }
         public decimal? Price { get { return Status == -1 ? null : _termCoefs.Price; } }
         public decimal? Chcoef { get { return Status == -1 ? null : MediaPlan.Chcoef; } }
         public decimal? Seccoef { get { return Status == -1 ? null : _termCoefs.Seccoef; } }

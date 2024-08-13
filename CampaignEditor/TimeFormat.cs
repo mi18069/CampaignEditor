@@ -21,7 +21,14 @@ namespace CampaignEditor
 
             return year + month + day;
         }
-        
+        public static string DateOnlyToYMDString(DateOnly date)
+        {
+            string year = date.Year.ToString().PadLeft(2, '0');
+            string month = date.Month.ToString().PadLeft(2, '0');
+            string day = date.Day.ToString().PadLeft(2, '0');
+
+            return year + month + day;
+        }
         public static string? DTToTimeString(DateTime dt)
         {
 

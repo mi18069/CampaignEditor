@@ -1,6 +1,7 @@
 ﻿using CampaignEditor.Controllers;
 using CampaignEditor.Entities;
 using CampaignEditor.Helpers;
+using CampaignEditor.StartupHelpers;
 using Database.DTOs.CampaignDTO;
 using Database.DTOs.ChannelDTO;
 using Database.DTOs.CmpBrndDTO;
@@ -33,6 +34,8 @@ namespace CampaignEditor
         private DatabaseFunctionsController _databaseFunctionsController;
         private BrandController _brandController;
         private CmpBrndController _cmpBrndController;
+        private CompletedValidationController _completedValidationController;
+
 
         private CampaignDTO _campaign;
         private List<ChannelDTO> _channels = new List<ChannelDTO>();
@@ -53,6 +56,8 @@ namespace CampaignEditor
         public event EventHandler SetContentPage;
 
         bool hideExpected = false;
+        private readonly PrintValidation _factoryPrintValidation;
+
         public CampaignValidation(
             IChannelCmpRepository channelCmpRepository,
             IChannelRepository channelRepository,
@@ -63,7 +68,9 @@ namespace CampaignEditor
             ISpotRepository spotRepository,
             IDatabaseFunctionsRepository databaseFunctionsRepository,
             IBrandRepository brandRepository,
-            ICmpBrndRepository cmpBrndRepository)
+            ICmpBrndRepository cmpBrndRepository,
+            ICompletedValidationRepository completedValidationRepository,
+            IAbstractFactory<PrintValidation> factoryPrintValidation)
         {
             _channelCmpController = new ChannelCmpController(channelCmpRepository);
             _channelController = new ChannelController(channelRepository);
@@ -76,6 +83,9 @@ namespace CampaignEditor
             _databaseFunctionsController = new DatabaseFunctionsController(databaseFunctionsRepository);
             _brandController = new BrandController(brandRepository);
             _cmpBrndController = new CmpBrndController(cmpBrndRepository);
+            _completedValidationController = new CompletedValidationController(completedValidationRepository);
+
+            _factoryPrintValidation = factoryPrintValidation.Create();
 
             InitializeComponent();
         }
@@ -94,6 +104,7 @@ namespace CampaignEditor
         public async Task Initialize(CampaignDTO campaign, ObservableRangeCollection<MediaPlanTuple> allMediaPlans)
         {
             _campaign = campaign;
+            _factoryPrintValidation.Initialize(campaign);
 
             if (!CheckPrerequisites())
             {
@@ -110,6 +121,7 @@ namespace CampaignEditor
             await FillChannels(campaign);
             await FillDates(campaign);
             await GetMediaPlanRealized(campaign);
+            await FillSpotNameDict(campaign);
             InitializeDicts();
             await AlignExpectedRealized();
 
@@ -128,10 +140,13 @@ namespace CampaignEditor
             validationStack._allMediaPlans = _allMediaPlans;
             validationStack._mediaPlanRealized = _mediaPlanRealized;
             validationStack._mediaPlanRealizedController = _mediaPlanRealizedController;
+            validationStack._completedValidationController = _completedValidationController;
 
             hideExpected = _allMediaPlans.Count == 0;
             await validationStack.Initialize(campaign, hideExpected);
             validationStack.UpdatedMediaPlanRealized += ValidationStack_UpdatedMediaPlanRealized;
+
+            BindPrintValidation();
         }
 
         private void InitializeDicts()
@@ -163,6 +178,8 @@ namespace CampaignEditor
         {
             _dateRealizedDict.Clear();
 
+
+
             foreach (var date in _dates)
             {
                 foreach (var channel in _channels)
@@ -175,6 +192,7 @@ namespace CampaignEditor
                     _dateRealizedDict[date].AddRange(GetRealizedByDateAndChannel(date, channel));
                 }
             }
+          
         }
 
         /* STATUSES 
@@ -205,7 +223,7 @@ namespace CampaignEditor
             // Calculate and add values
             if (mpR.status == null || mpR.status == 5 || (mpR.price == null))
             {
-                await SetRealizedName(mpR);
+                //await SetRealizedName(mpR);
                 var mediaPlan = tt == null ? null : tt.MediaPlan;
                 mpR.MediaPlan = mediaPlan;
                 CalculateCoefs(mpR);
@@ -460,9 +478,19 @@ namespace CampaignEditor
         private List<MediaPlanRealized?> GetRealizedByDateAndChannel(DateOnly date, ChannelDTO channel)
         {
 
-            var mediaPlanRealizes = _mediaPlanRealized.Where(mpr => _forecastData.ChrdsidChidDict[mpr.chid.Value] == channel.chid && 
-                                                TimeFormat.YMDStringToDateOnly(mpr.date) == date);
-            mediaPlanRealizes.ToList().ForEach(mpr => mpr.Channel = _forecastData.ChrdsChannelDict[mpr.chid.Value]);
+            
+            //var mediaPlanRealizes = _mediaPlanRealized.Where(mpr => TimeFormat.YMDStringToDateOnly(mpr.date) == date).ToList();
+            // _forecastData.ChrdsidChidDict.ContainsKey(mpr.chid.Value) this is 
+            // consequence of not deleting from database, so it has data in base, but not loaded in dictionary
+            // FIX THIS
+            var mediaPlanRealizes = _mediaPlanRealized.Where(mpr => TimeFormat.YMDStringToDateOnly(mpr.date) == date &&
+                            _forecastData.ChrdsidChidDict.ContainsKey(mpr.chid.Value) ? 
+                            _forecastData.ChrdsidChidDict[mpr.chid.Value] == channel.chid : false).ToList();
+
+            mediaPlanRealizes.ForEach(mpr => mpr.Channel = _forecastData.ChrdsChannelDict[mpr.chid.Value]);
+            // Add spot name in realized
+            mediaPlanRealizes.ForEach(mpr => mpr.spotname = mpr.spotnum.HasValue ? _spotnumNameDict[mpr.spotnum.Value] : "");
+
             mediaPlanRealizes = mediaPlanRealizes.OrderBy(mpr => mpr.stime.Value).ToList();
             return mediaPlanRealizes.ToList();
         }
@@ -475,19 +503,12 @@ namespace CampaignEditor
             {
                 _chidOrder[channel.chid] = i++;
             }
-            FillChannelsComboBox(_channels);
+            FillChannelsListBox(_channels);
         }
 
-        private void FillChannelsComboBox(IEnumerable<ChannelDTO> channels)
+        private void FillChannelsListBox(IEnumerable<ChannelDTO> channels)
         {
-            foreach (ChannelDTO channel in channels)
-            {
-                ComboBoxItem cbiChannel = new ComboBoxItem();
-                cbiChannel.DataContext = channel;
-                cbiChannel.Content = channel.chname;
-
-                cbChannels.Items.Add(cbiChannel);
-            }
+            lbChannels.ItemsSource = channels;
         }
 
         private async Task FillDates(CampaignDTO campaign)
@@ -512,6 +533,18 @@ namespace CampaignEditor
         {
             var mpRealized = await _mediaPlanRealizedController.GetAllMediaPlansRealizedByCmpid(campaign.cmpid);
             _mediaPlanRealized.ReplaceRange(mpRealized);
+        }
+
+        private async Task FillSpotNameDict(CampaignDTO campaign)
+        {
+            _spotnumNameDict.Clear();
+
+            var tuples = await _mediaPlanRealizedController.GetAllSpotNumSpotNamePairs(campaign.cmpid);
+
+            foreach (var tuple in tuples)
+            {
+                _spotnumNameDict[tuple.Item1] = tuple.Item2.Trim();
+            }
         }
 
         private async Task CheckRealizedPrice()
@@ -561,16 +594,14 @@ namespace CampaignEditor
             }
         }
 
-        private async void cbChannels_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private async void lbChannels_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            if (cbChannels.SelectedItem is ComboBoxItem selectedChannelItem)
+            var selectedChannels = new List<ChannelDTO>();
+            foreach (ChannelDTO channel in lbChannels.SelectedItems)
             {
-                if (selectedChannelItem.DataContext is ChannelDTO selectedChannel)
-                {
-                    await validationStack.LoadData(selectedChannel.chid);
-
-                }
+                selectedChannels.Add(channel);
             }
+            validationStack.SelectedChannelsChanged(selectedChannels);
         }
 
         private async Task<bool> CheckNewData()
@@ -608,6 +639,7 @@ namespace CampaignEditor
             if (await CheckNewData())
             {
                 await GetMediaPlanRealized(_forecastData.Campaign);
+                await FillSpotNameDict(_campaign);
                 InitializeRealizedDict();
                 await AlignExpectedRealized();
                 await validationStack.Initialize(_forecastData.Campaign, hideExpected);
@@ -615,16 +647,31 @@ namespace CampaignEditor
             SetContentPage?.Invoke(this, null);
         }
 
+        private void BindPrintValidation()
+        {
+            _factoryPrintValidation.DgExpectedMask = validationStack.DgExpectedMask;
+            _factoryPrintValidation.DgRealizedMask = validationStack.DgRealizedMask;
+            _factoryPrintValidation.ValidationDays = validationStack.ValidationDays;
+            _factoryPrintValidation._dateExpectedDict = validationStack._dateExpectedDict;
+            _factoryPrintValidation._dateRealizedDict = validationStack._dateRealizedDict;
+            _factoryPrintValidation._dates = validationStack._dates;
+        }
+
         private void btnPrint_Click(object sender, RoutedEventArgs e)
         {
-            bool allDecimals = (bool)chbAllDecimals.IsChecked;
-            validationStack.Print(allDecimals);
+
+
+
+            _factoryPrintValidation.ShowDialog();
         }
 
         public void CloseValidation()
         {
             validationStack.ClearStackPanel();
             validationStack.UpdatedMediaPlanRealized -= ValidationStack_UpdatedMediaPlanRealized;
+            // Close print window
+            _factoryPrintValidation.shouldClose = true;
+            _factoryPrintValidation.Close();
         }
 
         private async void btnReload_Click(object sender, RoutedEventArgs e)

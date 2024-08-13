@@ -10,6 +10,11 @@ using CampaignEditor.Helpers;
 using System.Windows.Input;
 using System.Reflection;
 using System.Diagnostics;
+using System.ComponentModel;
+using System.Windows.Data;
+using System.Data;
+using Database.DTOs.ChannelDTO;
+using SharpCompress.Compressors.Xz;
 
 namespace CampaignEditor.UserControls.ValidationItems
 {
@@ -36,11 +41,20 @@ namespace CampaignEditor.UserControls.ValidationItems
         string columnToEdit = string.Empty;
         decimal oldCellValue;
         bool skipCellUpdate = true;
+        bool canEdit = true;
+
+        // For filtering
+        ICollectionView dataViewExpected;
+        ICollectionView dataViewRealized;
+
+        List<int> _selectedChids = new List<int>();
+        List<int> _selectedChrdsids = new List<int>();
 
         public ValidationDay(DateOnly date,
             List<TermTuple> termTuples,
             List<MediaPlanRealized> mpRealizedTuples,
-            bool[] expectedGridMask, bool[] realizedGridMask)
+            bool[] expectedGridMask, bool[] realizedGridMask,
+            bool isCompleted)
         {
             InitializeComponent();
 
@@ -50,13 +64,56 @@ namespace CampaignEditor.UserControls.ValidationItems
             _termTuples = termTuples;
             _mpRealizedTuples = mpRealizedTuples;
 
+            if (isCompleted)
+            {
+                SetCompleted(true, true);
+            }
+            else
+                SetCompleted(false, true);
+
             this.date = date;
             if (_termTuples.Count > 0)
-                dgExpected.ItemsSource = _termTuples;
+            {
+                dataViewExpected = CollectionViewSource.GetDefaultView(_termTuples);
+                dgExpected.ItemsSource = dataViewExpected;
+                dataViewExpected.Filter = d =>
+                {
+                    bool result = true;
+
+                    if (_selectedChids.Count > 0)
+                    {
+                        var mediaPlan = ((TermTuple)d).MediaPlan;
+                        result = _selectedChids.Any(c => mediaPlan != null && c == mediaPlan.chid);
+                    }
+
+                    return result;
+                };
+                //dgExpected.ItemsSource = _termTuples;
+
+            }
             if (_mpRealizedTuples.Count > 0)
-                dgRealized.ItemsSource = _mpRealizedTuples;
+            {
+                dataViewRealized = CollectionViewSource.GetDefaultView(_mpRealizedTuples);
+                dgRealized.ItemsSource = dataViewRealized;
+                dataViewRealized.Filter = d =>
+                {
+                    bool result = true;
+                    if (_selectedChrdsids.Count > 0)
+                    {
+                        var chid = ((MediaPlanRealized)d).chid;
+                        result = _selectedChrdsids.Any(c => chid.HasValue && c == chid);
+                    }
+
+                    return result;
+                };
+                //dgRealized.ItemsSource = _mpRealizedTuples;
+
+            }
             SetUserControl();
             SetGridMasks(expectedGridMask, realizedGridMask);
+
+
+
         }
 
 
@@ -99,6 +156,14 @@ namespace CampaignEditor.UserControls.ValidationItems
         public void InvertRealizedColumnVisibility(int index)
         {
             dgRealized.Columns[index].Visibility = dgRealized.Columns[index].Visibility == System.Windows.Visibility.Visible ? System.Windows.Visibility.Hidden : System.Windows.Visibility.Visible;
+        }
+
+        public void ChannelsChanged(IEnumerable<int> chids, IEnumerable<int> chrdsids)
+        {
+            _selectedChids = chids.ToList();
+            _selectedChrdsids = chrdsids.ToList();
+            dataViewExpected.Refresh();
+            dataViewRealized.Refresh();
         }
 
         private void DgExpected_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -198,6 +263,10 @@ namespace CampaignEditor.UserControls.ValidationItems
                 MoveFocusToLastCell(dgExpected);
                 e.Handled = true;
             }
+
+            // Stop editing 
+            if (!canEdit)
+                return;
 
             // Handle changing status or accepted
             if (dgRealized.SelectedItems.Count > 0 &&
@@ -432,7 +501,7 @@ namespace CampaignEditor.UserControls.ValidationItems
                 if (dataGrid.SelectedItems.Contains(row.Item))
                 {
                     // Prevent the default behavior
-                    e.Handled = true;
+                    //e.Handled = true;
 
                     // Set the cell to edit mode
                     dataGrid.CurrentCell = new DataGridCellInfo(row.Item, column);
@@ -470,6 +539,9 @@ namespace CampaignEditor.UserControls.ValidationItems
 
         private void dgRealized_BeginningEdit(object sender, DataGridBeginningEditEventArgs e)
         {
+            if (!canEdit)
+                return;
+
             // Get cell value before editing
             var dataGrid = sender as DataGrid;
             var row = e.Row.Item;
@@ -541,5 +613,115 @@ namespace CampaignEditor.UserControls.ValidationItems
             }
 
         }
+
+        #region Edit date
+
+        public event EventHandler<CompletedValidationEventArgs> CompletedValidationChanged;
+
+        private void chbCompleted_Checked(object sender, RoutedEventArgs e)
+        {
+            string dateString = TimeFormat.DateOnlyToYMDString(date);
+            CompletedValidationChanged?.Invoke(this, new CompletedValidationEventArgs(dateString, true));
+            SetCompleted(true);
+        }
+
+        private void chbCompleted_Unchecked(object sender, RoutedEventArgs e)
+        {
+            string dateString = TimeFormat.DateOnlyToYMDString(date);
+            CompletedValidationChanged?.Invoke(this, new CompletedValidationEventArgs(dateString, false));
+            SetCompleted(false);
+        }
+
+        private void SetCompleted(bool isCompleted, bool setCheckbox = false)
+        {
+            if (isCompleted)
+            {
+                canEdit = false;
+                dgRealized.IsManipulationEnabled = false;
+                dgRealized.PreviewTextInput += DgRealized_PreviewTextInput;
+                // Change setter
+                SetHitTestVisible(false);
+            }
+            else
+            {
+                canEdit = true;
+                dgRealized.IsManipulationEnabled = true;
+                dgRealized.PreviewTextInput -= DgRealized_PreviewTextInput;
+
+                // Change setter
+                SetHitTestVisible(true);
+
+
+            }
+
+            if (setCheckbox)
+            {
+                chbCompleted.Checked -= chbCompleted_Checked;
+                chbCompleted.Unchecked -= chbCompleted_Unchecked;
+
+                chbCompleted.IsChecked = isCompleted;
+
+                chbCompleted.Checked += chbCompleted_Checked;
+                chbCompleted.Unchecked += chbCompleted_Unchecked;
+            }
+        }
+
+        private void SetHitTestVisible(bool isVisible)
+        {
+            var checkBoxColumn = dgRealized.Columns
+                .OfType<DataGridCheckBoxColumn>()
+                .FirstOrDefault(col => col.Header.ToString() == "Accept");
+
+            if (checkBoxColumn != null)
+            {
+                // Create a new style based on the current ElementStyle
+                var newStyle = new Style(typeof(CheckBox), checkBoxColumn.ElementStyle);
+
+                // Find the IsHitTestVisible setter if it exists
+                var existingSetter = newStyle.Setters
+                    .OfType<Setter>()
+                    .FirstOrDefault(s => s.Property == UIElement.IsHitTestVisibleProperty);
+
+                if (existingSetter != null)
+                {
+                    // Update the value of the existing setter
+                    existingSetter.Value = isVisible;
+                }
+                else
+                {
+                    // Add the IsHitTestVisible setter if it does not exist
+                    newStyle.Setters.Add(new Setter(UIElement.IsHitTestVisibleProperty, isVisible));
+                }
+
+                // Apply the new style to the column
+                checkBoxColumn.ElementStyle = newStyle;
+            }
+        }
+
+        // Function to prevent editing cells
+        private void DgRealized_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        {
+            e.Handled = true;
+        }
+
+        // To prevent copy-paste mechanism
+        private void HandleCanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+
+            if (e.Command == ApplicationCommands.Cut ||
+                 e.Command == ApplicationCommands.Copy ||
+                 e.Command == ApplicationCommands.Paste)
+            {
+
+                e.CanExecute = false;
+                e.Handled = true;
+
+            }
+
+        }
+
+
+        #endregion
+
     }
 }

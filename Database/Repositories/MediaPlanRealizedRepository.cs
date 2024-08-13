@@ -386,6 +386,22 @@ namespace Database.Repositories
             return nazreklame;
         }
 
+        public async Task<List<Tuple<int, string>>> GetAllSpotNumSpotNamePairs(int cmpid)
+        {
+            using var connection = _context.GetConnection();
+
+            var spotNums = await connection.QueryAsync<int>(
+                "SELECT DISTINCT brspot FROM xmpre WHERE cmpid = @Cmpid", new { Cmpid = cmpid });
+
+            List<Tuple<int, string>> tuples = new List<Tuple<int, string>>();
+            foreach (var spotNum in spotNums)
+            {
+                tuples.Add(Tuple.Create(spotNum, await GetDedicatedSpotName(spotNum)));
+            }
+
+            return tuples;
+        }
+
         public async Task<bool> SetStatusValue(int id, int statusValue)
         {
             using var connection = _context.GetConnection();
