@@ -3,6 +3,7 @@ using Database.Data;
 using Database.Entities;
 using System;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 
 namespace Database.Repositories
 {
@@ -34,11 +35,11 @@ namespace Database.Repositories
             return affected != 0;
         }
 
-        public async Task<DGConfig> GetDGConfig(int usrid, int clid)
+        public async Task<DGConfig?> GetDGConfig(int usrid, int clid)
         {
             using var connection = _context.GetConnection();
 
-            var dgConfig = await connection.QueryFirstAsync<DGConfig>(
+            var dgConfig = await connection.QueryFirstOrDefaultAsync<DGConfig>(
                 @"SELECT * FROM userdatagridconfig WHERE usrid = @Usrid AND clid = @Clid ", 
                 new { Usrid = usrid, Clid = clid });
 
@@ -50,13 +51,59 @@ namespace Database.Repositories
             using var connection = _context.GetConnection();
             var affected = await connection.ExecuteAsync(
                 @" UPDATE userdatagridconfig SET usrid = @Usrid, clid = @Clid,
-                   dgfor = @Dgfor, dgexp = @Dgexp, dgreal = @Dgreal ",
+                   dgfor = @Dgfor, dgexp = @Dgexp, dgreal = @Dgreal 
+                   WHERE usrid = @Usrid AND clid = @Clid",
                 new {
                     Usrid = dgConfig.usrid,
                     Clid = dgConfig.clid,
                     Dgfor = dgConfig.dgfor,
                     Dgexp = dgConfig.dgexp,
                     Dgreal = dgConfig.dgreal
+                });
+
+            return affected != 0;
+        }
+
+        public async Task<bool> UpdateDGConfigFor(int usrid, int clid, string mask)
+        {
+            using var connection = _context.GetConnection();
+            var affected = await connection.ExecuteAsync(
+                @" UPDATE userdatagridconfig SET dgfor = @Dgfor WHERE usrid = @Usrid AND clid = @Clid ",
+                new
+                {
+                    Usrid = usrid,
+                    Clid = clid,
+                    Dgfor = mask
+                });
+
+            return affected != 0;
+        }
+
+        public async Task<bool> UpdateDGConfigExp(int usrid, int clid, string mask)
+        {
+            using var connection = _context.GetConnection();
+            var affected = await connection.ExecuteAsync(
+                @" UPDATE userdatagridconfig SET dgexp = @Dgexp WHERE usrid = @Usrid AND clid = @Clid ",
+            new
+            {
+                    Usrid = usrid,
+                    Clid = clid,
+                    Dgexp = mask
+                });
+
+            return affected != 0;
+        }
+
+        public async Task<bool> UpdateDGConfigReal(int usrid, int clid, string mask)
+        {
+            using var connection = _context.GetConnection();
+            var affected = await connection.ExecuteAsync(
+                @" UPDATE userdatagridconfig SET dgreal = @Dgreal WHERE usrid = @Usrid AND clid = @Clid ",
+                new
+                {
+                    Usrid = usrid,
+                    Clid = clid,
+                    Dgreal = mask
                 });
 
             return affected != 0;

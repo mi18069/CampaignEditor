@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Controls;
 
 namespace CampaignEditor.UserControls.ValidationItems
@@ -30,6 +31,7 @@ namespace CampaignEditor.UserControls.ValidationItems
         public ChannelController _channelController;
         public MediaPlanVersionController _mediaPlanVersionController;
         public CompletedValidationController _completedValidationController;
+        public DGConfigController _dgConfigController;
 
         public MediaPlanController _mediaPlanController;
         public MediaPlanTermController _mediaPlanTermController;
@@ -45,14 +47,8 @@ namespace CampaignEditor.UserControls.ValidationItems
         //22 columns
         private string dgExpectedMask = "1110111001111111000111";
         private string dgRealizedMask = "1111111100111111100111";
+        private DGConfig dgConfig;
 
-        /*private bool[] dgExpectedMask = new bool[22]
-        { true, true, true, false, true, true, true, false, false, true, true, true,
-            true, true, true, true, false, false, false, true, true, true};
-
-        private bool[] dgRealizedMask = new bool[22]
-        { true, true, true, true, true, true, true, true, false, false, true,
-            true, true, true, true, true, true, false, false, true, true, true};*/
 
         public event EventHandler<UpdateMediaPlanRealizedEventArgs> UpdatedMediaPlanRealized;
         public string DgExpectedMask { get { return dgExpectedMask; } }
@@ -77,6 +73,8 @@ namespace CampaignEditor.UserControls.ValidationItems
 
             }
 
+            await SetColumnsVisibility();
+
             await LoadDates();
             // When reinitializing
             if (hideExpected)
@@ -86,13 +84,19 @@ namespace CampaignEditor.UserControls.ValidationItems
             }
         }
 
-        public async Task LoadData(int chid)
+        private async Task SetColumnsVisibility()
         {
+            var dgConf = await _dgConfigController.GetDGConfig(MainWindow.user.usrid, _campaign.clid);
+            if (dgConf == null)
+            {
+                MessageBox.Show("Error while getting config for dataGrids", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                return;
+            }
+            else
+                dgConfig = dgConf;
 
-            /*await LoadExpected(chid);
-            await LoadRealized(chid);
-            LoadDays();*/
         }
+       
 
         private async Task LoadDates()
         {
@@ -114,7 +118,7 @@ namespace CampaignEditor.UserControls.ValidationItems
                 {
                     isCompleted = compValidation.completed;
                 }
-                ValidationDay validationDay = new ValidationDay(day, dateExpected, dateRealized, dgExpectedMask, dgRealizedMask, isCompleted);
+                ValidationDay validationDay = new ValidationDay(day, dateExpected, dateRealized, dgConfig.dgexp, dgConfig.dgreal, isCompleted);
                 validationDay.InvertedExpectedColumnVisibility += ValidationDay_InvertedExpectedColumnVisibility;
                 validationDay.InvertedRealizedColumnVisibility += ValidationDay_InvertedRealizedColumnVisibility;
                 validationDay.UpdatedMediaPlanRealized += ValidationDay_UpdatedMediaPlanRealized;
@@ -126,13 +130,13 @@ namespace CampaignEditor.UserControls.ValidationItems
         }
 
 
-        private void ValidationDay_InvertedExpectedColumnVisibility(object? sender, IndexEventArgs e)
+        private async void ValidationDay_InvertedExpectedColumnVisibility(object? sender, IndexEventArgs e)
         {
-            InvertExpectedGridHeader(e.Index);
+            await InvertExpectedGridHeader(e.Index);
         }
-        private void ValidationDay_InvertedRealizedColumnVisibility(object? sender, IndexEventArgs e)
+        private async void ValidationDay_InvertedRealizedColumnVisibility(object? sender, IndexEventArgs e)
         {
-            InvertRealizedGridHeader(e.Index);
+            await InvertRealizedGridHeader(e.Index);
         }
         private void ValidationDay_UpdatedMediaPlanRealized(object? sender, UpdateMediaPlanRealizedEventArgs e)
         {
@@ -144,9 +148,9 @@ namespace CampaignEditor.UserControls.ValidationItems
             await _completedValidationController.UpdateCompValidation(new CompletedValidation(_campaign.cmpid, e.Date, e.IsCompleted));
         }
 
-        private void InvertExpectedGridHeader(int index)
+        private async Task InvertExpectedGridHeader(int index)
         {
-            InvertBit(dgRealizedMask, index);
+            await InvertBit(dgConfig.dgexp, index, "exp");
 
             foreach (ValidationDay validationDay in spValidationDays.Children)
             {
@@ -154,10 +158,10 @@ namespace CampaignEditor.UserControls.ValidationItems
             }
         }
 
-        private void InvertRealizedGridHeader(int index)
+        private async Task InvertRealizedGridHeader(int index)
         {
 
-            InvertBit(dgRealizedMask, index);
+            await InvertBit(dgConfig.dgreal, index, "real");
 
             foreach (ValidationDay validationDay in spValidationDays.Children)
             {
@@ -165,7 +169,7 @@ namespace CampaignEditor.UserControls.ValidationItems
             }
         }
 
-        public string InvertBit(string bitString, int position)
+        public async Task InvertBit(string bitString, int position, string type)
         {
             if (position < 0 || position >= bitString.Length)
             {
@@ -176,7 +180,17 @@ namespace CampaignEditor.UserControls.ValidationItems
 
             bitArray[position] = bitArray[position] == '0' ? '1' : '0';
 
-            return new string(bitArray);
+            var newBitArray = new string(bitArray);
+            if (string.Compare(type, "exp") == 0)
+            {
+                dgConfig.dgexp = newBitArray;
+                await _dgConfigController.UpdateDGConfigExp(dgConfig.usrid, dgConfig.clid, dgConfig.dgexp);
+            }
+            else if (string.Compare(type, "real") == 0)
+            {
+                dgConfig.dgreal = newBitArray;
+                await _dgConfigController.UpdateDGConfigReal(dgConfig.usrid, dgConfig.clid, dgConfig.dgreal);
+            }
         }
 
         public void ClearStackPanel()

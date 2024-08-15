@@ -23,13 +23,14 @@ namespace CampaignEditor
         private UserClientsController _userClientsController;
         private DayPartController _dayPartController;
         private DPTimeController _dpTimeController;
+        private DGConfigController _dgConfigController;
 
         private ClientDTO _client = null;
         public UsersAndClients(IClientRepository clientRepository, 
                                IUserRepository userRepository,
                                IUserClientsRepository userClientsRepository,
                                ICampaignRepository campaignRepository,
-                               IMediaPlanRefRepository mediaPlanRefRepository,
+                               IDGConfigRepository dgConfigRepository,
                                IDayPartRepository dayPartRepository,
                                IDPTimeRepository dpTimeRepository)
         {
@@ -39,6 +40,7 @@ namespace CampaignEditor
             _campaignController = new CampaignController(campaignRepository);
             _dayPartController = new DayPartController(dayPartRepository);
             _dpTimeController = new DPTimeController(dpTimeRepository);
+            _dgConfigController = new DGConfigController(dgConfigRepository);
         }
 
         public void Initialize(ClientDTO client)
@@ -116,7 +118,7 @@ namespace CampaignEditor
                 {
                     await _userClientsController.DeleteUserClientsByUserId(user.usrid);
                 }
-
+                await _dgConfigController.DeleteDGConfigByUsrid(user.usrid);
                 await _userController.DeleteUserById(user.usrid);
             }
             catch (Exception ex)
@@ -195,7 +197,8 @@ namespace CampaignEditor
                         await _dayPartController.DeleteDayPart(dayPart.dpid);
                     }
 
-                    bool success = await _clientController.DeleteClientById(client.clid);
+                    bool success = await _dgConfigController.DeleteDGConfigByClid(client.clid);
+                    success = success || await _clientController.DeleteClientById(client.clid);
                     if (!success)
                         return false;
                 }

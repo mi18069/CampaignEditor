@@ -34,7 +34,7 @@ namespace CampaignEditor
         private BrandController _brandController;
         private CmpBrndController _cmpBrndController;
         private CompletedValidationController _completedValidationController;
-
+        private DGConfigController _dgConfigController;
 
         private CampaignDTO _campaign;
         private List<ChannelDTO> _channels = new List<ChannelDTO>();
@@ -69,7 +69,8 @@ namespace CampaignEditor
             IBrandRepository brandRepository,
             ICmpBrndRepository cmpBrndRepository,
             ICompletedValidationRepository completedValidationRepository,
-            IAbstractFactory<PrintValidation> factoryPrintValidation)
+            IAbstractFactory<PrintValidation> factoryPrintValidation,
+            IDGConfigRepository dGConfigRepository)
         {
             _channelCmpController = new ChannelCmpController(channelCmpRepository);
             _channelController = new ChannelController(channelRepository);
@@ -83,6 +84,7 @@ namespace CampaignEditor
             _brandController = new BrandController(brandRepository);
             _cmpBrndController = new CmpBrndController(cmpBrndRepository);
             _completedValidationController = new CompletedValidationController(completedValidationRepository);
+            _dgConfigController = new DGConfigController(dGConfigRepository);
 
             _factoryPrintValidation = factoryPrintValidation.Create();
 
@@ -140,6 +142,7 @@ namespace CampaignEditor
             validationStack._mediaPlanRealized = _mediaPlanRealized;
             validationStack._mediaPlanRealizedController = _mediaPlanRealizedController;
             validationStack._completedValidationController = _completedValidationController;
+            validationStack._dgConfigController = _dgConfigController;
 
             hideExpected = _allMediaPlans.Count == 0;
             await validationStack.Initialize(campaign, hideExpected);

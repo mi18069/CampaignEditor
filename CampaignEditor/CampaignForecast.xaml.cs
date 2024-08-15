@@ -40,6 +40,7 @@ namespace CampaignEditor.UserControls
         private MediaPlanVersionController _mediaPlanVersionController;
         private ReachController _reachController;
         private ClientCoefsController _clientCoefsController;
+        private DGConfigController _dgConfigController;
 
         private DatabaseFunctionsController _databaseFunctionsController;
 
@@ -111,7 +112,8 @@ namespace CampaignEditor.UserControls
             //IAbstractFactory<MediaPlanForecastData> factoryForecastData,
             IReachRepository reachRepository,
             IAbstractFactory<ForecastDataManipulation> factoryForecastDataManipulation,
-            IClientCoefsRepository clientCoefsRepository)
+            IClientCoefsRepository clientCoefsRepository,
+            IDGConfigRepository dgConfigRepository)
         {
             this.DataContext = this;
 
@@ -125,7 +127,7 @@ namespace CampaignEditor.UserControls
             _mediaPlanVersionController = new MediaPlanVersionController(mediaPlanVersionRepository);
             _reachController = new ReachController(reachRepository);
             _clientCoefsController = new ClientCoefsController(clientCoefsRepository);
-
+            _dgConfigController = new DGConfigController(dgConfigRepository);
             _databaseFunctionsController = new DatabaseFunctionsController(databaseFunctionsRepository);
 
             _factoryAddSchema = factoryAddSchema;
@@ -402,6 +404,7 @@ namespace CampaignEditor.UserControls
             dgMediaPlans._mpConverter = _mpConverter;
             dgMediaPlans._mpTermConverter = _mpTermConverter;
             dgMediaPlans._clientCoefsController = _clientCoefsController;
+            dgMediaPlans._dgConfigController = _dgConfigController;
             dgMediaPlans.AddMediaPlanClicked += dgMediaPlans_AddMediaPlanClicked;
             dgMediaPlans.ImportMediaPlanClicked += dgMediaPlans_ImportMediaPlanClicked;
             dgMediaPlans.CopyNameClicked += dgMediaPlans_CopyNameClicked;
@@ -630,7 +633,7 @@ namespace CampaignEditor.UserControls
                 // Filling lvChannels and dictionary
                 await FillMPList(version);
                 await FillLoadedDateRanges();
-                InitializeDataGrid();
+                await InitializeDataGrid();
 
             }
             catch (Exception ex)
@@ -678,13 +681,13 @@ namespace CampaignEditor.UserControls
             reachGrid.Initialize(_campaign, _forecastData.Targets);
         }
 
-        private void InitializeDataGrid()
+        private async Task InitializeDataGrid()
         {
             dgMediaPlans.CanUserEdit = canUserEdit && isEditableVersion;
             dgMediaPlans._selectedChannels = _selectedChannels;
             dgMediaPlans._allMediaPlans = _allMediaPlans;
             dgMediaPlans._filteredDays = filteredDays;
-            dgMediaPlans.Initialize(_campaign, _forecastData.Channels, _forecastData.Spots);
+            await dgMediaPlans.Initialize(_campaign, _forecastData.Channels, _forecastData.Spots);
 
         }
 

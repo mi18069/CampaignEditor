@@ -50,6 +50,8 @@ namespace CampaignEditor.UserControls
         public MediaPlanTermConverter _mpTermConverter { get; set; }
         public ClientCoefsController _clientCoefsController { get; set; }
         public DatabaseFunctionsController _databaseFunctionsController { get; set; }
+        public DGConfigController _dgConfigController { get; set; }
+
         private Dictionary<int, string> chidChannelDictionary = new Dictionary<int, string>();
 
 
@@ -121,6 +123,8 @@ namespace CampaignEditor.UserControls
             get { return dgMediaPlans; }
         }
 
+        private DGConfig dgConfig = null;
+
         public MediaPlanGrid()
         {
 
@@ -151,9 +155,8 @@ namespace CampaignEditor.UserControls
             get { return dgMediaPlans; }
         }
         ICollectionView myDataView;
-        public void Initialize(CampaignDTO campaign, IEnumerable<ChannelDTO> channels, IEnumerable<SpotDTO> spots)
+        public async Task Initialize(CampaignDTO campaign, IEnumerable<ChannelDTO> channels, IEnumerable<SpotDTO> spots)
         {
-            SetColumnsVisibility();
 
             tcChannel.Binding = new Binding()
             {
@@ -175,6 +178,7 @@ namespace CampaignEditor.UserControls
 
             startDate = TimeFormat.YMDStringToDateTime(_campaign.cmpsdate);
             endDate = TimeFormat.YMDStringToDateTime(_campaign.cmpedate);
+            await SetColumnsVisibility();
 
             DeleteDateColumns(frozenColumnsNum);
             InitializeDateColumns();
@@ -223,10 +227,36 @@ namespace CampaignEditor.UserControls
 
         }
 
-        private void SetColumnsVisibility()
+        private async Task SetColumnsVisibility()
+        {
+            var dgConf = await _dgConfigController.GetDGConfig(MainWindow.user.usrid, _campaign.clid);
+            if (dgConf == null || dgConf.dgfor == null)
+            {
+                try
+                {
+                    await _dgConfigController.CreateDGConfig(new DGConfig(MainWindow.user.usrid, _campaign.clid,
+    dgGridMask, null, null));
+                    dgConfig = await _dgConfigController.GetDGConfig(MainWindow.user.usrid, _campaign.clid);
+                }
+                catch
+                {
+                    MessageBox.Show("Error while creating dgConfig", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
+            }
+            else
+            {
+                dgConfig = dgConf;
+                dgGridMask = dgConfig.dgfor;
+            }
+
+            SetColumnsVisibilityByMask(dgGridMask);
+        }
+
+        private void SetColumnsVisibilityByMask(string gridMask)
         {
             // Ensure the bitmask length matches the number of columns
-            if (dgGridMask.Length != dgMediaPlans.Columns.Count)
+            if (gridMask.Length != dgMediaPlans.Columns.Count)
             {
                 throw new ArgumentException("Bitmask length must match the number of DataGrid columns.");
             }
@@ -234,7 +264,7 @@ namespace CampaignEditor.UserControls
             // Iterate over the columns and set their visibility based on the bitmask
             for (int i = 0; i < dgMediaPlans.Columns.Count; i++)
             {
-                if (dgGridMask[i] == '1')
+                if (gridMask[i] == '1')
                 {
                     dgMediaPlans.Columns[i].Visibility = Visibility.Visible;
                 }
@@ -913,11 +943,12 @@ namespace CampaignEditor.UserControls
                     MenuItem item = new MenuItem();
                     item.Header = column.Header.ToString().Trim();
                     item.IsChecked = column.Visibility == Visibility.Visible ? true : false;
-                    item.Click += (obj, ea) =>
+                    item.Click += async (obj, ea) => 
                     {
                         column.Visibility = item.IsChecked ? Visibility.Hidden : Visibility.Visible;
                         item.IsChecked = column.Visibility == Visibility.Visible ? true : false;
-                        Dispatcher.BeginInvoke(new Action(() => SetTotalsWidth()), DispatcherPriority.ContextIdle);
+                        await Dispatcher.BeginInvoke(new Action(() => SetTotalsWidth()), DispatcherPriority.ContextIdle);
+                        await InvertMaskForBit(dgConfig.dgfor, column.DisplayIndex);
                     };
 
                     item.StaysOpenOnClick = true;
@@ -1018,6 +1049,23 @@ namespace CampaignEditor.UserControls
 
                 Schema.ContextMenu = menu;
             }
+        }
+
+        public async Task InvertMaskForBit(string bitString, int position)
+        {
+            if (position < 0 || position >= bitString.Length)
+            {
+                throw new ArgumentOutOfRangeException(nameof(position), "Position is out of range.");
+            }
+
+            char[] bitArray = bitString.ToCharArray();
+
+            bitArray[position] = bitArray[position] == '0' ? '1' : '0';
+
+            var newBitArray = new string(bitArray);
+
+            dgConfig.dgfor = newBitArray;
+            await _dgConfigController.UpdateDGConfigFor(dgConfig.usrid, dgConfig.clid, dgConfig.dgfor);
         }
 
         private static T FindParent<T>(DependencyObject child) where T : DependencyObject
