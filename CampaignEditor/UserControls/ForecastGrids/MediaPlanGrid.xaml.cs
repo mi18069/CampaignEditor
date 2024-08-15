@@ -32,6 +32,7 @@ using Database.DTOs.SpotDTO;
 using Database.DTOs.DayPartDTO;
 using System.Data;
 using Database.DTOs.ClientCoefsDTO;
+using System.Drawing;
 
 namespace CampaignEditor.UserControls
 {
@@ -61,6 +62,8 @@ namespace CampaignEditor.UserControls
 
         // number of frozen columns
         public int mediaPlanColumns = 33;
+        // 33 columns
+        string dgGridMask = "111100100010000000010111100001111";
 
         double dataColumnWidth = 51;
 
@@ -150,6 +153,8 @@ namespace CampaignEditor.UserControls
         ICollectionView myDataView;
         public void Initialize(CampaignDTO campaign, IEnumerable<ChannelDTO> channels, IEnumerable<SpotDTO> spots)
         {
+            SetColumnsVisibility();
+
             tcChannel.Binding = new Binding()
             {
                 Path = new PropertyPath("MediaPlan.chid"),
@@ -216,6 +221,28 @@ namespace CampaignEditor.UserControls
             InitializeTotalGrid();
 
 
+        }
+
+        private void SetColumnsVisibility()
+        {
+            // Ensure the bitmask length matches the number of columns
+            if (dgGridMask.Length != dgMediaPlans.Columns.Count)
+            {
+                throw new ArgumentException("Bitmask length must match the number of DataGrid columns.");
+            }
+
+            // Iterate over the columns and set their visibility based on the bitmask
+            for (int i = 0; i < dgMediaPlans.Columns.Count; i++)
+            {
+                if (dgGridMask[i] == '1')
+                {
+                    dgMediaPlans.Columns[i].Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    dgMediaPlans.Columns[i].Visibility = Visibility.Collapsed;
+                }
+            }
         }
 
         private IEnumerable<DateTime> GetCampaignDates(CampaignDTO campaign)

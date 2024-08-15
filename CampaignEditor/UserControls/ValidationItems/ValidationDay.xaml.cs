@@ -9,12 +9,9 @@ using System.Windows;
 using CampaignEditor.Helpers;
 using System.Windows.Input;
 using System.Reflection;
-using System.Diagnostics;
 using System.ComponentModel;
 using System.Windows.Data;
 using System.Data;
-using Database.DTOs.ChannelDTO;
-using SharpCompress.Compressors.Xz;
 
 namespace CampaignEditor.UserControls.ValidationItems
 {
@@ -47,13 +44,16 @@ namespace CampaignEditor.UserControls.ValidationItems
         ICollectionView dataViewExpected;
         ICollectionView dataViewRealized;
 
+        public List<TermTuple?> GetViewExpected { get { return dataViewExpected.Cast<TermTuple?>().ToList(); } }
+        public List<MediaPlanRealized?> GetViewRealized { get { return dataViewRealized.Cast<MediaPlanRealized?>().ToList(); } }
+
         List<int> _selectedChids = new List<int>();
         List<int> _selectedChrdsids = new List<int>();
 
         public ValidationDay(DateOnly date,
             List<TermTuple> termTuples,
             List<MediaPlanRealized> mpRealizedTuples,
-            bool[] expectedGridMask, bool[] realizedGridMask,
+            string expectedGridMask, string realizedGridMask,
             bool isCompleted)
         {
             InitializeComponent();
@@ -126,8 +126,15 @@ namespace CampaignEditor.UserControls.ValidationItems
 
         private void SetUserControl()
         {
-            int exCount = _termTuples.Where(tt => tt != null && tt.Status != -1).Count();
-            int realCount = _mpRealizedTuples.Where(rt => rt != null && rt.status != -1).Count();
+            /*int exCount = _termTuples.Where(tt => tt != null && tt.Status != -1).Count();
+            int realCount = _mpRealizedTuples.Where(rt => rt != null && rt.status != -1).Count();*/
+            int exCount = 0;
+            int realCount = 0;
+
+            if (_termTuples.Count > 0)
+                exCount = GetViewExpected.Where(tt => tt != null && tt.Status != -1).Count();
+            if (_mpRealizedTuples.Count > 0)
+                realCount = GetViewRealized.Where(rt => rt != null && rt.status != -1).Count(); 
 
             lblExCount.Content = exCount;
             lblRealCount.Content = realCount;
@@ -136,16 +143,16 @@ namespace CampaignEditor.UserControls.ValidationItems
         }
 
 
-        private void SetGridMasks(bool[] expectedGridMask, bool[] realizedGridMask)
+        private void SetGridMasks(string expectedGridMask, string realizedGridMask)
         {
             for (int i=0; i<expectedGridMask.Count(); i++)
             {
-                dgExpected.Columns[i].Visibility = expectedGridMask[i] ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
+                dgExpected.Columns[i].Visibility = expectedGridMask[i] == '1' ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
             }
 
             for (int i = 0; i < realizedGridMask.Count(); i++)
             {
-                dgRealized.Columns[i].Visibility = realizedGridMask[i] ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
+                dgRealized.Columns[i].Visibility = realizedGridMask[i] == '1' ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
             }
         }
 
@@ -162,8 +169,16 @@ namespace CampaignEditor.UserControls.ValidationItems
         {
             _selectedChids = chids.ToList();
             _selectedChrdsids = chrdsids.ToList();
-            dataViewExpected.Refresh();
-            dataViewRealized.Refresh();
+            if (_termTuples.Count > 0)
+            {
+                dataViewExpected.Refresh();
+            }
+            if (_mpRealizedTuples.Count > 0)
+            {
+                dataViewRealized.Refresh();
+            }
+
+            SetUserControl();
         }
 
         private void DgExpected_SelectionChanged(object sender, SelectionChangedEventArgs e)

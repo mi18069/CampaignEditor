@@ -10,7 +10,6 @@ using System.IO;
 using System.Linq;
 using System;
 using System.Windows;
-using System.ComponentModel.Design;
 using System.Windows.Controls;
 
 namespace CampaignEditor
@@ -22,14 +21,18 @@ namespace CampaignEditor
     {
 
         CampaignDTO _campaign;
-        public bool[] DgExpectedMask { get; set; }
-        public bool[] DgRealizedMask { get; set; }
+        public string DgExpectedMask { get; set; }
+        public string DgRealizedMask { get; set; }
 
         public List<DateOnly> _dates = new List<DateOnly>();
         public List<DateOnly> datesToPrint = new List<DateOnly>();
         public UIElementCollection ValidationDays { get; set; }
         public Dictionary<DateOnly, List<TermTuple?>> _dateExpectedDict;
         public Dictionary<DateOnly, List<MediaPlanRealized?>> _dateRealizedDict;
+
+        public Dictionary<DateOnly, ValidationDay> ValidationDaysDict;
+
+
         public PrintValidation()
         {
             InitializeComponent();
@@ -130,21 +133,23 @@ namespace CampaignEditor
                                 .Select(column => column.Header.ToString())
                                 .ToList();
                         AddHeaders(worksheet, 1, 1, headerNamesExpected, DgExpectedMask);
-                        AddExpected(worksheet, 2, 1, _dateExpectedDict, DgExpectedMask, allDecimals);
+                        //AddExpected(worksheet, 2, 1, _dateExpectedDict, DgExpectedMask, allDecimals);
+                        AddExpected(worksheet, 2, 1, ValidationDaysDict, DgExpectedMask, allDecimals);
                     }
                     // if expected stack is hidden, don't place one extra column between them,
                     // else separate by width of 1 column
 
                     if (printRealized)
                     {
-                        int separationWidth = !printExpected ? 0 : 1 + DgExpectedMask.Count(e => e == true);
+                        int separationWidth = !printExpected ? 0 : 1 + DgExpectedMask.Count(e => e == '1');
 
                         var headerNamesRealized = validationDay.RealizedGrid.Columns
                                     .Select(column => column.Header.ToString())
                                     .ToList();
 
                         AddHeaders(worksheet, 1, 1 + separationWidth, headerNamesRealized, DgRealizedMask);
-                        AddRealized(worksheet, 2, 1 + separationWidth, _dateRealizedDict, DgRealizedMask, allDecimals);
+                        //AddRealized(worksheet, 2, 1 + separationWidth, _dateRealizedDict, DgRealizedMask, allDecimals);
+                        AddRealized(worksheet, 2, 1 + separationWidth, ValidationDaysDict, DgRealizedMask, allDecimals);
                     }
                    
                     // Save the Excel package to a memory stream
@@ -165,7 +170,7 @@ namespace CampaignEditor
             };
         }
 
-        private void AddHeaders(ExcelWorksheet worksheet, int rowOff, int colOff, List<string> headerNames, bool[] headerMask)
+        private void AddHeaders(ExcelWorksheet worksheet, int rowOff, int colOff, List<string> headerNames, string headerMask)
         {
 
             int numOfColumns = headerMask.Count();
@@ -174,7 +179,7 @@ namespace CampaignEditor
             int colOffset = 0;
             for (int i = 0; i < numOfColumns; i++)
             {
-                if (headerMask[i])
+                if (headerMask[i] == '1')
                 {
                     worksheet.Cells[rowOff, colOff + colOffset].Value = headerNames[i];
                     worksheet.Cells[rowOff, colOff + colOffset].Style.Fill.PatternType = OfficeOpenXml.Style.ExcelFillStyle.Solid;
@@ -185,15 +190,16 @@ namespace CampaignEditor
             }
         }
 
-        private void AddExpected(ExcelWorksheet worksheet, int rowOff, int colOff, Dictionary<DateOnly, List<TermTuple>> dateExpectedDict, bool[] mask, bool allDecimals = false)
+        private void AddExpected(ExcelWorksheet worksheet, int rowOff, int colOff, Dictionary<DateOnly, ValidationDay> validationDaysDict, string mask, bool allDecimals = false)
         {
-            int colNum = mask.Count(c => c);
+            int colNum = mask.Count(c => c == '1');
             foreach (var date in datesToPrint)
             {
                 List<TermTuple> termTuples = null;
                 try
                 {
-                    termTuples = dateExpectedDict[date];
+                    var validationDay = validationDaysDict[date];
+                    termTuples = validationDay.GetViewExpected;
                 }
                 catch
                 {
@@ -214,32 +220,32 @@ namespace CampaignEditor
                         continue;
                     }
                     int colOffset = colOff;
-                    if (mask[0])
+                    if (mask[0] == '1')
                     {
                         //worksheet.Cells[rowOff, colOffset++].Value = termTuple.Date;
                         worksheet.Cells[rowOff, colOffset++].Value = termTuple.DateOnly;
                     }
-                    if (mask[1])
+                    if (mask[1] == '1')
                     {
                         worksheet.Cells[rowOff, colOffset++].Value = termTuple.ChannelName.Trim();
                     }
-                    if (mask[2])
+                    if (mask[2] == '1')
                     {
                         worksheet.Cells[rowOff, colOffset++].Value = termTuple.MediaPlan.name.Trim();
                     }
-                    if (mask[3])
+                    if (mask[3] == '1')
                     {
                         worksheet.Cells[rowOff, colOffset++].Value = termTuple.MediaPlan.DayPart.name.Trim();
                     }
-                    if (mask[4])
+                    if (mask[4] == '1')
                     {
                         worksheet.Cells[rowOff, colOffset++].Value = termTuple.MediaPlan.Blocktime;
                     }
-                    if (mask[5])
+                    if (mask[5] == '1')
                     {
                         worksheet.Cells[rowOff, colOffset++].Value = termTuple.MediaPlan.Position;
                     }
-                    if (mask[6])
+                    if (mask[6] == '1')
                     {
                         if (allDecimals)
                         {
@@ -250,7 +256,7 @@ namespace CampaignEditor
                             worksheet.Cells[rowOff, colOffset++].Value = Math.Round(termTuple.Amrp1.Value, 2);
                         }
                     }
-                    if (mask[7])
+                    if (mask[7] == '1')
                     {
                         if (allDecimals)
                         {
@@ -262,7 +268,7 @@ namespace CampaignEditor
                         }
 
                     }
-                    if (mask[8])
+                    if (mask[8] == '1')
                     {
                         if (allDecimals)
                         {
@@ -274,7 +280,7 @@ namespace CampaignEditor
                         }
 
                     }
-                    if (mask[9])
+                    if (mask[9] == '1')
                     {
                         if (allDecimals)
                         {
@@ -286,7 +292,7 @@ namespace CampaignEditor
                         }
 
                     }
-                    if (mask[10])
+                    if (mask[10] == '1')
                     {
                         if (allDecimals)
                         {
@@ -298,7 +304,7 @@ namespace CampaignEditor
                         }
 
                     }
-                    if (mask[11])
+                    if (mask[11] == '1')
                     {
                         if (allDecimals)
                         {
@@ -310,7 +316,7 @@ namespace CampaignEditor
                         }
 
                     }
-                    if (mask[12])
+                    if (mask[12] == '1')
                     {
                         if (allDecimals)
                         {
@@ -322,7 +328,7 @@ namespace CampaignEditor
                         }
 
                     }
-                    if (mask[13])
+                    if (mask[13] == '1')
                     {
                         if (allDecimals)
                         {
@@ -334,7 +340,7 @@ namespace CampaignEditor
                         }
 
                     }
-                    if (mask[14])
+                    if (mask[14] == '1')
                     {
                         if (allDecimals)
                         {
@@ -346,7 +352,7 @@ namespace CampaignEditor
                         }
 
                     }
-                    if (mask[15])
+                    if (mask[15] == '1')
                     {
                         if (allDecimals)
                         {
@@ -358,7 +364,7 @@ namespace CampaignEditor
                         }
 
                     }
-                    if (mask[16])
+                    if (mask[16] == '1')
                     {
                         if (allDecimals)
                         {
@@ -370,7 +376,7 @@ namespace CampaignEditor
                         }
 
                     }
-                    if (mask[17])
+                    if (mask[17] == '1')
                     {
                         if (allDecimals)
                         {
@@ -382,22 +388,22 @@ namespace CampaignEditor
                         }
 
                     }
-                    if (mask[18])
+                    if (mask[18] == '1')
                     {
                         worksheet.Cells[rowOff, colOffset++].Value = termTuple.Spot.spotname.Trim();
 
                     }
-                    if (mask[19])
+                    if (mask[19] == '1')
                     {
                         worksheet.Cells[rowOff, colOffset++].Value = termTuple.Spotlength;
 
                     }
-                    if (mask[20])
+                    if (mask[20] == '1')
                     {
                         worksheet.Cells[rowOff, colOffset++].Value = termTuple.Spot.spotcode;
 
                     }
-                    if (mask[21])
+                    if (mask[21] == '1')
                     {
                         if (allDecimals)
                         {
@@ -419,15 +425,16 @@ namespace CampaignEditor
 
         }
 
-        private void AddRealized(ExcelWorksheet worksheet, int rowOff, int colOff, Dictionary<DateOnly, List<MediaPlanRealized>> dateRealizedDict, bool[] mask, bool allDecimals = false)
+        private void AddRealized(ExcelWorksheet worksheet, int rowOff, int colOff, Dictionary<DateOnly, ValidationDay> validationDaysDict, string mask, bool allDecimals = false)
         {
-            int colNum = mask.Count(c => c);
+            int colNum = mask.Count(c => c == '1');
             foreach (var date in datesToPrint)
             {
                 List<MediaPlanRealized> realizedTuples = null;
                 try
                 {
-                    realizedTuples = dateRealizedDict[date];
+                    var validationDay = validationDaysDict[date];
+                    realizedTuples = validationDay.GetViewRealized;
                 }
                 catch
                 {
@@ -447,37 +454,37 @@ namespace CampaignEditor
                         continue;
                     }
                     int colOffset = colOff;
-                    if (mask[0])
+                    if (mask[0] == '1')
                     {
                         //worksheet.Cells[rowOff, colOffset++].Value = TimeFormat.YMDStringToDateOnly(mediaPlanRealized.Date).ToShortDateString();
                         worksheet.Cells[rowOff, colOffset++].Value = TimeFormat.YMDStringToDateOnly(mediaPlanRealized.Date);
                     }
-                    if (mask[1])
+                    if (mask[1] == '1')
                     {
                         worksheet.Cells[rowOff, colOffset++].Value = mediaPlanRealized.Channel.chname.Trim();
                     }
-                    if (mask[2])
+                    if (mask[2] == '1')
                     {
                         var name = mediaPlanRealized.name.Trim() ?? "";
                         worksheet.Cells[rowOff, colOffset++].Value = name;
                     }
-                    if (mask[3])
+                    if (mask[3] == '1')
                     {
                         worksheet.Cells[rowOff, colOffset++].Value = TimeFormat.TimeStrToRepresentative(mediaPlanRealized.stimestr);
                     }
-                    if (mask[4])
+                    if (mask[4] == '1')
                     {
                         worksheet.Cells[rowOff, colOffset++].Value = mediaPlanRealized.durf;
                     }
-                    if (mask[5])
+                    if (mask[5] == '1')
                     {
                         worksheet.Cells[rowOff, colOffset++].Value = mediaPlanRealized.dure;
                     }
-                    if (mask[6])
+                    if (mask[6] == '1')
                     {
                         worksheet.Cells[rowOff, colOffset++].Value = mediaPlanRealized.spotname.Trim();
                     }
-                    if (mask[7])
+                    if (mask[7] == '1')
                     {
                         var amrp1 = mediaPlanRealized.amrp1;
                         if (allDecimals)
@@ -490,7 +497,7 @@ namespace CampaignEditor
                         }
 
                     }
-                    if (mask[8])
+                    if (mask[8] == '1')
                     {
                         var amrp2 = mediaPlanRealized.amrp2;
                         if (allDecimals)
@@ -503,7 +510,7 @@ namespace CampaignEditor
                         }
 
                     }
-                    if (mask[9])
+                    if (mask[9] == '1')
                     {
                         var amrp3 = mediaPlanRealized.amrp3;
                         if (allDecimals)
@@ -516,7 +523,7 @@ namespace CampaignEditor
                         }
 
                     }
-                    if (mask[10])
+                    if (mask[10] == '1')
                     {
                         var amrpsale = mediaPlanRealized.amrpsale;
                         if (allDecimals)
@@ -529,7 +536,7 @@ namespace CampaignEditor
                         }
 
                     }
-                    if (mask[11])
+                    if (mask[11] == '1')
                     {
                         if (allDecimals)
                         {
@@ -541,7 +548,7 @@ namespace CampaignEditor
                         }
 
                     }
-                    if (mask[12])
+                    if (mask[12] == '1')
                     {
                         if (allDecimals)
                         {
@@ -553,7 +560,7 @@ namespace CampaignEditor
                         }
 
                     }
-                    if (mask[13])
+                    if (mask[13] == '1')
                     {
                         if (allDecimals)
                         {
@@ -565,7 +572,7 @@ namespace CampaignEditor
                         }
 
                     }
-                    if (mask[14])
+                    if (mask[14] == '1')
                     {
                         if (allDecimals)
                         {
@@ -577,7 +584,7 @@ namespace CampaignEditor
                         }
 
                     }
-                    if (mask[15])
+                    if (mask[15] == '1')
                     {
                         if (allDecimals)
                         {
@@ -589,7 +596,7 @@ namespace CampaignEditor
                         }
 
                     }
-                    if (mask[16])
+                    if (mask[16] == '1')
                     {
                         if (allDecimals)
                         {
@@ -601,7 +608,7 @@ namespace CampaignEditor
                         }
 
                     }
-                    if (mask[17])
+                    if (mask[17] == '1')
                     {
                         if (allDecimals)
                         {
@@ -613,7 +620,7 @@ namespace CampaignEditor
                         }
 
                     }
-                    if (mask[18])
+                    if (mask[18] == '1')
                     {
                         if (allDecimals)
                         {
@@ -625,7 +632,7 @@ namespace CampaignEditor
                         }
 
                     }
-                    if (mask[19])
+                    if (mask[19] == '1')
                     {
                         if (allDecimals)
                         {
@@ -637,11 +644,11 @@ namespace CampaignEditor
                         }
 
                     }
-                    if (mask[20])
+                    if (mask[20] == '1')
                     {
                         worksheet.Cells[rowOff, colOffset++].Value = mediaPlanRealized.status;
                     }
-                    if (mask[21])
+                    if (mask[21] == '1')
                     {
                         worksheet.Cells[rowOff, colOffset++].Value = mediaPlanRealized.Accept;
                     }

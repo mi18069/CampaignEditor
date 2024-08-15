@@ -1,5 +1,4 @@
 ﻿using CampaignEditor.Controllers;
-using CampaignEditor.Entities;
 using CampaignEditor.Helpers;
 using CampaignEditor.StartupHelpers;
 using Database.DTOs.CampaignDTO;
@@ -256,14 +255,18 @@ namespace CampaignEditor
                 tt.Status = 1;
         }
 
-        private void AddEmptyRealized(List<MediaPlanRealized?> realized, int index)
+        private void AddEmptyRealized(List<MediaPlanRealized?> realized, int index, int chid = -1)
         {
-            realized.Insert(index, new MediaPlanRealizedEmpty());
+            var mediaPlanRealizedEmpty = new MediaPlanRealizedEmpty();
+            mediaPlanRealizedEmpty.chid = chid;
+            realized.Insert(index, mediaPlanRealizedEmpty);
         }
 
-        private void AddEmptyExpected(List<TermTuple?> expected, int index)
+        private void AddEmptyExpected(List<TermTuple?> expected, int index, int chid = -1)
         {
-            expected.Insert(index, new TermTuple(new MediaPlan(), new MediaPlanTerm(), new SpotDTO(0, "", "", 0, true), new TermCoefs(), ""));
+            var termTuple = new TermTuple(new MediaPlan(), new MediaPlanTerm(), new SpotDTO(0, "", "", 0, true), new TermCoefs(), "");
+            termTuple.MediaPlan.chid = chid;
+            expected.Insert(index, termTuple);
         }
 
         private async Task AlignExpectedRealizedByDate(List<TermTuple?> expected, List<MediaPlanRealized?> realized)
@@ -315,7 +318,7 @@ namespace CampaignEditor
                                 {
                                     await PairMediaPlans(realized[k], expected[k]);
                                     realized[k].status = 2;
-                                    AddEmptyExpected(expected, k);
+                                    AddEmptyExpected(expected, k, expectedChid);
                                     n++;
                                     betterPairFound = true;
                                 }
@@ -335,7 +338,7 @@ namespace CampaignEditor
                                     Math.Abs(expectedTime - nextExpectedTime) <= minPeriod)
                                 {
                                     expected[k].Status = 2;
-                                    AddEmptyRealized(realized, k);
+                                    AddEmptyRealized(realized, k, realized[k].chid.Value);
                                     m++;
                                     betterPairFound = true;
                                 }
@@ -355,14 +358,14 @@ namespace CampaignEditor
                         if (expectedTime > realizedTime)
                         {
                             await PairMediaPlans(realized[k], null);
-                            AddEmptyExpected(expected, k);
+                            AddEmptyExpected(expected, k, expectedChid);
                             n++;
                         }
                         // Add empty realized row
                         else
                         {
                             expected[k].Status = 2;
-                            AddEmptyRealized(realized, k);
+                            AddEmptyRealized(realized, k, realized[k].chid.Value);
                             m++;
                         }
                     }
@@ -374,14 +377,14 @@ namespace CampaignEditor
                     if (_chidOrder[expectedChid] < _chidOrder[realizedChid])
                     {
                         expected[k].Status = 2;
-                        AddEmptyRealized(realized, k);
+                        AddEmptyRealized(realized, k, realized[k].chid.Value);
                         m++;
                     }
                     // Add empty expected row
                     else
                     {
                         await PairMediaPlans(realized[k], null);
-                        AddEmptyExpected(expected, k);
+                        AddEmptyExpected(expected, k, _forecastData.ChrdsidChidDict[realized[k].chid.Value]);
                         n++;
                     }
                 }
@@ -392,7 +395,8 @@ namespace CampaignEditor
             while (k < n)
             {
                 expected[k].Status = -1;
-                AddEmptyRealized(realized, k);
+                //AddEmptyRealized(realized, k, realized[m-1].chid.Value);
+                AddEmptyRealized(realized, k, realized[k-1].chid.Value);
                 k++;
             }
             // All expected used, fill the rest of realizations
@@ -401,7 +405,7 @@ namespace CampaignEditor
                 await PairMediaPlans(realized[k], null);
                 // If nothing is initialized , no need to add empty expected one by one
                 if (_allMediaPlans.Count != 0)
-                    AddEmptyExpected(expected, k);
+                    AddEmptyExpected(expected, k, _forecastData.ChrdsidChidDict[realized[k].chid.Value]);
                 k++;
             }
           
@@ -655,13 +659,11 @@ namespace CampaignEditor
             _factoryPrintValidation._dateExpectedDict = validationStack._dateExpectedDict;
             _factoryPrintValidation._dateRealizedDict = validationStack._dateRealizedDict;
             _factoryPrintValidation._dates = validationStack._dates;
+            _factoryPrintValidation.ValidationDaysDict = validationStack.ValidationDaysDict;
         }
 
         private void btnPrint_Click(object sender, RoutedEventArgs e)
         {
-
-
-
             _factoryPrintValidation.ShowDialog();
         }
 

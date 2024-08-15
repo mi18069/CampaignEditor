@@ -43,19 +43,19 @@
                     <ColumnDefinition Width="auto"/>
                     <ColumnDefinition Width="auto"/>
                 </Grid.ColumnDefinitions>
+
+                <ListBox x:Name="lbChannels" Grid.Column="0" DisplayMemberPath="chname"
+                      HorizontalAlignment="Left" HorizontalContentAlignment="Left"
+                      SelectionChanged="lbChannels_SelectionChanged" MaxHeight="100"
+                     SelectionMode="Multiple"/>
                 
                 <Button x:Name="btnCheckRealized" Grid.Column="1"
-                        Width="100" Content="Check new data" Click="btnCheckRealized_Click"/>
+                        Width="100" MaxHeight="20" Content="Check new data" Click="btnCheckRealized_Click"/>
                 <Button x:Name="btnPrint" Grid.Column="2" Content="Export"
-                        Width="70" Click="btnPrint_Click"/>
+                        Width="70" MaxHeight="20" Click="btnPrint_Click"/>
             </Grid>
-            
-            <local:ValidationStack x:Name="validationStack" Grid.Row="2" Grid.Column="1"/>
 
-            <ListBox x:Name="lbChannels" Grid.Column="1" Grid.Row="3" DisplayMemberPath="chname"
-                      HorizontalAlignment="Left" HorizontalContentAlignment="Left"
-                      SelectionChanged="lbChannels_SelectionChanged" MaxHeight="150"
-                     SelectionMode="Multiple" Visibility="Collapsed"/>
+            <local:ValidationStack x:Name="validationStack" Grid.Row="2" Grid.Column="1"/>
         </Grid>
     </Grid>
 </Page>

@@ -24,6 +24,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using Database.DTOs.DayPartDTO;
 using Database.DTOs.PricelistDTO;
+using System.Drawing;
 
 namespace CampaignEditor.UserControls
 {
@@ -49,7 +50,6 @@ namespace CampaignEditor.UserControls
         private readonly Listing _factoryListing;
         private readonly PrintForecast _factoryPrintForecast;
         private ForecastDataManipulation _forecastDataManipulation;
-
 
         private bool canUserEdit = true;
         private bool isEditableVersion = true;
@@ -345,7 +345,6 @@ namespace CampaignEditor.UserControls
             /*await _forecastData.Initialize(_campaign);
             _mpConverter.Initialize(_forecastData);*/
             _forecastDataManipulation.Initialize(_campaign, _forecastData, _mpConverter);
-
             await InitializeVersions();
             await InitializeGoals();
 
