@@ -37,22 +37,26 @@
                 <RowDefinition Height="10"/>
             </Grid.RowDefinitions>
             <Grid Grid.Row="1" Grid.Column="1" Margin="0, 10">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="auto"/>
+                </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="auto"/>
                 </Grid.ColumnDefinitions>
 
-                <ListBox x:Name="lbChannels" Grid.Column="0" DisplayMemberPath="chname"
+                <ListBox x:Name="lbChannels" Grid.Column="0" Grid.Row="0" Grid.RowSpan="3" DisplayMemberPath="chname"
                       HorizontalAlignment="Left" HorizontalContentAlignment="Left"
                       SelectionChanged="lbChannels_SelectionChanged" MaxHeight="100"
                      SelectionMode="Multiple"/>
                 
-                <Button x:Name="btnCheckRealized" Grid.Column="1"
-                        Width="100" MaxHeight="20" Content="Check new data" Click="btnCheckRealized_Click"/>
-                <Button x:Name="btnPrint" Grid.Column="2" Content="Export"
-                        Width="70" MaxHeight="20" Click="btnPrint_Click"/>
+                <Button x:Name="btnCheckRealized" Grid.Column="2" Grid.Row="0"
+                        Width="100" Height="30" Content="Check new data" Click="btnCheckRealized_Click"/>
+                <Button x:Name="btnPrint" Grid.Column="2" Grid.Row="2" Content="Export"
+                        Width="100" Height="30" Click="btnPrint_Click"/>
             </Grid>
 
             <local:ValidationStack x:Name="validationStack" Grid.Row="2" Grid.Column="1"/>

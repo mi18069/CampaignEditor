@@ -19,7 +19,7 @@
             <RowDefinition Height="auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <Grid x:Name="gridHeader" Grid.Row="0" Background="DarkGoldenrod" HorizontalAlignment="Stretch">
+        <Grid x:Name="gridHeader" Grid.Row="0" HorizontalAlignment="Stretch">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition Height="auto"/>
@@ -27,20 +27,32 @@
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
-                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="auto"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
 
-                <Label x:Name="lblExCount" Grid.Row="0" Grid.Column="0" FontWeight="Bold" HorizontalAlignment="Right"/>
-                <Label x:Name="lblDate" Grid.Row="0" Grid.Column="1" FontWeight="Bold" HorizontalAlignment="Center"/>
-                <Label x:Name="lblRealCount" Grid.Row="0" Grid.Column="2" FontWeight="Bold" HorizontalAlignment="Left"/>
-                <CheckBox x:Name="chbCompleted" Grid.Row="0" Grid.Column="3" Content="Completed" VerticalAlignment="Center"
-                          IsChecked="False" HorizontalAlignment="Center" Checked="chbCompleted_Checked" Unchecked="chbCompleted_Unchecked"/>
-                <ToggleButton x:Name="tglButton" Grid.Row="1" Grid.ColumnSpan="4" Content="Show" 
-                        HorizontalAlignment="Stretch" IsChecked="False"
-                        Click="tglButton_Click"  Background="LightGoldenrodYellow"
+                <Label x:Name="lblExCount" Grid.Row="0" Grid.Column="1" FontWeight="Bold" Margin="10, 0"/>
+                <Label x:Name="lblDate" Grid.Row="0" Grid.Column="2" FontWeight="Bold" Margin="10, 0"/>
+                <Label x:Name="lblRealCount" Grid.Row="0" Grid.Column="3" FontWeight="Bold" Margin="10, 0"/>
+                <CheckBox x:Name="chbCompleted" Grid.Row="0" Grid.Column="4" Content="Completed" VerticalAlignment="Center" Margin="20, 0, 0, 0"
+                          IsChecked="False" HorizontalAlignment="Left" Checked="chbCompleted_Checked" Unchecked="chbCompleted_Unchecked"/>
+                <ToggleButton x:Name="tglButton" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="5" Content="Show" 
+                        IsChecked="False" HorizontalAlignment="Stretch" Background="Transparent"
+                        Click="tglButton_Click" 
                       Height="30" VerticalAlignment="Top"/>
+
+                <Grid.Style>
+                    <Style TargetType="Grid">
+                        <Setter Property="Background" Value="PaleGoldenrod"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsChecked, ElementName=chbCompleted}" Value="True">
+                                <Setter Property="Background" Value="DarkGoldenrod"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Grid.Style>
             </Grid>
         </Grid>
 
@@ -247,6 +259,23 @@
                     </DataGridCheckBoxColumn>
                 </DataGrid.Columns>
             </DataGrid>
+
+            <!-- Overlay Rectangle -->
+            <Rectangle x:Name="overlayRectangle" Grid.ColumnSpan="2"
+               Fill="Black" 
+               Opacity="0.25"
+               IsHitTestVisible="False">
+                <Rectangle.Style>
+                    <Style TargetType="Rectangle">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsChecked, ElementName=chbCompleted}" Value="True">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Rectangle.Style>
+            </Rectangle>
         </Grid>
         
     </Grid>
