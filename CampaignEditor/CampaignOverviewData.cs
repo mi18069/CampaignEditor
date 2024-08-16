@@ -137,6 +137,7 @@ namespace CampaignEditor
             try
             {
                 var selectedChannels = await _channelCmpController.GetChannelCmpsByCmpid(cmpid);
+                selectedChannels = selectedChannels.OrderBy(chn => chn.pos);
 
                 foreach (var selected in selectedChannels)
                 {

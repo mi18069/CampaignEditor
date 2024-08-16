@@ -25,8 +25,8 @@ namespace Database.Repositories
             using var connection = _context.GetConnection();
 
             var affected = await connection.ExecuteAsync(
-                "INSERT INTO tblcmpchn (cmpid, chid, plid, actid, plidbuy, actidbuy) " +
-                    "VALUES (@Cmpid, @Chid, @Plid, @Actid, @Plidbuy, @Actidbuy)",
+                "INSERT INTO tblcmpchn (cmpid, chid, plid, actid, plidbuy, actidbuy, pos) " +
+                    "VALUES (@Cmpid, @Chid, @Plid, @Actid, @Plidbuy, @Actidbuy, @Pos)",
             new
             {
                 Cmpid = channelCmpDTO.cmpid,
@@ -34,7 +34,8 @@ namespace Database.Repositories
                 Plid = channelCmpDTO.plid,
                 Actid = channelCmpDTO.actid,
                 Plidbuy = channelCmpDTO.plidbuy,
-                Actidbuy = channelCmpDTO.actidbuy
+                Actidbuy = channelCmpDTO.actidbuy,
+                Pos = channelCmpDTO.pos
             });
 
             return affected != 0;
@@ -76,8 +77,8 @@ namespace Database.Repositories
 
             var affected = await connection.ExecuteAsync(
                 "UPDATE tblcmpchn SET cmpid = @Cmpid, chid = @Chid, plid = @Plid, " +
-                "actid = @Actid, plidbuy = @Plidbuy, Actidbuy = @Actidbuy " +
-                "WHERE cmpid = @Cmpid AND plid = @Plid",
+                "actid = @Actid, plidbuy = @Plidbuy, actidbuy = @Actidbuy, pos = @Pos " +
+                "WHERE cmpid = @Cmpid AND chid = @Chid",
                 new
                 {
                     Cmpid = channelCmpDTO.cmpid,
@@ -85,7 +86,8 @@ namespace Database.Repositories
                     Plid = channelCmpDTO.plid,
                     Actid = channelCmpDTO.actid,
                     Plidbuy = channelCmpDTO.plidbuy,
-                    Actidbuy = channelCmpDTO.actidbuy
+                    Actidbuy = channelCmpDTO.actidbuy,
+                    Pos = channelCmpDTO.pos
                 });
 
             return affected != 0;
@@ -118,8 +120,8 @@ namespace Database.Repositories
             using var connection = _context.GetConnection();
 
             var affected = await connection.ExecuteAsync(
-                @"INSERT INTO tblcmpchn (cmpid, chid, plid, actid, plidbuy, actidbuy)
-                  SELECT @NewCmpid, chid, plid, actid, plidbuy, actidbuy
+                @"INSERT INTO tblcmpchn (cmpid, chid, plid, actid, plidbuy, actidbuy, pos)
+                  SELECT @NewCmpid, chid, plid, actid, plidbuy, actidbuy, pos 
                   FROM tblcmpchn WHERE cmpid = @OldCmpid;",
                 new { OldCmpid = oldCmpid, NewCmpid = newCmpid });
 

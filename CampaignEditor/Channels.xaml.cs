@@ -704,6 +704,10 @@ namespace CampaignEditor
                     updateChannels = true;
                 }
             }
+            else
+            {
+                await CheckIfPositionChanged();
+            }
             btnSave.IsEnabled = true;
 
             this.Close();
@@ -715,13 +719,38 @@ namespace CampaignEditor
             this.Close();
         }
 
+        private async Task CheckIfPositionChanged()
+        {
+            var channelCmps = (await _channelCmpController.GetChannelCmpsByCmpid(_campaign.cmpid)).ToList();
+
+            for (int i = 0; i < Selected.Count; i++)
+            {
+                var channel = Selected[i].Item1;
+                var channelCmp = channelCmps.FirstOrDefault(cmpchn => cmpchn.chid == channel.chid);
+                if (channelCmp == null)
+                {
+                    continue;
+                }
+                if (channelCmp.pos != i)
+                {
+                    channelsModified = true;
+                    await _channelCmpController.UpdateChannelCmp(
+                        new UpdateChannelCmpDTO(channelCmp.cmpid, channelCmp.chid, channelCmp.plid,
+                            channelCmp.actid, channelCmp.plidbuy, channelCmp.actidbuy, i));
+                }
+
+            }
+        }     
+
         public async Task UpdateDatabase(List<Tuple<ChannelDTO, PricelistDTO, ActivityDTO>> channelList)
         {
             await _channelCmpController.DeleteChannelCmpByCmpid(_campaign.cmpid);
-            foreach (var channel in SelectedChannels)
+
+            for (int i=0; i<SelectedChannels.Count; i++)
             {
+                var channel = SelectedChannels[i];
                 CreateChannelCmpDTO channelCmp = new CreateChannelCmpDTO
-                    (_campaign.cmpid, channel.Item1.chid, channel.Item2.plid, channel.Item3.actid, -1, -1);
+                    (_campaign.cmpid, channel.Item1.chid, channel.Item2.plid, channel.Item3.actid, -1, -1, i);
                 await _channelCmpController.CreateChannelCmp(channelCmp);
             }
         }

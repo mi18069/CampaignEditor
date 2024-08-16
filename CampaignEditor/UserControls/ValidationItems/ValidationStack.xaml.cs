@@ -87,10 +87,20 @@ namespace CampaignEditor.UserControls.ValidationItems
         private async Task SetColumnsVisibility()
         {
             var dgConf = await _dgConfigController.GetDGConfig(MainWindow.user.usrid, _campaign.clid);
+
             if (dgConf == null)
             {
-                MessageBox.Show("Error while getting config for dataGrids", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
-                return;
+                try
+                {
+                    await _dgConfigController.CreateDGConfig(new DGConfig(MainWindow.user.usrid, _campaign.clid,
+                        null, dgExpectedMask, dgRealizedMask));
+                    dgConfig = await _dgConfigController.GetDGConfig(MainWindow.user.usrid, _campaign.clid);
+                }
+                catch
+                {
+                    MessageBox.Show("Error while creating dgConfig", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
+                }
             }
             else
                 dgConfig = dgConf;

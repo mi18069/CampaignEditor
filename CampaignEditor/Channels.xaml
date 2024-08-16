@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:CampaignEditor"
+        xmlns:helper="clr-namespace:CampaignEditor.Helpers"
         mc:Ignorable="d"
         Title="Channels" Height="650" Width="1400">
     <Grid>
@@ -130,7 +131,8 @@
                   IsReadOnly="True"
                   ItemsSource="{Binding Path=Selected}"
                   HeadersVisibility="Column"
-                  SelectionMode="Extended">
+                  SelectionMode="Extended"
+                  helper:VisualHelper.EnableRowsMove="True">
             <DataGrid.Resources>
                 <Style TargetType="{x:Type DataGridColumnHeader}">
                     <Setter Property="Background" Value="LightGray"/>

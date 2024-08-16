@@ -8,5 +8,6 @@
         public int actid { get; set; }
         public int plidbuy { get; set; }
         public int actidbuy { get; set; }
+        public int pos { get; set; }
     }
 }
