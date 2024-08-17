@@ -11,6 +11,7 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -119,7 +120,7 @@ namespace CampaignEditor
             gridNotInitialized.Visibility = System.Windows.Visibility.Collapsed;
             gridValidation.Visibility = System.Windows.Visibility.Visible;
 
-            await FillChannels(campaign);
+            FillChannels();
             await FillDates(campaign);
             await GetMediaPlanRealized(campaign);
             await FillSpotNameDict(campaign);
@@ -502,7 +503,7 @@ namespace CampaignEditor
             return mediaPlanRealizes.ToList();
         }
 
-        private async Task FillChannels(CampaignDTO campaign)
+        public void FillChannels()
         {           
             _channels = _forecastData.Channels;
             int i = 0;
@@ -510,12 +511,10 @@ namespace CampaignEditor
             {
                 _chidOrder[channel.chid] = i++;
             }
-            FillChannelsListBox(_channels);
-        }
+            lbChannels.SelectedItems.Clear();
+            lbChannels.ItemsSource = null;
+            lbChannels.ItemsSource = _channels;
 
-        private void FillChannelsListBox(IEnumerable<ChannelDTO> channels)
-        {
-            lbChannels.ItemsSource = channels;
         }
 
         private async Task FillDates(CampaignDTO campaign)

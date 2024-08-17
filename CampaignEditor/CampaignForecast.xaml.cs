@@ -293,6 +293,18 @@ namespace CampaignEditor.UserControls
 
         }
 
+        public void ChannelsOrderChanged()
+        {
+            SetLoadingPage?.Invoke(this, null);
+
+            _allChannels.ReplaceRange(_forecastData.Channels);
+
+            ChangeChannelsOrderInGrids();
+
+            SetContentPage?.Invoke(this, null);
+
+        }
+
         public async Task PricelistChanged(PricelistDTO pricelist)
         {
             SetLoadingPage?.Invoke(this, null);
@@ -743,6 +755,11 @@ namespace CampaignEditor.UserControls
 
         private void ChangeChannelsOrderInGrids()
         {
+            lvChannels.SelectedItems.Clear();
+            lvChannels.ItemsSource = null;
+            lvChannels.ItemsSource = _allChannels;
+            dgMediaPlans.ChannelsOrderChanged(_allChannels.ToList());
+
             sgGrid.UpdateUgChannelOrder(_forecastData.Channels, true);
             swgGrid.UpdateUgChannelOrder(_forecastData.Channels, true);
             sdgGrid.UpdateUgChannelOrder(_forecastData.Channels, true);

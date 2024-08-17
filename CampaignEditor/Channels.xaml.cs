@@ -58,6 +58,7 @@ namespace CampaignEditor
 
 
         public bool channelsModified = false;
+        public bool channelsOrderChanged = false;
         public bool canEdit = false;
         private bool onlyActive = false; // For chbActive
         public bool pricelistChanged = false;
@@ -733,7 +734,7 @@ namespace CampaignEditor
                 }
                 if (channelCmp.pos != i)
                 {
-                    channelsModified = true;
+                    channelsOrderChanged = true;
                     await _channelCmpController.UpdateChannelCmp(
                         new UpdateChannelCmpDTO(channelCmp.cmpid, channelCmp.chid, channelCmp.plid,
                             channelCmp.actid, channelCmp.plidbuy, channelCmp.actidbuy, i));

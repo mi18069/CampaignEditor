@@ -55,6 +55,7 @@ namespace CampaignEditor
         public event EventHandler GoalsUpdatedEvent;
         public event EventHandler<UpdateCampaignEventArgs> CampaignUpdatedEvent;
         public event EventHandler<UpdateChannelsEventArgs> ChannelsUpdatedEvent;
+        public event EventHandler ChannelsOrderChangedEvent;
         public event EventHandler<UpdatePricelistEventArgs> PricelistUpdatedEvent;
         public event EventHandler TargetsUpdatedEvent;
         public event EventHandler SpotsUpdatedEvent;
@@ -300,6 +301,12 @@ namespace CampaignEditor
             {
                 _channels = await _campaignOverviewData.GetChannelTuples(_campaign.cmpid);
                 dgChannels.ItemsSource = _channels;
+            }
+            if (fChannels != null && !fChannels.channelsModified && fChannels.channelsOrderChanged)
+            {
+                _channels = await _campaignOverviewData.GetChannelTuples(_campaign.cmpid);
+                dgChannels.ItemsSource = _channels;
+                ChannelsOrderChangedEvent?.Invoke(this, null);
             }
             if (fChannels != null && fChannels.updateChannels)
             {

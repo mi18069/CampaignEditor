@@ -32,7 +32,6 @@ using Database.DTOs.SpotDTO;
 using Database.DTOs.DayPartDTO;
 using System.Data;
 using Database.DTOs.ClientCoefsDTO;
-using System.Drawing;
 
 namespace CampaignEditor.UserControls
 {
@@ -155,7 +154,7 @@ namespace CampaignEditor.UserControls
             get { return dgMediaPlans; }
         }
         ICollectionView myDataView;
-        public async Task Initialize(CampaignDTO campaign, IEnumerable<ChannelDTO> channels, IEnumerable<SpotDTO> spots)
+        public async Task Initialize(CampaignDTO campaign, List<ChannelDTO> channels, IEnumerable<SpotDTO> spots)
         {
 
             tcChannel.Binding = new Binding()
@@ -218,6 +217,7 @@ namespace CampaignEditor.UserControls
 
                 return result;
             };
+            ChannelsOrderChanged(channels);
 
             _allMediaPlans.CollectionChanged += OnCollectionChanged;
             _selectedChannels.CollectionChanged += OnCollectionChanged;
@@ -230,7 +230,7 @@ namespace CampaignEditor.UserControls
         private async Task SetColumnsVisibility()
         {
             var dgConf = await _dgConfigController.GetDGConfig(MainWindow.user.usrid, _campaign.clid);
-            if (dgConf == null || dgConf.dgfor == null)
+            if (dgConf == null)
             {
                 try
                 {
@@ -246,8 +246,16 @@ namespace CampaignEditor.UserControls
             }
             else
             {
+                if (dgConf.dgfor == null)
+                {
+                    dgConf.dgfor = dgGridMask;                   
+                    await _dgConfigController.UpdateDGConfigFor(dgConf.usrid, dgConf.clid, dgConf.dgfor);
+
+                }
+
                 dgConfig = dgConf;
                 dgGridMask = dgConfig.dgfor;
+                
             }
 
             SetColumnsVisibilityByMask(dgGridMask);
@@ -255,14 +263,8 @@ namespace CampaignEditor.UserControls
 
         private void SetColumnsVisibilityByMask(string gridMask)
         {
-            // Ensure the bitmask length matches the number of columns
-            if (gridMask.Length != dgMediaPlans.Columns.Count)
-            {
-                throw new ArgumentException("Bitmask length must match the number of DataGrid columns.");
-            }
-
             // Iterate over the columns and set their visibility based on the bitmask
-            for (int i = 0; i < dgMediaPlans.Columns.Count; i++)
+            for (int i = 0; i < gridMask.Length; i++)
             {
                 if (gridMask[i] == '1')
                 {
@@ -273,6 +275,24 @@ namespace CampaignEditor.UserControls
                     dgMediaPlans.Columns[i].Visibility = Visibility.Collapsed;
                 }
             }
+        }
+
+        public void ChannelsOrderChanged(List<ChannelDTO> channels)
+        {
+            var customChidOrder = channels.Select(c => c.chid).ToList();
+
+            // Create the custom comparer
+            var customComparer = new CustomChidComparer(customChidOrder);
+
+            // Cast to ListCollectionView to access CustomSort
+            var listCollectionView = myDataView as ListCollectionView;
+            if (listCollectionView != null)
+            {
+                listCollectionView.CustomSort = customComparer;
+            }
+
+            // Refresh the view to apply the sort
+            myDataView.Refresh();
         }
 
         private IEnumerable<DateTime> GetCampaignDates(CampaignDTO campaign)

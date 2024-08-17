@@ -118,6 +118,8 @@ namespace CampaignEditor
             factoryCampaignValidation.SetContentPage += FactoryCampaignValidation_SetContentPage;
             
             factoryCampaignForecastView.UpdateValidation += ForecastView_UpdateValidation;
+
+            BindEvents();
         }
 
         private void FactoryCampaignValidation_SetContentPage(object? sender, EventArgs e)
@@ -131,6 +133,16 @@ namespace CampaignEditor
             var loadingPage = new LoadingPage();
             TabItem tabValidation = (TabItem)tcTabs.FindName("tiValidation");
             tabValidation.Content = loadingPage.Content;
+        }
+
+        private void BindEvents()
+        {
+            factoryCampaignOverview.ChannelsOrderChangedEvent += Campaign_ChannelsOrderChangedEvent;
+        }
+
+        private void UnbindEvents()
+        {
+            factoryCampaignOverview.ChannelsOrderChangedEvent -= Campaign_ChannelsOrderChangedEvent;
         }
 
         private void BindOverviewForecastEvents()
@@ -232,6 +244,22 @@ namespace CampaignEditor
             await factoryCampaignForecastView.UpdateChannels(channelsToDelete, channelsToAdd);
         }
 
+        private async void Campaign_ChannelsOrderChangedEvent(object? sender, EventArgs e)
+        {
+            await _forecastData.InitializeChannels();
+            // For Forecast
+            if (isCampaignInitialized)
+            {
+                factoryCampaignForecastView.ChannelsOrderChanged();
+            }
+            // For validation
+            if (factoryCampaignValidation != null)
+            {
+                factoryCampaignValidation.FillChannels();
+            }
+
+        }
+
         private async void CampaignForecastView_PricelistUpdatedEvent(object? sender, UpdatePricelistEventArgs e)
         {
             if (!isCampaignInitialized)
@@ -264,6 +292,7 @@ namespace CampaignEditor
             factoryCampaignForecastView.CloseForecast();
             factoryCampaignForecastView.UpdateValidation -= ForecastView_UpdateValidation;
             UnbindOverviewForecastEvents();
+            UnbindEvents();
             factoryCampaignValidation.CloseValidation();
 
             CampaignEventLinker.RemoveCampaign(_campaign.cmpid);

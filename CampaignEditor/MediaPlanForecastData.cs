@@ -150,6 +150,8 @@ namespace CampaignEditor
             _channels.Clear();
 
             var channelCmps = await _channelCmpController.GetChannelCmpsByCmpid(_campaign.cmpid);
+            channelCmps = channelCmps.OrderBy(chncmp => chncmp.pos);
+            
             foreach (var channelCmp in channelCmps)
             {
                 var channel = await _channelController.GetChannelById(channelCmp.chid);
@@ -175,7 +177,6 @@ namespace CampaignEditor
                 }
 
             }
-            _channels = _channels.OrderBy(ch => ch.chname).ToList();
         }      
 
         public async Task InitializePricelists()

@@ -292,6 +292,11 @@ namespace CampaignEditor
             }
         }
 
+        public void ChannelsOrderChanged()
+        {
+            _forecast.ChannelsOrderChanged();
+        }
+
         public async Task UpdatePricelist(PricelistDTO pricelist)
         {
             try

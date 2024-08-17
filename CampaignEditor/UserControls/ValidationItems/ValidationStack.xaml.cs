@@ -65,7 +65,7 @@ namespace CampaignEditor.UserControls.ValidationItems
         public async Task Initialize(CampaignDTO campaign, bool hideExpected = false)
         {
             _campaign = campaign;
-            var mpVersion = await _mediaPlanVersionController.GetLatestMediaPlanVersion(campaign.cmpid);
+                var mpVersion = await _mediaPlanVersionController.GetLatestMediaPlanVersion(campaign.cmpid);
             if (mpVersion != null)
             {
                 int version = mpVersion.version;
