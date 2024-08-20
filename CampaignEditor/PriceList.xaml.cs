@@ -90,6 +90,61 @@ namespace CampaignEditor
             ResetModifiers();
         }
 
+        public void MakeReadonly()
+        {
+            tbName.IsEnabled = false;
+            chbGlobal.IsEnabled = false;
+            cbType.IsEnabled = false;
+            cbSectable.IsEnabled = false;
+            btnEditSectable.IsEnabled = false;
+            btnNewSectable.IsEnabled = false;
+            cbSectable2.IsEnabled = false;
+            chbSectable2.IsEnabled = false;
+            tbSec2From.IsEnabled = false;
+            tbSec2To.IsEnabled = false;
+            cbSeasonality.IsEnabled = false;
+            btnNewSeasonality.IsEnabled = false;
+            btnEditSeasonality.IsEnabled = false;
+            tbCP.IsEnabled = false;
+            tbMinGRP.IsEnabled = false;
+            chbGRP.IsEnabled = false;
+            chbFixed.IsEnabled = false;
+            tbFixed.IsEnabled = false;
+            cbTarget.IsEnabled = false;
+            btnNewTarget.IsEnabled = false;
+            btnEditTarget.IsEnabled = false;
+            dpValidityFrom.IsEnabled = false;
+            dpValidityTo.IsEnabled = false;
+            MakeReadonlyDayParts();
+            MakeReadonlyChannels();
+
+            btnSave.Visibility = Visibility.Collapsed;
+            btnSaveAs.Visibility = Visibility.Collapsed;
+            btnCancel.Content = "Close";
+        }
+
+        private void MakeReadonlyDayParts()
+        {
+            for (int i = 0; i < wpDayParts.Children.Count - 1; i++)
+            {
+                TargetDPItem item = (TargetDPItem)wpDayParts.Children[i];
+                item.IsEnabled = false;
+            }
+            Button button = (Button)wpDayParts.Children[wpDayParts.Children.Count - 1];
+            button.Visibility = Visibility.Collapsed;
+        }
+
+        private void MakeReadonlyChannels()
+        {
+            for (int i=0; i<lbChannels.Items.Count - 1; i++)
+            {
+                ChannelPlItem item = (ChannelPlItem)lbChannels.Items[i];
+                item.IsEnabled = false;
+            }
+            Button button = (Button)lbChannels.Items[lbChannels.Items.Count - 1];
+            button.Visibility = Visibility.Collapsed;
+        }
+
         private void ResetModifiers()
         {
             pricelistModified = false;

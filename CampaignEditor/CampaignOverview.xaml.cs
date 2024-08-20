@@ -30,6 +30,8 @@ namespace CampaignEditor
         private readonly IAbstractFactory<ClientDayParts> _factoryClientDayParts;
         private readonly IAbstractFactory<ClientBrands> _factoryClientBrands;
 
+        private readonly IAbstractFactory<PriceList> _factoryPriceList;
+
         private CampaignOverviewData _campaignOverviewData;
 
         public ClientDTO _client = null;
@@ -65,7 +67,8 @@ namespace CampaignEditor
             IAbstractFactory<Goals> factoryGoals, IAbstractFactory<CmpInfo> factoryInfo,
             IAbstractFactory<CampaignOverviewData> campaignOverviewData, 
             IAbstractFactory<ClientDayParts> factoryClientDayParts,
-            IAbstractFactory<ClientBrands> factoryClientBrands)
+            IAbstractFactory<ClientBrands> factoryClientBrands,
+            IAbstractFactory<PriceList> factoryPriceList)
         {
             this.DataContext = this;
             InitializeComponent();
@@ -79,7 +82,7 @@ namespace CampaignEditor
             _factoryClientBrands = factoryClientBrands;
 
             _campaignOverviewData = campaignOverviewData.Create();
-
+            _factoryPriceList = factoryPriceList;
         }
 
         #region Initialization
@@ -323,6 +326,20 @@ namespace CampaignEditor
         {
             PricelistUpdatedEvent?.Invoke(this, e);
         }
+
+        private async void DataGridRow_MouseDoubleClick(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            DataGridRow row = sender as DataGridRow;
+            var tuple = row.Item as Tuple<ChannelDTO, PricelistDTO, ActivityDTO>;
+            if (tuple != null)
+            {
+                var pricelist = tuple.Item2;
+                var f = _factoryPriceList.Create();
+                await f.Initialize(_campaign, pricelist);
+                f.MakeReadonly();
+                f.ShowDialog();
+            }
+        }
         #endregion
 
         #region Spots
@@ -526,6 +543,7 @@ namespace CampaignEditor
             // Set the new vertical offset
             scrollViewer.ScrollToVerticalOffset(newVerticalOffset);
         }
+
 
     }
 }

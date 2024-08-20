@@ -372,6 +372,9 @@
                           IsReadOnly="True"
                         PreviewMouseWheel="dataGrid_PreviewMouseWheel">
                         <DataGrid.Resources>
+                            <Style TargetType="DataGridRow">
+                                <EventSetter Event="MouseDoubleClick" Handler="DataGridRow_MouseDoubleClick"/>
+                            </Style>
                             <Style TargetType="{x:Type DataGridColumnHeader}">
                                 <Setter Property="Background" Value="LightGray"/>
                                 <Setter Property="FontWeight" Value="SemiBold"/>
