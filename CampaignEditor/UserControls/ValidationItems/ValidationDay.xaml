@@ -36,8 +36,19 @@
                 <Label x:Name="lblExCount" Grid.Row="0" Grid.Column="1" FontWeight="Bold" Margin="10, 0"/>
                 <Label x:Name="lblDate" Grid.Row="0" Grid.Column="2" FontWeight="Bold" Margin="10, 0"/>
                 <Label x:Name="lblRealCount" Grid.Row="0" Grid.Column="3" FontWeight="Bold" Margin="10, 0"/>
-                <CheckBox x:Name="chbCompleted" Grid.Row="0" Grid.Column="4" Content="Completed" VerticalAlignment="Center" Margin="20, 0, 0, 0"
-                          IsChecked="False" HorizontalAlignment="Left" Checked="chbCompleted_Checked" Unchecked="chbCompleted_Unchecked"/>
+                
+                <Grid Grid.Row="0" Grid.Column="4">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="auto"/>
+                        <ColumnDefinition Width="auto"/>
+                    </Grid.ColumnDefinitions>
+                    <Button x:Name="btnRecalculateDay" Grid.Column="2" Content="Check data" 
+                            Click="btnRecalculateDay_Click" Margin="30, 0"/>
+                    <CheckBox x:Name="chbCompleted" Grid.Column="1" Content="Completed" VerticalAlignment="Center"
+                          IsChecked="False" Checked="chbCompleted_Checked" Unchecked="chbCompleted_Unchecked"/>
+                </Grid>
+                
                 <ToggleButton x:Name="tglButton" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="5" Content="Show" 
                         IsChecked="False" HorizontalAlignment="Stretch" Background="Transparent"
                         Click="tglButton_Click" 
@@ -72,7 +83,8 @@
                         PreviewMouseRightButtonDown="dgExpected_PreviewMouseRightButtonDown"
                         SelectionChanged="DgExpected_SelectionChanged"
                         PreviewKeyDown="DataGrid_PreviewKeyDown"
-                      ScrollViewer.ScrollChanged="dgExpected_ScrollChanged">
+                      ScrollViewer.ScrollChanged="dgExpected_ScrollChanged"
+                      Loaded="dgExpected_Loaded">
                 <DataGrid.RowStyle>
                     <Style TargetType="DataGridRow">
                         <Style.Triggers>
@@ -155,7 +167,8 @@
                       SelectionMode="Extended"
                       PreviewMouseLeftButtonDown="dgRealized_PreviewMouseLeftButtonDown"
                       BeginningEdit="dgRealized_BeginningEdit"
-                      CellEditEnding="dgRealized_CellEditEnding">
+                      CellEditEnding="dgRealized_CellEditEnding"
+                      Loaded="dgRealized_Loaded">
                 <DataGrid.RowStyle>
                     <Style TargetType="DataGridRow">
                         <Style.Triggers>

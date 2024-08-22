@@ -4,6 +4,7 @@ using Database.DTOs.CampaignDTO;
 using Database.DTOs.ChannelDTO;
 using Database.Entities;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -51,6 +52,7 @@ namespace CampaignEditor.UserControls.ValidationItems
 
 
         public event EventHandler<UpdateMediaPlanRealizedEventArgs> UpdatedMediaPlanRealized;
+        public event EventHandler<CheckDateEventArgs> CheckNewDataDay;
         public string DgExpectedMask { get { return dgExpectedMask; } }
         public string DgRealizedMask { get { return dgRealizedMask; } }
         public UIElementCollection ValidationDays{ get {return spValidationDays.Children; } }
@@ -103,7 +105,20 @@ namespace CampaignEditor.UserControls.ValidationItems
                 }
             }
             else
+            {
                 dgConfig = dgConf;
+            }
+            
+            if (dgConfig.dgexp == null)
+            {
+                dgConfig.dgexp = dgExpectedMask;
+                await _dgConfigController.UpdateDGConfigExp(dgConfig.usrid, dgConfig.clid, dgConfig.dgexp);
+            }
+            if (dgConfig.dgreal == null)
+            {
+                dgConfig.dgreal = dgRealizedMask;
+                await _dgConfigController.UpdateDGConfigReal(dgConfig.usrid, dgConfig.clid, dgConfig.dgreal);
+            }
 
         }
        
@@ -113,32 +128,61 @@ namespace CampaignEditor.UserControls.ValidationItems
             ClearStackPanel();
 
             ValidationDaysDict.Clear();
-            foreach (var day in _dates)
+            /*foreach (var date in _dates)
             {
-                var dateExpected = _dateExpectedDict[day];
-                var dateRealized = _dateRealizedDict[day];
-                bool isCompleted = false;
-                var compValidation = await _completedValidationController.GetCompValidation(_campaign.cmpid, TimeFormat.DateOnlyToYMDString(day));
+                await LoadDate(date);
+            }*/
+            await GetCompValidation();
+            foreach (var date in _dates)
+            {
+                LoadDate(date);
+            }
+            
+        }
+
+        public async Task<Dictionary<DateOnly, bool>> GetCompValidation()
+        {
+            var dict = new Dictionary<DateOnly, bool>();
+
+            foreach (var date in _dates)
+            {
+                var compValidation = await _completedValidationController.GetCompValidation(_campaign.cmpid, TimeFormat.DateOnlyToYMDString(date));
                 if (compValidation == null)
                 {
-                    await _completedValidationController.CreateCompValidation(new CompletedValidation(_campaign.cmpid, TimeFormat.DateOnlyToYMDString(day), false));
-                    isCompleted = false;
+                    await _completedValidationController.CreateCompValidation(new CompletedValidation(_campaign.cmpid, TimeFormat.DateOnlyToYMDString(date), false));
+                    dict[date] = false;
                 }
                 else
                 {
-                    isCompleted = compValidation.completed;
+                    dict[date] = true;
                 }
-                ValidationDay validationDay = new ValidationDay(day, dateExpected, dateRealized, dgConfig.dgexp, dgConfig.dgreal, isCompleted);
-                validationDay.InvertedExpectedColumnVisibility += ValidationDay_InvertedExpectedColumnVisibility;
-                validationDay.InvertedRealizedColumnVisibility += ValidationDay_InvertedRealizedColumnVisibility;
-                validationDay.UpdatedMediaPlanRealized += ValidationDay_UpdatedMediaPlanRealized;
-                validationDay.CompletedValidationChanged += ValidationDay_CompletedValidationChanged;
-                spValidationDays.Children.Add(validationDay);
-
-                ValidationDaysDict[day] = validationDay;
             }
+
+            return dict;
         }
 
+        public void LoadDate(DateOnly date)
+        {
+            var dateExpected = _dateExpectedDict[date];
+            var dateRealized = _dateRealizedDict[date];
+            bool isCompleted = false;
+
+            ValidationDay validationDay = new ValidationDay(date, dateExpected, dateRealized, dgConfig.dgexp, dgConfig.dgreal, isCompleted);
+            validationDay.InvertedExpectedColumnVisibility += ValidationDay_InvertedExpectedColumnVisibility;
+            validationDay.InvertedRealizedColumnVisibility += ValidationDay_InvertedRealizedColumnVisibility;
+            validationDay.UpdatedMediaPlanRealized += ValidationDay_UpdatedMediaPlanRealized;
+            validationDay.CompletedValidationChanged += ValidationDay_CompletedValidationChanged;
+            validationDay.CheckNewDataDay += ValidationDay_CheckNewDataDay;
+            spValidationDays.Children.Add(validationDay);
+
+            ValidationDaysDict[date] = validationDay;
+
+        }
+
+        private void ValidationDay_CheckNewDataDay(object? sender, CheckDateEventArgs e)
+        {
+            CheckNewDataDay?.Invoke(sender, e);
+        }
 
         private async void ValidationDay_InvertedExpectedColumnVisibility(object? sender, IndexEventArgs e)
         {
@@ -210,6 +254,7 @@ namespace CampaignEditor.UserControls.ValidationItems
                 validationDay.InvertedExpectedColumnVisibility -= ValidationDay_InvertedExpectedColumnVisibility;
                 validationDay.InvertedRealizedColumnVisibility -= ValidationDay_InvertedRealizedColumnVisibility;
                 validationDay.UpdatedMediaPlanRealized -= ValidationDay_UpdatedMediaPlanRealized;
+                validationDay.CheckNewDataDay -= ValidationDay_CheckNewDataDay;
             }
             spValidationDays.Children.Clear();
 
@@ -217,6 +262,11 @@ namespace CampaignEditor.UserControls.ValidationItems
 
         private void HideExpectedStack()
         {
+            //var validationDays = spValidationDays.Children.OfType<ValidationDay>();
+
+            //Parallel.ForEach(validationDays, validationDay => validationDay.HideExpected());
+
+
             foreach (ValidationDay validationDay in spValidationDays.Children)
             {
                 validationDay.HideExpected();

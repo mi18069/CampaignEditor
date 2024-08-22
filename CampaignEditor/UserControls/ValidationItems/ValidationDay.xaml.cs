@@ -30,6 +30,7 @@ namespace CampaignEditor.UserControls.ValidationItems
 
         public event EventHandler<IndexEventArgs> InvertedExpectedColumnVisibility;
         public event EventHandler<IndexEventArgs> InvertedRealizedColumnVisibility;
+        public event EventHandler<CheckDateEventArgs> CheckNewDataDay;
 
         public event EventHandler<UpdateMediaPlanRealizedEventArgs> UpdatedMediaPlanRealized;
 
@@ -116,6 +117,8 @@ namespace CampaignEditor.UserControls.ValidationItems
 
         }
 
+        
+
 
         private void ValidationDay_Loaded(object sender, RoutedEventArgs e)
         {
@@ -135,7 +138,7 @@ namespace CampaignEditor.UserControls.ValidationItems
                 exCount = GetViewExpected.Where(tt => tt != null && tt.Status != -1).Count();
             if (_mpRealizedTuples.Count > 0)
                 realCount = GetViewRealized.Where(rt => rt != null && rt.status != -1).Count(); 
-
+            
             lblExCount.Content = exCount;
             lblRealCount.Content = realCount;
             lblDate.Content = date.ToShortDateString();
@@ -422,6 +425,11 @@ namespace CampaignEditor.UserControls.ValidationItems
         }
 
         #endregion
+
+        private void btnRecalculateDay_Click(object sender, RoutedEventArgs e)
+        {
+            CheckNewDataDay?.Invoke(this, new CheckDateEventArgs(date));
+        }
 
         private void tglButton_Click(object sender, RoutedEventArgs e)
         {
@@ -736,7 +744,64 @@ namespace CampaignEditor.UserControls.ValidationItems
         }
 
 
+
         #endregion
 
+        private void dgExpected_Loaded(object sender, RoutedEventArgs e)
+        {
+            /*if (_termTuples.Count > 0)
+            {
+                dataViewExpected = CollectionViewSource.GetDefaultView(_termTuples);
+                dgExpected.ItemsSource = dataViewExpected;
+                dataViewExpected.Filter = d =>
+                {
+                    bool result = true;
+
+                    if (_selectedChids.Count > 0)
+                    {
+                        var mediaPlan = ((TermTuple)d).MediaPlan;
+                        result = _selectedChids.Any(c => mediaPlan != null && c == mediaPlan.chid);
+                    }
+
+                    return result;
+                };
+                //dgExpected.ItemsSource = _termTuples;
+
+            }
+
+            for (int i = 0; i < expectedGridMask.Count(); i++)
+            {
+                dgExpected.Columns[i].Visibility = expectedGridMask[i] == '1' ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
+            }*/
+
+        }
+
+        private void dgRealized_Loaded(object sender, RoutedEventArgs e)
+        {
+
+            /*if (_mpRealizedTuples.Count > 0)
+            {
+                dataViewRealized = CollectionViewSource.GetDefaultView(_mpRealizedTuples);
+                dgRealized.ItemsSource = dataViewRealized;
+                dataViewRealized.Filter = d =>
+                {
+                    bool result = true;
+                    if (_selectedChrdsids.Count > 0)
+                    {
+                        var chid = ((MediaPlanRealized)d).chid;
+                        result = _selectedChrdsids.Any(c => chid.HasValue && c == chid);
+                    }
+
+                    return result;
+                };
+                //dgRealized.ItemsSource = _mpRealizedTuples;
+
+            }
+
+            for (int i = 0; i < realizedGridMask.Count(); i++)
+            {
+                dgRealized.Columns[i].Visibility = realizedGridMask[i] == '1' ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
+            }*/
+        }
     }
 }
