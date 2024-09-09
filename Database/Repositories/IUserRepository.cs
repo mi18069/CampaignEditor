@@ -15,6 +15,7 @@ namespace CampaignEditor.Repositories
         Task<bool> DeleteUserById(int id);
         Task<bool> DeleteUserByUsername(string username);
         Task<bool> CheckCredentials(string username, string password);
+        Task<UserDTO> GetUserByCredentials(string username, string password);
  
     }
 }

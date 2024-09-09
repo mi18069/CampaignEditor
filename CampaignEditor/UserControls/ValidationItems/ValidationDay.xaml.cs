@@ -31,8 +31,11 @@ namespace CampaignEditor.UserControls.ValidationItems
         public event EventHandler<IndexEventArgs> InvertedExpectedColumnVisibility;
         public event EventHandler<IndexEventArgs> InvertedRealizedColumnVisibility;
         public event EventHandler<CheckDateEventArgs> CheckNewDataDay;
+        public event EventHandler GridOpened;
+        public event EventHandler GridClosed;
 
         public event EventHandler<UpdateMediaPlanRealizedEventArgs> UpdatedMediaPlanRealized;
+        public event EventHandler<UpdateMediaPlanRealizedEventArgs> ProgcoefChangedMediaPlanRealized;
 
         bool hideExpected = false;
 
@@ -117,7 +120,56 @@ namespace CampaignEditor.UserControls.ValidationItems
 
         }
 
-        
+        public void RefreshDate(List<TermTuple> termTuples,
+            List<MediaPlanRealized> mpRealizedTuples)
+        {
+            dgExpected.ItemsSource = null;
+            dgRealized.ItemsSource = null;
+
+            _termTuples = termTuples;
+            _mpRealizedTuples = mpRealizedTuples;
+
+            if (_termTuples.Count > 0)
+            {
+                dataViewExpected = CollectionViewSource.GetDefaultView(_termTuples);
+                dgExpected.ItemsSource = dataViewExpected;
+                dataViewExpected.Filter = d =>
+                {
+                    bool result = true;
+
+                    if (_selectedChids.Count > 0)
+                    {
+                        var mediaPlan = ((TermTuple)d).MediaPlan;
+                        result = _selectedChids.Any(c => mediaPlan != null && c == mediaPlan.chid);
+                    }
+
+                    return result;
+                };
+                //dgExpected.ItemsSource = _termTuples;
+
+            }
+            if (_mpRealizedTuples.Count > 0)
+            {
+                dataViewRealized = CollectionViewSource.GetDefaultView(_mpRealizedTuples);
+                dgRealized.ItemsSource = dataViewRealized;
+                dataViewRealized.Filter = d =>
+                {
+                    bool result = true;
+                    if (_selectedChrdsids.Count > 0)
+                    {
+                        var chid = ((MediaPlanRealized)d).chid;
+                        result = _selectedChrdsids.Any(c => chid.HasValue && c == chid);
+                    }
+
+                    return result;
+                };
+                //dgRealized.ItemsSource = _mpRealizedTuples;
+
+            }
+            SetUserControl();
+        }
+
+
 
 
         private void ValidationDay_Loaded(object sender, RoutedEventArgs e)
@@ -435,15 +487,30 @@ namespace CampaignEditor.UserControls.ValidationItems
         {
             if (tglButton.IsChecked == false)
             {
-                gridItems.Visibility = Visibility.Collapsed;
-                tglButton.Content = "Show";
+                HideGrid();
             }
             else
             {
-                gridItems.Visibility = Visibility.Visible;
-                tglButton.Content = "Hide";
-
+                ShowGrid();
             }
+        }
+
+        public void HideGrid()
+        {
+            if (gridItems.Visibility == Visibility.Collapsed)
+                return;
+            GridClosed?.Invoke(this, null);
+            gridItems.Visibility = Visibility.Collapsed;
+            tglButton.Content = "Show";
+        }
+
+        public void ShowGrid()
+        {
+            if (gridItems.Visibility == Visibility.Visible)
+                return;
+            GridOpened?.Invoke(this, null);
+            gridItems.Visibility = Visibility.Visible;
+            tglButton.Content = "Hide";
         }
 
         private void dgExpected_ScrollChanged(object sender, ScrollChangedEventArgs e)
@@ -619,11 +686,12 @@ namespace CampaignEditor.UserControls.ValidationItems
                     continue;
 
                 bool isChangedCoef = true;
+                bool progcoefChanged = false;
                 switch (columnToEdit)
                 {
                     case "Ch coef": mpR.Chcoef = newValue; break;
                     case "Dp coef": mpR.Dpcoef = newValue; break;
-                    case "Prog coef": mpR.Progcoef = newValue; break;
+                    case "Prog coef": mpR.Progcoef = newValue; progcoefChanged = true;  break;
                     case "Seas coef": mpR.Seascoef = newValue; break;
                     case "Sec coef": mpR.Seccoef = newValue; break;
                     case "Coef A": mpR.CoefA = newValue; break;
@@ -633,6 +701,9 @@ namespace CampaignEditor.UserControls.ValidationItems
 
                 if (isChangedCoef)
                     UpdatedMediaPlanRealized?.Invoke(this, new UpdateMediaPlanRealizedEventArgs(mpR, true));
+
+                if (progcoefChanged)
+                    ProgcoefChangedMediaPlanRealized?.Invoke(this, new UpdateMediaPlanRealizedEventArgs(mpR, true));
             }
 
         }

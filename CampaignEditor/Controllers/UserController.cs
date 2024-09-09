@@ -1,4 +1,5 @@
 ﻿using CampaignEditor.DTOs.UserDTO;
+using CampaignEditor.Entities;
 using CampaignEditor.Repositories;
 using Database.DTOs.ClientDTO;
 using Microsoft.AspNetCore.Mvc;
@@ -35,6 +36,10 @@ namespace CampaignEditor.Controllers
         {
             var user = await _repository.GetUserByUsername(username);
             return user;
+        }
+        public async Task<UserDTO> GetUserByCredentials(string username, string password)
+        {
+            return await _repository.GetUserByCredentials(username, password);
         }
         public async Task<IEnumerable<UserDTO>> GetAllUsers()
         {

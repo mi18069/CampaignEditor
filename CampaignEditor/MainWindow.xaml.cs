@@ -85,10 +85,34 @@ namespace CampaignEditor
             btnCheckCredentials.IsEnabled = false;
             lblError.Content = "";
 
-            string username = tbUsername.Text.Trim();
-            string password = pbPassword.Password.ToString().Trim();
+            string username = tbUsername.Text.ToLower().Trim();
+            string password = pbPassword.Password.ToLower().ToString().Trim();
 
-            bool userFound = false;
+            try
+            {
+                user = await _userController.GetUserByCredentials(username, password);
+                if (user == null)
+                {
+                    lblError.Content = "Wrong username or password";
+                }
+                else
+                {
+                    var f = _factoryClients.Create();
+                    f.Show();
+
+                    this.Close();
+                }
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Database error: " + ex.Message, "Message", MessageBoxButton.OK, MessageBoxImage.Error);
+                btnCheckCredentials.IsEnabled = true;
+                return;
+            }
+            btnCheckCredentials.IsEnabled = true;
+
+            /*bool userFound = false;
             try
             {
                 userFound = await _userController.CheckCredentials(username, password);
@@ -114,7 +138,7 @@ namespace CampaignEditor
 
                     this.Close();            
             }
-            btnCheckCredentials.IsEnabled = true;
+            btnCheckCredentials.IsEnabled = true;*/
 
 
         }

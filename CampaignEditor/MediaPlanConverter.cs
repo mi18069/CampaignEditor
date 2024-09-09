@@ -457,10 +457,7 @@ namespace CampaignEditor
             mpRealized.CoefA = coefA;
             mpRealized.CoefB = coefB;
 
-            decimal coefs = mpRealized.Chcoef.Value * mpRealized.CoefA.Value * mpRealized.CoefB.Value * mpRealized.Seccoef.Value * mpRealized.Seascoef.Value * mpRealized.Progcoef.Value * mpRealized.Dpcoef!.Value;
-
-            CalculateRealizedPrice(mpRealized, pricelist, coefs);
-            CalculateRealizedCPP(mpRealized, pricelist);
+            CoefsUpdated(mpRealized, pricelist);
         }
 
         // When user update coefs manually, recalculate this
@@ -469,6 +466,14 @@ namespace CampaignEditor
             decimal coefs = mpRealized.Chcoef.Value * mpRealized.CoefA.Value * mpRealized.CoefB.Value * mpRealized.Seccoef.Value * mpRealized.Seascoef.Value * mpRealized.Progcoef.Value * mpRealized.Dpcoef!.Value;
             CalculateRealizedPrice(mpRealized, pricelist, coefs);
             CalculateRealizedCPP(mpRealized, pricelist);
+        }
+        public void CalculateRealizedPrice(MediaPlanRealized mpRealized)
+        {
+            decimal coefs = mpRealized.Chcoef.Value * mpRealized.CoefA.Value * mpRealized.CoefB.Value * mpRealized.Seccoef.Value * mpRealized.Seascoef.Value * mpRealized.Progcoef.Value * mpRealized.Dpcoef!.Value;
+            var chid = _forecastData.ChrdsidChidDict[mpRealized.chid.Value];
+            var pricelist = _forecastData.ChidPricelistDict[chid];
+
+            CalculateRealizedPrice(mpRealized, pricelist, coefs);
         }
 
         public void CalculateRealizedPrice(MediaPlanRealized mpRealized, PricelistDTO pricelist, decimal coefs)
@@ -493,7 +498,8 @@ namespace CampaignEditor
 
                 int realizedLength = mpRealized.etime.Value - mpRealized.stime.Value;
                 int spotLength = FindClosestSpotLength(realizedLength);
-                decimal standardPrice = (pricelist.price / 30) * spotLength * amrpSale * coefs;
+                //decimal standardPrice = (pricelist.price / 30) * spotLength * amrpSale * coefs;
+                decimal standardPrice = pricelist.price * amrpSale * coefs;
                 price = PriceWithGRPCheck(mpRealized, pricelist, standardPrice);
             }
 

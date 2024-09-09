@@ -7,6 +7,16 @@
              mc:Ignorable="d" 
              d:DesignHeight="800" d:DesignWidth="800" Background="White">
     <Grid>
+        <!-- <Grid.RowDefinitions>
+            <RowDefinition Height="auto"/>
+            <RowDefinition Height="auto"/>
+        </Grid.RowDefinitions>
+         <Button x:Name="btnShowHideAll" Grid.Row="0" Content="Show All" HorizontalAlignment="Stretch" 
+                Background="LightGoldenrodYellow" Click="btnShowHideAll_Click"
+                Height="30"/> 
+        <ScrollViewer x:Name="svGrid" Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+            <StackPanel x:Name="spValidationDays"/>
+        </ScrollViewer> -->
         <ScrollViewer x:Name="svGrid" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
             <StackPanel x:Name="spValidationDays"/>
         </ScrollViewer>

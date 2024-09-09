@@ -6,6 +6,7 @@ using Database.Data;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Linq;
 
 namespace CampaignEditor.Repositories
 {
@@ -26,7 +27,7 @@ namespace CampaignEditor.Repositories
 
             var newId = await connection.QuerySingleOrDefaultAsync<int?>(
                 "INSERT INTO tblusers (usrname, usrpass, usrlevel, email, telefon, enabled, father, buy) " +
-                    " VALUES (@Usrname, @Usrpass, @Usrlevel, @Email, @Telefon, @Enabled, @Father, @Buy) " +
+                    " VALUES (LOWER(@Usrname), LOWER(@Usrpass), @Usrlevel, @Email, @Telefon, @Enabled, @Father, @Buy) " +
                     " RETURNING usrid",
                 new
                 {
@@ -59,6 +60,16 @@ namespace CampaignEditor.Repositories
 
             var user = await connection.QueryFirstOrDefaultAsync<User>(
                 "SELECT * FROM tblusers WHERE usrname = @Username", new { Username = username });
+
+            return _mapper.Map<UserDTO>(user);
+        }
+
+        public async Task<UserDTO> GetUserByCredentials(string username, string password)
+        {
+            using var connection = _context.GetConnection();
+
+            var user = await connection.QueryFirstOrDefaultAsync<User?>(
+                "SELECT * FROM tblusers WHERE usrname = LOWER(@username) AND usrpass = LOWER(@password)", new { username = username, password = password });
 
             return _mapper.Map<UserDTO>(user);
         }
@@ -134,6 +145,7 @@ namespace CampaignEditor.Repositories
 
             return affected > 0;
         }
+
 
     }
 }

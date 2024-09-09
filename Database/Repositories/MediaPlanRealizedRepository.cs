@@ -174,22 +174,22 @@ namespace Database.Repositories
             mediaPlansRealized = mediaPlansRealized.Select(item => new MediaPlanRealized()
             {
                 id = item.id,
-                cmpid = item.cmpid,
+                cmpid = Convert.ToInt32(item.cmpid),
                 name = item.naziv.Trim(),
                 stime = item.vremeod,
                 etime = item.vremedo,
                 stimestr = item.vremeodv,
                 etimestr = item.vremedov,
-                chid = item.chid,
-                dure = item.dure,
-                durf = item.durf,
+                chid = Convert.ToInt32(item.chid),
+                dure = Convert.ToInt32(item.dure),
+                durf = Convert.ToInt32(item.durf),
                 date = item.datum,
-                emsnum = item.bremisije,
+                emsnum = Convert.ToInt32(item.bremisije),
                 posinbr = item.pozinbr,
                 totalspotnum = item.totspotbr,
                 breaktype = item.breaktype,
-                spotnum = item.brspot,
-                brandnum = item.brbrand,
+                spotnum = Convert.ToInt32(item.brspot),
+                brandnum = Convert.ToInt32(item.brbrand),
                 amrp1 = item.amrp1,
                 amrp2 = item.amrp2,
                 amrp3 = item.amrp3,
@@ -222,22 +222,69 @@ namespace Database.Repositories
             mediaPlansRealized = mediaPlansRealized.Select(item => new MediaPlanRealized()
             {
                 id = item.id,
-                cmpid = item.cmpid,
+                cmpid = Convert.ToInt32(item.cmpid),
                 name = item.naziv.Trim(),
                 stime = item.vremeod,
                 etime = item.vremedo,
                 stimestr = item.vremeodv,
                 etimestr = item.vremedov,
-                chid = item.chid,
-                dure = item.dure,
-                durf = item.durf,
+                chid = Convert.ToInt32(item.chid),
+                dure = Convert.ToInt32(item.dure),
+                durf = Convert.ToInt32(item.durf),
                 date = item.datum,
-                emsnum = item.bremisije,
+                emsnum = Convert.ToInt32(item.bremisije),
                 posinbr = item.pozinbr,
                 totalspotnum = item.totspotbr,
                 breaktype = item.breaktype,
-                spotnum = item.brspot,
-                brandnum = item.brbrand,
+                spotnum = Convert.ToInt32(item.brspot),
+                brandnum = Convert.ToInt32(item.brbrand),
+                amrp1 = item.amrp1,
+                amrp2 = item.amrp2,
+                amrp3 = item.amrp3,
+                amrpsale = item.amrpsale,
+                Cpp = item.cpp ?? null,
+                Dpcoef = item.dpkoef ?? null,
+                Seascoef = item.seaskoef ?? null,
+                Seccoef = item.seckoef ?? null,
+                Progcoef = item.progkoef ?? null,
+                price = item.cena ?? null,
+                status = item.status ?? null,
+                Chcoef = item.chcoef ?? null,
+                CoefA = item.koefa ?? null,
+                CoefB = item.koefb ?? null,
+                Accept = item.accept ?? false
+            });
+
+            return _mapper.Map<IEnumerable<MediaPlanRealizedDTO>>(mediaPlansRealized);
+        }
+
+        public async Task<IEnumerable<MediaPlanRealizedDTO>> GetAllMediaPlansRealizedByCmpidAndEmsnum(int cmpid, int emsnum)
+        {
+            using var connection = _context.GetConnection();
+
+            var mediaPlansRealized = await connection.QueryAsync<dynamic>(
+                "SELECT * FROM xmpre WHERE cmpid = @Cmpid AND bremisije = @Emsnum ",
+                new { Cmpid = cmpid, Emsnum = emsnum });
+
+            mediaPlansRealized = mediaPlansRealized.Select(item => new MediaPlanRealized()
+            {
+                id = item.id,
+                cmpid = Convert.ToInt32(item.cmpid),
+                name = item.naziv.Trim(),
+                stime = item.vremeod,
+                etime = item.vremedo,
+                stimestr = item.vremeodv,
+                etimestr = item.vremedov,
+                chid = Convert.ToInt32(item.chid),
+                dure = Convert.ToInt32(item.dure),
+                durf = Convert.ToInt32(item.durf),
+                date = item.datum,
+                emsnum = Convert.ToInt32(item.bremisije),
+                posinbr = item.pozinbr,
+                totalspotnum = item.totspotbr,
+                breaktype = item.breaktype,
+                spotnum = Convert.ToInt32(item.brspot),
+                brandnum = Convert.ToInt32(item.brbrand),
                 amrp1 = item.amrp1,
                 amrp2 = item.amrp2,
                 amrp3 = item.amrp3,
@@ -268,7 +315,7 @@ namespace Database.Repositories
                 " vremeodv = @Stimestr, vremedov = @Etimestr, chid = @Chid, dure = @Dure, durf = @Durf, datum = @Date, bremisije = @Emsnum,  " +
                 " pozinbr = @Posinbr, totspotbr = @Totalspotnum, breaktype = @Breaktype, " +
                 " brspot = @Spotnum, brbrand = @Brandnum, amrp1 = @Amrp1, amrp2 = @Amrp2, amrp3 = @Amrp3, " +
-                " amrpsale = @Amrpsale, cpp = @Cpp, dpkoef = @Dpcoef, seaskoef = @Seascoef, seckoef = @Seccoef" +
+                " amrpsale = @Amrpsale, cpp = @Cpp, dpkoef = @Dpcoef, seaskoef = @Seascoef, seckoef = @Seccoef, " +
                 " progkoef = @Progcoef, cena = @Price, status = @Status, chcoef = @Chcoef, koefa = @CoefA, koefb = @CoefB, accept = @Accept " +
                 " WHERE id = @Id",
                 new

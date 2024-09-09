@@ -112,6 +112,7 @@ namespace CampaignEditor
                     Database.Extensions.MediaPlanRealizedExtensions.AddMediaPlanRealizedExtensions(services);
                     Database.Extensions.CompletedValidationExtensions.AddCompletedValidationExtensions(services);
                     Database.Extensions.DGConfigExtensions.AddDGConfigExtensions(services);
+                    Database.Extensions.ClientRealizedCoefsExtensions.AddClientRealizedCoefsExtensions(services);
 
                 }).Build();
 

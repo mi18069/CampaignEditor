@@ -4,7 +4,6 @@ using Database.DTOs.CampaignDTO;
 using Database.DTOs.ChannelDTO;
 using Database.Entities;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -44,7 +43,7 @@ namespace CampaignEditor.UserControls.ValidationItems
         public ObservableRangeCollection<MediaPlanRealized> _mediaPlanRealized;
 
         private bool hideExpected = false;
-
+        private int numGridsOpen = 0;
         //22 columns
         private string dgExpectedMask = "1110111001111111000111";
         private string dgRealizedMask = "1111111100111111100111";
@@ -53,6 +52,7 @@ namespace CampaignEditor.UserControls.ValidationItems
 
         public event EventHandler<UpdateMediaPlanRealizedEventArgs> UpdatedMediaPlanRealized;
         public event EventHandler<CheckDateEventArgs> CheckNewDataDay;
+        public event EventHandler<UpdateMediaPlanRealizedEventArgs> ProgcoefChangedMediaPlanRealized;
         public string DgExpectedMask { get { return dgExpectedMask; } }
         public string DgRealizedMask { get { return dgRealizedMask; } }
         public UIElementCollection ValidationDays{ get {return spValidationDays.Children; } }
@@ -171,12 +171,47 @@ namespace CampaignEditor.UserControls.ValidationItems
             validationDay.InvertedExpectedColumnVisibility += ValidationDay_InvertedExpectedColumnVisibility;
             validationDay.InvertedRealizedColumnVisibility += ValidationDay_InvertedRealizedColumnVisibility;
             validationDay.UpdatedMediaPlanRealized += ValidationDay_UpdatedMediaPlanRealized;
+            validationDay.ProgcoefChangedMediaPlanRealized += ValidationDay_ProgcoefChangedMediaPlanRealized;
             validationDay.CompletedValidationChanged += ValidationDay_CompletedValidationChanged;
             validationDay.CheckNewDataDay += ValidationDay_CheckNewDataDay;
+            /*validationDay.GridOpened += ValidationDay_GridOpened;
+            validationDay.GridClosed += ValidationDay_GridClosed;*/
             spValidationDays.Children.Add(validationDay);
 
             ValidationDaysDict[date] = validationDay;
 
+        }
+
+        private void ValidationDay_ProgcoefChangedMediaPlanRealized(object? sender, UpdateMediaPlanRealizedEventArgs e)
+        {
+            ProgcoefChangedMediaPlanRealized?.Invoke(this, e);
+        }
+
+        /*private void ValidationDay_GridClosed(object? sender, EventArgs e)
+        {
+            numGridsOpen -= 1;
+            if (numGridsOpen == 0)
+            {
+                btnShowHideAll.Content = "Show All";
+            }
+        }
+
+        private void ValidationDay_GridOpened(object? sender, EventArgs e)
+        {
+            numGridsOpen += 1;
+            if(numGridsOpen > 0)
+            {
+                btnShowHideAll.Content = "Hide All";
+            }
+        }*/
+
+        public void RefreshDate(DateOnly date)
+        {
+            var dateExpected = _dateExpectedDict[date];
+            var dateRealized = _dateRealizedDict[date];
+
+            ValidationDay validationDay = ValidationDaysDict[date];
+            validationDay.RefreshDate(dateExpected, dateRealized);
         }
 
         private void ValidationDay_CheckNewDataDay(object? sender, CheckDateEventArgs e)
@@ -254,7 +289,10 @@ namespace CampaignEditor.UserControls.ValidationItems
                 validationDay.InvertedExpectedColumnVisibility -= ValidationDay_InvertedExpectedColumnVisibility;
                 validationDay.InvertedRealizedColumnVisibility -= ValidationDay_InvertedRealizedColumnVisibility;
                 validationDay.UpdatedMediaPlanRealized -= ValidationDay_UpdatedMediaPlanRealized;
+                validationDay.ProgcoefChangedMediaPlanRealized -= ValidationDay_ProgcoefChangedMediaPlanRealized;
                 validationDay.CheckNewDataDay -= ValidationDay_CheckNewDataDay;
+                /*validationDay.GridOpened -= ValidationDay_GridOpened;
+                validationDay.GridClosed -= ValidationDay_GridClosed;*/
             }
             spValidationDays.Children.Clear();
 
@@ -288,9 +326,23 @@ namespace CampaignEditor.UserControls.ValidationItems
             }
         }
 
-        
-
-
+        /*private void btnShowHideAll_Click(object sender, RoutedEventArgs e)
+        {
+            if (numGridsOpen > 0)
+            {
+                foreach (ValidationDay validationDay in spValidationDays.Children)
+                {
+                    validationDay.HideGrid();
+                }
+            }
+            else
+            {
+                foreach (ValidationDay validationDay in spValidationDays.Children)
+                {
+                    validationDay.ShowGrid();
+                }
+            }
+        }*/
     }
 }
 

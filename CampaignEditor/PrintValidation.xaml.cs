@@ -61,8 +61,9 @@ namespace CampaignEditor
             bool allDecimals = (bool)chbAllDecimals.IsChecked;
             bool printExpected = (bool)chbPrintExpected.IsChecked;
             bool printRealized = (bool)chbPrintRealized.IsChecked;
+            bool separateByDays = (bool)chbDateSeparator.IsChecked;
             SetDatesToPrint();
-            Print(allDecimals, printExpected, printRealized);
+            Print(allDecimals, printExpected, printRealized, separateByDays);
         }
 
         private void SetDatesToPrint()
@@ -111,7 +112,7 @@ namespace CampaignEditor
 
         #region Print
 
-        public void Print(bool allDecimals, bool printExpected, bool printRealized)
+        public void Print(bool allDecimals, bool printExpected, bool printRealized, bool separateByDays)
         {
 
             using (var memoryStream = new MemoryStream())
@@ -129,18 +130,26 @@ namespace CampaignEditor
 
                     if (printExpected)
                     {
+                        bool skipEmptyRows = false;
+                        if (!printRealized)
+                            skipEmptyRows = true;
+
                         var headerNamesExpected = validationDay.ExpectedGrid.Columns
                                 .Select(column => column.Header.ToString())
                                 .ToList();
                         AddHeaders(worksheet, 1, 1, headerNamesExpected, DgExpectedMask);
                         //AddExpected(worksheet, 2, 1, _dateExpectedDict, DgExpectedMask, allDecimals);
-                        AddExpected(worksheet, 2, 1, ValidationDaysDict, DgExpectedMask, allDecimals);
+                        AddExpected(worksheet, 2, 1, ValidationDaysDict, DgExpectedMask, allDecimals, skipEmptyRows, separateByDays);
                     }
                     // if expected stack is hidden, don't place one extra column between them,
                     // else separate by width of 1 column
 
                     if (printRealized)
                     {
+                        bool skipEmptyRows = false;
+                        if (!printExpected)
+                            skipEmptyRows = true;
+
                         int separationWidth = !printExpected ? 0 : 1 + DgExpectedMask.Count(e => e == '1');
 
                         var headerNamesRealized = validationDay.RealizedGrid.Columns
@@ -149,7 +158,7 @@ namespace CampaignEditor
 
                         AddHeaders(worksheet, 1, 1 + separationWidth, headerNamesRealized, DgRealizedMask);
                         //AddRealized(worksheet, 2, 1 + separationWidth, _dateRealizedDict, DgRealizedMask, allDecimals);
-                        AddRealized(worksheet, 2, 1 + separationWidth, ValidationDaysDict, DgRealizedMask, allDecimals);
+                        AddRealized(worksheet, 2, 1 + separationWidth, ValidationDaysDict, DgRealizedMask, allDecimals, skipEmptyRows, separateByDays);
                     }
                    
                     // Save the Excel package to a memory stream
@@ -190,7 +199,7 @@ namespace CampaignEditor
             }
         }
 
-        private void AddExpected(ExcelWorksheet worksheet, int rowOff, int colOff, Dictionary<DateOnly, ValidationDay> validationDaysDict, string mask, bool allDecimals = false)
+        private void AddExpected(ExcelWorksheet worksheet, int rowOff, int colOff, Dictionary<DateOnly, ValidationDay> validationDaysDict, string mask, bool allDecimals = false, bool skipEmptyRows = false, bool separateByDays = false)
         {
             int colNum = mask.Count(c => c == '1');
             foreach (var date in datesToPrint)
@@ -206,17 +215,21 @@ namespace CampaignEditor
                     continue;
                 }
 
-                //worksheet.Cells[rowOff, colOff].Value = date.ToShortDateString();
-                worksheet.Cells[rowOff, colOff].Value = date;
-                // last +1 for coloring the next empty row to look homogenous
-                worksheet.Cells[rowOff, colOff, rowOff, colOff + colNum - 1 + 1].Style.Fill.PatternType = ExcelFillStyle.Solid;
-                worksheet.Cells[rowOff, colOff, rowOff, colOff + colNum - 1 + 1].Style.Fill.BackgroundColor.SetColor(SetColorByStatus(-2));
-                rowOff++;
+                if (separateByDays)
+                {
+                    //worksheet.Cells[rowOff, colOff].Value = date.ToShortDateString();
+                    worksheet.Cells[rowOff, colOff].Value = date;
+                    // last +1 for coloring the next empty row to look homogenous
+                    worksheet.Cells[rowOff, colOff, rowOff, colOff + colNum - 1 + 1].Style.Fill.PatternType = ExcelFillStyle.Solid;
+                    worksheet.Cells[rowOff, colOff, rowOff, colOff + colNum - 1 + 1].Style.Fill.BackgroundColor.SetColor(SetColorByStatus(-2));
+                    rowOff++;
+                }
                 foreach (var termTuple in termTuples)
                 {
                     if (termTuple.Status == -1)
                     {
-                        rowOff++;
+                        if (!skipEmptyRows) 
+                            rowOff++;
                         continue;
                     }
                     int colOffset = colOff;
@@ -425,7 +438,7 @@ namespace CampaignEditor
 
         }
 
-        private void AddRealized(ExcelWorksheet worksheet, int rowOff, int colOff, Dictionary<DateOnly, ValidationDay> validationDaysDict, string mask, bool allDecimals = false)
+        private void AddRealized(ExcelWorksheet worksheet, int rowOff, int colOff, Dictionary<DateOnly, ValidationDay> validationDaysDict, string mask, bool allDecimals = false, bool skipEmptyRows = false, bool separateByDays = false)
         {
             int colNum = mask.Count(c => c == '1');
             foreach (var date in datesToPrint)
@@ -441,16 +454,21 @@ namespace CampaignEditor
                     continue;
                 }
 
-                //worksheet.Cells[rowOff, colOff].Value = date.ToShortDateString();
-                worksheet.Cells[rowOff, colOff].Value = date;
-                worksheet.Cells[rowOff, colOff, rowOff, colOff + colNum - 1].Style.Fill.PatternType = ExcelFillStyle.Solid;
-                worksheet.Cells[rowOff, colOff, rowOff, colOff + colNum - 1].Style.Fill.BackgroundColor.SetColor(SetColorByStatus(-2));
-                rowOff++;
+                if (separateByDays)
+                {
+                    //worksheet.Cells[rowOff, colOff].Value = date.ToShortDateString();
+                    worksheet.Cells[rowOff, colOff].Value = date;
+                    worksheet.Cells[rowOff, colOff, rowOff, colOff + colNum - 1].Style.Fill.PatternType = ExcelFillStyle.Solid;
+                    worksheet.Cells[rowOff, colOff, rowOff, colOff + colNum - 1].Style.Fill.BackgroundColor.SetColor(SetColorByStatus(-2));
+                    rowOff++;
+                }
+                
                 foreach (var mediaPlanRealized in realizedTuples)
                 {
                     if (mediaPlanRealized.status == -1)
                     {
-                        rowOff++;
+                        if (!skipEmptyRows)
+                            rowOff++;
                         continue;
                     }
                     int colOffset = colOff;

@@ -42,7 +42,7 @@ namespace CampaignEditor
             string newPassword = pbNewPassword.Password.ToString().Trim();
             _user.usrpass = newPassword;
 
-            _userController.UpdateUser(new UpdateUserDTO(_user));
+            await _userController.UpdateUser(new UpdateUserDTO(_user));
         }
 
         private bool CheckNewPassword()

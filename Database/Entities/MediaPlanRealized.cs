@@ -73,7 +73,8 @@ namespace Database.Entities
             get { return _status; } 
             set { 
                 _status = value; 
-                OnPropertyChanged(); 
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(Status));
             } 
         }
 

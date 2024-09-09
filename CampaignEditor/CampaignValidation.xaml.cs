@@ -4,17 +4,14 @@ using CampaignEditor.StartupHelpers;
 using Database.DTOs.CampaignDTO;
 using Database.DTOs.ChannelDTO;
 using Database.DTOs.CmpBrndDTO;
+using Database.DTOs.MediaPlanRealizedDTO;
 using Database.DTOs.SpotDTO;
 using Database.Entities;
 using Database.Repositories;
-using NuGet;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
-using System.Diagnostics;
 using System.Linq;
-using System.Threading.Channels;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -39,6 +36,8 @@ namespace CampaignEditor
         private CmpBrndController _cmpBrndController;
         private CompletedValidationController _completedValidationController;
         private DGConfigController _dgConfigController;
+        private ClientRealizedCoefsController _clientRealizedCoefsController;
+        private CampaignController _campaignController;
 
         private CampaignDTO _campaign;
         private List<ChannelDTO> _channels = new List<ChannelDTO>();
@@ -74,7 +73,9 @@ namespace CampaignEditor
             ICmpBrndRepository cmpBrndRepository,
             ICompletedValidationRepository completedValidationRepository,
             IAbstractFactory<PrintValidation> factoryPrintValidation,
-            IDGConfigRepository dGConfigRepository)
+            IDGConfigRepository dGConfigRepository,
+            IClientRealizedCoefsRepository clientRealizedCoefsRepository,
+            ICampaignRepository campaignRepository)
         {
             _channelCmpController = new ChannelCmpController(channelCmpRepository);
             _channelController = new ChannelController(channelRepository);
@@ -89,6 +90,8 @@ namespace CampaignEditor
             _cmpBrndController = new CmpBrndController(cmpBrndRepository);
             _completedValidationController = new CompletedValidationController(completedValidationRepository);
             _dgConfigController = new DGConfigController(dGConfigRepository);
+            _clientRealizedCoefsController = new ClientRealizedCoefsController(clientRealizedCoefsRepository);
+            _campaignController = new CampaignController(campaignRepository);
 
             _factoryPrintValidation = factoryPrintValidation.Create();
 
@@ -184,7 +187,8 @@ namespace CampaignEditor
                 InitializeDateRealizedDict(date);
                 await AlignExpectedRealized(date);
                 //await validationStack.Initialize(_forecastData.Campaign, hideExpected);
-                validationStack.LoadDate(date);
+                //validationStack.LoadDate(date);
+                validationStack.RefreshDate(date);
             }
             SetContentPage?.Invoke(this, null);
         }
@@ -282,7 +286,7 @@ namespace CampaignEditor
             3 - SAME HOUR
             4 - +- 1 HOUR
             5 - CHANGED VALUES SINCE LAST UPDATING  
-            6 - DIFFERENT PRICE
+            6 - DIFFERENT COEFS
             7 - DIFFERENT DURE DURF
          */
         private async Task AlignExpectedRealized(DateOnly? alignDate = null)
@@ -304,26 +308,34 @@ namespace CampaignEditor
 
         }
 
-        private async Task PairMediaPlans(MediaPlanRealized mpR, TermTuple tt = null)
+        private void PairMediaPlans(MediaPlanRealized mpR, TermTuple tt = null)
         {
             if (mpR.status == -1)
                 return;
 
+            var mediaPlan = tt == null ? null : tt.MediaPlan;
+            mpR.MediaPlan = mediaPlan;
+            //SetStatus(mpR, tt);
+
+
             // Calculate and add values
-            if (mpR.status == null || mpR.status == 5 || (mpR.price == null))
+            /*if (mpR.status == null || mpR.status == 5 || (mpR.price == null))
             {
                 //await SetRealizedName(mpR);
                 var mediaPlan = tt == null ? null : tt.MediaPlan;
                 mpR.MediaPlan = mediaPlan;
-                CalculateCoefs(mpR);
+                //CalculateCoefs(mpR);
                 SetStatus(mpR, tt);
                 await _mediaPlanRealizedController.UpdateMediaPlanRealized(mpR);
-            }
+            }*/
 
         }
 
-        private void SetStatus(MediaPlanRealized mpR, TermTuple tt = null)
+        private async Task SetStatus(MediaPlanRealized mpR, TermTuple tt = null)
         {
+            /*if (mpR.status == 5)
+                return;
+            decimal eps = 0.001M;
             if (tt == null)
             {
                 mpR.status = 2;
@@ -331,8 +343,8 @@ namespace CampaignEditor
             else if (Math.Abs(mpR.dure.Value - mpR.durf.Value) > 1)
             {
                 mpR.status = 7;
-            }
-            else if(tt.Price.HasValue && mpR.price.HasValue && Math.Abs(tt.Price.Value - mpR.price.Value) > 0.1M)
+            }*/
+            /*else if(tt.Price.HasValue && mpR.price.HasValue && Math.Abs(tt.Price.Value - mpR.price.Value) > 0.1M)
             {
                 var pricelist = _forecastData.ChidPricelistDict[_forecastData.ChrdsidChidDict[mpR.chid.Value]];
                 // cpp type
@@ -340,6 +352,12 @@ namespace CampaignEditor
                     mpR.status = 1;
                 else
                     mpR.status = 6;
+            }*/
+            /*else if (tt.Progcoef - mpR.Progcoef > eps || tt.CoefA - mpR.CoefA > eps ||
+                tt.CoefB - mpR.CoefB > eps && tt.Seascoef - mpR.Seascoef > eps || 
+                tt.Seccoef - mpR.Seccoef > eps && tt.Dpcoef - mpR.Dpcoef > eps)
+            {
+                mpR.status = 6;
             }
             else
             {
@@ -348,7 +366,9 @@ namespace CampaignEditor
 
             if (tt != null)
                 tt.Status = 1;
-        }
+
+            await _mediaPlanRealizedController.UpdateMediaPlanRealized(mpR);*/
+        }       
 
         private void AddEmptyRealized(List<MediaPlanRealized?> realized, int index, int chid = -1)
         {
@@ -392,7 +412,8 @@ namespace CampaignEditor
                     // Match within minPeriod
                     if (Math.Abs(expectedTime - realizedTime) <= minPeriod)
                     {
-                        await PairMediaPlans(realized[k], expected[k]);
+                        PairMediaPlans(realized[k], expected[k]);
+                        await SetStatus(realized[k], expected[k]);
                     }
                     // Check if it's in the same hour
                     else if (checkSameHour && IsSameHour(expectedTime, realizedTime))
@@ -412,8 +433,8 @@ namespace CampaignEditor
                                 if (nextRealized.chid == realized[k].chid &&
                                     Math.Abs(expectedTime - nextRealizedTime) <= minPeriod)
                                 {
-                                    await PairMediaPlans(realized[k], expected[k]);
-                                    realized[k].status = 2;
+                                    PairMediaPlans(realized[k], expected[k]);
+                                    await SetStatus(realized[k], null);
                                     AddEmptyExpected(expected, k, expectedChid);
                                     n++;
                                     betterPairFound = true;
@@ -444,7 +465,8 @@ namespace CampaignEditor
                         // No better pair, pair current
                         if (!betterPairFound)
                         {
-                            await PairMediaPlans(realized[k], expected[k]);
+                            PairMediaPlans(realized[k], expected[k]);
+                            await SetStatus(realized[k], expected[k]);
                         }
                     }
                     // No match, add empty rows
@@ -453,7 +475,8 @@ namespace CampaignEditor
                         // Add empty expected row
                         if (expectedTime > realizedTime)
                         {
-                            await PairMediaPlans(realized[k], null);
+                            PairMediaPlans(realized[k], null);
+                            await SetStatus(realized[k], null);
                             AddEmptyExpected(expected, k, expectedChid);
                             n++;
                         }
@@ -473,13 +496,15 @@ namespace CampaignEditor
                     if (_chidOrder[expectedChid] < _chidOrder[realizedChid])
                     {
                         expected[k].Status = 2;
-                        AddEmptyRealized(realized, k, realized[k].chid.Value);
+                        //AddEmptyRealized(realized, k, realized[k].chid.Value);
+                        AddEmptyRealized(realized, k, _forecastData.ChrdsidChidDict.First(dict => dict.Value == expectedChid).Key);
                         m++;
                     }
                     // Add empty expected row
                     else
                     {
-                        await PairMediaPlans(realized[k], null);
+                        PairMediaPlans(realized[k], null);
+                        await SetStatus(realized[k], null);
                         AddEmptyExpected(expected, k, _forecastData.ChrdsidChidDict[realized[k].chid.Value]);
                         n++;
                     }
@@ -504,7 +529,9 @@ namespace CampaignEditor
             // All expected used, fill the rest of realizations
             while (k < m)
             {
-                await PairMediaPlans(realized[k], null);
+
+                PairMediaPlans(realized[k], null);
+                await SetStatus(realized[k], null);
                 // If nothing is initialized , no need to add empty expected one by one
                 if (_allMediaPlans.Count != 0)
                     AddEmptyExpected(expected, k, _forecastData.ChrdsidChidDict[realized[k].chid.Value]);
@@ -761,7 +788,19 @@ namespace CampaignEditor
 
         private async Task GetMediaPlanRealized(CampaignDTO campaign)
         {
-            var mpRealized = await _mediaPlanRealizedController.GetAllMediaPlansRealizedByCmpid(campaign.cmpid);
+            var mpRealized = (await _mediaPlanRealizedController.GetAllMediaPlansRealizedByCmpid(campaign.cmpid)).ToList();
+
+            for (int i=0; i<mpRealized.Count(); i++)
+            {
+                if (mpRealized[i].status == null)
+                {
+                    CalculateCoefs(mpRealized[i]);
+                    await _mediaPlanRealizedController.UpdateMediaPlanRealized(mpRealized[i]);
+
+                }
+                Console.WriteLine("i: " + i);
+            }
+
             _mediaPlanRealized.ReplaceRange(mpRealized);
         }
 
@@ -781,7 +820,7 @@ namespace CampaignEditor
         {
             foreach (var mediaPlanRealized in _mediaPlanRealized)
             {
-                if (mediaPlanRealized.price == null || mediaPlanRealized.status == 5)
+                if (mediaPlanRealized.price == null)
                 {
                     CalculateCoefs(mediaPlanRealized);
                 }
@@ -790,6 +829,9 @@ namespace CampaignEditor
 
         private void CalculateCoefs(MediaPlanRealized mediaPlanRealized)
         {
+            if (!_forecastData.ChrdsidChidDict.ContainsKey(mediaPlanRealized.chid.Value))
+                return;
+
             var chid = _forecastData.ChrdsidChidDict[mediaPlanRealized.chid.Value];
             var pricelist = _forecastData.ChidPricelistDict[chid];
  
@@ -824,7 +866,7 @@ namespace CampaignEditor
             }
         }
 
-        private async void lbChannels_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void lbChannels_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var selectedChannels = new List<ChannelDTO>();
             foreach (ChannelDTO channel in lbChannels.SelectedItems)
@@ -855,7 +897,7 @@ namespace CampaignEditor
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error while searching for new realizations", "Error",
+                MessageBox.Show("Error while searching for new realizations" + ex.Message, "Error",
                     MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
@@ -884,7 +926,7 @@ namespace CampaignEditor
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error while searching for new realizations", "Error",
+                MessageBox.Show("Error while searching for new realizations " + ex.Message, "Error",
                     MessageBoxButton.OK, MessageBoxImage.Error);
                 return false;
             }
@@ -926,7 +968,51 @@ namespace CampaignEditor
             validationStack._completedValidationController = _completedValidationController;
             validationStack._dgConfigController = _dgConfigController;
 
+            validationStack.ProgcoefChangedMediaPlanRealized += ValidationStack_ProgcoefChangedMediaPlanRealized;
+
         }
+
+        private async void ValidationStack_ProgcoefChangedMediaPlanRealized(object? sender, UpdateMediaPlanRealizedEventArgs e)
+        {
+            // add or update row in dataTable
+            var mediaPlanRealized = e.MediaPlanRealized;
+            if (mediaPlanRealized == null)
+                return;
+            var coefs = new ClientRealizedCoefs(_campaign.clid, mediaPlanRealized.emsnum.Value, mediaPlanRealized.Progcoef.Value);
+            await _clientRealizedCoefsController.CreateOrUpdateRealizedCoefs(coefs);
+
+            // update all unverified rows in current campaign
+            foreach (var date in _dateRealizedDict.Keys)
+            {
+                foreach (var mpRealized in _dateRealizedDict[date].Where(mpr => mpr.Status != null &&
+                                                                   !(bool)mpr.Accept &&
+                                                                   mpr.emsnum == mediaPlanRealized.emsnum))
+                {
+                    mpRealized.Progcoef = coefs.progcoef;
+                    _mpConverter.CalculateRealizedPrice(mpRealized);
+                    mpRealized.Status = 5;
+                    await _mediaPlanRealizedController.UpdateMediaPlanRealized(mpRealized);
+                }
+            }
+            // update all unverified rows in database from that client, except for this campaign (it's already done)
+            var activeClientCampaigns = (await _campaignController.GetCampaignsByClientId(_campaign.clid))
+                                        .Where(cmp => cmp.active && cmp.cmpid != _campaign.cmpid);
+
+            foreach (var campaign in activeClientCampaigns)
+            {
+                var mpRealizedList = await _mediaPlanRealizedController.GetAllMediaPlansRealizedByCmpidAndEmsnum(campaign.cmpid, mediaPlanRealized.emsnum.Value);
+                foreach (var mpRealized in mpRealizedList)
+                {
+                    decimal oldProgcoef = mpRealized.progcoef;
+                    mpRealized.progcoef = coefs.progcoef;
+                    mpRealized.status = 5;
+                    decimal quotient = coefs.progcoef / oldProgcoef;
+                    mpRealized.price *= quotient;
+                    await _mediaPlanRealizedController.UpdateMediaPlanRealized(new UpdateMediaPlanRealizedDTO(mpRealized));
+                }
+            }
+        }
+
         private void BindPrintValidation()
         {
             _factoryPrintValidation.DgExpectedMask = validationStack.DgExpectedMask;

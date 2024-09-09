@@ -13,6 +13,7 @@ namespace Database.Repositories
         Task<IEnumerable<MediaPlanRealized>> GetAllMediaPlansRealizedByCmpid(int id);
         Task<IEnumerable<MediaPlanRealizedDTO>> GetAllMediaPlansRealizedByChid(int chid);
         Task<IEnumerable<MediaPlanRealizedDTO>> GetAllMediaPlansRealizedByChidAndDate(int chid, string date);
+        Task<IEnumerable<MediaPlanRealizedDTO>> GetAllMediaPlansRealizedByCmpidAndEmsnum(int cmpid, int emsnum);
         Task<bool> UpdateMediaPlanRealized(UpdateMediaPlanRealizedDTO mediaPlanRealizedDTO);
         Task<bool> UpdateMediaPlanRealized(MediaPlanRealized mediaPlanRealized);
         Task<bool> DeleteMediaPlanRealizedById(int id);
