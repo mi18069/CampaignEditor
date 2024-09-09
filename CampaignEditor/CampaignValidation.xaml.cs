@@ -333,27 +333,23 @@ namespace CampaignEditor
 
         private async Task SetStatus(MediaPlanRealized mpR, TermTuple tt = null)
         {
-            /*if (mpR.status == 5)
+            if (tt != null)
+                tt.Status = 1;
+
+            if (mpR.status != null)
                 return;
+
             decimal eps = 0.001M;
-            if (tt == null)
+
+            if (Math.Abs(mpR.dure.Value - mpR.durf.Value) > 1)
+            {
+                mpR.status = 7;
+            }
+            else if (tt == null)
             {
                 mpR.status = 2;
             }
-            else if (Math.Abs(mpR.dure.Value - mpR.durf.Value) > 1)
-            {
-                mpR.status = 7;
-            }*/
-            /*else if(tt.Price.HasValue && mpR.price.HasValue && Math.Abs(tt.Price.Value - mpR.price.Value) > 0.1M)
-            {
-                var pricelist = _forecastData.ChidPricelistDict[_forecastData.ChrdsidChidDict[mpR.chid.Value]];
-                // cpp type
-                if (pricelist.pltype == 0)
-                    mpR.status = 1;
-                else
-                    mpR.status = 6;
-            }*/
-            /*else if (tt.Progcoef - mpR.Progcoef > eps || tt.CoefA - mpR.CoefA > eps ||
+            else if (tt.Progcoef - mpR.Progcoef > eps || tt.CoefA - mpR.CoefA > eps ||
                 tt.CoefB - mpR.CoefB > eps && tt.Seascoef - mpR.Seascoef > eps || 
                 tt.Seccoef - mpR.Seccoef > eps && tt.Dpcoef - mpR.Dpcoef > eps)
             {
@@ -364,10 +360,7 @@ namespace CampaignEditor
                 mpR.status = 1;
             }
 
-            if (tt != null)
-                tt.Status = 1;
-
-            await _mediaPlanRealizedController.UpdateMediaPlanRealized(mpR);*/
+            await _mediaPlanRealizedController.UpdateMediaPlanRealized(mpR);
         }       
 
         private void AddEmptyRealized(List<MediaPlanRealized?> realized, int index, int chid = -1)
@@ -790,15 +783,15 @@ namespace CampaignEditor
         {
             var mpRealized = (await _mediaPlanRealizedController.GetAllMediaPlansRealizedByCmpid(campaign.cmpid)).ToList();
 
-            for (int i=0; i<mpRealized.Count(); i++)
+            foreach (var mpr in mpRealized.Where(mpR => mpR.status == null))
             {
-                if (mpRealized[i].status == null)
+                var coefs = await _clientRealizedCoefsController.GetRealizedCoefs(_campaign.clid, mpr.emsnum.Value);
+                if (coefs != null)
                 {
-                    CalculateCoefs(mpRealized[i]);
-                    await _mediaPlanRealizedController.UpdateMediaPlanRealized(mpRealized[i]);
-
+                    mpr.Progcoef = coefs.progcoef;
                 }
-                Console.WriteLine("i: " + i);
+                CalculateCoefs(mpr);
+                await _mediaPlanRealizedController.UpdateMediaPlanRealized(mpr);
             }
 
             _mediaPlanRealized.ReplaceRange(mpRealized);

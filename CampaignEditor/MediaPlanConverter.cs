@@ -452,10 +452,10 @@ namespace CampaignEditor
                 coefB = mpRealized.MediaPlan.coefB;
             }
 
-            mpRealized.Chcoef = chcoef;
-            mpRealized.Progcoef = progcoef;
-            mpRealized.CoefA = coefA;
-            mpRealized.CoefB = coefB;
+            mpRealized.Chcoef = mpRealized.Chcoef ?? chcoef;
+            mpRealized.Progcoef = mpRealized.Progcoef ?? progcoef;
+            mpRealized.CoefA = mpRealized.CoefA ?? coefA;
+            mpRealized.CoefB = mpRealized.CoefB ?? coefB;
 
             CoefsUpdated(mpRealized, pricelist);
         }
