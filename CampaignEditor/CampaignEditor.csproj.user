@@ -216,6 +216,15 @@
     <Compile Update="UserControls\ValidationItems\DateLabelItem.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Update="UserControls\ValidationItems\PairSpotsItems\EqualSpotsItem.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="UserControls\ValidationItems\PairSpotsItems\EqualSpotsPannel.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="UserControls\ValidationItems\PairSpotsItems\RealizedSpotItem.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Update="UserControls\ValidationItems\ValidationDay.xaml.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -444,6 +453,15 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Update="UserControls\ValidationItems\DateLabelItem.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UserControls\ValidationItems\PairSpotsItems\EqualSpotsItem.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UserControls\ValidationItems\PairSpotsItems\EqualSpotsPannel.xaml">
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="UserControls\ValidationItems\PairSpotsItems\RealizedSpotItem.xaml">
       <SubType>Designer</SubType>
     </Page>
     <Page Update="UserControls\ValidationItems\ValidationDay.xaml">

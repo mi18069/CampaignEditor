@@ -17,4 +17,5 @@ namespace CampaignEditor.Controllers
         {
             return await _repository.GetRealizedSpot(spotnum);
         }
+    }
 }
