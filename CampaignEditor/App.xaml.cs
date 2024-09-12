@@ -113,6 +113,7 @@ namespace CampaignEditor
                     Database.Extensions.CompletedValidationExtensions.AddCompletedValidationExtensions(services);
                     Database.Extensions.DGConfigExtensions.AddDGConfigExtensions(services);
                     Database.Extensions.ClientRealizedCoefsExtensions.AddClientRealizedCoefsExtensions(services);
+                    Database.Extensions.RealizedSpotExtensions.AddRealizedSpotExtensions(services);
 
                 }).Build();
 
