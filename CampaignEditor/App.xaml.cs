@@ -114,6 +114,7 @@ namespace CampaignEditor
                     Database.Extensions.DGConfigExtensions.AddDGConfigExtensions(services);
                     Database.Extensions.ClientRealizedCoefsExtensions.AddClientRealizedCoefsExtensions(services);
                     Database.Extensions.RealizedSpotExtensions.AddRealizedSpotExtensions(services);
+                    Database.Extensions.SpotPairExtensioins.AddSpotPairExtensions(services);
 
                 }).Build();
 
