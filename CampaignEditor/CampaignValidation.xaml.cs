@@ -39,6 +39,7 @@ namespace CampaignEditor
         private ClientRealizedCoefsController _clientRealizedCoefsController;
         private CampaignController _campaignController;
 
+
         private CampaignDTO _campaign;
         private List<ChannelDTO> _channels = new List<ChannelDTO>();
         private List<DateOnly> _dates = new List<DateOnly>();
@@ -59,6 +60,8 @@ namespace CampaignEditor
 
         bool hideExpected = false;
         private readonly PrintValidation _factoryPrintValidation;
+        private IAbstractFactory<PairSpots> _factoryPairSpots;
+        private IEnumerable<int> uniqueSpotNums;
 
         public CampaignValidation(
             IChannelCmpRepository channelCmpRepository,
@@ -75,7 +78,8 @@ namespace CampaignEditor
             IAbstractFactory<PrintValidation> factoryPrintValidation,
             IDGConfigRepository dGConfigRepository,
             IClientRealizedCoefsRepository clientRealizedCoefsRepository,
-            ICampaignRepository campaignRepository)
+            ICampaignRepository campaignRepository,
+            IAbstractFactory<PairSpots> factoryPairSpots)
         {
             _channelCmpController = new ChannelCmpController(channelCmpRepository);
             _channelController = new ChannelController(channelRepository);
@@ -94,6 +98,7 @@ namespace CampaignEditor
             _campaignController = new CampaignController(campaignRepository);
 
             _factoryPrintValidation = factoryPrintValidation.Create();
+            _factoryPairSpots = factoryPairSpots;
 
             InitializeComponent();
         }
@@ -795,6 +800,8 @@ namespace CampaignEditor
             }
 
             _mediaPlanRealized.ReplaceRange(mpRealized);
+
+            uniqueSpotNums = mpRealized.DistinctBy(mpr => mpr.spotnum).Where(mpr => mpr.spotnum.HasValue).Select(mpr => mpr.spotnum!.Value);
         }
 
         private async Task FillSpotNameDict(CampaignDTO campaign)
@@ -1035,6 +1042,14 @@ namespace CampaignEditor
         private async void btnReload_Click(object sender, RoutedEventArgs e)
         {
             await Initialize(_campaign, _allMediaPlans);
+        }
+
+        private async void btnPairSpots_Click(object sender, RoutedEventArgs e)
+        {
+            var factory = _factoryPairSpots.Create();
+            await factory.Initialize(_campaign, _forecastData.Spots, uniqueSpotNums);
+            factory.ShowDialog();
+
         }
     }
 }

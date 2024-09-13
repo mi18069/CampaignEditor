@@ -42,7 +42,10 @@ namespace CampaignEditor.UserControls.ValidationItems.PairSpotsItems
 
         private void RealizedItem_AssignedSpotChanged(object? sender, RealizedSpotPairChangedEventArgs e)
         {
-            AssignedSpotChanged?.Invoke(this, e);
+            var newSpotcode = e.Spotcode;
+            var oldSpotcode = _equalSpots.ExpectedSpot.spotcode;
+            if (string.Compare(newSpotcode, oldSpotcode) != 0)
+                AssignedSpotChanged?.Invoke(this, e);
         }
 
         public void DeleteRealized(RealizedSpotDTO realizedSpotDTO)

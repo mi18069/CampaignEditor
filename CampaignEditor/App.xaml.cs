@@ -69,6 +69,7 @@ namespace CampaignEditor
                     services.AddFormFactory<DuplicatePricelist>();
                     services.AddFormFactory<ClientBrands>();
                     services.AddFormFactory<PrintValidation>();
+                    services.AddFormFactory<PairSpots>();
                     services.AddScoped<IDataContext, DataContext>();
                     // Add services
                     Extensions.UserExtensions.AddUserExtensions(services);

@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:CampaignEditor.UserControls.ValidationItems.PairSpotsItems"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="850" d:Background="White"
-             BorderThickness="2" BorderBrush="Black">
+             BorderThickness="2" BorderBrush="LightBlue">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
@@ -14,7 +14,7 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
         <StackPanel x:Name="spExpectedSpots" Grid.Column="0"/>
-        <Line Grid.Column="1" Stroke="Black" StrokeThickness="2"/>
+        <Line Grid.Column="1" Stroke="Black" StrokeThickness="2" VerticalAlignment="Stretch"/>
         <StackPanel x:Name="spRealizedSpots" Grid.Column="2"/>
     </Grid>
 </UserControl>

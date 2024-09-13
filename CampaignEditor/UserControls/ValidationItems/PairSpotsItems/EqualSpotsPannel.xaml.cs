@@ -15,9 +15,14 @@ namespace CampaignEditor.UserControls.ValidationItems.PairSpotsItems
         List<EqualSpots> _equalSpots = new List<EqualSpots>();
         List<string> _spotcodes = new List<string>();
         public event EventHandler<RealizedSpotPairChangedEventArgs> AssignedSpotChanged;
-        public EqualSpotsPannel(IEnumerable<EqualSpots> equalSpots, IEnumerable<string> spotcodes)
+
+        public EqualSpotsPannel()
         {
             InitializeComponent();
+        }
+
+        public void Initialize(IEnumerable<EqualSpots> equalSpots, IEnumerable<string> spotcodes)
+        {
             _equalSpots.AddRange(equalSpots);
             _spotcodes.AddRange(spotcodes);
             SetControl();

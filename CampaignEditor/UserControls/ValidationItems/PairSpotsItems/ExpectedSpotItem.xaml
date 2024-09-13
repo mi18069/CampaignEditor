@@ -16,7 +16,9 @@
             <ColumnDefinition Width="*"/>
             <ColumnDefinition Width="10"/>
         </Grid.ColumnDefinitions>
-        <TextBlock x:Name="lblSpot" Grid.Column="1" Grid.Row="0" FontWeight="Bold"/>
+        <ScrollViewer Grid.Column="1" Grid.Row="0" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+            <Label x:Name="lblSpot" FontWeight="Bold"/>
+        </ScrollViewer>
         <Label x:Name="lblSpotlength" Grid.Column="1" Grid.Row="1"/>
     </Grid>
 </UserControl>

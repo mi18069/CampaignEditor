@@ -19,7 +19,7 @@ namespace CampaignEditor.UserControls.ValidationItems.PairSpotsItems
 
         private void SetControl(SpotDTO spot)
         {
-            lblSpot.Text = $"{_spot.spotcode}: {_spot.spotname}";
+            lblSpot.Content = $"{_spot.spotcode}: {_spot.spotname.Trim()}";
             lblSpotlength.Content = $"Length: {_spot.spotlength}";
         }
     }
