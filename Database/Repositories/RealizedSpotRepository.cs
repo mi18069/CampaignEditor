@@ -34,7 +34,7 @@ namespace Database.Repositories
                 brandnum = item.brbrand,
                 row = item.redreklame,
                 spotname = item.nazreklame.Trim(),
-                spotlength = item.duzina,
+                spotlength = decimal.ToInt32(Math.Floor(item.duzina)),
                 active = item.aktivan,
                 variant = item.varijanta,
                 firstdate = item.prvidatum
