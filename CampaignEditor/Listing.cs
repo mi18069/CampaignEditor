@@ -8,6 +8,7 @@ using System.Linq;
 using Database.DTOs.ChannelDTO;
 using Database.DTOs.CampaignDTO;
 using Database.DTOs.SpotDTO;
+using Microsoft.VisualBasic;
 
 namespace CampaignEditor
 {
@@ -75,12 +76,11 @@ namespace CampaignEditor
 
             return visibleColumns;
         }
-
-        public void PopulateWorksheet(List<MediaPlanTuple> mpTuples, bool[] visibleGridColumns, ExcelWorksheet worksheet, int rowOff = 1, int colOff = 1, bool showAllDecimals = false)
+        // if terms to print == 0 => print all, 1 => print only added, 2 => print only deleted
+        public void PopulateWorksheet(List<MediaPlanTuple> mpTuples, bool[] visibleGridColumns, ExcelWorksheet worksheet, DateTime startDate, DateTime endDate, int rowOff = 1, int colOff = 1, bool showAllDecimals = false, int termsToPrint = 0)
         {
             mpTuples = mpTuples.OrderBy(mpt => mpt.MediaPlan.chid).ThenBy(mpt => mpt.MediaPlan.stime).ToList();
-            DateTime startDate = TimeFormat.YMDStringToDateTime(_campaign.cmpsdate);
-            DateTime endDate = TimeFormat.YMDStringToDateTime(_campaign.cmpedate);
+
 
             bool[] visibleColumns = TransformVisibleColumns(visibleGridColumns);
             int visibleColumnsNum = visibleColumns.Count(v => v);
@@ -89,6 +89,13 @@ namespace CampaignEditor
 
             int rowOffset = 1;
             int dateIndex = 0;
+            var firstDate = TimeFormat.YMDStringToDateTime(_campaign.cmpsdate).Date;
+            while (firstDate < startDate)
+            {
+                dateIndex++;
+                firstDate = firstDate.AddDays(1);
+            }
+
             for (DateTime date = startDate; date <= endDate; date = date.AddDays(1))
             {
                 bool first = true;
@@ -96,7 +103,17 @@ namespace CampaignEditor
                 {
                     var mediaPlan = mpTuple.MediaPlan;
                     var term = mpTuple.Terms[dateIndex];
-                    if (term == null || term.Spotcode == null || term.Spotcode.Trim().Count() == 0)
+                    if (term == null)
+                        continue;
+                    string? spotcode = "";
+                    switch (termsToPrint)
+                    {
+                        case 0: spotcode = term.Spotcode; break;
+                        case 1: spotcode = term.Added; break;
+                        case 2: spotcode = term.Deleted; break;
+                        default: continue;
+                    }
+                    if (string.IsNullOrWhiteSpace(spotcode))
                     {
                         continue;
                     }
@@ -111,9 +128,9 @@ namespace CampaignEditor
                         rowOffset++;
                     }
 
-                    foreach (char spotcode in term.Spotcode.Trim())
+                    foreach (char code in spotcode.Trim())
                     {
-                        AddSpotcode(worksheet, mediaPlan, term, spotcode, visibleColumns, rowOff + rowOffset, colOff, showAllDecimals);                          
+                        AddSpotcode(worksheet, mediaPlan, term, code, visibleColumns, rowOff + rowOffset, colOff, showAllDecimals);                          
                         rowOffset += 1;
                     }                  
                 }

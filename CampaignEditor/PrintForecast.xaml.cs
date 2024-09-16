@@ -15,6 +15,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System;
 
 namespace CampaignEditor
 {
@@ -86,6 +87,18 @@ namespace CampaignEditor
             return true;
         }
 
+        public void SetDates(CampaignDTO campaign)
+        {
+            dpFrom.DisplayDateStart = TimeFormat.YMDStringToDateTime(campaign.cmpsdate);
+            dpFrom.DisplayDateEnd = TimeFormat.YMDStringToDateTime(campaign.cmpedate);
+
+            dpTo.DisplayDateStart = TimeFormat.YMDStringToDateTime(campaign.cmpsdate);
+            dpTo.DisplayDateEnd = TimeFormat.YMDStringToDateTime(campaign.cmpedate);
+
+            dpOneDay.DisplayDateStart = TimeFormat.YMDStringToDateTime(campaign.cmpsdate);
+            dpOneDay.DisplayDateEnd = TimeFormat.YMDStringToDateTime(campaign.cmpedate);
+        }
+
         private async void btnPrint_Click(object sender, RoutedEventArgs e)
         {
             bool hideSensitiveData = (bool)chbHideSensitiveData.IsChecked;
@@ -140,8 +153,31 @@ namespace CampaignEditor
                     if (chbListing.IsChecked == true)
                     {
                         var worksheet6 = excelPackage.Workbook.Worksheets.Add("Spot listing");
+                        DateTime startDate = TimeFormat.YMDStringToDateTime(_campaign.cmpsdate);
+                        DateTime endDate = TimeFormat.YMDStringToDateTime(_campaign.cmpedate);
+                        if ((bool)rbRangeDays.IsChecked)
+                        {
+                            startDate = dpFrom.SelectedDate.HasValue ? dpFrom.SelectedDate.Value : startDate; 
+                            endDate = dpTo.SelectedDate.HasValue ? dpTo.SelectedDate.Value : endDate;
+                        }
+                        else if ((bool)rbOneDay.IsChecked)
+                        {
+                            startDate = endDate = dpOneDay.SelectedDate.HasValue ? dpOneDay.SelectedDate.Value : startDate;
+                        }
                         //var list = _allMediaPlans.Where(mpTuple => mpTuple.MediaPlan.Insertations > 0 && selectedChannels.Any(ch => ch.chid == mpTuple.MediaPlan.chid)).ToList();
-                        factoryListing.PopulateWorksheet(visibleTuples, visibleColumns, worksheet6, 1, 1, showAllDecimals);
+                        var mpTuples = visibleTuples;
+                        int termsToPrint = 0;
+                        if (rbAdded.IsChecked == true)
+                        {
+                            termsToPrint = 1;
+                            mpTuples = mpTuples.Where(mpt => mpt.Terms.Any(mpt => mpt != null && mpt.Added != null)).ToList();
+                        }
+                        else if (rbDeleted.IsChecked == true)
+                        {
+                            termsToPrint = 2;
+                            mpTuples = mpTuples.Where(mpt => mpt.Terms.Any(mpt => mpt != null && mpt.Deleted != null)).ToList();
+                        }
+                        factoryListing.PopulateWorksheet(mpTuples, visibleColumns, worksheet6, startDate, endDate, 1, 1, showAllDecimals, termsToPrint);
                     }
 
                     // Save the Excel package to a memory stream

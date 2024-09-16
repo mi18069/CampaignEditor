@@ -462,7 +462,7 @@ namespace CampaignEditor.UserControls
             _factoryPrintForecast.factoryPrintCmpInfo = _factoryPrintCmpInfo;
             _factoryPrintForecast._allMediaPlans = _allMediaPlans;
             _factoryPrintForecast._campaign = _campaign;
-
+            _factoryPrintForecast.SetDates(_campaign);
         }
 
         public void SubscribeReachTabItemControllers()
