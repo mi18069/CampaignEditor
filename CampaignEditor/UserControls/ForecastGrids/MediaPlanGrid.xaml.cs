@@ -473,6 +473,13 @@ namespace CampaignEditor.UserControls
         {
             var dates = GetCampaignDates(_campaign).ToList();
 
+            var enabledCellColor = Brushes.Green;
+            var disabledCellColor = Brushes.Goldenrod;
+
+            var addedCellColor = Brushes.YellowGreen;
+            var deletedCellColor = Brushes.Red;
+            var modifiedCellColor = Brushes.Violet;
+
             // Create a column for each date
             foreach (DateTime date in dates)
             {
@@ -482,15 +489,14 @@ namespace CampaignEditor.UserControls
                 // Set the column header to the date
                 column.Header = date.ToString("dd.MM.yy");
 
-                var disabledCellColor = Brushes.LightGoldenrodYellow;
-                var enabledCellColor = Brushes.LightGreen;
+                
                 if (DateTime.TryParse(column.Header.ToString(), out DateTime columnHeaderDate))
                 {
-                    if (columnHeaderDate.Date <= DateTime.Today.Date)
+                    if (columnHeaderDate.Date > DateTime.Today.Date)
                     {
                         // Apply the dimmed column style
-                        disabledCellColor = Brushes.Goldenrod;
-                        enabledCellColor = Brushes.Green;
+                        enabledCellColor = Brushes.LightGreen;
+                        disabledCellColor = Brushes.LightGoldenrodYellow;
                     }
                 }
 
@@ -498,6 +504,7 @@ namespace CampaignEditor.UserControls
                 //binding.ValidationRules.Add(new CharLengthValidationRule(1)); // add validation rule to restrict input to a single character
                 column.Binding = binding;
                 column.Width = dataColumnWidth;
+                
 
                 var cellStyle = new Style(typeof(DataGridCell));
 
@@ -510,6 +517,8 @@ namespace CampaignEditor.UserControls
                 cellStyle.Setters.Add(keyDownEventSetter);
                 cellStyle.Setters.Add(mouseLeftButtonDownEventSetter);
                 //cellStyle.Setters.Add(new Setter(DataGridCell.IsHitTestVisibleProperty, CanUserEdit.Value));
+
+
                 column.CellStyle = cellStyle;
 
                 var trigger = new DataTrigger();
@@ -561,6 +570,25 @@ namespace CampaignEditor.UserControls
                 focusTrigger.Value = true;
                 focusTrigger.Setters.Add(new Setter(BackgroundProperty, Brushes.Orange));
                 column.CellStyle.Triggers.Add(focusTrigger);
+
+                // change color when term is different than the one in previous version
+                // Triggers for Status = 1, 2, 3
+                var statusTrigger1 = new DataTrigger { Value = 1 };
+                statusTrigger1.Binding = new Binding($"Terms[{dates.IndexOf(date)}].Status");
+                statusTrigger1.Setters.Add(new Setter(DataGridCell.BackgroundProperty, addedCellColor));
+
+                var statusTrigger2 = new DataTrigger { Value = 2 };
+                statusTrigger2.Binding = new Binding($"Terms[{dates.IndexOf(date)}].Status");
+                statusTrigger2.Setters.Add(new Setter(DataGridCell.BackgroundProperty, deletedCellColor));
+
+                var statusTrigger3 = new DataTrigger { Value = 3 };
+                statusTrigger3.Binding = new Binding($"Terms[{dates.IndexOf(date)}].Status");
+                statusTrigger3.Setters.Add(new Setter(DataGridCell.BackgroundProperty, modifiedCellColor));
+
+                // Adding triggers to the style
+                cellStyle.Triggers.Add(statusTrigger1);
+                cellStyle.Triggers.Add(statusTrigger2);
+                cellStyle.Triggers.Add(statusTrigger3);
 
                 // Add the column to the DataGrid
                 dgMediaPlans.Columns.Add(column);
@@ -673,6 +701,8 @@ namespace CampaignEditor.UserControls
             await _mediaPlanTermController.UpdateMediaPlanTerm(
                 new UpdateMediaPlanTermDTO(mpTerm.Xmptermid, mpTerm.Xmpid, mpTerm.Date, newSpotcode, added, deleted));
 
+            mpTerm.Added = added;
+            mpTerm.Deleted = deleted;
             mpTerm.Spotcode = newSpotcode;           
 
             int numberOfDays = mpTerm.Date.DayNumber - DateOnly.FromDateTime(startDate).DayNumber;
@@ -775,6 +805,8 @@ namespace CampaignEditor.UserControls
                 await _mediaPlanTermController.UpdateMediaPlanTerm(
                     new UpdateMediaPlanTermDTO(mpTerm.Xmptermid, mpTerm.Xmpid, mpTerm.Date, newSpotcode, added, deleted));
 
+                mpTerm.Added = added;
+                mpTerm.Deleted = deleted;
                 mpTerm.Spotcode = newSpotcode;
 
                 totals[numberOfDays].Total -= 1;

@@ -57,7 +57,8 @@ namespace Database.Entities
                 if (_added != value)
                 {
                     _added = value;
-                    OnPropertyChanged(nameof(Added));
+                    // no need for this since we're updating status when spotcode is changed
+                    //OnPropertyChanged(nameof(Added));
                 }
             }
         }
@@ -69,7 +70,7 @@ namespace Database.Entities
                 if (_deleted != value)
                 {
                     _deleted = value;
-                    OnPropertyChanged(nameof(Deleted));
+                    //OnPropertyChanged(nameof(Deleted));
                 }
             }
         }
@@ -84,13 +85,12 @@ namespace Database.Entities
             {
                 if (string.IsNullOrEmpty(_added) && string.IsNullOrEmpty(_deleted))
                     return 0;
-                else if (string.IsNullOrEmpty(_added) && !string.IsNullOrEmpty(_deleted))
-                    return 1;
                 else if (!string.IsNullOrEmpty(_added) && string.IsNullOrEmpty(_deleted))
+                    return 1;
+                else if (string.IsNullOrEmpty(_added) && !string.IsNullOrEmpty(_deleted))
                     return 2;
                 else 
                     return 3;
-
             }
         }
 

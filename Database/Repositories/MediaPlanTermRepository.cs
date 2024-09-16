@@ -71,6 +71,8 @@ namespace Database.Repositories
             if (mediaPlanTerm != null)
             {
                 mediaPlanTerm.Spotcode = mediaPlanTerm.Spotcode?.Trim();
+                mediaPlanTerm.Added = mediaPlanTerm.Added?.Trim();
+                mediaPlanTerm.Added = mediaPlanTerm.Deleted?.Trim();
             }
 
             return _mapper.Map<MediaPlanTermDTO>(mediaPlanTerm);
@@ -89,7 +91,9 @@ namespace Database.Repositories
                 Xmptermid = item.xmptermid,
                 Xmpid = item.xmpid,
                 Date = DateOnly.FromDateTime(item.datum),
-                Spotcode = item.spotcode != null ? item.spotcode.Trim() : null
+                Spotcode = item.spotcode != null ? item.spotcode.Trim() : null,
+                Added = item.added != null ? item.added.Trim() : null,
+                Deleted = item.deleted != null ? item.deleted.Trim() : null
             });
 
             return _mapper.Map<MediaPlanTermDTO>(mediaPlanTerm.First());
@@ -107,7 +111,9 @@ namespace Database.Repositories
                 Xmptermid = item.xmptermid,
                 Xmpid = item.xmpid,
                 Date = DateOnly.FromDateTime(item.datum),
-                Spotcode = item.spotcode != null ? item.spotcode.Trim() : null
+                Spotcode = item.spotcode != null ? item.spotcode.Trim() : null,
+                Added = item.added != null ? item.added.Trim() : null,
+                Deleted = item.deleted != null ? item.deleted.Trim() : null
             });
 
             return _mapper.Map<IEnumerable<MediaPlanTermDTO>>(allMediaPlanTerms);
@@ -125,7 +131,9 @@ namespace Database.Repositories
                 Xmptermid = item.xmptermid,
                 Xmpid = item.xmpid,
                 Date = DateOnly.FromDateTime(item.datum),
-                Spotcode = item.spotcode != null ? item.spotcode.Trim() : null
+                Spotcode = item.spotcode != null ? item.spotcode.Trim() : null,
+                Added = item.added != null ? item.added.Trim() : null,
+                Deleted = item.deleted != null ? item.deleted.Trim() : null
             });
 
             return _mapper.Map<IEnumerable<MediaPlanTermDTO>>(allMediaPlanTerms);
@@ -157,6 +165,8 @@ namespace Database.Repositories
                 if (mediaPlanTerm != null)
                 {
                     mediaPlanTerm.Spotcode = mediaPlanTerm.Spotcode?.Trim();
+                    mediaPlanTerm.Added = mediaPlanTerm.Added?.Trim();
+                    mediaPlanTerm.Deleted = mediaPlanTerm.Deleted?.Trim();
                 }
 
             return _mapper.Map<IEnumerable<MediaPlanTermDTO>>(allMediaPlanTerms);
