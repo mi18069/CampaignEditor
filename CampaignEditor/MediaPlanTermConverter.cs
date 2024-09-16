@@ -30,7 +30,7 @@ namespace CampaignEditor
         public MediaPlanTermDTO ConvertToDTO(MediaPlanTerm mediaPlanTerm)
         {
             MediaPlanTermDTO mediaPlanTermDTO = new MediaPlanTermDTO(
-                mediaPlanTerm.Xmptermid, mediaPlanTerm.Xmpid, mediaPlanTerm.Date, mediaPlanTerm.Spotcode);
+                mediaPlanTerm.Xmptermid, mediaPlanTerm.Xmpid, mediaPlanTerm.Date, mediaPlanTerm.Spotcode, mediaPlanTerm.Added, mediaPlanTerm.Deleted);
 
             return mediaPlanTermDTO;
         }

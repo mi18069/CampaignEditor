@@ -46,13 +46,15 @@ namespace Database.Repositories
             using var connection = _context.GetConnection();
 
             var affected = await connection.ExecuteAsync(
-                "INSERT INTO xmpterm (xmpid, datum, spotcode) " +
-                "VALUES (@Xmpid, CAST (@Date AS DATE), @Spotcode) ",
+                "INSERT INTO xmpterm (xmpid, datum, spotcode, added, deleted) " +
+                "VALUES (@Xmpid, CAST (@Date AS DATE), @Spotcode, @Added, @Deleted) ",
             new
             {
                 Xmpid = mediaPlanTermDTO.xmpid,
                 Date = mediaPlanTermDTO.date.ToString("yyyy-MM-dd"),
-                Spotcode = mediaPlanTermDTO.spotcode
+                Spotcode = mediaPlanTermDTO.spotcode,
+                Added = mediaPlanTermDTO.added,
+                Deleted = mediaPlanTermDTO.deleted
             });
 
 
@@ -165,14 +167,17 @@ namespace Database.Repositories
             using var connection = _context.GetConnection();
 
             var affected = await connection.ExecuteAsync(
-                "UPDATE xmpterm SET xmptermid = @Xmptermid, xmpid = @Xmpid, datum = CAST(@Date AS DATE), spotcode = @Spotcode " +
+                "UPDATE xmpterm SET xmptermid = @Xmptermid, xmpid = @Xmpid, datum = CAST(@Date AS DATE), " +
+                "spotcode = @Spotcode, added = @Added, deleted = @Deleted " +
                 "WHERE xmptermid = @Xmptermid",
                 new
                 {
                     Xmptermid = mediaPlanTermDTO.xmptermid,
                     Xmpid = mediaPlanTermDTO.xmpid,
                     Date = mediaPlanTermDTO.date.ToString("yyyy-MM-dd"),
-                    Spotcode = mediaPlanTermDTO.spotcode
+                    Spotcode = mediaPlanTermDTO.spotcode,
+                    Added = mediaPlanTermDTO.added,
+                    Deleted = mediaPlanTermDTO.deleted
                 });
 
             return affected != 0;

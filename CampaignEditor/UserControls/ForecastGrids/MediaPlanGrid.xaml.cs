@@ -659,7 +659,7 @@ namespace CampaignEditor.UserControls
             string newSpotcode = (mpTerm.Spotcode == null ? "" : mpTerm.Spotcode) + spotcode.ToString();
 
             await _mediaPlanTermController.UpdateMediaPlanTerm(
-                new UpdateMediaPlanTermDTO(mpTerm.Xmptermid, mpTerm.Xmpid, mpTerm.Date, newSpotcode));
+                new UpdateMediaPlanTermDTO(mpTerm.Xmptermid, mpTerm.Xmpid, mpTerm.Date, newSpotcode, mpTerm.Added, mpTerm.Deleted));
 
             mpTerm.Spotcode = newSpotcode;           
 
@@ -737,7 +737,7 @@ namespace CampaignEditor.UserControls
 
 
                 await _mediaPlanTermController.UpdateMediaPlanTerm(
-                    new UpdateMediaPlanTermDTO(mpTerm.Xmptermid, mpTerm.Xmpid, mpTerm.Date, newSpotcode));
+                    new UpdateMediaPlanTermDTO(mpTerm.Xmptermid, mpTerm.Xmpid, mpTerm.Date, newSpotcode, mpTerm.Added, mpTerm.Deleted));
 
                 mpTerm.Spotcode = newSpotcode;
 
