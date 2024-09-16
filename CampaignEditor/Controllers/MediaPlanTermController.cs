@@ -43,6 +43,11 @@ namespace CampaignEditor.Controllers
             return await _repository.GetAllNotNullMediaPlanTermsByXmpid(xmpid);
         }
 
+        public async Task<MediaPlanTermDTO> GetMediaPlanTermByXmpidAndDate(int xmpid, DateOnly date)
+        {           
+            return await _repository.GetMediaPlanTermByXmpidAndDate(xmpid, date);
+        }
+
         public async Task<bool> CheckIfMediaPlanHasSpotsDedicated(int xmpid)
         {
             return await _repository.CheckIfMediaPlanHasSpotsDedicated(xmpid);

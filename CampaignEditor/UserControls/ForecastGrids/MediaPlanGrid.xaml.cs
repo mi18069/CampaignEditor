@@ -32,6 +32,7 @@ using Database.DTOs.SpotDTO;
 using Database.DTOs.DayPartDTO;
 using System.Data;
 using Database.DTOs.ClientCoefsDTO;
+using System.Text;
 
 namespace CampaignEditor.UserControls
 {
@@ -623,14 +624,14 @@ namespace CampaignEditor.UserControls
 
             try
             {
-                await AddSpotcodeToMpTerm(mpTerm, spotcode);
+                await AddSpotcodeToMpTerm(mpTerm, spotcode, mediaPlanTuple.MediaPlan);
                 await UpdateMediaPlan(mediaPlanTuple);
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Error while updating program!\n" + ex.Message, "Error",
                 MessageBoxButton.OK, MessageBoxImage.Error);
-                await DeleteSpotcodeFromMpTerm(mpTerm);
+                await DeleteSpotcodeFromMpTerm(mpTerm, mediaPlanTuple.MediaPlan);
                 var termsDTO = _mpTermConverter.ConvertToEnumerableDTO(mediaPlanTuple.Terms);
                 _mpConverter.ComputeExtraProperties(mediaPlanTuple.MediaPlan, termsDTO, true);
                 return;
@@ -651,15 +652,26 @@ namespace CampaignEditor.UserControls
             return Char.ToUpper(spotcodeChar);
         }
 
-        private async Task AddSpotcodeToMpTerm(MediaPlanTerm mpTerm, char spotcode)
+        private async Task AddSpotcodeToMpTerm(MediaPlanTerm mpTerm, char spotcode, MediaPlan mediaPlan)
         {
             if (mpTerm.Spotcode != null && mpTerm.Spotcode.Length >= 3)
                 return;
 
             string newSpotcode = (mpTerm.Spotcode == null ? "" : mpTerm.Spotcode) + spotcode.ToString();
 
+            string? added = mpTerm.Added;
+            string? deleted = mpTerm.Deleted;
+            if (mediaPlan.version > 1)
+            {
+                var previousPairTerm = await GetPreviousVersionTerm(mediaPlan, mpTerm);
+                if (previousPairTerm != null)
+                {
+                    added = _mpTermConverter.CalculateMpTermAdded(newSpotcode, previousPairTerm.spotcode);
+                    deleted = _mpTermConverter.CalculateMpTermDeleted(newSpotcode, previousPairTerm.spotcode);
+                }
+            }
             await _mediaPlanTermController.UpdateMediaPlanTerm(
-                new UpdateMediaPlanTermDTO(mpTerm.Xmptermid, mpTerm.Xmpid, mpTerm.Date, newSpotcode, mpTerm.Added, mpTerm.Deleted));
+                new UpdateMediaPlanTermDTO(mpTerm.Xmptermid, mpTerm.Xmpid, mpTerm.Date, newSpotcode, added, deleted));
 
             mpTerm.Spotcode = newSpotcode;           
 
@@ -668,7 +680,20 @@ namespace CampaignEditor.UserControls
 
             // Refactor this
             //TermUpdated(mpTerm, spotcode);
-        }       
+        }     
+        
+        private async Task<MediaPlanTermDTO?> GetPreviousVersionTerm(MediaPlan mediaPlan, MediaPlanTerm mpTerm)
+        {
+            int previousVersion = mediaPlan.version - 1;
+            var previousMediaPlan = await _mediaPlanController.GetMediaPlanBySchemaAndCmpId(mediaPlan.schid, mediaPlan.cmpid, previousVersion);
+            
+            if (previousMediaPlan == null)
+                return null;
+
+            return await _mediaPlanTermController.GetMediaPlanTermByXmpidAndDate(previousMediaPlan.xmpid, mpTerm.Date);
+        }
+
+        
 
         // For deleting spotcode from mediaPlanTerm
         private async void OnCellPreviewKeyDown(object sender, KeyEventArgs e)
@@ -693,7 +718,7 @@ namespace CampaignEditor.UserControls
                 return;
             }
 
-            char? spotcode = await DeleteSpotcodeFromMpTerm(mpTerm);
+            char? spotcode = await DeleteSpotcodeFromMpTerm(mpTerm, mediaPlanTuple.MediaPlan);
             if (spotcode.HasValue)
             {
                 try
@@ -704,7 +729,7 @@ namespace CampaignEditor.UserControls
                 {
                     MessageBox.Show("Error while updating program!\n" + ex.Message, "Error",
                     MessageBoxButton.OK, MessageBoxImage.Error);
-                    await DeleteSpotcodeFromMpTerm(mpTerm);
+                    await DeleteSpotcodeFromMpTerm(mpTerm, mediaPlanTuple.MediaPlan);
                     var termsDTO = _mpTermConverter.ConvertToEnumerableDTO(mediaPlanTuple.Terms);
                     _mpConverter.ComputeExtraProperties(mediaPlanTuple.MediaPlan, termsDTO, true);
                     return;
@@ -713,7 +738,7 @@ namespace CampaignEditor.UserControls
             }     
         }
 
-        private async Task<char?> DeleteSpotcodeFromMpTerm(MediaPlanTerm mpTerm)
+        private async Task<char?> DeleteSpotcodeFromMpTerm(MediaPlanTerm mpTerm, MediaPlan mediaPlan)
         {
             if (mpTerm.Spotcode != null && mpTerm.Spotcode.Length > 0)
             {
@@ -735,9 +760,20 @@ namespace CampaignEditor.UserControls
 
                 int numberOfDays = mpTerm.Date.DayNumber - DateOnly.FromDateTime(startDate).DayNumber;
 
+                string? added = mpTerm.Added;
+                string? deleted = mpTerm.Deleted;
+                if (mediaPlan.version > 1)
+                {
+                    var previousPairTerm = await GetPreviousVersionTerm(mediaPlan, mpTerm);
+                    if (previousPairTerm != null)
+                    {
+                        added = _mpTermConverter.CalculateMpTermAdded(newSpotcode, previousPairTerm.spotcode);
+                        deleted = _mpTermConverter.CalculateMpTermDeleted(newSpotcode, previousPairTerm.spotcode);
+                    }
+                }
 
                 await _mediaPlanTermController.UpdateMediaPlanTerm(
-                    new UpdateMediaPlanTermDTO(mpTerm.Xmptermid, mpTerm.Xmpid, mpTerm.Date, newSpotcode, mpTerm.Added, mpTerm.Deleted));
+                    new UpdateMediaPlanTermDTO(mpTerm.Xmptermid, mpTerm.Xmpid, mpTerm.Date, newSpotcode, added, deleted));
 
                 mpTerm.Spotcode = newSpotcode;
 

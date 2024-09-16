@@ -1,12 +1,9 @@
 ﻿using AutoMapper;
-using Database.DTOs.MediaPlanDTO;
 using Database.DTOs.MediaPlanTermDTO;
 using Database.Entities;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 
 namespace CampaignEditor
 {
@@ -38,6 +35,58 @@ namespace CampaignEditor
         public IEnumerable<MediaPlanTermDTO> ConvertToEnumerableDTO(IEnumerable<MediaPlanTerm?> mediaPlanTerms)
         {
             return _mapper.Map<IEnumerable<MediaPlanTermDTO>>(mediaPlanTerms);
+        }
+
+        public string? CalculateMpTermAdded(string? newSpotcode, string? oldSpotcode)
+        {
+            if (string.IsNullOrEmpty(newSpotcode))
+                return null;
+
+            if (string.IsNullOrEmpty(oldSpotcode))
+                return newSpotcode;
+
+            StringBuilder sb = new StringBuilder("");
+            foreach (char c in newSpotcode.Trim())
+            {
+                // if oldSpotcode contains char, delete it and continue
+                if (oldSpotcode.Contains(c))
+                {
+                    int index = oldSpotcode.IndexOf(c);
+                    oldSpotcode = oldSpotcode.Remove(index, 1);
+                }
+                // else add that char to added
+                else
+                {
+                    sb.Append(c);
+                }
+            }
+            return sb.ToString().Count() == 0 ? null : sb.ToString();
+        }
+
+        public string? CalculateMpTermDeleted(string? newSpotcode, string? oldSpotcode)
+        {
+            if (string.IsNullOrEmpty(newSpotcode))
+                return oldSpotcode;
+
+            if (string.IsNullOrEmpty(oldSpotcode))
+                return null;
+
+            StringBuilder sb = new StringBuilder("");
+            foreach (char c in oldSpotcode.Trim())
+            {
+                // if newSpotcode contains char, delete it and continue
+                if (newSpotcode.Contains(c))
+                {
+                    int index = newSpotcode.IndexOf(c);
+                    newSpotcode = newSpotcode.Remove(index, 1);
+                }
+                // else add that char to deleted
+                else
+                {
+                    sb.Append(c);
+                }
+            }
+            return sb.ToString().Count() == 0 ? null : sb.ToString();
         }
     }
 
