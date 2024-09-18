@@ -85,7 +85,7 @@
                         PreviewKeyDown="DataGrid_PreviewKeyDown"
                       ScrollViewer.ScrollChanged="dgExpected_ScrollChanged"
                       Loaded="dgExpected_Loaded">
-                <DataGrid.RowStyle>
+                <!--<DataGrid.RowStyle>
                     <Style TargetType="DataGridRow">
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding Status}" Value="-1">
@@ -100,18 +100,29 @@
                             <DataTrigger Binding="{Binding Status}" Value="2">
                                 <Setter Property="Background" Value="OrangeRed"></Setter>
                             </DataTrigger>
-                            <DataTrigger Binding="{Binding Status}" Value="3">
-                                <Setter Property="Background" Value="Green"></Setter>
+                            <DataTrigger Binding="{Binding StatusAD}" Value="1">
+                                <Setter Property="Background" Value="YellowGreen"></Setter>
                             </DataTrigger>
-                            <DataTrigger Binding="{Binding Status}" Value="4">
-                                <Setter Property="Background" Value="Orange"></Setter>
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding Status}" Value="5">
-                                <Setter Property="Background" Value="PaleVioletRed"></Setter>
+                            <DataTrigger Binding="{Binding StatusAD}" Value="2">
+                                <Setter Property="Background" Value="Gray"></Setter>
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
-                </DataGrid.RowStyle>
+                </DataGrid.RowStyle> -->
+                <DataGrid.RowStyle>
+                    <Style TargetType="DataGridRow">
+                        <Setter Property="Background">
+                            <Setter.Value>
+                                <MultiBinding Converter="{StaticResource StatusToColorConverter}">
+                                    <MultiBinding.Bindings>
+                                        <Binding Path="Status" />
+                                        <Binding Path="StatusAD" />
+                                    </MultiBinding.Bindings>
+                                </MultiBinding>
+                            </Setter.Value>
+                        </Setter>
+                    </Style>
+                </DataGrid.RowStyle> 
                 <DataGrid.Resources>
                     <!-- Style for selected cells -->
                     <Style TargetType="DataGridCell">

@@ -12,9 +12,12 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Text;
+using System.Threading.Channels;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace CampaignEditor
 {
@@ -405,6 +408,12 @@ namespace CampaignEditor
                     k++;
                     continue;
                 }
+                // Deleted term
+                if (expected[k] != null && expected[k].StatusAD == 2)
+                {
+                    AddEmptyRealized(realized, k, -1);
+                    k++;
+                }
                 if (expectedChid == realizedChid)
                 {
                     // Match within minPeriod
@@ -513,7 +522,7 @@ namespace CampaignEditor
             // All realized used, fill the rest of expected
             while (k < n)
             {
-                expected[k].Status = -1;
+                expected[k].Status = 2;
                 //AddEmptyRealized(realized, k, realized[m-1].chid.Value);
                 int chrdsid = -1;
                 if (k == 0)
@@ -710,26 +719,60 @@ namespace CampaignEditor
 
             foreach (var mediaPlanTuple in _allMediaPlans.Where(mpt => mpt.MediaPlan.chid == channel.chid))
             {
-                var mediaPlanTerms = mediaPlanTuple.Terms.Where(t => t != null && t.Date == date && t.Spotcode != null && 
-                                                    t.Spotcode.Count() > 0);
+                var mediaPlanTerms = mediaPlanTuple.Terms.Where(t => t != null && t.Date == date && 
+                (!string.IsNullOrEmpty(t.Spotcode) || !string.IsNullOrEmpty(t.Deleted)));
                 foreach (var mediaPlanTerm in mediaPlanTerms)
                 {
-                    foreach (char spotcode in mediaPlanTerm!.Spotcode!.Trim())
+                    string? spotcodes = mediaPlanTerm!.Spotcode;
+                    string? added = mediaPlanTerm.Added;
+                    string? deleted = mediaPlanTerm.Deleted;
+
+                    if (!string.IsNullOrEmpty(spotcodes))
                     {
-                        var spot = _forecastData.SpotcodeSpotDict[spotcode];
-                        // It's better to have info from allMediaPlans
-                        var mediaPlan = mediaPlanTuple.MediaPlan;
-                        var termCoefs = new TermCoefs(mediaPlan.Amrpsale, mediaPlan.Cpp);
-                        var price = _mpConverter.GetProgramSpotPrice(mediaPlan, mediaPlanTerm, spot, termCoefs);
-                        TermTuple termTuple = new TermTuple(mediaPlan, mediaPlanTerm, spot, termCoefs, channel.chname.Trim());
-                        termTuples.Add(termTuple);
+                        foreach (char spotcode in spotcodes)
+                        {
+                            var termTuple = MakeTermTuple(spotcode, mediaPlanTuple, mediaPlanTerm, channel);
+                            int statusAd = 0;
+                            if (!string.IsNullOrEmpty(added))
+                            {
+                                if (added.Contains(spotcode))
+                                {
+                                    int index = added.IndexOf(spotcode);
+                                    added.Remove(index, 1);
+                                    statusAd = 1;
+                                }
+                            }
+                            termTuple.StatusAD = statusAd;
+                            termTuples.Add(termTuple);
+                        }
                     }
 
+                    if (!string.IsNullOrEmpty(deleted))
+                    {
+                        foreach (char spotcode in deleted)
+                        {
+                            var termTuple = MakeTermTuple(spotcode, mediaPlanTuple, mediaPlanTerm, channel);
+                            termTuple.StatusAD = 2;
+                            termTuples.Add(termTuple);
+                        }
+                    }
                 }
             }
 
             termTuples = termTuples.OrderBy(tt => tt.MediaPlan.blocktime).ToList();
             return termTuples;
+        }
+
+        private TermTuple MakeTermTuple(char spotcode, MediaPlanTuple mediaPlanTuple, MediaPlanTerm mediaPlanTerm,
+            ChannelDTO channel)
+        {
+            var spot = _forecastData.SpotcodeSpotDict[spotcode];
+            // It's better to have info from allMediaPlans
+            var mediaPlan = mediaPlanTuple.MediaPlan;
+            var termCoefs = new TermCoefs(mediaPlan.Amrpsale, mediaPlan.Cpp);
+            var price = _mpConverter.GetProgramSpotPrice(mediaPlan, mediaPlanTerm, spot, termCoefs);
+            TermTuple termTuple = new TermTuple(mediaPlan, mediaPlanTerm, spot, termCoefs, channel.chname.Trim());
+            return termTuple;
         }
 
         private List<MediaPlanRealized?> GetRealizedByDateAndChannel(DateOnly date, ChannelDTO channel)

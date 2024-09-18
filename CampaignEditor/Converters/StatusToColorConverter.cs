@@ -1,29 +1,33 @@
 ﻿using System;
-using System.Drawing;
+using System.Windows.Media;
 using System.Globalization;
 using System.Windows.Data;
 
 namespace CampaignEditor.Converters
 {
-    public class StatusToColorConverter : IValueConverter
+    public class StatusToColorConverter : IMultiValueConverter
     {
-        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        public object Convert(object[] values, Type targetType, object parameter, System.Globalization.CultureInfo culture)
         {
-            if (value is int intValue)
+            if (values[0] is int status && values[1] is int statusAD)
             {
-                switch (intValue)
-                {
-                    case -1: return Brushes.Transparent;
-                    case 0: return Brushes.LightGray;
-                    case 1: return Brushes.LightGreen;
-                    case 2: return Brushes.OrangeRed;
-                    case 5: return Brushes.Violet;
-                }
+                if (statusAD == 2)
+                    return Brushes.Gray;
+                if (statusAD == 1)
+                    return Brushes.YellowGreen;
+
+                if (status == 2)
+                    return Brushes.OrangeRed;
+                if (status == 1)
+                    return Brushes.Green;
+
             }
+
+            // Default background color if no condition is met
             return Brushes.Transparent;
         }
 
-        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        public object[] ConvertBack(object value, Type[] targetTypes, object parameter, CultureInfo culture)
         {
             throw new NotImplementedException();
         }

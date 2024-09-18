@@ -770,53 +770,53 @@ namespace CampaignEditor.UserControls
 
         private async Task<char?> DeleteSpotcodeFromMpTerm(MediaPlanTerm mpTerm, MediaPlan mediaPlan)
         {
-            if (mpTerm.Spotcode != null && mpTerm.Spotcode.Length > 0)
+            if (string.IsNullOrWhiteSpace(mpTerm.Spotcode))
+                return null;
+
+            // If old spotcode have only one character, then pass null as parameter, otherwise
+            // pass substring without last spotcode
+            string? newSpotcode = mpTerm.Spotcode.Substring(0, mpTerm.Spotcode.Length - 1);
+            if (newSpotcode.Length == 0)
+                newSpotcode = null;
+
+            char? deletedSpotcode = null;
+            try
             {
-                // If old spotcode have only one character, then pass null as parameter, otherwise
-                // pass substring without last spotcode
-                string? newSpotcode = null;
-                if (mpTerm.Spotcode.Length > 0)
-                    newSpotcode = mpTerm.Spotcode.Substring(0, mpTerm.Spotcode.Length - 1);                
-
-                char? deletedSpotcode = null;
-                try
-                {
-                    deletedSpotcode = mpTerm.Spotcode[mpTerm.Spotcode.Length - 1];
-                }
-                catch
-                {
-                    return null;
-                }
-
-                int numberOfDays = mpTerm.Date.DayNumber - DateOnly.FromDateTime(startDate).DayNumber;
-
-                string? added = mpTerm.Added;
-                string? deleted = mpTerm.Deleted;
-                if (mediaPlan.version > 1)
-                {
-                    var previousPairTerm = await GetPreviousVersionTerm(mediaPlan, mpTerm);
-                    if (previousPairTerm != null)
-                    {
-                        added = _mpTermConverter.CalculateMpTermAdded(newSpotcode, previousPairTerm.spotcode);
-                        deleted = _mpTermConverter.CalculateMpTermDeleted(newSpotcode, previousPairTerm.spotcode);
-                    }
-                }
-
-                await _mediaPlanTermController.UpdateMediaPlanTerm(
-                    new UpdateMediaPlanTermDTO(mpTerm.Xmptermid, mpTerm.Xmpid, mpTerm.Date, newSpotcode, added, deleted));
-
-                mpTerm.Added = added;
-                mpTerm.Deleted = deleted;
-                mpTerm.Spotcode = newSpotcode;
-
-                totals[numberOfDays].Total -= 1;
-
-                return deletedSpotcode;
-                // Refactor this
-                //TermUpdated(mpTerm, deletedSpotcode);
+                deletedSpotcode = mpTerm.Spotcode[mpTerm.Spotcode.Length - 1];
+            }
+            catch
+            {
+                return null;
             }
 
-            return null;
+
+            string? added = mpTerm.Added;
+            string? deleted = mpTerm.Deleted;
+            if (mediaPlan.version > 1)
+            {
+                var previousPairTerm = await GetPreviousVersionTerm(mediaPlan, mpTerm);
+                if (previousPairTerm != null)
+                {
+                    added = _mpTermConverter.CalculateMpTermAdded(newSpotcode, previousPairTerm.spotcode);
+                    deleted = _mpTermConverter.CalculateMpTermDeleted(newSpotcode, previousPairTerm.spotcode);
+                }
+            }
+
+            await _mediaPlanTermController.UpdateMediaPlanTerm(
+                new UpdateMediaPlanTermDTO(mpTerm.Xmptermid, mpTerm.Xmpid, mpTerm.Date, newSpotcode, added, deleted));
+
+            mpTerm.Added = added;
+            mpTerm.Deleted = deleted;
+            mpTerm.Spotcode = newSpotcode;
+
+            int numberOfDays = mpTerm.Date.DayNumber - DateOnly.FromDateTime(startDate).DayNumber;
+            totals[numberOfDays].Total -= 1;
+
+            return deletedSpotcode;
+            // Refactor this
+            //TermUpdated(mpTerm, deletedSpotcode);
+            
+
 
         }
 
@@ -853,7 +853,7 @@ namespace CampaignEditor.UserControls
 
         #endregion
 
-        #region Editing MediaPlan
+        #region Editing MediaPlan Coefs
 
         private void dgMediaPlans_PreparingCellForEdit(object sender, DataGridPreparingCellForEditEventArgs e)
         {

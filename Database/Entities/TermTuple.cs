@@ -11,12 +11,19 @@ namespace Database.Entities
         private SpotDTO _spot;
         private decimal _price;
         private int _status = 2;
+        private int _statusad = 0;
         public int chid = -1; // Only for assigning value to empty item
         public string ChannelName { get; set; }
         public int Status
         {
             get { return _status; }
             set { _status = value; }
+        }
+        // for added/deleted
+        public int StatusAD
+        {
+            get { return _statusad; }
+            set { _statusad = value; }
         }
 
         public string StatusStr
