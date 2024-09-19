@@ -45,6 +45,7 @@ namespace CampaignEditor
         private bool isReadOnly = true;
 
         public event EventHandler UpdateValidation;
+        public event EventHandler<UpdatedTermDateAndChannelEventArgs> UpdateTermDateAndChannel;
         public CampaignForecastView(IMediaPlanRefRepository mediaPlanRefRepository,
             IDatabaseFunctionsRepository databaseFunctionsRepository,
             IMediaPlanVersionRepository mediaPlanVersionRepository,
@@ -152,6 +153,12 @@ namespace CampaignEditor
             _forecast.SetLoadingPage += _forecast_SetLoadingPage;
             _forecast.UpdateProgressBar += _forecast_UpdateProgressBar;
             _forecast.SetContentPage += _forecast_SetContentPage;
+            _forecast.UpdatedTermDateAndChannel += _forecast_UpdatedTermDateAndChannel;
+        }
+
+        private void _forecast_UpdatedTermDateAndChannel(object? sender, UpdatedTermDateAndChannelEventArgs e)
+        {
+            UpdateTermDateAndChannel?.Invoke(this, e);
         }
 
         private void ForecastDates_CancelButtonClicked(object sender, EventArgs e)

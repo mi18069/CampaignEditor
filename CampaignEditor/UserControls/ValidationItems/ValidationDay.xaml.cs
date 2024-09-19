@@ -187,7 +187,7 @@ namespace CampaignEditor.UserControls.ValidationItems
             int realCount = 0;
 
             if (_termTuples.Count > 0)
-                exCount = GetViewExpected.Where(tt => tt != null && tt.Status != -1).Count();
+                exCount = GetViewExpected.Where(tt => tt != null && tt.Status != -1 && tt.StatusAD != 2).Count();
             if (_mpRealizedTuples.Count > 0)
                 realCount = GetViewRealized.Where(rt => rt != null && rt.status != -1).Count(); 
             

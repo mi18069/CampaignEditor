@@ -85,30 +85,6 @@
                         PreviewKeyDown="DataGrid_PreviewKeyDown"
                       ScrollViewer.ScrollChanged="dgExpected_ScrollChanged"
                       Loaded="dgExpected_Loaded">
-                <!--<DataGrid.RowStyle>
-                    <Style TargetType="DataGridRow">
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding Status}" Value="-1">
-                                <Setter Property="Background" Value="Transparent"></Setter>
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding Status}" Value="0">
-                                <Setter Property="Background" Value="LightGray"></Setter>
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding Status}" Value="1">
-                                <Setter Property="Background" Value="LightGreen"></Setter>
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding Status}" Value="2">
-                                <Setter Property="Background" Value="OrangeRed"></Setter>
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding StatusAD}" Value="1">
-                                <Setter Property="Background" Value="YellowGreen"></Setter>
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding StatusAD}" Value="2">
-                                <Setter Property="Background" Value="Gray"></Setter>
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </DataGrid.RowStyle> -->
                 <DataGrid.RowStyle>
                     <Style TargetType="DataGridRow">
                         <Setter Property="Background">

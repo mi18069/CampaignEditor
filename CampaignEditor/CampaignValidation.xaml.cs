@@ -66,6 +66,9 @@ namespace CampaignEditor
         private IAbstractFactory<PairSpots> _factoryPairSpots;
         private IEnumerable<int> uniqueSpotNums;
 
+        //For delegating changes from forecast when terms are changed
+        private Dictionary<DateOnly, HashSet<ChannelDTO>> _updatedTerms = new Dictionary<DateOnly, HashSet<ChannelDTO>>();
+
         public CampaignValidation(
             IChannelCmpRepository channelCmpRepository,
             IChannelRepository channelRepository,
@@ -246,6 +249,111 @@ namespace CampaignEditor
             _dateExpectedDict[date].AddRange(results.SelectMany(x => x));*/
         }
 
+        #region Propagation of changed terms in forecast
+
+        // While changing terms in forecast, we're adding keys and values into dictionary.
+        public void AddIntoUpdatedTerms(DateOnly date, ChannelDTO channel)
+        {
+            if (!_updatedTerms.ContainsKey(date))
+            {
+                _updatedTerms[date] = new HashSet<ChannelDTO>();
+            }
+
+            var channelSet = (HashSet<ChannelDTO>)_updatedTerms[date];
+            channelSet.Add(channel);
+        }
+        // We check for changes in forecast and propagate them into validation
+        public async Task CheckUpdatedTerms()
+        {
+            foreach (var date in _updatedTerms.Keys)
+            {
+                foreach (var channel in _updatedTerms[date])
+                {
+                    RecalculateExpectedDictDateChannel(date, channel);
+                    ClearEmptyRealizedDictDateChannel(date, channel);
+                }
+                // Bad approach, better would be if we have function which aligns with date and channel
+                await AlignExpectedRealized(date);
+                _updatedTerms.Remove(date);
+                validationStack.RefreshDate(date);
+            }
+        }
+
+        private void RecalculateExpectedDictDateChannel(DateOnly date, ChannelDTO channel)
+        {
+            if (!_dateExpectedDict.ContainsKey(date))
+            {
+                _dateExpectedDict[date] = new List<TermTuple?>();
+            }
+
+            var newData = GetExpectedByDateAndChannel(date, channel);
+            var firstTuple = _dateExpectedDict[date].FirstOrDefault(tt => tt != null && tt.MediaPlan.chid == channel.chid);
+            var tupleCount = _dateExpectedDict[date].Count(tt => tt != null && tt.MediaPlan.chid == channel.chid);
+            // No channel instances found, just add new insertations
+            if (firstTuple == null)
+            {
+                var channelIndex = _channels.IndexOf(channel);
+                int indexBefore = channelIndex-1;
+                int indexToInsert = 0;
+                while(indexBefore >= 0)
+                {
+                    var lastBefore = _dateExpectedDict[date].LastOrDefault(tt => tt != null && tt.MediaPlan.chid == _channels[indexBefore].chid);
+                    if (lastBefore != null)
+                    {
+                        indexToInsert = _dateExpectedDict[date].LastIndexOf(lastBefore) + 1;
+                        break;
+                    }
+                    indexBefore--;
+                }
+
+                if (indexToInsert == _dateExpectedDict[date].Count)
+                    _dateExpectedDict[date].AddRange(newData);
+                else
+                    _dateExpectedDict[date].InsertRange(indexToInsert, newData);
+
+            }
+            // Replace existing terms with new terms
+            else
+            {
+                int firstIndexToRemove = _dateExpectedDict[date].IndexOf(firstTuple);
+                _dateExpectedDict[date].RemoveRange(firstIndexToRemove, tupleCount);
+                _dateExpectedDict[date].InsertRange(firstIndexToRemove, newData);
+            }
+
+        }
+
+        private void ClearEmptyRealizedDictDateChannel(DateOnly date, ChannelDTO channel)
+        {
+            if (!_dateRealizedDict.ContainsKey(date))
+            {
+                return;
+            }
+            int? chrdsid = _forecastData.ChrdsidChidDict.FirstOrDefault(dict => dict.Value == channel.chid).Key;
+            if (chrdsid == null)
+                return;
+
+            var firstMP = _dateRealizedDict[date].FirstOrDefault(mpR => mpR != null && mpR.chid == chrdsid);
+            var lastMP = _dateRealizedDict[date].LastOrDefault(mpR => mpR != null && mpR.chid == chrdsid);
+
+            if (firstMP == null || lastMP == null)
+                return;
+
+            int firstIndex = _dateRealizedDict[date].IndexOf(firstMP);
+            int lastIndex = _dateRealizedDict[date].IndexOf(lastMP);
+
+            for (int i=firstIndex; i<=lastIndex; i++)
+            {
+                if (_dateRealizedDict[date][i].Status == null)
+                {
+                    _dateRealizedDict[date].RemoveAt(i);
+                    i--;
+                    lastIndex--;
+                }
+            }
+        }
+
+        #endregion
+
         private void InitializeRealizedDict()
         {
             _dateRealizedDict.Clear();
@@ -301,8 +409,8 @@ namespace CampaignEditor
         {
             if (alignDate != null)
             {
-                _dateExpectedDict[alignDate.Value] = _dateExpectedDict[alignDate.Value].Where(tt => tt.Status != -1).ToList();
-                _dateRealizedDict[alignDate.Value] = _dateRealizedDict[alignDate.Value].Where(mpR => mpR.Status != -1).ToList();
+                _dateExpectedDict[alignDate.Value] = _dateExpectedDict[alignDate.Value].Where(tt => tt != null && tt.Status != -1).ToList();
+                _dateRealizedDict[alignDate.Value] = _dateRealizedDict[alignDate.Value].Where(mpR => mpR != null && mpR.Status != null).ToList();
                 await AlignExpectedRealizedByDate(_dateExpectedDict[alignDate.Value], _dateRealizedDict[alignDate.Value]);
             }
             else
@@ -396,7 +504,6 @@ namespace CampaignEditor
             int k = 0;
             while (k < n && k < m)
             {
-
                 int expectedTime = TimeFormat.RepresentativeToMins(expected[k].MediaPlan.Blocktime);
                 int realizedTime = (int)realized[k].stime / (int)60;
 
@@ -522,13 +629,9 @@ namespace CampaignEditor
             // All realized used, fill the rest of expected
             while (k < n)
             {
-                expected[k].Status = 2;
+                expected[k]!.Status = 2;
                 //AddEmptyRealized(realized, k, realized[m-1].chid.Value);
-                int chrdsid = -1;
-                if (k == 0)
-                    chrdsid = _forecastData.ChrdsidChidDict.First(c => c.Value == expected[k].MediaPlan.chid).Key;
-                else                
-                    chrdsid = realized[k - 1].chid.Value;
+                int chrdsid = _forecastData.ChrdsidChidDict.First(c => c.Value == expected[k].MediaPlan.chid).Key;
                 
                 AddEmptyRealized(realized, k, chrdsid);
                 k++;
@@ -1094,5 +1197,6 @@ namespace CampaignEditor
             factory.ShowDialog();
 
         }
+
     }
 }

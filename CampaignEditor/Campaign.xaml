@@ -12,13 +12,13 @@
         <local:ToThirdConverterM4 x:Key="toThirdConverter" />
     </Window.Resources>
     <Grid>
-        <TabControl x:Name="tcTabs" >
+        <TabControl x:Name="tcTabs" SelectionChanged="tcTabs_SelectionChanged" >
             <TabItem x:Name="tiOverview" Header="Overview"
                      Height="50"  Width="{Binding ElementName=tcTabs, Path=ActualWidth, Converter={StaticResource toThirdConverter}}"/>
             <TabItem x:Name="tiForecast" Header="Forecast" Width="{Binding ElementName=tcTabs, Path=ActualWidth, Converter={StaticResource toThirdConverter}}"
                      Height="50"/>
             <TabItem x:Name="tiValidation" Header="Validation" Width="{Binding ElementName=tcTabs, Path=ActualWidth, Converter={StaticResource toThirdConverter}}"
-                     Height="50"/>
+                     Height="50" />
         </TabControl>
     </Grid>
 </Window>

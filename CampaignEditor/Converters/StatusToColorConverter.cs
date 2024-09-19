@@ -19,7 +19,7 @@ namespace CampaignEditor.Converters
                 if (status == 2)
                     return Brushes.OrangeRed;
                 if (status == 1)
-                    return Brushes.Green;
+                    return Brushes.LightGreen;
 
             }
 

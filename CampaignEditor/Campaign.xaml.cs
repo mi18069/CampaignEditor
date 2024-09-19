@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using Database.Entities;
+using Database.DTOs.ChannelDTO;
 
 namespace CampaignEditor
 {
@@ -117,9 +118,18 @@ namespace CampaignEditor
             factoryCampaignValidation.SetLoadingPage += FactoryCampaignValidation_SetLoadingPage;
             factoryCampaignValidation.SetContentPage += FactoryCampaignValidation_SetContentPage;
             
+            
             factoryCampaignForecastView.UpdateValidation += ForecastView_UpdateValidation;
+            factoryCampaignForecastView.UpdateTermDateAndChannel += FactoryCampaignForecastView_UpdateTermDateAndChannel;
 
             BindEvents();
+        }
+
+        private void FactoryCampaignForecastView_UpdateTermDateAndChannel(object? sender, UpdatedTermDateAndChannelEventArgs e)
+        {
+            var date = e.Date;
+            var channel = e.Channel;
+            TermUpdatedInForecast(date, channel);
         }
 
         private void FactoryCampaignValidation_SetContentPage(object? sender, EventArgs e)
@@ -291,12 +301,37 @@ namespace CampaignEditor
             factoryCampaignOverview.ClosePageEvent -= Page_ClosePageEvent;
             factoryCampaignForecastView.CloseForecast();
             factoryCampaignForecastView.UpdateValidation -= ForecastView_UpdateValidation;
+            factoryCampaignForecastView.UpdateTermDateAndChannel -= FactoryCampaignForecastView_UpdateTermDateAndChannel;
             UnbindOverviewForecastEvents();
             UnbindEvents();
             factoryCampaignValidation.CloseValidation();
 
             CampaignEventLinker.RemoveCampaign(_campaign.cmpid);
         }
+
+        private async void tcTabs_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (tcTabs.SelectedIndex == 2)
+            {
+                if (factoryCampaignValidation == null)
+                    return;
+
+                await factoryCampaignValidation.CheckUpdatedTerms();
+            }
+
+        }
+
+        // Different approach would be to pass the term, and in validation extract informations 
+        // for date and channel. That proach would enable not to propagate changes
+        // if some term is changed back to original state, but with additional checkings
+        private void TermUpdatedInForecast(DateOnly date, ChannelDTO channel)
+        {
+            if (factoryCampaignValidation == null)
+                return;
+
+            factoryCampaignValidation.AddIntoUpdatedTerms(date, channel);
+        }
+
 
     }
 }

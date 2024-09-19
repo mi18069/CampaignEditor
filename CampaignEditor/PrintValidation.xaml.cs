@@ -429,7 +429,7 @@ namespace CampaignEditor
 
                     }
                     worksheet.Cells[rowOff, colOff, rowOff, colOff + colNum - 1].Style.Fill.PatternType = ExcelFillStyle.Solid;
-                    worksheet.Cells[rowOff, colOff, rowOff, colOff + colNum - 1].Style.Fill.BackgroundColor.SetColor(SetColorByStatus(termTuple.Status));
+                    worksheet.Cells[rowOff, colOff, rowOff, colOff + colNum - 1].Style.Fill.BackgroundColor.SetColor(SetExpectedColorByStatus(termTuple.Status, termTuple.StatusAD));
                     rowOff++;
 
                 }
@@ -678,6 +678,31 @@ namespace CampaignEditor
             }
 
 
+        }
+
+        private System.Drawing.Color SetExpectedColorByStatus(int status, int statusad = 0)
+        {
+            switch (statusad)
+            {
+                case 1: return System.Drawing.Color.YellowGreen;
+                case 2: return System.Drawing.Color.Gray;
+                default: break;
+            }
+
+            switch (status)
+            {
+                case -2: return System.Drawing.Color.BlueViolet; // For row representing date
+                case -1: return System.Drawing.Color.Transparent;
+                case 0: return System.Drawing.Color.LightGray;
+                case 1: return System.Drawing.Color.LightGreen;
+                case 2: return System.Drawing.Color.OrangeRed;
+                case 3: return System.Drawing.Color.Green;
+                case 4: return System.Drawing.Color.Orange;
+                case 5: return System.Drawing.Color.PaleVioletRed;
+                case 6: return System.Drawing.Color.Violet;
+                case 7: return System.Drawing.Color.Cyan;
+                default: return System.Drawing.Color.Transparent;
+            }
         }
 
         private System.Drawing.Color SetColorByStatus(int? status)

@@ -87,6 +87,7 @@ namespace CampaignEditor.UserControls
         private bool gridFirstOpening = true;
 
         public event PropertyChangedEventHandler? PropertyChanged;
+        public event EventHandler<UpdatedTermDateAndChannelEventArgs> UpdatedTermDateAndChannel;
         public void OnPropertyChanged([CallerMemberName] string propertyname = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyname));
@@ -1418,6 +1419,9 @@ namespace CampaignEditor.UserControls
             sdgGrid.RecalculateGoals(channel, date, spot, true);
             swgGrid.RecalculateGoals(channel, date, spot, true);
             cgGrid.RecalculateGoals(channel.chid);
+
+            // For propagating changes in validation
+            UpdatedTermDateAndChannel?.Invoke(this, new UpdatedTermDateAndChannelEventArgs(date, channel));
         }
 
         #endregion
