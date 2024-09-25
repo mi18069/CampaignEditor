@@ -70,6 +70,7 @@ namespace CampaignEditor
                     services.AddFormFactory<ClientBrands>();
                     services.AddFormFactory<PrintValidation>();
                     services.AddFormFactory<PairSpots>();
+                    services.AddFormFactory<Cobranding>();
                     services.AddScoped<IDataContext, DataContext>();
                     // Add services
                     Extensions.UserExtensions.AddUserExtensions(services);
@@ -116,6 +117,7 @@ namespace CampaignEditor
                     Database.Extensions.ClientRealizedCoefsExtensions.AddClientRealizedCoefsExtensions(services);
                     Database.Extensions.RealizedSpotExtensions.AddRealizedSpotExtensions(services);
                     Database.Extensions.SpotPairExtensioins.AddSpotPairExtensions(services);
+                    Database.Extensions.CobrandExtensions.AddCobrandExtensions(services);
 
                 }).Build();
 
