@@ -476,9 +476,9 @@ namespace CampaignEditor.UserControls
             var enabledCellColor = Brushes.Green;
             var disabledCellColor = Brushes.Goldenrod;
 
-            var addedCellColor = Brushes.YellowGreen;
-            var deletedCellColor = Brushes.Red;
-            var modifiedCellColor = Brushes.Violet;
+            var addedCellColor = Brushes.SteelBlue;
+            var deletedCellColor = Brushes.DarkGray;
+            var modifiedCellColor = Brushes.MediumVioletRed;
 
             // Create a column for each date
             foreach (DateTime date in dates)
@@ -497,6 +497,10 @@ namespace CampaignEditor.UserControls
                         // Apply the dimmed column style
                         enabledCellColor = Brushes.LightGreen;
                         disabledCellColor = Brushes.LightGoldenrodYellow;
+
+                        addedCellColor = Brushes.DodgerBlue;
+                        deletedCellColor = Brushes.Gray;
+                        modifiedCellColor = Brushes.PaleVioletRed;
                     }
                 }
 

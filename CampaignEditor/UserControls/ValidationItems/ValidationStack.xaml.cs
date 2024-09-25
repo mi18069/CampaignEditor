@@ -6,6 +6,7 @@ using Database.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -58,6 +59,7 @@ namespace CampaignEditor.UserControls.ValidationItems
         public UIElementCollection ValidationDays{ get {return spValidationDays.Children; } }
 
         public Dictionary<DateOnly, ValidationDay> ValidationDaysDict = new Dictionary<DateOnly, ValidationDay>();
+
         public ValidationStack()
         {
             InitializeComponent();
@@ -174,6 +176,7 @@ namespace CampaignEditor.UserControls.ValidationItems
             validationDay.ProgcoefChangedMediaPlanRealized += ValidationDay_ProgcoefChangedMediaPlanRealized;
             validationDay.CompletedValidationChanged += ValidationDay_CompletedValidationChanged;
             validationDay.CheckNewDataDay += ValidationDay_CheckNewDataDay;
+            validationDay.DgExpectedSizeChanged += ValidationDay_DgExpectedSizeChanged;
             /*validationDay.GridOpened += ValidationDay_GridOpened;
             validationDay.GridClosed += ValidationDay_GridClosed;*/
             spValidationDays.Children.Add(validationDay);
@@ -181,6 +184,18 @@ namespace CampaignEditor.UserControls.ValidationItems
             ValidationDaysDict[date] = validationDay;
 
         }
+
+        private void ValidationDay_DgExpectedSizeChanged(object? sender, SizeChangedEventArgs e)
+        {    
+            double newWidth = e.NewSize.Width;
+            foreach (ValidationDay validationDay in spValidationDays.Children)
+            {
+                if (validationDay == sender)
+                    continue;
+                validationDay.SetWidthExpected(newWidth);
+            }
+        }
+
 
         private void ValidationDay_ProgcoefChangedMediaPlanRealized(object? sender, UpdateMediaPlanRealizedEventArgs e)
         {

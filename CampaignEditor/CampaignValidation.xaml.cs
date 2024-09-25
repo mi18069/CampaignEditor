@@ -397,13 +397,13 @@ namespace CampaignEditor
             NULL - NEW
             -1 - EMPTY ITEM
             0 - UNDEFINED
+
             1 - OK
-            2 - NOT OK
-            3 - SAME HOUR
-            4 - +- 1 HOUR
-            5 - CHANGED VALUES SINCE LAST UPDATING  
-            6 - DIFFERENT COEFS
-            7 - DIFFERENT DURE DURF
+            2 - CHANGED COEFS
+            3 - GRATIS
+            4 - GRATIS 2
+            5 - NOT OK
+            6 - WARNING
          */
         private async Task AlignExpectedRealized(DateOnly? alignDate = null)
         {
@@ -459,11 +459,11 @@ namespace CampaignEditor
 
             if (Math.Abs(mpR.dure.Value - mpR.durf.Value) > 1)
             {
-                mpR.status = 7;
+                mpR.status = 6;
             }
             else if (tt == null)
             {
-                mpR.status = 2;
+                mpR.status = 5;
             }
             else if (tt.Progcoef - mpR.Progcoef > eps || tt.CoefA - mpR.CoefA > eps ||
                 tt.CoefB - mpR.CoefB > eps && tt.Seascoef - mpR.Seascoef > eps || 
@@ -568,7 +568,7 @@ namespace CampaignEditor
                                 if (nextExpected.MediaPlan.chid == expected[k].MediaPlan.chid &&
                                     Math.Abs(expectedTime - nextExpectedTime) <= minPeriod)
                                 {
-                                    expected[k].Status = 2;
+                                    expected[k].Status = 5;
                                     AddEmptyRealized(realized, k, realized[k].chid.Value);
                                     m++;
                                     betterPairFound = true;
@@ -597,7 +597,7 @@ namespace CampaignEditor
                         // Add empty realized row
                         else
                         {
-                            expected[k].Status = 2;
+                            expected[k].Status = 5;
                             AddEmptyRealized(realized, k, realized[k].chid.Value);
                             m++;
                         }
@@ -609,7 +609,7 @@ namespace CampaignEditor
                     // Add empty realized row
                     if (_chidOrder[expectedChid] < _chidOrder[realizedChid])
                     {
-                        expected[k].Status = 2;
+                        expected[k].Status = 5;
                         //AddEmptyRealized(realized, k, realized[k].chid.Value);
                         AddEmptyRealized(realized, k, _forecastData.ChrdsidChidDict.First(dict => dict.Value == expectedChid).Key);
                         m++;
@@ -629,7 +629,7 @@ namespace CampaignEditor
             // All realized used, fill the rest of expected
             while (k < n)
             {
-                expected[k]!.Status = 2;
+                expected[k]!.Status = 5;
                 //AddEmptyRealized(realized, k, realized[m-1].chid.Value);
                 int chrdsid = _forecastData.ChrdsidChidDict.First(c => c.Value == expected[k].MediaPlan.chid).Key;
                 
@@ -1136,7 +1136,7 @@ namespace CampaignEditor
                 {
                     mpRealized.Progcoef = coefs.progcoef;
                     _mpConverter.CalculateRealizedPrice(mpRealized);
-                    mpRealized.Status = 5;
+                    mpRealized.Status = 2;
                     await _mediaPlanRealizedController.UpdateMediaPlanRealized(mpRealized);
                 }
             }
@@ -1151,7 +1151,7 @@ namespace CampaignEditor
                 {
                     decimal oldProgcoef = mpRealized.progcoef;
                     mpRealized.progcoef = coefs.progcoef;
-                    mpRealized.status = 5;
+                    mpRealized.status = 2;
                     decimal quotient = coefs.progcoef / oldProgcoef;
                     mpRealized.price *= quotient;
                     await _mediaPlanRealizedController.UpdateMediaPlanRealized(new UpdateMediaPlanRealizedDTO(mpRealized));

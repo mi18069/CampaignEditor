@@ -120,7 +120,7 @@ namespace CampaignEditor
                     if (first)
                     {
                         var excelCell = worksheet.Cells[rowOff + rowOffset, colOff];
-                        excelCell.Value = DateOnly.FromDateTime(date);
+                        excelCell.Value = DateOnly.FromDateTime(date).ToShortDateString();
                         excelCell.Style.Border.Bottom.Style = ExcelBorderStyle.Thick;
                         excelCell.Style.Border.Bottom.Color.SetColor(System.Drawing.Color.Black);
 
@@ -166,7 +166,7 @@ namespace CampaignEditor
             int colOffset = 0;
             if (visibleColumns[0])
             {
-                worksheet.Cells[rowOff, colOff + colOffset].Value = term.Date;
+                worksheet.Cells[rowOff, colOff + colOffset].Value = term.Date.ToShortDateString();
                 colOffset += 1;
             }
             if (visibleColumns[1])

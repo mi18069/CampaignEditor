@@ -218,7 +218,7 @@ namespace CampaignEditor
                 if (separateByDays)
                 {
                     //worksheet.Cells[rowOff, colOff].Value = date.ToShortDateString();
-                    worksheet.Cells[rowOff, colOff].Value = date;
+                    worksheet.Cells[rowOff, colOff].Value = date.ToShortDateString();
                     // last +1 for coloring the next empty row to look homogenous
                     worksheet.Cells[rowOff, colOff, rowOff, colOff + colNum - 1 + 1].Style.Fill.PatternType = ExcelFillStyle.Solid;
                     worksheet.Cells[rowOff, colOff, rowOff, colOff + colNum - 1 + 1].Style.Fill.BackgroundColor.SetColor(SetColorByStatus(-2));
@@ -236,7 +236,7 @@ namespace CampaignEditor
                     if (mask[0] == '1')
                     {
                         //worksheet.Cells[rowOff, colOffset++].Value = termTuple.Date;
-                        worksheet.Cells[rowOff, colOffset++].Value = termTuple.DateOnly;
+                        worksheet.Cells[rowOff, colOffset++].Value = termTuple.Date;
                     }
                     if (mask[1] == '1')
                     {
@@ -456,8 +456,7 @@ namespace CampaignEditor
 
                 if (separateByDays)
                 {
-                    //worksheet.Cells[rowOff, colOff].Value = date.ToShortDateString();
-                    worksheet.Cells[rowOff, colOff].Value = date;
+                    worksheet.Cells[rowOff, colOff].Value = date.ToShortDateString();
                     worksheet.Cells[rowOff, colOff, rowOff, colOff + colNum - 1].Style.Fill.PatternType = ExcelFillStyle.Solid;
                     worksheet.Cells[rowOff, colOff, rowOff, colOff + colNum - 1].Style.Fill.BackgroundColor.SetColor(SetColorByStatus(-2));
                     rowOff++;
@@ -475,7 +474,7 @@ namespace CampaignEditor
                     if (mask[0] == '1')
                     {
                         //worksheet.Cells[rowOff, colOffset++].Value = TimeFormat.YMDStringToDateOnly(mediaPlanRealized.Date).ToShortDateString();
-                        worksheet.Cells[rowOff, colOffset++].Value = TimeFormat.YMDStringToDateOnly(mediaPlanRealized.Date);
+                        worksheet.Cells[rowOff, colOffset++].Value = TimeFormat.YMDStringToDateOnly(mediaPlanRealized.Date).ToShortDateString();
                     }
                     if (mask[1] == '1')
                     {

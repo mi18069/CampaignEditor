@@ -701,6 +701,8 @@ namespace CampaignEditor
                         if (mpTerm != null)
                         {
                             MediaPlanTermDTO mpTermDTO = _mpTermConverter.ConvertToDTO(mpTerm);
+                            mpTermDTO.added = null;
+                            mpTermDTO.deleted = null;
                             CreateMediaPlanTermDTO createMPTermDTO = new CreateMediaPlanTermDTO(mpTermDTO);
                             createMPTermDTO.xmpid = mediaPlan.xmpid;
                             await _mediaPlanTermController.CreateMediaPlanTerm(createMPTermDTO);

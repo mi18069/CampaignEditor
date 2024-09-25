@@ -36,6 +36,8 @@ namespace CampaignEditor.UserControls.ValidationItems
 
         public event EventHandler<UpdateMediaPlanRealizedEventArgs> UpdatedMediaPlanRealized;
         public event EventHandler<UpdateMediaPlanRealizedEventArgs> ProgcoefChangedMediaPlanRealized;
+        public event EventHandler<SizeChangedEventArgs> DgExpectedSizeChanged;
+        public event EventHandler<DoubleValueEventArgs> DgExpectedWidthChanged;
 
         bool hideExpected = false;
 
@@ -874,5 +876,23 @@ namespace CampaignEditor.UserControls.ValidationItems
                 dgRealized.Columns[i].Visibility = realizedGridMask[i] == '1' ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
             }*/
         }
+
+        private void dgExpected_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            // For propagation of changed dimensions of dataGrid so all grids are equal width
+            if (e.WidthChanged == true && e.NewSize.Width > 0)
+                DgExpectedSizeChanged?.Invoke(this, e);
+
+        }
+
+        public void SetWidthExpected(double width)
+        {
+            dgExpected.SizeChanged -= dgExpected_SizeChanged;
+            dgExpected.Width = width;
+            dgExpected.SizeChanged += dgExpected_SizeChanged;
+
+        }
+
+
     }
 }

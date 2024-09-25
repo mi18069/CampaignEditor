@@ -188,8 +188,10 @@ namespace CampaignEditor
             }
             else if (!(dpStartDate.SelectedDate.Value.Date > DateTime.Today.Date))
             {
-                MessageBox.Show("Start date must be set in future", "Result: ", MessageBoxButton.OK, MessageBoxImage.Exclamation);
-                return false;
+                if (MessageBox.Show("Start date is set in the past. Are you sure you want to proceed?", "Warning", MessageBoxButton.OKCancel, MessageBoxImage.Warning) == MessageBoxResult.Cancel)
+                    return false;
+                else
+                    return true;
             }          
             else
             {

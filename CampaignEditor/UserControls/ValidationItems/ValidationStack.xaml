@@ -17,8 +17,9 @@
         <ScrollViewer x:Name="svGrid" Grid.Row="1" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
             <StackPanel x:Name="spValidationDays"/>
         </ScrollViewer> -->
+
         <ScrollViewer x:Name="svGrid" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-            <StackPanel x:Name="spValidationDays"/>
+            <VirtualizingStackPanel x:Name="spValidationDays"/>
         </ScrollViewer>
     </Grid>
 </UserControl>
