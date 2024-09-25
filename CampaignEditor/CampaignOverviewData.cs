@@ -4,6 +4,7 @@ using Database.DTOs.BrandDTO;
 using Database.DTOs.CampaignDTO;
 using Database.DTOs.ChannelDTO;
 using Database.DTOs.CmpBrndDTO;
+using Database.DTOs.CobrandDTO;
 using Database.DTOs.DayPartDTO;
 using Database.DTOs.DPTimeDTO;
 using Database.DTOs.GoalsDTO;
@@ -28,6 +29,7 @@ namespace CampaignEditor
         private TargetController _targetController;
 
         private SpotController _spotController;
+        private CobrandController _cobrandController;
 
         private GoalsController _goalsController;
 
@@ -42,6 +44,7 @@ namespace CampaignEditor
 
         public CampaignOverviewData(ICmpBrndRepository cmpBrndRepo, IBrandRepository brandRepo,
             ITargetCmpRepository targetCmpRepo, ITargetRepository targetRepo, ISpotRepository spotRepo,
+            ICobrandRepository cobrandRepository,
             IGoalsRepository goalsRepo, IChannelCmpRepository channelCmpRepo, IChannelRepository channelRepo,
             IPricelistChannelsRepository pricelistChannelRepo, IPricelistRepository pricelistRepo,
             IActivityRepository activityRepo, IDayPartRepository dayPartRepository, IDPTimeRepository dPTimeRepository)
@@ -51,6 +54,7 @@ namespace CampaignEditor
             _targetCmpController = new TargetCmpController(targetCmpRepo);
             _targetController = new TargetController(targetRepo);
             _spotController = new SpotController(spotRepo);
+            _cobrandController = new CobrandController(cobrandRepository);
             _goalsController = new GoalsController(goalsRepo);
             _channelCmpController = new ChannelCmpController(channelCmpRepo);
             _channelController = new ChannelController(channelRepo);
@@ -98,6 +102,23 @@ namespace CampaignEditor
             }
 
             return spots;
+        }
+
+        public async Task<IEnumerable<CobrandDTO>> GetCobrands(int cmpid)
+        {
+
+            List<CobrandDTO> cobrands = new List<CobrandDTO>();
+            try
+            {
+                cobrands = (List<CobrandDTO>)await _cobrandController.GetAllCampaignCobrands(cmpid);
+                cobrands = cobrands.OrderBy(cb => cb.chid).ThenBy(cb => cb.spotcode).ToList();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"Cannot retrieve data for cobrands\n {ex.Message}");
+            }
+
+            return cobrands;
         }
 
         public async Task<GoalsDTO> GetGoals(int cmpid)

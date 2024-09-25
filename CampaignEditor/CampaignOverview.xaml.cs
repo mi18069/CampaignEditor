@@ -17,6 +17,8 @@ using System.Windows.Controls;
 using CampaignEditor.Helpers;
 using Database.DTOs.DayPartDTO;
 using Database.DTOs.DPTimeDTO;
+using Database.Entities;
+using Database.DTOs.CobrandDTO;
 
 namespace CampaignEditor
 {
@@ -29,6 +31,7 @@ namespace CampaignEditor
         private readonly IAbstractFactory<CmpInfo> _factoryInfo;
         private readonly IAbstractFactory<ClientDayParts> _factoryClientDayParts;
         private readonly IAbstractFactory<ClientBrands> _factoryClientBrands;
+        private readonly IAbstractFactory<Cobranding> _factoryCobranding;
 
         private readonly IAbstractFactory<PriceList> _factoryPriceList;
 
@@ -40,6 +43,8 @@ namespace CampaignEditor
         public bool isReadOnly = false;
 
         private List<SpotDTO> _spotlist = new List<SpotDTO>();
+
+        private List<CobrandDTO> _cobrands = new List<CobrandDTO>();
 
         private List<TargetDTO> _targetlist = new List<TargetDTO>();
 
@@ -68,7 +73,8 @@ namespace CampaignEditor
             IAbstractFactory<CampaignOverviewData> campaignOverviewData, 
             IAbstractFactory<ClientDayParts> factoryClientDayParts,
             IAbstractFactory<ClientBrands> factoryClientBrands,
-            IAbstractFactory<PriceList> factoryPriceList)
+            IAbstractFactory<PriceList> factoryPriceList,
+            IAbstractFactory<Cobranding> factoryCobranding)
         {
             this.DataContext = this;
             InitializeComponent();
@@ -83,6 +89,7 @@ namespace CampaignEditor
 
             _campaignOverviewData = campaignOverviewData.Create();
             _factoryPriceList = factoryPriceList;
+            _factoryCobranding = factoryCobranding;
         }
 
         #region Initialization
@@ -99,6 +106,7 @@ namespace CampaignEditor
                 btnGoals.IsEnabled = false;
                 btnChannels.IsEnabled = false;
                 btnDayParts.IsEnabled = false;
+                btnCobranding.IsEnabled = false;
                 //btnBrands.IsEnabled = false;
             }
 
@@ -109,13 +117,14 @@ namespace CampaignEditor
                 Task infoTask = Task.Run(() => InitializeInfo());
                 Task targetsTask = Task.Run(() => InitializeTargets());
                 Task spotsTask = Task.Run(() => InitializeSpots());
+                Task cobrandsTask = Task.Run(() => InitializeCobrands());
                 Task goalsTask = Task.Run(() => InitializeGoals());
                 Task channelsTask = Task.Run(() => InitializeChannels());
                 Task dayPartsTask = Task.Run(() => InitializeDayParts());
                 Task brandsTask = Task.Run(() => InitializeBrands());
 
                 // Wait for all tasks to complete
-                await Task.WhenAll(infoTask, targetsTask, spotsTask, goalsTask, channelsTask, dayPartsTask);
+                await Task.WhenAll(infoTask, targetsTask, spotsTask, cobrandsTask, goalsTask, channelsTask, dayPartsTask);
 
                 FillFields();
               
@@ -149,6 +158,10 @@ namespace CampaignEditor
         private async Task InitializeSpots()
         {
             _spotlist = await _campaignOverviewData.GetSpots(_campaign.cmpid);
+        }
+        private async Task InitializeCobrands()
+        {
+            _cobrands = (await _campaignOverviewData.GetCobrands(_campaign.cmpid)).ToList();
         }
         private async Task InitializeInfo()
         {
@@ -369,6 +382,26 @@ namespace CampaignEditor
             btnSpots.IsEnabled = true;
 
         }
+        #endregion
+
+        #region Cobranding
+
+        private void btnCobranding_Click(object sender, RoutedEventArgs e)
+        {
+            btnCobranding.IsEnabled = false;
+            try
+            {
+                var fCobranding = _factoryCobranding.Create();
+                fCobranding.Initialize(_campaign, _cobrands, _channels.Select(chn => chn.Item1), _spotlist);
+                fCobranding.ShowDialog();
+            }
+            catch
+            {
+                btnCobranding.IsEnabled = true;
+                return;
+            }
+        }
+
         #endregion
 
         #region Goals
