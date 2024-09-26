@@ -11,16 +11,35 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="auto"/>
         </Grid.RowDefinitions>
-        <DataGrid x:Name="dgGrid" Grid.Row="0" Margin="10" AutoGenerateColumns="False">
+        <DataGrid x:Name="dgGrid" Grid.Row="0" Margin="10, 20" 
+                  AutoGenerateColumns="False" CanUserReorderColumns="False" 
+                  CanUserSortColumns="False" HeadersVisibility="Column"
+                  BeginningEdit="dgGrid_BeginningEdit"
+                  CellEditEnding="dgGrid_CellEditEnding">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Channel" Binding="{Binding Channel.chname}"/>
-                <DataGridTextColumn Header="Status" Binding="{Binding Status}"/>
+                <DataGridTextColumn Header="Channel" Binding="{Binding Channel.chname}"
+                                    IsReadOnly="True"/>
                 <!-- Other columns will be added dynamically in the code-behind -->
             </DataGrid.Columns>
         </DataGrid>
-        <Button x:Name="btnClose" Grid.Row="1" Content="Close" 
+        <Grid Grid.Row="1" MinWidth="250">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="10"/>
+                <RowDefinition Height="auto"/>
+                <RowDefinition Height="10"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="auto"/>
+            </Grid.ColumnDefinitions>
+            <Button x:Name="btnClose" Grid.Row="1" Grid.Column="0" Content="Close" 
                 Width="100" Height="40"
-                Margin="10" HorizontalAlignment="Right"
+                HorizontalAlignment="Right"
                 Click="btnClose_Click"/>
+            <Button x:Name="btnSave" Grid.Row="1" Grid.Column="1" Content="Save" 
+                Width="100" Height="40" Margin="10, 0"
+                Click="btnSave_Click"/>
+        </Grid>
+        
     </Grid>
 </Window>

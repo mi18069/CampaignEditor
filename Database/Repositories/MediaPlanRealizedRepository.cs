@@ -423,6 +423,16 @@ namespace Database.Repositories
             return affected != 0;
         }
 
+        public async Task<bool> DeleteMediaPlanRealizedForCampaign(int cmpid)
+        {
+            using var connection = _context.GetConnection();
+
+            var affected = await connection.ExecuteAsync(
+                "DELETE FROM xmpre WHERE cmpid = @Cmpid", new { Cmpid = cmpid });
+
+            return affected != 0;
+        }
+
         public async Task<string> GetDedicatedSpotName(int spotid)
         {
             using var connection = _context.GetConnection();
@@ -459,5 +469,7 @@ namespace Database.Repositories
 
             return affected != 0;
         }
+
+
     }
 }

@@ -317,6 +317,8 @@ namespace CampaignEditor
             {
                 _channels = await _campaignOverviewData.GetChannelTuples(_campaign.cmpid);
                 dgChannels.ItemsSource = _channels;
+                await InitializeCobrands();
+
             }
             if (fChannels != null && !fChannels.channelsModified && fChannels.channelsOrderChanged)
             {
@@ -378,6 +380,7 @@ namespace CampaignEditor
                 _spotlist = fSpots.Spotlist.ToList();
                 dgSpots.ItemsSource = _spotlist;
                 SpotsUpdatedEvent?.Invoke(this, null);
+                await InitializeCobrands();
             }
             btnSpots.IsEnabled = true;
 
@@ -386,13 +389,14 @@ namespace CampaignEditor
 
         #region Cobranding
 
-        private void btnCobranding_Click(object sender, RoutedEventArgs e)
+        private async void btnCobranding_Click(object sender, RoutedEventArgs e)
         {
             btnCobranding.IsEnabled = false;
+            Cobranding fCobranding = null;
             try
             {
-                var fCobranding = _factoryCobranding.Create();
-                fCobranding.Initialize(_campaign, _cobrands, _channels.Select(chn => chn.Item1), _spotlist);
+                fCobranding = _factoryCobranding.Create();
+                fCobranding.Initialize(_campaign, _cobrands, _channels.Select(chn => chn.Item1), _spotlist.Select(s => s.spotcode.Trim()[0]));
                 fCobranding.ShowDialog();
             }
             catch
@@ -400,6 +404,13 @@ namespace CampaignEditor
                 btnCobranding.IsEnabled = true;
                 return;
             }
+            if (fCobranding != null && fCobranding.Modified)
+            {
+                await InitializeCobrands();
+            }
+
+            btnCobranding.IsEnabled = true;
+
         }
 
         #endregion

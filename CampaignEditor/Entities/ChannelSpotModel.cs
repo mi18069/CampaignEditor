@@ -16,19 +16,20 @@ namespace CampaignEditor.Entities
          * 2 - update in database
          * 3 - delete from database
         */
-        private int _status = -1;
-        public int Status { get { return _status; } }
+        private Dictionary<char, int> _statuses;
+        public Dictionary<char, int> Statuses { get { return _statuses; } }
 
         public ChannelSpotModel(ChannelDTO channel, List<char> spotcodes)
         {
             Channel = channel;
             SpotCoefficients = spotcodes.ToDictionary(sc => sc, sc => 1.0m); // Default coefficient is 1.0
+            _statuses = spotcodes.ToDictionary(sc => sc, sc => -1);
         }
 
         public void InitializeCoef(char spotcode, decimal value)
         {
             SpotCoefficients[spotcode] = value;
-            _status = 0;
+            _statuses[spotcode] = 0;
         }
         public void SetCoef(char spotcode, decimal value)
         {
@@ -36,27 +37,27 @@ namespace CampaignEditor.Entities
             
             if (value != 1.0M)
             {
-                switch (_status)
+                switch (_statuses[spotcode])
                 {
                     case -1: // not in database
-                        _status = 1; break; // create
+                        _statuses[spotcode] = 1; break; // create
                     case 0: // already in database
-                        _status = 2; break; // update
+                        _statuses[spotcode] = 2; break; // update
                     default: break;
                 }
             }
             else
             {
-                switch (_status)
+                switch (_statuses[spotcode])
                 {
                     case -1: // not in database
                         break; // pass
                     case 0: // already in database
-                        _status = 3; break; // delete
+                        _statuses[spotcode] = 3; break; // delete
                     case 1: // not in database
-                        _status = -1; break; // mark as initial
+                        _statuses[spotcode] = -1; break; // mark as initial
                     case 2: // in database
-                        _status = 3; break; // delete
+                        _statuses[spotcode] = 3; break; // delete
                     default: break;
                 }
             }

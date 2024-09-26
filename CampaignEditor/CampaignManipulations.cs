@@ -17,12 +17,17 @@ namespace CampaignEditor
         private SpotController _spotController;
         private ChannelCmpController _channelCmpController;
         private ClientCoefsController _clientProgcoefController;
+        private CobrandController _cobrandController;
+        private SpotPairController _spotPairController;
+        private MediaPlanRealizedController _mediaPlanRealizedController;
 
         public CampaignManipulations(ICampaignRepository campaignRepository,
             IMediaPlanRefRepository mediaPlanRefRepository,
             ICmpBrndRepository cmpBrndRepository, IGoalsRepository goalsRepository,
             ITargetCmpRepository targetCmpRepository, ISpotRepository spotRepository,
-            IChannelCmpRepository channelCmpRepository, IClientCoefsRepository clientProgCoefRepository)
+            IChannelCmpRepository channelCmpRepository, IClientCoefsRepository clientProgCoefRepository,
+            ICobrandRepository cobrandRepository, ISpotPairRepository spotPairRepository,
+            IMediaPlanRealizedRepository mediaPlanRealizedRepository)
         {
             _campaignController = new CampaignController(campaignRepository);
             _mediaPlanRefController = new MediaPlanRefController(mediaPlanRefRepository);
@@ -32,6 +37,9 @@ namespace CampaignEditor
             _spotController = new SpotController(spotRepository);
             _channelCmpController = new ChannelCmpController(channelCmpRepository);
             _clientProgcoefController = new ClientCoefsController(clientProgCoefRepository);
+            _cobrandController = new CobrandController(cobrandRepository);
+            _spotPairController = new SpotPairController(spotPairRepository);
+            _mediaPlanRealizedController = new MediaPlanRealizedController(mediaPlanRealizedRepository);    
         }
 
         public async Task<bool> DuplicateCampaign(CampaignDTO oldCampaign, CampaignDTO newCampaign)
@@ -110,7 +118,11 @@ namespace CampaignEditor
                 // Deleting Forecast
                 await _campaignController.DeleteCampaignInitialization(campaign.cmpid);
                 await _mediaPlanRefController.DeleteMediaPlanRefById(campaign.cmpid);
-                await _clientProgcoefController.DeleteClientCoefsByClientId(campaign.clid);
+                //await _clientProgcoefController.DeleteClientCoefsByClientId(campaign.clid);
+
+                // Deleting Validation
+                await _mediaPlanRealizedController.DeleteMediaPlanRealizedForCampaign(campaign.cmpid);
+                await _spotPairController.DeleteAllCampaignSpotPairs(campaign.cmpid);
 
                 // Deleting connections with campaign
                 await _channelCmpController.DeleteChannelCmpByCmpid(campaign.cmpid);
@@ -118,6 +130,7 @@ namespace CampaignEditor
                 await _targetCmpController.DeleteTargetCmpByCmpid(campaign.cmpid);
                 await _goalsController.DeleteGoalsByCmpid(campaign.cmpid);
                 await _cmpBrndController.DeleteBrandByCmpId(campaign.cmpid);
+                await _cobrandController.DeleteCampaignCobrands(campaign.cmpid);
 
                 // Deleting campaign
                 await _campaignController.DeleteCampaignById(campaign.cmpid);

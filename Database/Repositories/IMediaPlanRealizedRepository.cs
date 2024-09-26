@@ -17,6 +17,7 @@ namespace Database.Repositories
         Task<bool> UpdateMediaPlanRealized(UpdateMediaPlanRealizedDTO mediaPlanRealizedDTO);
         Task<bool> UpdateMediaPlanRealized(MediaPlanRealized mediaPlanRealized);
         Task<bool> DeleteMediaPlanRealizedById(int id);
+        Task<bool> DeleteMediaPlanRealizedForCampaign(int cmpid);
         Task<string> GetDedicatedSpotName(int spotid);
         Task<List<Tuple<int, string>>> GetAllSpotNumSpotNamePairs(int cmpid);
 

@@ -61,6 +61,9 @@ namespace CampaignEditor.Controllers
             return await _repository.DeleteMediaPlanRealizedById(id);
         }
 
+        public async Task<bool> DeleteMediaPlanRealizedForCampaign(int cmpid)
+        => await _repository.DeleteMediaPlanRealizedForCampaign(cmpid);
+
         public async Task<string> GetDedicatedSpotName(int spotid)
         {
             return await _repository.GetDedicatedSpotName(spotid);
