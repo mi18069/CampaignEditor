@@ -3,7 +3,7 @@ namespace Database.DTOs.MediaPlanRealizedDTO
 {
     public class BaseMediaPlanRealizedDTO
     {
-        public BaseMediaPlanRealizedDTO(int cmpid, string name, int stime, int etime, string stimestr, string etimestr, int chid, int dure, int durf, string date, int emsnum, int posinbr, int totalspotnum, int breaktype, int spotnum, int brandnum, decimal amrp1, decimal amrp2, decimal amrp3, decimal amrpsale, decimal cpp, decimal dpcoef, decimal seascoef, decimal seccoef, decimal progcoef, decimal price, int status, decimal chcoef, decimal coefA, decimal coefB, bool accept)
+        public BaseMediaPlanRealizedDTO(int cmpid, string name, int stime, int etime, string stimestr, string etimestr, int chid, int dure, int durf, string date, int emsnum, int posinbr, int totalspotnum, int breaktype, int spotnum, int brandnum, decimal amrp1, decimal amrp2, decimal amrp3, decimal amrpsale, decimal cpp, decimal dpcoef, decimal seascoef, decimal seccoef, decimal progcoef, decimal price, int status, decimal chcoef, decimal coefA, decimal coefB, decimal cbrcoef, bool accept)
         {
             this.cmpid = cmpid;
             this.name = name;
@@ -35,6 +35,7 @@ namespace Database.DTOs.MediaPlanRealizedDTO
             this.chcoef = chcoef;
             this.coefA = coefA;
             this.coefB = coefB;
+            this.cbrcoef = cbrcoef;
             this.accept = accept;
         }
 
@@ -68,6 +69,7 @@ namespace Database.DTOs.MediaPlanRealizedDTO
         public decimal chcoef { get; set; }
         public decimal coefA { get; set; }
         public decimal coefB { get; set; }
+        public decimal cbrcoef { get; set; }
         public bool accept { get; set; }
 
     }

@@ -40,7 +40,7 @@ namespace CampaignEditor
 
         private readonly IMapper _mapper;
 
-        private bool[] visibleColumns = new bool[33];
+        private bool[] visibleColumns = new bool[34];
         public List<MediaPlanTuple> visibleTuples = new List<MediaPlanTuple>();
 
 

@@ -136,6 +136,7 @@
                     <DataGridTextColumn x:Name="tcESeccoef" Header="Sec coef" Binding="{Binding Path=Seccoef, Converter={StaticResource RoundValueConverter}}"/>
                     <DataGridTextColumn x:Name="tcECoefA" Header="Coef A" Binding="{Binding Path=CoefA, Converter={StaticResource RoundValueConverter}}"/>
                     <DataGridTextColumn x:Name="tcECoefB" Header="Coef B" Binding="{Binding Path=CoefB, Converter={StaticResource RoundValueConverter}}"/>
+                    <DataGridTextColumn x:Name="tcECbrcoef" Header="Cbr coef" Binding="{Binding Path=Cbrcoef, Converter={StaticResource RoundValueConverter}}"/>
                     <DataGridTextColumn x:Name="tcESpot" Header="Spot" Binding="{Binding Path=Spot.SpotName}" Visibility="Collapsed" MaxWidth="200"/>
                     <DataGridTextColumn x:Name="tcESpotlength" Header="Spot len" Binding="{Binding Path=Spotlength}"/>
                     <DataGridTextColumn x:Name="tcESpotcode" Header="Spotcode" Binding="{Binding Path=Spot.spotcode}"/>
@@ -253,6 +254,7 @@
                                         IsReadOnly="True"/>
                     <DataGridTextColumn x:Name="tcRCoefA" Header="Coef A" Binding="{Binding Path=CoefA, Converter={StaticResource RoundValueConverter}}"/>
                     <DataGridTextColumn x:Name="tcRCoefB" Header="Coef B" Binding="{Binding Path=CoefB, Converter={StaticResource RoundValueConverter}}"/>
+                    <DataGridTextColumn x:Name="tcRCbrcoef" Header="Cbr coef" Binding="{Binding Path=Cbrcoef, Converter={StaticResource RoundValueConverter}}"/>
                     <DataGridTextColumn x:Name="tcRPrice" Header="Price" Binding="{Binding Path=price, Converter={StaticResource RoundValueConverter}}"
                                         IsReadOnly="True"/>
                     <DataGridTextColumn x:Name="tcRStatus" Header="Status" Binding="{Binding Path=Status}" 

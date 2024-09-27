@@ -67,6 +67,8 @@ namespace CampaignEditor
         public event EventHandler TargetsUpdatedEvent;
         public event EventHandler SpotsUpdatedEvent;
         public event EventHandler DayPartsUpdatedEvent;
+        public event EventHandler<UpdateCobrandsEventArgs> CobrandsUpdatedEvent;
+
         public CampaignOverview(IAbstractFactory<AssignTargets> factoryAssignTargets,
             IAbstractFactory<Channels> factoryChannels, IAbstractFactory<Spots> factorySpots,
             IAbstractFactory<Goals> factoryGoals, IAbstractFactory<CmpInfo> factoryInfo,
@@ -406,7 +408,12 @@ namespace CampaignEditor
             }
             if (fCobranding != null && fCobranding.Modified)
             {
+                // Propagating change
+                var cobrands = fCobranding.GetChangedCobrands();
+                CobrandsUpdatedEvent?.Invoke(this, new UpdateCobrandsEventArgs(cobrands));
+                // Getting new data
                 await InitializeCobrands();
+
             }
 
             btnCobranding.IsEnabled = true;

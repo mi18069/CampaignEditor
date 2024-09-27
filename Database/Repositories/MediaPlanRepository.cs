@@ -28,10 +28,10 @@ namespace Database.Repositories
             var affected = await connection.ExecuteAsync(
                 "INSERT INTO xmp (schid, cmpid, chid, naziv, verzija, pozicija, vremeod, vremedo, vremerbl, " +
                 "dani, tipologija, specijal, datumod, datumdo, progkoef, datumkreiranja, datumizmene, " +
-                "amr1, amr1trim, amr2, amr2trim, amr3, amr3trim, amrsale, amrsaletrim, amrp1, amrp2, amrp3, amrpsale, dpkoef, seaskoef, seckoef, price, active, pricepersec, koefa, koefb) " +
+                "amr1, amr1trim, amr2, amr2trim, amr3, amr3trim, amrsale, amrsaletrim, amrp1, amrp2, amrp3, amrpsale, dpkoef, seaskoef, seckoef, price, active, pricepersec, koefa, koefb, cbrkoef) " +
                 "VALUES (@Schid, @Cmpid, @Chid, @Name, @Version, @Position, @Stime, @Etime, @Blocktime, " +
                 "@Days, @Type, @Special, CAST (@Sdate AS DATE), CAST(@Edate AS DATE), @Progcoef, CAST(@Created AS DATE), CAST(@Modified AS DATE), " +
-                "@Amr1, @Amr1trim, @Amr2, @Amr2trim, @Amr3, @Amr3trim, @Amrsale, @Amrsaletrim, @Amrp1, @Amrp2, @Amrp3, @Amrpsale, @Dpcoef, @Seascoef, @Seccoef, @Price, @Active, @PricePerSec, @CoefA, @CoefB) ",
+                "@Amr1, @Amr1trim, @Amr2, @Amr2trim, @Amr3, @Amr3trim, @Amrsale, @Amrsaletrim, @Amrp1, @Amrp2, @Amrp3, @Amrpsale, @Dpcoef, @Seascoef, @Seccoef, @Price, @Active, @PricePerSec, @CoefA, @CoefB, @Cbrcoef) ",
             new
             {
                 Schid = mediaPlanDTO.schid,
@@ -70,7 +70,8 @@ namespace Database.Repositories
                 Active = mediaPlanDTO.active,
                 PricePerSec = Math.Round(mediaPlanDTO.pps, 2),
                 CoefA = mediaPlanDTO.coefA,
-                CoefB = mediaPlanDTO.coefB
+                CoefB = mediaPlanDTO.coefB,
+                Cbrcoef = mediaPlanDTO.cbrcoef
             });
 
 
@@ -84,11 +85,11 @@ namespace Database.Repositories
             var result = await connection.QuerySingleAsync<MediaPlanDTO>(
                 "INSERT INTO xmp (schid, cmpid, chid, naziv, verzija, pozicija, vremeod, vremedo, vremerbl, " +
                 "dani, tipologija, specijal, datumod, datumdo, progkoef, datumkreiranja, datumizmene, " +
-                "amr1, amr1trim, amr2, amr2trim, amr3, amr3trim, amrsale, amrsaletrim, amrp1, amrp2, amrp3, amrpsale, dpkoef, seaskoef, seckoef, price, active, pricepersec, koefa, koefb) " +
+                "amr1, amr1trim, amr2, amr2trim, amr3, amr3trim, amrsale, amrsaletrim, amrp1, amrp2, amrp3, amrpsale, dpkoef, seaskoef, seckoef, price, active, pricepersec, koefa, koefb, cbrkoef) " +
                 "OUTPUT INSERTED.Id " + // Retrieve the newly inserted Id
                 "VALUES (@Schid, @Cmpid, @Chid, @Name, @Version, @Position, @Stime, @Etime, @Blocktime, " +
                 "@Days, @Type, @Special, CAST (@Sdate AS DATE), CAST(@Edate AS DATE), @Progcoef, CAST(@Created AS DATE), CAST(@Modified AS DATE), " +
-                "@Amr1, @Amr1trim, @Amr2, @Amr2trim, @Amr3, @Amr3trim, @Amrsale, @Amrsaletrim, @Amrp1, @Amrp2, @Amrp3, @Amrpsale, @Dpcoef, @Seascoef, @Seccoef, @Price, @Active, @PricePerSec, @CoefA, @CoefB) ",
+                "@Amr1, @Amr1trim, @Amr2, @Amr2trim, @Amr3, @Amr3trim, @Amrsale, @Amrsaletrim, @Amrp1, @Amrp2, @Amrp3, @Amrpsale, @Dpcoef, @Seascoef, @Seccoef, @Price, @Active, @PricePerSec, @CoefA, @CoefB, @Cbrcoef) ",
             new
             {
                 Schid = mediaPlanDTO.schid,
@@ -127,7 +128,8 @@ namespace Database.Repositories
                 Active = mediaPlanDTO.active,
                 PricePerSec = Math.Round(mediaPlanDTO.pps, 2),
                 CoefA = mediaPlanDTO.coefA,
-                CoefB = mediaPlanDTO.coefB
+                CoefB = mediaPlanDTO.coefB,
+                Cbrcoef = mediaPlanDTO.cbrcoef
             });
 
             if (result != null)
@@ -188,7 +190,8 @@ namespace Database.Repositories
                 active = item.active,
                 pps = item.pps != null ? (decimal)item.pps : 0.0M,
                 coefA = (decimal)item.koefa,
-                coefB = (decimal)item.koefb
+                coefB = (decimal)item.koefb,
+                cbrcoef = (decimal)item.cbrkoef
             });
 
             return _mapper.Map<MediaPlanDTO>(mediaPlan.FirstOrDefault());
@@ -240,7 +243,8 @@ namespace Database.Repositories
                 active = item.active,
                 pps = item.pps != null ? (decimal)item.pps : 0.0M,
                 coefA = (decimal)item.koefa,
-                coefB = (decimal)item.koefb
+                coefB = (decimal)item.koefb,
+                cbrcoef = (decimal)item.cbrkoef
             });
 
             return _mapper.Map<MediaPlanDTO>(mediaPlan.FirstOrDefault());
@@ -293,7 +297,9 @@ namespace Database.Repositories
                 active = item.active,
                 pps = item.pps != null ? (decimal)item.pps : 0.0M,
                 coefA = (decimal)item.koefa,
-                coefB = (decimal)item.koefb
+                coefB = (decimal)item.koefb,
+                cbrcoef = (decimal)item.cbrkoef
+
             });
 
             return _mapper.Map<MediaPlanDTO>(mediaPlan.FirstOrDefault());
@@ -345,7 +351,9 @@ namespace Database.Repositories
                 active = item.active,
                 pps = item.pps != null ? (decimal)item.pps : 0.0M,
                 coefA = (decimal)item.koefa,
-                coefB = (decimal)item.koefb
+                coefB = (decimal)item.koefb,
+                cbrcoef = (decimal)item.cbrkoef
+
             });
 
             return _mapper.Map<MediaPlanDTO>(mediaPlan.FirstOrDefault());
@@ -397,7 +405,9 @@ namespace Database.Repositories
                 active = item.active,
                 pps = item.pps != null ? (decimal)item.pps : 0.0M,
                 coefA = (decimal)item.koefa,
-                coefB = (decimal)item.koefb
+                coefB = (decimal)item.koefb,
+                cbrcoef = (decimal)item.cbrkoef
+
             });
 
             return _mapper.Map<MediaPlanDTO>(mediaPlan.FirstOrDefault());
@@ -449,7 +459,9 @@ namespace Database.Repositories
                 active = item.active,
                 pps = item.pps != null ? (decimal)item.pps : 0.0M,
                 coefA = (decimal)item.koefa,
-                coefB = (decimal)item.koefb
+                coefB = (decimal)item.koefb,
+                cbrcoef = (decimal)item.cbrkoef
+
             });
 
             return _mapper.Map<IEnumerable<MediaPlanDTO>>(allMediaPlans);
@@ -513,7 +525,9 @@ namespace Database.Repositories
                 active = item.active,
                 pps = item.pps != null ? (decimal)item.pps : 0.0M,
                 coefA = (decimal)item.koefa,
-                coefB = (decimal)item.koefb
+                coefB = (decimal)item.koefb,
+                cbrcoef = (decimal)item.cbrkoef
+
             });
 
             return _mapper.Map<IEnumerable<MediaPlanDTO>>(mediaPlans);
@@ -607,6 +621,7 @@ namespace Database.Repositories
                 (decimal)item.seckoef,
                 (decimal)item.koefa,
                 (decimal)item.koefb,
+                (decimal)item.cbrkoef,
                 (decimal)item.price,
                 item.active,
                 item.pricepersec != null ? (decimal)item.pricepersec : 0.0M
@@ -662,7 +677,9 @@ namespace Database.Repositories
                 active = item.active,
                 pps = item.pps != null ? (decimal)item.pps : 0.0M,
                 coefA = (decimal)item.koefa,
-                coefB = (decimal)item.koefb
+                coefB = (decimal)item.koefb,
+                cbrcoef = (decimal)item.cbrkoef
+
             });
 
             return _mapper.Map<IEnumerable<MediaPlanDTO>>(mediaPlans);
@@ -715,7 +732,9 @@ namespace Database.Repositories
                 active = item.active,
                 pps = item.pps != null ? (decimal)item.pps : 0.0M,
                 coefA = (decimal)item.koefa,
-                coefB = (decimal)item.koefb
+                coefB = (decimal)item.koefb,
+                cbrcoef = (decimal)item.cbrkoef
+
             });
 
             return _mapper.Map<IEnumerable<MediaPlanDTO>>(allMediaPlans);
@@ -768,7 +787,9 @@ namespace Database.Repositories
                 active = item.active,
                 pps = item.pps != null ? (decimal)item.pps : 0.0M,
                 coefA = (decimal)item.koefa,
-                coefB = (decimal)item.koefb
+                coefB = (decimal)item.koefb,
+                cbrcoef = (decimal)item.cbrkoef
+
             });
 
             return _mapper.Map<IEnumerable<MediaPlanDTO>>(mediaPlans);
@@ -792,7 +813,7 @@ namespace Database.Repositories
                     amrp1 = @Amrp1, amrp2 = @Amrp2, amrp3 = @Amrp3, amrpsale = @Amrpsale, 
                     dpkoef = @Dpcoef, progkoef = @Progcoef, seaskoef = @Seascoef, seckoef = @Seccoef, 
                     price = @Price, active = @Active, pricepersec = @PricePerSec, 
-                    koefa = @CoefA, koefb = @CoefB 
+                    koefa = @CoefA, koefb = @CoefB, cbrkoef = @Cbrcoef 
                 WHERE xmpid = @Xmpid",
                 new
                 {
@@ -833,7 +854,8 @@ namespace Database.Repositories
                     Active = mediaPlanDTO.active,
                     PricePerSec = Math.Round(mediaPlanDTO.pps, 2),
                     CoefA = mediaPlanDTO.coefA,
-                    CoefB = mediaPlanDTO.coefB
+                    CoefB = mediaPlanDTO.coefB,
+                    Cbrcoef = mediaPlanDTO.cbrcoef
                 });
 
            

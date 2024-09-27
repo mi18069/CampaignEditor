@@ -14,9 +14,9 @@ namespace CampaignEditor.Converters
                 if (statusAD == 2)
                     return Brushes.Gray;
                 if (statusAD == 1)
-                    return Brushes.YellowGreen;
+                    return Brushes.DodgerBlue;
 
-                if (status == 2)
+                if (status == 5)
                     return Brushes.OrangeRed;
                 if (status == 1)
                     return Brushes.LightGreen;

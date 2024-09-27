@@ -41,6 +41,7 @@ namespace Database.Entities
         private decimal? chcoef  = 1.0M;
         private decimal? coefA  = 1.0M;
         private decimal? coefB  = 1.0M;
+        private decimal? cbrcoef  = 1.0M;
         private bool? accept = false;
 
         public bool? Accept
@@ -157,6 +158,15 @@ namespace Database.Entities
             set
             {
                 coefB = value;
+                OnPropertyChanged();
+            }
+        }
+        public decimal? Cbrcoef
+        {
+            get { return status == -1 ? null : cbrcoef; }
+            set
+            {
+                cbrcoef = value;
                 OnPropertyChanged();
             }
         }

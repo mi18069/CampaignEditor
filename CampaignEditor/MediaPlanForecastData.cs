@@ -1,6 +1,7 @@
 ﻿using CampaignEditor.Controllers;
 using Database.DTOs.CampaignDTO;
 using Database.DTOs.ChannelDTO;
+using Database.DTOs.CobrandDTO;
 using Database.DTOs.DayPartDTO;
 using Database.DTOs.DPTimeDTO;
 using Database.DTOs.PricelistDTO;
@@ -10,6 +11,7 @@ using Database.DTOs.SeasonalityDTO;
 using Database.DTOs.SectableDTO;
 using Database.DTOs.SectablesDTO;
 using Database.DTOs.SpotDTO;
+using Database.DTOs.SpotPairDTO;
 using Database.DTOs.TargetDTO;
 using Database.Entities;
 using Database.Repositories;
@@ -27,6 +29,8 @@ namespace CampaignEditor
         private List<SpotDTO> _spots = new List<SpotDTO>();
         private List<PricelistDTO> _pricelists = new List<PricelistDTO>();
         private List<TargetDTO> _targets = new List<TargetDTO>();
+        private List<CobrandDTO> _cobrands = new List<CobrandDTO>();
+        private List<SpotPairDTO> _spotPairs = new List<SpotPairDTO>();
 
         private Dictionary<char, SpotDTO> _spotcodeSpotDict = new Dictionary<char, SpotDTO>();
         private Dictionary<int, PricelistDTO> _chidPricelistDict = new Dictionary<int, PricelistDTO>();
@@ -54,6 +58,8 @@ namespace CampaignEditor
         private DayPartController _dayPartController;
         private DPTimeController _dpTimeController;
         private PricelistChannelsController _pricelistChannelsController;
+        private CobrandController _cobrandController;
+        private SpotPairController _spotPairController;
 
         public CampaignDTO Campaign { get {return _campaign; }
             set { _campaign = value; } }
@@ -61,6 +67,8 @@ namespace CampaignEditor
         public List<SpotDTO> Spots { get { return _spots; } }
         public List<PricelistDTO> Pricelists { get { return _pricelists; } }
         public List<TargetDTO> Targets { get { return _targets; } }
+        public List<CobrandDTO> Cobrands { get { return _cobrands; } }
+        public List<SpotPairDTO> SpotPairs { get { return _spotPairs; } }
 
         public Dictionary<char, SpotDTO> SpotcodeSpotDict { get { return _spotcodeSpotDict; } }
         public Dictionary<int, PricelistDTO> ChidPricelistDict { get { return _chidPricelistDict; } }
@@ -81,7 +89,8 @@ namespace CampaignEditor
             IPricesRepository pricesRepository, ITargetCmpRepository targetCmpRepository, 
             ITargetRepository targetRepository,
             IDayPartRepository dayPartRepository, IDPTimeRepository dPTimeRepository,
-            IPricelistChannelsRepository pricelistChannelsRepository)
+            IPricelistChannelsRepository pricelistChannelsRepository,
+            ICobrandRepository cobrandRepository, ISpotPairRepository spotPairRepository)
         {
             _channelController = new ChannelController(channelRepository);
             _spotController = new SpotController(spotRepository);
@@ -97,6 +106,8 @@ namespace CampaignEditor
             _dayPartController = new DayPartController(dayPartRepository);
             _dpTimeController = new DPTimeController(dPTimeRepository);
             _pricelistChannelsController = new PricelistChannelsController(pricelistChannelsRepository);
+            _cobrandController = new CobrandController(cobrandRepository);
+            _spotPairController = new SpotPairController(spotPairRepository);
         }
 
         public async Task Initialize(CampaignDTO campaign)
@@ -109,9 +120,11 @@ namespace CampaignEditor
         {
             await InitializeTargets();
             await InitializeSpots();
-            await InitializeChannels();
+            await InitializeChannels();            
             await InitializePricelists();
             await InitializeDayParts();
+            await InitializeCobrands();
+            await InitializeSpotPairs();
         }
 
         public async Task InitializeTargets()
@@ -177,7 +190,19 @@ namespace CampaignEditor
                 }
 
             }
-        }      
+        }
+
+        public async Task InitializeCobrands()
+        {
+            _cobrands.Clear();
+            _cobrands = (await _cobrandController.GetAllCampaignCobrands(_campaign.cmpid)).ToList();
+        }
+
+        public async Task InitializeSpotPairs()
+        {
+            _spotPairs.Clear();
+            _spotPairs = (await _spotPairController.GetAllCampaignSpotPairs(_campaign.cmpid)).ToList();
+        }
 
         public async Task InitializePricelists()
         {

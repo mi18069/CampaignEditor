@@ -52,7 +52,7 @@ namespace CampaignEditor
 
         private bool[] TransformVisibleColumns(bool[] visibleGridColumns)
         {
-            bool[] visibleColumns = new bool[34];
+            bool[] visibleColumns = new bool[35];
             visibleColumns[0] = true;
             /*for (int i = 0; i < 18; i++)
             {
@@ -69,7 +69,7 @@ namespace CampaignEditor
             }
             // Skipping CPP and Ins
             visibleColumns[26] = visibleGridColumns[28]; // CPSP
-            for (int i=27; i<34; i++)
+            for (int i=27; i<35; i++)
             {
                 visibleColumns[i] = true;
             }
@@ -144,7 +144,7 @@ namespace CampaignEditor
         {
             List<string> columnHeaders = new List<string> { "Date", "Channel", "Program", "Day Part", "Position", "Start time",
             "End time", "Block time", "Type", "Special", "Amr1", "Amr% 1", "Amr1 Trim", "Amr2", "Amr% 2", "Amr2 Trim", "Amr3",
-            "Amr% 3","Amr3 Trim", "Amr Sale", "Amr Sale%", "Amr Sale Trim", "Affinity", "Ch coef", "Prog coef", "Dp coef", "Seas coef", "Sec coef", "Coef A", "Coef B", "CPSP",  "Length", "Price", "Spot"};
+            "Amr% 3","Amr3 Trim", "Amr Sale", "Amr Sale%", "Amr Sale Trim", "Affinity", "Ch coef", "Prog coef", "Dp coef", "Seas coef", "Sec coef", "Coef A", "Coef B", "Cbr coef", "CPSP",  "Length", "Price", "Spot"};
 
             int numOfColumns = visibleColumns.Count();
 
@@ -353,13 +353,23 @@ namespace CampaignEditor
             }
             if (visibleColumns[30])
             {
+                decimal cbrcoef = _mpConverter.CalculateTermCbrcoef(mediaPlan, _spotcodeSpotDictionary[spotcode]);
+
+                if (showAllDecimals)
+                    worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.cbrcoef;
+                else
+                    worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.cbrcoef, 2);
+                colOffset += 1;
+            }
+            if (visibleColumns[31])
+            {
                 if (showAllDecimals)
                     worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.PricePerSecond;
                 else
                     worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.PricePerSecond, 2);
                 colOffset += 1;
             }
-            if (visibleColumns[31])
+            if (visibleColumns[32])
             {
                 worksheet.Cells[rowOff, colOff + colOffset].Value = (_spotcodeSpotDictionary[spotcode] as SpotDTO).spotlength;
                 colOffset += 1;
@@ -374,7 +384,7 @@ namespace CampaignEditor
                     worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(termCoefs.Price, 2).ToString("#,##0.00");
                 colOffset += 1;
             }
-            if (visibleColumns[32])
+            if (visibleColumns[33])
             {
                 worksheet.Cells[rowOff, colOff + colOffset].Value = spotcode;
                 colOffset += 1;

@@ -1,11 +1,14 @@
 ﻿using CampaignEditor.Controllers;
 using CampaignEditor.Helpers;
 using CampaignEditor.StartupHelpers;
+using CampaignEditor.UserControls.ValidationItems.PairSpotsItems;
 using Database.DTOs.CampaignDTO;
 using Database.DTOs.ChannelDTO;
 using Database.DTOs.CmpBrndDTO;
+using Database.DTOs.CobrandDTO;
 using Database.DTOs.MediaPlanRealizedDTO;
 using Database.DTOs.SpotDTO;
+using Database.DTOs.SpotPairDTO;
 using Database.Entities;
 using Database.Repositories;
 using System;
@@ -41,6 +44,8 @@ namespace CampaignEditor
         private DGConfigController _dgConfigController;
         private ClientRealizedCoefsController _clientRealizedCoefsController;
         private CampaignController _campaignController;
+        private SpotPairController _spotPairController;
+
 
 
         private CampaignDTO _campaign;
@@ -65,6 +70,8 @@ namespace CampaignEditor
         private readonly PrintValidation _factoryPrintValidation;
         private IAbstractFactory<PairSpots> _factoryPairSpots;
         private IEnumerable<int> uniqueSpotNums;
+        List<SpotPairDTO> _spotPairs = new List<SpotPairDTO>();
+
 
         //For delegating changes from forecast when terms are changed
         private Dictionary<DateOnly, HashSet<ChannelDTO>> _updatedTerms = new Dictionary<DateOnly, HashSet<ChannelDTO>>();
@@ -85,6 +92,7 @@ namespace CampaignEditor
             IDGConfigRepository dGConfigRepository,
             IClientRealizedCoefsRepository clientRealizedCoefsRepository,
             ICampaignRepository campaignRepository,
+            ISpotPairRepository spotPairRepository,
             IAbstractFactory<PairSpots> factoryPairSpots)
         {
             _channelCmpController = new ChannelCmpController(channelCmpRepository);
@@ -102,6 +110,7 @@ namespace CampaignEditor
             _dgConfigController = new DGConfigController(dGConfigRepository);
             _clientRealizedCoefsController = new ClientRealizedCoefsController(clientRealizedCoefsRepository);
             _campaignController = new CampaignController(campaignRepository);
+            _spotPairController = new SpotPairController(spotPairRepository);
 
             _factoryPrintValidation = factoryPrintValidation.Create();
             _factoryPairSpots = factoryPairSpots;
@@ -154,6 +163,7 @@ namespace CampaignEditor
             //Stopwatch s3 = new Stopwatch();
             //s3.Start();
             await FillSpotNameDict(campaign);
+            await GetSpotPairs(campaign);
             //s3.Stop();
 
             //Stopwatch s4 = new Stopwatch();
@@ -185,6 +195,54 @@ namespace CampaignEditor
                 $"4: {s4.ElapsedMilliseconds}\n" +
                 $"5: {s5.ElapsedMilliseconds}\n" +
                 $"6: {s6.ElapsedMilliseconds}\n", "");*/
+        }
+
+        public void CobrandsChanged(IEnumerable<CobrandDTO> cobrands)
+        {
+            foreach (var cobrand in cobrands)
+            {
+                RecalculateCobrandExpected(cobrand);
+                RecalculateCobrandRealized(cobrand);
+            }
+        }
+        private void RecalculateCobrandExpected(CobrandDTO cobrand)
+        {
+            int chid = cobrand.chid;
+            char spotcode = cobrand.spotcode;
+            var terms = _dateExpectedDict.Values
+                .Where(tt => tt != null)
+                .SelectMany(tt => tt)
+                .Where(tt => tt!.MediaPlan.chid == chid && tt.Spot.spotcode[0] == spotcode)
+                .ToList();
+
+            for (int i=0; i<terms.Count(); i++)
+            {
+                var term = terms[i];
+                term = MakeTermTuple(spotcode, _allMediaPlans.First(mpt => mpt.MediaPlan.xmpid == term.MediaPlan.xmpid), term.MediaPlanTerm, _forecastData.Channels.First(ch => ch.chid == chid));
+            }
+        }
+
+        private void RecalculateCobrandRealized(CobrandDTO cobrand)
+        {
+            int chid = cobrand.chid;
+            char spotcode = cobrand.spotcode;
+            int? chrdsid = _forecastData.ChrdsidChidDict.FirstOrDefault(dict => dict.Value == chid).Key;
+            var spotpair = _spotPairs.FirstOrDefault(sp => sp.spotcode[0] == spotcode);
+            if (chrdsid == null || spotpair == null)
+                return;
+
+            int spotnum = spotpair.spotnum;
+            var realizes = _dateRealizedDict.Values
+                .Where(mpR => mpR != null)
+                .SelectMany(mpR => mpR)
+                .Where(mpR => mpR.chid == chrdsid && mpR.spotnum == spotnum)
+                .ToList();
+
+            for (int i = 0; i < realizes.Count(); i++)
+            {
+                var mpR = realizes[i];
+                CalculateCoefs(mpR);
+            }
         }
 
         private async void ValidationStack_CheckNewDataDay(object? sender, CheckDateEventArgs e)
@@ -960,6 +1018,11 @@ namespace CampaignEditor
             {
                 _spotnumNameDict[tuple.Item1] = tuple.Item2.Trim();
             }
+        }
+
+        private async Task GetSpotPairs(CampaignDTO campaign)
+        {
+            _spotPairs = (await _spotPairController.GetAllCampaignSpotPairs(campaign.cmpid)).ToList();       
         }
 
         private async Task CheckRealizedPrice()

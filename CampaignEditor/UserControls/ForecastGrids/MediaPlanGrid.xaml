@@ -148,6 +148,8 @@
                                     Visibility="Collapsed"/>
                 <DataGridTextColumn Header="Coef B" Binding="{Binding MediaPlan.CoefB, Mode=TwoWay, StringFormat=N2}"
                                     Visibility="Collapsed"/>
+                <DataGridTextColumn Header="Cbr coef" Binding="{Binding MediaPlan.Cbrcoef, Mode=TwoWay, StringFormat=N2}"
+                                    Visibility="Collapsed"/>
                 <DataGridTextColumn Header="CPP" Binding="{Binding MediaPlan.Cpp, StringFormat=N2}"
                                     IsReadOnly="True"/>
                 <DataGridTextColumn Header="Ins" Binding="{Binding MediaPlan.Insertations}"

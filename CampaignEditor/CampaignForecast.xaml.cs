@@ -25,6 +25,7 @@ using System.Windows.Media;
 using Database.DTOs.DayPartDTO;
 using Database.DTOs.PricelistDTO;
 using System.Drawing;
+using Database.DTOs.CobrandDTO;
 
 namespace CampaignEditor.UserControls
 {
@@ -340,6 +341,31 @@ namespace CampaignEditor.UserControls
             SetLoadingPage?.Invoke(this, new LoadingPageEventArgs("LOADING...", 0));
 
             await LoadData(_maxVersion);
+
+            SetContentPage?.Invoke(this, null);
+
+        }
+
+        public async Task CobrandsChanged(IEnumerable<CobrandDTO> cobrands)
+        {
+            SetLoadingPage?.Invoke(this, null);
+
+            var mpVer = await _mediaPlanVersionController.GetLatestMediaPlanVersion(_campaign.cmpid);
+
+            goalsTreeView._mpConverter = _mpConverter;
+            try
+            {
+                var chids = cobrands.Select(cb => cb.chid).Distinct().ToList();
+                foreach (var chid in chids)
+                    await CalculateMPValuesForChannel(_campaign.cmpid, chid, mpVer.version);
+                await LoadData(mpVer.version);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error while updating spots\n{ex.Message}", "Error",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+
 
             SetContentPage?.Invoke(this, null);
 

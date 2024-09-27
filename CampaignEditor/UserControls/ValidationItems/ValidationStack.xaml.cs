@@ -46,8 +46,8 @@ namespace CampaignEditor.UserControls.ValidationItems
         private bool hideExpected = false;
         private int numGridsOpen = 0;
         //22 columns
-        private string dgExpectedMask = "1110111001111111000111";
-        private string dgRealizedMask = "1111111100111111100111";
+        private string dgExpectedMask = "11101110011111110000111";
+        private string dgRealizedMask = "11111111001111111000111";
         private DGConfig dgConfig;
 
 

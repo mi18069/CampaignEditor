@@ -312,7 +312,7 @@ namespace CampaignEditor
             CreateMediaPlanDTO createMediaPlan = new CreateMediaPlanDTO(schema.id, _campaign.cmpid, schema.chid,
             schema.name.Trim(), version, schema.position, schema.stime, schema.etime, schema.blocktime,
             schema.days, schema.type, schema.special, schema.sdate, schema.edate, progcoef,
-            schema.created, schema.modified, 0, 100, 0, 100, 0, 100, 0, 100, 0, 0, 0, 0, 1, 1, 1, 1.0M, 1.0M, 0, true, 0);
+            schema.created, schema.modified, 0, 100, 0, 100, 0, 100, 0, 100, 0, 0, 0, 0, 1, 1, 1, 1.0M, 1.0M, 1.0M, 0, true, 0);
 
             return await _mediaPlanController.CreateMediaPlan(createMediaPlan);
 

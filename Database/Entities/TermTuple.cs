@@ -42,6 +42,7 @@ namespace Database.Entities
         public decimal? Chcoef { get { return Status == -1 ? null : MediaPlan.Chcoef; } }
         public decimal? Seccoef { get { return Status == -1 ? null : _termCoefs.Seccoef; } }
         public decimal? Seascoef { get { return Status == -1 ? null : _termCoefs.Seascoef; } }
+        public decimal? Cbrcoef { get { return Status == -1 ? null : _termCoefs.Cbrcoef; } }
         public decimal? Progcoef { get { return Status == -1 ? null : MediaPlan.Progcoef; } }
         public decimal? Dpcoef { get { return Status == -1 ? null : MediaPlan.Dpcoef; } }
         public decimal? CoefA { get { return Status == -1 ? null : MediaPlan.CoefA; } }

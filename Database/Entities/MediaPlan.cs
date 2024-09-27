@@ -47,6 +47,7 @@ namespace Database.Entities
         public decimal pps { get; set; }
         public decimal coefA { get; set; }
         public decimal coefB { get; set; }
+        public decimal cbrcoef { get; set; }
 
         private decimal cpp;
 
@@ -348,6 +349,16 @@ namespace Database.Entities
             set
             {
                 coefB = value;
+                OnPropertyChanged();
+            }
+        }
+
+        public decimal Cbrcoef
+        {
+            get { return cbrcoef; }
+            set
+            {
+                cbrcoef = value;
                 OnPropertyChanged();
             }
         }

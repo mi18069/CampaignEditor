@@ -4,7 +4,7 @@ namespace Database.DTOs.MediaPlanDTO
 {
     public class BaseMediaPlanDTO
     {
-        public BaseMediaPlanDTO(int schid, int cmpid, int chid, string name, int version, string position, string stime, string? etime, string? blocktime, string days, string type, bool special, DateOnly sdate, DateOnly? edate, decimal progcoef, DateOnly created, DateOnly? modified, decimal amr1, int amr1trim, decimal amr2, int amr2trim, decimal amr3, int amr3trim, decimal amrsale, int amrsaletrim, decimal amrp1, decimal amrp2, decimal amrp3, decimal amrpsale, decimal dpcoef, decimal seascoef, decimal seccoef, decimal coefA, decimal coefB, decimal price, bool active, decimal pps)
+        public BaseMediaPlanDTO(int schid, int cmpid, int chid, string name, int version, string position, string stime, string? etime, string? blocktime, string days, string type, bool special, DateOnly sdate, DateOnly? edate, decimal progcoef, DateOnly created, DateOnly? modified, decimal amr1, int amr1trim, decimal amr2, int amr2trim, decimal amr3, int amr3trim, decimal amrsale, int amrsaletrim, decimal amrp1, decimal amrp2, decimal amrp3, decimal amrpsale, decimal dpcoef, decimal seascoef, decimal seccoef, decimal coefA, decimal coefB, decimal cbrcoef, decimal price, bool active, decimal pps)
         {
             this.schid = schid;
             this.cmpid = cmpid;
@@ -40,6 +40,7 @@ namespace Database.DTOs.MediaPlanDTO
             this.seccoef = seccoef;
             this.coefA = coefA;
             this.coefB = coefB;
+            this.cbrcoef = cbrcoef;
             this.price = price;
             this.active = active;
             this.pps = pps;
@@ -79,6 +80,7 @@ namespace Database.DTOs.MediaPlanDTO
         public decimal seccoef { get; set; }
         public decimal coefA { get; set; }
         public decimal coefB { get; set; }
+        public decimal cbrcoef { get; set; }
         public decimal price { get; set; }
         public bool active { get; set; }
 

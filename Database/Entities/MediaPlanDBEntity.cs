@@ -42,5 +42,6 @@ namespace Database.Entities
         public decimal pricepersec { get; set; }
         public decimal koefa { get; set; }
         public decimal koefb { get; set; }
+        public decimal cbrkoef { get; set; }
     }
 }

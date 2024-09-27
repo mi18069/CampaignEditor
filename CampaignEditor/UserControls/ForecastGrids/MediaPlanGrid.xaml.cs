@@ -63,9 +63,9 @@ namespace CampaignEditor.UserControls
         string lastSpotCell = "";
 
         // number of frozen columns
-        public int mediaPlanColumns = 33;
-        // 33 columns
-        string dgGridMask = "111100100010000000010111100001111";
+        public int mediaPlanColumns = 34;
+        // 34 columns
+        string dgGridMask = "1111001000100000000101111000001111";
 
         double dataColumnWidth = 51;
 
@@ -1341,7 +1341,7 @@ namespace CampaignEditor.UserControls
             string[] columnHeaders = new string[]{"Channel", "Program", "Day Part", "Position", "Start time",
             "End time", "Block time", "Type", "Special", "Amr1", "Amr% 1", "Amr1 Trim", "Amr2", "Amr% 2", "Amr2 Trim",
             "Amr3", "Amr% 3","Amr3 Trim", "Amr sale", "Amr% sale", "Amr sale Trim",
-            "Affinity", "Ch coef", "Prog coef", "Dp coef", "Seas coef", "Sec coef", "Coef A", "Coef B", "CPP", "Ins", "CPSP", "Price"};
+            "Affinity", "Ch coef", "Prog coef", "Dp coef", "Seas coef", "Sec coef", "Coef A", "Coef B", "Cbr coef", "CPP", "Ins", "CPSP", "Price"};
 
             int colOffset = 0;
 
@@ -1558,17 +1558,25 @@ namespace CampaignEditor.UserControls
             if (visibleColumns[29])
             {
                 if (showAllDecimals)
+                    worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Cbrcoef;
+                else
+                    worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.Cbrcoef, 2);
+                colOffset += 1;
+            }
+            if (visibleColumns[30])
+            {
+                if (showAllDecimals)
                     worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Cpp;
                 else
                     worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.Cpp, 2);
                 colOffset += 1;
             }
-            if (visibleColumns[30])
+            if (visibleColumns[31])
             {
                 worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Insertations;
                 colOffset += 1;
             }
-            if (visibleColumns[31])
+            if (visibleColumns[32])
             {
                 if (showAllDecimals)
                     worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.PricePerSecond;
@@ -1576,7 +1584,7 @@ namespace CampaignEditor.UserControls
                     worksheet.Cells[rowOff, colOff + colOffset].Value = Math.Round(mediaPlan.PricePerSecond, 2);
                 colOffset += 1;
             }
-            if (visibleColumns[32])
+            if (visibleColumns[33])
             {
                 if (showAllDecimals)
                     worksheet.Cells[rowOff, colOff + colOffset].Value = mediaPlan.Price;

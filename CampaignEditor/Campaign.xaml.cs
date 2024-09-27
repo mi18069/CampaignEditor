@@ -115,6 +115,7 @@ namespace CampaignEditor
             factoryCampaignValidation._mpConverter = _mpConverter;
             await factoryCampaignValidation.Initialize(_campaign, _allMediaPlans);
             tabValidation.Content = factoryCampaignValidation.Content;
+            BindOverviewValidationEvents();
             factoryCampaignValidation.SetLoadingPage += FactoryCampaignValidation_SetLoadingPage;
             factoryCampaignValidation.SetContentPage += FactoryCampaignValidation_SetContentPage;
             
@@ -164,6 +165,7 @@ namespace CampaignEditor
             factoryCampaignOverview.TargetsUpdatedEvent += CampaignForecastView_TargetsUpdatedEvent;
             factoryCampaignOverview.SpotsUpdatedEvent += CampaignForecastView_SpotsUpdatedEvent;
             factoryCampaignOverview.DayPartsUpdatedEvent += CampaignForecastView_DayPartsUpdatedEvent;
+            factoryCampaignOverview.CobrandsUpdatedEvent += CampaignForecastView_CobrandsUpdatedEvent;
         }
 
         private void UnbindOverviewForecastEvents()
@@ -175,8 +177,11 @@ namespace CampaignEditor
             factoryCampaignOverview.TargetsUpdatedEvent -= CampaignForecastView_TargetsUpdatedEvent;
             factoryCampaignOverview.SpotsUpdatedEvent -= CampaignForecastView_SpotsUpdatedEvent;
             factoryCampaignOverview.DayPartsUpdatedEvent -= CampaignForecastView_DayPartsUpdatedEvent;
+            factoryCampaignOverview.CobrandsUpdatedEvent -= CampaignForecastView_CobrandsUpdatedEvent;
+
 
         }
+
 
         private async void CampaignForecastView_CampaignUpdatedEvent(object? sender, UpdateCampaignEventArgs e)
         {
@@ -205,6 +210,19 @@ namespace CampaignEditor
             await _forecastData.InitializeDayParts();
             _mpConverter.Initialize(_forecastData);
             await factoryCampaignForecastView.UpdateDayParts();
+        }
+
+        private async void CampaignForecastView_CobrandsUpdatedEvent(object? sender, UpdateCobrandsEventArgs e)
+        {
+            if (!isCampaignInitialized)
+            {
+                return;
+            }
+
+            await _forecastData.InitializeCobrands();
+            _mpConverter.Initialize(_forecastData);
+            var cobrands = e.Cobrands;
+            await factoryCampaignForecastView.UpdateCobrands(cobrands);
         }
 
         private async void CampaignForecastView_TargetsUpdatedEvent(object? sender, EventArgs e)
@@ -290,6 +308,26 @@ namespace CampaignEditor
                 isCampaignInitialized = true;
         }
 
+        private void BindOverviewValidationEvents()
+        {
+            factoryCampaignOverview.CobrandsUpdatedEvent += CampaignValidation_CobrandsUpdatedEvent; ;
+        }
+        private void UnbindOverviewValidationEvents()
+        {
+
+            factoryCampaignOverview.CobrandsUpdatedEvent += CampaignValidation_CobrandsUpdatedEvent; ;
+
+
+        }
+        private void CampaignValidation_CobrandsUpdatedEvent(object? sender, UpdateCobrandsEventArgs e)
+        {
+            if (factoryCampaignValidation == null)
+                return;
+
+            var cobrands = e.Cobrands;
+            factoryCampaignValidation.CobrandsChanged(cobrands);
+        }
+
         private void Page_ClosePageEvent(object? sender, EventArgs e)
         {
             this.Close();
@@ -303,6 +341,7 @@ namespace CampaignEditor
             factoryCampaignForecastView.UpdateValidation -= ForecastView_UpdateValidation;
             factoryCampaignForecastView.UpdateTermDateAndChannel -= FactoryCampaignForecastView_UpdateTermDateAndChannel;
             UnbindOverviewForecastEvents();
+            UnbindOverviewValidationEvents();
             UnbindEvents();
             factoryCampaignValidation.CloseValidation();
 

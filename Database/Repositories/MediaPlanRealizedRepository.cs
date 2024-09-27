@@ -28,10 +28,10 @@ namespace Database.Repositories
             var affected = await connection.ExecuteAsync(
                 "INSERT INTO xmpre (naziv, cmpid, vremeod, vremedo, vremeodv, vremedov, chid, dure, durf, datum, bremisije  " +
                 " pozinbr, totspotbr, breaktype, brspot, brbrand, amrp1, amrp2, amrp3, amrpsale " +
-                " cpp, dpkoef, seaskoef, seckoef, progkoef, cena, status, chcoef, koefa, koefb, accept " + 
+                " cpp, dpkoef, seaskoef, seckoef, progkoef, cena, status, chcoef, koefa, koefb, cbrkoef, accept " + 
                 "VALUES (@Name, @Cmpid, @Stime, @Etime, @Stimestr, @Etimestr, @Chid, @Dure, @Durf, @Date, @Emsnum, " +
                 " @Posinbr, @Totalspotnum, @Breaktype, @Spotnum, @Brandnum, @Amrp1, @Amrp2, @Amrp3, @Amrpsale " +
-                "@Cpp, @Dpcoef, @Seascoef, @Progcoef, @Price, @Status, @Chcoef, @CoefA, @CoefB, @Accept ) ",
+                "@Cpp, @Dpcoef, @Seascoef, @Progcoef, @Price, @Status, @Chcoef, @CoefA, @CoefB, @Cbrcoef, @Accept ) ",
             new
             {
                 Name = mediaPlanRealizedDTO.name.Trim(),
@@ -64,6 +64,7 @@ namespace Database.Repositories
                 Chcoef = mediaPlanRealizedDTO.chcoef,
                 CoefA = mediaPlanRealizedDTO.coefA,
                 CoefB = mediaPlanRealizedDTO.coefB,
+                Cbrcoef = mediaPlanRealizedDTO.cbrcoef,
                 Accept = mediaPlanRealizedDTO.accept
             });
 
@@ -111,6 +112,7 @@ namespace Database.Repositories
                 Chcoef = item.chcoef ?? null,
                 CoefA = item.koefa ?? null,
                 CoefB = item.koefb ?? null,
+                Cbrcoef = item.cbrkoef ?? null,
                 Accept = item.accept ?? false
             });
 
@@ -157,6 +159,7 @@ namespace Database.Repositories
                 Chcoef = item.chcoef ?? null,
                 CoefA = item.koefa ?? null,
                 CoefB = item.koefb ?? null,
+                Cbrcoef = item.cbrkoef ?? null,
                 Accept = item.accept ?? false
             });
 
@@ -204,6 +207,7 @@ namespace Database.Repositories
                 Chcoef = item.chcoef ?? null,
                 CoefA = item.koefa ?? null,
                 CoefB = item.koefb ?? null,
+                Cbrcoef = item.cbrkoef ?? null,
                 Accept = item.accept ?? false
             });
 
@@ -252,6 +256,7 @@ namespace Database.Repositories
                 Chcoef = item.chcoef ?? null,
                 CoefA = item.koefa ?? null,
                 CoefB = item.koefb ?? null,
+                Cbrcoef = item.cbrkoef ?? null,
                 Accept = item.accept ?? false
             });
 
@@ -299,6 +304,7 @@ namespace Database.Repositories
                 Chcoef = item.chcoef ?? null,
                 CoefA = item.koefa ?? null,
                 CoefB = item.koefb ?? null,
+                Cbrcoef = item.cbrkoef ?? null,
                 Accept = item.accept ?? false
             });
 
@@ -316,7 +322,7 @@ namespace Database.Repositories
                 " pozinbr = @Posinbr, totspotbr = @Totalspotnum, breaktype = @Breaktype, " +
                 " brspot = @Spotnum, brbrand = @Brandnum, amrp1 = @Amrp1, amrp2 = @Amrp2, amrp3 = @Amrp3, " +
                 " amrpsale = @Amrpsale, cpp = @Cpp, dpkoef = @Dpcoef, seaskoef = @Seascoef, seckoef = @Seccoef, " +
-                " progkoef = @Progcoef, cena = @Price, status = @Status, chcoef = @Chcoef, koefa = @CoefA, koefb = @CoefB, accept = @Accept " +
+                " progkoef = @Progcoef, cena = @Price, status = @Status, chcoef = @Chcoef, koefa = @CoefA, koefb = @CoefB, cbrkoef = @Cbrcoef, accept = @Accept " +
                 " WHERE id = @Id",
                 new
                 {
@@ -351,6 +357,7 @@ namespace Database.Repositories
                     Chcoef = mediaPlanRealizedDTO.chcoef,
                     CoefA = mediaPlanRealizedDTO.coefA,
                     CoefB = mediaPlanRealizedDTO.coefB,
+                    Cbrcoef = mediaPlanRealizedDTO.cbrcoef,
                     Accept = mediaPlanRealizedDTO.accept
                 });
 
@@ -370,7 +377,7 @@ namespace Database.Repositories
                 " pozinbr = @Posinbr, totspotbr = @Totalspotnum, breaktype = @Breaktype, " +
                 " brspot = @Spotnum, brbrand = @Brandnum, amrp1 = @Amrp1, amrp2 = @Amrp2, amrp3 = @Amrp3, amrpsale = @Amrpsale, " +
                 " cpp = @Cpp, dpkoef = @Dpcoef, seaskoef = @Seascoef, seckoef = @Seccoef, " +
-                " progkoef = @Progcoef, cena = @Price, status = @Status, chcoef = @Chcoef, koefa = @CoefA, koefb = @CoefB, accept = @Accept " +
+                " progkoef = @Progcoef, cena = @Price, status = @Status, chcoef = @Chcoef, koefa = @CoefA, koefb = @CoefB, cbrkoef = @Cbrcoef, accept = @Accept " +
                 " WHERE id = @Id",
                 new
                 {
@@ -405,6 +412,7 @@ namespace Database.Repositories
                     Chcoef = mediaPlanRealized.Chcoef.GetValueOrDefault(),
                     CoefA = mediaPlanRealized.CoefA.GetValueOrDefault(),
                     CoefB = mediaPlanRealized.CoefB.GetValueOrDefault(),
+                    Cbrcoef = mediaPlanRealized.Cbrcoef.GetValueOrDefault(),
                     Accept = mediaPlanRealized.Accept.GetValueOrDefault()
                 });
 

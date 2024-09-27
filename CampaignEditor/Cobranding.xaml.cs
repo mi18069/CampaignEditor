@@ -11,6 +11,7 @@ using System.Reflection.Metadata.Ecma335;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Markup;
 
 namespace CampaignEditor
 {
@@ -103,7 +104,15 @@ namespace CampaignEditor
 
                 if (newValue != _previousValue)
                 {
-                    editedItem.SetCoef(spotcoef, newValue);
+                    if (newValue >= 100)
+                    {
+                        MessageBox.Show("Invalid value!\nValue must be less than 100", "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+                        editingElement.Text = _previousValue.ToString();
+                    }
+                    else
+                    {
+                        editedItem.SetCoef(spotcoef, newValue);
+                    }
                 }
 
             }
@@ -118,6 +127,28 @@ namespace CampaignEditor
             {
                 _previousValue = editedItem.SpotCoefficients[spotcode];
             }
+        }
+
+        public IEnumerable<CobrandDTO> GetChangedCobrands()
+        {
+            List<CobrandDTO> cobrands = new List<CobrandDTO>();
+
+            var data = (List<ChannelSpotModel>)dgGrid.ItemsSource;
+            foreach (var channelSpotModel in data)
+            {
+                foreach (var spotcode in _spotcodes)
+                {
+                    switch (channelSpotModel.Statuses[spotcode])
+                    {
+                        case -1: case 0: break;
+                        default:
+                            cobrands.Add(new CobrandDTO(_campaign.cmpid, channelSpotModel.Channel.chid, spotcode, channelSpotModel.SpotCoefficients[spotcode]));
+                            break;
+                    }
+                }
+            }
+
+            return cobrands;
         }
 
         private async void btnSave_Click(object sender, RoutedEventArgs e)
@@ -149,8 +180,6 @@ namespace CampaignEditor
                     }
                 }
             }
-
-            // TODO Perform updates in forecast and validation
 
             this.Close();
         }

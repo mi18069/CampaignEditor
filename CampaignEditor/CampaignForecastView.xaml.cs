@@ -13,6 +13,7 @@ using System.Windows;
 using System.Windows.Controls;
 using Database.DTOs.PricelistDTO;
 using Database.Entities;
+using Database.DTOs.CobrandDTO;
 
 namespace CampaignEditor
 {
@@ -316,6 +317,11 @@ namespace CampaignEditor
                     MessageBoxImage.Error);
                 return;
             }
+        }
+
+        public async Task UpdateCobrands(IEnumerable<CobrandDTO> cobrands)
+        {
+            await _forecast.CobrandsChanged(cobrands);
         }
 
         // Inside CampaignForecast

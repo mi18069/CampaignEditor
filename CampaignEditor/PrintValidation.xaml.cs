@@ -403,20 +403,32 @@ namespace CampaignEditor
                     }
                     if (mask[18] == '1')
                     {
-                        worksheet.Cells[rowOff, colOffset++].Value = termTuple.Spot.spotname.Trim();
+                        if (allDecimals)
+                        {
+                            worksheet.Cells[rowOff, colOffset++].Value = termTuple.Cbrcoef;
+                        }
+                        else
+                        {
+                            worksheet.Cells[rowOff, colOffset++].Value = Math.Round(termTuple.Cbrcoef.Value, 2);
+                        }
 
                     }
                     if (mask[19] == '1')
                     {
-                        worksheet.Cells[rowOff, colOffset++].Value = termTuple.Spotlength;
+                        worksheet.Cells[rowOff, colOffset++].Value = termTuple.Spot.spotname.Trim();
 
                     }
                     if (mask[20] == '1')
                     {
-                        worksheet.Cells[rowOff, colOffset++].Value = termTuple.Spot.spotcode;
+                        worksheet.Cells[rowOff, colOffset++].Value = termTuple.Spotlength;
 
                     }
                     if (mask[21] == '1')
+                    {
+                        worksheet.Cells[rowOff, colOffset++].Value = termTuple.Spot.spotcode;
+
+                    }
+                    if (mask[22] == '1')
                     {
                         if (allDecimals)
                         {
@@ -653,6 +665,18 @@ namespace CampaignEditor
                     {
                         if (allDecimals)
                         {
+                            worksheet.Cells[rowOff, colOffset++].Value = mediaPlanRealized.Cbrcoef;
+                        }
+                        else
+                        {
+                            worksheet.Cells[rowOff, colOffset++].Value = Math.Round(mediaPlanRealized.Cbrcoef.Value, 2);
+                        }
+
+                    }
+                    if (mask[20] == '1')
+                    {
+                        if (allDecimals)
+                        {
                             worksheet.Cells[rowOff, colOffset++].Value = mediaPlanRealized.price;
                         }
                         else
@@ -661,11 +685,11 @@ namespace CampaignEditor
                         }
 
                     }
-                    if (mask[20] == '1')
+                    if (mask[21] == '1')
                     {
                         worksheet.Cells[rowOff, colOffset++].Value = mediaPlanRealized.status;
                     }
-                    if (mask[21] == '1')
+                    if (mask[22] == '1')
                     {
                         worksheet.Cells[rowOff, colOffset++].Value = mediaPlanRealized.Accept;
                     }
