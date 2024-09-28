@@ -85,7 +85,7 @@ namespace CampaignEditor
                 }
                 datesToPrint.Add(DateOnly.FromDateTime(dpOneDay.SelectedDate.Value));
             }
-            else
+            else if (((bool)rbRangeDays.IsChecked))
             {
                 if (!dpFrom.SelectedDate.HasValue)
                 {
@@ -707,8 +707,8 @@ namespace CampaignEditor
         {
             switch (statusad)
             {
-                case 1: return System.Drawing.Color.YellowGreen;
                 case 2: return System.Drawing.Color.Gray;
+                case 1: return System.Drawing.Color.DodgerBlue;
                 default: break;
             }
 
@@ -716,14 +716,8 @@ namespace CampaignEditor
             {
                 case -2: return System.Drawing.Color.BlueViolet; // For row representing date
                 case -1: return System.Drawing.Color.Transparent;
-                case 0: return System.Drawing.Color.LightGray;
                 case 1: return System.Drawing.Color.LightGreen;
-                case 2: return System.Drawing.Color.OrangeRed;
-                case 3: return System.Drawing.Color.Green;
-                case 4: return System.Drawing.Color.Orange;
-                case 5: return System.Drawing.Color.PaleVioletRed;
-                case 6: return System.Drawing.Color.Violet;
-                case 7: return System.Drawing.Color.Cyan;
+                case 5: return System.Drawing.Color.Red;
                 default: return System.Drawing.Color.Transparent;
             }
         }
@@ -736,12 +730,11 @@ namespace CampaignEditor
                 case -1: return System.Drawing.Color.Transparent;
                 case 0: return System.Drawing.Color.LightGray;
                 case 1: return System.Drawing.Color.LightGreen;
-                case 2: return System.Drawing.Color.OrangeRed;
-                case 3: return System.Drawing.Color.Green;
-                case 4: return System.Drawing.Color.Orange;
-                case 5: return System.Drawing.Color.PaleVioletRed;
-                case 6: return System.Drawing.Color.Violet;
-                case 7: return System.Drawing.Color.Cyan;
+                case 2: return System.Drawing.Color.Orange;
+                case 3: return System.Drawing.Color.Yellow;
+                case 4: return System.Drawing.Color.LightGoldenrodYellow;
+                case 5: return System.Drawing.Color.Red;
+                case 6: return System.Drawing.Color.PaleVioletRed;
                 default: return System.Drawing.Color.Transparent;
             }
         }

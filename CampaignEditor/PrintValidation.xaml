@@ -43,9 +43,9 @@
             <RadioButton x:Name="rbAllDays" GroupName="rbDays" Grid.Column="0" 
                          Content="All days" IsChecked="True"/>
             <RadioButton x:Name="rbOneDay" GroupName="rbDays" Grid.Column="1" 
-                         Content="Selected day" IsChecked="False" Margin="20, 0, 0, 0"/>
+                         Content="Selected day" Margin="20, 0, 0, 0"/>
             <RadioButton x:Name="rbRangeDays" GroupName="rbDays" Grid.Column="2" 
-                         Content="Range" IsChecked="False" Margin="20, 0, 0, 0"/>
+                         Content="Range"  Margin="20, 0, 0, 0"/>
         </Grid>
         <Grid x:Name="gridDays" Grid.Row="3" Grid.Column="1">
             <Grid.ColumnDefinitions>

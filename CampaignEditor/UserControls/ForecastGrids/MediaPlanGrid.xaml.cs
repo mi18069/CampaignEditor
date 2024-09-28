@@ -1284,6 +1284,12 @@ namespace CampaignEditor.UserControls
 
             var term = System.Drawing.ColorTranslator.FromHtml(Brushes.LightGreen.ToString());
             colors.Add("term", term);
+            var added = System.Drawing.ColorTranslator.FromHtml(Brushes.DodgerBlue.ToString());
+            colors.Add("added", added);
+            var deleted = System.Drawing.ColorTranslator.FromHtml(Brushes.Gray.ToString());
+            colors.Add("deleted", deleted);
+            var modified = System.Drawing.ColorTranslator.FromHtml(Brushes.PaleVioletRed.ToString());
+            colors.Add("modified", modified);
 
             var nullTerm = System.Drawing.ColorTranslator.FromHtml(Brushes.LightGoldenrodYellow.ToString());
             colors.Add("null", nullTerm);
@@ -1614,7 +1620,15 @@ namespace CampaignEditor.UserControls
                 else
                 {
                     excelCell.Value = term.Spotcode;
-                    SetBackgroundColor(excelCell, colors["term"]);
+                    var color = colors["term"];
+                    if (term.Status == 1)
+                        color = colors["added"];
+                    else if (term.Status == 2)
+                        color = colors["deleted"];
+                    else if (term.Status == 3)
+                        color = colors["modified"];
+
+                    SetBackgroundColor(excelCell, color);
                 }
 
                 if (date.DayOfWeek == DayOfWeek.Saturday || date.DayOfWeek == DayOfWeek.Sunday)
