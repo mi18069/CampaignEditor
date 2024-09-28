@@ -893,8 +893,22 @@ namespace CampaignEditor
         private async void ValidationStack_UpdatedMediaPlanRealized(object? sender, UpdateMediaPlanRealizedEventArgs e)
         {
             var mpRealized = e.MediaPlanRealized;
-            if (e.CoefsUpdated)
-                CoefsUpdated(mpRealized);
+            if (e.RecalculateCoefs)
+                CalculateCoefs(mpRealized);
+
+            if (e.RecalculatePrice)
+            {
+                if ((mpRealized.status == 3 || mpRealized.status == 4))
+                {
+                    mpRealized.price = 0.0M;
+                }
+                else
+                {
+                    _mpConverter.CalculateRealizedPrice(mpRealized);
+                }
+            }
+
+
 
             await _mediaPlanRealizedController.UpdateMediaPlanRealized(mpRealized);
         }

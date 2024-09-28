@@ -486,7 +486,10 @@ namespace CampaignEditor
         public void CoefsUpdated(MediaPlanRealized mpRealized, PricelistDTO pricelist)
         {
             decimal coefs = mpRealized.Chcoef.Value * mpRealized.CoefA.Value * mpRealized.CoefB.Value * mpRealized.Seccoef.Value * mpRealized.Seascoef.Value * mpRealized.Cbrcoef.Value * mpRealized.Progcoef.Value * mpRealized.Dpcoef!.Value;
-            CalculateRealizedPrice(mpRealized, pricelist, coefs);
+            if (mpRealized.Status == 3 || mpRealized.Status == 4)
+                mpRealized.price = 0.0M;
+            else
+                CalculateRealizedPrice(mpRealized, pricelist, coefs);
             CalculateRealizedCPP(mpRealized, pricelist);
         }
         public void CalculateRealizedPrice(MediaPlanRealized mpRealized)

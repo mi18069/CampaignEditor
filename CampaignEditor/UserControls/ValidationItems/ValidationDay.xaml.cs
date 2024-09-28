@@ -367,6 +367,7 @@ namespace CampaignEditor.UserControls.ValidationItems
 
                 foreach (MediaPlanRealized mpRealized in dgRealized.SelectedItems)
                 {
+                    bool recalculatePrice = false;
                     if (mpRealized.status == -1)
                         continue;
                     if (changeAccept)
@@ -375,9 +376,13 @@ namespace CampaignEditor.UserControls.ValidationItems
                     }
                     else
                     {
+                        bool gratisStatus = status == 3 || status == 4;
+                        bool gratisMPRStatus = mpRealized.status == 3 || mpRealized.status == 4;
+                        if (gratisStatus != gratisMPRStatus)
+                            recalculatePrice = true;
                         mpRealized.status = status;
                     }
-                    UpdatedMediaPlanRealized?.Invoke(this, new UpdateMediaPlanRealizedEventArgs(mpRealized, false));
+                    UpdatedMediaPlanRealized?.Invoke(this, new UpdateMediaPlanRealizedEventArgs(mpRealized, false, recalculatePrice));
                 }
             }
         }
@@ -702,10 +707,10 @@ namespace CampaignEditor.UserControls.ValidationItems
                 }
 
                 if (isChangedCoef)
-                    UpdatedMediaPlanRealized?.Invoke(this, new UpdateMediaPlanRealizedEventArgs(mpR, true));
+                    UpdatedMediaPlanRealized?.Invoke(this, new UpdateMediaPlanRealizedEventArgs(mpR, true, false));
 
                 if (progcoefChanged)
-                    ProgcoefChangedMediaPlanRealized?.Invoke(this, new UpdateMediaPlanRealizedEventArgs(mpR, true));
+                    ProgcoefChangedMediaPlanRealized?.Invoke(this, new UpdateMediaPlanRealizedEventArgs(mpR, true, false));
             }
 
         }
