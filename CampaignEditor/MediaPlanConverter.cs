@@ -596,7 +596,7 @@ namespace CampaignEditor
         public decimal CalculateRealizedCbrcoef(MediaPlanRealized mpRealized)
         {
             decimal cbrcoef = 1.0M;
-            var spotPair = _forecastData.SpotPairs.FirstOrDefault(sp => sp.spotnum == mpRealized.spotnum);
+            var spotPair = _forecastData.SpotPairs.FirstOrDefault(sp => !string.IsNullOrEmpty(sp.spotcode) && sp.spotnum == mpRealized.spotnum);
             if (spotPair != null)
             {
                 char spotcode = spotPair.spotcode[0];

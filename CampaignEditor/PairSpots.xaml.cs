@@ -21,6 +21,9 @@ namespace CampaignEditor
         private SpotPairController _spotPairController;
         private RealizedSpotController _realizedSpotController;
         List<EqualSpots> equalSpots = new List<EqualSpots>();
+
+        public List<SpotPairDTO> UpdateSpotPairs = new List<SpotPairDTO>();
+
         public PairSpots(ISpotPairRepository spotPairRepository,
             IRealizedSpotRepository realizedSpotRepository)
         {
@@ -98,7 +101,29 @@ namespace CampaignEditor
             var realizedSpot = e.RealizedSpot;
             if (string.Compare(newSpotcode, "None") == 0)
                 newSpotcode = null;
-            await _spotPairController.UpdateSpotPair(new UpdateSpotPairDTO(_campaign.cmpid, newSpotcode, realizedSpot.spotnum));
+
+            var updateSpot = UpdateSpotPairs.FirstOrDefault(usp => usp.spotnum == realizedSpot.spotnum);
+
+            if (updateSpot != null)
+            {
+                updateSpot.spotcode = newSpotcode;
+            }
+            else
+            {
+                updateSpot = new SpotPairDTO(_campaign.cmpid, newSpotcode, realizedSpot.spotnum);
+                UpdateSpotPairs.Add(updateSpot);
+            }
+
+        }
+
+        private async void btnSave_Click(object sender, RoutedEventArgs e)
+        {
+            foreach (var updateSpotPair in UpdateSpotPairs)
+            {
+                await _spotPairController.UpdateSpotPair(new UpdateSpotPairDTO(updateSpotPair));
+            }
+
+            this.Close();
         }
 
         private void btnCancel_Click(object sender, RoutedEventArgs e)
@@ -110,5 +135,7 @@ namespace CampaignEditor
         {
             spotsPannel.UnbindEvents();
         }
+
+
     }
 }

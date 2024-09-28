@@ -15,8 +15,21 @@
         <Label Content="Pair spots" Grid.Row="0" HorizontalAlignment="Center"/>
         <local:EqualSpotsPannel x:Name="spotsPannel" Grid.Row="1" 
                                 HorizontalAlignment="Stretch" Margin="20, 0"/>
-        <Button x:Name="btnCancel" Content="Cancel" Grid.Row="2" 
-                Width="70" Height="40" HorizontalAlignment="Right" 
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="auto"/>
+            </Grid.ColumnDefinitions>
+
+            <Button x:Name="btnCancel" Content="Cancel" 
+                Width="70" Height="40" Grid.Column="1"
                 Margin="0, 0, 20, 0" Click="btnCancel_Click"/>
+
+            <Button x:Name="btnSave" Content="Save"  
+                Width="70" Height="40" Grid.Column="2" 
+                Margin="0, 0, 20, 0" Click="btnSave_Click"/>
+        </Grid>
+        
     </Grid>
 </Window>

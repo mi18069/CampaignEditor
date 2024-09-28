@@ -5,5 +5,9 @@
         public UpdateSpotPairDTO(int cmpid, string spotcode, int spotnum) : base(cmpid, spotcode, spotnum)
         {
         }
+
+        public UpdateSpotPairDTO(SpotPairDTO spDTO) : base(spDTO.cmpid, spDTO.spotcode, spDTO.spotnum)
+        {
+        }
     }
 }

@@ -193,6 +193,40 @@ namespace CampaignEditor
                 $"6: {s6.ElapsedMilliseconds}\n", "");*/
         }
 
+        private async Task UpdateSpotPairs(IEnumerable<SpotPairDTO> spotPairs)
+        {
+            // for every changed spotnum, recalculate it's values
+            foreach (var spotPair in spotPairs)
+            {
+                RecalculateRealizedSpotsBySpotnum(spotPair.spotnum);
+            }
+        }
+
+        private async Task RecalculateRealizedSpotsBySpotnum(int spotnum)
+        {
+
+            foreach (var date in _dates)
+            {
+
+                var realizes = _dateRealizedDict[date]
+                .Where(mpR => mpR != null)
+                .Where(mpR => mpR.spotnum != null && mpR.spotnum == spotnum)
+                .ToList();
+
+                for (int i = 0; i < realizes.Count(); i++)
+                {
+                    var mpR = realizes[i];
+                    int realizedIndex = _dateRealizedDict[date].IndexOf(mpR);
+                    var mediaPlanRealized = _dateRealizedDict[date][realizedIndex]!;
+                    CalculateCoefs(mediaPlanRealized);
+                    await _mediaPlanRealizedController.UpdateMediaPlanRealized(mediaPlanRealized);
+                }
+                
+                
+            }
+        }
+
+
         public async Task CobrandsChanged(IEnumerable<CobrandDTO> cobrands)
         {
             SetLoadingPage?.Invoke(this, null);
@@ -264,6 +298,8 @@ namespace CampaignEditor
             }
 
         }
+
+
 
         private async void ValidationStack_CheckNewDataDay(object? sender, CheckDateEventArgs e)
         {
@@ -1278,7 +1314,20 @@ namespace CampaignEditor
             await factory.Initialize(_campaign, _forecastData.Spots, uniqueSpotNums);
             factory.ShowDialog();
 
+            if (factory.UpdateSpotPairs.Count > 0)
+            {
+                SetLoadingPage?.Invoke(this, null);
+                await _forecastData.InitializeSpotPairs();
+                await GetSpotPairs(_campaign);
+                var spotPairs = factory.UpdateSpotPairs as List<SpotPairDTO>;
+                await UpdateSpotPairs(spotPairs);
+                SetContentPage?.Invoke(this, null);
+
+            }
+
         }
+
+
 
     }
 }
