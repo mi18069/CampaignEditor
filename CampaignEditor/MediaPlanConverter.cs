@@ -215,7 +215,7 @@ namespace CampaignEditor
 
                             //price += coefs * spotDTO.spotlength;
                             decimal standardPrice = coefs * 30;
-                            price += PriceWithGRPCheck(mediaPlan, pricelist, standardPrice);
+                            price += PriceWithFixedCheck(mediaPlan, pricelist, standardPrice);
                         }
                         // For cpp pricelists
                         else
@@ -229,7 +229,7 @@ namespace CampaignEditor
                             //decimal standardPrice = (pricelist.price / 30) * spotDTO.spotlength * amrpSale * coefs;
                             //decimal standardPrice = (pricelist.price / 30) * spotDTO.spotlength * mediaPlan.Amrpsale * coefs;
                             decimal standardPrice = pricelist.price * amrpSale * coefs;
-                            price = PriceWithGRPCheck(mediaPlan, pricelist, standardPrice);
+                            price = PriceWithFixedCheck(mediaPlan, pricelist, standardPrice);
                             //price = (pricelist.price / 30) * spot.spotlength * mediaPlan.Amrpsale * coefs;
                         }
                     }                  
@@ -272,7 +272,7 @@ namespace CampaignEditor
                     if (pricelist.pltype == 1)
                     {
                         decimal standardPrice = coefs * 30;
-                        price = PriceWithGRPCheck(mediaPlan, pricelist, standardPrice);
+                        price = PriceWithFixedCheck(mediaPlan, pricelist, standardPrice);
 
                         break;
                     }
@@ -290,7 +290,7 @@ namespace CampaignEditor
                         
                         decimal standardPrice = pricelist.price * amrpSale * coefs;
 
-                        price = PriceWithGRPCheck(mediaPlan, pricelist, standardPrice);
+                        price = PriceWithFixedCheck(mediaPlan, pricelist, standardPrice);
                         break;
                     }
                 }
@@ -509,7 +509,7 @@ namespace CampaignEditor
             {
                 decimal standardPrice = coefs * 30;
 
-                price = PriceWithGRPCheck(mpRealized, pricelist, standardPrice);
+                price = PriceWithFixedCheck(mpRealized, pricelist, standardPrice);
 
             }
             // For cpp pricelists
@@ -525,13 +525,13 @@ namespace CampaignEditor
                 int spotLength = FindClosestSpotLength(realizedLength);
                 //decimal standardPrice = (pricelist.price / 30) * spotLength * amrpSale * coefs;
                 decimal standardPrice = pricelist.price * amrpSale * coefs;
-                price = PriceWithGRPCheck(mpRealized, pricelist, standardPrice);
+                price = PriceWithFixedCheck(mpRealized, pricelist, standardPrice);
             }
 
             mpRealized.price = price;
         }
 
-        private decimal PriceWithGRPCheck(MediaPlanRealized mpRealized, PricelistDTO pricelist, decimal standardValue)
+        private decimal PriceWithFixedCheck(MediaPlanRealized mpRealized, PricelistDTO pricelist, decimal standardValue)
         {
             if (mpRealized.Amrp1 < pricelist.minprice && pricelist.fixprice != 0)
             {
@@ -713,7 +713,7 @@ namespace CampaignEditor
                         }
                         //price += coefs * spotDTO.spotlength;
                         decimal standardPrice = coefs * 30;
-                        price += PriceWithGRPCheck(mediaPlan, pricelist, standardPrice);
+                        price += PriceWithFixedCheck(mediaPlan, pricelist, standardPrice);
                     }
                 }
 
@@ -744,16 +744,13 @@ namespace CampaignEditor
                             price = 0.0M;
                             break;
                         }
-                        decimal amrpSale = mediaPlan.Amrpsale;
-                        if (pricelist.mgtype && amrpSale < pricelist.minprice && amrpSale != 0)
-                        {
-                            amrpSale = pricelist.minprice;
-                        }
+                        decimal amrpSale = ZeroGRPAmr(mediaPlan.Amrpsale, pricelist);
+
                         //decimal standardPrice = (pricelist.price / 30) * spotDTO.spotlength * amrpSale * coefs;
                         //decimal standardPrice = (pricelist.price / 30) * spotDTO.spotlength * mediaPlan.Amrpsale * coefs;
                         decimal standardPrice = pricelist.price * amrpSale * coefs;
 
-                        price += PriceWithGRPCheck(mediaPlan, pricelist, standardPrice);
+                        price += PriceWithFixedCheck(mediaPlan, pricelist, standardPrice);
                     }
                 }
 
@@ -851,13 +848,30 @@ namespace CampaignEditor
 
         
 
-        private decimal PriceWithGRPCheck(MediaPlan mediaPlan, PricelistDTO pricelist, decimal standardValue)
+        private decimal PriceWithFixedCheck(MediaPlan mediaPlan, PricelistDTO pricelist, decimal standardValue)
         {
+            // fixed is checked - if x < min then fix price
             if (mediaPlan.Amrp1 < pricelist.minprice && pricelist.fixprice != 0)
             {
                 return pricelist.fixprice;
             }
             return standardValue;
+        }
+
+        private decimal ZeroGRPAmr(decimal amrp1, PricelistDTO pricelist)
+        {
+            // If zeroGrp not checked - if x < min then x
+            if (amrp1 < pricelist.minprice && pricelist.mgtype == false)
+            {
+                return amrp1;
+            }
+            // zeroGRP is checked - if x = 0 then min, if 0 < x < min then x
+            if (amrp1 < pricelist.minprice && pricelist.mgtype == true)
+            {
+                return amrp1 == 0 ? pricelist.minprice : amrp1;
+            }
+
+            return amrp1;
         }
 
         public decimal CalculateTermSeccoef(MediaPlan mediaPlan, SpotDTO spotDTO)
