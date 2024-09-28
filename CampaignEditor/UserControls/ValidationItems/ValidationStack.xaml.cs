@@ -225,6 +225,14 @@ namespace CampaignEditor.UserControls.ValidationItems
             var dateExpected = _dateExpectedDict[date];
             var dateRealized = _dateRealizedDict[date];
 
+            foreach (var data in dateExpected)
+            {
+                if (data.MediaPlan.chid == 21010)
+                {
+                    var b = data.Spot.spotcode;
+                    var a = data.Cbrcoef;
+                }
+            }
             ValidationDay validationDay = ValidationDaysDict[date];
             validationDay.RefreshDate(dateExpected, dateRealized);
         }

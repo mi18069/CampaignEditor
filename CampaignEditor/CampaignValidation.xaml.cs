@@ -1,7 +1,6 @@
 ﻿using CampaignEditor.Controllers;
 using CampaignEditor.Helpers;
 using CampaignEditor.StartupHelpers;
-using CampaignEditor.UserControls.ValidationItems.PairSpotsItems;
 using Database.DTOs.CampaignDTO;
 using Database.DTOs.ChannelDTO;
 using Database.DTOs.CmpBrndDTO;
@@ -15,12 +14,9 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Text;
-using System.Threading.Channels;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media;
 
 namespace CampaignEditor
 {
@@ -197,32 +193,49 @@ namespace CampaignEditor
                 $"6: {s6.ElapsedMilliseconds}\n", "");*/
         }
 
-        public void CobrandsChanged(IEnumerable<CobrandDTO> cobrands)
+        public async Task CobrandsChanged(IEnumerable<CobrandDTO> cobrands)
         {
+            SetLoadingPage?.Invoke(this, null);
+
             foreach (var cobrand in cobrands)
             {
                 RecalculateCobrandExpected(cobrand);
-                RecalculateCobrandRealized(cobrand);
+                await RecalculateCobrandRealized(cobrand);
             }
+
+            foreach (var date in _dates)
+                validationStack.RefreshDate(date);
+
+            SetContentPage?.Invoke(this, null);
         }
         private void RecalculateCobrandExpected(CobrandDTO cobrand)
         {
             int chid = cobrand.chid;
             char spotcode = cobrand.spotcode;
-            var terms = _dateExpectedDict.Values
+            foreach (var date in _dates)
+            {
+                var terms = _dateExpectedDict[date]
                 .Where(tt => tt != null)
-                .SelectMany(tt => tt)
-                .Where(tt => tt!.MediaPlan.chid == chid && tt.Spot.spotcode[0] == spotcode)
+                .Where(tt => tt!.MediaPlan.chid == chid
+                        && !string.IsNullOrWhiteSpace(tt.Spot.spotcode)
+                        && tt.Spot.spotcode[0] == spotcode)
                 .ToList();
 
-            for (int i=0; i<terms.Count(); i++)
-            {
-                var term = terms[i];
-                term = MakeTermTuple(spotcode, _allMediaPlans.First(mpt => mpt.MediaPlan.xmpid == term.MediaPlan.xmpid), term.MediaPlanTerm, _forecastData.Channels.First(ch => ch.chid == chid));
+                for (int i = 0; i < terms.Count(); i++)
+                {
+                    var term = terms[i];
+                    var newTerm = MakeTermTuple(spotcode, term!.MediaPlan, term.MediaPlanTerm, _forecastData.Channels.First(ch => ch.chid == chid));
+                    newTerm.Status = term.Status;
+                    newTerm.StatusAD = term.StatusAD;
+                    var termIndex = _dateExpectedDict[date].IndexOf(term);
+
+                    _dateExpectedDict[date][termIndex] = newTerm;
+                }
             }
+            
         }
 
-        private void RecalculateCobrandRealized(CobrandDTO cobrand)
+        private async Task RecalculateCobrandRealized(CobrandDTO cobrand)
         {
             int chid = cobrand.chid;
             char spotcode = cobrand.spotcode;
@@ -232,17 +245,24 @@ namespace CampaignEditor
                 return;
 
             int spotnum = spotpair.spotnum;
-            var realizes = _dateRealizedDict.Values
-                .Where(mpR => mpR != null)
-                .SelectMany(mpR => mpR)
-                .Where(mpR => mpR.chid == chrdsid && mpR.spotnum == spotnum)
-                .ToList();
 
-            for (int i = 0; i < realizes.Count(); i++)
+            foreach (var date in _dates)
             {
-                var mpR = realizes[i];
-                CalculateCoefs(mpR);
+                var realizes = _dateRealizedDict[date]
+                    .Where(mpR => mpR != null)
+                    .Where(mpR => mpR!.chid == chrdsid && mpR.spotnum == spotnum)
+                    .ToList();
+
+                for (int i = 0; i < realizes.Count(); i++)
+                {
+                    var mpR = realizes[i];
+                    int realizedIndex = _dateRealizedDict[date].IndexOf(mpR);
+                    var mediaPlanRealized = _dateRealizedDict[date][realizedIndex]!;
+                    CalculateCoefs(mediaPlanRealized);
+                    await _mediaPlanRealizedController.UpdateMediaPlanRealized(mediaPlanRealized);
+                }
             }
+
         }
 
         private async void ValidationStack_CheckNewDataDay(object? sender, CheckDateEventArgs e)
@@ -892,7 +912,7 @@ namespace CampaignEditor
                     {
                         foreach (char spotcode in spotcodes)
                         {
-                            var termTuple = MakeTermTuple(spotcode, mediaPlanTuple, mediaPlanTerm, channel);
+                            var termTuple = MakeTermTuple(spotcode, mediaPlanTuple.MediaPlan, mediaPlanTerm, channel);
                             int statusAd = 0;
                             if (!string.IsNullOrEmpty(added))
                             {
@@ -912,7 +932,7 @@ namespace CampaignEditor
                     {
                         foreach (char spotcode in deleted)
                         {
-                            var termTuple = MakeTermTuple(spotcode, mediaPlanTuple, mediaPlanTerm, channel);
+                            var termTuple = MakeTermTuple(spotcode, mediaPlanTuple.MediaPlan, mediaPlanTerm, channel);
                             termTuple.StatusAD = 2;
                             termTuples.Add(termTuple);
                         }
@@ -924,12 +944,11 @@ namespace CampaignEditor
             return termTuples;
         }
 
-        private TermTuple MakeTermTuple(char spotcode, MediaPlanTuple mediaPlanTuple, MediaPlanTerm mediaPlanTerm,
+        private TermTuple MakeTermTuple(char spotcode, MediaPlan mediaPlan, MediaPlanTerm mediaPlanTerm,
             ChannelDTO channel)
         {
             var spot = _forecastData.SpotcodeSpotDict[spotcode];
             // It's better to have info from allMediaPlans
-            var mediaPlan = mediaPlanTuple.MediaPlan;
             var termCoefs = new TermCoefs(mediaPlan.Amrpsale, mediaPlan.Cpp);
             var price = _mpConverter.GetProgramSpotPrice(mediaPlan, mediaPlanTerm, spot, termCoefs);
             TermTuple termTuple = new TermTuple(mediaPlan, mediaPlanTerm, spot, termCoefs, channel.chname.Trim());

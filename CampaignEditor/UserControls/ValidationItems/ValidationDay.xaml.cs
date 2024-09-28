@@ -880,8 +880,8 @@ namespace CampaignEditor.UserControls.ValidationItems
         private void dgExpected_SizeChanged(object sender, SizeChangedEventArgs e)
         {
             // For propagation of changed dimensions of dataGrid so all grids are equal width
-            if (e.WidthChanged == true && e.NewSize.Width > 0)
-                DgExpectedSizeChanged?.Invoke(this, e);
+            /*if (e.WidthChanged == true && e.NewSize.Width > 0)
+                DgExpectedSizeChanged?.Invoke(this, e);*/
 
         }
 

@@ -17,7 +17,7 @@ namespace CampaignEditor.Converters
                     return Brushes.DodgerBlue;
 
                 if (status == 5)
-                    return Brushes.OrangeRed;
+                    return Brushes.Red;
                 if (status == 1)
                     return Brushes.LightGreen;
 
