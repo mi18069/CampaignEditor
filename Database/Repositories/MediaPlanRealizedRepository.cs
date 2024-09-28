@@ -478,6 +478,15 @@ namespace Database.Repositories
             return affected != 0;
         }
 
+        public async Task<bool> SetAcceptValue(int id, bool acceptValue)
+        {
+            using var connection = _context.GetConnection();
 
+            var affected = await connection.ExecuteAsync(
+                "UPDATE xmpre SET accept = @AcceptValue WHERE id = @Id",
+                new { Id = id, AcceptValue = acceptValue });
+
+            return affected != 0;
+        }
     }
 }

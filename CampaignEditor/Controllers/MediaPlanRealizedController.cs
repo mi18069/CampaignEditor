@@ -78,5 +78,10 @@ namespace CampaignEditor.Controllers
         {
             return await _repository.SetStatusValue(id, statusValue);
         }
+
+        public async Task<bool> SetAcceptValue(int id, bool acceptValue)
+        {
+            return await _repository.SetAcceptValue(id, acceptValue);
+        }
     }
 }

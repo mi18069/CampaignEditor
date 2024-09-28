@@ -515,11 +515,7 @@ namespace CampaignEditor
             // For cpp pricelists
             else
             {
-                decimal amrpSale = mpRealized.Amrpsale.Value;
-                if (pricelist.mgtype && amrpSale < pricelist.minprice && amrpSale != 0)
-                {
-                    amrpSale = pricelist.minprice;
-                }
+                decimal amrpSale = Math.Round(ZeroGRPAmr(mpRealized.amrpsale, pricelist), 2);
 
                 int realizedLength = mpRealized.etime.Value - mpRealized.stime.Value;
                 int spotLength = FindClosestSpotLength(realizedLength);

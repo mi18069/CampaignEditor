@@ -22,5 +22,6 @@ namespace Database.Repositories
         Task<List<Tuple<int, string>>> GetAllSpotNumSpotNamePairs(int cmpid);
 
         Task<bool> SetStatusValue(int id, int statusValue);
+        Task<bool> SetAcceptValue(int id, bool acceptValue);
     }
 }

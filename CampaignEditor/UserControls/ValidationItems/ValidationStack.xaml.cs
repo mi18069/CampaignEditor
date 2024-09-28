@@ -6,7 +6,6 @@ using Database.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -258,7 +257,19 @@ namespace CampaignEditor.UserControls.ValidationItems
         private async void ValidationDay_CompletedValidationChanged(object? sender, CompletedValidationEventArgs e)
         {
             await _completedValidationController.UpdateCompValidation(new CompletedValidation(_campaign.cmpid, e.Date, e.IsCompleted));
+            if (e.IsCompleted)
+            {
+                foreach (var mpR in _dateRealizedDict[TimeFormat.YMDStringToDateOnly(e.Date)])
+                {
+                    if (mpR.Accept == false)
+                    {
+                        mpR.Accept = true;
+                        await _mediaPlanRealizedController.SetAcceptValue(mpR.id.Value, true);
+                    }
+                }
+            }
         }
+
 
         private async Task InvertExpectedGridHeader(int index)
         {
