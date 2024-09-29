@@ -12,6 +12,8 @@ using System.Reflection;
 using System.ComponentModel;
 using System.Windows.Data;
 using System.Data;
+using System.Windows.Controls.Primitives;
+using Microsoft.VisualBasic;
 
 namespace CampaignEditor.UserControls.ValidationItems
 {
@@ -38,6 +40,8 @@ namespace CampaignEditor.UserControls.ValidationItems
         public event EventHandler<UpdateMediaPlanRealizedEventArgs> ProgcoefChangedMediaPlanRealized;
         public event EventHandler<SizeChangedEventArgs> DgExpectedSizeChanged;
         public event EventHandler<DoubleValueEventArgs> DgExpectedWidthChanged;
+        public event EventHandler<ColumnWidthChangedEventArgs> DgExpectedColumnWidthChanged;
+        public event EventHandler<ColumnWidthChangedEventArgs> DgRealizedColumnWidthChanged;
 
         bool hideExpected = false;
 
@@ -518,6 +522,7 @@ namespace CampaignEditor.UserControls.ValidationItems
             GridOpened?.Invoke(this, null);
             gridItems.Visibility = Visibility.Visible;
             tglButton.Content = "Hide";
+
         }
 
         private void dgExpected_ScrollChanged(object sender, ScrollChangedEventArgs e)
@@ -825,69 +830,65 @@ namespace CampaignEditor.UserControls.ValidationItems
 
         #endregion
 
-        private void dgExpected_Loaded(object sender, RoutedEventArgs e)
-        {
-            /*if (_termTuples.Count > 0)
-            {
-                dataViewExpected = CollectionViewSource.GetDefaultView(_termTuples);
-                dgExpected.ItemsSource = dataViewExpected;
-                dataViewExpected.Filter = d =>
-                {
-                    bool result = true;
-
-                    if (_selectedChids.Count > 0)
-                    {
-                        var mediaPlan = ((TermTuple)d).MediaPlan;
-                        result = _selectedChids.Any(c => mediaPlan != null && c == mediaPlan.chid);
-                    }
-
-                    return result;
-                };
-                //dgExpected.ItemsSource = _termTuples;
-
-            }
-
-            for (int i = 0; i < expectedGridMask.Count(); i++)
-            {
-                dgExpected.Columns[i].Visibility = expectedGridMask[i] == '1' ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
-            }*/
-
-        }
-
-        private void dgRealized_Loaded(object sender, RoutedEventArgs e)
-        {
-
-            /*if (_mpRealizedTuples.Count > 0)
-            {
-                dataViewRealized = CollectionViewSource.GetDefaultView(_mpRealizedTuples);
-                dgRealized.ItemsSource = dataViewRealized;
-                dataViewRealized.Filter = d =>
-                {
-                    bool result = true;
-                    if (_selectedChrdsids.Count > 0)
-                    {
-                        var chid = ((MediaPlanRealized)d).chid;
-                        result = _selectedChrdsids.Any(c => chid.HasValue && c == chid);
-                    }
-
-                    return result;
-                };
-                //dgRealized.ItemsSource = _mpRealizedTuples;
-
-            }
-
-            for (int i = 0; i < realizedGridMask.Count(); i++)
-            {
-                dgRealized.Columns[i].Visibility = realizedGridMask[i] == '1' ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden;
-            }*/
-        }
-
         private void dgExpected_SizeChanged(object sender, SizeChangedEventArgs e)
         {
-            // For propagation of changed dimensions of dataGrid so all grids are equal width
-            /*if (e.WidthChanged == true && e.NewSize.Width > 0)
-                DgExpectedSizeChanged?.Invoke(this, e);*/
+            var viewModel = (SharedColumnsWidthViewModel)DataContext;
+            // Ensure ColumnWidths is initialized and has the correct number of columns
+            if (viewModel.ExpectedColumnWidthViewModel.ColumnWidths == null || viewModel.ExpectedColumnWidthViewModel.ColumnWidths.Count() != dgExpected.Columns.Count)
+            {
+                viewModel.ExpectedColumnWidthViewModel.ColumnWidths = new double[dgExpected.Columns.Count];
+            }
 
+            bool update = false;
+            for (int i=0; i<dgExpected.Columns.Count; i++)
+            {
+                var column = dgExpected.Columns[i];
+                if (column.Width.DisplayValue > viewModel.ExpectedColumnWidthViewModel.ColumnWidths[i])
+                {
+                    viewModel.ExpectedColumnWidthViewModel.ColumnWidths[i] = column.Width.DisplayValue;
+                    update = true;
+                    DgExpectedColumnWidthChanged?.Invoke(this, new ColumnWidthChangedEventArgs(column.Width.DisplayValue, i));
+                }
+            }
+            if (update)
+            {
+                viewModel.ExpectedColumnWidthViewModel.OnPropertyChanged(nameof(viewModel.ExpectedColumnWidthViewModel.ColumnWidths));
+            }
+        }
+
+        private void dgRealized_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+            var viewModel = (SharedColumnsWidthViewModel)DataContext;
+            if (viewModel.RealizedColumnWidthViewModel.ColumnWidths == null || viewModel.RealizedColumnWidthViewModel.ColumnWidths.Count() != dgRealized.Columns.Count)
+            {
+                viewModel.RealizedColumnWidthViewModel.ColumnWidths = new double[dgRealized.Columns.Count];
+            }
+            bool update = false;
+            for (int i = 0; i < dgRealized.Columns.Count; i++)
+            {
+                var column = dgRealized.Columns[i];
+                if (column.Width.DisplayValue > viewModel.RealizedColumnWidthViewModel.ColumnWidths[i])
+                {
+                    viewModel.RealizedColumnWidthViewModel.ColumnWidths[i] = column.Width.DisplayValue;
+                    update = true;
+                    DgRealizedColumnWidthChanged?.Invoke(this, new ColumnWidthChangedEventArgs(column.Width.DisplayValue, i));
+
+                }
+            }
+
+            if (update)
+            {
+                viewModel.RealizedColumnWidthViewModel.OnPropertyChanged(nameof(viewModel.RealizedColumnWidthViewModel.ColumnWidths));
+            }
+        }
+
+        public void SetRealizedColumnWidth(double width, int index)
+        {
+            dgRealized.Columns[index].Width = width;
+        }
+        public void SetExpectedColumnWidth(double width, int index)
+        {
+            dgExpected.Columns[index].Width = width;
         }
 
         public void SetWidthExpected(double width)

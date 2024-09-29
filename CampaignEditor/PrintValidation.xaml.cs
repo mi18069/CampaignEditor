@@ -41,6 +41,7 @@ namespace CampaignEditor
         public void Initialize(CampaignDTO campaign)
         {
             _campaign = campaign;
+            rbAllDays.IsChecked = true;
             SetDates(campaign);
         }
 

@@ -5,9 +5,11 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:CampaignEditor.UserControls.ValidationItems"
              xmlns:converters="clr-namespace:CampaignEditor.Converters"
+             xmlns:helpers="clr-namespace:CampaignEditor.Helpers"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800" d:Background="White" Loaded="ValidationDay_Loaded"
-             CommandManager.PreviewCanExecute="HandleCanExecute">
+             CommandManager.PreviewCanExecute="HandleCanExecute"
+             DataContext="{StaticResource SharedColumnsWidthViewModel}">
     <UserControl.Resources>
         <converters:TimeStrToRepresentativeConverter x:Key="TimeStrToRepresentativeConverter"/>
         <converters:RoundValueConverter x:Key="RoundValueConverter"/>
@@ -68,7 +70,8 @@
             </Grid>
         </Grid>
 
-        <Grid x:Name="gridItems" Visibility="Collapsed" Grid.Row="1">
+        <Grid x:Name="gridItems" Visibility="Collapsed" Grid.Row="1" 
+              HorizontalAlignment="Center" Width="{Binding DataGridWidth}">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
@@ -86,9 +89,7 @@
                         SelectionChanged="DgExpected_SelectionChanged"
                         PreviewKeyDown="DataGrid_PreviewKeyDown"
                       ScrollViewer.ScrollChanged="dgExpected_ScrollChanged"
-                      Loaded="dgExpected_Loaded"
-                      SizeChanged="dgExpected_SizeChanged"
-                      
+                      SizeChanged="dgExpected_SizeChanged"                      
                       HorizontalScrollBarVisibility="Disabled">
                 <DataGrid.RowStyle>
                     <Style TargetType="DataGridRow">
@@ -118,29 +119,52 @@
                     </Style>
                 </DataGrid.Resources>
                 <DataGrid.Columns>
-                    <DataGridTextColumn x:Name="tcEDate" Header="Date" Binding="{Binding Path=Date}" MaxWidth="200"/>
-                    <DataGridTextColumn x:Name="tcEChannel" Header="Channel" Binding="{Binding Path=ChannelName}" MaxWidth="200"/>
-                    <DataGridTextColumn x:Name="tcEProgram" Header="Program" Binding="{Binding Path=MediaPlan.name}" MaxWidth="200"/>
-                    <DataGridTextColumn x:Name="tcEDayPart" Header="Day part" Binding="{Binding Path=MediaPlan.DayPart.name}" MaxWidth="200"/>
-                    <DataGridTextColumn x:Name="tcEBlocktime" Header="Block time" Binding="{Binding Path=MediaPlan.blocktime}"/>
-                    <DataGridTextColumn x:Name="tcEPosition" Header="Position" Binding="{Binding Path=MediaPlan.position}"/>
-                    <DataGridTextColumn x:Name="tcEAmrp3" Header="Amr% 1" Binding="{Binding Path=Amrp1, Converter={StaticResource RoundValueConverter}}"/>
-                    <DataGridTextColumn x:Name="tcEAmrp2" Header="Amr% 2" Binding="{Binding Path=Amrp2, Converter={StaticResource RoundValueConverter}}"/>
-                    <DataGridTextColumn x:Name="tcEAmrp1" Header="Amr% 3" Binding="{Binding Path=Amrp3, Converter={StaticResource RoundValueConverter}}"/>
-                    <DataGridTextColumn x:Name="tcEAmrpsale" Header="Amr% Sale" Binding="{Binding Path=Amrpsale, Converter={StaticResource RoundValueConverter}}"/>
-                    <DataGridTextColumn x:Name="tcECpp" Header="Cpp" Binding="{Binding Path=Cpp, Converter={StaticResource RoundValueConverter}}"/>
-                    <DataGridTextColumn x:Name="tcEChcoef" Header="Ch coef" Binding="{Binding Path=Chcoef, Converter={StaticResource RoundValueConverter}}"/>
-                    <DataGridTextColumn x:Name="tcEProgcoef" Header="Prog coef" Binding="{Binding Path=Progcoef, Converter={StaticResource RoundValueConverter}}"/>
-                    <DataGridTextColumn x:Name="tcEDpcoef" Header="Dp coef" Binding="{Binding Path=Dpcoef, Converter={StaticResource RoundValueConverter}}"/>
-                    <DataGridTextColumn x:Name="tcESeascoef" Header="Seas coef" Binding="{Binding Path=Seascoef, Converter={StaticResource RoundValueConverter}}"/>
-                    <DataGridTextColumn x:Name="tcESeccoef" Header="Sec coef" Binding="{Binding Path=Seccoef, Converter={StaticResource RoundValueConverter}}"/>
-                    <DataGridTextColumn x:Name="tcECoefA" Header="Coef A" Binding="{Binding Path=CoefA, Converter={StaticResource RoundValueConverter}}"/>
-                    <DataGridTextColumn x:Name="tcECoefB" Header="Coef B" Binding="{Binding Path=CoefB, Converter={StaticResource RoundValueConverter}}"/>
-                    <DataGridTextColumn x:Name="tcECbrcoef" Header="Cbr coef" Binding="{Binding Path=Cbrcoef, Converter={StaticResource RoundValueConverter}}"/>
-                    <DataGridTextColumn x:Name="tcESpot" Header="Spot" Binding="{Binding Path=Spot.SpotName}" Visibility="Collapsed" MaxWidth="200"/>
-                    <DataGridTextColumn x:Name="tcESpotlength" Header="Spot len" Binding="{Binding Path=Spotlength}"/>
-                    <DataGridTextColumn x:Name="tcESpotcode" Header="Spotcode" Binding="{Binding Path=Spot.spotcode}"/>
-                    <DataGridTextColumn x:Name="tcEPrice" Header="Price" Binding="{Binding Path=Price, Converter={StaticResource RoundValueConverter}}"/>
+                    <DataGridTextColumn x:Name="tcEDate" Header="Date" Binding="{Binding Path=Date}" MaxWidth="200"
+                                        Width="{Binding ExpectedColumnWidthViewModel.ColumnWidths[0], Mode=TwoWay}"/>
+                    <DataGridTextColumn x:Name="tcEChannel" Header="Channel" Binding="{Binding Path=ChannelName}" MaxWidth="200"
+                                        Width="{Binding ExpectedColumnWidthViewModel.ColumnWidths[1], Mode=TwoWay}"/>
+                    <DataGridTextColumn x:Name="tcEProgram" Header="Program" Binding="{Binding Path=MediaPlan.name}" MaxWidth="200"
+                                        Width="{Binding ExpectedColumnWidthViewModel.ColumnWidths[2], Mode=TwoWay}"/>
+                    <DataGridTextColumn x:Name="tcEDayPart" Header="Day part" Binding="{Binding Path=MediaPlan.DayPart.name}" MaxWidth="200"
+                                        Width="{Binding ExpectedColumnWidthViewModel.ColumnWidths[3], Mode=TwoWay}"/>
+                    <DataGridTextColumn x:Name="tcEBlocktime" Header="Block time" Binding="{Binding Path=MediaPlan.blocktime}"
+                                        Width="{Binding ExpectedColumnWidthViewModel.ColumnWidths[4], Mode=TwoWay}"/>
+                    <DataGridTextColumn x:Name="tcEPosition" Header="Position" Binding="{Binding Path=MediaPlan.position}"
+                                        Width="{Binding ExpectedColumnWidthViewModel.ColumnWidths[5], Mode=TwoWay}"/>
+                    <DataGridTextColumn x:Name="tcEAmrp3" Header="Amr% 1" Binding="{Binding Path=Amrp1, Converter={StaticResource RoundValueConverter}}"
+                                        Width="{Binding ExpectedColumnWidthViewModel.ColumnWidths[6], Mode=TwoWay}"/>
+                    <DataGridTextColumn x:Name="tcEAmrp2" Header="Amr% 2" Binding="{Binding Path=Amrp2, Converter={StaticResource RoundValueConverter}}"
+                                        Width="{Binding ExpectedColumnWidthViewModel.ColumnWidths[7], Mode=TwoWay}"/>
+                    <DataGridTextColumn x:Name="tcEAmrp1" Header="Amr% 3" Binding="{Binding Path=Amrp3, Converter={StaticResource RoundValueConverter}}"
+                                        Width="{Binding ExpectedColumnWidthViewModel.ColumnWidths[8], Mode=TwoWay}"/>
+                    <DataGridTextColumn x:Name="tcEAmrpsale" Header="Amr% Sale" Binding="{Binding Path=Amrpsale, Converter={StaticResource RoundValueConverter}}"
+                                        Width="{Binding ExpectedColumnWidthViewModel.ColumnWidths[9], Mode=TwoWay}"/>
+                    <DataGridTextColumn x:Name="tcECpp" Header="Cpp" Binding="{Binding Path=Cpp, Converter={StaticResource RoundValueConverter}}"
+                                        Width="{Binding ExpectedColumnWidthViewModel.ColumnWidths[10], Mode=TwoWay}"/>
+                    <DataGridTextColumn x:Name="tcEChcoef" Header="Ch coef" Binding="{Binding Path=Chcoef, Converter={StaticResource RoundValueConverter}}"
+                                        Width="{Binding ExpectedColumnWidthViewModel.ColumnWidths[11], Mode=TwoWay}"/>
+                    <DataGridTextColumn x:Name="tcEProgcoef" Header="Prog coef" Binding="{Binding Path=Progcoef, Converter={StaticResource RoundValueConverter}}"
+                                        Width="{Binding ExpectedColumnWidthViewModel.ColumnWidths[12], Mode=TwoWay}"/>
+                    <DataGridTextColumn x:Name="tcEDpcoef" Header="Dp coef" Binding="{Binding Path=Dpcoef, Converter={StaticResource RoundValueConverter}}"
+                                        Width="{Binding ExpectedColumnWidthViewModel.ColumnWidths[13], Mode=TwoWay}"/>
+                    <DataGridTextColumn x:Name="tcESeascoef" Header="Seas coef" Binding="{Binding Path=Seascoef, Converter={StaticResource RoundValueConverter}}"
+                                        Width="{Binding ExpectedColumnWidthViewModel.ColumnWidths[14], Mode=TwoWay}"/>
+                    <DataGridTextColumn x:Name="tcESeccoef" Header="Sec coef" Binding="{Binding Path=Seccoef, Converter={StaticResource RoundValueConverter}}"
+                                        Width="{Binding ExpectedColumnWidthViewModel.ColumnWidths[15], Mode=TwoWay}"/>
+                    <DataGridTextColumn x:Name="tcECoefA" Header="Coef A" Binding="{Binding Path=CoefA, Converter={StaticResource RoundValueConverter}}"
+                                        Width="{Binding ExpectedColumnWidthViewModel.ColumnWidths[16], Mode=TwoWay}"/>
+                    <DataGridTextColumn x:Name="tcECoefB" Header="Coef B" Binding="{Binding Path=CoefB, Converter={StaticResource RoundValueConverter}}"
+                                        Width="{Binding ExpectedColumnWidthViewModel.ColumnWidths[17], Mode=TwoWay}"/>
+                    <DataGridTextColumn x:Name="tcECbrcoef" Header="Cbr coef" Binding="{Binding Path=Cbrcoef, Converter={StaticResource RoundValueConverter}}"
+                                        Width="{Binding ExpectedColumnWidthViewModel.ColumnWidths[18], Mode=TwoWay}"/>
+                    <DataGridTextColumn x:Name="tcESpot" Header="Spot" Binding="{Binding Path=Spot.SpotName}" Visibility="Collapsed" MaxWidth="200"
+                                        Width="{Binding ExpectedColumnWidthViewModel.ColumnWidths[19], Mode=TwoWay}"/>
+                    <DataGridTextColumn x:Name="tcESpotlength" Header="Spot len" Binding="{Binding Path=Spotlength}"
+                                        Width="{Binding ExpectedColumnWidthViewModel.ColumnWidths[20], Mode=TwoWay}"/>
+                    <DataGridTextColumn x:Name="tcESpotcode" Header="Spotcode" Binding="{Binding Path=Spot.spotcode}"
+                                        Width="{Binding ExpectedColumnWidthViewModel.ColumnWidths[21], Mode=TwoWay}"/>
+                    <DataGridTextColumn x:Name="tcEPrice" Header="Price" Binding="{Binding Path=Price, Converter={StaticResource RoundValueConverter}}"
+                                        Width="{Binding ExpectedColumnWidthViewModel.ColumnWidths[22], Mode=TwoWay}"/>
                     <!-- <DataGridTextColumn x:Name="tcEStatus" Header="Status" Binding="{Binding Path=Status}" MaxWidth="200"/> -->
                 </DataGrid.Columns>
             </DataGrid>
@@ -161,7 +185,7 @@
                       PreviewMouseLeftButtonDown="dgRealized_PreviewMouseLeftButtonDown"
                       BeginningEdit="dgRealized_BeginningEdit"
                       CellEditEnding="dgRealized_CellEditEnding"
-                      Loaded="dgRealized_Loaded"
+                      SizeChanged="dgRealized_SizeChanged"
                       CanUserResizeColumns="False">
                 <DataGrid.RowStyle>
                     <Style TargetType="DataGridRow">
@@ -172,37 +196,6 @@
                             </Setter.Value>
                         </Setter>
                     </Style>
-                    <!-- <Style TargetType="DataGridRow">
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding status}" Value="-1">
-                                <Setter Property="Background" Value="Transparent"></Setter>
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding status}" Value="0">
-                                <Setter Property="Background" Value="LightGray"></Setter>
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding status}" Value="1">
-                                <Setter Property="Background" Value="LightGreen"></Setter>
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding status}" Value="2">
-                                <Setter Property="Background" Value="Orange"></Setter>
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding status}" Value="3">
-                                <Setter Property="Background" Value="Yellow"></Setter>
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding status}" Value="4">
-                                <Setter Property="Background" Value="LightGoldenrodYellow"></Setter>
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding status}" Value="5">
-                                <Setter Property="Background" Value="Red"></Setter>
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding status}" Value="6">
-                                <Setter Property="Background" Value="PaleVioletRed"></Setter>
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding status}" Value="7">
-                                <Setter Property="Background" Value="Cyan"></Setter>
-                            </DataTrigger>
-                        </Style.Triggers> 
-                    </Style> -->
                 </DataGrid.RowStyle>
                 <DataGrid.Resources>
                     <!-- Style for selected cells -->
@@ -219,48 +212,71 @@
                 </DataGrid.Resources>
                 <DataGrid.Columns>
                     <DataGridTextColumn x:Name="tcRDate" Header="Date" Binding="{Binding Path=Date, Converter={StaticResource DateStrToDateOnlyConverter}}" 
-                                        MaxWidth="200" IsReadOnly="True" />
+                                        MaxWidth="200" IsReadOnly="True" 
+                                        Width="{Binding RealizedColumnWidthViewModel.ColumnWidths[0], Mode=TwoWay}"/>
                     <DataGridTextColumn x:Name="tcRChannel" Header="Channel" Binding="{Binding Path=Channel.chname}" 
-                                        MaxWidth="200" IsReadOnly="True" />
+                                        MaxWidth="200" IsReadOnly="True" 
+                                        Width="{Binding RealizedColumnWidthViewModel.ColumnWidths[1], Mode=TwoWay}"/>
                     <DataGridTextColumn x:Name="tcRProgram" Header="Program" Binding="{Binding Path=name}" 
-                                        MaxWidth="200" IsReadOnly="True" />
+                                        MaxWidth="200" IsReadOnly="True"
+                                        Width="{Binding RealizedColumnWidthViewModel.ColumnWidths[2], Mode=TwoWay}"/>
                     <DataGridTextColumn x:Name="tcRStarttime" Header="Start time" 
                                         Binding="{Binding Path=stimestr, Converter={StaticResource TimeStrToRepresentativeConverter}}"
-                                        IsReadOnly="True" />
+                                        IsReadOnly="True"
+                                        Width="{Binding RealizedColumnWidthViewModel.ColumnWidths[3], Mode=TwoWay}"/>
                     <DataGridTextColumn x:Name="tcRFormattetime" Header="For dur" Binding="{Binding Path=durf}"
-                                        IsReadOnly="True" />
+                                        IsReadOnly="True"
+                                        Width="{Binding RealizedColumnWidthViewModel.ColumnWidths[4], Mode=TwoWay}"/>
                     <DataGridTextColumn x:Name="tcREffectivetime" Header="Eff dur" Binding="{Binding Path=dure}"
-                                        IsReadOnly="True" />
+                                        IsReadOnly="True"
+                                        Width="{Binding RealizedColumnWidthViewModel.ColumnWidths[5], Mode=TwoWay}"/>
                     <DataGridTextColumn x:Name="tcRSpot" Header="Spot" Binding="{Binding Path=spotname}" 
-                                        MaxWidth="200" IsReadOnly="True" />
+                                        MaxWidth="200" IsReadOnly="True"
+                                        Width="{Binding RealizedColumnWidthViewModel.ColumnWidths[6], Mode=TwoWay}"/>
                     <DataGridTextColumn x:Name="tcRAmrp1" Header="Amr% 1" Binding="{Binding Path=Amrp1, Converter={StaticResource RoundValueConverter}}" 
-                                        IsReadOnly="True" />
+                                        IsReadOnly="True" 
+                                        Width="{Binding RealizedColumnWidthViewModel.ColumnWidths[7], Mode=TwoWay}"/>
                     <DataGridTextColumn x:Name="tcRAmrp2" Header="Amr% 2" Binding="{Binding Path=Amrp2, Converter={StaticResource RoundValueConverter}}" 
-                                        IsReadOnly="True" />
+                                        IsReadOnly="True" 
+                                        Width="{Binding RealizedColumnWidthViewModel.ColumnWidths[8], Mode=TwoWay}"/>
                     <DataGridTextColumn x:Name="tcRAmrp3" Header="Amr% 3" Binding="{Binding Path=Amrp3, Converter={StaticResource RoundValueConverter}}" 
-                                        IsReadOnly="True" />
+                                        IsReadOnly="True" 
+                                        Width="{Binding RealizedColumnWidthViewModel.ColumnWidths[9], Mode=TwoWay}"/>
                     <DataGridTextColumn x:Name="tcRAmrpsale" Header="Amr% Sale" Binding="{Binding Path=Amrpsale, Converter={StaticResource RoundValueConverter}}" 
-                                        IsReadOnly="True" />
+                                        IsReadOnly="True" 
+                                        Width="{Binding RealizedColumnWidthViewModel.ColumnWidths[10], Mode=TwoWay}"/>
                     <DataGridTextColumn x:Name="tcRCpp" Header="Cpp" Binding="{Binding Path=Cpp, Converter={StaticResource RoundValueConverter}}" 
-                                        IsReadOnly="True" />
+                                        IsReadOnly="True" 
+                                        Width="{Binding RealizedColumnWidthViewModel.ColumnWidths[11], Mode=TwoWay}"/>
                     <DataGridTextColumn x:Name="tcRChcoef" Header="Ch coef" Binding="{Binding Path=Chcoef, Converter={StaticResource RoundValueConverter}}"
-                                        IsReadOnly="True"/>
+                                        IsReadOnly="True"
+                                        Width="{Binding RealizedColumnWidthViewModel.ColumnWidths[12], Mode=TwoWay}"/>
                     <DataGridTextColumn x:Name="tcRDpcoef" Header="Dp coef" Binding="{Binding Path=Dpcoef, Converter={StaticResource RoundValueConverter}}"
-                                        IsReadOnly="True"/>
-                    <DataGridTextColumn x:Name="tcRProgcoef" Header="Prog coef" Binding="{Binding Path=Progcoef, Converter={StaticResource RoundValueConverter}}"/>
+                                        IsReadOnly="True"
+                                        Width="{Binding RealizedColumnWidthViewModel.ColumnWidths[13], Mode=TwoWay}"/>
+                    <DataGridTextColumn x:Name="tcRProgcoef" Header="Prog coef" Binding="{Binding Path=Progcoef, Converter={StaticResource RoundValueConverter}}"
+                                        Width="{Binding RealizedColumnWidthViewModel.ColumnWidths[14], Mode=TwoWay}"/>
                     <DataGridTextColumn x:Name="tcRSeascoef" Header="Seas coef" Binding="{Binding Path=Seascoef, Converter={StaticResource RoundValueConverter}}"
-                                        IsReadOnly="True"/>
+                                        IsReadOnly="True"
+                                        Width="{Binding RealizedColumnWidthViewModel.ColumnWidths[15], Mode=TwoWay}"/>
                     <DataGridTextColumn x:Name="tcRSeccoef" Header="Sec coef" Binding="{Binding Path=Seccoef, Converter={StaticResource RoundValueConverter}}"
-                                        IsReadOnly="True"/>
-                    <DataGridTextColumn x:Name="tcRCoefA" Header="Coef A" Binding="{Binding Path=CoefA, Converter={StaticResource RoundValueConverter}}"/>
-                    <DataGridTextColumn x:Name="tcRCoefB" Header="Coef B" Binding="{Binding Path=CoefB, Converter={StaticResource RoundValueConverter}}"/>
-                    <DataGridTextColumn x:Name="tcRCbrcoef" Header="Cbr coef" Binding="{Binding Path=Cbrcoef, Converter={StaticResource RoundValueConverter}}"/>
+                                        IsReadOnly="True"
+                                        Width="{Binding RealizedColumnWidthViewModel.ColumnWidths[16], Mode=TwoWay}"/>
+                    <DataGridTextColumn x:Name="tcRCoefA" Header="Coef A" Binding="{Binding Path=CoefA, Converter={StaticResource RoundValueConverter}}"
+                                        Width="{Binding RealizedColumnWidthViewModel.ColumnWidths[17], Mode=TwoWay}"/>
+                    <DataGridTextColumn x:Name="tcRCoefB" Header="Coef B" Binding="{Binding Path=CoefB, Converter={StaticResource RoundValueConverter}}"
+                                        Width="{Binding RealizedColumnWidthViewModel.ColumnWidths[18], Mode=TwoWay}"/>
+                    <DataGridTextColumn x:Name="tcRCbrcoef" Header="Cbr coef" Binding="{Binding Path=Cbrcoef, Converter={StaticResource RoundValueConverter}}"
+                                        Width="{Binding RealizedColumnWidthViewModel.ColumnWidths[19], Mode=TwoWay}"/>
                     <DataGridTextColumn x:Name="tcRPrice" Header="Price" Binding="{Binding Path=price, Converter={StaticResource RoundValueConverter}}"
-                                        IsReadOnly="True"/>
+                                        IsReadOnly="True"
+                                        Width="{Binding RealizedColumnWidthViewModel.ColumnWidths[20], Mode=TwoWay}"/>
                     <DataGridTextColumn x:Name="tcRStatus" Header="Status" Binding="{Binding Path=Status}" 
-                                        MaxWidth="200" IsReadOnly="True"/>
+                                        MaxWidth="200" IsReadOnly="True"
+                                        Width="{Binding RealizedColumnWidthViewModel.ColumnWidths[21], Mode=TwoWay}"/>
                     <DataGridCheckBoxColumn x:Name="tcRAccept" Header="Accept"
-                                            Binding="{Binding Accept}">
+                                            Binding="{Binding Accept}"
+                                            Width="{Binding RealizedColumnWidthViewModel.ColumnWidths[22], Mode=TwoWay}">
                         <DataGridCheckBoxColumn.ElementStyle>
                             <Style TargetType="CheckBox">
                                 <Setter Property="HorizontalAlignment" Value="Center"/>

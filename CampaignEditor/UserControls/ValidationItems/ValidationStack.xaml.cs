@@ -6,6 +6,8 @@ using Database.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using System.Reflection.Metadata.Ecma335;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -48,6 +50,8 @@ namespace CampaignEditor.UserControls.ValidationItems
         private string dgExpectedMask = "11101110011111110000111";
         private string dgRealizedMask = "11111111001111111000111";
         private DGConfig dgConfig;
+        SharedColumnsWidthViewModel sharedViewModel = new SharedColumnsWidthViewModel();
+
 
 
         public event EventHandler<UpdateMediaPlanRealizedEventArgs> UpdatedMediaPlanRealized;
@@ -178,21 +182,46 @@ namespace CampaignEditor.UserControls.ValidationItems
             validationDay.DgExpectedSizeChanged += ValidationDay_DgExpectedSizeChanged;
             /*validationDay.GridOpened += ValidationDay_GridOpened;
             validationDay.GridClosed += ValidationDay_GridClosed;*/
+            validationDay.DataContext = sharedViewModel;
+            validationDay.DgExpectedColumnWidthChanged += ValidationDay_DgExpectedColumnWidthChanged;
+            validationDay.DgRealizedColumnWidthChanged += ValidationDay_DgRealizedColumnWidthChanged;
             spValidationDays.Children.Add(validationDay);
-
+            
             ValidationDaysDict[date] = validationDay;
 
         }
+        private void ValidationDay_DgExpectedColumnWidthChanged(object? sender, ColumnWidthChangedEventArgs e)
+        {
+            var vd = sender as ValidationDay;
+            foreach (ValidationDay validationDay in spValidationDays.Children)
+            {
+                if (sender == validationDay)
+                    continue;
+                validationDay.SetExpectedColumnWidth(e.Width, e.Index);
+            }
+        }
+        private void ValidationDay_DgRealizedColumnWidthChanged(object? sender, ColumnWidthChangedEventArgs e)
+        {
+            var vd = sender as ValidationDay;
+            foreach (ValidationDay validationDay in spValidationDays.Children)
+            {
+                if (sender == validationDay)
+                    continue;
+                validationDay.SetRealizedColumnWidth(e.Width, e.Index);
+            }
+        }
+
+
 
         private void ValidationDay_DgExpectedSizeChanged(object? sender, SizeChangedEventArgs e)
         {    
-            double newWidth = e.NewSize.Width;
+            /*double newWidth = e.NewSize.Width;
             foreach (ValidationDay validationDay in spValidationDays.Children)
             {
                 if (validationDay == sender)
                     continue;
                 validationDay.SetWidthExpected(newWidth);
-            }
+            }*/
         }
 
 
@@ -224,14 +253,6 @@ namespace CampaignEditor.UserControls.ValidationItems
             var dateExpected = _dateExpectedDict[date];
             var dateRealized = _dateRealizedDict[date];
 
-            foreach (var data in dateExpected)
-            {
-                if (data.MediaPlan.chid == 21010)
-                {
-                    var b = data.Spot.spotcode;
-                    var a = data.Cbrcoef;
-                }
-            }
             ValidationDay validationDay = ValidationDaysDict[date];
             validationDay.RefreshDate(dateExpected, dateRealized);
         }

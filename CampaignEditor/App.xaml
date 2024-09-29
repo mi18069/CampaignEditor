@@ -2,10 +2,12 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:CampaignEditor"
-             xmlns:calendar="clr-namespace:CampaignEditor.Helpers"
+             xmlns:helpers="clr-namespace:CampaignEditor.Helpers"
+             xmlns:converters="clr-namespace:CampaignEditor.Converters"
              ShutdownMode="OnLastWindowClose">
     <Application.Resources>
         <ResourceDictionary>
+            <helpers:SharedColumnsWidthViewModel x:Key="SharedColumnsWidthViewModel"/>
             <BitmapImage x:Key="change_pass_icon" UriSource="\images\ChangePassIcon.png"></BitmapImage>
             <BitmapImage x:Key="config_icon" UriSource="\images\ConfigIcon.png"></BitmapImage>
             <BitmapImage x:Key="edit_icon" UriSource="\images\EditIcon.png"></BitmapImage>
@@ -24,8 +26,8 @@
             <BitmapImage x:Key="plus_extend_icon" UriSource="\images\plus_extend_icon.png"></BitmapImage>
             <BitmapImage x:Key="check_icon" UriSource="\images\check.png"></BitmapImage>
             <BitmapImage x:Key="info_icon" UriSource="\images\info.png"></BitmapImage>
-            <BitmapImage x:Key="arrow_down_icon" UriSource="\images\arrow_down.png"></BitmapImage>
-            <BitmapImage x:Key="arrow_up_icon" UriSource="\images\arrow_up.png"></BitmapImage>
+            <BitmapImage x:Key="arrow_down_icon" UriSource="\images\arrows_down.png"></BitmapImage>
+            <BitmapImage x:Key="arrow_up_icon" UriSource="\images\arrows_up.png"></BitmapImage>
         </ResourceDictionary>
     </Application.Resources>
 </Application>
