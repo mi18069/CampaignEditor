@@ -531,6 +531,8 @@ namespace CampaignEditor
             {
                 foreach (var date in _dates)
                 {
+                    _dateExpectedDict[date] = _dateExpectedDict[date].Where(tt => tt != null && tt.Status != -1).ToList();
+                    _dateRealizedDict[date] = _dateRealizedDict[date].Where(mpR => mpR != null && mpR.Status != null).ToList();
                     await AlignExpectedRealizedByDate(_dateExpectedDict[date], _dateRealizedDict[date]);
                 }
             }
