@@ -561,9 +561,47 @@ namespace CampaignEditor.UserControls.ValidationItems
             }
         }
 
-        private void dg_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        private void gridItems_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
         {
-            e.Handled = true;
+            // Get the current vertical offset and scroll viewer
+            var scrollViewer = GetScrollViewer(dgExpected);
+            double initialVerticalOffset = scrollViewer.VerticalOffset;
+
+            // Check if we can scroll up or down in myDataGrid
+            bool canScrollUp = initialVerticalOffset > 0;
+            bool canScrollDown = initialVerticalOffset < scrollViewer.ScrollableHeight;
+
+            if ((e.Delta > 0 && !canScrollUp) || (e.Delta < 0 && !canScrollDown))
+            {
+                var parentScrollViewer = FindParentScrollViewer(this); // Method to find parent stack pannel
+                var v = parentScrollViewer.Name;
+
+                // If we can't scroll, trigger scrolling in the parent DataGrid
+                if (e.Delta > 0)
+                {
+                    // Scroll up in the parent
+                    parentScrollViewer.ScrollToVerticalOffset(parentScrollViewer.VerticalOffset - 20); // Adjust scroll amount as needed
+                }
+                else
+                {
+                    // Scroll down in the parent
+                    parentScrollViewer.ScrollToVerticalOffset(parentScrollViewer.VerticalOffset + 20); // Adjust scroll amount as needed
+
+                }
+            }
+        }
+
+        private ScrollViewer FindParentScrollViewer(DependencyObject child)
+        {
+            while (child != null)
+            {
+                if (child is ScrollViewer parentPannel)
+                {
+                    return parentPannel;
+                }
+                child = VisualTreeHelper.GetParent(child);
+            }
+            return null;
         }
 
         #region Edit cells

@@ -71,7 +71,7 @@
         </Grid>
 
         <Grid x:Name="gridItems" Visibility="Collapsed" Grid.Row="1" 
-              HorizontalAlignment="Center" Width="{Binding DataGridWidth}">
+              HorizontalAlignment="Center" PreviewMouseWheel="gridItems_PreviewMouseWheel">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
