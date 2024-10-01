@@ -896,7 +896,10 @@ namespace CampaignEditor
         {
             var mpRealized = e.MediaPlanRealized;
             if (e.RecalculateCoefs)
+            {
+                mpRealized.Status = 2;
                 CalculateCoefs(mpRealized);
+            }
 
             if (e.RecalculatePrice)
             {
@@ -1270,7 +1273,7 @@ namespace CampaignEditor
                 {
                     mpRealized.Progcoef = coefs.progcoef;
                     _mpConverter.CalculateRealizedPrice(mpRealized);
-                    mpRealized.Status = 2;
+                    //mpRealized.Status = 2;
                     await _mediaPlanRealizedController.UpdateMediaPlanRealized(mpRealized);
                 }
             }

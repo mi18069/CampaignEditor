@@ -16,6 +16,7 @@
         <converters:StatusToColorConverter x:Key="StatusToColorConverter" />
         <converters:StatusRealizedToColorConverter x:Key="StatusRealizedToColorConverter" />
         <converters:DateStrToDateOnlyConverter x:Key="DateStrToDateOnlyConverter" />
+        <converters:NotEqualToOneConverter x:Key="NotEqualToOneConverter" />
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -249,25 +250,74 @@
                                         IsReadOnly="True" 
                                         Width="{Binding RealizedColumnWidthViewModel.ColumnWidths[11], Mode=TwoWay}"/>
                     <DataGridTextColumn x:Name="tcRChcoef" Header="Ch coef" Binding="{Binding Path=Chcoef, Converter={StaticResource RoundValueConverter}}"
-                                        IsReadOnly="True"
                                         Width="{Binding RealizedColumnWidthViewModel.ColumnWidths[12], Mode=TwoWay}"/>
                     <DataGridTextColumn x:Name="tcRDpcoef" Header="Dp coef" Binding="{Binding Path=Dpcoef, Converter={StaticResource RoundValueConverter}}"
-                                        IsReadOnly="True"
-                                        Width="{Binding RealizedColumnWidthViewModel.ColumnWidths[13], Mode=TwoWay}"/>
+                                        Width="{Binding RealizedColumnWidthViewModel.ColumnWidths[13], Mode=TwoWay}"
+                                        IsReadOnly="True"/>
+
                     <DataGridTextColumn x:Name="tcRProgcoef" Header="Prog coef" Binding="{Binding Path=Progcoef, Converter={StaticResource RoundValueConverter}}"
-                                        Width="{Binding RealizedColumnWidthViewModel.ColumnWidths[14], Mode=TwoWay}"/>
+                                        Width="{Binding RealizedColumnWidthViewModel.ColumnWidths[14], Mode=TwoWay}">
+                        <DataGridTextColumn.CellStyle>
+                            <Style TargetType="DataGridCell">
+                                <Setter Property="Background" Value="Transparent" />
+                                <Setter Property="Foreground" Value="Black" />
+                                <Setter Property="FontWeight" Value="Bold" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Path=Progcoef, Converter={StaticResource NotEqualToOneConverter}}" Value="True">
+                                        <Setter Property="Background" Value="Teal" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGridTextColumn.CellStyle>
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="IsEnabled" Value="True" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Accept}" Value="True">
+                                        <Setter Property="IsEnabled" Value="False" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
                     <DataGridTextColumn x:Name="tcRSeascoef" Header="Seas coef" Binding="{Binding Path=Seascoef, Converter={StaticResource RoundValueConverter}}"
-                                        IsReadOnly="True"
-                                        Width="{Binding RealizedColumnWidthViewModel.ColumnWidths[15], Mode=TwoWay}"/>
+                                        Width="{Binding RealizedColumnWidthViewModel.ColumnWidths[15], Mode=TwoWay}"
+                                        IsReadOnly="True"/>
+
                     <DataGridTextColumn x:Name="tcRSeccoef" Header="Sec coef" Binding="{Binding Path=Seccoef, Converter={StaticResource RoundValueConverter}}"
-                                        IsReadOnly="True"
-                                        Width="{Binding RealizedColumnWidthViewModel.ColumnWidths[16], Mode=TwoWay}"/>
+                                        Width="{Binding RealizedColumnWidthViewModel.ColumnWidths[16], Mode=TwoWay}"
+                                        IsReadOnly="True"/>
+
+
                     <DataGridTextColumn x:Name="tcRCoefA" Header="Coef A" Binding="{Binding Path=CoefA, Converter={StaticResource RoundValueConverter}}"
-                                        Width="{Binding RealizedColumnWidthViewModel.ColumnWidths[17], Mode=TwoWay}"/>
+                                        Width="{Binding RealizedColumnWidthViewModel.ColumnWidths[17], Mode=TwoWay}">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="IsEnabled" Value="True" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Accept}" Value="True">
+                                        <Setter Property="IsEnabled" Value="False" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
                     <DataGridTextColumn x:Name="tcRCoefB" Header="Coef B" Binding="{Binding Path=CoefB, Converter={StaticResource RoundValueConverter}}"
-                                        Width="{Binding RealizedColumnWidthViewModel.ColumnWidths[18], Mode=TwoWay}"/>
+                                        Width="{Binding RealizedColumnWidthViewModel.ColumnWidths[18], Mode=TwoWay}">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="IsEnabled" Value="True" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding Accept}" Value="True">
+                                        <Setter Property="IsEnabled"  Value="False" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
                     <DataGridTextColumn x:Name="tcRCbrcoef" Header="Cbr coef" Binding="{Binding Path=Cbrcoef, Converter={StaticResource RoundValueConverter}}"
-                                        Width="{Binding RealizedColumnWidthViewModel.ColumnWidths[19], Mode=TwoWay}"/>
+                                        Width="{Binding RealizedColumnWidthViewModel.ColumnWidths[19], Mode=TwoWay}"
+                                        IsReadOnly="True"/>
                     <DataGridTextColumn x:Name="tcRPrice" Header="Price" Binding="{Binding Path=price, Converter={StaticResource RoundValueConverter}}"
                                         IsReadOnly="True"
                                         Width="{Binding RealizedColumnWidthViewModel.ColumnWidths[20], Mode=TwoWay}"/>
@@ -288,6 +338,13 @@
                                 </Style.Triggers>
                             </Style>
                         </DataGridCheckBoxColumn.ElementStyle>
+                        <DataGridCheckBoxColumn.EditingElementStyle>
+                            <Style TargetType="CheckBox">
+                                <Setter Property="HorizontalAlignment" Value="Center"/>
+                                <EventSetter Event="Checked" Handler="tcRAccept_Checked"/>
+                                <EventSetter Event="Unchecked" Handler="tcRAccept_Unchecked"/>
+                            </Style>
+                        </DataGridCheckBoxColumn.EditingElementStyle>
                     </DataGridCheckBoxColumn>
                 </DataGrid.Columns>
             </DataGrid>

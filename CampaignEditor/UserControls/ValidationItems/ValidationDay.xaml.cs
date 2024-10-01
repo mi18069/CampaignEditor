@@ -14,6 +14,7 @@ using System.Windows.Data;
 using System.Data;
 using System.Windows.Controls.Primitives;
 using Microsoft.VisualBasic;
+using System.Threading.Tasks;
 
 namespace CampaignEditor.UserControls.ValidationItems
 {
@@ -341,54 +342,63 @@ namespace CampaignEditor.UserControls.ValidationItems
             }
 
             // Stop editing 
-            if (!canEdit)
+            if (!canEdit || dgRealized.SelectedItems.Count == 0)
                 return;
 
             // Handle changing status or accepted
-            if (dgRealized.SelectedItems.Count > 0 &&
-                (e.Key == Key.F1 || e.Key == Key.F2 || e.Key == Key.F3 || e.Key == Key.F4 ||
-                e.Key == Key.F5 || e.Key == Key.F6 || e.Key == Key.F7 || e.Key == Key.F8 ||
-                e.Key == Key.Z || e.Key == Key.Y || e.Key == Key.X))
+            int status = 2;
+            bool changeAccept = false;
+            bool acceptValue = false;
+            switch (e.Key)
             {
-                int status = 2;
-                bool changeAccept = false;
-                bool acceptValue = false;
-                switch (e.Key)
-                {
-                    case Key.F1: status = 1; break;
-                    case Key.F2: status = 2; break;
-                    case Key.F3: status = 3; break;
-                    case Key.F4: status = 4; break;
-                    case Key.F5: status = 5; break;
-                    case Key.F6: status = 6; break;
-                    case Key.F7: status = 7; break;
-                    case Key.F8: status = 8; break;
-                    case Key.X: changeAccept = true; acceptValue = false; break;
-                    case Key.Z:
-                    case Key.Y:    
-                        changeAccept = true; acceptValue = true; break;
-                }
+                case Key.F1: status = 1; break;
+                case Key.F2: status = 2; break;
+                case Key.F3: status = 3; break;
+                case Key.F4: status = 4; break;
+                case Key.F5: status = 5; break;
+                case Key.F6: status = 6; break;
+                case Key.F7: status = 7; break;
+                case Key.F8: status = 8; break;
+                case Key.X: changeAccept = true; acceptValue = false; break;
+                case Key.Z:
+                case Key.Y:    
+                    changeAccept = true; acceptValue = true; break;
+                default: return;
+            }
 
+
+            if (changeAccept)
+            {
                 foreach (MediaPlanRealized mpRealized in dgRealized.SelectedItems)
                 {
-                    bool recalculatePrice = false;
                     if (mpRealized.status == -1)
                         continue;
-                    if (changeAccept)
-                    {
-                        mpRealized.Accept = acceptValue;
-                    }
-                    else
-                    {
-                        bool gratisStatus = status == 3 || status == 4;
-                        bool gratisMPRStatus = mpRealized.status == 3 || mpRealized.status == 4;
-                        if (gratisStatus != gratisMPRStatus)
-                            recalculatePrice = true;
-                        mpRealized.status = status;
-                    }
+
+                    RealizedAcceptChanged(mpRealized, acceptValue);
+
+                }
+            }
+            else
+            {
+                foreach (MediaPlanRealized mpRealized in dgRealized.SelectedItems)
+                {
+                    if (mpRealized.status == -1 || 
+                       (mpRealized.Accept != null && mpRealized.Accept.Value))
+                        continue;
+
+                    bool recalculatePrice = false;
+                    bool gratisStatus = status == 3 || status == 4;
+                    bool gratisMPRStatus = mpRealized.status == 3 || mpRealized.status == 4;
+                    if (gratisStatus != gratisMPRStatus)
+                        recalculatePrice = true;
+                    mpRealized.status = status;
+
                     UpdatedMediaPlanRealized?.Invoke(this, new UpdateMediaPlanRealizedEventArgs(mpRealized, false, recalculatePrice));
                 }
             }
+            e.Handled = true;
+
+
         }
 
 
@@ -682,9 +692,12 @@ namespace CampaignEditor.UserControls.ValidationItems
             if (!canEdit)
                 return;
 
+
             // Get cell value before editing
             var dataGrid = sender as DataGrid;
             var row = e.Row.Item;
+            var mediaPlanRealized = row as MediaPlanRealized;
+
             var column = e.Column;
             oldCellValue = -1.0M;
 
@@ -703,18 +716,21 @@ namespace CampaignEditor.UserControls.ValidationItems
 
         private void dgRealized_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
         {
-
             var dataGrid = sender as DataGrid;
             var row = e.Row.Item;
             var column = e.Column;
 
             var cellInfo = new DataGridCellInfo(row, column);
-            var editingElement = e.EditingElement as TextBox;
+            var editingElement = e.EditingElement as TextBox;           
 
-            if (editingElement != null)
+            var mediaPlanRealized = e.Row.Item as MediaPlanRealized;
+
+            if (editingElement != null && mediaPlanRealized != null)
             {
                 var newValue = editingElement.Text;
-                if (!decimal.TryParse(newValue, out decimal result))
+                if (!decimal.TryParse(newValue, out decimal result) || 
+                    mediaPlanRealized.Accept.Value ||
+                    Math.Abs(result - oldCellValue) < 0.001M)
                 {
                     // Returning old value to cell
                     editingElement.Text = oldCellValue.ToString();
@@ -732,13 +748,15 @@ namespace CampaignEditor.UserControls.ValidationItems
 
             foreach (MediaPlanRealized mpR in dgRealized.SelectedItems)
             {
-                if (mpR.status == -1)
+                if (mpR.status == -1 ||
+                    (mpR.Accept != null && mpR.Accept.Value))
                     continue;
 
-                bool isChangedCoef = true;
+                bool isChangedCoef = false;
                 bool progcoefChanged = false;
-                switch (columnToEdit)
+                /*switch (columnToEdit)
                 {
+                isChangedCoef = true;
                     case "Ch coef": mpR.Chcoef = newValue; break;
                     case "Dp coef": mpR.Dpcoef = newValue; break;
                     case "Prog coef": mpR.Progcoef = newValue; progcoefChanged = true;  break;
@@ -746,8 +764,54 @@ namespace CampaignEditor.UserControls.ValidationItems
                     case "Sec coef": mpR.Seccoef = newValue; break;
                     case "Coef A": mpR.CoefA = newValue; break;
                     case "Coef B": mpR.CoefB = newValue; break;
+                    case "Cbr coef": mpR.Cbrcoef = newValue; break;
                     default: isChangedCoef = false; break;
+                }*/
+
+                if (string.Compare(columnToEdit, "Prog coef") == 0)
+                {
+                    mpR.Progcoef = newValue;
+                    progcoefChanged = true;
                 }
+                else if (string.Compare(columnToEdit, "Coef A") == 0)
+                {
+                    mpR.CoefA = newValue;
+                    isChangedCoef = true;
+
+                }
+                else if (string.Compare(columnToEdit, "Coef B") == 0)
+                {
+                    mpR.CoefB = newValue;
+                    isChangedCoef = true;
+
+                }
+                /*else if (string.Compare(columnToEdit, "Ch coef") == 0)
+                {
+                    mpR.Chcoef = newValue;
+                    isChangedCoef = true;
+                }
+                else if (string.Compare(columnToEdit, "Dp coef") == 0)
+                {
+                    mpR.Dpcoef = newValue;
+                    isChangedCoef = true;
+                }
+                else if (string.Compare(columnToEdit, "Seas coef") == 0)
+                {
+                    mpR.Seascoef = newValue;
+                    isChangedCoef = true;
+
+                }
+                else if (string.Compare(columnToEdit, "Sec coef") == 0)
+                {
+                    mpR.Seccoef = newValue;
+                    isChangedCoef = true;
+
+                }
+                else if (string.Compare(columnToEdit, "Cbr coef") == 0)
+                {
+                    mpR.Cbrcoef = newValue;
+                    isChangedCoef = true;
+                }*/
 
                 if (isChangedCoef)
                     UpdatedMediaPlanRealized?.Invoke(this, new UpdateMediaPlanRealizedEventArgs(mpR, true, false));
@@ -935,6 +999,40 @@ namespace CampaignEditor.UserControls.ValidationItems
             dgExpected.Width = width;
             dgExpected.SizeChanged += dgExpected_SizeChanged;
 
+        }
+
+        private void tcRAccept_Checked(object sender, RoutedEventArgs e)
+        {
+            var checkBox = sender as CheckBox;
+            if (checkBox == null)
+                return;
+
+            var mpRealized = checkBox.DataContext as MediaPlanRealized;
+            if (mpRealized != null)
+            {
+                RealizedAcceptChanged(mpRealized, true);
+            }
+
+        }
+
+        private void tcRAccept_Unchecked(object sender, RoutedEventArgs e)
+        {
+            var checkBox = sender as CheckBox;
+            if (checkBox == null)
+                return;
+
+            var mpRealized = checkBox.DataContext as MediaPlanRealized;
+            if (mpRealized != null)
+            {
+                RealizedAcceptChanged(mpRealized, false);
+            }
+        }
+
+        private void RealizedAcceptChanged(MediaPlanRealized mpR, bool value)
+        {
+            // Handle x and y key press
+            mpR.Accept = value;
+            UpdatedMediaPlanRealized?.Invoke(this, new UpdateMediaPlanRealizedEventArgs(mpR, false, false));
         }
 
 
