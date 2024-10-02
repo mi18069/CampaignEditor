@@ -16,6 +16,7 @@ namespace Database.Repositories
         Task<IEnumerable<MediaPlanRealizedDTO>> GetAllMediaPlansRealizedByCmpidAndEmsnum(int cmpid, int emsnum);
         Task<bool> UpdateMediaPlanRealized(UpdateMediaPlanRealizedDTO mediaPlanRealizedDTO);
         Task<bool> UpdateMediaPlanRealized(MediaPlanRealized mediaPlanRealized);
+        Task<bool> UpdatePriceMediaPlanRealized(int id, decimal price);
         Task<bool> DeleteMediaPlanRealizedById(int id);
         Task<bool> DeleteMediaPlanRealizedForCampaign(int cmpid);
         Task<string> GetDedicatedSpotName(int spotid);

@@ -421,6 +421,22 @@ namespace Database.Repositories
             return affected != 0;
         }
 
+        public async Task<bool> UpdatePriceMediaPlanRealized(int id, decimal price)
+        {
+            using var connection = _context.GetConnection();
+
+            var affected = await connection.ExecuteAsync(
+                "UPDATE xmpre SET id = @Id, cena = @Price " +
+                " WHERE id = @Id",
+                new
+                {
+                    Id = id,
+                    Price = price
+                });
+
+            return affected != 0;
+        }
+
         public async Task<bool> DeleteMediaPlanRealizedById(int id)
         {
             using var connection = _context.GetConnection();
@@ -488,5 +504,7 @@ namespace Database.Repositories
 
             return affected != 0;
         }
+
+
     }
 }

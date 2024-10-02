@@ -1066,15 +1066,30 @@ namespace CampaignEditor
         {
             var mpRealized = (await _mediaPlanRealizedController.GetAllMediaPlansRealizedByCmpid(campaign.cmpid)).ToList();
 
-            foreach (var mpr in mpRealized.Where(mpR => mpR.status == null))
+            foreach (var mpr in mpRealized)
             {
-                var coefs = await _clientRealizedCoefsController.GetRealizedCoefs(_campaign.clid, mpr.emsnum.Value);
-                if (coefs != null)
+                if (!_forecastData.ChrdsidChidDict.ContainsKey(mpr.chid.Value))
+                    continue;
+                // New realizations should set all coefs and price
+                if (mpr.status == null || mpr.status == 0)
                 {
-                    mpr.Progcoef = coefs.progcoef;
+                    var coefs = await _clientRealizedCoefsController.GetRealizedCoefs(_campaign.clid, mpr.emsnum.Value);
+                    if (coefs != null)
+                    {
+                        mpr.Progcoef = coefs.progcoef;
+                    }
+                    CalculateCoefs(mpr);
+                    await _mediaPlanRealizedController.UpdateMediaPlanRealized(mpr);
                 }
-                CalculateCoefs(mpr);
-                await _mediaPlanRealizedController.UpdateMediaPlanRealized(mpr);
+                // Change price if necessary, because amrs will be changed in background
+                else 
+                {
+                    var oldPrice = mpr.price;
+                    _mpConverter.CalculateRealizedPrice(mpr);
+                    if (mpr.price != oldPrice)
+                        await _mediaPlanRealizedController.UpdatePriceMediaPlanRealized(mpr.id.Value, mpr.price.Value);
+
+                }
             }
 
             _mediaPlanRealized.ReplaceRange(mpRealized);
