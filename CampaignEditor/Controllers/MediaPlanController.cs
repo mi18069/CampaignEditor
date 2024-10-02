@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System;
 using Database.Repositories;
+using Database.Entities;
 
 namespace CampaignEditor.Controllers
 {
@@ -105,5 +106,8 @@ namespace CampaignEditor.Controllers
         {
             return await _repository.SetActiveMediaPlanById(id, isActive);
         }
+
+        public async Task<List<int>> DuplicateMediaPlans(IEnumerable<MediaPlan> mediaPlans, int newVersion)
+        => await _repository.DuplicateMediaPlans(mediaPlans, newVersion);
     }
 }

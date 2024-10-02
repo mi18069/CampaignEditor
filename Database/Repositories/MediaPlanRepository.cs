@@ -3,10 +3,12 @@ using Dapper;
 using Database.Data;
 using Database.DTOs.MediaPlanDTO;
 using Database.Entities;
+using Npgsql;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Database.Repositories
@@ -894,6 +896,61 @@ namespace Database.Repositories
             return affected != 0;
         }
 
+        public async Task<List<int>> DuplicateMediaPlans(IEnumerable<MediaPlan> mediaPlans, int newVersion)
+        {
+            using var connection = _context.GetConnection();
 
+            StringBuilder sbQuery = new StringBuilder();
+            int batchSize = 100; 
+            int currentBatch = 0;
+            bool firstMp = true;
+            List<int> mediaPlanIdsList = new List<int>();
+
+            foreach (var mediaPlan in mediaPlans)
+            {
+                if (currentBatch == 0)
+                {
+                    sbQuery.Append("INSERT INTO xmp (schid, cmpid, chid, naziv, verzija, pozicija, vremeod, vremedo, vremerbl, dani, tipologija, specijal, datumod, datumdo, progkoef, datumkreiranja, datumizmene, amr1, amr1trim, amr2, amr2trim, amr3, amr3trim, amrsale, amrsaletrim, amrp1, amrp2, amrp3, amrpsale, dpkoef, seaskoef, seckoef, price, active, pricepersec, koefa, koefb, cbrkoef) VALUES ");
+                    firstMp = true;
+                }
+
+                var values = $",({mediaPlan.schid}, {mediaPlan.cmpid}, {mediaPlan.chid}, '{mediaPlan.Name}', {newVersion}, '{mediaPlan.position}', '{mediaPlan.stime}', '{mediaPlan.etime}', {(mediaPlan.blocktime == null ? "NULL" : $"'{mediaPlan.blocktime}'")}, '{mediaPlan.days}', '{mediaPlan.type}', {mediaPlan.special}, CAST ('{mediaPlan.sdate.ToString("yyyy-MM-dd")}' AS DATE), {(mediaPlan.edate == null ? "NULL" : $"CAST('{mediaPlan.edate.Value.ToString("yyyy-MM-dd")}' AS DATE)")},  {mediaPlan.Progcoef}, CAST('{mediaPlan.created.ToString("yyyy-MM-dd")}' AS DATE), {(mediaPlan.modified == null ? "NULL" : $"CAST('{mediaPlan.modified.Value.ToString("yyyy-MM-dd")}' AS DATE)")}, {mediaPlan.Amr1}, {mediaPlan.Amr1trim}, {mediaPlan.Amr2}, {mediaPlan.Amr2trim}, {mediaPlan.Amr3}, {mediaPlan.amr3trim}, {mediaPlan.Amrsale}, {mediaPlan.Amrsaletrim}, {mediaPlan.Amrp1}, {mediaPlan.Amrp2}, {mediaPlan.Amrp3}, {mediaPlan.Amrpsale}, {mediaPlan.Dpcoef}, {mediaPlan.Seascoef}, {mediaPlan.Seccoef}, {mediaPlan.Price}, {mediaPlan.active}, {mediaPlan.PricePerSecond}, {mediaPlan.CoefA}, {mediaPlan.CoefB}, {mediaPlan.Cbrcoef})";
+
+                if (!firstMp)
+                {
+                    sbQuery.Append(values);
+                }
+                else
+                {
+                    sbQuery.Append(values.Substring(1));
+                    firstMp = false;
+                }
+
+                currentBatch++;
+
+                if (currentBatch >= batchSize)
+                {
+                    // Add the RETURNING clause to fetch new IDs
+                    sbQuery.Append(" RETURNING xmpid;");
+
+                    var mediaPlanIds = await connection.QueryAsync<int>(sbQuery.ToString());
+                    mediaPlanIdsList.AddRange(mediaPlanIds);
+
+                    sbQuery.Clear(); // Reset for the next batch
+                    currentBatch = 0;
+                }
+            }
+
+            // If any remaining rows after the loop
+            if (currentBatch > 0)
+            {                    
+                // Add the RETURNING clause to fetch new IDs
+                sbQuery.Append(" RETURNING xmpid;");
+                var mediaPlanIds = await connection.QueryAsync<int>(sbQuery.ToString());
+                mediaPlanIdsList.AddRange(mediaPlanIds);
+            }
+
+            return mediaPlanIdsList;
+        }
     }
 }

@@ -6,6 +6,7 @@ using Database.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace Database.Repositories
@@ -222,6 +223,56 @@ namespace Database.Repositories
                 "WHERE xmpid = @Id", new { Active = isActive, Id = id });
 
             return affected != 0;
+        }
+
+        public async Task<bool> DuplicateMediaPlanTerms(IEnumerable<MediaPlanTerm> mediaPlanTerms)
+        {
+            using var connection = _context.GetConnection();
+
+            StringBuilder sbQuery = new StringBuilder();
+            int batchSize = 100;
+            int currentBatch = 0;
+            bool first = true;
+
+            foreach (var term in mediaPlanTerms)
+            {
+                if (currentBatch == 0)
+                {
+                    sbQuery.Append("INSERT INTO xmpterm (xmpid, datum, spotcode, added, deleted) VALUES ");
+                    first = true;
+                }
+
+                var values = $",({term.Xmpid}, CAST ('{term.Date.ToString("yyyy-MM-dd")}' AS DATE), {(term.Spotcode == null ? "NULL" : $"'{term.Spotcode}'")}, NULL, NULL) ";
+
+                if (!first)
+                {
+                    sbQuery.Append(values);
+                }
+                else
+                {
+                    sbQuery.Append(values.Substring(1));
+                    first = false;
+                }
+
+                currentBatch++;
+
+                if (currentBatch >= batchSize)
+                {
+
+                    await connection.ExecuteAsync(sbQuery.ToString());
+
+                    sbQuery.Clear(); // Reset for the next batch
+                    currentBatch = 0;
+                }
+            }
+
+            // If any remaining rows after the loop
+            if (currentBatch > 0)
+            {
+                await connection.ExecuteAsync(sbQuery.ToString());
+            }
+
+            return true;
         }
     }
 }

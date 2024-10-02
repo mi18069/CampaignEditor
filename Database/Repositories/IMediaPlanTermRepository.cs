@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Database.DTOs.MediaPlanTermDTO;
+using Database.Entities;
 
 namespace Database.Repositories
 {
@@ -19,6 +20,8 @@ namespace Database.Repositories
         Task<bool> DeleteMediaPlanTermById(int id);
         Task<bool> DeleteMediaPlanTermByXmpId(int id);
         Task<bool> SetActiveMediaPlanTermByMPId(int id, bool isActive);
+        Task<bool> DuplicateMediaPlanTerms(IEnumerable<MediaPlanTerm> mediaPlanTerms);
+
 
     }
 }

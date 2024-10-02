@@ -1,4 +1,5 @@
 ﻿using Database.DTOs.MediaPlanDTO;
+using Database.Entities;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -25,6 +26,7 @@ namespace Database.Repositories
         Task<bool> DeleteMediaPlanById(int id);
         Task<bool> DeleteMediaPlanByCmpId(int id);
         Task<bool> SetActiveMediaPlanById(int id, bool isActive);
+        Task<List<int>> DuplicateMediaPlans(IEnumerable<MediaPlan> mediaPlans, int newVersion);
 
     }
 }

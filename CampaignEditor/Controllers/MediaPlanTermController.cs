@@ -1,4 +1,5 @@
 ﻿using Database.DTOs.MediaPlanTermDTO;
+using Database.Entities;
 using Database.Repositories;
 using Microsoft.AspNetCore.Mvc;
 using System;
@@ -44,7 +45,7 @@ namespace CampaignEditor.Controllers
         }
 
         public async Task<MediaPlanTermDTO> GetMediaPlanTermByXmpidAndDate(int xmpid, DateOnly date)
-        {           
+        {
             return await _repository.GetMediaPlanTermByXmpidAndDate(xmpid, date);
         }
 
@@ -76,5 +77,8 @@ namespace CampaignEditor.Controllers
         {
             return await _repository.SetActiveMediaPlanTermByMPId(id, isActive);
         }
+
+        public async Task<bool> DuplicateMediaPlanTerms(IEnumerable<MediaPlanTerm> mediaPlanTerms)
+        => await _repository.DuplicateMediaPlanTerms(mediaPlanTerms);
     }
 }

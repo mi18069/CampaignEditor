@@ -9,6 +9,7 @@ using Database.Entities;
 using Database.Repositories;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -684,7 +685,24 @@ namespace CampaignEditor
         #region Adding New MediaPlans
         public async Task InsertNewForecastMediaPlans(IEnumerable<MediaPlanTuple> mediaPlanTuples, int newVersion)
         {
-            foreach (MediaPlanTuple mediaPlanTuple in mediaPlanTuples)
+            var mpTupleList = mediaPlanTuples.ToList();
+            List<MediaPlan> mediaPlans = mpTupleList.Select(mpt => mpt.MediaPlan).ToList();
+            var mediaPlanIDsList = await _mediaPlanController.DuplicateMediaPlans(mediaPlans, newVersion);
+
+            var mpTerms = mpTupleList.Select(mpt => mpt.Terms.Where(term => term != null).ToList()).ToList();
+            for (int i=0; i<mpTerms.Count; i++)
+            {
+                for (int j=0; j < mpTerms[i].Count(); j++)
+                {
+                    mpTerms[i][j].Xmpid = mediaPlanIDsList[i];
+                }
+
+            }
+            var flatten = mpTerms.SelectMany(terms => terms);
+            await _mediaPlanTermController.DuplicateMediaPlanTerms(flatten);
+
+            // mediaPlanHists shouldn't copy 
+            /*foreach (MediaPlanTuple mediaPlanTuple in mediaPlanTuples)
             {
                 MediaPlan mp = mediaPlanTuple.MediaPlan;
                 MediaPlanDTO mpDTO = _mpConverter.ConvertToDTO(mp);
@@ -721,8 +739,8 @@ namespace CampaignEditor
                     }
 
                 }
-            }
-                     
+            }*/
+
         }
         #endregion
 

@@ -618,6 +618,7 @@ namespace CampaignEditor.UserControls
 
         public async Task MakeNewVersion(IEnumerable<MediaPlanTuple> allMediaPlans)
         {
+
             // Updating version in database
             int newVersion = -1;
             try
@@ -632,7 +633,7 @@ namespace CampaignEditor.UserControls
                 return;
             }
 
-            // Make new MediaPlan, MediaPlanTerms and MediaPlanHists in database
+            // Make new MediaPlan and MediaPlanTerms in database
             try
             {
                 await _forecastDataManipulation.InsertNewForecastMediaPlans(allMediaPlans, newVersion);
@@ -690,7 +691,7 @@ namespace CampaignEditor.UserControls
             // btnNewVersion is always enabled
             if (!canUserEdit || !isEditableVersion)
             {
-                btnNewVersion.IsEnabled = false;
+                //btnNewVersion.IsEnabled = false;
                 btnClear.IsEnabled = false;
                 btnFetchData.IsEnabled = false;
                 btnRecalculateData.IsEnabled = false;
@@ -1114,8 +1115,13 @@ namespace CampaignEditor.UserControls
             {
                 var mediaPlanTuple = dgMediaPlans.Schema.SelectedItems[0] as MediaPlanTuple;
                 var mediaPlan = mediaPlanTuple.MediaPlan;
+                int xmpid = mediaPlan.xmpid;
 
-                var mediaPlanHists = await _mediaPlanHistController.GetAllMediaPlanHistsByXmpid(mediaPlan.xmpid);
+                if (_cmpVersion > 1)
+                {
+                    xmpid = (await _mediaPlanController.GetMediaPlanBySchemaAndCmpId(mediaPlan.schid, _campaign.cmpid, 1)).xmpid;
+                }
+                var mediaPlanHists = await _mediaPlanHistController.GetAllMediaPlanHistsByXmpid(xmpid);
                 mediaPlanHists = mediaPlanHists.OrderBy(m => m.date).ThenBy(m => m.stime);
                 foreach (var mediaPlanHist in mediaPlanHists)
                     _showMPHist.Add(mediaPlanHist);
