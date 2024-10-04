@@ -636,6 +636,7 @@ namespace CampaignEditor
                 {
                     AddEmptyRealized(realized, k, -1);
                     k++;
+                    continue;
                 }
                 if (expectedChid == realizedChid)
                 {
@@ -1079,6 +1080,7 @@ namespace CampaignEditor
                         mpr.Progcoef = coefs.progcoef;
                     }
                     CalculateCoefs(mpr);
+                    mpr.Status = 5;
                     await _mediaPlanRealizedController.UpdateMediaPlanRealized(mpr);
                 }
                 // Change price if necessary, because amrs will be changed in background
