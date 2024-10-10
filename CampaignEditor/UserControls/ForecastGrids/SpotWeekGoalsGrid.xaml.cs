@@ -14,6 +14,10 @@ using System.Linq;
 using System.Windows.Data;
 using CampaignEditor.Helpers;
 using CampaignEditor.Controllers;
+using System.Windows.Markup;
+using System.Threading.Channels;
+using System.Net;
+using Microsoft.AspNetCore.Http;
 
 namespace CampaignEditor.UserControls
 {
@@ -23,6 +27,14 @@ namespace CampaignEditor.UserControls
     /// </summary>
     public partial class SpotWeekGoalsGrid : UserControl
     {
+        enum Data
+        {
+            Expected,
+            Realized,
+            ExpectedAndRealized
+        }
+
+        Data showData = Data.Expected;
 
         CampaignDTO _campaign;
         int _version = 1;
@@ -36,10 +48,11 @@ namespace CampaignEditor.UserControls
 
         List<SpotDTO> _spots = new List<SpotDTO>();
         List<ChannelDTO> _channels = new List<ChannelDTO>();
-        public MediaPlanController _mediaPlanController { get; set; }
-        public MediaPlanTermController _mediaPlanTermController { get; set; }
+
         private List<ChannelDTO> _selectedChannels = new List<ChannelDTO>();
         private List<ChannelDTO> _visibleChannels = new List<ChannelDTO>();
+        public ObservableRangeCollection<MediaPlanRealized> _mpRealized;
+        public MediaPlanForecastData _forecastData;
 
         public ObservableRangeCollection<MediaPlanTuple> _allMediaPlans;
         public ObservableRangeCollection<MediaPlanTuple> _visibleTuples = new ObservableRangeCollection<MediaPlanTuple>();
@@ -93,14 +106,6 @@ namespace CampaignEditor.UserControls
                 }
             }
 
-            /*var channelIds = await _mediaPlanController.GetAllChannelsByCmpid(_campaign.cmpid, _version);
-            List<ChannelDTO> channels = new List<ChannelDTO>();
-            foreach (var chid in channelIds)
-            {
-                ChannelDTO channel = await _channelController.GetChannelById(chid);
-                channels.Add(channel);
-            }
-            _channels = channels.OrderBy(c => c.chname).ToList();*/
 
             _channels.AddRange(channels);
             _channels.Add(dummyChannel);
@@ -187,7 +192,11 @@ namespace CampaignEditor.UserControls
                 RecalculateGoals(channel, weekNum);
             }
         }
-
+        public void RecalculateGoals(ChannelDTO channel, DateOnly date)
+        {
+            int weekNum = GetWeekOfYear(date);
+            RecalculateGoals(channel, weekNum);
+        }
         public void RecalculateGoals(ChannelDTO channel, int weekNum)
         {
             foreach (var spotSpotGoalsDict in _data[channel][weekNum].Keys)
@@ -214,7 +223,7 @@ namespace CampaignEditor.UserControls
         {
             var spotGoals = _data[channel][weekNum][spot];
 
-            List<int> weekIndexes = GetWeekIndexes(weekNum);
+            /*List<int> weekIndexes = GetWeekIndexes(weekNum);
 
             //var channelMpTuples = _allMediaPlans.Where(mpt => mpt.MediaPlan.chid == channel.chid);
             var channelMpTuples = _visibleTuples.Where(mpt => mpt.MediaPlan.chid == channel.chid);
@@ -248,7 +257,22 @@ namespace CampaignEditor.UserControls
             }
             spotGoals.Insertations = ins;
             spotGoals.Grp = grp;
-            spotGoals.Budget = budget;
+            spotGoals.Budget = budget;*/
+
+            SpotGoals goals = new SpotGoals();
+            if (showData == Data.Expected)
+                goals = CalculateSpotGoalsExpected(channel.chid, spot, weekNum);
+            else if (showData == Data.Realized)
+            {
+                int? chrdsid = _forecastData.ChrdsidChidDict.FirstOrDefault(dict => dict.Value == channel.chid).Key;
+                if (!chrdsid.HasValue)
+                    return;
+                goals = CalculateSpotGoalsRealized(chrdsid.Value, spot, weekNum);
+            }
+
+            spotGoals.Insertations = goals.Insertations;
+            spotGoals.Grp = goals.Grp;
+            spotGoals.Budget = goals.Budget;
 
             if (updateTotal)
             {
@@ -256,6 +280,63 @@ namespace CampaignEditor.UserControls
                 RecalculateTotalFooterSpotGoals(channel, spot);
                 RecalculateTotalFooterSpotGoals(dummyChannel, spot);
             }
+        }
+
+        private SpotGoals CalculateSpotGoalsExpected(int chid, SpotDTO spot, int weekNum)
+        {
+            List<int> weekIndexes = GetWeekIndexes(weekNum);
+
+            var channelMpTuples = _visibleTuples.Where(mpt => mpt.MediaPlan.chid == chid);
+
+            SpotGoals spotGoals = new SpotGoals();
+
+            foreach (var mpTuple in channelMpTuples)
+            {
+                foreach (int index in weekIndexes)
+                {
+                    var term = mpTuple.Terms[index];
+                    if (term == null || term.Spotcode == null)
+                        continue;
+                    foreach (char spotcode in term.Spotcode.Trim())
+                    {
+                        if (spotcode == spot.spotcode[0])
+                        {
+                            var mediaPlan = mpTuple.MediaPlan;
+                            spotGoals.Insertations += 1;
+                            spotGoals.Grp += mediaPlan.Amrp1;
+                            // Need to fix this
+                            if (mediaPlan.Length == 0)
+                                spotGoals.Budget += 0;
+                            else
+                                spotGoals.Budget += (mediaPlan.Price / mediaPlan.Length) * spot.spotlength;
+                        }
+                    }
+                }
+            }
+            
+            return spotGoals;
+        }
+
+        private SpotGoals CalculateSpotGoalsRealized(int chrdsid, SpotDTO spot, int weekNum)
+        {
+            List<DateOnly> weekDates = GetWeekDates(weekNum);
+            SpotGoals spotGoals = new SpotGoals();
+            var spotnums = _forecastData.SpotPairs.Where(sp => sp.spotcode[0] == spot.spotcode[0]).Select(sp => sp.spotnum);
+
+            var mediaPlansRealized = _mpRealized.Where(
+                mpr => mpr.chid == chrdsid &&
+                spotnums.Any(sn => sn == mpr.spotnum) &&
+                weekDates.Contains(TimeFormat.YMDStringToDateOnly(mpr.Date)) &&
+                mpr.Status != null && mpr.Status != 5);
+
+            foreach (var mediaPlanRealized in mediaPlansRealized)
+            {
+                spotGoals.Insertations += 1;
+                spotGoals.Grp += mediaPlanRealized.Amrp1 ?? 0.0M;
+                spotGoals.Budget += mediaPlanRealized.price ?? 0.0M;
+            }
+
+            return spotGoals;
         }
 
         private List<int> GetWeekIndexes(int weekNum)
@@ -275,6 +356,25 @@ namespace CampaignEditor.UserControls
                 index++;
             }
             return indexes;
+        }
+
+        private List<DateOnly> GetWeekDates(int weekNum)
+        {
+            DateOnly firstDate = DateOnly.FromDateTime(startDate);
+            DateOnly lastDate = DateOnly.FromDateTime(endDate);
+
+            List<DateOnly> dates = new List<DateOnly>();
+            int index = 0;
+            for (var date = firstDate; date <= lastDate; date = date.AddDays(1))
+            {
+                int dateWeekNum = GetWeekOfYear(date);
+                if (dateWeekNum == weekNum)
+                {
+                    dates.Add(date);
+                }
+                index++;
+            }
+            return dates;
         }
 
         private void RecalculateTotalFooterSpotGoals(ChannelDTO channel)
@@ -789,7 +889,23 @@ namespace CampaignEditor.UserControls
 
         #endregion
 
+        public void ChangeDataForShowing(string dataName)
+        {
+            Data data;
+            switch (dataName)
+            {
+                case "expected": data = Data.Expected; break;
+                case "realized": data = Data.Realized; break;
+                default: data = Data.Expected; break;
+            }
 
+            if (data == showData)
+                return;
+
+            showData = data;
+
+            RecalculateGoals();
+        }
 
         #region Datagrid Functionality
 

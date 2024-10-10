@@ -466,8 +466,6 @@ namespace CampaignEditor.UserControls
 
         private void SubscribeSWGGridControllers()
         {
-            swgGrid._mediaPlanController = _mediaPlanController;
-            swgGrid._mediaPlanTermController = _mediaPlanTermController;
             swgGrid._allMediaPlans = _allMediaPlans;
 
             swgGrid.spotGoalsGrid = sgGrid;
@@ -715,6 +713,7 @@ namespace CampaignEditor.UserControls
 
             InitializeCGGrid();
             swgGrid.Initialize(_campaign, _forecastData.Channels, _forecastData.Spots, _cmpVersion);
+            swgGrid._forecastData = _forecastData;
             sdgGrid.Initialize(_campaign, _forecastData.Channels, _forecastData.Spots, _cmpVersion);
             sdgGrid._forecastData = _forecastData;
 
@@ -1644,6 +1643,7 @@ namespace CampaignEditor.UserControls
             rbRealized.IsEnabled = true;
             cgGrid._mpRealized = mpRealized;
             sdgGrid._mpRealized = mpRealized;
+            swgGrid._mpRealized = mpRealized;
         }
         private void rbExpected_Checked(object sender, RoutedEventArgs e)
         {
@@ -1652,6 +1652,9 @@ namespace CampaignEditor.UserControls
 
             if (sdgGrid != null)
                 sdgGrid.ChangeDataForShowing("expected");
+
+            if (swgGrid != null)
+                swgGrid.ChangeDataForShowing("expected");
         }
 
         private void rbRealized_Checked(object sender, RoutedEventArgs e)
@@ -1661,6 +1664,9 @@ namespace CampaignEditor.UserControls
 
             if (sdgGrid != null)
                 sdgGrid.ChangeDataForShowing("realized");
+
+            if (swgGrid != null)
+                swgGrid.ChangeDataForShowing("realized");
         }
 
         public void AddIntoUpdatedRealizations(DateOnly date, int chrdsid, SpotDTO spot)
@@ -1692,6 +1698,8 @@ namespace CampaignEditor.UserControls
                 if (channel == null)
                     continue;
                 sdgGrid.RecalculateGoals(channel, date, spot, true);
+
+                swgGrid.RecalculateGoals(channel, date);
             }
             
         }

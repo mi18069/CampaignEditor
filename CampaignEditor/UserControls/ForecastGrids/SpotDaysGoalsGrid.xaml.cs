@@ -183,32 +183,6 @@ namespace CampaignEditor.UserControls.ForecastGrids
         {
             var spotGoals = _data[channel][date][spot];
 
-            /*int ins = 0;
-            decimal grp = 0;
-            decimal budget = 0;
-
-            var channelMpTuples = _visibleTuples.Where(mpt => mpt.MediaPlan.chid == channel.chid);
-
-            foreach (var mpTuple in channelMpTuples)
-            {
-                var term = mpTuple.Terms[dateIndex];
-                if (term == null || term.Spotcode == null)
-                    continue;
-                foreach (char spotcode in term.Spotcode.Trim())
-                {
-                    if (spotcode == spot.spotcode[0])
-                    {
-                        var mediaPlan = mpTuple.MediaPlan;
-                        ins += 1;
-                        grp += mediaPlan.Amrp1;
-                        // Need to fix this
-                        if (mediaPlan.Length == 0)
-                            budget += 0;
-                        else
-                            budget += (mediaPlan.Price / mediaPlan.Length) * spot.spotlength;
-                    }
-                }
-            }*/
             SpotGoals goals = new SpotGoals();
             if (showData == Data.Expected)
                 goals = CalculateSpotGoalsExpected(channel.chid, spot, date);
