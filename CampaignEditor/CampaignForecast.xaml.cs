@@ -26,6 +26,7 @@ using Database.DTOs.DayPartDTO;
 using Database.DTOs.PricelistDTO;
 using System.Drawing;
 using Database.DTOs.CobrandDTO;
+using Database.DTOs.SpotDTO;
 
 namespace CampaignEditor.UserControls
 {
@@ -80,7 +81,7 @@ namespace CampaignEditor.UserControls
 
         // For delegating changes to forecast when realizations are changed
         // selecting different chids and date 
-        private HashSet<Tuple<DateOnly, int, char>> _updatedRealizations = new HashSet<Tuple<DateOnly, int, char>>();
+        private HashSet<Tuple<DateOnly, int, SpotDTO>> _updatedRealizations = new HashSet<Tuple<DateOnly, int, SpotDTO>>();
 
         public MediaPlanForecastData _forecastData;
         public MediaPlanConverter _mpConverter;
@@ -474,8 +475,6 @@ namespace CampaignEditor.UserControls
 
         private void SubscribeSDGGridControllers()
         {
-            sdgGrid._mediaPlanController = _mediaPlanController;
-            sdgGrid._mediaPlanTermController = _mediaPlanTermController;
             sdgGrid._allMediaPlans = _allMediaPlans;
         }
 
@@ -717,6 +716,8 @@ namespace CampaignEditor.UserControls
             InitializeCGGrid();
             swgGrid.Initialize(_campaign, _forecastData.Channels, _forecastData.Spots, _cmpVersion);
             sdgGrid.Initialize(_campaign, _forecastData.Channels, _forecastData.Spots, _cmpVersion);
+            sdgGrid._forecastData = _forecastData;
+
             _factoryListing.Initialize(_campaign, _forecastData.Channels,
                 _forecastData.SpotcodeSpotDict, _mpConverter);
             // should be awaitable, but it takes too long now
@@ -1642,22 +1643,29 @@ namespace CampaignEditor.UserControls
         {
             rbRealized.IsEnabled = true;
             cgGrid._mpRealized = mpRealized;
+            sdgGrid._mpRealized = mpRealized;
         }
         private void rbExpected_Checked(object sender, RoutedEventArgs e)
         {
             if (cgGrid != null)
                 cgGrid.ChangeDataForShowing("expected");
+
+            if (sdgGrid != null)
+                sdgGrid.ChangeDataForShowing("expected");
         }
 
         private void rbRealized_Checked(object sender, RoutedEventArgs e)
         {
             if (cgGrid != null)
                 cgGrid.ChangeDataForShowing("realized");
+
+            if (sdgGrid != null)
+                sdgGrid.ChangeDataForShowing("realized");
         }
 
-        public void AddIntoUpdatedRealizations(DateOnly date, int chrdsid, char spotcode)
+        public void AddIntoUpdatedRealizations(DateOnly date, int chrdsid, SpotDTO spot)
         {
-            _updatedRealizations.Add(Tuple.Create(date, chrdsid, spotcode));
+            _updatedRealizations.Add(Tuple.Create(date, chrdsid, spot));
         }
 
         public void CheckUpdatedRealizations()
@@ -1668,6 +1676,22 @@ namespace CampaignEditor.UserControls
             foreach(var chrdsid in _updatedRealizations.Select(t => t.Item2))
             {
                 cgGrid.RecalculateGoalsRealized(chrdsid);
+            }
+
+            foreach (var updatedRealization in _updatedRealizations)
+            {
+                var spot = updatedRealization.Item3;
+                if (spot == null)
+                    continue; // Undedicated spot is ignoring
+                int chrdsid = updatedRealization.Item2;
+                var date = updatedRealization.Item1;
+                if (!_forecastData.ChrdsidChidDict.ContainsKey(chrdsid))
+                    continue;
+                int chid = _forecastData.ChrdsidChidDict[chrdsid];
+                var channel = _forecastData.Channels.FirstOrDefault(c => c.chid == chid);
+                if (channel == null)
+                    continue;
+                sdgGrid.RecalculateGoals(channel, date, spot, true);
             }
             
         }

@@ -14,6 +14,7 @@ using System.Windows.Controls;
 using Database.DTOs.PricelistDTO;
 using Database.Entities;
 using Database.DTOs.CobrandDTO;
+using Database.DTOs.SpotDTO;
 
 namespace CampaignEditor
 {
@@ -335,12 +336,12 @@ namespace CampaignEditor
             _forecast.AddRealizations(mediaPlanRealized);
         }
 
-        public void AddIntoUpdatedRealizations(DateOnly date, int chrdsid, char spotcode)
+        public void AddIntoUpdatedRealizations(DateOnly date, int chrdsid, SpotDTO spot)
         {
             if (_forecast == null)
                 return;
 
-            _forecast.AddIntoUpdatedRealizations(date, chrdsid, spotcode);
+            _forecast.AddIntoUpdatedRealizations(date, chrdsid, spot);
         }
 
         public void CheckUpdatedRealizations()

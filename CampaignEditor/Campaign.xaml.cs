@@ -10,6 +10,7 @@ using System.Windows;
 using System.Windows.Controls;
 using Database.Entities;
 using Database.DTOs.ChannelDTO;
+using Database.DTOs.SpotDTO;
 
 namespace CampaignEditor
 {
@@ -165,8 +166,8 @@ namespace CampaignEditor
         {
             var date = e.Date;
             var chrdsid = e.Chrdsid;
-            char spotcode = e.Spotcode;
-            RealizationUpdatedInValidation(date, chrdsid, spotcode);
+            var spot = e.Spot;
+            RealizationUpdatedInValidation(date, chrdsid, spot);
         }
 
         private void BindEvents()
@@ -389,12 +390,12 @@ namespace CampaignEditor
         }
 
         // When we change some realization, we want to delegate that change to Forecast
-        private void RealizationUpdatedInValidation(DateOnly date, int chrdsid, char spotcode)
+        private void RealizationUpdatedInValidation(DateOnly date, int chrdsid, SpotDTO spot)
         {
             if (factoryCampaignForecastView == null)
                 return;
 
-            factoryCampaignForecastView.AddIntoUpdatedRealizations(date, chrdsid, spotcode);
+            factoryCampaignForecastView.AddIntoUpdatedRealizations(date, chrdsid, spot);
         }
     }
 }

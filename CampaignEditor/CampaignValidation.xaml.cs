@@ -929,7 +929,15 @@ namespace CampaignEditor
 
 
             await _mediaPlanRealizedController.UpdateMediaPlanRealized(mpRealized);
-            UpdatedRealization?.Invoke(this, new UpdatedRealizationEventArgs(TimeFormat.YMDStringToDateOnly(mpRealized.date), ' ', mpRealized.chid!.Value));
+            var date = TimeFormat.YMDStringToDateOnly(mpRealized.date);
+            SpotDTO? spot = null;
+            var spotPair = _forecastData.SpotPairs.FirstOrDefault(sp => sp.cmpid == _campaign.cmpid && sp.spotnum == mpRealized.spotnum);
+            if (spotPair != null)
+            {
+                spot = _forecastData.Spots.FirstOrDefault(s => s.spotcode[0] == spotPair.spotcode[0]);
+            }
+            var chrdsid = mpRealized.chid!.Value;
+            UpdatedRealization?.Invoke(this, new UpdatedRealizationEventArgs(date, spot, chrdsid));
         }
         
         private bool IsSameHour(int mins1, int mins2)
