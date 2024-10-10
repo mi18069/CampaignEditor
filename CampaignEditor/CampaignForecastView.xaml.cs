@@ -324,6 +324,35 @@ namespace CampaignEditor
             await _forecast.CobrandsChanged(cobrands);
         }
 
+
+        #region Validation Forecast synchronizations
+
+        public void AddRealizations(ObservableRangeCollection<MediaPlanRealized> mediaPlanRealized)
+        {
+            if (_forecast == null)
+                return;
+
+            _forecast.AddRealizations(mediaPlanRealized);
+        }
+
+        public void AddIntoUpdatedRealizations(DateOnly date, int chrdsid, char spotcode)
+        {
+            if (_forecast == null)
+                return;
+
+            _forecast.AddIntoUpdatedRealizations(date, chrdsid, spotcode);
+        }
+
+        public void CheckUpdatedRealizations()
+        {
+            if (_forecast == null)
+                return;
+
+            _forecast.CheckUpdatedRealizations();
+        }
+
+        #endregion
+
         // Inside CampaignForecast
         private async void Forecast_InitializeButtonClicked(object sender, EventArgs e)
         {

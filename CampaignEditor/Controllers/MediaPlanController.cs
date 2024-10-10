@@ -42,6 +42,11 @@ namespace CampaignEditor.Controllers
             return await _repository.GetMediaPlanBySchemaAndCmpId(schemaid, cmpid, version);
         }
 
+        public async Task<MediaPlanDTO?> GetOldestVersionMediaPlanBySchemaAndCmpId(int schemaid, int cmpid)
+        {
+            return await _repository.GetOldestVersionMediaPlanBySchemaAndCmpId(schemaid, cmpid);
+        }
+
         public async Task<MediaPlanDTO> GetMediaPlanByCmpId(int id)
         {
             return await _repository.GetMediaPlanByCmpId(id);

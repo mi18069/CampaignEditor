@@ -54,6 +54,13 @@ namespace CampaignEditor
         public MediaPlanConverter _mpConverter;
         public ObservableRangeCollection<MediaPlanTuple> _allMediaPlans;
         private ObservableRangeCollection<MediaPlanRealized> _mediaPlanRealized = new ObservableRangeCollection<MediaPlanRealized>();
+        public ObservableRangeCollection<MediaPlanRealized> MediaPlanRealized
+        {
+            get
+            {
+                return _mediaPlanRealized;
+            }
+        }
         private Dictionary<int, string> _spotnumNameDict = new Dictionary<int, string>();
 
         public Dictionary<DateOnly, List<TermTuple?>> _dateExpectedDict = new Dictionary<DateOnly, List<TermTuple?>>();
@@ -61,6 +68,8 @@ namespace CampaignEditor
 
         public event EventHandler SetLoadingPage;
         public event EventHandler SetContentPage;
+        public event EventHandler RealizationsAcquired;
+        public event EventHandler<UpdatedRealizationEventArgs> UpdatedRealization;
 
         bool hideExpected = false;
         private readonly PrintValidation _factoryPrintValidation;
@@ -72,6 +81,9 @@ namespace CampaignEditor
         //For delegating changes from forecast when terms are changed
         private Dictionary<DateOnly, HashSet<ChannelDTO>> _updatedTerms = new Dictionary<DateOnly, HashSet<ChannelDTO>>();
 
+
+ 
+        
         public CampaignValidation(
             IChannelCmpRepository channelCmpRepository,
             IChannelRepository channelRepository,
@@ -198,7 +210,7 @@ namespace CampaignEditor
             // for every changed spotnum, recalculate it's values
             foreach (var spotPair in spotPairs)
             {
-                RecalculateRealizedSpotsBySpotnum(spotPair.spotnum);
+                await RecalculateRealizedSpotsBySpotnum(spotPair.spotnum);
             }
         }
 
@@ -917,34 +929,9 @@ namespace CampaignEditor
 
 
             await _mediaPlanRealizedController.UpdateMediaPlanRealized(mpRealized);
+            UpdatedRealization?.Invoke(this, new UpdatedRealizationEventArgs(TimeFormat.YMDStringToDateOnly(mpRealized.date), ' ', mpRealized.chid!.Value));
         }
-
-        private MediaPlan FindClosestMediaPlan(MediaPlanRealized mpRealized)
-        {
-            var closestMediaPlan = _allMediaPlans.FirstOrDefault(mp => (mp.MediaPlan.chid == _forecastData.ChrdsidChidDict[mpRealized.chid.Value] &&
-                            String.Compare(mp.MediaPlan.stime, TimeFormat.TimeStrToRepresentative(mpRealized.stimestr)) <= 0 &&
-                            String.Compare(mp.MediaPlan.etime, TimeFormat.TimeStrToRepresentative(mpRealized.stimestr)) >= 0 &&
-                            mp.MediaPlan.days.Contains(TimeFormat.GetDayOfWeekInt(mpRealized.date).ToString())));
-            if (closestMediaPlan != null)
-            {
-                return closestMediaPlan.MediaPlan;
-            }
-            else
-            {
-                closestMediaPlan = _allMediaPlans
-                    .Where(mp =>
-                        mp.MediaPlan.chid == _forecastData.ChrdsidChidDict[mpRealized.chid.Value] &&
-                        mp.MediaPlan.days.Contains(TimeFormat.GetDayOfWeekInt(mpRealized.date).ToString()))
-                    .OrderBy(mp => Math.Abs(TimeFormat.RepresentativeToMins(mp.MediaPlan.blocktime) - (int)mpRealized.stime / 60))
-                    .FirstOrDefault();
-
-                if (closestMediaPlan != null)
-                {
-                    return closestMediaPlan.MediaPlan;
-                }
-            }
-            return new MediaPlan();
-        }
+        
         private bool IsSameHour(int mins1, int mins2)
         {
             return mins1/60 == mins2/60; // dividing int/int to get hour then compare them
@@ -1097,6 +1084,9 @@ namespace CampaignEditor
             _mediaPlanRealized.ReplaceRange(mpRealized);
 
             uniqueSpotNums = mpRealized.DistinctBy(mpr => mpr.spotnum).Where(mpr => mpr.spotnum.HasValue).Select(mpr => mpr.spotnum!.Value);
+            
+            RealizationsAcquired?.Invoke(this, null);
+
         }
 
         private async Task FillSpotNameDict(CampaignDTO campaign)
@@ -1312,6 +1302,8 @@ namespace CampaignEditor
                 }
             }
         }
+
+
 
         private void BindPrintValidation()
         {

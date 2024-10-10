@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Windows.Controls;
 
 namespace CampaignEditor.UserControls
@@ -16,11 +17,24 @@ namespace CampaignEditor.UserControls
     /// </summary>
     public partial class ChannelsGoalsGrid : UserControl
     {
+        enum Data
+        {
+            Expected,
+            Realized,
+            ExpectedAndRealized
+        }
+
+        Data showData = Data.Expected;
+
         Dictionary<int, ProgramGoals> _dictionary = new Dictionary<int, ProgramGoals>();
         ObservableRangeCollection<ProgramGoals> _values = new ObservableRangeCollection<ProgramGoals>();
         ObservableCollection<MediaPlan> _mediaPlans;
         ObservableRangeCollection<MediaPlan> _visibleMediaPlans = new ObservableRangeCollection<MediaPlan>();
         List<ChannelDTO> _selectedChannels = new List<ChannelDTO>();
+        public ObservableRangeCollection<MediaPlanRealized> _mpRealized;
+
+        public MediaPlanForecastData _forecastData;
+
         public ChannelsGoalsGrid()
         {
             InitializeComponent();         
@@ -55,10 +69,10 @@ namespace CampaignEditor.UserControls
             {
                 _selectedChannels.Add(channel);
             }
-            UpdateOrder(selectedChannels);
+            UpdateOrder(selectedChannels.ToList());
         }
 
-        public void UpdateOrder(IEnumerable<ChannelDTO> selectedChannels)
+        public void UpdateOrder(List<ChannelDTO> selectedChannels)
         {
             List<ProgramGoals> selectedInOrder = new List<ProgramGoals>();
             foreach (var channel in selectedChannels)
@@ -72,19 +86,77 @@ namespace CampaignEditor.UserControls
         private void CalculateGoals()
         {
             ResetDictionaryValues();
-            foreach (MediaPlan mediaPlan in _visibleMediaPlans)
+            var channelIds = _visibleMediaPlans.Select(mp => mp.chid).Distinct();
+            if (showData == Data.Expected)
             {
-                int chid = mediaPlan.chid;
+                Parallel.ForEach(channelIds, chid =>
+                {
+                    var mediaPlans = _visibleMediaPlans.Where(mp => mp.chid == chid);
+                    CalculateGoalsExpected(mediaPlans);
+                });
+            }
+            else
+            {
+                if (_mpRealized == null)
+                    return;
+                Parallel.ForEach(channelIds, chid =>
+                {
+                    int? chrdsid = _forecastData.ChrdsidChidDict.FirstOrDefault(dict => dict.Value == chid).Key;
+                    if (chrdsid.HasValue)
+                    {
+                        var mediaPlansRealized = _mpRealized.Where(mpr => mpr.chid == chrdsid && mpr.Status != null && mpr.Status != 5);
+                        CalculateGoalsRealized(mediaPlansRealized);
+                    }
+
+                });
+            }
+            //_values.ReplaceRange(_dictionary.Values);
+            _values.ReplaceRange(_dictionary.Values.Where(pg => _selectedChannels
+                                            .Select(ch => ch.chid).Contains(pg.Channel.chid)));
+
+        }
+
+        private void CalculateGoalsExpected(IEnumerable<MediaPlan> mediaPlans)
+        {
+            int chid;
+            if (mediaPlans.Count() > 0)
+                chid = mediaPlans.ElementAt(0).chid;
+            else
+                return;
+
+            foreach (MediaPlan mediaPlan in mediaPlans)
+            {
                 _dictionary[chid].Insertations += mediaPlan.Insertations;
                 _dictionary[chid].Grp1 += mediaPlan.Insertations * mediaPlan.Amrp1;
                 _dictionary[chid].Grp2 += mediaPlan.Insertations * mediaPlan.Amrp2;
                 _dictionary[chid].Grp3 += mediaPlan.Insertations * mediaPlan.Amrp3;
                 _dictionary[chid].Budget += mediaPlan.price;
             }
+        }
 
-            _values.ReplaceRange(_dictionary.Values);
-            /*dgGrid.ItemsSource = _values.Where(pg => _visibleMediaPlans.Select(ch => ch.chid).Contains(pg.Channel.chid));
-            */
+        private void CalculateGoalsRealized(IEnumerable<MediaPlanRealized> mediaPlansRealized)
+        {
+            int chid;
+            if (mediaPlansRealized.Count() > 0)
+            {
+                int chrdsid = mediaPlansRealized.ElementAt(0).chid!.Value;
+                if (_forecastData.ChrdsidChidDict.ContainsKey(chrdsid))
+                    chid = _forecastData.ChrdsidChidDict[chrdsid];
+                else
+                    return;
+            }
+            else
+                return;
+
+            // CHECK WHAT TO DO IF WE HAVE NULL FOR AMRP? 
+            foreach (MediaPlanRealized mpRealized in mediaPlansRealized)
+            {
+                _dictionary[chid].Insertations += 1;
+                _dictionary[chid].Grp1 += mpRealized.Amrp1 ?? 0.0M;
+                _dictionary[chid].Grp2 += mpRealized.Amrp2 ?? 0.0M;
+                _dictionary[chid].Grp3 += mpRealized.Amrp3 ?? 0.0M;
+                _dictionary[chid].Budget += mpRealized.price ?? 0.0M;
+            }
         }
 
         public void VisibleTuplesChanged(IEnumerable<MediaPlanTuple> visibleMpTuples)
@@ -94,8 +166,11 @@ namespace CampaignEditor.UserControls
             CalculateGoals();
         }
 
-        public void RecalculateGoals(int chid)
+        public void RecalculateGoalsExpected(int chid)
         {
+            if (showData != Data.Expected)
+                return;
+
             ResetDictionaryValues(chid);
             var mediaPlans = _visibleMediaPlans.Where(mp => mp.chid == chid);
             foreach (MediaPlan mediaPlan in mediaPlans)
@@ -106,6 +181,33 @@ namespace CampaignEditor.UserControls
                 _dictionary[chid].Grp3 += mediaPlan.Insertations * mediaPlan.Amrp3;
                 _dictionary[chid].Budget += mediaPlan.Price;           
             }
+            _values.ReplaceRange(_dictionary.Values.Where(pg => _selectedChannels
+                                            .Select(ch => ch.chid).Contains(pg.Channel.chid)));
+        }
+
+        public void RecalculateGoalsRealized(int chrdsid)
+        {
+            if (showData != Data.Realized)
+                return;
+
+            if (!_forecastData.ChrdsidChidDict.ContainsKey(chrdsid))
+                return;
+
+            int chid = _forecastData.ChrdsidChidDict[chrdsid];
+            ResetDictionaryValues(chid);
+
+            var mediaPlansRealized = _mpRealized.Where(mpr => mpr.chid == chrdsid && mpr.Status != 5 && mpr.Status != -1);
+
+            // CHECK WHAT TO DO IF WE HAVE NULL FOR AMRP? 
+            foreach (MediaPlanRealized mpRealized in mediaPlansRealized)
+            {
+                _dictionary[chid].Insertations += 1;
+                _dictionary[chid].Grp1 += mpRealized.Amrp1 ?? 0.0M;
+                _dictionary[chid].Grp2 += mpRealized.Amrp2 ?? 0.0M;
+                _dictionary[chid].Grp3 += mpRealized.Amrp3 ?? 0.0M;
+                _dictionary[chid].Budget += mpRealized.price ?? 0.0M;
+            }
+
             _values.ReplaceRange(_dictionary.Values.Where(pg => _selectedChannels
                                             .Select(ch => ch.chid).Contains(pg.Channel.chid)));
         }
@@ -125,12 +227,32 @@ namespace CampaignEditor.UserControls
             }
             else
             {
+                if (!_dictionary.ContainsKey(chid))
+                    return;
                 _dictionary[chid].Budget = 0;
                 _dictionary[chid].Grp1 = 0;
                 _dictionary[chid].Grp2 = 0;
                 _dictionary[chid].Grp3 = 0;
                 _dictionary[chid].Insertations = 0;
             }
+        }
+
+        public void ChangeDataForShowing(string dataName)
+        {
+            Data data;
+            switch (dataName)
+            {
+                case "expected": data = Data.Expected; break;
+                case "realized": data = Data.Realized; break;
+                default: data = Data.Expected; break;
+            }
+
+            if (data == showData)
+                return;
+
+            showData = data;
+
+            CalculateGoals();
         }
 
         private void AddHeader(ExcelWorksheet worksheet, int rowOff = 1, int colOff = 1)

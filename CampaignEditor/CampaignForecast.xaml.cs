@@ -76,9 +76,11 @@ namespace CampaignEditor.UserControls
         private ObservableRangeCollection<ChannelDTO> _selectedChannels = new ObservableRangeCollection<ChannelDTO>();
         private ObservableRangeCollection<ChannelDTO> _gridDisplayChannels = new ObservableRangeCollection<ChannelDTO>();
 
-
-
         private ObservableCollection<MediaPlanHist> _showMPHist = new ObservableCollection<MediaPlanHist>();
+
+        // For delegating changes to forecast when realizations are changed
+        // selecting different chids and date 
+        private HashSet<Tuple<DateOnly, int, char>> _updatedRealizations = new HashSet<Tuple<DateOnly, int, char>>();
 
         public MediaPlanForecastData _forecastData;
         public MediaPlanConverter _mpConverter;
@@ -736,6 +738,7 @@ namespace CampaignEditor.UserControls
 
             ObservableCollection<MediaPlan> mediaPlans = new ObservableCollection<MediaPlan>(_allMediaPlans.Select(mp => mp.MediaPlan));
             cgGrid.Initialize(mediaPlans, _forecastData.Channels);
+            cgGrid._forecastData = _forecastData;
         }
 
         #region Drag and Drop selected Channels
@@ -1119,7 +1122,11 @@ namespace CampaignEditor.UserControls
 
                 if (_cmpVersion > 1)
                 {
-                    xmpid = (await _mediaPlanController.GetMediaPlanBySchemaAndCmpId(mediaPlan.schid, _campaign.cmpid, 1)).xmpid;
+                    var oldestVersionMediaPlan = await _mediaPlanController.GetOldestVersionMediaPlanBySchemaAndCmpId(mediaPlan.schid, _campaign.cmpid);
+                    if (oldestVersionMediaPlan == null)
+                        return;
+
+                    xmpid = oldestVersionMediaPlan.xmpid;
                 }
                 var mediaPlanHists = await _mediaPlanHistController.GetAllMediaPlanHistsByXmpid(xmpid);
                 mediaPlanHists = mediaPlanHists.OrderBy(m => m.date).ThenBy(m => m.stime);
@@ -1450,7 +1457,7 @@ namespace CampaignEditor.UserControls
 
             sdgGrid.RecalculateGoals(channel, date, spot, true);
             swgGrid.RecalculateGoals(channel, date, spot, true);
-            cgGrid.RecalculateGoals(channel.chid);
+            cgGrid.RecalculateGoalsExpected(channel.chid);
 
             // For propagating changes in validation
             UpdatedTermDateAndChannel?.Invoke(this, new UpdatedTermDateAndChannelEventArgs(date, channel));
@@ -1628,6 +1635,45 @@ namespace CampaignEditor.UserControls
             // Set the new vertical offset
             scrollViewer.ScrollToVerticalOffset(newVerticalOffset);
         }
+
+        #region Report radio buttons
+
+        public void AddRealizations(ObservableRangeCollection<MediaPlanRealized> mpRealized)
+        {
+            rbRealized.IsEnabled = true;
+            cgGrid._mpRealized = mpRealized;
+        }
+        private void rbExpected_Checked(object sender, RoutedEventArgs e)
+        {
+            if (cgGrid != null)
+                cgGrid.ChangeDataForShowing("expected");
+        }
+
+        private void rbRealized_Checked(object sender, RoutedEventArgs e)
+        {
+            if (cgGrid != null)
+                cgGrid.ChangeDataForShowing("realized");
+        }
+
+        public void AddIntoUpdatedRealizations(DateOnly date, int chrdsid, char spotcode)
+        {
+            _updatedRealizations.Add(Tuple.Create(date, chrdsid, spotcode));
+        }
+
+        public void CheckUpdatedRealizations()
+        {
+            if (_updatedRealizations.Count == 0)
+                return;
+
+            foreach(var chrdsid in _updatedRealizations.Select(t => t.Item2))
+            {
+                cgGrid.RecalculateGoalsRealized(chrdsid);
+            }
+            
+        }
+
+
+        #endregion
     }
 
 }

@@ -257,7 +257,7 @@ namespace Database.Repositories
             using var connection = _context.GetConnection();
 
             var mediaPlan = await connection.QueryAsync<dynamic>(
-                "SELECT * FROM xmp WHERE schid = @Schemaid AND cmpid = @Cmpid AND verzija = @Version", 
+                "SELECT * FROM xmp WHERE schid = @Schemaid AND cmpid = @Cmpid AND verzija = @Version ",
                 new { Schemaid = schemaid, Cmpid = cmpid, Version = version });
 
             mediaPlan = mediaPlan.Select(item => new MediaPlan()
@@ -300,8 +300,61 @@ namespace Database.Repositories
                 pps = item.pps != null ? (decimal)item.pps : 0.0M,
                 coefA = (decimal)item.koefa,
                 coefB = (decimal)item.koefb,
-                cbrcoef = (decimal)item.cbrkoef
+                cbrcoef = (decimal)(item.cbrkoef ?? 1.0M)
+            });
 
+            return _mapper.Map<MediaPlanDTO>(mediaPlan.FirstOrDefault());
+        }
+
+        public async Task<MediaPlanDTO?> GetOldestVersionMediaPlanBySchemaAndCmpId(int schemaid, int cmpid)
+        {
+            using var connection = _context.GetConnection();
+
+            var mediaPlan = await connection.QueryAsync<dynamic>(
+                "SELECT * FROM xmp WHERE schid = @Schemaid AND cmpid = @Cmpid ORDER BY verzija ASC LIMIT 1; ",
+                new { Schemaid = schemaid, Cmpid = cmpid});
+
+            mediaPlan = mediaPlan.Select(item => new MediaPlan()
+            {
+                xmpid = item.xmpid,
+                schid = item.schid,
+                cmpid = item.cmpid,
+                chid = item.chid,
+                name = (string)item.naziv.Trim(),
+                version = item.verzija,
+                position = item.pozicija,
+                stime = item.vremeod,
+                etime = item.vremedo == null ? null : item.vremedo,
+                blocktime = item.vremerbl == null ? null : item.vremerbl,
+                days = item.dani,
+                type = item.tipologija,
+                special = item.specijal,
+                sdate = DateOnly.FromDateTime(item.datumod),
+                edate = item.datumdo == null ? null : DateOnly.FromDateTime(item.datumdo),
+                progcoef = (decimal)item.progkoef,
+                created = DateOnly.FromDateTime(item.datumkreiranja),
+                modified = item.datumizmene == null ? null : DateOnly.FromDateTime(item.datumizmene),
+                amr1 = (decimal)item.amr1,
+                amr1trim = item.amr1trim,
+                amr2 = (decimal)item.amr2,
+                amr2trim = item.amr2trim,
+                amr3 = (decimal)item.amr3,
+                amr3trim = item.amr3trim,
+                amrsale = (decimal)item.amrsale,
+                amrsaletrim = item.amrsaletrim,
+                amrp1 = (decimal)item.amrp1,
+                amrp2 = (decimal)item.amrp2,
+                amrp3 = (decimal)item.amrp3,
+                amrpsale = (decimal)item.amrpsale,
+                dpcoef = (decimal)item.dpkoef,
+                seascoef = (decimal)item.seaskoef,
+                seccoef = (decimal)item.seckoef,
+                price = (decimal)item.price,
+                active = item.active,
+                pps = item.pps != null ? (decimal)item.pps : 0.0M,
+                coefA = (decimal)item.koefa,
+                coefB = (decimal)item.koefb,
+                cbrcoef = (decimal)(item.cbrkoef ?? 1.0M)
             });
 
             return _mapper.Map<MediaPlanDTO>(mediaPlan.FirstOrDefault());

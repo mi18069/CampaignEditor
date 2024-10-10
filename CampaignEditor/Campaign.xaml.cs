@@ -113,17 +113,21 @@ namespace CampaignEditor
 
             factoryCampaignValidation._forecastData = _forecastData;
             factoryCampaignValidation._mpConverter = _mpConverter;
+            factoryCampaignValidation.RealizationsAcquired += FactoryCampaignValidation_RealizationsAcquired;
             await factoryCampaignValidation.Initialize(_campaign, _allMediaPlans);
             tabValidation.Content = factoryCampaignValidation.Content;
             factoryCampaignValidation.SetLoadingPage += FactoryCampaignValidation_SetLoadingPage;
             factoryCampaignValidation.SetContentPage += FactoryCampaignValidation_SetContentPage;
             
-            
             factoryCampaignForecastView.UpdateValidation += ForecastView_UpdateValidation;
             factoryCampaignForecastView.UpdateTermDateAndChannel += FactoryCampaignForecastView_UpdateTermDateAndChannel;
 
+            factoryCampaignValidation.UpdatedRealization += FactoryCampaignValidation_UpdatedRealization;
+            
             BindEvents();
         }
+
+
 
         private void FactoryCampaignForecastView_UpdateTermDateAndChannel(object? sender, UpdatedTermDateAndChannelEventArgs e)
         {
@@ -138,11 +142,31 @@ namespace CampaignEditor
             tabValidation.Content = factoryCampaignValidation.Content;
         }
 
+        private void FactoryCampaignValidation_RealizationsAcquired(object? sender, EventArgs e)
+        {
+            if (factoryCampaignValidation == null || factoryCampaignForecastView == null)
+                return;
+
+            var mpRealized = factoryCampaignValidation.MediaPlanRealized;
+            if (mpRealized.Count == 0)
+                return;
+
+            factoryCampaignForecastView.AddRealizations(mpRealized);
+        }
+
         private void FactoryCampaignValidation_SetLoadingPage(object? sender, EventArgs e)
         {
             var loadingPage = new LoadingPage();
             TabItem tabValidation = (TabItem)tcTabs.FindName("tiValidation");
             tabValidation.Content = loadingPage.Content;
+        }
+
+        private void FactoryCampaignValidation_UpdatedRealization(object? sender, UpdatedRealizationEventArgs e)
+        {
+            var date = e.Date;
+            var chrdsid = e.Chrdsid;
+            char spotcode = e.Spotcode;
+            RealizationUpdatedInValidation(date, chrdsid, spotcode);
         }
 
         private void BindEvents()
@@ -343,6 +367,13 @@ namespace CampaignEditor
 
                 await factoryCampaignValidation.CheckUpdatedTerms();
             }
+            else if (tcTabs.SelectedIndex == 1)
+            {
+                if (factoryCampaignForecastView == null)
+                    return;
+
+                factoryCampaignForecastView.CheckUpdatedRealizations();
+            }
 
         }
 
@@ -357,6 +388,13 @@ namespace CampaignEditor
             factoryCampaignValidation.AddIntoUpdatedTerms(date, channel);
         }
 
+        // When we change some realization, we want to delegate that change to Forecast
+        private void RealizationUpdatedInValidation(DateOnly date, int chrdsid, char spotcode)
+        {
+            if (factoryCampaignForecastView == null)
+                return;
 
+            factoryCampaignForecastView.AddIntoUpdatedRealizations(date, chrdsid, spotcode);
+        }
     }
 }

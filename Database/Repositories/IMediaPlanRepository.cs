@@ -13,6 +13,7 @@ namespace Database.Repositories
         Task<MediaPlanDTO> GetMediaPlanById(int id);
         Task<MediaPlanDTO> GetMediaPlanBySchemaId(int id);
         Task<MediaPlanDTO?> GetMediaPlanBySchemaAndCmpId(int schemaid, int cmpid, int version);
+        Task<MediaPlanDTO?> GetOldestVersionMediaPlanBySchemaAndCmpId(int schemaid, int cmpid);
         Task<MediaPlanDTO> GetMediaPlanByCmpId(int id);
         Task<MediaPlanDTO> GetMediaPlanByName(string name);
         Task<IEnumerable<MediaPlanDTO>> GetAllMediaPlansByCmpid(int cmpid, int version);
