@@ -198,7 +198,8 @@
                                  GroupName="rbReports" Margin="20, 0" Checked="rbRealized_Checked"
                                  IsEnabled="False"/>
                     <RadioButton x:Name="rbExpectedRealized" Content="Expected + Realized" 
-                                 Grid.Row="1" Grid.Column="2" GroupName="rbReports" Visibility="Hidden"/>
+                                 Grid.Row="1" Grid.Column="2" GroupName="rbReports" IsEnabled="False"
+                                 Checked="rbExpectedRealized_Checked"/>
                 </Grid>
                 <TabControl x:Name="tcGrids" Grid.Row="1">
                     <TabItem Header="By Weeks 1" x:Name="tiSpotGoals" >

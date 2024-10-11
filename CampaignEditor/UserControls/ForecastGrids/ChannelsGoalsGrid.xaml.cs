@@ -34,7 +34,7 @@ namespace CampaignEditor.UserControls
         public ObservableRangeCollection<MediaPlanRealized> _mpRealized;
 
         public MediaPlanForecastData _forecastData;
-
+        public DateOnly startDate;
         public ChannelsGoalsGrid()
         {
             InitializeComponent();         
@@ -95,10 +95,8 @@ namespace CampaignEditor.UserControls
                     CalculateGoalsExpected(mediaPlans);
                 });
             }
-            else
+            else if (showData == Data.Realized)
             {
-                if (_mpRealized == null)
-                    return;
                 Parallel.ForEach(channelIds, chid =>
                 {
                     int? chrdsid = _forecastData.ChrdsidChidDict.FirstOrDefault(dict => dict.Value == chid).Key;
@@ -110,7 +108,37 @@ namespace CampaignEditor.UserControls
 
                 });
             }
-            //_values.ReplaceRange(_dictionary.Values);
+            else if (showData == Data.ExpectedAndRealized)
+            {
+                /*DateOnly separationDate;
+                var threeDaysAgo = DateOnly.FromDateTime(DateTime.Today.AddDays(-3));
+                if (threeDaysAgo < startDate)
+                    separationDate = startDate;
+                else
+                    separationDate = threeDaysAgo;
+
+
+                Parallel.ForEach(channelIds, chid =>
+                {
+                    var mediaPlans = _visibleMediaPlans.Where(mp => mp.chid == chid);
+                    CalculateGoalsExpected(mediaPlans);
+                });
+                Parallel.ForEach(channelIds, chid =>
+                {
+                    int? chrdsid = _forecastData.ChrdsidChidDict.FirstOrDefault(dict => dict.Value == chid).Key;
+                    if (chrdsid.HasValue)
+                    {
+                        var mediaPlansRealized = _mpRealized.Where(
+                            mpr => mpr.chid == chrdsid && 
+                            mpr.Status != null && 
+                            mpr.Status != 5 &&
+                            TimeFormat.YMDStringToDateOnly(mpr.Date) > separationDate);
+                        CalculateGoalsRealized(mediaPlansRealized);
+                    }
+
+                });*/
+            }
+
             _values.ReplaceRange(_dictionary.Values.Where(pg => _selectedChannels
                                             .Select(ch => ch.chid).Contains(pg.Channel.chid)));
 
@@ -244,6 +272,7 @@ namespace CampaignEditor.UserControls
             {
                 case "expected": data = Data.Expected; break;
                 case "realized": data = Data.Realized; break;
+                case "expectedrealized": data = Data.ExpectedAndRealized; break;
                 default: data = Data.Expected; break;
             }
 

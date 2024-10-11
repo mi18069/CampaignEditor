@@ -739,6 +739,7 @@ namespace CampaignEditor.UserControls
             ObservableCollection<MediaPlan> mediaPlans = new ObservableCollection<MediaPlan>(_allMediaPlans.Select(mp => mp.MediaPlan));
             cgGrid.Initialize(mediaPlans, _forecastData.Channels);
             cgGrid._forecastData = _forecastData;
+            cgGrid.startDate = DateOnly.FromDateTime(startDate);
         }
 
         #region Drag and Drop selected Channels
@@ -1641,6 +1642,7 @@ namespace CampaignEditor.UserControls
         public void AddRealizations(ObservableRangeCollection<MediaPlanRealized> mpRealized)
         {
             rbRealized.IsEnabled = true;
+            rbExpectedRealized.IsEnabled = true;
             cgGrid._mpRealized = mpRealized;
             sdgGrid._mpRealized = mpRealized;
             swgGrid._mpRealized = mpRealized;
@@ -1667,6 +1669,18 @@ namespace CampaignEditor.UserControls
 
             if (swgGrid != null)
                 swgGrid.ChangeDataForShowing("realized");
+        }
+
+        private void rbExpectedRealized_Checked(object sender, RoutedEventArgs e)
+        {
+            if (cgGrid != null)
+                cgGrid.ChangeDataForShowing("expectedrealized");
+
+            if (sdgGrid != null)
+                sdgGrid.ChangeDataForShowing("expectedrealized");
+
+            if (swgGrid != null)
+                swgGrid.ChangeDataForShowing("expectedrealized");
         }
 
         public void AddIntoUpdatedRealizations(DateOnly date, int chrdsid, SpotDTO spot)
@@ -1699,13 +1713,15 @@ namespace CampaignEditor.UserControls
                     continue;
                 sdgGrid.RecalculateGoals(channel, date, spot, true);
 
-                swgGrid.RecalculateGoals(channel, date);
+                swgGrid.RecalculateGoals(channel, date, spot, true);
             }
             
         }
 
 
         #endregion
+
+
     }
 
 }

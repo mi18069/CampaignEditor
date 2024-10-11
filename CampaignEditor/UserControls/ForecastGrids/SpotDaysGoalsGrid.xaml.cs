@@ -41,6 +41,7 @@ namespace CampaignEditor.UserControls.ForecastGrids
         // for duration of campaign
         DateTime startDate;
         DateTime endDate;
+        DateOnly separationDate; // for showing expectedAndRealized
 
         List<SpotDTO> _spots = new List<SpotDTO>();
         List<ChannelDTO> _channels = new List<ChannelDTO>();
@@ -86,6 +87,9 @@ namespace CampaignEditor.UserControls.ForecastGrids
 
             startDate = TimeFormat.YMDStringToDateTime(_campaign.cmpsdate);
             endDate = TimeFormat.YMDStringToDateTime(_campaign.cmpedate);
+            var threeDaysAgo = DateTime.Today.AddDays(-3);
+            separationDate = DateOnly.FromDateTime(threeDaysAgo);
+
 
             _spots.AddRange(spots);
             foreach (var spot in spots)
@@ -193,6 +197,23 @@ namespace CampaignEditor.UserControls.ForecastGrids
                     return;
                 goals = CalculateSpotGoalsRealized(chrdsid.Value, spot, date);
             }
+            else if (showData == Data.ExpectedAndRealized)
+            {
+                if (date < separationDate)
+                {
+                    goals = CalculateSpotGoalsExpected(channel.chid, spot, date);
+                }
+                else
+                {
+                    int? chrdsid = _forecastData.ChrdsidChidDict.FirstOrDefault(dict => dict.Value == channel.chid).Key;
+                    if (!chrdsid.HasValue)
+                        return;
+
+                    goals = CalculateSpotGoalsRealized(chrdsid.Value, spot, date);
+                }
+
+            }
+
 
             spotGoals.Insertations = goals.Insertations;
             spotGoals.Grp = goals.Grp;
@@ -742,6 +763,7 @@ namespace CampaignEditor.UserControls.ForecastGrids
             {
                 case "expected": data = Data.Expected; break;
                 case "realized": data = Data.Realized; break;
+                case "expectedrealized": data = Data.ExpectedAndRealized; break;
                 default: data = Data.Expected; break;
             }
 
