@@ -43,7 +43,7 @@ namespace CampaignEditor.UserControls
         // for duration of campaign
         DateTime startDate;
         DateTime endDate;
-        DateOnly separationDate;
+        DateOnly SeparationDate { get; set; }
         int firstWeekNum;
         int lastWeekNum;
         int separationWeekNum;
@@ -92,12 +92,9 @@ namespace CampaignEditor.UserControls
 
             startDate = TimeFormat.YMDStringToDateTime(_campaign.cmpsdate);
             endDate = TimeFormat.YMDStringToDateTime(_campaign.cmpedate);
-            var threeDaysAgo = DateTime.Today.AddDays(-3);
-            separationDate = DateOnly.FromDateTime(threeDaysAgo);
 
             firstWeekNum = GetWeekOfYear(startDate);
             lastWeekNum = GetWeekOfYear(endDate);
-            separationWeekNum = GetWeekOfYear(threeDaysAgo);
 
             _spots.AddRange(spots);
             foreach (var spot in spots)
@@ -121,6 +118,12 @@ namespace CampaignEditor.UserControls
             SetWidth();
         }
 
+        public void SetSeparationDate(DateOnly separationDate)
+        {
+            SeparationDate = separationDate;
+            separationWeekNum = GetWeekOfYear(SeparationDate);
+
+        }
         private void SubscribeDataToSpotGoalsGrid(SpotGoalsGrid sgGrid)
         {
             sgGrid.firstWeekNum = firstWeekNum;
@@ -277,13 +280,15 @@ namespace CampaignEditor.UserControls
             else if (showData == Data.ExpectedAndRealized)
             {
                 if (weekNum < separationWeekNum)
-                    goals = CalculateSpotGoalsExpected(channel.chid, spot, weekNum);
-                else if (weekNum > separationWeekNum)
                 {
                     int? chrdsid = _forecastData.ChrdsidChidDict.FirstOrDefault(dict => dict.Value == channel.chid).Key;
                     if (!chrdsid.HasValue)
                         return;
                     goals = CalculateSpotGoalsRealized(chrdsid.Value, spot, weekNum);
+                }
+                else if (weekNum > separationWeekNum)
+                {
+                    goals = CalculateSpotGoalsExpected(channel.chid, spot, weekNum);
                 }
                 else
                 {
@@ -374,7 +379,7 @@ namespace CampaignEditor.UserControls
             DateOnly lastDate = DateOnly.FromDateTime(endDate);
             if (checkSeparationDate)
             {
-                lastDate = separationDate.AddDays(-1);
+                lastDate = SeparationDate;
             }
 
             List<int> indexes = new List<int>();
@@ -397,7 +402,7 @@ namespace CampaignEditor.UserControls
             DateOnly lastDate = DateOnly.FromDateTime(endDate);
             if (checkSeparationDate)
             {
-                firstDate = separationDate;
+                firstDate = SeparationDate;
             }
 
             List<DateOnly> dates = new List<DateOnly>();

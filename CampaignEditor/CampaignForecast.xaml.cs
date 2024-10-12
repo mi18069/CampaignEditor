@@ -1639,13 +1639,36 @@ namespace CampaignEditor.UserControls
 
         #region Report radio buttons
 
-        public void AddRealizations(ObservableRangeCollection<MediaPlanRealized> mpRealized)
+        public void AddRealizations(ObservableRangeCollection<MediaPlanRealized> mpRealized, DateOnly lastDateImport)
         {
             rbRealized.IsEnabled = true;
             rbExpectedRealized.IsEnabled = true;
+            SetLastDataImportDate(lastDateImport);
+
             cgGrid._mpRealized = mpRealized;
             sdgGrid._mpRealized = mpRealized;
             swgGrid._mpRealized = mpRealized;
+        }
+        private void SetLastDataImportDate(DateOnly lastDateImport)
+        {
+            var dateImportString = "-";
+            //var separationDate = DateOnly.FromDateTime(startDate);
+            if (lastDateImport > DateOnly.FromDateTime(endDate))
+            {
+                dateImportString = DateOnly.FromDateTime(endDate).ToShortDateString();
+                //separationDate = DateOnly.FromDateTime(endDate);
+            }
+            else if (lastDateImport > DateOnly.FromDateTime(startDate))
+            {
+                dateImportString = DateOnly.FromDateTime(startDate).ToShortDateString();
+                //separationDate = lastDateImport;
+            }
+
+            lblLastDataDate.Content = "Last data gathered on: " + dateImportString;
+
+            cgGrid.SeparationDate = lastDateImport;
+            sdgGrid.SeparationDate = lastDateImport;
+            swgGrid.SetSeparationDate(lastDateImport);
         }
         private void rbExpected_Checked(object sender, RoutedEventArgs e)
         {

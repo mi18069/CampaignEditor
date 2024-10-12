@@ -41,7 +41,7 @@ namespace CampaignEditor.UserControls.ForecastGrids
         // for duration of campaign
         DateTime startDate;
         DateTime endDate;
-        DateOnly separationDate; // for showing expectedAndRealized
+        public DateOnly SeparationDate { get; set; } // for showing expectedAndRealized
 
         List<SpotDTO> _spots = new List<SpotDTO>();
         List<ChannelDTO> _channels = new List<ChannelDTO>();
@@ -87,8 +87,6 @@ namespace CampaignEditor.UserControls.ForecastGrids
 
             startDate = TimeFormat.YMDStringToDateTime(_campaign.cmpsdate);
             endDate = TimeFormat.YMDStringToDateTime(_campaign.cmpedate);
-            var threeDaysAgo = DateTime.Today.AddDays(-3);
-            separationDate = DateOnly.FromDateTime(threeDaysAgo);
 
 
             _spots.AddRange(spots);
@@ -199,17 +197,19 @@ namespace CampaignEditor.UserControls.ForecastGrids
             }
             else if (showData == Data.ExpectedAndRealized)
             {
-                if (date < separationDate)
-                {
-                    goals = CalculateSpotGoalsExpected(channel.chid, spot, date);
-                }
-                else
+                if (date <= SeparationDate)
                 {
                     int? chrdsid = _forecastData.ChrdsidChidDict.FirstOrDefault(dict => dict.Value == channel.chid).Key;
                     if (!chrdsid.HasValue)
                         return;
 
                     goals = CalculateSpotGoalsRealized(chrdsid.Value, spot, date);
+                }
+                else
+                {
+
+                    goals = CalculateSpotGoalsExpected(channel.chid, spot, date);
+
                 }
 
             }

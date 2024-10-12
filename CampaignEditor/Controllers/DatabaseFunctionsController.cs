@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Windows.Navigation;
 
 namespace CampaignEditor.Controllers
 {
@@ -43,6 +44,9 @@ namespace CampaignEditor.Controllers
         {
             return await _repository.StartRealizationFunction(cmpid, brandid, sdate, edate);
         }
+
+        public async Task<DateOnly> GetLastDateImport()
+        => await _repository.GetLastDateImport();
 
     }
 }

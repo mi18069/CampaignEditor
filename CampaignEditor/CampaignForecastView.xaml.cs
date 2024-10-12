@@ -328,12 +328,12 @@ namespace CampaignEditor
 
         #region Validation Forecast synchronizations
 
-        public void AddRealizations(ObservableRangeCollection<MediaPlanRealized> mediaPlanRealized)
+        public void AddRealizations(ObservableRangeCollection<MediaPlanRealized> mediaPlanRealized, DateOnly lastDateImport)
         {
             if (_forecast == null)
                 return;
 
-            _forecast.AddRealizations(mediaPlanRealized);
+            _forecast.AddRealizations(mediaPlanRealized, lastDateImport);
         }
 
         public void AddIntoUpdatedRealizations(DateOnly date, int chrdsid, SpotDTO spot)

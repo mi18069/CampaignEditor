@@ -182,24 +182,28 @@
                 </Grid.RowDefinitions>
                 <Grid x:Name="gridReportsRadioButtons" Grid.Row="0">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="5"/>
+                        <RowDefinition Height="1"/>
                         <RowDefinition Height="auto"/>
-                        <RowDefinition Height="5"/>
+                        <RowDefinition Height="1"/>
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="auto"/>
                         <ColumnDefinition Width="auto"/>
                         <ColumnDefinition Width="auto"/>
                         <ColumnDefinition Width="auto"/>
                         <ColumnDefinition Width="*"/>
                     </Grid.ColumnDefinitions>
                     <RadioButton x:Name="rbExpected" Content="Expected" Grid.Row="1" Grid.Column="0" 
-                                 GroupName="rbReports" IsChecked="True" Checked="rbExpected_Checked"/>
+                                 GroupName="rbReports" IsChecked="True" 
+                                 Checked="rbExpected_Checked" VerticalAlignment="Center"/>
                     <RadioButton x:Name="rbRealized" Content="Realized" Grid.Row="1" Grid.Column="1" 
                                  GroupName="rbReports" Margin="20, 0" Checked="rbRealized_Checked"
-                                 IsEnabled="False"/>
+                                 IsEnabled="False" VerticalAlignment="Center"/>
                     <RadioButton x:Name="rbExpectedRealized" Content="Expected + Realized" 
                                  Grid.Row="1" Grid.Column="2" GroupName="rbReports" IsEnabled="False"
-                                 Checked="rbExpectedRealized_Checked"/>
+                                 Checked="rbExpectedRealized_Checked" VerticalAlignment="Center"/>
+                    <Label x:Name="lblLastDataDate" Grid.Row="1" Grid.Column="3"
+                           FontStyle="Italic" Foreground="Gray" Margin="20, 0, 0, 0"/>
                 </Grid>
                 <TabControl x:Name="tcGrids" Grid.Row="1">
                     <TabItem Header="By Weeks 1" x:Name="tiSpotGoals" >

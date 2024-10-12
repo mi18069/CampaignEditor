@@ -143,16 +143,21 @@ namespace CampaignEditor
             tabValidation.Content = factoryCampaignValidation.Content;
         }
 
-        private void FactoryCampaignValidation_RealizationsAcquired(object? sender, EventArgs e)
+        private void FactoryCampaignValidation_RealizationsAcquired(object? sender, RealizationsAcquiredEventArgs e)
         {
             if (factoryCampaignValidation == null || factoryCampaignForecastView == null)
                 return;
 
-            var mpRealized = factoryCampaignValidation.MediaPlanRealized;
+            /*var mpRealized = factoryCampaignValidation.MediaPlanRealized;
             if (mpRealized.Count == 0)
-                return;
+                return;*/
 
-            factoryCampaignForecastView.AddRealizations(mpRealized);
+            var realizations = e.MediaPlanRealized;
+            if (realizations == null) return;
+
+            var lastDateImport = e.LastImportedDate;
+
+            factoryCampaignForecastView.AddRealizations(realizations, lastDateImport);
         }
 
         private void FactoryCampaignValidation_SetLoadingPage(object? sender, EventArgs e)

@@ -35,6 +35,7 @@ namespace CampaignEditor.UserControls
 
         public MediaPlanForecastData _forecastData;
         public DateOnly startDate;
+        public DateOnly SeparationDate { get; set; }
         public ChannelsGoalsGrid()
         {
             InitializeComponent();         

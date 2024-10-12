@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Dapper;
 using Database.Data;
+using Database.Entities;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -200,6 +201,20 @@ namespace Database.Repositories
 
             return affected != 0;
             
+        }
+
+        public async Task<DateOnly> GetLastDateImport()
+        {
+            using var connection = _context.GetConnection();
+
+            // Query to get the latest dateimport value
+            var lastImportTimestamp = await connection.QuerySingleAsync<DateTime>(
+                "SELECT MAX(dateimport) FROM emsfiles.tblspofileslist");
+
+            // Convert the DateTime to DateOnly
+            DateOnly lastImportDate = DateOnly.FromDateTime(lastImportTimestamp);
+
+            return lastImportDate;
         }
     }
 }

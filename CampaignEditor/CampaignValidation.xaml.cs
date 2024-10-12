@@ -68,7 +68,7 @@ namespace CampaignEditor
 
         public event EventHandler SetLoadingPage;
         public event EventHandler SetContentPage;
-        public event EventHandler RealizationsAcquired;
+        public event EventHandler<RealizationsAcquiredEventArgs> RealizationsAcquired;
         public event EventHandler<UpdatedRealizationEventArgs> UpdatedRealization;
 
         bool hideExpected = false;
@@ -1092,8 +1092,9 @@ namespace CampaignEditor
             _mediaPlanRealized.ReplaceRange(mpRealized);
 
             uniqueSpotNums = mpRealized.DistinctBy(mpr => mpr.spotnum).Where(mpr => mpr.spotnum.HasValue).Select(mpr => mpr.spotnum!.Value);
-            
-            RealizationsAcquired?.Invoke(this, null);
+
+            var lastImportedDate = await _databaseFunctionsController.GetLastDateImport();
+            RealizationsAcquired?.Invoke(this, new RealizationsAcquiredEventArgs(MediaPlanRealized, lastImportedDate));
 
         }
 
