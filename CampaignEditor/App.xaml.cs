@@ -6,6 +6,7 @@ using Database.Data;
 using System.Globalization;
 using System.Threading;
 using CampaignEditor.UserControls;
+using CampaignEditor.UserControls.ForecastGrids;
 
 namespace CampaignEditor
 {

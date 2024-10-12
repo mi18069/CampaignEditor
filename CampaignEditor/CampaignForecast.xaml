@@ -170,7 +170,7 @@
                 <RowDefinition Height="10"/>
                 <RowDefinition Height="*" MinHeight="200"/>
             </Grid.RowDefinitions>
-            <local:MediaPlanGrid x:Name="dgMediaPlans" 
+            <local1:MediaPlanGrid x:Name="dgMediaPlans" 
                                 Grid.Row="0" 
                                 SelectionChanged="dgMediaPlans_SelectionChanged"/>
 
@@ -208,12 +208,12 @@
                 <TabControl x:Name="tcGrids" Grid.Row="1">
                     <TabItem Header="By Weeks 1" x:Name="tiSpotGoals" >
                         <ScrollViewer x:Name="svsg1" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Disabled">
-                            <local:SpotGoalsGrid x:Name="sgGrid" />
+                            <local1:SpotGoalsGrid x:Name="sgGrid" />
                         </ScrollViewer>
                     </TabItem>
                     <TabItem Header="By Weeks 2" x:Name="tiSpotWeekGoals" >
                         <ScrollViewer x:Name="svsg2" HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Disabled">
-                            <local:SpotWeekGoalsGrid x:Name="swgGrid" />
+                            <local1:SpotWeekGoalsGrid x:Name="swgGrid" />
                         </ScrollViewer>
                     </TabItem>
                     <TabItem Header="By Days" x:Name="tiSpotDaysGoals" >
@@ -222,7 +222,7 @@
                         </ScrollViewer>
                     </TabItem>
                     <TabItem x:Name="tiChannelGoals" Header="Channels Goals" Height="20" VerticalAlignment="Top">
-                        <local:ChannelsGoalsGrid x:Name="cgGrid"/>
+                        <local1:ChannelsGoalsGrid x:Name="cgGrid"/>
                     </TabItem>
                     <TabItem Header="Data">
                         <DataGrid x:Name="dgHist" 

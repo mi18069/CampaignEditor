@@ -19,7 +19,7 @@ using System.Threading.Channels;
 using System.Net;
 using Microsoft.AspNetCore.Http;
 
-namespace CampaignEditor.UserControls
+namespace CampaignEditor.UserControls.ForecastGrids
 {
     /// <summary>
     /// This grid is very similar to SpotGoalsGrid, so I'll pass it some SpotGoalsGrid, and make

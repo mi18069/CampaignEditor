@@ -10,7 +10,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Controls;
 
-namespace CampaignEditor.UserControls
+namespace CampaignEditor.UserControls.ForecastGrids
 {
     /// <summary>
     /// Interaction logic for ChannelsGoalsGrid.xaml

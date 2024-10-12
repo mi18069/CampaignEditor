@@ -12,7 +12,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 
-namespace CampaignEditor.UserControls
+namespace CampaignEditor.UserControls.ForecastGrids
 {
     /// <summary>
     /// This is part of dataGrid which contains only datas for one channel and week

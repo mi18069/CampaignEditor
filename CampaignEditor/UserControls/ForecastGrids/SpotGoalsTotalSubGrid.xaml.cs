@@ -11,7 +11,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 
-namespace CampaignEditor.UserControls
+namespace CampaignEditor.UserControls.ForecastGrids
 {
     /// <summary>
     /// Like spotGoalsSubGrid, but only with Total values

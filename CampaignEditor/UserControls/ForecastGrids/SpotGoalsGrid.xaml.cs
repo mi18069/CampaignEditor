@@ -13,7 +13,7 @@ using System.Windows.Controls.Primitives;
 using System.Windows.Data;
 using System.Windows.Input;
 
-namespace CampaignEditor.UserControls
+namespace CampaignEditor.UserControls.ForecastGrids
 {
     /// <summary>
     /// Grid which have multiple headers and is used in showing goals of campaign 

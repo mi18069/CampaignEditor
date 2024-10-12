@@ -34,7 +34,7 @@ using System.Data;
 using Database.DTOs.ClientCoefsDTO;
 using System.Text;
 
-namespace CampaignEditor.UserControls
+namespace CampaignEditor.UserControls.ForecastGrids
 {
     public partial class MediaPlanGrid : UserControl
     {
