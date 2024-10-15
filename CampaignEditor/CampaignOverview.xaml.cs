@@ -101,7 +101,7 @@ namespace CampaignEditor
             _campaign = campaign;
             isReadOnly = _isReadOnly;
 
-            if (isReadOnly){
+            /*if (isReadOnly){
                 btnCmpInfo.IsEnabled = false;
                 btnAssignTargets.IsEnabled = false;
                 btnSpots.IsEnabled = false;
@@ -110,7 +110,7 @@ namespace CampaignEditor
                 btnDayParts.IsEnabled = false;
                 btnCobranding.IsEnabled = false;
                 //btnBrands.IsEnabled = false;
-            }
+            }*/
 
             try
             {
