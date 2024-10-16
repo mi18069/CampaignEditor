@@ -1066,8 +1066,12 @@ namespace CampaignEditor
             {
                 if (!_forecastData.ChrdsidChidDict.ContainsKey(mpr.chid.Value))
                     continue;
+                if (mpr.id == 81069)
+                {
+                    Console.WriteLine("A");
+                }
                 // New realizations should set all coefs and price
-                if (mpr.status == null || mpr.status == 0)
+                if (mpr.status == null || mpr.status == 0 || mpr.price is null)
                 {
                     var coefs = await _clientRealizedCoefsController.GetRealizedCoefs(_campaign.clid, mpr.emsnum.Value);
                     if (coefs != null)

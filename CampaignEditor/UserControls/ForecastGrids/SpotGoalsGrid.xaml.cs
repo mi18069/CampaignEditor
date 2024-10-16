@@ -31,7 +31,6 @@ namespace CampaignEditor.UserControls.ForecastGrids
         public List<ChannelDTO> _channels { get; set; }
         public List<ChannelDTO> _selectedChannels { get; set; }
         public List<ChannelDTO> _visibleChannels;
-        public Dictionary<Char, int> _spotLengths { get; set; }
         public Dictionary<ChannelDTO, Dictionary<int, Dictionary<SpotDTO, SpotGoals>>> _data { get; set; }
         public ChannelDTO dummyChannel { get; set; } // Dummy channel for Total Column
 
@@ -53,7 +52,20 @@ namespace CampaignEditor.UserControls.ForecastGrids
             CreateOutboundHeaders();
             SetWidth();
         }
-      
+
+        public void ConstructGrid(DateTime startDate, DateTime endDate)
+        {
+            ugGrid.Children.Clear();
+            _channelWeekGrids.Clear();
+            channelBorderDict.Clear();
+
+            this.startDate = startDate;
+            this.endDate = endDate;
+
+            CreateOutboundHeaders();
+            SetWidth();
+        }
+
         private void CreateOutboundHeaders()
         {
             ugWeeks.Children.Clear();
@@ -269,9 +281,9 @@ namespace CampaignEditor.UserControls.ForecastGrids
 
             ApplyCellStyle(dataGrid);
            
-            var columnData = _data[channel].Where(dateDict => dateDict.Key == weekNum)
+            /*var columnData = _data[channel].Where(dateDict => dateDict.Key == weekNum)
                                            .SelectMany(dateDict => dateDict.Value
-                                           .Select(spotSpotGoalsDict => spotSpotGoalsDict.Value));
+                                           .Select(spotSpotGoalsDict => spotSpotGoalsDict.Value));*/
 
 
             var insColumn = new DataGridTextColumn
@@ -300,10 +312,30 @@ namespace CampaignEditor.UserControls.ForecastGrids
             dataGrid.Columns.Add(budColumn);
 
             //ugGrid.Children.Add(dataGrid);
-            dataGrid.ItemsSource = columnData;
+            //dataGrid.ItemsSource = columnData;
 
             dict.Add(channel, dataGrid);
         }
+
+        public void BindDataValues()
+        {
+            for (int weekNum = firstWeekNum; weekNum <= lastWeekNum + 1; weekNum++)
+            {
+                var dataGridWeek = _channelWeekGrids[weekNum];
+
+                foreach (var channel in _channels)
+                {
+                    var columnData = _data[channel].Where(dateDict => dateDict.Key == weekNum).SelectMany(dateDict => dateDict.Value.Select(spotSpotGoalsDict => spotSpotGoalsDict.Value));
+
+                    var dataGrid = dataGridWeek[channel];
+                    dataGrid.ItemsSource = columnData;
+                }
+            }
+
+
+        }
+
+
 
         #endregion
 

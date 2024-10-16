@@ -27,6 +27,7 @@ using Database.DTOs.PricelistDTO;
 using System.Drawing;
 using Database.DTOs.CobrandDTO;
 using Database.DTOs.SpotDTO;
+using CampaignEditor.UserControls.ForecastGrids;
 
 namespace CampaignEditor.UserControls
 {
@@ -89,6 +90,8 @@ namespace CampaignEditor.UserControls
         MediaPlanTermConverter _mpTermConverter;
         private bool gridShowSelected = true;
         private bool gridFirstOpening = true;
+
+        private GridsDataManipulation gridsDataManipulation = new GridsDataManipulation();
 
         public event PropertyChangedEventHandler? PropertyChanged;
         public event EventHandler<UpdatedTermDateAndChannelEventArgs> UpdatedTermDateAndChannel;
@@ -391,7 +394,6 @@ namespace CampaignEditor.UserControls
             _forecastDataManipulation.Initialize(_campaign, _forecastData, _mpConverter);
             await InitializeVersions();
             await InitializeGoals();
-
             SubscribeControllers();
 
             BindLists();
@@ -429,10 +431,22 @@ namespace CampaignEditor.UserControls
         private void SubscribeControllers()
         {
             SubscribeDataGridControllers();
-            SubscribeSWGGridControllers();
-            SubscribeSDGGridControllers();
+            SubscribeGridManipulationControllers();
+            //SubscribeSWGGridControllers();
+            //SubscribeSDGGridControllers();
             SubscribePrintForecastControllers();
             SubscribeReachTabItemControllers();
+        }
+
+        private void SubscribeGridManipulationControllers()
+        {
+            gridsDataManipulation._allMediaPlans = _allMediaPlans;
+            gridsDataManipulation.cgGrid = cgGrid;
+            gridsDataManipulation.swgGrid = swgGrid;
+            gridsDataManipulation.sdgGrid = sdgGrid;
+            gridsDataManipulation.sgGrid = sgGrid;
+            gridsDataManipulation.swgGrid.spotGoalsGrid = sgGrid;
+
         }
 
         private void SubscribeDataGridControllers()
@@ -712,10 +726,11 @@ namespace CampaignEditor.UserControls
             lvChannels.SelectedItems.Clear();
 
             InitializeCGGrid();
-            swgGrid.Initialize(_campaign, _forecastData.Channels, _forecastData.Spots, _cmpVersion);
+            /*swgGrid.Initialize(_campaign, _forecastData.Channels, _forecastData.Spots, _cmpVersion);
             swgGrid._forecastData = _forecastData;
             sdgGrid.Initialize(_campaign, _forecastData.Channels, _forecastData.Spots, _cmpVersion);
-            sdgGrid._forecastData = _forecastData;
+            sdgGrid._forecastData = _forecastData;*/
+            gridsDataManipulation.Initialize(_campaign, _forecastData, _cmpVersion);
 
             _factoryListing.Initialize(_campaign, _forecastData.Channels,
                 _forecastData.SpotcodeSpotDict, _mpConverter);
@@ -736,10 +751,10 @@ namespace CampaignEditor.UserControls
         private void InitializeCGGrid()
         {
 
-            ObservableCollection<MediaPlan> mediaPlans = new ObservableCollection<MediaPlan>(_allMediaPlans.Select(mp => mp.MediaPlan));
+            /*ObservableCollection<MediaPlan> mediaPlans = new ObservableCollection<MediaPlan>(_allMediaPlans.Select(mp => mp.MediaPlan));
             cgGrid.Initialize(mediaPlans, _forecastData.Channels);
             cgGrid._forecastData = _forecastData;
-            cgGrid.startDate = DateOnly.FromDateTime(startDate);
+            cgGrid.startDate = DateOnly.FromDateTime(startDate);*/
         }
 
         #region Drag and Drop selected Channels
@@ -792,10 +807,11 @@ namespace CampaignEditor.UserControls
             lvChannels.ItemsSource = _allChannels;
             dgMediaPlans.ChannelsOrderChanged(_allChannels.ToList());
 
-            sgGrid.UpdateUgChannelOrder(_forecastData.Channels, true);
+            /*sgGrid.UpdateUgChannelOrder(_forecastData.Channels, true);
             swgGrid.UpdateUgChannelOrder(_forecastData.Channels, true);
-            sdgGrid.UpdateUgChannelOrder(_forecastData.Channels, true);
-            cgGrid.UpdateOrder(_forecastData.Channels);
+            sdgGrid.UpdateUgChannelOrder(_forecastData.Channels, true);*/
+            gridsDataManipulation.UpdateChannelOrder(_forecastData.Channels);
+            //cgGrid.UpdateOrder(_forecastData.Channels);
         }
 
         #endregion
@@ -999,9 +1015,10 @@ namespace CampaignEditor.UserControls
             if (gridShowSelected == true)
             {
                 _gridDisplayChannels.ReplaceRange(displayChannels);
-                sdgGrid.SelectedChannelsChanged(displayChannels);
-                swgGrid.SelectedChannelsChanged(displayChannels);
-                cgGrid.SelectedChannelsChanged(displayChannels);
+                gridsDataManipulation.SelectedChannelsChanged(displayChannels);
+                /*sdgGrid.SelectedChannelsChanged(displayChannels);
+                swgGrid.SelectedChannelsChanged(displayChannels);*/
+               // cgGrid.SelectedChannelsChanged(displayChannels);
             }
             
            
@@ -1441,9 +1458,10 @@ namespace CampaignEditor.UserControls
             if (gridShowSelected == true)
             {
                 IEnumerable<MediaPlanTuple> visibleTuples = collectionView.OfType<MediaPlanTuple>();
-                swgGrid.VisibleTuplesChanged(visibleTuples);
-                sdgGrid.VisibleTuplesChanged(visibleTuples);
-                cgGrid.VisibleTuplesChanged(visibleTuples);
+                /*swgGrid.VisibleTuplesChanged(visibleTuples);
+                sdgGrid.VisibleTuplesChanged(visibleTuples);*/
+                gridsDataManipulation.VisibleTuplesChanged(visibleTuples);
+                //cgGrid.VisibleTuplesChanged(visibleTuples);
             }
 
         }
@@ -1456,9 +1474,10 @@ namespace CampaignEditor.UserControls
             var date = term.Date;
             var spot = _forecastData.SpotcodeSpotDict[spotcode];
 
-            sdgGrid.RecalculateGoals(channel, date, spot, true);
-            swgGrid.RecalculateGoals(channel, date, spot, true);
-            cgGrid.RecalculateGoalsExpected(channel.chid);
+            /*sdgGrid.RecalculateGoals(channel, date, spot, true);
+            swgGrid.RecalculateGoals(channel, date, spot, true);*/
+            gridsDataManipulation.RecalculateGoals(channel, date, spot, true);
+            //cgGrid.RecalculateGoalsExpected(channel.chid);
 
             // For propagating changes in validation
             UpdatedTermDateAndChannel?.Invoke(this, new UpdatedTermDateAndChannelEventArgs(date, channel));
@@ -1612,9 +1631,10 @@ namespace CampaignEditor.UserControls
             _gridDisplayChannels.ReplaceRange(_forecastData.Channels);
             ChangeGridDisplayData(_gridDisplayChannels);
             IEnumerable<MediaPlanTuple> visibleTuples = _allMediaPlans;
-            swgGrid.VisibleTuplesChanged(visibleTuples);
-            sdgGrid.VisibleTuplesChanged(visibleTuples);
-            cgGrid.VisibleTuplesChanged(visibleTuples);
+            /*swgGrid.VisibleTuplesChanged(visibleTuples);
+            sdgGrid.VisibleTuplesChanged(visibleTuples);*/
+            gridsDataManipulation.VisibleTuplesChanged(visibleTuples);
+            //cgGrid.VisibleTuplesChanged(visibleTuples);
             gridShowSelected = false;
         }
 
@@ -1645,9 +1665,10 @@ namespace CampaignEditor.UserControls
             rbExpectedRealized.IsEnabled = true;
             SetLastDataImportDate(lastDateImport);
 
-            cgGrid._mpRealized = mpRealized;
+            gridsDataManipulation.AddRealizations(mpRealized);
+            /*cgGrid._mpRealized = mpRealized;
             sdgGrid._mpRealized = mpRealized;
-            swgGrid._mpRealized = mpRealized;
+            swgGrid._mpRealized = mpRealized;*/
         }
         private void SetLastDataImportDate(DateOnly lastDateImport)
         {
@@ -1666,44 +1687,50 @@ namespace CampaignEditor.UserControls
 
             lblLastDataDate.Content = "Last data gathered on: " + dateImportString;
 
-            cgGrid.SeparationDate = lastDateImport;
+            gridsDataManipulation.SeparationDate = lastDateImport;
+            /*cgGrid.SeparationDate = lastDateImport;
             sdgGrid.SeparationDate = lastDateImport;
-            swgGrid.SetSeparationDate(lastDateImport);
+            swgGrid.SetSeparationDate(lastDateImport);*/
         }
         private void rbExpected_Checked(object sender, RoutedEventArgs e)
         {
-            if (cgGrid != null)
+            /*if (cgGrid != null)
                 cgGrid.ChangeDataForShowing("expected");
 
             if (sdgGrid != null)
                 sdgGrid.ChangeDataForShowing("expected");
 
             if (swgGrid != null)
-                swgGrid.ChangeDataForShowing("expected");
+                swgGrid.ChangeDataForShowing("expected");*/
+            gridsDataManipulation.ChangeDataForShowing("expected");
         }
 
         private void rbRealized_Checked(object sender, RoutedEventArgs e)
         {
-            if (cgGrid != null)
-                cgGrid.ChangeDataForShowing("realized");
+            /* if (cgGrid != null)
+                 cgGrid.ChangeDataForShowing("realized");
 
-            if (sdgGrid != null)
-                sdgGrid.ChangeDataForShowing("realized");
+             if (sdgGrid != null)
+                 sdgGrid.ChangeDataForShowing("realized");
 
-            if (swgGrid != null)
-                swgGrid.ChangeDataForShowing("realized");
+             if (swgGrid != null)
+                 swgGrid.ChangeDataForShowing("realized");*/
+            gridsDataManipulation.ChangeDataForShowing("realized");
+
         }
 
         private void rbExpectedRealized_Checked(object sender, RoutedEventArgs e)
         {
-            if (cgGrid != null)
+            /*if (cgGrid != null)
                 cgGrid.ChangeDataForShowing("expectedrealized");
 
             if (sdgGrid != null)
                 sdgGrid.ChangeDataForShowing("expectedrealized");
 
             if (swgGrid != null)
-                swgGrid.ChangeDataForShowing("expectedrealized");
+                swgGrid.ChangeDataForShowing("expectedrealized");*/
+            gridsDataManipulation.ChangeDataForShowing("expectedrealized");
+
         }
 
         public void AddIntoUpdatedRealizations(DateOnly date, int chrdsid, SpotDTO spot)
@@ -1716,7 +1743,7 @@ namespace CampaignEditor.UserControls
             if (_updatedRealizations.Count == 0)
                 return;
 
-            foreach(var chrdsid in _updatedRealizations.Select(t => t.Item2))
+            /*foreach(var chrdsid in _updatedRealizations.Select(t => t.Item2))
             {
                 cgGrid.RecalculateGoalsRealized(chrdsid);
             }
@@ -1737,8 +1764,25 @@ namespace CampaignEditor.UserControls
                 sdgGrid.RecalculateGoals(channel, date, spot, true);
 
                 swgGrid.RecalculateGoals(channel, date, spot, true);
+            }*/
+
+            foreach (var updatedRealization in _updatedRealizations)
+            {
+                var spot = updatedRealization.Item3;
+                if (spot == null)
+                    continue; // Undedicated spot is ignoring
+                int chrdsid = updatedRealization.Item2;
+                var date = updatedRealization.Item1;
+                if (!_forecastData.ChrdsidChidDict.ContainsKey(chrdsid))
+                    continue;
+                int chid = _forecastData.ChrdsidChidDict[chrdsid];
+                var channel = _forecastData.Channels.FirstOrDefault(c => c.chid == chid);
+                if (channel == null)
+                    continue;
+                gridsDataManipulation.RecalculateGoals(channel, date, spot, true);
             }
             
+
         }
 
 

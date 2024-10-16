@@ -494,7 +494,11 @@ namespace CampaignEditor
         }
         public void CalculateRealizedPrice(MediaPlanRealized mpRealized)
         {
+            if (!_forecastData.ChrdsidChidDict.ContainsKey(mpRealized.chid.Value))
+                return;
+
             decimal coefs = mpRealized.Chcoef.Value * mpRealized.CoefA.Value * mpRealized.CoefB.Value * mpRealized.Seccoef.Value * mpRealized.Seascoef.Value * mpRealized.Progcoef.Value * mpRealized.Dpcoef!.Value;
+
             var chid = _forecastData.ChrdsidChidDict[mpRealized.chid.Value];
             var pricelist = _forecastData.ChidPricelistDict[chid];
 

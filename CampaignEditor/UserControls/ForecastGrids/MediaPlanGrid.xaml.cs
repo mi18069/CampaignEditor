@@ -293,7 +293,8 @@ namespace CampaignEditor.UserControls.ForecastGrids
             }
 
             // Refresh the view to apply the sort
-            myDataView.Refresh();
+            if (myDataView != null)
+                myDataView.Refresh();
         }
 
         private IEnumerable<DateTime> GetCampaignDates(CampaignDTO campaign)

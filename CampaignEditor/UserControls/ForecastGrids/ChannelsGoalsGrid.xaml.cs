@@ -1,13 +1,12 @@
 ﻿using CampaignEditor.Helpers;
 using Database.DTOs.ChannelDTO;
+using Database.DTOs.SpotDTO;
 using Database.Entities;
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Controls;
 
 namespace CampaignEditor.UserControls.ForecastGrids
@@ -17,31 +16,40 @@ namespace CampaignEditor.UserControls.ForecastGrids
     /// </summary>
     public partial class ChannelsGoalsGrid : UserControl
     {
-        enum Data
+        /*enum Data
         {
             Expected,
             Realized,
             ExpectedAndRealized
         }
 
-        Data showData = Data.Expected;
+        Data showData = Data.Expected;*/
 
         Dictionary<int, ProgramGoals> _dictionary = new Dictionary<int, ProgramGoals>();
         ObservableRangeCollection<ProgramGoals> _values = new ObservableRangeCollection<ProgramGoals>();
-        ObservableCollection<MediaPlan> _mediaPlans;
-        ObservableRangeCollection<MediaPlan> _visibleMediaPlans = new ObservableRangeCollection<MediaPlan>();
-        List<ChannelDTO> _selectedChannels = new List<ChannelDTO>();
-        public ObservableRangeCollection<MediaPlanRealized> _mpRealized;
+        /*ObservableCollection<MediaPlan> _mediaPlans;
+        ObservableRangeCollection<MediaPlan> _visibleMediaPlans = new ObservableRangeCollection<MediaPlan>();*/
+        public List<ChannelDTO> _selectedChannels;
+        //public ObservableRangeCollection<MediaPlanRealized> _mpRealized;
 
         public MediaPlanForecastData _forecastData;
-        public DateOnly startDate;
+        public DateTime startDate;
+        public DateTime endDate;
         public DateOnly SeparationDate { get; set; }
         public ChannelsGoalsGrid()
         {
             InitializeComponent();         
         }
 
-        public void Initialize(ObservableCollection<MediaPlan> mediaPlans, List<ChannelDTO> channels)
+        public void ConstructGrid(DateTime startDate, DateTime endDate)
+        {
+            this.startDate = startDate;
+            this.endDate = endDate;
+            dgGrid.ItemsSource = _values;
+
+        }
+
+        /*public void Initialize(ObservableCollection<MediaPlan> mediaPlans, List<ChannelDTO> channels)
         {
             _mediaPlans = mediaPlans;
             _dictionary.Clear();
@@ -61,15 +69,15 @@ namespace CampaignEditor.UserControls.ForecastGrids
                 SelectedChannelsChanged(new List<ChannelDTO>(_selectedChannels));
             }
 
-        }
+        }*/
 
         public void SelectedChannelsChanged(IEnumerable<ChannelDTO> selectedChannels)
         {
-            _selectedChannels.Clear();
+            /*_selectedChannels.Clear();
             foreach (var channel in selectedChannels)
             {
                 _selectedChannels.Add(channel);
-            }
+            }*/
             UpdateOrder(selectedChannels.ToList());
         }
 
@@ -84,163 +92,57 @@ namespace CampaignEditor.UserControls.ForecastGrids
             _values.ReplaceRange(selectedInOrder);
         }
 
-        private void CalculateGoals()
+
+        public void AssignDataValues(Dictionary<ChannelDTO, Dictionary<DateOnly, Dictionary<SpotDTO, SpotGoals>>> data)
         {
-            ResetDictionaryValues();
-            var channelIds = _visibleMediaPlans.Select(mp => mp.chid).Distinct();
-            if (showData == Data.Expected)
+            TransformData(data);
+        }
+
+        private void TransformData(Dictionary<ChannelDTO, Dictionary<DateOnly, Dictionary<SpotDTO, SpotGoals>>> data)
+        {
+
+            foreach (var channelEntry in data)
             {
-                Parallel.ForEach(channelIds, chid =>
+                var channel = channelEntry.Key;
+                var dateDict = channelEntry.Value;
+                int channelId = channel.chid;
+
+
+                // Sum up SpotGoals for all dates and spots for the current channel
+                var totalSpotGoalsBySpot = dateDict[DateOnly.FromDateTime(endDate.AddDays(1))];
+                SpotGoals totalSpotGoals = new SpotGoals();
+                foreach(var spotGoal in totalSpotGoalsBySpot)
                 {
-                    var mediaPlans = _visibleMediaPlans.Where(mp => mp.chid == chid);
-                    CalculateGoalsExpected(mediaPlans);
-                });
+                    totalSpotGoals += spotGoal.Value;
+                }
+
+                // Add the accumulated SpotGoals to the result dictionary
+                var programGoals = new ProgramGoals(channel);
+                programGoals.Budget = totalSpotGoals.Budget;
+                programGoals.Insertations = totalSpotGoals.Insertations;
+                programGoals.Grp1 = totalSpotGoals.Grp;
+                programGoals.Grp2 = totalSpotGoals.Grp2;
+                programGoals.Grp3 = totalSpotGoals.Grp3;
+                _dictionary[channelId] = programGoals;
             }
-            else if (showData == Data.Realized)
-            {
-                Parallel.ForEach(channelIds, chid =>
-                {
-                    int? chrdsid = _forecastData.ChrdsidChidDict.FirstOrDefault(dict => dict.Value == chid).Key;
-                    if (chrdsid.HasValue)
-                    {
-                        var mediaPlansRealized = _mpRealized.Where(mpr => mpr.chid == chrdsid && mpr.Status != null && mpr.Status != 5);
-                        CalculateGoalsRealized(mediaPlansRealized);
-                    }
+        }
 
-                });
-            }
-            else if (showData == Data.ExpectedAndRealized)
-            {
-                /*DateOnly separationDate;
-                var threeDaysAgo = DateOnly.FromDateTime(DateTime.Today.AddDays(-3));
-                if (threeDaysAgo < startDate)
-                    separationDate = startDate;
-                else
-                    separationDate = threeDaysAgo;
-
-
-                Parallel.ForEach(channelIds, chid =>
-                {
-                    var mediaPlans = _visibleMediaPlans.Where(mp => mp.chid == chid);
-                    CalculateGoalsExpected(mediaPlans);
-                });
-                Parallel.ForEach(channelIds, chid =>
-                {
-                    int? chrdsid = _forecastData.ChrdsidChidDict.FirstOrDefault(dict => dict.Value == chid).Key;
-                    if (chrdsid.HasValue)
-                    {
-                        var mediaPlansRealized = _mpRealized.Where(
-                            mpr => mpr.chid == chrdsid && 
-                            mpr.Status != null && 
-                            mpr.Status != 5 &&
-                            TimeFormat.YMDStringToDateOnly(mpr.Date) > separationDate);
-                        CalculateGoalsRealized(mediaPlansRealized);
-                    }
-
-                });*/
-            }
-
+        public void BindDataValues()
+        {
             _values.ReplaceRange(_dictionary.Values.Where(pg => _selectedChannels
                                             .Select(ch => ch.chid).Contains(pg.Channel.chid)));
-
         }
 
-        private void CalculateGoalsExpected(IEnumerable<MediaPlan> mediaPlans)
-        {
-            int chid;
-            if (mediaPlans.Count() > 0)
-                chid = mediaPlans.ElementAt(0).chid;
-            else
-                return;
-
-            foreach (MediaPlan mediaPlan in mediaPlans)
-            {
-                _dictionary[chid].Insertations += mediaPlan.Insertations;
-                _dictionary[chid].Grp1 += mediaPlan.Insertations * mediaPlan.Amrp1;
-                _dictionary[chid].Grp2 += mediaPlan.Insertations * mediaPlan.Amrp2;
-                _dictionary[chid].Grp3 += mediaPlan.Insertations * mediaPlan.Amrp3;
-                _dictionary[chid].Budget += mediaPlan.price;
-            }
-        }
-
-        private void CalculateGoalsRealized(IEnumerable<MediaPlanRealized> mediaPlansRealized)
-        {
-            int chid;
-            if (mediaPlansRealized.Count() > 0)
-            {
-                int chrdsid = mediaPlansRealized.ElementAt(0).chid!.Value;
-                if (_forecastData.ChrdsidChidDict.ContainsKey(chrdsid))
-                    chid = _forecastData.ChrdsidChidDict[chrdsid];
-                else
-                    return;
-            }
-            else
-                return;
-
-            // CHECK WHAT TO DO IF WE HAVE NULL FOR AMRP? 
-            foreach (MediaPlanRealized mpRealized in mediaPlansRealized)
-            {
-                _dictionary[chid].Insertations += 1;
-                _dictionary[chid].Grp1 += mpRealized.Amrp1 ?? 0.0M;
-                _dictionary[chid].Grp2 += mpRealized.Amrp2 ?? 0.0M;
-                _dictionary[chid].Grp3 += mpRealized.Amrp3 ?? 0.0M;
-                _dictionary[chid].Budget += mpRealized.price ?? 0.0M;
-            }
-        }
+       
 
         public void VisibleTuplesChanged(IEnumerable<MediaPlanTuple> visibleMpTuples)
         {
-            var visibleMediaPlans = visibleMpTuples.Select(mpTuple => mpTuple.MediaPlan);
+            /*var visibleMediaPlans = visibleMpTuples.Select(mpTuple => mpTuple.MediaPlan);
             _visibleMediaPlans.ReplaceRange(visibleMediaPlans);
-            CalculateGoals();
+            CalculateGoals();*/
         }
 
-        public void RecalculateGoalsExpected(int chid)
-        {
-            if (showData != Data.Expected)
-                return;
-
-            ResetDictionaryValues(chid);
-            var mediaPlans = _visibleMediaPlans.Where(mp => mp.chid == chid);
-            foreach (MediaPlan mediaPlan in mediaPlans)
-            {
-                _dictionary[chid].Insertations += mediaPlan.Insertations;
-                _dictionary[chid].Grp1 += mediaPlan.Insertations * mediaPlan.Amrp1;
-                _dictionary[chid].Grp2 += mediaPlan.Insertations * mediaPlan.Amrp2;
-                _dictionary[chid].Grp3 += mediaPlan.Insertations * mediaPlan.Amrp3;
-                _dictionary[chid].Budget += mediaPlan.Price;           
-            }
-            _values.ReplaceRange(_dictionary.Values.Where(pg => _selectedChannels
-                                            .Select(ch => ch.chid).Contains(pg.Channel.chid)));
-        }
-
-        public void RecalculateGoalsRealized(int chrdsid)
-        {
-            if (showData != Data.Realized)
-                return;
-
-            if (!_forecastData.ChrdsidChidDict.ContainsKey(chrdsid))
-                return;
-
-            int chid = _forecastData.ChrdsidChidDict[chrdsid];
-            ResetDictionaryValues(chid);
-
-            var mediaPlansRealized = _mpRealized.Where(mpr => mpr.chid == chrdsid && mpr.Status != 5 && mpr.Status != -1);
-
-            // CHECK WHAT TO DO IF WE HAVE NULL FOR AMRP? 
-            foreach (MediaPlanRealized mpRealized in mediaPlansRealized)
-            {
-                _dictionary[chid].Insertations += 1;
-                _dictionary[chid].Grp1 += mpRealized.Amrp1 ?? 0.0M;
-                _dictionary[chid].Grp2 += mpRealized.Amrp2 ?? 0.0M;
-                _dictionary[chid].Grp3 += mpRealized.Amrp3 ?? 0.0M;
-                _dictionary[chid].Budget += mpRealized.price ?? 0.0M;
-            }
-
-            _values.ReplaceRange(_dictionary.Values.Where(pg => _selectedChannels
-                                            .Select(ch => ch.chid).Contains(pg.Channel.chid)));
-        }
-
+        
         public void ResetDictionaryValues(int chid = -1)
         {
             if (chid == -1)
@@ -265,26 +167,7 @@ namespace CampaignEditor.UserControls.ForecastGrids
                 _dictionary[chid].Insertations = 0;
             }
         }
-
-        public void ChangeDataForShowing(string dataName)
-        {
-            Data data;
-            switch (dataName)
-            {
-                case "expected": data = Data.Expected; break;
-                case "realized": data = Data.Realized; break;
-                case "expectedrealized": data = Data.ExpectedAndRealized; break;
-                default: data = Data.Expected; break;
-            }
-
-            if (data == showData)
-                return;
-
-            showData = data;
-
-            CalculateGoals();
-        }
-
+       
         private void AddHeader(ExcelWorksheet worksheet, int rowOff = 1, int colOff = 1)
         {
             // Set the column headers in Excel 

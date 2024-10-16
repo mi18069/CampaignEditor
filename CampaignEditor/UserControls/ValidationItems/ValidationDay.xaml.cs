@@ -575,6 +575,9 @@ namespace CampaignEditor.UserControls.ValidationItems
         {
             // Get the current vertical offset and scroll viewer
             var scrollViewer = GetScrollViewer(dgExpected);
+            if (scrollViewer == null)
+                return;
+
             double initialVerticalOffset = scrollViewer.VerticalOffset;
 
             // Check if we can scroll up or down in myDataGrid

@@ -25,29 +25,17 @@ namespace CampaignEditor.UserControls.ForecastGrids
     /// </summary>
     public partial class SpotDaysGoalsGrid : UserControl
     {
-        enum Data
-        {
-            Expected,
-            Realized,
-            ExpectedAndRealized
-        }
-
-        Data showData = Data.Expected;
-
-        CampaignDTO _campaign;
-        int _version = 1;
-
+        
 
         // for duration of campaign
         DateTime startDate;
         DateTime endDate;
-        public DateOnly SeparationDate { get; set; } // for showing expectedAndRealized
+        public DateOnly SeparationDate { get; set; } // for showing expectedAndRealized     
 
-        List<SpotDTO> _spots = new List<SpotDTO>();
-        List<ChannelDTO> _channels = new List<ChannelDTO>();
-
-        private List<ChannelDTO> _selectedChannels = new List<ChannelDTO>();
-        private List<ChannelDTO> _visibleChannels = new List<ChannelDTO>();
+        public List<SpotDTO> _spots;
+        public List<ChannelDTO> _channels;
+        public List<ChannelDTO> _selectedChannels;
+        public List<ChannelDTO> _visibleChannels;
 
         public ObservableRangeCollection<MediaPlanTuple> _allMediaPlans;
         public ObservableRangeCollection<MediaPlanTuple> _visibleTuples = new ObservableRangeCollection<MediaPlanTuple>();
@@ -55,9 +43,8 @@ namespace CampaignEditor.UserControls.ForecastGrids
         public MediaPlanForecastData _forecastData;
 
 
-        private Dictionary<Char, int> _spotLengths = new Dictionary<char, int>();
 
-        private Dictionary<ChannelDTO, Dictionary<DateOnly, Dictionary<SpotDTO, SpotGoals>>> _data;
+        public Dictionary<ChannelDTO, Dictionary<DateOnly, Dictionary<SpotDTO, SpotGoals>>> _data;
         private Dictionary<ChannelDTO, DataGrid> _channelGrids = new Dictionary<ChannelDTO, DataGrid>();
         private Dictionary<ChannelDTO, System.Windows.Controls.Border> channelBorderDict = new Dictionary<ChannelDTO, System.Windows.Controls.Border>();
 
@@ -68,7 +55,7 @@ namespace CampaignEditor.UserControls.ForecastGrids
             InitializeComponent();
         }
 
-        public void Initialize(CampaignDTO campaign, IEnumerable<ChannelDTO> channels, IEnumerable<SpotDTO> spots, int version)
+        /*public void Initialize(CampaignDTO campaign, IEnumerable<ChannelDTO> channels, IEnumerable<SpotDTO> spots, int version)
         {
             _campaign = campaign;
             _version = version;
@@ -85,8 +72,8 @@ namespace CampaignEditor.UserControls.ForecastGrids
             ugGrid.Children.Clear();
 
 
-            startDate = TimeFormat.YMDStringToDateTime(_campaign.cmpsdate);
-            endDate = TimeFormat.YMDStringToDateTime(_campaign.cmpedate);
+            //startDate = TimeFormat.YMDStringToDateTime(_campaign.cmpsdate);
+            //endDate = TimeFormat.YMDStringToDateTime(_campaign.cmpedate);
 
 
             _spots.AddRange(spots);
@@ -105,13 +92,36 @@ namespace CampaignEditor.UserControls.ForecastGrids
             _channels.AddRange(channels);
             _channels.Add(dummyChannel); 
 
-            TransformData();
+            //TransformData();
+            CreateOutboundHeaders();
+            SetWidth();
+        
+        }*/
+
+        public void ConstructGrid(DateTime startDate, DateTime endDate)
+        {
+            this.startDate = startDate;
+            this.endDate = endDate;
+
+            _channelGrids.Clear();
+            channelBorderDict.Clear();
+            ugChannels.Children.Clear();
+            ugGoals.Children.Clear();
+            ugDays.Children.Clear();
+            ugSpots.Children.Clear();
+            ugGrid.Children.Clear();           
+
             CreateOutboundHeaders();
             SetWidth();
 
         }
 
-        public void TransformData()
+        public void AssignDataValues(Dictionary<ChannelDTO, Dictionary<DateOnly, Dictionary<SpotDTO, SpotGoals>>> data)
+        {
+            this._data = data;
+        }
+
+        /*public void TransformData()
         {
             InitializeData();
             //RecalculateGoals();
@@ -356,7 +366,7 @@ namespace CampaignEditor.UserControls.ForecastGrids
             totalSpotGoals.Budget = budget;
         }
 
-        #endregion
+        #endregion*/
         private void CreateOutboundHeaders()
         {
             int firstDayNum = GetDayOfYear(startDate);
@@ -456,14 +466,14 @@ namespace CampaignEditor.UserControls.ForecastGrids
             {
                 ugGoals.Children[i].Visibility = Visibility.Collapsed;
             }
-            /*foreach (var channel in _selectedChannels)
+            foreach (var channel in _selectedChannels)
             {
                 ShowChannel(channel);
             }
             if (_selectedChannels.Count > 0)
             {
                 ShowChannel(dummyChannel);
-            }*/
+            }
 
 
 
@@ -479,6 +489,11 @@ namespace CampaignEditor.UserControls.ForecastGrids
         {
             System.Globalization.Calendar calendar = CultureInfo.CurrentCulture.Calendar;
             return calendar.GetDayOfYear(date);
+        }
+        private int GetDayOfYear(DateOnly date)
+        {
+            System.Globalization.Calendar calendar = CultureInfo.CurrentCulture.Calendar;
+            return calendar.GetDayOfYear(date.ToDateTime(TimeOnly.MinValue));
         }
 
         #region ChannelDataColumn
@@ -552,8 +567,8 @@ namespace CampaignEditor.UserControls.ForecastGrids
 
             ApplyCellStyle(dataGrid);
 
-            var columnData = _data[channel].SelectMany(dateDict => dateDict.Value
-                                                               .Select(spotSpotGoalsDict => spotSpotGoalsDict.Value));
+            /*var columnData = _data[channel].SelectMany(dateDict => dateDict.Value
+                                                               .Select(spotSpotGoalsDict => spotSpotGoalsDict.Value));*/
 
 
             var insColumn = new DataGridTextColumn
@@ -582,16 +597,28 @@ namespace CampaignEditor.UserControls.ForecastGrids
             dataGrid.Columns.Add(budColumn);
 
             //ugGrid.Children.Add(dataGrid);
-            dataGrid.ItemsSource = columnData;
+            //dataGrid.ItemsSource = columnData;
 
             _channelGrids[channel] = dataGrid;
+        }
+
+        public void BindDataValues()
+        {
+            foreach (var channel in _channels)
+            {
+                var columnData = _data[channel].SelectMany(dateDict => dateDict.Value
+                                       .Select(spotSpotGoalsDict => spotSpotGoalsDict.Value));
+                var dataGrid = _channelGrids[channel];
+                dataGrid.ItemsSource = columnData;
+            }
+
         }
 
         #endregion
 
         #region Selection changed
 
-        public void VisibleTuplesChanged(IEnumerable<MediaPlanTuple> visibleMpTuples)
+        /*public void VisibleTuplesChanged(IEnumerable<MediaPlanTuple> visibleMpTuples)
         {
             _visibleTuples.ReplaceRange(visibleMpTuples);
             RecalculateGoals();
@@ -665,23 +692,21 @@ namespace CampaignEditor.UserControls.ForecastGrids
                 ugGoals.Children[i].Visibility = Visibility.Collapsed;
 
             }
-        }
+        }*/
 
-        private void ShowChannel(ChannelDTO channel)
+        public void ShowChannel(ChannelDTO channel)
         {
-            // Showing Channel and Goals headers
-            /*for (int i = 0; i < _channels.Count; i++)
+            /*for (int i = 0; i < _visibleChannels.Count * 3; i++)
             {
-                if (_channels[i].chid == channel.chid)
-                {
-                    ugChannels.Children[i].Visibility = Visibility.Visible;
-                    for (int j = 0; j < 3; j++)
-                    {
-                        ugGoals.Children[i * 3 + j].Visibility = Visibility.Visible;
-                    }
-                }
+                ugGoals.Children[i].Visibility = Visibility.Visible;
+            }
+            for (int i = _visibleChannels.Count * 3; i < _channels.Count * 3; i++)
+            {
+                ugGoals.Children[i].Visibility = Visibility.Collapsed;
+            
             }*/
 
+            // Showing Channel and Goals headers
             var border = channelBorderDict[channel];
             border.Visibility = Visibility.Visible;
 
@@ -691,20 +716,9 @@ namespace CampaignEditor.UserControls.ForecastGrids
             dataGrid.Visibility = Visibility.Visible;
         }
 
-        private void HideChannel(ChannelDTO channel)
+        public void HideChannel(ChannelDTO channel)
         {
-            // Hiding Channel and Goals headers
-            /*for (int i = 0; i < _channels.Count; i++)
-            {
-                if (_channels[i].chid == channel.chid)
-                {
-                    ugChannels.Children[i].Visibility = Visibility.Collapsed;
-                    for (int j = 0; j < 3; j++)
-                    {
-                        ugGoals.Children[i * 3 + j].Visibility = Visibility.Collapsed;
-                    }
-                }
-            }*/
+
 
             var border = channelBorderDict[channel];
             border.Visibility = Visibility.Collapsed;
@@ -715,7 +729,7 @@ namespace CampaignEditor.UserControls.ForecastGrids
             dataGrid.Visibility = Visibility.Collapsed;
         }
 
-        private void UpdateListsOrder(IEnumerable<ChannelDTO> channels, bool addDummyChannel = false)
+        /*private void UpdateListsOrder(IEnumerable<ChannelDTO> channels, bool addDummyChannel = false)
         {
             _channels = channels.ToList();
             if (addDummyChannel)
@@ -734,13 +748,13 @@ namespace CampaignEditor.UserControls.ForecastGrids
                 }
             }
             _visibleChannels = visibleChannels.ToList();
-        }
+        }*/
 
         public void UpdateUgChannelOrder(IEnumerable<ChannelDTO> channels, bool addDummyChannel = false)
         {
             ugChannels.Children.Clear();
             ugGrid.Children.Clear();
-            UpdateListsOrder(channels, addDummyChannel);
+            //UpdateListsOrder(channels, addDummyChannel);
 
             foreach (var channel in channels)
             {
@@ -756,7 +770,7 @@ namespace CampaignEditor.UserControls.ForecastGrids
 
         #endregion
 
-        public void ChangeDataForShowing(string dataName)
+        /*public void ChangeDataForShowing(string dataName)
         {
             Data data;
             switch (dataName)
@@ -774,7 +788,7 @@ namespace CampaignEditor.UserControls.ForecastGrids
 
             RecalculateGoals();
         }
-
+        */
         #region Datagrid Functionality
 
         private void SetWidth()
